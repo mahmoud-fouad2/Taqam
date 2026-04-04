@@ -44,6 +44,26 @@ import { buildTenantUrl } from "@/lib/tenant";
 import { tenantsService } from "@/lib/api";
 import { TableSkeleton } from "@/components/skeletons/table-skeleton";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const statusConfig: Record<TenantStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }> = {
   active: { 
@@ -95,6 +115,9 @@ export function TenantsTable() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [busy, setBusy] = React.useState<{ id: string; action: "suspend" | "activate" | "delete" } | null>(null);
+  const [tenantToDelete, setTenantToDelete] = React.useState<Tenant | null>(null);
+  const [tenantToSuspend, setTenantToSuspend] = React.useState<Tenant | null>(null);
+  const [suspendReason, setSuspendReason] = React.useState("Suspended by admin");
 
   const loadTenants = React.useCallback(async () => {
     setIsLoading(true);
@@ -133,8 +156,13 @@ export function TenantsTable() {
   }, [loadTenants]);
 
   async function handleDeleteTenant(tenant: Tenant) {
-    const ok = confirm(`هل أنت متأكد من حذف الشركة: ${tenant.nameAr}?\nسيتم إلغاؤها (Soft delete).`);
-    if (!ok) return;
+    setTenantToDelete(tenant);
+  }
+
+  async function confirmDeleteTenant() {
+    if (!tenantToDelete) return;
+    const tenant = tenantToDelete;
+    setTenantToDelete(null);
     setBusy({ id: tenant.id, action: "delete" });
     try {
       const res = await tenantsService.delete(tenant.id);
@@ -150,10 +178,17 @@ export function TenantsTable() {
   }
 
   async function handleSuspendTenant(tenant: Tenant) {
-    const reason = prompt("سبب الإيقاف (اختياري):", "Suspended by admin") ?? "";
+    setTenantToSuspend(tenant);
+    setSuspendReason("Suspended by admin");
+  }
+
+  async function confirmSuspendTenant() {
+    if (!tenantToSuspend) return;
+    const tenant = tenantToSuspend;
+    setTenantToSuspend(null);
     setBusy({ id: tenant.id, action: "suspend" });
     try {
-      const res = await tenantsService.suspend(tenant.id, reason.trim() || "Suspended by admin");
+      const res = await tenantsService.suspend(tenant.id, suspendReason.trim() || "Suspended by admin");
       if (!res.success) {
         toast.error(res.error || "تعذر إيقاف الشركة");
         return;
@@ -207,6 +242,7 @@ export function TenantsTable() {
   }
 
   return (
+    <>
     <Table>
       <TableHeader>
         <TableRow>
@@ -349,5 +385,57 @@ export function TenantsTable() {
         ))}
       </TableBody>
     </Table>
+
+    {/* Delete Confirmation */}
+    <AlertDialog open={tenantToDelete !== null} onOpenChange={(open) => !open && setTenantToDelete(null)}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>تأكيد حذف الشركة</AlertDialogTitle>
+          <AlertDialogDescription>
+            هل أنت متأكد من حذف الشركة &quot;{tenantToDelete?.nameAr}&quot;؟ سيتم إلغاؤها (Soft delete).
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={() => void confirmDeleteTenant()}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            حذف
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    {/* Suspend Dialog with reason input */}
+    <Dialog open={tenantToSuspend !== null} onOpenChange={(open) => !open && setTenantToSuspend(null)}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>إيقاف الشركة</DialogTitle>
+          <DialogDescription>
+            سيتم منع المستخدمين من الدخول حتى يتم تفعيل الشركة مرة أخرى.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2 py-2">
+          <Label htmlFor="suspend-reason">سبب الإيقاف (اختياري)</Label>
+          <Input
+            id="suspend-reason"
+            value={suspendReason}
+            onChange={(e) => setSuspendReason(e.target.value)}
+            placeholder="مثال: فواتير متأخرة"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setTenantToSuspend(null)}>إلغاء</Button>
+          <Button
+            className="bg-amber-600 hover:bg-amber-700"
+            onClick={() => void confirmSuspendTenant()}
+          >
+            تأكيد الإيقاف
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

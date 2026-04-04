@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /**
  * Subscription Request Form
@@ -11,6 +11,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import ReCAPTCHA from "react-google-recaptcha";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,12 +24,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { t } from "@/lib/i18n/messages";
-
-function getLocaleFromCookie(): "ar" | "en" {
-  if (typeof document === "undefined") return "ar";
-  const match = document.cookie.match(/(?:^|; )ujoors_locale=([^;]+)/);
-  return match?.[1] === "en" ? "en" : "ar";
-}
 
 function createRequestSchema(isAr: boolean) {
   const phoneRegex = /^\+?\d{8,15}$/;
@@ -51,11 +46,15 @@ function createRequestSchema(isAr: boolean) {
 
 type RequestInput = z.infer<ReturnType<typeof createRequestSchema>>;
 
-export function SubscriptionRequestForm() {
+type SubscriptionRequestFormProps = {
+  locale: "ar" | "en";
+};
+
+export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [locale] = useState<"ar" | "en">(() => getLocaleFromCookie());
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
 
@@ -71,6 +70,15 @@ export function SubscriptionRequestForm() {
     formState: { errors },
   } = useForm<RequestInput>({
     resolver: zodResolver(requestSchema),
+    defaultValues: {
+      companyName: "",
+      companyNameAr: "",
+      contactName: "",
+      contactEmail: "",
+      contactPhone: "",
+      employeesCount: "",
+      message: "",
+    },
   });
 
   const onSubmit = async (data: RequestInput) => {
@@ -122,10 +130,10 @@ export function SubscriptionRequestForm() {
         </h3>
         <p className="mb-6 text-muted-foreground">
           {isAr
-            ? "شكرًا لاهتمامك بمنصة أجور. سيتواصل معك فريقنا خلال 24 ساعة."
-            : "Thanks for your interest in Ujoors. Our team will contact you within 24 hours."}
+            ? "شكرًا لاهتمامك بمنصة طاقم. سيتواصل معك فريقنا خلال 24 ساعة."
+            : "Thanks for your interest in Taqam. Our team will contact you within 24 hours."}
         </p>
-        <Button variant="outline" onClick={() => (window.location.href = prefix || "/") }>
+        <Button variant="brandOutline" onClick={() => router.push(prefix || "/") }>
           {isAr ? "العودة للرئيسية" : "Back to home"}
         </Button>
       </div>
@@ -133,14 +141,16 @@ export function SubscriptionRequestForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Company Info */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="companyName">{isAr ? "اسم الشركة (بالإنجليزية) *" : "Company name (English) *"}</Label>
           <Input
             id="companyName"
             placeholder={isAr ? "Company Name" : "Company Name"}
+            autoComplete="organization"
+            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
             {...register("companyName")}
           />
           {errors.companyName && (
@@ -148,11 +158,12 @@ export function SubscriptionRequestForm() {
           )}
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="companyNameAr">{isAr ? "اسم الشركة (بالعربية)" : "Company name (Arabic)"}</Label>
           <Input
             id="companyNameAr"
             placeholder={isAr ? "اسم الشركة" : "اسم الشركة"}
+            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
             {...register("companyNameAr")}
           />
         </div>
@@ -160,11 +171,13 @@ export function SubscriptionRequestForm() {
 
       {/* Contact Info */}
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="contactName">{isAr ? "اسم المسؤول *" : "Contact name *"}</Label>
           <Input
             id="contactName"
             placeholder={isAr ? "أحمد محمد" : "John Smith"}
+            autoComplete="name"
+            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
             {...register("contactName")}
           />
           {errors.contactName && (
@@ -172,12 +185,14 @@ export function SubscriptionRequestForm() {
           )}
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="contactEmail">{isAr ? "البريد الإلكتروني *" : "Email *"}</Label>
           <Input
             id="contactEmail"
             type="email"
             placeholder="email@company.sa"
+            autoComplete="email"
+            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
             {...register("contactEmail")}
           />
           {errors.contactEmail && (
@@ -187,19 +202,21 @@ export function SubscriptionRequestForm() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label htmlFor="contactPhone">{isAr ? "رقم الهاتف" : "Phone"}</Label>
           <Input
             id="contactPhone"
             placeholder="+966501234567"
+            autoComplete="tel"
+            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
             {...register("contactPhone")}
           />
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <Label>{isAr ? "عدد الموظفين *" : "Employee count *"}</Label>
-          <Select onValueChange={(value) => setValue("employeesCount", value)}>
-            <SelectTrigger>
+          <Select onValueChange={(value) => setValue("employeesCount", value, { shouldDirty: true, shouldValidate: true })}>
+            <SelectTrigger className="h-11 rounded-xl bg-muted/50 focus:bg-background">
               <SelectValue placeholder={isAr ? "اختر" : "Select"} />
             </SelectTrigger>
             <SelectContent>
@@ -216,22 +233,24 @@ export function SubscriptionRequestForm() {
       </div>
 
       {/* Message */}
-      <div className="space-y-2">
+      <div className="space-y-1.5">
         <Label htmlFor="message">{isAr ? "رسالة أو ملاحظات" : "Message / notes"}</Label>
         <Textarea
           id="message"
           placeholder={isAr ? "أخبرنا المزيد عن احتياجاتك..." : "Tell us about your needs..."}
           rows={4}
+          className="min-h-28 rounded-2xl bg-muted/50 focus-visible:bg-background"
           {...register("message")}
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
         <Label>{isAr ? "التحقق" : "Verification"}</Label>
         {siteKey ? (
           <div className="flex justify-center sm:justify-start">
             <ReCAPTCHA
               sitekey={siteKey}
+              hl={locale}
               onChange={(token: string | null) => setCaptchaToken(token)}
               onExpired={() => setCaptchaToken(null)}
             />
@@ -241,10 +260,14 @@ export function SubscriptionRequestForm() {
         )}
       </div>
 
-      {submitError ? <p className="text-sm text-destructive">{submitError}</p> : null}
+      {submitError ? (
+        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          {submitError}
+        </div>
+      ) : null}
 
       {/* Submit */}
-      <Button type="submit" className="w-full" disabled={isLoading}>
+      <Button type="submit" variant="brand" className="h-11 w-full rounded-xl" disabled={isLoading}>
         {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
         {isLoading ? t(locale, "form.submitting") : t(locale, "form.submit")}
       </Button>

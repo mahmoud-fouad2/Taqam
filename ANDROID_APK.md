@@ -3,6 +3,8 @@
 This repo is a **Next.js** application (API routes + DB + auth), so it **cannot be exported as a fully-offline static app**.
 The APK we build here is a **WebView wrapper** that loads the app from a server URL.
 
+For the actively maintained Expo mobile app, use `apps/mobile`. This document only covers the Capacitor WebView wrapper configured at the repo root.
+
 ## Prerequisites (Windows)
 
 - Install **Android Studio**
@@ -55,5 +57,5 @@ Install it on your phone:
 
 ## Notes
 
-- If you open the APK and see a plain "Ujoor" placeholder page, it means `CAP_SERVER_URL` was not set when syncing/building.
+- If you open the APK and see a plain "Taqam" placeholder page, it means `CAP_SERVER_URL` was not set when syncing/building.
 - For production, use an **HTTPS** URL and consider disabling `cleartext` (HTTP) in `capacitor.config.ts`.

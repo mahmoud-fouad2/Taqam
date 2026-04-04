@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { downloadBlob, fetchBlobOrThrow, openBlob } from "@/lib/browser/download";
 import {
   type Payslip,
   type PayslipStatus,
@@ -160,6 +161,51 @@ export function PayslipsManager() {
     }
   };
 
+  const handleDownloadPayslip = async (payslipId: string) => {
+    try {
+      const { blob, filename } = await fetchBlobOrThrow(
+        `/api/payroll/payslips/${encodeURIComponent(payslipId)}/download`,
+        { cache: "no-store" }
+      );
+      downloadBlob(blob, filename || `payslip-${payslipId}.html`);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "فشل تحميل القسيمة");
+    }
+  };
+
+  const handlePrintPayslip = async (payslipId: string) => {
+    try {
+      const { blob } = await fetchBlobOrThrow(
+        `/api/payroll/payslips/${encodeURIComponent(payslipId)}/download`,
+        { cache: "no-store" }
+      );
+      openBlob(blob);
+    } catch (e: any) {
+      console.error(e);
+      toast.error(e?.message || "فشل فتح القسيمة للطباعة");
+    }
+  };
+
+  const handleExportPayslips = () => {
+    const headers = ["الرقم الوظيفي", "الموظف", "القسم", "الإجمالي", "الخصومات", "الصافي", "الحالة"];
+    const rows = filteredPayslips.map((payslip) => [
+      payslip.employeeNumber,
+      payslip.employeeNameAr,
+      payslip.departmentAr,
+      payslip.totalEarnings,
+      payslip.totalDeductions,
+      payslip.netSalary,
+      payslip.status,
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
+    downloadBlob(
+      new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8" }),
+      `payslips-${currentPeriod?.name || currentPeriod?.id || "export"}.csv`
+    );
+  };
+
   const getStatusBadge = (status: PayslipStatus) => {
     const labels: Record<PayslipStatus, { label: string; variant: "default" | "secondary" | "outline" }> = {
       draft: { label: "مسودة", variant: "secondary" },
@@ -269,7 +315,7 @@ export function PayslipsManager() {
             <IconSend className="ms-2 h-4 w-4" />
             إرسال الكل
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportPayslips} disabled={filteredPayslips.length === 0}>
             <IconDownload className="ms-2 h-4 w-4" />
             تصدير
           </Button>
@@ -359,23 +405,20 @@ export function PayslipsManager() {
                     <TableCell>{getStatusBadge(payslip.status)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => setSelectedPayslip(payslip)}
-                        >
+                        <Button variant="ghost" size="icon" aria-label="عرض" onClick={() => setSelectedPayslip(payslip)}>
                           <IconEye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label="تحميل" onClick={() => handleDownloadPayslip(payslip.id)}>
                           <IconDownload className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label="طباعة" onClick={() => handlePrintPayslip(payslip.id)}>
                           <IconPrinter className="h-4 w-4" />
                         </Button>
                         {payslip.status !== "sent" && payslip.status !== "viewed" && (
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="إرسال"
                             onClick={() => handleSendPayslip(payslip.id)}
                           >
                             <IconSend className="h-4 w-4" />
@@ -393,7 +436,7 @@ export function PayslipsManager() {
 
       {/* Payslip Preview Dialog */}
       <Dialog open={!!selectedPayslip} onOpenChange={() => setSelectedPayslip(null)}>
-        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>قسيمة الراتب</DialogTitle>
           </DialogHeader>
@@ -511,11 +554,11 @@ export function PayslipsManager() {
 
               {/* Actions */}
               <div className="flex justify-end gap-2">
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => handlePrintPayslip(selectedPayslip.id)}>
                   <IconPrinter className="ms-2 h-4 w-4" />
                   طباعة
                 </Button>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => handleDownloadPayslip(selectedPayslip.id)}>
                   <IconDownload className="ms-2 h-4 w-4" />
                   تحميل PDF
                 </Button>

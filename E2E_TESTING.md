@@ -1,4 +1,7 @@
-# 🧪 اختبار E2E كامل للنظام
+# 🧪 اختبار E2E كامل للنظام - أرشيف اختبارات قديم
+
+> **ملاحظة أرشيفية:** هذا الملف يحتوي على أمثلة تاريخية وقد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو بيانات دخول أو Bootstrap قديمة.
+> للاستخدام الحالي اعتمد على `TESTING_GUIDE.md` و `QUICK_START.md` و `SUMMARY.md` واستخدم `https://YOUR-RENDER-DOMAIN` مع `ENABLE_SUPER_ADMIN_BOOTSTRAP=true` و `SUPER_ADMIN_BOOTSTRAP_TOKEN` وترويسة `x-bootstrap-token`.
 
 ## 🎯 البيئة
 - **URL:** https://ujoor.onrender.com

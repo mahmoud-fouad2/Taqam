@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { JsonLd } from "@/components/marketing/json-ld";
@@ -9,17 +9,17 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/faq",
-    titleAr: "الأسئلة الشائعة | أجور",
-    titleEn: "FAQ | Ujoors",
-    descriptionAr: "إجابات على الأسئلة الشائعة حول أجور: التفعيل، التسعير، الدعم، والأمان.",
-    descriptionEn: "Frequently asked questions about Ujoors: onboarding, pricing, support, and security.",
+    titleAr: "الأسئلة الشائعة | طاقم",
+    titleEn: "FAQ | Taqam",
+    descriptionAr: "إجابات على الأسئلة الشائعة حول طاقم: التفعيل، التسعير، الدعم، والأمان.",
+    descriptionEn: "Frequently asked questions about Taqam: onboarding, pricing, support, and security.",
   });
 }
 
 const faqs = [
   {
-    qAr: "هل أجور مناسب للشركات الصغيرة والمتوسطة؟",
-    qEn: "Is Ujoors suitable for small and mid-sized companies?",
+    qAr: "هل طاقم مناسب للشركات الصغيرة والمتوسطة؟",
+    qEn: "Is Taqam suitable for small and mid-sized companies?",
     aAr: "نعم. تقدر تبدأ بسرعة على باقة مناسبة، ومع النمو تنتقل لباقات أكبر بدون فقد بيانات أو إعادة إعدادات.",
     aEn: "Yes. You can start quickly on a plan that fits your size and upgrade later without losing data or reconfiguring everything.",
   },

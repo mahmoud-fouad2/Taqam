@@ -7,10 +7,10 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { getMonthName } from "@/lib/types/payroll";
-import { Prisma } from "@prisma/client";
+import { requireTenantSession } from "@/lib/api/route-helper";
+import { ensurePayslipsForPeriod } from "@/lib/payroll/payslips";
+import { buildCsv } from "@/lib/payroll/export";
 
 function monthKey(date: Date) {
   const y = date.getUTCFullYear();
@@ -22,107 +22,17 @@ function toNumber(v: any) {
   return typeof v === "number" ? v : Number(v);
 }
 
-function roundInt(n: number) {
-  return Math.round(n);
-}
-
-async function ensurePayslipsForPeriod(tenantId: string, periodId: string) {
-  const existingCount = await prisma.payrollPayslip.count({
-    where: { tenantId, payrollPeriodId: periodId },
-  });
-
-  if (existingCount > 0) return;
-
-  const period = await prisma.payrollPeriod.findFirst({
-    where: { id: periodId, tenantId },
-    select: { id: true, startDate: true, endDate: true, paymentDate: true },
-  });
-
-  if (!period) return;
-
-  const employees = await prisma.employee.findMany({
-    where: { tenantId, status: "ACTIVE" },
-    select: {
-      id: true,
-      baseSalary: true,
-      currency: true,
-    },
-  });
-
-  await prisma.$transaction(
-    employees.map((e) => {
-      const basicSalary = toNumber(e.baseSalary ?? 0);
-      const housingAllowance = basicSalary * 0.25;
-      const transportAllowance = basicSalary * 0.1;
-      const totalEarnings = basicSalary + housingAllowance + transportAllowance;
-
-      const gosiBase = basicSalary + housingAllowance;
-      const gosiEmployee = roundInt(gosiBase * 0.0975);
-      const gosiEmployer = roundInt(gosiBase * 0.1175);
-      const totalDeductions = gosiEmployee;
-      const netSalary = totalEarnings - totalDeductions;
-
-      const earnings = [
-        { type: "basic", name: "Basic Salary", nameAr: "الراتب الأساسي", amount: basicSalary },
-        { type: "housing", name: "Housing Allowance", nameAr: "بدل السكن", amount: housingAllowance },
-        { type: "transport", name: "Transport Allowance", nameAr: "بدل المواصلات", amount: transportAllowance },
-      ];
-
-      const deductions = [
-        { type: "gosi", name: "GOSI", nameAr: "التأمينات الاجتماعية", amount: gosiEmployee },
-      ];
-
-      return prisma.payrollPayslip.upsert({
-        where: {
-          tenantId_payrollPeriodId_employeeId: {
-            tenantId,
-            payrollPeriodId: periodId,
-            employeeId: e.id,
-          },
-        },
-        create: {
-          tenantId,
-          payrollPeriodId: periodId,
-          employeeId: e.id,
-          status: "GENERATED",
-          currency: e.currency,
-          paymentMethod: "bank_transfer",
-          basicSalary,
-          totalEarnings,
-          totalDeductions,
-          netSalary,
-          earnings: earnings as unknown as Prisma.InputJsonValue,
-          deductions: deductions as unknown as Prisma.InputJsonValue,
-          workingDays: 22,
-          actualWorkDays: 22,
-          absentDays: 0,
-          lateDays: 0,
-          overtimeHours: 0,
-          gosiEmployee,
-          gosiEmployer,
-        },
-        update: {},
-      });
-    })
-  );
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { searchParams } = new URL(request.url);
     const yearRaw = searchParams.get("year") || "";
     const monthRaw = searchParams.get("month") || "all";
     const departmentId = searchParams.get("departmentId") || "all";
+    const format = (searchParams.get("format") || "json").toLowerCase();
 
     const year = Number(yearRaw);
     if (!year || Number.isNaN(year)) {
@@ -270,6 +180,45 @@ export async function GET(request: NextRequest) {
     }
 
     const monthlyTrend = months.map(({ y, m }) => byMonth.get(`${y}-${String(m).padStart(2, "0")}`)!);
+
+    if (format === "csv") {
+      const csv = buildCsv(
+        ["section", "name", "employeeCount", "totalGross", "totalDeductions", "totalNet", "avgSalary", "gosiBase", "gosiEmployee", "gosiEmployer"],
+        [
+          ...departmentStats.map((item) => [
+            "department",
+            item.name,
+            item.employeeCount,
+            item.totalGross,
+            item.totalDeductions,
+            item.totalNet,
+            item.avgSalary,
+            item.gosiBase,
+            item.gosiEmployee,
+            item.gosiEmployer,
+          ]),
+          ...monthlyTrend.map((item) => [
+            "trend",
+            item.month,
+            item.employeeCount,
+            item.totalGross,
+            undefined,
+            item.totalNet,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+          ]),
+        ]
+      );
+
+      return new NextResponse(`\ufeff${csv}`, {
+        headers: {
+          "Content-Type": "text/csv; charset=utf-8",
+          "Content-Disposition": `attachment; filename="payroll-report-${year}-${monthRaw}.csv"`,
+        },
+      });
+    }
 
     return NextResponse.json({
       data: {

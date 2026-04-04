@@ -6,6 +6,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { hasRole, isSuperAdminRole } from "@/lib/access-control";
 import { getAuditLogStats } from "@/lib/audit/logger";
 
 export async function GET(request: NextRequest) {
@@ -16,17 +17,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only SUPER_ADMIN and ADMIN can view audit stats
-    if (session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+    if (!hasRole(session.user.role, ["SUPER_ADMIN", "TENANT_ADMIN"])) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!isSuperAdminRole(session.user.role) && !session.user.tenantId) {
+      return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
     const tenantId = searchParams.get("tenantId") || undefined;
 
-    // Super admin can view stats for any tenant, others only their tenant
-    const finalTenantId =
-      session.user.role === "SUPER_ADMIN" ? tenantId : session.user.tenantId || undefined;
+    const finalTenantId = isSuperAdminRole(session.user.role)
+      ? tenantId
+      : session.user.tenantId || undefined;
 
     const stats = await getAuditLogStats(finalTenantId);
 

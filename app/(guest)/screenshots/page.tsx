@@ -1,61 +1,137 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { ScreenshotsGallery } from "./gallery";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { LayoutDashboard, Users, DollarSign, Clock, BarChart3, Smartphone } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/screenshots",
-    titleAr: "استعراض النظام | أجور",
-    titleEn: "Product Tour | Ujoors",
-    descriptionAr: "معرض لواجهات أجور: لوحة التحكم، الموظفين، الحضور، والرواتب.",
-    descriptionEn: "A guided UI tour of Ujoors: dashboard, employees, attendance, and payroll.",
+    titleAr: "استعراض النظام | طاقم",
+    titleEn: "Product Tour | Taqam",
+    descriptionAr: "معرض لواجهات طاقم: لوحة التحكم، الموظفين، الحضور، والرواتب.",
+    descriptionEn: "A guided UI tour of Taqam: dashboard, employees, attendance, and payroll.",
   });
 }
 
 const desktopShots = [
   {
     src: "/preview.png",
-    titleAr: "لوحة التحكم (معاينة)",
-    titleEn: "Dashboard (preview)",
+    titleAr: "لوحة التحكم",
+    titleEn: "Dashboard",
+    badgeAr: "HR",
+    badgeEn: "HR",
+    badgeColor: "indigo" as const,
   },
   {
     src: "/preview2.png",
-    titleAr: "تقارير ولوحات",
+    titleAr: "التقارير والتحليلات",
     titleEn: "Reports & insights",
+    badgeAr: "تقارير",
+    badgeEn: "Reports",
+    badgeColor: "orange" as const,
   },
   {
-    src: "/images/marketing/screenshot-dashboard.svg",
-    titleAr: "الواجهة (توضيحية)",
-    titleEn: "UI (illustration)",
+    src: "/images/marketing/screenshot-dashboard.svg?v=2",
+    titleAr: "لوحة التحكم الرئيسية",
+    titleEn: "Main Dashboard",
+    badgeAr: "لوحة التحكم",
+    badgeEn: "Dashboard",
+    badgeColor: "indigo" as const,
   },
   {
-    src: "/images/marketing/screenshot-employees.svg",
-    titleAr: "الموظفون (توضيحية)",
-    titleEn: "Employees (illustration)",
+    src: "/images/marketing/screenshot-employees.svg?v=2",
+    titleAr: "إدارة الموظفين",
+    titleEn: "Employee Management",
+    badgeAr: "موارد بشرية",
+    badgeEn: "HR",
+    badgeColor: "blue" as const,
   },
   {
-    src: "/images/marketing/screenshot-payroll.svg",
-    titleAr: "الرواتب (توضيحية)",
-    titleEn: "Payroll (illustration)",
+    src: "/images/marketing/screenshot-payroll-new.svg?v=2",
+    titleAr: "كشف الرواتب",
+    titleEn: "Payroll Processing",
+    badgeAr: "رواتب",
+    badgeEn: "Payroll",
+    badgeColor: "purple" as const,
   },
 ];
 
 const mobileShots = [
   {
     src: "/images/marketing/mobile-dashboard.svg",
-    titleAr: "موبايل: لوحة التحكم (توضيحية)",
-    titleEn: "Mobile: Dashboard (illustration)",
+    titleAr: "لوحة التحكم — جوال",
+    titleEn: "Dashboard — Mobile",
+    badgeAr: "لوحة التحكم",
+    badgeEn: "Dashboard",
+    badgeColor: "indigo" as const,
   },
   {
     src: "/images/marketing/mobile-employees.svg",
-    titleAr: "موبايل: الموظفون (توضيحية)",
-    titleEn: "Mobile: Employees (illustration)",
+    titleAr: "الموظفون — جوال",
+    titleEn: "Employees — Mobile",
+    badgeAr: "موارد بشرية",
+    badgeEn: "HR",
+    badgeColor: "blue" as const,
   },
   {
     src: "/images/marketing/mobile-payroll.svg",
-    titleAr: "موبايل: الرواتب (توضيحية)",
-    titleEn: "Mobile: Payroll (illustration)",
+    titleAr: "الرواتب — جوال",
+    titleEn: "Payroll — Mobile",
+    badgeAr: "رواتب",
+    badgeEn: "Payroll",
+    badgeColor: "purple" as const,
+  },
+];
+
+const features = [
+  {
+    icon: LayoutDashboard,
+    color: "text-indigo-600 bg-indigo-500/10",
+    labelAr: "لوحة تحكم ذكية",
+    labelEn: "Smart Dashboard",
+    descAr: "إحصائيات حية وتنبيهات فورية",
+    descEn: "Live stats & instant alerts",
+  },
+  {
+    icon: Users,
+    color: "text-blue-600 bg-blue-500/10",
+    labelAr: "إدارة الموظفين",
+    labelEn: "Employee Management",
+    descAr: "ملفات شاملة وصلاحيات مرنة",
+    descEn: "Full profiles & flexible roles",
+  },
+  {
+    icon: Clock,
+    color: "text-green-600 bg-green-500/10",
+    labelAr: "الحضور والانصراف",
+    labelEn: "Attendance Tracking",
+    descAr: "تسجيل يومي وتقارير غياب",
+    descEn: "Daily tracking & absence reports",
+  },
+  {
+    icon: DollarSign,
+    color: "text-purple-600 bg-purple-500/10",
+    labelAr: "معالجة الرواتب",
+    labelEn: "Payroll Processing",
+    descAr: "احتساب تلقائي وصرف دفعي",
+    descEn: "Auto-calculate & bulk payment",
+  },
+  {
+    icon: BarChart3,
+    color: "text-orange-600 bg-orange-500/10",
+    labelAr: "التقارير والتحليلات",
+    labelEn: "Reports & Analytics",
+    descAr: "رسوم بيانية وتصدير Excel",
+    descEn: "Charts & Excel export",
+  },
+  {
+    icon: Smartphone,
+    color: "text-teal-600 bg-teal-500/10",
+    labelAr: "تطبيق الجوال",
+    labelEn: "Mobile App",
+    descAr: "iOS و Android — جاهز قريباً",
+    descEn: "iOS & Android — coming soon",
   },
 ];
 
@@ -65,21 +141,90 @@ export default async function ScreenshotsPage() {
 
   return (
     <main className="bg-background">
-      <section className="relative overflow-hidden border-b">
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-indigo-50/60 via-background to-background dark:from-indigo-950/20">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute -top-24 start-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -bottom-28 start-12 h-[420px] w-[420px] rounded-full bg-blue-500/10 blur-3xl" />
-        </div>
-        <div className="container mx-auto px-4 py-14">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold sm:text-4xl">{isAr ? "استعراض النظام" : "Product tour"}</h1>
-          <p className="mt-3 text-muted-foreground">
-            {isAr
-              ? "معرض لواجهات أجور — اضغط على أي لقطة للتكبير."
-              : "A quick look at Ujoors UI — click any item to zoom."}
-          </p>
+          <div className="absolute -top-32 start-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-indigo-500/8 blur-3xl" />
+          <div className="absolute -bottom-20 end-0 h-[400px] w-[400px] rounded-full bg-blue-500/8 blur-3xl" />
+          <div className="absolute top-1/2 start-0 h-[300px] w-[300px] -translate-y-1/2 rounded-full bg-purple-500/6 blur-3xl" />
         </div>
 
+        <div className="container mx-auto px-4 pb-0 pt-16">
+          {/* Badge */}
+          <div className="flex justify-center">
+            <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
+              <span className="size-1.5 rounded-full bg-indigo-500" />
+              {isAr ? "جولة تفاعلية في المنصة" : "Interactive Platform Tour"}
+            </span>
+          </div>
+
+          {/* Heading */}
+          <div className="mx-auto mt-5 max-w-3xl text-center">
+            <h1 className="text-3xl font-extrabold tracking-tight sm:text-5xl">
+              {isAr ? (
+                <>
+                  شاهد{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+                    طاقم
+                  </span>{" "}
+                  في العمل
+                </>
+              ) : (
+                <>
+                  See{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 to-blue-500 bg-clip-text text-transparent">
+                    Taqam
+                  </span>{" "}
+                  in action
+                </>
+              )}
+            </h1>
+            <p className="mt-4 text-base text-muted-foreground sm:text-lg">
+              {isAr
+                ? "استعرض واجهات المنصة بالتفصيل — من لوحة التحكم إلى الرواتب. اضغط على أي لقطة للتكبير."
+                : "Explore every corner of the platform — from the dashboard to payroll. Click any screenshot to zoom in."}
+            </p>
+          </div>
+
+          {/* Stats row */}
+          <div className="mx-auto mt-8 flex max-w-lg justify-center gap-8 text-center">
+            <div>
+              <p className="text-2xl font-bold text-foreground">٨+</p>
+              <p className="text-xs text-muted-foreground">{isAr ? "لقطات شاشة" : "Screenshots"}</p>
+            </div>
+            <div className="h-10 w-px bg-border" />
+            <div>
+              <p className="text-2xl font-bold text-foreground">٦</p>
+              <p className="text-xs text-muted-foreground">{isAr ? "وحدات وظيفية" : "Feature modules"}</p>
+            </div>
+            <div className="h-10 w-px bg-border" />
+            <div>
+              <p className="text-2xl font-bold text-foreground">٢</p>
+              <p className="text-xs text-muted-foreground">{isAr ? "منصة (ويب + جوال)" : "Platforms (web + mobile)"}</p>
+            </div>
+          </div>
+
+          {/* Feature highlights */}
+          <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            {features.map((f) => (
+              <div
+                key={f.labelEn}
+                className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center shadow-sm transition-shadow hover:shadow-md"
+              >
+                <div className={`flex size-9 items-center justify-center rounded-lg ${f.color}`}>
+                  <f.icon className="size-4" />
+                </div>
+                <p className="text-xs font-semibold leading-tight text-foreground">
+                  {isAr ? f.labelAr : f.labelEn}
+                </p>
+                <p className="text-[10px] leading-tight text-muted-foreground">
+                  {isAr ? f.descAr : f.descEn}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          {/* Gallery */}
           <ScreenshotsGallery locale={locale} desktop={desktopShots} mobile={mobileShots} />
         </div>
       </section>

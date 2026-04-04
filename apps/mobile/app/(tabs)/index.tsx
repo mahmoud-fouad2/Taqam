@@ -147,28 +147,64 @@ export default function AttendanceScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>{header}</Text>
-      <Text style={styles.subtitle}>{t(language, "attendance_subtitle")}</Text>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>{header}</Text>
+        <Text style={styles.todayDate}>
+          {new Date().toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", {
+            weekday: "long", year: "numeric", month: "long", day: "numeric",
+          })}
+        </Text>
+      </View>
 
-      <View style={styles.statusCard}>
+      {/* Status card */}
+      <View style={[
+        styles.statusCard,
+        today?.status === "CHECKED_IN"  && styles.statusCardGreen,
+        today?.status === "CHECKED_OUT" && styles.statusCardBlue,
+      ]}>
         <View style={styles.statusRow}>
+          <View style={[
+            styles.statusDot,
+            today?.status === "CHECKED_IN"  ? styles.dotGreen :
+            today?.status === "CHECKED_OUT" ? styles.dotBlue : styles.dotGray,
+          ]} />
           <Text style={styles.statusLabel}>{t(language, "today")}</Text>
-          <Pressable onPress={() => void loadToday()} disabled={loadingToday || busy} style={styles.refreshBtn}>
-            {loadingToday ? <ActivityIndicator color="#fff" /> : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
+          <Pressable
+            onPress={() => void loadToday()}
+            disabled={loadingToday || busy}
+            style={[styles.refreshBtn, (loadingToday || busy) && { opacity: 0.5 }]}
+          >
+            {loadingToday
+              ? <ActivityIndicator color="#fff" size="small" />
+              : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
           </Pressable>
         </View>
         <Text style={styles.statusValue}>{statusText}</Text>
-        <View style={styles.metaRow}>
-          <Text style={styles.metaText}>{t(language, "last_check_in")}: {fmt(today?.record?.checkInTime)}</Text>
-          <Text style={styles.metaText}>{t(language, "last_check_out")}: {fmt(today?.record?.checkOutTime)}</Text>
+        <View style={styles.timesRow}>
+          <View style={styles.timeBlock}>
+            <Text style={styles.timeLabel}>{t(language, "last_check_in")}</Text>
+            <Text style={styles.timeValue}>{fmt(today?.record?.checkInTime)}</Text>
+          </View>
+          <View style={styles.timeDivider} />
+          <View style={styles.timeBlock}>
+            <Text style={styles.timeLabel}>{t(language, "last_check_out")}</Text>
+            <Text style={styles.timeValue}>{fmt(today?.record?.checkOutTime)}</Text>
+          </View>
         </View>
       </View>
 
+      {/* Action buttons */}
       <View style={styles.actions}>
         <Pressable
           onPress={() => void doAttendance("check-in")}
           disabled={!canCheckIn}
-          style={[styles.button, styles.checkIn, !canCheckIn && styles.buttonDisabled]}
+          style={({ pressed }) => [
+            styles.button,
+            styles.checkIn,
+            !canCheckIn && styles.buttonDisabled,
+            pressed && canCheckIn && { opacity: 0.88, transform: [{ scale: 0.98 }] },
+          ]}
         >
           {busy ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.buttonText}>{t(language, "check_in")}</Text>}
         </Pressable>
@@ -176,28 +212,27 @@ export default function AttendanceScreen() {
         <Pressable
           onPress={() => void doAttendance("check-out")}
           disabled={!canCheckOut}
-          style={[styles.button, styles.checkOut, !canCheckOut && styles.buttonDisabled]}
+          style={({ pressed }) => [
+            styles.button,
+            styles.checkOut,
+            !canCheckOut && styles.buttonDisabled,
+            pressed && canCheckOut && { opacity: 0.88, transform: [{ scale: 0.98 }] },
+          ]}
         >
           {busy ? <ActivityIndicator color="#fff" /> : <Text style={[styles.buttonText, styles.buttonTextAlt]}>{t(language, "check_out")}</Text>}
         </Pressable>
       </View>
 
+      {/* Last result */}
       {last ? (
         <View style={[styles.alert, last.ok ? styles.alertOk : styles.alertErr]}>
           <Text style={styles.alertText}>{last.message}</Text>
-
-          {(!last.ok && (locationIssue === "PERMISSION" || locationIssue === "SERVICES")) ? (
+          {!last.ok && (locationIssue === "PERMISSION" || locationIssue === "SERVICES") ? (
             <View style={styles.alertActions}>
-              <Pressable
-                onPress={() => void Linking.openSettings()}
-                style={[styles.smallBtn, styles.smallBtnPrimary]}
-              >
+              <Pressable onPress={() => void Linking.openSettings()} style={[styles.smallBtn, styles.smallBtnPrimary]}>
                 <Text style={styles.smallBtnText}>{t(language, "open_settings")}</Text>
               </Pressable>
-              <Pressable
-                onPress={() => void loadToday()}
-                style={[styles.smallBtn, styles.smallBtnSecondary]}
-              >
+              <Pressable onPress={() => void loadToday()} style={[styles.smallBtn, styles.smallBtnSecondary]}>
                 <Text style={styles.smallBtnText}>{t(language, "try_again")}</Text>
               </Pressable>
             </View>
@@ -205,11 +240,12 @@ export default function AttendanceScreen() {
         </View>
       ) : null}
 
+      {/* Note */}
       <View style={styles.note}>
         <Text style={styles.noteText}>
           {language === "ar"
-            ? "إذا تم تفعيل geofence للشركة، التسجيل خارج المواقع المسموحة سيتم رفضه."
-            : "If geofence is enabled, requests outside allowed locations will be rejected."}
+            ? "🔒 إذا كان نظام Geofence مفعلاً، التسجيل خارج مواقع العمل سيتم رفضه."
+            : "🔒 If geofence is enabled, check-ins outside allowed locations will be rejected."}
         </Text>
       </View>
     </View>
@@ -220,146 +256,182 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#0b1220",
+    backgroundColor: "#0a0f1e",
   },
-  title: {
-    color: "#fff",
-    fontSize: 22,
-    fontWeight: "800",
-    marginTop: 10,
-  },
-  subtitle: {
-    color: "rgba(255,255,255,0.70)",
-    marginTop: 6,
+  header: {
+    marginTop: 8,
     marginBottom: 16,
   },
-  actions: {
-    flexDirection: "row",
-    gap: 12,
+  title: {
+    color: "#f1f5f9",
+    fontSize: 24,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  todayDate: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 13,
   },
   statusCard: {
-    marginTop: 8,
-    marginBottom: 14,
-    padding: 12,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.04)",
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.03)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(255,255,255,0.09)",
+  },
+  statusCardGreen: {
+    borderColor: "rgba(34,197,94,0.25)",
+    backgroundColor: "rgba(34,197,94,0.06)",
+  },
+  statusCardBlue: {
+    borderColor: "rgba(59,130,246,0.25)",
+    backgroundColor: "rgba(59,130,246,0.06)",
   },
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
+    marginBottom: 10,
   },
+  statusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+  },
+  dotGreen: { backgroundColor: "#22c55e" },
+  dotBlue:  { backgroundColor: "#3b82f6" },
+  dotGray:  { backgroundColor: "rgba(255,255,255,0.25)" },
   statusLabel: {
-    color: "rgba(255,255,255,0.75)",
+    color: "rgba(255,255,255,0.65)",
     fontWeight: "700",
+    flex: 1,
   },
   refreshBtn: {
     paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingVertical: 5,
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
     backgroundColor: "rgba(255,255,255,0.05)",
   },
-  refreshText: {
-    color: "#fff",
-    fontWeight: "700",
-    fontSize: 12,
-  },
+  refreshText: { color: "#fff", fontWeight: "700", fontSize: 12 },
   statusValue: {
-    color: "#fff",
-    fontSize: 18,
+    color: "#f1f5f9",
+    fontSize: 19,
     fontWeight: "900",
-    marginTop: 6,
+    marginBottom: 14,
   },
-  metaRow: {
-    marginTop: 8,
-    gap: 4,
+  timesRow: {
+    flexDirection: "row",
+    alignItems: "center",
   },
-  metaText: {
-    color: "rgba(255,255,255,0.70)",
-    fontSize: 12,
+  timeBlock: { flex: 1 },
+  timeDivider: {
+    width: 1,
+    height: 28,
+    backgroundColor: "rgba(255,255,255,0.10)",
+    marginHorizontal: 12,
+  },
+  timeLabel: {
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 11,
+    fontWeight: "600",
+    marginBottom: 3,
+  },
+  timeValue: {
+    color: "#f1f5f9",
+    fontSize: 15,
+    fontWeight: "800",
+  },
+  actions: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 14,
   },
   button: {
     flex: 1,
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   checkIn: {
     backgroundColor: "#22c55e",
+    shadowColor: "#22c55e",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 6,
   },
   checkOut: {
-    backgroundColor: "#334155",
+    backgroundColor: "#1e293b",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.38,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
-    fontSize: 16,
-    fontWeight: "800",
     color: "#0b1220",
+    fontWeight: "800",
+    fontSize: 15,
   },
   buttonTextAlt: {
-    color: "#fff",
+    color: "#f1f5f9",
   },
   alert: {
-    marginTop: 14,
-    padding: 12,
-    borderRadius: 12,
+    padding: 14,
+    borderRadius: 14,
     borderWidth: 1,
+    marginBottom: 12,
   },
   alertOk: {
-    backgroundColor: "rgba(34,197,94,0.12)",
-    borderColor: "rgba(34,197,94,0.35)",
+    backgroundColor: "rgba(34,197,94,0.10)",
+    borderColor: "rgba(34,197,94,0.28)",
   },
   alertErr: {
-    backgroundColor: "rgba(248,113,113,0.10)",
-    borderColor: "rgba(248,113,113,0.30)",
+    backgroundColor: "rgba(239,68,68,0.10)",
+    borderColor: "rgba(239,68,68,0.28)",
   },
   alertText: {
-    color: "#fff",
+    color: "#f1f5f9",
+    fontWeight: "700",
+    fontSize: 14,
   },
   alertActions: {
     flexDirection: "row",
-    gap: 10,
+    gap: 8,
     marginTop: 10,
   },
   smallBtn: {
     flex: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
+    paddingVertical: 9,
+    borderRadius: 10,
     alignItems: "center",
     borderWidth: 1,
   },
   smallBtnPrimary: {
-    backgroundColor: "rgba(255,255,255,0.10)",
-    borderColor: "rgba(255,255,255,0.18)",
+    backgroundColor: "rgba(59,130,246,0.18)",
+    borderColor: "rgba(59,130,246,0.35)",
   },
   smallBtnSecondary: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.06)",
     borderColor: "rgba(255,255,255,0.12)",
   },
-  smallBtnText: {
-    color: "#fff",
-    fontWeight: "800",
-    fontSize: 12,
-  },
+  smallBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
   note: {
-    marginTop: 14,
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(59,130,246,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "rgba(59,130,246,0.13)",
   },
   noteText: {
-    color: "rgba(255,255,255,0.70)",
+    color: "rgba(255,255,255,0.45)",
     fontSize: 12,
+    lineHeight: 18,
   },
 });

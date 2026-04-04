@@ -228,6 +228,7 @@ export default function ReportsManager() {
                       <Button 
                         variant="ghost" 
                         size="icon"
+                        aria-label="تفضيل"
                         onClick={(e) => {
                           e.stopPropagation();
                           void toggleFavorite(report.id);
@@ -296,6 +297,7 @@ export default function ReportsManager() {
                         <Button 
                           variant="ghost" 
                           size="icon"
+                          aria-label="تفضيل"
                           onClick={() => void toggleFavorite(report.id)}
                         >
                           <Star className={`h-4 w-4 ${report.isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
@@ -406,7 +408,7 @@ export default function ReportsManager() {
 
       {/* Run Report Dialog */}
       <Dialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="w-full max-w-md">
           <DialogHeader>
             <DialogTitle>تشغيل التقرير</DialogTitle>
             <DialogDescription>{selectedReport?.name}</DialogDescription>

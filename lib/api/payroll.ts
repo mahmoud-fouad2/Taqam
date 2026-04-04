@@ -10,12 +10,13 @@ import type {
   Payslip,
   Loan,
   LoanPayment,
-  GOSISettings 
+  GOSISettings,
+  PayrollReportData,
 } from "@/lib/types/payroll";
 
 export interface PayrollFilters {
   year?: number;
-  month?: number;
+  month?: number | "all";
   status?: string;
   departmentId?: string;
 }
@@ -205,11 +206,11 @@ export const payrollService = {
   },
 
   /**
-   * Download payslip PDF
+   * Download payslip file
    */
   async downloadPayslip(id: string): Promise<ApiResponse<Blob>> {
     return apiClient.get<Blob>(`/payroll/payslips/${id}/download`, {
-      headers: { Accept: "application/pdf" },
+      headers: { Accept: "text/html, application/octet-stream" },
     });
   },
 
@@ -285,8 +286,11 @@ export const payrollService = {
   /**
    * Generate payroll report
    */
-  async generateReport(filters: PayrollFilters & { format?: "json" | "csv" | "pdf" }): Promise<ApiResponse<Blob | unknown>> {
-    return apiClient.get("/payroll/reports", { params: filters as Record<string, string | number> });
+  async generateReport(filters: PayrollFilters & { format?: "json" | "csv" }): Promise<ApiResponse<PayrollReportData | Blob>> {
+    return apiClient.get<PayrollReportData | Blob>("/payroll/reports", {
+      params: filters as Record<string, string | number>,
+      headers: filters.format === "csv" ? { Accept: "text/csv" } : undefined,
+    });
   },
 
   /**
@@ -304,7 +308,7 @@ export const payrollService = {
    */
   async getGOSIReport(periodId: string): Promise<ApiResponse<Blob>> {
     return apiClient.get<Blob>(`/payroll/periods/${periodId}/gosi-report`, {
-      headers: { Accept: "application/pdf" },
+      headers: { Accept: "text/csv, application/octet-stream" },
     });
   },
 };

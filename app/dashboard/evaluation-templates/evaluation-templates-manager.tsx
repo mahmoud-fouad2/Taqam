@@ -1,19 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import * as React from "react";
 import {
   IconPlus,
   IconEdit,
   IconTrash,
   IconCopy,
   IconCheck,
-  IconX,
   IconDots,
   IconClipboardList,
   IconScale,
-  IconPercentage,
   IconStarFilled,
+  IconLoader,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -57,511 +57,540 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { evaluationTemplatesApi } from "@/lib/api/performance";
 import {
-  EvaluationTemplate,
-  EvaluationSection,
-  EvaluationCriterion,
-  RatingScale,
+  type EvaluationTemplate,
+  type EvaluationSection,
+  type EvaluationCriterion,
+  type RatingScale,
   ratingScaleLabels,
 } from "@/lib/types/performance";
 
+type TemplateFormState = Partial<EvaluationTemplate>;
+
+type SectionFormState = {
+  name: string;
+  description: string;
+  weight: number;
+};
+
+type CriterionFormState = {
+  name: string;
+  description: string;
+  weight: number;
+  isRequired: boolean;
+};
+
+const EMPTY_FORM: TemplateFormState = {
+  name: "",
+  nameEn: "",
+  description: "",
+  ratingScale: "numeric_5",
+  sections: [],
+  isActive: true,
+  isDefault: false,
+};
+
+const EMPTY_SECTION_FORM: SectionFormState = {
+  name: "",
+  description: "",
+  weight: 0,
+};
+
+const EMPTY_CRITERION_FORM: CriterionFormState = {
+  name: "",
+  description: "",
+  weight: 0,
+  isRequired: true,
+};
+
+const SUPPORTED_RATING_SCALES: RatingScale[] = ["numeric_5", "numeric_10"];
+
+function getScaleIcon(scale: RatingScale) {
+  switch (scale) {
+    case "numeric_10":
+      return <IconScale className="h-4 w-4" />;
+    case "numeric_5":
+    default:
+      return <IconStarFilled className="h-4 w-4" />;
+  }
+}
+
 export function EvaluationTemplatesManager() {
-  const [templates, setTemplates] = useState<EvaluationTemplate[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<EvaluationTemplate | null>(null);
+  const [templates, setTemplates] = React.useState<EvaluationTemplate[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [selectedTemplate, setSelectedTemplate] = React.useState<EvaluationTemplate | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [formData, setFormData] = React.useState<TemplateFormState>(EMPTY_FORM);
+  const [sectionForm, setSectionForm] = React.useState<SectionFormState>(EMPTY_SECTION_FORM);
+  const [criterionTargetSectionId, setCriterionTargetSectionId] = React.useState<string | null>(null);
+  const [criterionForm, setCriterionForm] = React.useState<CriterionFormState>(EMPTY_CRITERION_FORM);
+  const [busyTemplateId, setBusyTemplateId] = React.useState<string | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // Form state
-  const [formData, setFormData] = useState<Partial<EvaluationTemplate>>({
-    name: "",
-    nameEn: "",
-    description: "",
-    ratingScale: "numeric_5",
-    includesSelfReview: true,
-    includesManagerReview: true,
-    includes360Review: false,
-    requiresCalibration: true,
-    sections: [],
-    isActive: true,
-  });
+  const loadTemplates = React.useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await evaluationTemplatesApi.getAll();
+      if (!response.success || !response.data) {
+        setTemplates([]);
+        setError(response.error || "فشل تحميل نماذج التقييم");
+        return;
+      }
 
-  // Section form
-  const [editingSection, setEditingSection] = useState<EvaluationSection | null>(null);
-  const [sectionForm, setSectionForm] = useState({
-    name: "",
-    description: "",
-    weight: 0,
-  });
+      setTemplates(response.data);
+    } catch (loadError) {
+      setTemplates([]);
+      setError(loadError instanceof Error ? loadError.message : "فشل تحميل نماذج التقييم");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
-  // Criterion form
-  const [editingCriterion, setEditingCriterion] = useState<{ sectionId: string; criterion: EvaluationCriterion | null } | null>(null);
-  const [criterionForm, setCriterionForm] = useState({
-    name: "",
-    description: "",
-    weight: 0,
-    isRequired: true,
-  });
+  React.useEffect(() => {
+    void loadTemplates();
+  }, [loadTemplates]);
 
-  const resetForm = () => {
-    setFormData({
-      name: "",
-      nameEn: "",
-      description: "",
-      ratingScale: "numeric_5",
-      includesSelfReview: true,
-      includesManagerReview: true,
-      includes360Review: false,
-      requiresCalibration: true,
-      sections: [],
-      isActive: true,
-    });
-  };
+  const totalWeight = React.useMemo(
+    () => formData.sections?.reduce((sum, section) => sum + section.weight, 0) || 0,
+    [formData.sections]
+  );
 
-  const calculateTotalWeight = () => {
-    return formData.sections?.reduce((sum, section) => sum + section.weight, 0) || 0;
-  };
+  function resetDialogState() {
+    setSelectedTemplate(null);
+    setIsEditing(false);
+    setFormData(EMPTY_FORM);
+    setSectionForm(EMPTY_SECTION_FORM);
+    setCriterionTargetSectionId(null);
+    setCriterionForm(EMPTY_CRITERION_FORM);
+  }
 
-  const handleAddSection = () => {
-    if (!sectionForm.name || sectionForm.weight <= 0) return;
+  function openCreateDialog() {
+    resetDialogState();
+    setIsDialogOpen(true);
+  }
+
+  function openEditDialog(template: EvaluationTemplate) {
+    setSelectedTemplate(template);
+    setIsEditing(true);
+    setFormData({ ...template, sections: template.sections.map((section) => ({ ...section, criteria: [...section.criteria] })) });
+    setSectionForm(EMPTY_SECTION_FORM);
+    setCriterionTargetSectionId(null);
+    setCriterionForm(EMPTY_CRITERION_FORM);
+    setIsDialogOpen(true);
+  }
+
+  function updateForm<K extends keyof TemplateFormState>(key: K, value: TemplateFormState[K]) {
+    setFormData((current) => ({ ...current, [key]: value }));
+  }
+
+  function handleAddSection() {
+    if (!sectionForm.name.trim() || sectionForm.weight <= 0) {
+      return;
+    }
 
     const newSection: EvaluationSection = {
-      id: `sec-${Date.now()}`,
-      name: sectionForm.name,
-      description: sectionForm.description,
+      id: `section-${Date.now()}`,
+      name: sectionForm.name.trim(),
+      description: sectionForm.description.trim() || undefined,
       weight: sectionForm.weight,
       order: (formData.sections?.length || 0) + 1,
       criteria: [],
     };
 
-    setFormData({
-      ...formData,
-      sections: [...(formData.sections || []), newSection],
-    });
+    setFormData((current) => ({
+      ...current,
+      sections: [...(current.sections || []), newSection],
+    }));
+    setSectionForm(EMPTY_SECTION_FORM);
+  }
 
-    setSectionForm({ name: "", description: "", weight: 0 });
-  };
+  function handleRemoveSection(sectionId: string) {
+    setFormData((current) => ({
+      ...current,
+      sections: (current.sections || []).filter((section) => section.id !== sectionId),
+    }));
+  }
 
-  const handleRemoveSection = (sectionId: string) => {
-    setFormData({
-      ...formData,
-      sections: formData.sections?.filter((s) => s.id !== sectionId),
-    });
-  };
-
-  const handleAddCriterion = (sectionId: string) => {
-    if (!criterionForm.name || criterionForm.weight <= 0) return;
+  function handleAddCriterion(sectionId: string) {
+    if (!criterionForm.name.trim() || criterionForm.weight <= 0) {
+      return;
+    }
 
     const newCriterion: EvaluationCriterion = {
-      id: `cr-${Date.now()}`,
-      name: criterionForm.name,
-      description: criterionForm.description,
+      id: `criterion-${Date.now()}`,
+      name: criterionForm.name.trim(),
+      description: criterionForm.description.trim() || undefined,
       weight: criterionForm.weight,
-      order: 0,
+      order: 1,
       isRequired: criterionForm.isRequired,
     };
 
-    setFormData({
-      ...formData,
-      sections: formData.sections?.map((s) =>
-        s.id === sectionId
-          ? { ...s, criteria: [...s.criteria, { ...newCriterion, order: s.criteria.length + 1 }] }
-          : s
+    setFormData((current) => ({
+      ...current,
+      sections: (current.sections || []).map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              criteria: [...section.criteria, { ...newCriterion, order: section.criteria.length + 1 }],
+            }
+          : section
       ),
-    });
+    }));
+    setCriterionTargetSectionId(null);
+    setCriterionForm(EMPTY_CRITERION_FORM);
+  }
 
-    setCriterionForm({ name: "", description: "", weight: 0, isRequired: true });
-    setEditingCriterion(null);
-  };
-
-  const handleRemoveCriterion = (sectionId: string, criterionId: string) => {
-    setFormData({
-      ...formData,
-      sections: formData.sections?.map((s) =>
-        s.id === sectionId
-          ? { ...s, criteria: s.criteria.filter((c) => c.id !== criterionId) }
-          : s
+  function handleRemoveCriterion(sectionId: string, criterionId: string) {
+    setFormData((current) => ({
+      ...current,
+      sections: (current.sections || []).map((section) =>
+        section.id === sectionId
+          ? {
+              ...section,
+              criteria: section.criteria.filter((criterion) => criterion.id !== criterionId),
+            }
+          : section
       ),
-    });
-  };
+    }));
+  }
 
-  const handleSave = () => {
-    const template: EvaluationTemplate = {
-      ...(formData as EvaluationTemplate),
-      id: selectedTemplate?.id || `et-${Date.now()}`,
-      tenantId: "tenant-1",
-      totalWeight: calculateTotalWeight(),
-      isDefault: selectedTemplate?.isDefault || false,
-      createdAt: selectedTemplate?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    if (isEditDialogOpen && selectedTemplate) {
-      setTemplates(templates.map((t) => (t.id === selectedTemplate.id ? template : t)));
-    } else {
-      setTemplates([...templates, template]);
+  async function handleSave() {
+    if (!formData.name?.trim() || !formData.nameEn?.trim()) {
+      toast.error("يرجى إدخال اسم النموذج بالعربية والإنجليزية");
+      return;
     }
 
-    setIsAddDialogOpen(false);
-    setIsEditDialogOpen(false);
-    setSelectedTemplate(null);
-    resetForm();
-  };
-
-  const handleDuplicate = (template: EvaluationTemplate) => {
-    const duplicate: EvaluationTemplate = {
-      ...template,
-      id: `et-${Date.now()}`,
-      name: `${template.name} (نسخة)`,
-      nameEn: `${template.nameEn} (Copy)`,
-      isDefault: false,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    setTemplates([...templates, duplicate]);
-  };
-
-  const handleDelete = (id: string) => {
-    setTemplates(templates.filter((t) => t.id !== id));
-  };
-
-  const openEditDialog = (template: EvaluationTemplate) => {
-    setSelectedTemplate(template);
-    setFormData(template);
-    setIsEditDialogOpen(true);
-  };
-
-  const getScaleIcon = (scale: RatingScale) => {
-    switch (scale) {
-      case "numeric_5":
-        return <IconStarFilled className="h-4 w-4" />;
-      case "numeric_10":
-        return <IconScale className="h-4 w-4" />;
-      case "percentage":
-        return <IconPercentage className="h-4 w-4" />;
-      default:
-        return <IconClipboardList className="h-4 w-4" />;
+    if ((formData.sections?.length || 0) === 0) {
+      toast.error("أضف قسمًا واحدًا على الأقل قبل الحفظ");
+      return;
     }
-  };
+
+    if (totalWeight !== 100) {
+      toast.error("يجب أن يساوي الوزن الإجمالي 100%");
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        nameEn: formData.nameEn.trim(),
+        description: formData.description?.trim() || undefined,
+        ratingScale: formData.ratingScale || "numeric_5",
+        sections: formData.sections || [],
+        totalWeight,
+        isActive: formData.isActive ?? true,
+        isDefault: formData.isDefault ?? false,
+        includesSelfReview: true,
+        includesManagerReview: true,
+        includes360Review: false,
+        requiresCalibration: true,
+      } as Omit<EvaluationTemplate, "id" | "tenantId" | "createdAt" | "updatedAt">;
+
+      const response = isEditing && selectedTemplate
+        ? await evaluationTemplatesApi.update(selectedTemplate.id, payload)
+        : await evaluationTemplatesApi.create(payload);
+
+      if (!response.success || !response.data) {
+        toast.error(response.error || "تعذر حفظ النموذج");
+        return;
+      }
+
+      toast.success(isEditing ? "تم تحديث النموذج" : "تم إنشاء النموذج");
+      setIsDialogOpen(false);
+      resetDialogState();
+      await loadTemplates();
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : "تعذر حفظ النموذج");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDuplicate(template: EvaluationTemplate) {
+    setBusyTemplateId(template.id);
+    try {
+      const response = await evaluationTemplatesApi.duplicate(template.id, `${template.name} (نسخة)`);
+      if (!response.success) {
+        toast.error(response.error || "تعذر نسخ النموذج");
+        return;
+      }
+
+      toast.success("تم إنشاء نسخة من النموذج");
+      await loadTemplates();
+    } catch (duplicateError) {
+      toast.error(duplicateError instanceof Error ? duplicateError.message : "تعذر نسخ النموذج");
+    } finally {
+      setBusyTemplateId(null);
+    }
+  }
+
+  async function handleSetDefault(template: EvaluationTemplate) {
+    setBusyTemplateId(template.id);
+    try {
+      const response = await evaluationTemplatesApi.setDefault(template.id);
+      if (!response.success) {
+        toast.error(response.error || "تعذر تعيين النموذج كافتراضي");
+        return;
+      }
+
+      toast.success("تم تعيين النموذج كافتراضي");
+      await loadTemplates();
+    } catch (defaultError) {
+      toast.error(defaultError instanceof Error ? defaultError.message : "تعذر تعيين النموذج كافتراضي");
+    } finally {
+      setBusyTemplateId(null);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    setBusyTemplateId(id);
+    try {
+      const response = await evaluationTemplatesApi.delete(id);
+      if (!response.success) {
+        toast.error(response.error || "تعذر حذف النموذج");
+        return;
+      }
+
+      toast.success("تم حذف النموذج");
+      await loadTemplates();
+    } catch (deleteError) {
+      toast.error(deleteError instanceof Error ? deleteError.message : "تعذر حذف النموذج");
+    } finally {
+      setBusyTemplateId(null);
+    }
+  }
+
+  const stats = React.useMemo(() => ({
+    total: templates.length,
+    active: templates.filter((template) => template.isActive).length,
+    defaults: templates.filter((template) => template.isDefault).length,
+    criteria: templates.reduce(
+      (sum, template) => sum + template.sections.reduce((sectionSum, section) => sectionSum + section.criteria.length, 0),
+      0
+    ),
+  }), [templates]);
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+          {error}
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">نماذج التقييم</h2>
           <p className="text-muted-foreground">إدارة نماذج ومعايير تقييم الأداء</p>
         </div>
-        <Button onClick={() => setIsAddDialogOpen(true)}>
+        <Button onClick={openCreateDialog}>
           <IconPlus className="ms-2 h-4 w-4" />
           إضافة نموذج
         </Button>
       </div>
 
-      {/* Stats */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>إجمالي النماذج</CardDescription>
-            <CardTitle className="text-3xl">{templates.length}</CardTitle>
+            <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>نماذج نشطة</CardDescription>
-            <CardTitle className="text-3xl text-green-600">
-              {templates.filter((t) => t.isActive).length}
-            </CardTitle>
+            <CardTitle className="text-3xl text-green-600">{stats.active}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>مع تقييم ذاتي</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">
-              {templates.filter((t) => t.includesSelfReview).length}
-            </CardTitle>
+            <CardDescription>نماذج افتراضية</CardDescription>
+            <CardTitle className="text-3xl text-blue-600">{stats.defaults}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>تتطلب معايرة</CardDescription>
-            <CardTitle className="text-3xl text-purple-600">
-              {templates.filter((t) => t.requiresCalibration).length}
-            </CardTitle>
+            <CardDescription>إجمالي المعايير</CardDescription>
+            <CardTitle className="text-3xl text-purple-600">{stats.criteria}</CardTitle>
           </CardHeader>
         </Card>
       </div>
 
-      {/* Templates Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {templates.map((template) => (
-          <Card key={template.id} className={!template.isActive ? "opacity-60" : ""}>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="flex items-center gap-2">
-                    {template.name}
-                    {template.isDefault && (
-                      <Badge variant="secondary" className="text-xs">افتراضي</Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>{template.nameEn}</CardDescription>
+      {isLoading ? (
+        <div className="flex justify-center py-12">
+          <IconLoader className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {templates.map((template) => (
+            <Card key={template.id} className={!template.isActive ? "opacity-70" : ""}>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <CardTitle className="flex items-center gap-2">
+                      {template.name}
+                      {template.isDefault && <Badge variant="secondary">افتراضي</Badge>}
+                    </CardTitle>
+                    <CardDescription>{template.nameEn}</CardDescription>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" aria-label="خيارات" disabled={busyTemplateId === template.id}>
+                        <IconDots className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openEditDialog(template)}>
+                        <IconEdit className="ms-2 h-4 w-4" />
+                        تعديل
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => void handleDuplicate(template)}>
+                        <IconCopy className="ms-2 h-4 w-4" />
+                        نسخ
+                      </DropdownMenuItem>
+                      {!template.isDefault && (
+                        <DropdownMenuItem onClick={() => void handleSetDefault(template)}>
+                          <IconCheck className="ms-2 h-4 w-4" />
+                          تعيين كافتراضي
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem className="text-red-600" onClick={() => void handleDelete(template.id)} disabled={template.isDefault}>
+                        <IconTrash className="ms-2 h-4 w-4" />
+                        حذف
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <IconDots className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openEditDialog(template)}>
-                      <IconEdit className="ms-2 h-4 w-4" />
-                      تعديل
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDuplicate(template)}>
-                      <IconCopy className="ms-2 h-4 w-4" />
-                      نسخ
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      className="text-red-600"
-                      onClick={() => handleDelete(template.id)}
-                      disabled={template.isDefault}
-                    >
-                      <IconTrash className="ms-2 h-4 w-4" />
-                      حذف
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {template.description && (
-                <p className="text-sm text-muted-foreground">{template.description}</p>
-              )}
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {template.description && <p className="text-sm text-muted-foreground">{template.description}</p>}
 
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="flex items-center gap-1">
-                  {getScaleIcon(template.ratingScale)}
-                  {ratingScaleLabels[template.ratingScale]}
-                </Badge>
-                <Badge variant="outline">{template.sections.length} أقسام</Badge>
-                <Badge variant="outline">
-                  {template.sections.reduce((sum, s) => sum + s.criteria.length, 0)} معيار
-                </Badge>
-              </div>
-
-              <div className="flex flex-wrap gap-2 text-xs">
-                {template.includesSelfReview && (
-                  <Badge className="bg-blue-100 text-blue-700">تقييم ذاتي</Badge>
-                )}
-                {template.includesManagerReview && (
-                  <Badge className="bg-green-100 text-green-700">تقييم المدير</Badge>
-                )}
-                {template.includes360Review && (
-                  <Badge className="bg-purple-100 text-purple-700">360°</Badge>
-                )}
-                {template.requiresCalibration && (
-                  <Badge className="bg-orange-100 text-orange-700">معايرة</Badge>
-                )}
-              </div>
-
-              <div className="pt-2 border-t">
-                <p className="text-sm font-medium mb-2">الأقسام:</p>
-                <div className="space-y-1">
-                  {template.sections.map((section) => (
-                    <div
-                      key={section.id}
-                      className="flex items-center justify-between text-sm"
-                    >
-                      <span>{section.name}</span>
-                      <Badge variant="secondary">{section.weight}%</Badge>
-                    </div>
-                  ))}
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="flex items-center gap-1">
+                    {getScaleIcon(template.ratingScale)}
+                    {ratingScaleLabels[template.ratingScale]}
+                  </Badge>
+                  <Badge variant="outline">{template.sections.length} أقسام</Badge>
+                  <Badge variant="outline">
+                    {template.sections.reduce((sum, section) => sum + section.criteria.length, 0)} معيار
+                  </Badge>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
 
-      {/* Add/Edit Dialog */}
+                <div className="border-t pt-3">
+                  <p className="mb-2 text-sm font-medium">الأقسام:</p>
+                  <div className="space-y-1">
+                    {template.sections.map((section) => (
+                      <div key={section.id} className="flex items-center justify-between text-sm">
+                        <span>{section.name}</span>
+                        <Badge variant="secondary">{section.weight}%</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
       <Dialog
-        open={isAddDialogOpen || isEditDialogOpen}
+        open={isDialogOpen}
         onOpenChange={(open) => {
+          setIsDialogOpen(open);
           if (!open) {
-            setIsAddDialogOpen(false);
-            setIsEditDialogOpen(false);
-            setSelectedTemplate(null);
-            resetForm();
+            resetDialogState();
           }
         }}
       >
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {isEditDialogOpen ? "تعديل نموذج التقييم" : "إضافة نموذج تقييم جديد"}
-            </DialogTitle>
-            <DialogDescription>
-              تحديد معايير وأقسام نموذج التقييم
-            </DialogDescription>
+            <DialogTitle>{isEditing ? "تعديل نموذج التقييم" : "إضافة نموذج تقييم جديد"}</DialogTitle>
+            <DialogDescription>تحديد معلومات النموذج، الأقسام، والمعايير.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Basic Info */}
             <div className="space-y-4">
               <h4 className="font-medium">المعلومات الأساسية</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>الاسم بالعربية *</Label>
-                  <Input
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    placeholder="نموذج التقييم السنوي"
-                  />
+                  <Input value={formData.name || ""} onChange={(event) => updateForm("name", event.target.value)} />
                 </div>
                 <div className="space-y-2">
                   <Label>الاسم بالإنجليزية *</Label>
-                  <Input
-                    value={formData.nameEn}
-                    onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
-                    placeholder="Annual Evaluation Template"
-                    dir="ltr"
-                  />
+                  <Input value={formData.nameEn || ""} onChange={(event) => updateForm("nameEn", event.target.value)} dir="ltr" />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>الوصف</Label>
-                <Textarea
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="وصف النموذج..."
-                  rows={2}
-                />
+                <Textarea value={formData.description || ""} onChange={(event) => updateForm("description", event.target.value)} rows={2} />
               </div>
             </div>
 
-            {/* Settings */}
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">الإعدادات</h4>
+              <h4 className="font-medium">إعدادات مدعومة</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>مقياس التقييم</Label>
-                  <Select
-                    value={formData.ratingScale}
-                    onValueChange={(value: RatingScale) =>
-                      setFormData({ ...formData, ratingScale: value })
-                    }
-                  >
+                  <Select value={formData.ratingScale} onValueChange={(value: RatingScale) => updateForm("ratingScale", value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(ratingScaleLabels).map(([key, label]) => (
-                        <SelectItem key={key} value={key}>
-                          {label}
+                      {SUPPORTED_RATING_SCALES.map((scale) => (
+                        <SelectItem key={scale} value={scale}>
+                          {ratingScaleLabels[scale]}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
-              <div className="flex flex-wrap gap-6">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.includesSelfReview}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, includesSelfReview: checked })
-                    }
-                  />
-                  <Label>تقييم ذاتي</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.includesManagerReview}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, includesManagerReview: checked })
-                    }
-                  />
-                  <Label>تقييم المدير</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.includes360Review}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, includes360Review: checked })
-                    }
-                  />
-                  <Label>تقييم 360°</Label>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formData.requiresCalibration}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, requiresCalibration: checked })
-                    }
-                  />
-                  <Label>يتطلب معايرة</Label>
+                <div className="flex items-center gap-2 pt-8">
+                  <Switch checked={formData.isActive ?? true} onCheckedChange={(checked) => updateForm("isActive", checked)} />
+                  <Label>نموذج نشط</Label>
                 </div>
               </div>
             </div>
 
-            {/* Sections */}
             <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">أقسام التقييم</h4>
-                <Badge variant={calculateTotalWeight() === 100 ? "default" : "destructive"}>
-                  الوزن الإجمالي: {calculateTotalWeight()}%
-                </Badge>
+                <Badge variant={totalWeight === 100 ? "default" : "destructive"}>الوزن الإجمالي: {totalWeight}%</Badge>
               </div>
 
-              {/* Add Section Form */}
-              <div className="rounded-lg border p-4 space-y-3">
+              <div className="space-y-3 rounded-lg border p-4">
                 <p className="text-sm font-medium">إضافة قسم جديد</p>
                 <div className="grid gap-3 md:grid-cols-4">
-                  <Input
-                    placeholder="اسم القسم"
-                    value={sectionForm.name}
-                    onChange={(e) => setSectionForm({ ...sectionForm, name: e.target.value })}
-                  />
-                  <Input
-                    placeholder="الوصف (اختياري)"
-                    value={sectionForm.description}
-                    onChange={(e) => setSectionForm({ ...sectionForm, description: e.target.value })}
-                  />
-                  <Input
-                    type="number"
-                    placeholder="الوزن %"
-                    value={sectionForm.weight || ""}
-                    onChange={(e) => setSectionForm({ ...sectionForm, weight: Number(e.target.value) })}
-                    min={1}
-                    max={100}
-                  />
-                  <Button onClick={handleAddSection} disabled={!sectionForm.name || sectionForm.weight <= 0}>
+                  <Input placeholder="اسم القسم" value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} />
+                  <Input placeholder="الوصف" value={sectionForm.description} onChange={(event) => setSectionForm((current) => ({ ...current, description: event.target.value }))} />
+                  <Input type="number" placeholder="الوزن %" value={sectionForm.weight || ""} onChange={(event) => setSectionForm((current) => ({ ...current, weight: Number(event.target.value) }))} min={1} max={100} />
+                  <Button onClick={handleAddSection} disabled={!sectionForm.name.trim() || sectionForm.weight <= 0}>
                     <IconPlus className="ms-2 h-4 w-4" />
                     إضافة
                   </Button>
                 </div>
               </div>
 
-              {/* Sections List */}
               <Accordion type="multiple" className="space-y-2">
-                {formData.sections?.map((section) => (
-                  <AccordionItem key={section.id} value={section.id} className="border rounded-lg">
+                {(formData.sections || []).map((section) => (
+                  <AccordionItem key={section.id} value={section.id} className="rounded-lg border">
                     <AccordionTrigger className="px-4 hover:no-underline">
-                      <div className="flex items-center justify-between w-full ms-2">
+                      <div className="ms-2 flex w-full items-center justify-between">
                         <span className="font-medium">{section.name}</span>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{section.weight}%</Badge>
                           <Badge variant="secondary">{section.criteria.length} معيار</Badge>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveSection(section.id);
-                            }}
-                          >
+                          <Button variant="ghost" size="icon" aria-label="حذف القسم" className="h-6 w-6" onClick={(event) => {
+                            event.stopPropagation();
+                            handleRemoveSection(section.id);
+                          }}>
                             <IconTrash className="h-4 w-4 text-red-500" />
                           </Button>
                         </div>
@@ -569,49 +598,42 @@ export function EvaluationTemplatesManager() {
                     </AccordionTrigger>
                     <AccordionContent className="px-4 pb-4">
                       <div className="space-y-3">
-                        {/* Add Criterion Form */}
-                        <div className="rounded-lg bg-muted p-3 space-y-2">
+                        <div className="space-y-2 rounded-lg bg-muted p-3">
                           <p className="text-sm">إضافة معيار</p>
                           <div className="grid gap-2 md:grid-cols-5">
                             <Input
                               placeholder="اسم المعيار"
-                              value={editingCriterion?.sectionId === section.id ? criterionForm.name : ""}
-                              onChange={(e) => {
-                                setEditingCriterion({ sectionId: section.id, criterion: null });
-                                setCriterionForm({ ...criterionForm, name: e.target.value });
+                              value={criterionTargetSectionId === section.id ? criterionForm.name : ""}
+                              onFocus={() => setCriterionTargetSectionId(section.id)}
+                              onChange={(event) => {
+                                setCriterionTargetSectionId(section.id);
+                                setCriterionForm((current) => ({ ...current, name: event.target.value }));
                               }}
-                              onFocus={() => setEditingCriterion({ sectionId: section.id, criterion: null })}
                             />
                             <Input
                               placeholder="الوصف"
-                              value={editingCriterion?.sectionId === section.id ? criterionForm.description : ""}
-                              onChange={(e) => setCriterionForm({ ...criterionForm, description: e.target.value })}
+                              value={criterionTargetSectionId === section.id ? criterionForm.description : ""}
+                              onFocus={() => setCriterionTargetSectionId(section.id)}
+                              onChange={(event) => setCriterionForm((current) => ({ ...current, description: event.target.value }))}
                             />
                             <Input
                               type="number"
                               placeholder="الوزن %"
-                              value={editingCriterion?.sectionId === section.id ? criterionForm.weight || "" : ""}
-                              onChange={(e) => setCriterionForm({ ...criterionForm, weight: Number(e.target.value) })}
+                              value={criterionTargetSectionId === section.id ? criterionForm.weight || "" : ""}
+                              onFocus={() => setCriterionTargetSectionId(section.id)}
+                              onChange={(event) => setCriterionForm((current) => ({ ...current, weight: Number(event.target.value) }))}
                               min={1}
                             />
                             <div className="flex items-center gap-2">
-                              <Switch
-                                checked={criterionForm.isRequired}
-                                onCheckedChange={(checked) => setCriterionForm({ ...criterionForm, isRequired: checked })}
-                              />
+                              <Switch checked={criterionForm.isRequired} onCheckedChange={(checked) => setCriterionForm((current) => ({ ...current, isRequired: checked }))} />
                               <span className="text-sm">مطلوب</span>
                             </div>
-                            <Button
-                              size="sm"
-                              onClick={() => handleAddCriterion(section.id)}
-                              disabled={!criterionForm.name || criterionForm.weight <= 0 || editingCriterion?.sectionId !== section.id}
-                            >
+                            <Button size="sm" onClick={() => handleAddCriterion(section.id)} disabled={criterionTargetSectionId !== section.id || !criterionForm.name.trim() || criterionForm.weight <= 0}>
                               إضافة
                             </Button>
                           </div>
                         </div>
 
-                        {/* Criteria List */}
                         {section.criteria.length > 0 && (
                           <Table>
                             <TableHeader>
@@ -627,26 +649,13 @@ export function EvaluationTemplatesManager() {
                               {section.criteria.map((criterion) => (
                                 <TableRow key={criterion.id}>
                                   <TableCell className="font-medium">{criterion.name}</TableCell>
-                                  <TableCell className="text-muted-foreground">
-                                    {criterion.description || "-"}
-                                  </TableCell>
+                                  <TableCell className="text-muted-foreground">{criterion.description || "-"}</TableCell>
                                   <TableCell>
                                     <Badge variant="outline">{criterion.weight}%</Badge>
                                   </TableCell>
+                                  <TableCell>{criterion.isRequired ? <IconCheck className="h-4 w-4 text-green-600" /> : "-"}</TableCell>
                                   <TableCell>
-                                    {criterion.isRequired ? (
-                                      <IconCheck className="h-4 w-4 text-green-600" />
-                                    ) : (
-                                      <IconX className="h-4 w-4 text-gray-400" />
-                                    )}
-                                  </TableCell>
-                                  <TableCell>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={() => handleRemoveCriterion(section.id, criterion.id)}
-                                    >
+                                    <Button variant="ghost" size="icon" aria-label="حذف المعيار" className="h-6 w-6" onClick={() => handleRemoveCriterion(section.id, criterion.id)}>
                                       <IconTrash className="h-4 w-4 text-red-500" />
                                     </Button>
                                   </TableCell>
@@ -664,28 +673,12 @@ export function EvaluationTemplatesManager() {
           </div>
 
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddDialogOpen(false);
-                setIsEditDialogOpen(false);
-                setSelectedTemplate(null);
-                resetForm();
-              }}
-            >
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
               إلغاء
             </Button>
-            <Button
-              onClick={handleSave}
-              disabled={
-                !formData.name ||
-                !formData.nameEn ||
-                (formData.sections?.length || 0) === 0 ||
-                calculateTotalWeight() !== 100
-              }
-            >
+            <Button onClick={() => void handleSave()} disabled={isSaving}>
               <IconCheck className="ms-2 h-4 w-4" />
-              {isEditDialogOpen ? "حفظ التعديلات" : "إضافة النموذج"}
+              {isEditing ? "حفظ التعديلات" : "إضافة النموذج"}
             </Button>
           </DialogFooter>
         </DialogContent>

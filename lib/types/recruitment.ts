@@ -2,38 +2,37 @@
 
 // ==================== الوظائف الشاغرة ====================
 
-export type JobStatus = 'draft' | 'open' | 'on-hold' | 'filled' | 'closed';
+export type JobStatus = 'draft' | 'active' | 'filled' | 'closed';
 
 export const jobStatusLabels: Record<JobStatus, string> = {
   'draft': 'مسودة',
-  'open': 'مفتوح',
-  'on-hold': 'معلق',
+  'active': 'مفتوح',
   'filled': 'تم شغلها',
   'closed': 'مغلق',
 };
 
 export const jobStatusColors: Record<JobStatus, string> = {
   'draft': 'bg-gray-100 text-gray-800',
-  'open': 'bg-green-100 text-green-800',
-  'on-hold': 'bg-yellow-100 text-yellow-800',
+  'active': 'bg-green-100 text-green-800',
   'filled': 'bg-blue-100 text-blue-800',
   'closed': 'bg-red-100 text-red-800',
 };
 
-export type JobType = 'full-time' | 'part-time' | 'contract' | 'freelance' | 'internship';
+export type JobType = 'full-time' | 'part-time' | 'contract' | 'internship' | 'temporary';
 
 export const jobTypeLabels: Record<JobType, string> = {
   'full-time': 'دوام كامل',
   'part-time': 'دوام جزئي',
   'contract': 'عقد مؤقت',
-  'freelance': 'عمل حر',
   'internship': 'تدريب',
+  'temporary': 'مؤقت',
 };
 
-export type ExperienceLevel = 'entry' | 'mid' | 'senior' | 'lead' | 'executive';
+export type ExperienceLevel = 'entry' | 'junior' | 'mid' | 'senior' | 'lead' | 'executive';
 
 export const experienceLevelLabels: Record<ExperienceLevel, string> = {
   'entry': 'مبتدئ',
+  'junior': 'مبتدئ+',
   'mid': 'متوسط',
   'senior': 'خبير',
   'lead': 'قائد فريق',
@@ -75,15 +74,15 @@ export interface JobPosting {
 
 // ==================== المتقدمين ====================
 
-export type ApplicationStatus = 'new' | 'screening' | 'interview' | 'assessment' | 'offer' | 'hired' | 'rejected' | 'withdrawn';
+export type ApplicationStatus = 'new' | 'screening' | 'shortlisted' | 'interview' | 'offer' | 'accepted' | 'rejected' | 'withdrawn';
 
 export const applicationStatusLabels: Record<ApplicationStatus, string> = {
   'new': 'جديد',
   'screening': 'فرز',
+  'shortlisted': 'قائمة مختصرة',
   'interview': 'مقابلة',
-  'assessment': 'تقييم',
   'offer': 'عرض وظيفي',
-  'hired': 'تم التوظيف',
+  'accepted': 'مقبول',
   'rejected': 'مرفوض',
   'withdrawn': 'منسحب',
 };
@@ -91,18 +90,19 @@ export const applicationStatusLabels: Record<ApplicationStatus, string> = {
 export const applicationStatusColors: Record<ApplicationStatus, string> = {
   'new': 'bg-blue-100 text-blue-800',
   'screening': 'bg-purple-100 text-purple-800',
+  'shortlisted': 'bg-indigo-100 text-indigo-800',
   'interview': 'bg-cyan-100 text-cyan-800',
-  'assessment': 'bg-orange-100 text-orange-800',
   'offer': 'bg-green-100 text-green-800',
-  'hired': 'bg-emerald-100 text-emerald-800',
+  'accepted': 'bg-emerald-100 text-emerald-800',
   'rejected': 'bg-red-100 text-red-800',
   'withdrawn': 'bg-gray-100 text-gray-800',
 };
 
-export type SourceChannel = 'website' | 'linkedin' | 'indeed' | 'referral' | 'agency' | 'social' | 'direct' | 'other';
+export type SourceChannel = 'website' | 'career-portal' | 'linkedin' | 'indeed' | 'referral' | 'agency' | 'social' | 'direct' | 'other';
 
 export const sourceChannelLabels: Record<SourceChannel, string> = {
   'website': 'الموقع الإلكتروني',
+  'career-portal': 'بوابة التوظيف',
   'linkedin': 'لينكد إن',
   'indeed': 'إنديد',
   'referral': 'ترشيح موظف',
@@ -142,23 +142,21 @@ export interface Applicant {
 
 // ==================== المقابلات ====================
 
-export type InterviewType = 'phone' | 'video' | 'in-person' | 'panel' | 'technical' | 'hr';
+export type InterviewType = 'phone' | 'video' | 'in-person' | 'technical' | 'hr' | 'final';
 
 export const interviewTypeLabels: Record<InterviewType, string> = {
   'phone': 'هاتفية',
   'video': 'فيديو',
   'in-person': 'حضورية',
-  'panel': 'لجنة',
   'technical': 'تقنية',
   'hr': 'موارد بشرية',
+  'final': 'نهائية',
 };
 
-export type InterviewStatus = 'scheduled' | 'confirmed' | 'in-progress' | 'completed' | 'cancelled' | 'no-show';
+export type InterviewStatus = 'scheduled' | 'completed' | 'cancelled' | 'no-show';
 
 export const interviewStatusLabels: Record<InterviewStatus, string> = {
   'scheduled': 'مجدولة',
-  'confirmed': 'مؤكدة',
-  'in-progress': 'جارية',
   'completed': 'مكتملة',
   'cancelled': 'ملغاة',
   'no-show': 'لم يحضر',
@@ -166,8 +164,6 @@ export const interviewStatusLabels: Record<InterviewStatus, string> = {
 
 export const interviewStatusColors: Record<InterviewStatus, string> = {
   'scheduled': 'bg-blue-100 text-blue-800',
-  'confirmed': 'bg-green-100 text-green-800',
-  'in-progress': 'bg-yellow-100 text-yellow-800',
   'completed': 'bg-gray-100 text-gray-800',
   'cancelled': 'bg-red-100 text-red-800',
   'no-show': 'bg-orange-100 text-orange-800',

@@ -161,20 +161,53 @@ export interface EmployeeCertificate {
 
 // ==================== خطط التطوير ====================
 
-export type DevelopmentPlanStatus = 'draft' | 'active' | 'on-hold' | 'completed' | 'cancelled';
+export type DevelopmentPlanType =
+  | 'individual'
+  | 'team'
+  | 'onboarding'
+  | 'performance-improvement'
+  | 'career-growth'
+  | 'skill-development';
+
+export const developmentPlanTypeLabels: Record<DevelopmentPlanType, string> = {
+  'individual': 'فردية',
+  'team': 'لفريق',
+  'onboarding': 'تهيئة',
+  'performance-improvement': 'تحسين أداء',
+  'career-growth': 'نمو مهني',
+  'skill-development': 'تطوير مهارات',
+};
+
+export type DevelopmentPlanPriority = 'low' | 'medium' | 'high' | 'critical';
+
+export const developmentPlanPriorityLabels: Record<DevelopmentPlanPriority, string> = {
+  'low': 'منخفضة',
+  'medium': 'متوسطة',
+  'high': 'عالية',
+  'critical': 'حرجة',
+};
+
+export const developmentPlanPriorityColors: Record<DevelopmentPlanPriority, string> = {
+  'low': 'bg-gray-100 text-gray-800',
+  'medium': 'bg-yellow-100 text-yellow-800',
+  'high': 'bg-orange-100 text-orange-800',
+  'critical': 'bg-red-100 text-red-800',
+};
+
+export type DevelopmentPlanStatus = 'draft' | 'pending-approval' | 'active' | 'completed' | 'cancelled';
 
 export const developmentPlanStatusLabels: Record<DevelopmentPlanStatus, string> = {
   'draft': 'مسودة',
+  'pending-approval': 'بانتظار الموافقة',
   'active': 'نشط',
-  'on-hold': 'معلق',
   'completed': 'مكتمل',
   'cancelled': 'ملغي',
 };
 
 export const developmentPlanStatusColors: Record<DevelopmentPlanStatus, string> = {
   'draft': 'bg-gray-100 text-gray-800',
+  'pending-approval': 'bg-yellow-100 text-yellow-800',
   'active': 'bg-green-100 text-green-800',
-  'on-hold': 'bg-yellow-100 text-yellow-800',
   'completed': 'bg-blue-100 text-blue-800',
   'cancelled': 'bg-red-100 text-red-800',
 };
@@ -186,6 +219,9 @@ export interface DevelopmentPlan {
   employeeAvatar?: string;
   title: string;
   description?: string;
+  notes?: string;
+  type: DevelopmentPlanType;
+  priority: DevelopmentPlanPriority;
   status: DevelopmentPlanStatus;
   startDate: string;
   targetDate: string;
@@ -211,6 +247,7 @@ export interface DevelopmentGoal {
   title: string;
   description?: string;
   targetDate: string;
+  completedDate?: string;
   status: 'not-started' | 'in-progress' | 'completed';
   progress: number;
   metrics?: string;

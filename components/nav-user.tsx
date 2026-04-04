@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import {
@@ -49,7 +49,7 @@ export function NavUser({
   const toggleLocale = () => {
     const next = locale === "ar" ? "en" : "ar";
     const maxAge = 60 * 60 * 24 * 365;
-    document.cookie = `ujoors_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
+    document.cookie = `taqam_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
     window.location.reload();
   };
 

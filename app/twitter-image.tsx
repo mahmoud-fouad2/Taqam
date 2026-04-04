@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const size = {
@@ -57,7 +57,7 @@ export default function TwitterImage() {
               }}
             />
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1 }}>Ujoors</div>
+              <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1 }}>Taqam | طاقم</div>
               <div style={{ fontSize: 18, opacity: 0.85 }}>HR • Payroll • Attendance</div>
             </div>
           </div>
@@ -72,7 +72,7 @@ export default function TwitterImage() {
           </div>
 
           <div style={{ display: "flex", justifyContent: "space-between", opacity: 0.75, fontSize: 16 }}>
-            <div>ujoor.onrender.com</div>
+            <div>taqam.com</div>
             <div>Request a demo</div>
           </div>
         </div>

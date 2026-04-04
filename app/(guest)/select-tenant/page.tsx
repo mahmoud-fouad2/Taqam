@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Select Tenant Page
  * صفحة اختيار الشركة (Tenant)
  */
@@ -12,8 +12,8 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/select-tenant",
-    titleAr: "اختيار الشركة | أجور",
-    titleEn: "Select Tenant | Ujoors",
+    titleAr: "اختيار الشركة | طاقم",
+    titleEn: "Select Tenant | Taqam",
     descriptionAr: "اختر شركتك (Tenant) للدخول إلى لوحة التحكم.",
     descriptionEn: "Select your tenant to continue to the dashboard.",
   });

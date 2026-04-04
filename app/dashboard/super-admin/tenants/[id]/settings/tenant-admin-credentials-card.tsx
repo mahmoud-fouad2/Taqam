@@ -232,6 +232,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                   <Input
                     id="new-password"
                     type="password"
+                    autoComplete="new-password"
                     dir="ltr"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -243,6 +244,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                   <Input
                     id="confirm-password"
                     type="password"
+                    autoComplete="new-password"
                     dir="ltr"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}

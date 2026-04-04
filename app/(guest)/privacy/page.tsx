@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
-    titleAr: "سياسة الخصوصية | أجور",
-    titleEn: "Privacy Policy | Ujoors",
-    descriptionAr: "تعرف على سياسة الخصوصية وكيفية تعامل أجور مع البيانات.",
-    descriptionEn: "Learn how Ujoors handles and protects your data.",
+    titleAr: "سياسة الخصوصية | طاقم",
+    titleEn: "Privacy Policy | Taqam",
+    descriptionAr: "تعرف على سياسة الخصوصية وكيفية تعامل طاقم مع البيانات.",
+    descriptionEn: "Learn how Taqam handles and protects your data.",
     path: "/privacy",
   });
 }
@@ -23,8 +23,8 @@ export default async function PrivacyPage() {
       <h1 className="text-3xl font-bold tracking-tight">{isAr ? "سياسة الخصوصية" : "Privacy Policy"}</h1>
       <p className="mt-3 text-muted-foreground">
         {isAr
-          ? "توضح هذه الصفحة كيفية جمع البيانات واستخدامها وحمايتها عند استخدام منصة أجور."
-          : "This page explains how Ujoors collects, uses, and protects data."}
+          ? "توضح هذه الصفحة كيفية جمع البيانات واستخدامها وحمايتها عند استخدام منصة طاقم."
+          : "This page explains how Taqam collects, uses, and protects data."}
       </p>
 
       <div className="mt-10 space-y-8 text-sm leading-7 text-muted-foreground">

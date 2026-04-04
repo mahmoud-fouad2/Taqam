@@ -110,7 +110,7 @@ export default function AddUserPage() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" asChild>
+        <Button variant="ghost" size="icon" aria-label="رجوع" asChild>
           <Link href="/dashboard/users">
             <ArrowIcon className="h-5 w-5" />
           </Link>
@@ -208,7 +208,7 @@ export default function AddUserPage() {
                     <FormItem>
                       <FormLabel>{isRtl ? "كلمة المرور *" : "Password *"}</FormLabel>
                       <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
+                        <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
                       </FormControl>
                       <FormDescription>
                         {isRtl ? "6 أحرف على الأقل" : "At least 6 characters"}

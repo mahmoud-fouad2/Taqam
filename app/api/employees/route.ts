@@ -6,28 +6,33 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireTenantSession, requireRole, parsePagination } from "@/lib/api/route-helper";
+import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
+import { z } from "zod";
+
+const createEmployeeRequiredSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  hireDate: z.string().min(1),
+});
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireTenantSession(request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "10");
-    const search = searchParams.get("search") || "";
+    const { page, limit, skip } = parsePagination(searchParams, 100);
+    const search = searchParams.get("search")?.trim() || "";
     const departmentId = searchParams.get("departmentId");
     const status = searchParams.get("status");
 
-    const tenantId = session.user.tenantId;
-
     // Build where clause
-    const where: any = {};
+    const where: any = {
+      deletedAt: null,
+    };
     
     if (tenantId) {
       where.tenantId = tenantId;
@@ -64,7 +69,7 @@ export async function GET(request: NextRequest) {
             },
           },
         },
-        skip: (page - 1) * limit,
+        skip,
         take: limit,
         orderBy: { createdAt: "desc" },
       }),
@@ -91,28 +96,49 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const limit = 20;
+    const rl = checkRateLimit(request, { keyPrefix: "api:employees:create", limit, windowMs: 60 * 1000 });
+    if (!rl.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        { limit, remaining: rl.remaining, resetAt: rl.resetAt }
+      );
     }
 
-    // Restrict employee creation to privileged roles
-    if (!(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"] as const).includes(session.user.role as any)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const auth = await requireRole(request, ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
-    const tenantId = session.user.tenantId;
-    
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+    // ── Plan Limit Enforcement ──────────────────────────────────────
+    const tenant = await prisma.tenant.findUnique({
+      where: { id: tenantId },
+      select: { maxEmployees: true, plan: true },
+    });
+    if (tenant) {
+      const currentCount = await prisma.employee.count({
+        where: { tenantId, status: { not: "TERMINATED" } },
+      });
+      if (currentCount >= tenant.maxEmployees) {
+        return NextResponse.json(
+          {
+            error: `لقد وصلت إلى الحد الأقصى للموظفين في باقتك (${tenant.maxEmployees} موظف). يرجى الترقية إلى باقة أعلى.`,
+            code: "PLAN_LIMIT_EXCEEDED",
+            limit: tenant.maxEmployees,
+            current: currentCount,
+          },
+          { status: 403 }
+        );
+      }
     }
+    // ────────────────────────────────────────────────────────────────
 
-    const body = await request.json();
 
-    if (!body?.firstName || !body?.lastName || !body?.email || !body?.hireDate) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    const rawBody = await request.json();
+    const empValidation = createEmployeeRequiredSchema.safeParse(rawBody);
+    if (!empValidation.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: empValidation.error.flatten() }, { status: 400 });
     }
+    const body = rawBody;
 
     const userId = body.userId ? String(body.userId) : null;
     if (userId) {

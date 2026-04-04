@@ -653,7 +653,7 @@ export function OrganizationManager() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon" onClick={() => fetchBranches()}>
+                  <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchBranches()}>
                     <IconRefresh className="size-4" />
                   </Button>
                   <Button onClick={handleAddBranch}>
@@ -717,6 +717,7 @@ export function OrganizationManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="تعديل"
                               onClick={() => handleEditBranch(branch)}
                             >
                               <IconPencil className="size-4" />
@@ -724,6 +725,7 @@ export function OrganizationManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="حذف"
                               onClick={() => handleDeleteBranch(branch)}
                               disabled={branch.isHeadquarters || branch.employeesCount > 0}
                             >
@@ -743,7 +745,7 @@ export function OrganizationManager() {
 
       {/* Branch Dialog */}
       <Dialog open={branchDialogOpen} onOpenChange={setBranchDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingBranch ? "تعديل الفرع" : "إضافة فرع جديد"}

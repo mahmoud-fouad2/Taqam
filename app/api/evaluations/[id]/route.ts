@@ -174,8 +174,15 @@ export async function PATCH(
       updateData.status = status;
     }
 
-    if (status === "COMPLETED" && existingEvaluation.status !== "COMPLETED") {
+    if (status === "PENDING_REVIEW" && existingEvaluation.status !== "PENDING_REVIEW") {
       updateData.submittedAt = new Date();
+    }
+
+    if (status === "COMPLETED") {
+      if (!existingEvaluation.submittedAt) {
+        updateData.submittedAt = new Date();
+      }
+      updateData.reviewedAt = new Date();
     }
 
     if (status === "ACKNOWLEDGED" && !existingEvaluation.employeeAcknowledgedAt) {

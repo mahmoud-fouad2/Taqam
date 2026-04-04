@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { notifyLeaveStatusChanged } from "@/lib/notifications/send";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -80,6 +81,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         id,
         ...(tenantId ? { tenantId } : {}),
       },
+      include: {
+        employee: {
+          select: {
+            userId: true,
+            firstName: true,
+            lastName: true,
+            firstNameAr: true,
+            lastNameAr: true,
+          },
+        },
+        leaveType: {
+          select: {
+            name: true,
+            nameAr: true,
+          },
+        },
+      },
     });
 
     if (!existing) {
@@ -130,6 +148,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
         return updated;
       });
+
+      if (existing.employee.userId) {
+        await notifyLeaveStatusChanged({
+          tenantId: existing.tenantId,
+          employeeUserId: existing.employee.userId,
+          status: action === "approve" ? "approved" : "rejected",
+          leaveType: existing.leaveType.nameAr || existing.leaveType.name,
+          rejectionReason: action === "reject" ? body.rejectionReason : undefined,
+          requestId: leaveRequest.id,
+        });
+      }
 
       return NextResponse.json({ data: leaveRequest });
     }

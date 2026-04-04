@@ -1,8 +1,8 @@
 import * as SecureStore from "expo-secure-store";
 
-const ACCESS_KEY = "ujoors_mobile_access_token";
-const REFRESH_KEY = "ujoors_mobile_refresh_token";
-const DEVICE_KEY = "ujoors_mobile_device_id";
+const ACCESS_KEY = "taqam_mobile_access_token";
+const REFRESH_KEY = "taqam_mobile_refresh_token";
+const DEVICE_KEY = "taqam_mobile_device_id";
 
 function generateDeviceId(): string {
   const c: any = (globalThis as any).crypto;

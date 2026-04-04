@@ -45,6 +45,25 @@ type ProfileApiResponse = {
       gender: 'MALE' | 'FEMALE' | null;
       nationality: string | null;
       maritalStatus: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | null;
+      address?: {
+        street?: string;
+        city?: string;
+        state?: string;
+        country?: string;
+        postalCode?: string;
+      } | null;
+      emergencyContact?: {
+        name?: string;
+        relationship?: string;
+        phone?: string;
+        email?: string;
+      } | null;
+      bankInfo?: {
+        bankName: string;
+        accountNumber: string;
+        iban?: string;
+        swiftCode?: string;
+      } | null;
       hireDate: string;
       employmentType: string;
       workLocation: string | null;
@@ -151,6 +170,16 @@ function mapProfileApiToEmployeeProfile(api: NonNullable<ProfileApiResponse['dat
     maritalStatus: mapMaritalStatusToUi(employee?.maritalStatus ?? null),
     nationality: employee?.nationality ?? undefined,
     nationalId: employee?.nationalId ?? undefined,
+    address: employee?.address ?? undefined,
+    emergencyContact: employee?.emergencyContact
+      ? {
+          name: employee.emergencyContact.name ?? '',
+          relationship: employee.emergencyContact.relationship ?? '',
+          phone: employee.emergencyContact.phone ?? '',
+          email: employee.emergencyContact.email ?? undefined,
+        }
+      : undefined,
+    bankInfo: employee?.bankInfo ?? undefined,
     documents,
   };
 }
@@ -265,6 +294,8 @@ export default function MyProfileManager() {
           gender: mapUiGenderToDb(editedProfile.gender),
           maritalStatus: mapUiMaritalStatusToDb(editedProfile.maritalStatus),
           nationality: editedProfile.nationality || null,
+          address: editedProfile.address || null,
+          emergencyContact: editedProfile.emergencyContact || null,
         };
 
         const empRes = await fetch(`/api/employees/${encodeURIComponent(profile.id)}`, {
@@ -452,6 +483,7 @@ export default function MyProfileManager() {
               <Avatar className="h-24 w-24">
                 <AvatarImage
                   src={(isEditing ? (editedProfile?.avatar || profile.avatar) : profile.avatar) || undefined}
+                  alt=""
                 />
                 <AvatarFallback className="text-2xl">
                   {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
@@ -462,6 +494,7 @@ export default function MyProfileManager() {
                   size="icon" 
                   variant="secondary" 
                   className="absolute bottom-0 start-0 h-8 w-8 rounded-full"
+                  aria-label="تغيير الصورة"
                   onClick={openAvatarPicker}
                   disabled={isUploadingAvatar}
                 >

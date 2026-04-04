@@ -1,5 +1,5 @@
-/**
- * Ujoors Design System - Design Tokens
+﻿/**
+ * Taqam Design System - Design Tokens
  * 
  * هذا الملف يحتوي على جميع القيم الأساسية للتصميم
  * يُستخدم لتوحيد الألوان والخطوط والمسافات عبر المشروع
@@ -100,7 +100,7 @@ export const colors = {
 export const typography = {
   // Font Families
   fontFamily: {
-    sans: "var(--font-ujoors-sans), ui-sans-serif, system-ui, sans-serif",
+    sans: "var(--font-taqam-sans), ui-sans-serif, system-ui, sans-serif",
     mono: "ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace",
   },
 

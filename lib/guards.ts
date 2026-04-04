@@ -1,5 +1,5 @@
-/**
- * Ujoors Route Guards
+﻿/**
+ * Taqam Route Guards
  * 
  * Higher-order components ودوال للتحقق من الصلاحيات على مستوى الصفحات
  */
@@ -61,7 +61,7 @@ export async function guardRole(allowedRoles: TenantRole | TenantRole[]) {
 
 /**
  * Guard: Super Admin only
- * Usage: For Ujoors internal admin pages
+ * Usage: For Taqam internal admin pages
  */
 export async function guardSuperAdmin() {
   await guardAuth();

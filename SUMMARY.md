@@ -1,73 +1,65 @@
-# 📋 ملخص شامل - نظام Ujoor HRMS
+# 📋 ملخص شامل - منصة Taqam HR
 
 ## 🎯 معلومات المشروع
 
 ### الموقع المباشر
-🌐 **URL:** https://ujoor.onrender.com
+🌐 **URL:** https://YOUR-RENDER-DOMAIN
 
 ### بيانات تسجيل الدخول
-📧 **Email:** admin@admin.com  
-🔐 **Password:** 123456
+📧 **Email:** قيمة `SUPER_ADMIN_EMAIL`  
+🔐 **Password:** قيمة `SUPER_ADMIN_PASSWORD`
 
-⚠️ **مشكلة حالية:** بيانات admin غير موجودة أو الباسورد خاطئ في قاعدة البيانات على Render.
+⚠️ **ملاحظة:** الدخول يعتمد على ضبط متغيرات Super Admin وBootstrap token بشكل صحيح في بيئة Render.
 
 ---
 
 ## ✅ الحلول المتاحة
 
-### 🔧 الحل السريع: إنشاء Super Admin
+### 🔧 الحل السريع: تهيئة Super Admin
 
-**في Render Dashboard → Shell:**
+**في Render Dashboard → Environment:**
 
-```bash
-export SUPER_ADMIN_EMAIL="admin@admin.com"
-export SUPER_ADMIN_PASSWORD="123456"
-node scripts/db-create-admin.mjs
+```env
+ENABLE_SUPER_ADMIN_BOOTSTRAP=true
+SUPER_ADMIN_BOOTSTRAP_TOKEN=replace-with-a-long-random-secret
+SUPER_ADMIN_EMAIL=your-admin@example.com
+SUPER_ADMIN_PASSWORD=replace-with-a-strong-password
 ```
 
-أو أضف هذه المتغيرات في **Environment Variables** وأعد Deploy:
-```env
-SUPER_ADMIN_EMAIL=admin@admin.com
-SUPER_ADMIN_PASSWORD=123456
-SUPER_ADMIN_FORCE=1
+ثم استدعِ endpoint مرة واحدة:
+```bash
+curl -X POST https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin \
+  -H "x-bootstrap-token: $SUPER_ADMIN_BOOTSTRAP_TOKEN"
 ```
 
 📄 **تفاصيل كاملة في:** `RENDER_SETUP.md`
 
 ---
 
-## 📱 تطبيق البصمة (Mobile App)
+## 📱 تطبيق الموبايل
 
-### موقع التطبيق
-المجلد: `mobile-app/`
+### المسار الرسمي
+المجلد النشط: `apps/mobile/`
+
+### ملاحظة مهمة
+المجلد `mobile-app/` أصبح **legacy/reference** فقط، وليس مسار التطوير الرسمي.
 
 ### طرق استخدام التطبيق:
 
 #### 1. Expo Go (الأسرع) ⚡
 - حمّل **Expo Go** من Google Play
-- المطور يشغل: `cd mobile-app && npm start`
+- المطور يشغل: `cd apps/mobile && pnpm install && pnpm start`
 - امسح QR code
 - ✅ يعمل مباشرة!
 
-#### 2. بناء APK (EAS Build) 🏗️
+#### 2. بناء APK عبر Capacitor Wrapper 🏗️
 ```bash
-npm install -g eas-cli
-eas login
-cd mobile-app
-eas build --platform android --profile preview
-```
-**النتيجة:** رابط تحميل APK مباشر!
-
-#### 3. بناء محلي (للمطورين) 💻
-```bash
-cd mobile-app
-npx expo prebuild --platform android
-cd android
-./gradlew assembleRelease
-# APK: android/app/build/outputs/apk/release/app-release.apk
+pnpm install
+set MOBILE_WEB_URL=https://YOUR-RENDER-DOMAIN
+node scripts/build-apk.mjs
 ```
 
-📄 **تفاصيل كاملة في:** `mobile-app/BUILD_APK.md` و `mobile-app/DOWNLOAD_LINK.md`
+📄 **تفاصيل كاملة في:** `ANDROID_APK.md`
 
 ---
 
@@ -75,7 +67,7 @@ cd android
 
 ### 1. Health Check ✅
 ```bash
-curl https://ujoor.onrender.com/api/health
+curl https://YOUR-RENDER-DOMAIN/api/health
 ```
 
 **✅ النتيجة:** النظام يعمل!
@@ -88,11 +80,11 @@ curl https://ujoor.onrender.com/api/health
 
 ### 2. تسجيل دخول Mobile ❌
 ```bash
-curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
+curl -X POST https://YOUR-RENDER-DOMAIN/api/mobile/auth/login \
   -H "Content-Type: application/json" \
   -H "x-device-id: TEST-001" \
   -H "x-device-platform: android" \
-  -d '{"email":"admin@admin.com","password":"123456"}'
+  -d '{"email":"YOUR_SUPER_ADMIN_EMAIL","password":"YOUR_SUPER_ADMIN_PASSWORD"}'
 ```
 
 **❌ النتيجة:** `Invalid credentials`  
@@ -107,7 +99,7 @@ curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
     "accessToken": "eyJhbG...",
     "refreshToken": "rt_...",
     "user": {
-      "email": "admin@admin.com",
+      "email": "YOUR_SUPER_ADMIN_EMAIL",
       "role": "SUPER_ADMIN"
     }
   }
@@ -118,12 +110,12 @@ curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
 
 ```bash
 # Check-in
-curl -X POST https://ujoor.onrender.com/api/mobile/attendance \
+curl -X POST https://YOUR-RENDER-DOMAIN/api/mobile/attendance \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"action":"CHECK_IN","location":{"lat":24.7136,"lng":46.6753}}'
 
 # إنشاء موظف
-curl -X POST https://ujoor.onrender.com/api/employees \
+curl -X POST https://YOUR-RENDER-DOMAIN/api/employees \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"firstName":"محمد","email":"mohamed@test.com",...}'
 ```
@@ -138,8 +130,8 @@ curl -X POST https://ujoor.onrender.com/api/employees \
 
 ```bash
 # 1. Clone
-git clone https://github.com/mahmoud-fouad2/Ujoor.git
-cd Ujoor
+git clone <your-repository-url>
+cd taqam
 
 # 2. Install
 pnpm install
@@ -150,7 +142,7 @@ cp .env.example .env
 pnpm db:push
 
 # 4. إنشاء Admin
-SUPER_ADMIN_EMAIL="admin@admin.com" SUPER_ADMIN_PASSWORD="123456" \
+SUPER_ADMIN_EMAIL="your-admin@example.com" SUPER_ADMIN_PASSWORD="replace-with-a-strong-password" \
   node scripts/db-create-admin.mjs
 
 # 5. Run
@@ -234,9 +226,9 @@ pnpm dev
 |------|-------|
 | `COMPLETE_GUIDE.md` | 🚀 دليل التشغيل الكامل (local + Render) |
 | `RENDER_SETUP.md` | 🔧 إعداد Render وحل مشاكل Super Admin |
-| `E2E_TESTING.md` | 🧪 50+ مثال curl للاختبار E2E |
-| `mobile-app/BUILD_APK.md` | 📱 بناء APK (EAS + Local) |
-| `mobile-app/DOWNLOAD_LINK.md` | 📲 توزيع التطبيق (Expo Go + APK + Play Store) |
+| `E2E_TESTING.md` | 🧪 أمثلة curl للاختبار E2E |
+| `ANDROID_APK.md` | 📱 بناء APK عبر Capacitor wrapper |
+| `mobile-app/BUILD_APK.md` | 📦 مرجع legacy فقط |
 | `README.md` | 📖 نظرة عامة |
 
 ---
@@ -253,23 +245,23 @@ pnpm dev
 
 2. **سجل دخول** إلى Dashboard
    ```
-   https://ujoor.onrender.com/login
-   admin@admin.com / 123456
+  https://YOUR-RENDER-DOMAIN/login
+  YOUR_SUPER_ADMIN_EMAIL / YOUR_SUPER_ADMIN_PASSWORD
    ```
 
 3. **أنشئ موظفين** من Dashboard
 
 4. **جرب تطبيق الموبايل**
    ```bash
-   cd mobile-app
-   echo 'EXPO_PUBLIC_API_BASE_URL=https://ujoor.onrender.com' > .env
-   npm start
+  cd apps/mobile
+  echo 'EXPO_PUBLIC_API_BASE_URL=https://YOUR-RENDER-DOMAIN' > .env
+  pnpm start
    # امسح QR من Expo Go
    ```
 
 ### بعد ذلك:
 
-5. **بناء APK** للتوزيع (راجع `mobile-app/BUILD_APK.md`)
+5. **بناء APK** للتوزيع (راجع `ANDROID_APK.md`)
 6. **اختبار E2E كامل** (راجع `E2E_TESTING.md`)
 7. **تخصيص Branding** (اسم، لوقو، ألوان)
 8. **نشر على Play Store** (اختياري)

@@ -65,7 +65,7 @@ export default function MobileLoginPage() {
           <Fingerprint className="size-9 text-white" />
         </div>
         <div className="text-center">
-          <h1 className="text-[28px] font-bold tracking-tight text-slate-900">Ujoor</h1>
+          <h1 className="text-[28px] font-bold tracking-tight text-slate-900">Taqam</h1>
           <p className="mt-0.5 text-[13px] text-slate-400">نظام إدارة الموارد البشرية</p>
         </div>
       </motion.div>
@@ -146,7 +146,7 @@ export default function MobileLoginPage() {
         animate="visible"
         variants={fadeUp}
       >
-        Ujoor © {new Date().getFullYear()}
+        Taqam © {new Date().getFullYear()}
       </motion.p>
     </div>
   );

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -9,8 +9,8 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/support",
-    titleAr: "الدعم الفني | أجور",
-    titleEn: "Support | Ujoors",
+    titleAr: "الدعم الفني | طاقم",
+    titleEn: "Support | Taqam",
     descriptionAr: "قنوات الدعم الفني، ساعات العمل، وسياسة الاستجابة حسب الباقة.",
     descriptionEn: "Support channels, working hours, and response policy based on plan.",
   });
@@ -20,7 +20,7 @@ export default async function SupportPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
-  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@ujoor.app";
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@taqam.com";
 
   return (
     <main className="bg-background">
@@ -34,7 +34,7 @@ export default async function SupportPage() {
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Link href={`${p}/request-demo`}>
-              <Button>{isAr ? "طلب تواصل" : "Contact us"}</Button>
+              <Button variant="brand">{isAr ? "طلب تواصل" : "Contact us"}</Button>
             </Link>
             <Link href={`${p}/faq`}>
               <Button variant="outline">{isAr ? "الأسئلة الشائعة" : "FAQ"}</Button>

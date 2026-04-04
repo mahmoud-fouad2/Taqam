@@ -421,7 +421,7 @@ export function PerformanceGoalsManagerNew() {
           <p className="text-muted-foreground">إدارة ومتابعة أهداف الموظفين</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => fetchGoals()}>
+          <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchGoals()}>
             <IconRefresh className="size-4" />
           </Button>
           <Button onClick={handleAdd}>
@@ -530,7 +530,7 @@ export function PerformanceGoalsManagerNew() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="size-8">
-                          <AvatarImage src={goal.employee.avatar || ""} />
+                          <AvatarImage src={goal.employee.avatar || ""} alt="" />
                           <AvatarFallback>
                             {goal.employee.firstName[0]}
                             {goal.employee.lastName[0]}
@@ -578,7 +578,7 @@ export function PerformanceGoalsManagerNew() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
+                          <Button variant="ghost" size="icon" aria-label="خيارات">
                             <IconDots className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -640,7 +640,7 @@ export function PerformanceGoalsManagerNew() {
           }
         }}
       >
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
               {isEditDialogOpen ? "تعديل الهدف" : "إضافة هدف جديد"}

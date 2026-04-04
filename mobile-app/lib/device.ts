@@ -4,7 +4,7 @@ import { Platform } from "react-native";
 import { getAppVersion } from "./config";
 import { getSecureItem, setSecureItem } from "./storage";
 
-const DEVICE_ID_KEY = "ujoors_device_id";
+const DEVICE_ID_KEY = "taqam_device_id";
 
 function createPseudoUuid(): string {
   // Good enough for deviceId uniqueness; server only checks length.

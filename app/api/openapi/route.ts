@@ -8,9 +8,9 @@ export async function GET() {
   const spec = {
     openapi: "3.0.3",
     info: {
-      title: "Ujoor API",
+      title: "Taqam API",
       version: "0.1.0",
-      description: "Initial OpenAPI spec (incremental).",
+      description: "Incremental OpenAPI spec for Taqam.",
     },
     tags: [{ name: "Audit" }, { name: "Employees" }],
     paths: {

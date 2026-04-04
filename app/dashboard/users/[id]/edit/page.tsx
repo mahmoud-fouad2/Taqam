@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
 import prisma from "@/lib/db";
-import { requireRole, type UserRole } from "@/lib/auth";
+import { requireTenantRole } from "@/lib/auth";
 import EditUserClient from "./edit-user-client";
 
 interface PageProps {
@@ -29,12 +29,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 export default async function EditUserPage({ params }: PageProps) {
   const { id } = await params;
   const locale = await getAppLocale();
-  const currentUser = await requireRole(["TENANT_ADMIN", "HR_MANAGER", "SUPER_ADMIN"] as UserRole[]);
+  const currentUser = await requireTenantRole(["TENANT_ADMIN", "HR_MANAGER"]);
 
-  const user = await prisma.user.findUnique({
+  const user = await prisma.user.findFirst({
     where: {
       id,
-      ...(currentUser.tenantId ? { tenantId: currentUser.tenantId } : {}),
+      tenantId: currentUser.tenantId,
     },
     select: {
       id: true,

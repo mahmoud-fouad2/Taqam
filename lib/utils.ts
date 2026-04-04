@@ -1,4 +1,4 @@
-import { type ClassValue, clsx } from "clsx";
+﻿import { type ClassValue, clsx } from "clsx";
 import { Metadata } from "next";
 import { twMerge } from "tailwind-merge";
 
@@ -21,7 +21,7 @@ export function generateMeta({
   description: string;
 }): Metadata {
   return {
-    title: `${title} - Ujoors (أجور)`,
+    title: `${title} | طاقم`,
     description: description,
     openGraph: {
       images: [`/seo.jpg`]

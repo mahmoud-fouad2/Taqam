@@ -190,7 +190,7 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-3xl">
+      <DialogContent className="w-full sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>استيراد الموظفين (CSV)</DialogTitle>
           <DialogDescription>

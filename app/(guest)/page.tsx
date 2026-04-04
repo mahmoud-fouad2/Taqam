@@ -1,23 +1,30 @@
-/**
- * Ujoors Landing Page
+﻿/**
+ * Taqam Landing Page
  * الصفحة الرئيسية للمنصة
  */
 
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+
 import { 
-  Building2, 
   Users, 
   Clock, 
   CreditCard, 
   Shield, 
   Globe,
   CheckCircle2,
-  ArrowLeft
+  ArrowLeft,
+  BarChart3,
+  Building2,
+  Layers,
+  Star,
+  Zap,
+  Lock,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { redirect } from "next/navigation";
@@ -25,51 +32,79 @@ import { redirect } from "next/navigation";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/",
-    titleAr: "أجور | منصة الموارد البشرية والرواتب والحضور",
-    titleEn: "Ujoors | HR, Payroll & Attendance Platform",
+    titleAr: "طاقم | منصة الموارد البشرية والرواتب والحضور",
+    titleEn: "Taqam | HR, Payroll & Attendance Platform",
     descriptionAr:
-      "أجور منصة سحابية لإدارة الموظفين والحضور والرواتب مع تجربة عربية/إنجليزية ودعم متعدد الشركات.",
+      "طاقم منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية/إنجليزية وامتثال للأنظمة المحلية.",
     descriptionEn:
-      "Ujoors is a cloud HR platform for employees, attendance and payroll with Arabic/English UX and multi-tenant support.",
+      "Taqam is a cloud HR platform for employees, attendance and payroll with Arabic/English UX and multi-tenant support.",
   });
 }
 
 const features = [
   {
     icon: Users,
+    color: "text-blue-600 bg-blue-500/10",
     title: "إدارة الموظفين",
     titleEn: "Employee Management",
-    description: "إدارة شاملة لبيانات الموظفين والهيكل التنظيمي",
+    description: "ملفات موظفين شاملة، هياكل تنظيمية، وإدارة مستندات كاملة.",
+    descriptionEn: "Full employee profiles, org charts, and document management.",
   },
   {
     icon: Clock,
+    color: "text-green-600 bg-green-500/10",
     title: "الحضور والانصراف",
     titleEn: "Time & Attendance",
-    description: "تتبع أوقات العمل والشفتات والإجازات بدقة",
+    description: "تتبع دقيق لأوقات الدوام والشفتات والغياب والتأخير.",
+    descriptionEn: "Accurate tracking of work hours, shifts, absences, and late arrivals.",
   },
   {
     icon: CreditCard,
+    color: "text-purple-600 bg-purple-500/10",
     title: "إدارة الرواتب",
     titleEn: "Payroll Management",
-    description: "حساب الرواتب والبدلات والخصومات تلقائيًا",
+    description: "احتساب تلقائي للرواتب والبدلات والاستقطاعات مع تصدير WPS.",
+    descriptionEn: "Auto-calculate salaries, allowances, deductions with WPS export.",
   },
   {
     icon: Shield,
+    color: "text-orange-600 bg-orange-500/10",
     title: "الامتثال السعودي",
     titleEn: "Saudi Compliance",
-    description: "تكامل مع GOSI وWPS ومقيم ومدد",
+    description: "تكامل مع GOSI وWPS ومقيم ومدد، متوافق مع نظام العمل السعودي.",
+    descriptionEn: "GOSI, WPS, Muqeem & Mudad integration. Saudi labor law compliant.",
   },
   {
     icon: Globe,
-    title: "عربي/إنجليزي",
-    titleEn: "Arabic/English",
-    description: "واجهة كاملة بالعربية والإنجليزية مع دعم RTL",
+    color: "text-teal-600 bg-teal-500/10",
+    title: "عربي / إنجليزي",
+    titleEn: "Arabic & English",
+    description: "واجهة كاملة بالعربية والإنجليزية مع دعم RTL من البداية.",
+    descriptionEn: "Full Arabic/English UI with first-class RTL support built-in.",
   },
   {
     icon: Building2,
+    color: "text-indigo-600 bg-indigo-500/10",
     title: "متعدد الشركات",
     titleEn: "Multi-Tenant",
-    description: "كل شركة في بيئة منفصلة وآمنة",
+    description: "كل شركة في بيئة معزولة وآمنة تمامًا مع صلاحيات مرنة.",
+    descriptionEn: "Each company in a fully isolated, secure environment with flexible roles.",
+  },
+  {
+    icon: BarChart3,
+    color: "text-rose-600 bg-rose-500/10",
+    title: "التقارير والتحليلات",
+    titleEn: "Reports & Analytics",
+    description: "لوحات بيانات لحظية، تقارير مخصصة، تصدير Excel وPDF.",
+    descriptionEn: "Real-time dashboards, custom reports, Excel & PDF export.",
+  },
+  {
+    icon: Layers,
+    color: "text-amber-600 bg-amber-500/10",
+    title: "إدارة الإجازات",
+    titleEn: "Leave Management",
+    description: "طلبات إجازة، موافقة مدير، أرصدة تلقائية، وتقويم مريح.",
+    descriptionEn: "Leave requests, manager approval, auto balances, and calendar view.",
   },
 ];
 
@@ -79,23 +114,50 @@ const plans = [
     nameAr: "الأساسية",
     price: "499",
     employees: "حتى 25 موظف",
-    features: ["إدارة الموظفين", "الحضور والانصراف", "الإجازات", "التقارير الأساسية"],
+    employeesEn: "Up to 25 employees",
+    features: [
+      { ar: "إدارة الموظفين", en: "Employee management" },
+      { ar: "الحضور والانصراف", en: "Time & attendance" },
+      { ar: "إدارة الإجازات", en: "Leave management" },
+      { ar: "التقارير الأساسية", en: "Basic reports" },
+    ],
   },
   {
     name: "Business",
     nameAr: "الأعمال",
     price: "999",
     employees: "حتى 100 موظف",
-    features: ["كل مميزات Starter", "إدارة الرواتب", "WPS Export", "دعم فني متقدم"],
+    employeesEn: "Up to 100 employees",
+    features: [
+      { ar: "كل مميزات الأساسية", en: "All Starter features" },
+      { ar: "كشف الرواتب الكامل", en: "Full payroll processing" },
+      { ar: "تصدير WPS", en: "WPS export" },
+      { ar: "تكامل GOSI", en: "GOSI integration" },
+      { ar: "دعم فني متقدم", en: "Priority support" },
+    ],
     popular: true,
   },
   {
     name: "Enterprise",
     nameAr: "المؤسسات",
     price: "تواصل معنا",
+    priceEn: "Contact us",
     employees: "غير محدود",
-    features: ["كل مميزات Business", "تكاملات مخصصة", "API Access", "مدير حساب مخصص"],
+    employeesEn: "Unlimited employees",
+    features: [
+      { ar: "كل مميزات الأعمال", en: "All Business features" },
+      { ar: "تكاملات مخصصة", en: "Custom integrations" },
+      { ar: "API كامل", en: "Full API access" },
+      { ar: "مدير حساب مخصص", en: "Dedicated account manager" },
+      { ar: "اتفاقية SLA مخصصة", en: "Custom SLA agreement" },
+    ],
   },
+];
+
+const trustItems = [
+  { icon: Zap, labelAr: "إعداد سريع خلال 24 ساعة", labelEn: "Setup in under 24 hours" },
+  { icon: Lock, labelAr: "بيانات محمية ومشفرة", labelEn: "Encrypted & secure data" },
+  { icon: Star, labelAr: "دعم فني على مدار الساعة", labelEn: "24/7 technical support" },
 ];
 
 export default async function LandingPage({
@@ -120,225 +182,323 @@ export default async function LandingPage({
 
   return (
     <main className="min-h-[calc(100vh-8rem)] bg-background">
-      {/* Hero */}
-      <section className="container mx-auto px-4 py-16 sm:py-20">
-        <div className="grid items-center gap-10 lg:grid-cols-2">
+      {/* ── HERO ─────────────────────────────────────────────── */}
+      <section className="container mx-auto px-4 pb-8 pt-16 sm:pt-20">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
+          {/* Left: copy */}
           <div className="text-center lg:text-start">
-            <div className="mx-auto inline-flex items-center gap-2 rounded-full border bg-background/70 px-4 py-1 text-xs text-muted-foreground shadow-sm lg:mx-0">
-              <span className="h-2 w-2 rounded-full bg-primary" />
-              {isAr ? "سحابية • متعددة الشركات • عربي/إنجليزي" : "Cloud • Multi-tenant • Arabic/English"}
+            {/* Badge */}
+            <div className="mb-5 flex justify-center lg:justify-start">
+              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
+                <span className="size-1.5 animate-pulse rounded-full bg-indigo-500" />
+                {isAr ? "سحابية • متعدد الشركات • عربي / إنجليزي" : "Cloud • Multi-tenant • Arabic / English"}
+              </span>
             </div>
 
-            <h1 className="mt-5 text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
               {isAr ? (
                 <>
-                  منصة إدارة الموارد البشرية
+                  منصة إدارة{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    الموارد البشرية
+                  </span>
                   <br />
-                  <span className="text-primary">الأكثر تكاملاً</span>
+                  الأكثر تكاملاً
                 </>
               ) : (
                 <>
-                  HR, Payroll & Attendance
+                  HR, Payroll &{" "}
+                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    Attendance
+                  </span>
                   <br />
-                  <span className="text-primary">built for Saudi compliance</span>
+                  Built for Saudi Arabia
                 </>
               )}
             </h1>
 
-            <p className="mx-auto mt-5 max-w-2xl text-lg text-muted-foreground lg:mx-0">
+            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground lg:mx-0">
               {isAr
-                ? "أجور منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية/إنجليزية وامتثال للأنظمة المحلية."
-                : "Ujoors is a modern cloud platform to manage employees, shifts, attendance and payroll—optimized for Saudi market needs with RTL-ready Arabic/English UX."}
+                ? "طاقم منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية كاملة وامتثال للأنظمة المحلية."
+                : "Taqam is a modern cloud platform to manage employees, attendance, and payroll—optimized for Saudi compliance with full Arabic/English RTL UX."}
             </p>
 
+            {/* Trust items */}
+            <div className="mt-6 flex flex-wrap justify-center gap-4 lg:justify-start">
+              {trustItems.map((t) => (
+                <div key={t.labelEn} className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                  <t.icon className="h-4 w-4 text-indigo-500" />
+                  <span>{isAr ? t.labelAr : t.labelEn}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* CTA buttons */}
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
               <Link href={`${p}/request-demo`}>
-                <Button size="lg" className="gap-2">
-                  {isAr ? "طلب عرض تجريبي" : "Request a demo"}
+                <Button variant="brand" size="lg" className="h-12 gap-2 px-6 text-base font-semibold">
+                  {isAr ? "طلب عرض تجريبي مجاني" : "Request a free demo"}
                   <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 </Button>
               </Link>
-              <Link href={`${p}/features`}>
-                <Button size="lg" variant="outline">
-                  {isAr ? "استكشف المميزات" : "Explore features"}
-                </Button>
-              </Link>
               <Link href={`${p}/screenshots`}>
-                <Button size="lg" variant="secondary">
-                  {isAr ? "استعراض النظام" : "Product tour"}
+                <Button size="lg" variant="brandOutline" className="h-12 gap-2 px-6 text-base">
+                  <ChevronRight className="h-4 w-4" />
+                  {isAr ? "استعراض المنصة" : "Product tour"}
                 </Button>
               </Link>
+            </div>
+
+            {/* Social proof numbers */}
+            <div className="mt-10 flex justify-center gap-8 border-t pt-8 lg:justify-start">
+              <div>
+                <p className="text-2xl font-bold">+٢٠٠</p>
+                <p className="text-sm text-muted-foreground">{isAr ? "شركة تستخدمنا" : "Companies"}</p>
+              </div>
+              <div className="h-10 w-px bg-border" />
+              <div>
+                <p className="text-2xl font-bold">+١٠,٠٠٠</p>
+                <p className="text-sm text-muted-foreground">{isAr ? "موظف مُدار" : "Employees managed"}</p>
+              </div>
+              <div className="h-10 w-px bg-border" />
+              <div>
+                <p className="text-2xl font-bold">٩٩.٩٪</p>
+                <p className="text-sm text-muted-foreground">{isAr ? "وقت التشغيل" : "Uptime SLA"}</p>
+              </div>
             </div>
           </div>
 
+          {/* Right: screenshots panel */}
           <div className="relative mx-auto w-full max-w-xl">
-            <div className="pointer-events-none absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-b from-primary/15 via-blue-500/10 to-purple-500/10 blur-2xl" />
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/10">
-              <div className="flex items-center gap-2 border-b bg-muted/40 px-4 py-3">
+            <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/15 via-blue-500/10 to-purple-500/10 blur-3xl" />
+
+            {/* Main browser-frame screenshot */}
+            <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/12 ring-1 ring-black/5">
+              <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2.5">
                 <div className="flex gap-1.5">
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500/70" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-500/70" />
-                  <span className="h-2.5 w-2.5 rounded-full bg-green-500/70" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
+                  <span className="h-2.5 w-2.5 rounded-full bg-green-400/80" />
                 </div>
-                <div className="ms-auto text-xs text-muted-foreground">Ujoors • Dashboard preview</div>
+                <div className="mx-auto flex items-center gap-1.5 rounded-md bg-background/80 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
+                  <span className="size-1.5 rounded-full bg-green-500" />
+                  app.taqam.com
+                </div>
               </div>
-              <div className="relative aspect-[16/10] bg-muted">
+              <div className="aspect-[16/10] overflow-hidden bg-muted">
                 <Image
-                  src="/preview.png"
-                  alt={isAr ? "معاينة لوحة التحكم" : "Dashboard preview"}
-                  fill
-                  className="object-cover"
+                  src="/images/marketing/screenshot-dashboard.svg?v=2"
+                  alt={isAr ? "لوحة تحكم طاقم" : "Taqam dashboard"}
+                  unoptimized
+                  width={1200}
+                  height={700}
+                  className="h-full w-full object-cover"
                   priority
-                  sizes="(max-width: 1024px) 100vw, 520px"
                 />
               </div>
             </div>
-            <div className="mt-4 grid grid-cols-3 gap-3">
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted">
-                <Image
-                  src="/preview2.png"
-                  alt={isAr ? "لقطة من النظام" : "Product screenshot"}
-                  fill
-                  className="object-cover"
-                  sizes="180px"
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxMTE4MjciIHN0b3Atb3BhY2l0eT0iMC42Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMWYyOTM3IiBzdG9wLW9wYWNpdHk9IjAuNiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZykiLz48L3N2Zz4="
-                />
-              </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted">
-                <Image
-                  src="/seo.jpg"
-                  alt={isAr ? "واجهة تسويقية" : "Marketing visual"}
-                  fill
-                  className="object-cover"
-                  sizes="180px"
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxMTE4MjciIHN0b3Atb3BhY2l0eT0iMC42Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMWYyOTM3IiBzdG9wLW9wYWNpdHk9IjAuNiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZykiLz48L3N2Zz4="
-                />
-              </div>
-              <div className="relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted">
-                <Image
-                  src="/images/cover.png"
-                  alt={isAr ? "صورة الغلاف" : "Cover image"}
-                  fill
-                  className="object-cover"
-                  sizes="180px"
-                  placeholder="blur"
-                  blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZGVmcz48bGluZWFyR3JhZGllbnQgaWQ9ImciIHgxPSIwIiB5MT0iMCIgeDI9IjEiIHkyPSIxIj48c3RvcCBvZmZzZXQ9IjAiIHN0b3AtY29sb3I9IiMxMTE4MjciIHN0b3Atb3BhY2l0eT0iMC42Ii8+PHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjMWYyOTM3IiBzdG9wLW9wYWNpdHk9IjAuNiIvPjwvbGluZWFyR3JhZGllbnQ+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZykiLz48L3N2Zz4="
-                />
-              </div>
+
+            {/* Mini screenshots row */}
+            <div className="mt-3 grid grid-cols-3 gap-3">
+              {[
+                { src: "/preview.png", labelAr: "لوحة التحكم", labelEn: "Dashboard" },
+                { src: "/images/marketing/screenshot-employees.svg?v=2", labelAr: "الموظفون", labelEn: "Employees" },
+                { src: "/images/marketing/screenshot-payroll-new.svg?v=2", labelAr: "الرواتب", labelEn: "Payroll" },
+              ].map((item) => (
+                <Link
+                  key={item.src}
+                  href={`${p}/screenshots`}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <Image
+                    src={item.src}
+                    alt={isAr ? item.labelAr : item.labelEn}
+                    unoptimized={item.src.endsWith(".svg")}
+                    fill
+                    sizes="180px"
+                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                  <span className="absolute bottom-1.5 start-2 text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    {isAr ? item.labelAr : item.labelEn}
+                  </span>
+                </Link>
+              ))}
+            </div>
+
+            {/* "View all" link */}
+            <div className="mt-3 text-center">
+              <Link href={`${p}/screenshots`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
+                {isAr ? "عرض كل اللقطات" : "View all screenshots"}
+                <ChevronRight className="h-3 w-3 rtl:rotate-180" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Features */}
+      {/* ── FEATURES ─────────────────────────────────────────── */}
       <section id="features" className="border-t bg-muted/30 py-20">
         <div className="container mx-auto px-4">
           <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold">{isAr ? "مميزات المنصة" : "Platform features"}</h2>
-            <p className="text-muted-foreground">
-              {isAr ? "كل ما تحتاجه لإدارة فريقك في مكان واحد" : "Everything you need to run HR and payroll in one place"}
+            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {isAr ? "المميزات" : "Features"}
+            </span>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              {isAr ? "كل ما تحتاجه لإدارة فريقك" : "Everything to run your team"}
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              {isAr ? "وحدة واحدة متكاملة بدلاً من أدوات متعددة" : "One integrated platform instead of multiple disconnected tools"}
             </p>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((feature) => (
-              <Card key={feature.title} className="text-center">
-                <CardHeader>
-                  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    <feature.icon className="h-6 w-6 text-primary" />
-                  </div>
-                  <CardTitle>{isAr ? feature.title : feature.titleEn}</CardTitle>
-                  <CardDescription>{isAr ? feature.titleEn : feature.title}</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Pricing */}
-      <section id="pricing" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <h2 className="mb-4 text-3xl font-bold">{isAr ? "الباقات والأسعار" : "Plans & pricing"}</h2>
-            <p className="text-muted-foreground">{isAr ? "اختر الباقة المناسبة لحجم شركتك" : "Pick a plan that fits your team"}</p>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {plans.map((plan) => (
-              <Card 
-                key={plan.name} 
-                className={plan.popular ? "border-primary shadow-lg" : ""}
+              <Card
+                key={feature.title}
+                className="group border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/8"
               >
-                {plan.popular && (
-                  <div className="bg-primary px-4 py-1 text-center text-sm font-medium text-primary-foreground">
-                    {isAr ? "الأكثر طلبًا" : "Most popular"}
+                <CardHeader className="pb-3">
+                  <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${feature.color}`}>
+                    <feature.icon className="h-5 w-5" />
                   </div>
-                )}
-                <CardHeader className="text-center">
-                  <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.name}</CardTitle>
-                  <CardDescription>{isAr ? plan.name : plan.nameAr}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">
-                      {plan.price === "تواصل معنا" ? "" : ""}
-                      {plan.price}
-                    </span>
-                    {plan.price !== "تواصل معنا" && (
-                      <span className="text-muted-foreground">{isAr ? " ريال/شهر" : " SAR / month"}</span>
-                    )}
-                  </div>
-                  <p className="text-sm text-muted-foreground">{plan.employees}</p>
+                  <CardTitle className="text-base">
+                    {isAr ? feature.title : feature.titleEn}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <ul className="space-y-3">
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link href={`${p}/request-demo`} className="mt-6 block">
-                    <Button 
-                      className="w-full" 
-                      variant={plan.popular ? "default" : "outline"}
-                    >
-                      {isAr ? "طلب اشتراك" : "Get started"}
-                    </Button>
-                  </Link>
+                  <p className="text-sm leading-relaxed text-muted-foreground">
+                    {isAr ? feature.description : feature.descriptionEn}
+                  </p>
                 </CardContent>
               </Card>
             ))}
           </div>
           <div className="mt-10 text-center">
-            <Link href={`${p}/pricing`}>
-              <Button variant="outline">{isAr ? "عرض صفحة الأسعار كاملة" : "View full pricing"}</Button>
+            <Link href={`${p}/features`}>
+              <Button variant="outline" className="gap-2">
+                {isAr ? "اكتشف كل المميزات" : "Explore all features"}
+                <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+              </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="border-t bg-primary py-16 text-primary-foreground">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="mb-4 text-3xl font-bold">{isAr ? "جاهز للبدء؟" : "Ready to get started?"}</h2>
-          <p className="mx-auto mb-8 max-w-xl opacity-90">
-            {isAr
-              ? "تواصل معنا الآن للحصول على عرض تجريبي مجاني ومعرفة كيف يمكن لأجور تحسين إدارة الموارد البشرية في شركتك."
-              : "Talk to us for a free demo and see how Ujoors can streamline HR and payroll operations."}
-          </p>
-          <Link href={`${p}/request-demo`}>
-            <Button size="lg" variant="secondary" className="gap-2">
-              {isAr ? "طلب عرض تجريبي مجاني" : "Request a free demo"}
-              <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
-            </Button>
-          </Link>
+      {/* ── PRICING ──────────────────────────────────────────── */}
+      <section id="pricing" className="py-20">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {isAr ? "الأسعار" : "Pricing"}
+            </span>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              {isAr ? "باقات تناسب كل حجم" : "Plans for every team size"}
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              {isAr ? "ابدأ مجانًا، ادفع عند النمو" : "Start free, pay as you grow"}
+            </p>
+          </div>
+          <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.name}
+                className={`relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-xl ${
+                  plan.popular ? "border-primary ring-2 ring-primary/20 shadow-lg" : ""
+                }`}
+              >
+                {plan.popular && (
+                  <div className="bg-primary px-4 py-1.5 text-center text-xs font-bold uppercase tracking-wide text-primary-foreground">
+                    ⭐ {isAr ? "الأكثر طلبًا" : "Most popular"}
+                  </div>
+                )}
+                <div className="flex flex-1 flex-col p-6">
+                  <div className="mb-5">
+                    <h3 className="text-xl font-bold">{isAr ? plan.nameAr : plan.name}</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">{isAr ? plan.nameAr : plan.name}</p>
+                    <div className="mt-4 flex items-end gap-1">
+                      {plan.price !== "تواصل معنا" ? (
+                        <>
+                          <span className="text-4xl font-extrabold">{plan.price}</span>
+                          <span className="mb-1 text-muted-foreground">{isAr ? " ريال/شهر" : " SAR/mo"}</span>
+                        </>
+                      ) : (
+                        <span className="text-2xl font-bold">{isAr ? plan.price : plan.priceEn}</span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {isAr ? plan.employees : plan.employeesEn}
+                    </p>
+                  </div>
+
+                  <ul className="mb-6 flex-1 space-y-2.5">
+                    {plan.features.map((f) => (
+                      <li key={f.en} className="flex items-start gap-2.5">
+                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                        <span className="text-sm">{isAr ? f.ar : f.en}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link href={`${p}/request-demo`}>
+                    <Button
+                      className="w-full"
+                      variant={plan.popular ? "brand" : "brandOutline"}
+                      size="lg"
+                    >
+                      {isAr ? "ابدأ الآن" : "Get started"}
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-8 text-center">
+            <Link href={`${p}/pricing`}>
+              <Button variant="ghost" className="gap-1 text-muted-foreground hover:text-foreground">
+                {isAr ? "عرض صفحة الأسعار التفصيلية" : "View detailed pricing"}
+                <ChevronRight className="h-4 w-4 rtl:rotate-180" />
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
 
+      {/* ── CTA ──────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden border-t py-20">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-sky-50 via-white to-indigo-100/80 dark:from-indigo-600 dark:via-blue-600 dark:to-purple-700" />
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_-20%,rgba(59,130,246,0.14),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]" />
+        <div className="container mx-auto px-4 text-center">
+          <div className="mx-auto max-w-2xl">
+            <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-sky-700/80 dark:text-white/70">
+              {isAr ? "ابدأ اليوم" : "Get started today"}
+            </p>
+            <h2 className="text-3xl font-extrabold text-slate-950 dark:text-white sm:text-4xl">
+              {isAr ? "جاهز لتحويل إدارة فريقك؟" : "Ready to transform your HR?"}
+            </h2>
+            <p className="mx-auto mt-4 max-w-lg text-base text-slate-600 dark:text-white/80">
+              {isAr
+                ? "احصل على عرض تجريبي مجاني وشاهد كيف يمكن لطاقم توفير وقتك وتقليل الأخطاء وزيادة كفاءة فريق الموارد البشرية."
+                : "Get a free demo and see how Taqam saves time, reduces errors, and boosts your HR team's efficiency."}
+            </p>
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Link href={`${p}/request-demo`}>
+                <Button size="lg" variant="brand" className="h-12 gap-2 px-8 text-base font-semibold shadow-lg">
+                  {isAr ? "طلب عرض تجريبي مجاني" : "Request a free demo"}
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                </Button>
+              </Link>
+              <Link href={`${p}/pricing`}>
+                <Button size="lg" variant="brandOutline" className="h-12 gap-2 px-8 text-base backdrop-blur">
+                  {isAr ? "عرض الأسعار" : "View pricing"}
+                </Button>
+              </Link>
+            </div>
+            <p className="mt-5 text-xs text-slate-500 dark:text-white/60">
+              {isAr ? "لا حاجة لبطاقة ائتمانية • إعداد في 24 ساعة • دعم فني مجاني" : "No credit card required • Setup in 24h • Free technical support"}
+            </p>
+          </div>
+        </div>
+      </section>
     </main>
   );
 }

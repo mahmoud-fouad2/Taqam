@@ -607,7 +607,7 @@ export function OnboardingManagerNew() {
                           <TableCell>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-9 w-9">
-                                <AvatarImage src={process.employee.avatar} />
+                                <AvatarImage src={process.employee.avatar} alt="" />
                                 <AvatarFallback>
                                   {getInitials(getEmployeeName(process.employee))}
                                 </AvatarFallback>
@@ -739,7 +739,7 @@ export function OnboardingManagerNew() {
 
       {/* Dialog بدء إلحاق جديد */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
             <DialogTitle>بدء عملية إلحاق جديدة</DialogTitle>
             <DialogDescription>اختر الموظف الجديد وقالب الإلحاق</DialogDescription>
@@ -819,7 +819,7 @@ export function OnboardingManagerNew() {
 
       {/* Dialog إنشاء قالب */}
       <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
             <DialogTitle>إنشاء قالب إلحاق جديد</DialogTitle>
             <DialogDescription>أنشئ قالب يمكن استخدامه لعمليات الإلحاق</DialogDescription>
@@ -883,7 +883,7 @@ export function OnboardingManagerNew() {
               {/* معلومات الموظف */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
-                  <AvatarImage src={selectedProcess.employee.avatar} />
+                  <AvatarImage src={selectedProcess.employee.avatar} alt="" />
                   <AvatarFallback>
                     {getInitials(getEmployeeName(selectedProcess.employee))}
                   </AvatarFallback>

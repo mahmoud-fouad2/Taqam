@@ -1,4 +1,7 @@
-# ✅ تقرير الاختبار E2E - Ujoor HRMS
+# ✅ تقرير الاختبار E2E - Taqam HR
+
+> **ملاحظة أرشيفية:** هذا التقرير يوثق تشغيلًا تاريخيًا وقت التنفيذ. قد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو بيانات دخول أو Bootstrap قديمة.
+> للاستخدام الحالي اعتمد على `QUICK_START.md` و `SUMMARY.md` و `TESTING_GUIDE.md` واستخدم `https://YOUR-RENDER-DOMAIN` مع تدفق Bootstrap الموثق حاليًا.
 
 **التاريخ:** 2026-02-01  
 **الموقع:** https://ujoor.onrender.com  

@@ -37,7 +37,7 @@ export interface SalaryComponentItem {
 export interface EmployeeSalary {
   id: string;
   employeeId: string;
-  structureId: string;
+  structureId?: string;
   basicSalary: number;
   components: EmployeeSalaryComponent[];
   effectiveDate: string;
@@ -45,15 +45,17 @@ export interface EmployeeSalary {
   bankName?: string;
   bankAccountNumber?: string;
   iban?: string;
+  swiftCode?: string;
   paymentMethod: "bank_transfer" | "cash" | "check";
   currency: string;
+  notes?: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface EmployeeSalaryComponent {
   componentId: string;
-  type: SalaryComponent;
+  type: SalaryComponent | AllowanceType;
   name: string;
   nameAr: string;
   amount: number;
@@ -95,14 +97,21 @@ export type PayslipStatus = "draft" | "generated" | "sent" | "viewed";
 export interface Payslip {
   id: string;
   payrollPeriodId: string;
+  periodName?: string;
+  periodNameAr?: string;
+  periodStartDate?: string;
+  periodEndDate?: string;
+  paymentDate?: string;
   employeeId: string;
   employeeName: string;
   employeeNameAr: string;
   employeeNumber: string;
+  departmentId?: string;
   department: string;
   departmentAr: string;
   jobTitle: string;
   jobTitleAr: string;
+  currency: string;
   
   // Earnings
   basicSalary: number;
@@ -165,17 +174,18 @@ export interface Loan {
   id: string;
   employeeId: string;
   tenantId: string;
-  type: "salary_advance" | "personal_loan" | "housing_loan" | "car_loan" | "other";
+  type: "salary_advance" | "personal_loan" | "emergency_loan" | "housing_loan" | "car_loan" | "other";
   amount: number;
   installments: number;
   installmentAmount: number;
   remainingAmount: number;
   paidInstallments: number;
   interestRate: number;
-  startDate: string;
+  startDate?: string;
   endDate?: string;
   status: LoanStatus;
   reason?: string;
+  notes?: string;
   approvedBy?: string;
   approvedAt?: string;
   rejectedReason?: string;
@@ -191,6 +201,10 @@ export interface LoanPayment {
   paymentDate: string;
   installmentNumber: number;
   notes?: string;
+  paymentMethod?: string;
+  reference?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 // ============ GOSI Settings ============
@@ -201,6 +215,31 @@ export interface GOSISettings {
   employerPercentage: number; // عادة 11.75%
   maxSalary: number; // الحد الأقصى للراتب الخاضع للتأمينات
   isEnabled: boolean;
+}
+
+export interface PayrollDepartmentStat {
+  id: string;
+  name: string;
+  employeeCount: number;
+  totalGross: number;
+  totalDeductions: number;
+  totalNet: number;
+  avgSalary: number;
+  gosiBase: number;
+  gosiEmployee: number;
+  gosiEmployer: number;
+}
+
+export interface PayrollMonthlyTrendItem {
+  month: string;
+  totalGross: number;
+  totalNet: number;
+  employeeCount: number;
+}
+
+export interface PayrollReportData {
+  departmentStats: PayrollDepartmentStat[];
+  monthlyTrend: PayrollMonthlyTrendItem[];
 }
 
 // ============ Tax Settings ============
@@ -267,6 +306,7 @@ export const loanStatusLabels: Record<LoanStatus, { en: string; ar: string; colo
 export const loanTypeLabels: Record<Loan["type"], { en: string; ar: string }> = {
   salary_advance: { en: "Salary Advance", ar: "سلفة راتب" },
   personal_loan: { en: "Personal Loan", ar: "قرض شخصي" },
+  emergency_loan: { en: "Emergency Loan", ar: "قرض طارئ" },
   housing_loan: { en: "Housing Loan", ar: "قرض سكني" },
   car_loan: { en: "Car Loan", ar: "قرض سيارة" },
   other: { en: "Other", ar: "أخرى" },

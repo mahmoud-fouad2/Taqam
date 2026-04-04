@@ -38,9 +38,21 @@ export async function GET(request: NextRequest) {
             gender: true,
             nationality: true,
             maritalStatus: true,
+            address: true,
+            emergencyContact: true,
             hireDate: true,
             employmentType: true,
             workLocation: true,
+            salaryRecords: {
+              orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
+              take: 1,
+              select: {
+                bankName: true,
+                bankAccountNumber: true,
+                iban: true,
+                swiftCode: true,
+              },
+            },
             department: {
               select: {
                 id: true,
@@ -87,7 +99,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: user });
+    const employee = user.employee
+      ? {
+          ...user.employee,
+          bankInfo: user.employee.salaryRecords[0]
+            ? {
+                bankName: user.employee.salaryRecords[0].bankName ?? "",
+                accountNumber: user.employee.salaryRecords[0].bankAccountNumber ?? "",
+                iban: user.employee.salaryRecords[0].iban ?? undefined,
+                swiftCode: user.employee.salaryRecords[0].swiftCode ?? undefined,
+              }
+            : undefined,
+        }
+      : null;
+
+    return NextResponse.json({ data: { ...user, employee } });
   } catch (error) {
     console.error("Error fetching profile:", error);
     return NextResponse.json(

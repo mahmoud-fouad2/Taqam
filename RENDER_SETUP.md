@@ -1,295 +1,123 @@
 # 🚀 إعداد المشروع على Render
 
-## 🔴 مهم جداً: إنشاء حساب Super Admin
+## نظرة سريعة
 
-### الطريقة 1: إعداد المتغيرات قبل النشر (الأسهل)
+- استخدم `pnpm start:render` كأمر التشغيل على Render.
+- الإقلاع ينفذ `prisma migrate deploy` افتراضياً.
+- تفعيل إنشاء Super Admin أصبح صريحاً ومؤقتاً عبر `ENABLE_SUPER_ADMIN_BOOTSTRAP=true`.
+- الـ endpoint العام الخاص بالـ bootstrap يتطلب أيضاً `SUPER_ADMIN_BOOTSTRAP_TOKEN` في الهيدر `x-bootstrap-token`.
 
-في **Render Dashboard → Environment Variables**، أضف:
+## المتغيرات المطلوبة
 
-```env
-SUPER_ADMIN_EMAIL=admin@admin.com
-SUPER_ADMIN_PASSWORD=123456
-SUPER_ADMIN_FORCE=1
-```
-
-⚠️ **`SUPER_ADMIN_FORCE=1`** مهم جداً! بدونه لن يتم إنشاء حساب إذا كان هناك مستخدمين آخرين.
-
----
-
-### الطريقة 2: تشغيل السكريبت يدوياً (بعد النشر)
-
-إذا كان المشروع منشور بالفعل ولم يتم إنشاء super admin:
-
-**في Render Dashboard:**
-
-1. اذهب إلى **Shell** (Terminal)
-2. شغل الأمر:
-
-```bash
-node scripts/db-create-admin.mjs
-```
-
-أو:
-
-```bash
-SUPER_ADMIN_FORCE=1 node scripts/ensure-super-admin.mjs
-```
-
----
-
-## ✅ التحقق من نجاح الإنشاء
-
-### 1. افتح Shell في Render
-
-```bash
-node -e "
-const { PrismaClient } = require('@prisma/client');
-const prisma = new PrismaClient();
-prisma.user.findUnique({ where: { email: 'admin@admin.com' } })
-  .then(u => console.log(u ? 'Super Admin exists!' : 'NOT FOUND'))
-  .finally(() => prisma.\$disconnect());
-"
-```
-
-### 2. أو استخدم Prisma Studio
-
-```bash
-npx prisma studio
-```
-
----
-
-## 🧪 اختبار تسجيل الدخول
-
-### اختبار Web Dashboard
-
-افتح المتصفح:
-```
-https://ujoor.onrender.com/login
-```
-
-البيانات:
-- Email: `admin@admin.com`
-- Password: `123456`
-
-### اختبار Mobile API
-
-```bash
-curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
-  -H "Content-Type: application/json" \
-  -H "x-device-id: TEST-001" \
-  -H "x-device-platform: android" \
-  -H "x-device-name: Test Device" \
-  -H "x-app-version: 1.0.0" \
-  -d '{"email":"admin@admin.com","password":"123456"}'
-```
-
-**إذا نجح،** سترى رد مثل:
-```json
-{
-  "data": {
-    "accessToken": "eyJhbGc...",
-    "refreshToken": "rt_...",
-    "user": {
-      "id": "...",
-      "email": "admin@admin.com",
-      "firstName": "Super",
-      "lastName": "Admin",
-      "role": "SUPER_ADMIN"
-    }
-  }
-}
-```
-
-**إذا فشل** مع `Invalid credentials`:
-- Super admin غير موجود أو الباسورد خاطئ
-- تحتاج تشغيل `db-create-admin.mjs`
-
----
-
-## 🔐 إنشاء Super Admin الآن!
-
-لأن الاختبار فشل بـ `Invalid credentials`، معناه إما:
-
-### السيناريو 1: الحساب غير موجود
-
-**الحل:** شغل هذا في Render Shell:
-
-```bash
-export SUPER_ADMIN_EMAIL="admin@admin.com"
-export SUPER_ADMIN_PASSWORD="123456"
-node scripts/db-create-admin.mjs
-```
-
-### السيناريو 2: الباسورد مختلف
-
-**الحل:** أعد تعيين الباسورد:
-
-```bash
-export SUPER_ADMIN_EMAIL="admin@admin.com"
-export SUPER_ADMIN_PASSWORD="123456"
-node scripts/db-create-admin.mjs
-```
-
-(السكريبت `db-create-admin.mjs` يحدّث الباسورد حتى لو كان الحساب موجود)
-
----
-
-## 📋 Render Environment Variables - Complete List
+أضف هذه القيم في **Render Dashboard → Environment Variables**:
 
 ```env
-# ===== Node & Deployment =====
+# Core
 NODE_VERSION=20
-DATABASE_URL=[من Render Postgres]
+DATABASE_URL=[Render Postgres internal URL]
+NEXTAUTH_SECRET=[openssl rand -base64 32]
+NEXTAUTH_URL=https://your-app.onrender.com
+NEXT_PUBLIC_APP_URL=https://your-app.onrender.com
 
-# ===== Auth Secrets =====
-NEXTAUTH_SECRET=[يولده Render تلقائياً أو: openssl rand -base64 32]
-NEXTAUTH_URL=https://ujoor.onrender.com
-NEXT_PUBLIC_APP_URL=https://ujoor.onrender.com
-
-# ===== Super Admin Bootstrap =====
-SUPER_ADMIN_EMAIL=admin@admin.com
-SUPER_ADMIN_PASSWORD=123456
+# Super Admin bootstrap - فعّلها فقط أثناء الإنشاء الأول
+ENABLE_SUPER_ADMIN_BOOTSTRAP=true
+SUPER_ADMIN_BOOTSTRAP_TOKEN=[openssl rand -hex 32]
+SUPER_ADMIN_EMAIL=admin@your-app.com
+SUPER_ADMIN_PASSWORD=[strong-password]
 SUPER_ADMIN_FORCE=1
 
-# ===== Mobile JWT =====
+# Prisma schema sync
+PRISMA_SCHEMA_SYNC_MODE=migrate
+# استخدم push فقط في بيئات مؤقتة عند الضرورة
+# PRISMA_SCHEMA_SYNC_MODE=push
+
+# Mobile Auth
 MOBILE_JWT_SECRET=[openssl rand -base64 32]
 MOBILE_REFRESH_TOKEN_SECRET=[openssl rand -base64 32]
 
-# ===== Cloudflare R2 =====
+# Cloudflare R2
 R2_ACCOUNT_ID=your-account-id
 R2_ACCESS_KEY_ID=your-key
 R2_SECRET_ACCESS_KEY=your-secret
 R2_BUCKET_NAME=ujoor
 R2_PUBLIC_URL=https://pub-xxxxx.r2.dev
 R2_ENDPOINT=https://xxxxx.r2.cloudflarestorage.com
-
-# ===== Optional: Sentry =====
-SENTRY_DSN=https://xxxxx@o123456.ingest.sentry.io/123456
-NEXT_PUBLIC_SENTRY_DSN=https://xxxxx@o123456.ingest.sentry.io/123456
-
-# ===== Optional: reCAPTCHA =====
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=6Le...
-RECAPTCHA_SECRET_KEY=6Le...
 ```
 
----
+## إعداد الخدمة
 
-## 🔄 بعد إضافة المتغيرات
+1. اجعل **Build Command** هو `pnpm install && pnpm build`.
+2. اجعل **Start Command** هو `pnpm start:render`.
+3. نفّذ deploy بعد حفظ المتغيرات.
+4. راقب السجلات حتى ترى نجاح `prisma migrate deploy` ثم `ensure-super-admin`.
 
-1. **حفظ** Environment Variables
-2. **Manual Deploy** (أو انتظر auto-deploy)
-3. راقب **Logs** للتأكد من نجاح `ensure-super-admin`
-4. جرب تسجيل الدخول
+## إنشاء Super Admin يدوياً
 
----
+إذا احتجت إعادة الإنشاء من Render Shell:
 
-## 🐛 Troubleshooting
-
-### "Invalid credentials" عند Login
-
-**السبب:** Super admin غير موجود أو password خاطئ
-
-**الحل:**
 ```bash
-# في Render Shell
-export SUPER_ADMIN_EMAIL="admin@admin.com"
-export SUPER_ADMIN_PASSWORD="123456"
+export ENABLE_SUPER_ADMIN_BOOTSTRAP="true"
+export SUPER_ADMIN_EMAIL="admin@your-app.com"
+export SUPER_ADMIN_PASSWORD="your-strong-password"
+export SUPER_ADMIN_FORCE="1"
+node scripts/ensure-super-admin.mjs
+```
+
+أو:
+
+```bash
+export ENABLE_SUPER_ADMIN_BOOTSTRAP="true"
+export SUPER_ADMIN_EMAIL="admin@your-app.com"
+export SUPER_ADMIN_PASSWORD="your-strong-password"
 node scripts/db-create-admin.mjs
 ```
 
-### "Account is temporarily locked"
+## التحقق
 
-**السبب:** محاولات login فاشلة متكررة (rate limiting)
+بعد الإقلاع، اختبر تسجيل الدخول على `/login` باستخدام البريد وكلمة المرور اللذين قمت بتعيينهما.
 
-**الحل:**
+للتحقق من وجود المستخدم من Render Shell:
+
 ```bash
-# في Render Shell
+node -e "
+const { PrismaClient } = require('@prisma/client');
+const prisma = new PrismaClient();
+prisma.user.findUnique({ where: { email: 'admin@your-app.com' } })
+  .then(u => console.log(u ? 'Super Admin exists' : 'NOT FOUND'))
+  .finally(() => prisma.\$disconnect());
+"
+```
+
+## بعد أول دخول ناجح
+
+1. عطّل `ENABLE_SUPER_ADMIN_BOOTSTRAP` أو احذفه.
+2. احذف `SUPER_ADMIN_FORCE` إذا لم تعد تحتاجه.
+3. احتفظ بـ `SUPER_ADMIN_BOOTSTRAP_TOKEN` خارج الاستخدام اليومي.
+
+## Troubleshooting
+
+### `Invalid credentials`
+
+- تأكد أن البريد يطابق `SUPER_ADMIN_EMAIL`.
+- أعد ضبط كلمة المرور عبر `scripts/ensure-super-admin.mjs` مع تفعيل `ENABLE_SUPER_ADMIN_BOOTSTRAP=true`.
+
+### فشل schema sync عند الإقلاع
+
+- افحص `DATABASE_URL`.
+- تأكد أن migrations موجودة ومطابقة للبيئة.
+- استخدم `PRISMA_SCHEMA_SYNC_MODE=push` فقط كحل مؤقت في بيئات غير حرجة.
+
+### الحساب مقفل مؤقتاً
+
+نفّذ من Render Shell:
+
+```bash
 node -e "
 const { PrismaClient } = require('@prisma/client');
 const p = new PrismaClient();
 p.user.update({
-  where: { email: 'admin@admin.com' },
+  where: { email: 'admin@your-app.com' },
   data: { failedLoginAttempts: 0, lockedUntil: null }
 }).then(() => console.log('Unlocked')).finally(() => p.\$disconnect());
 "
-```
-
-### Database connection fails
-
-**السبب:** `DATABASE_URL` خاطئ أو Database غير جاهز
-
-**الحل:**
-- تأكد من `DATABASE_URL` في Environment Variables
-- تأكد من نسخ **Internal Database URL** من Postgres
-- جرب Manual Deploy مرة أخرى
-
----
-
-## 🎯 الخطوات السريعة (Quick Fix)
-
-**إذا كان المشروع منشور الآن ولا تستطيع الدخول:**
-
-1. افتح **Render Dashboard → Shell**
-2. شغل:
-```bash
-cat > /tmp/fix-admin.js << 'EOF'
-const { PrismaClient } = require('@prisma/client');
-const { hash } = require('bcryptjs');
-
-const prisma = new PrismaClient();
-
-async function main() {
-  const passwordHash = await hash('123456', 12);
-  const user = await prisma.user.upsert({
-    where: { email: 'admin@admin.com' },
-    update: {
-      password: passwordHash,
-      role: 'SUPER_ADMIN',
-      status: 'ACTIVE',
-      failedLoginAttempts: 0,
-      lockedUntil: null
-    },
-    create: {
-      email: 'admin@admin.com',
-      password: passwordHash,
-      firstName: 'Super',
-      lastName: 'Admin',
-      role: 'SUPER_ADMIN',
-      status: 'ACTIVE',
-      permissions: []
-    }
-  });
-  console.log('Fixed:', user.email);
-}
-
-main().finally(() => prisma.$disconnect());
-EOF
-
-node /tmp/fix-admin.js
-```
-
-3. الآن جرب تسجيل الدخول!
-
----
-
-## ✅ النتيجة النهائية
-
-بعد التأكد من إنشاء super admin، يمكنك:
-
-✅ الدخول إلى Dashboard: `https://ujoor.onrender.com/login`
-✅ استخدام Mobile API للبصمة
-✅ إنشاء موظفين جدد
-✅ تسجيل حضور/انصراف
-✅ إدارة كامل النظام
-
----
-
-## 📞 لو ما زال لا يعمل
-
-شارك معي:
-- صورة من **Render Logs** (آخر 50 سطر)
-- نتيجة تشغيل:
-```bash
-node scripts/db-create-admin.mjs
 ```

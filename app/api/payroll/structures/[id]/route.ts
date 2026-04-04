@@ -9,6 +9,16 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { z } from "zod";
+
+const updateSalaryStructureSchema = z.object({
+  name: z.string().min(1).optional(),
+  nameAr: z.string().optional(),
+  description: z.string().optional(),
+  isDefault: z.boolean().optional(),
+  isActive: z.boolean().optional(),
+  components: z.any(),
+}).passthrough();
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -57,7 +67,12 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     const { id } = await params;
-    const body = await request.json();
+    const rawBody = await request.json();
+    const parsedBody = updateSalaryStructureSchema.safeParse(rawBody);
+    if (!parsedBody.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: parsedBody.error.flatten() }, { status: 400 });
+    }
+    const body = parsedBody.data;
 
     const isDefault = body?.isDefault === undefined ? undefined : Boolean(body.isDefault);
 

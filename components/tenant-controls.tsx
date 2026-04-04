@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -22,24 +22,24 @@ function getCookie(name: string): string | undefined {
 export function TenantControls() {
   const [locale, setLocale] = useState<Locale>(() => {
     if (typeof document === "undefined") return "ar";
-    const l = getCookie("ujoors_locale");
+    const l = getCookie("taqam_locale");
     return l === "en" || l === "ar" ? l : "ar";
   });
   const [uiTheme, setUiTheme] = useState<UiTheme>(() => {
     if (typeof document === "undefined") return "shadcn";
-    const t = getCookie("ujoors_ui_theme");
+    const t = getCookie("taqam_ui_theme");
     return t === "mantine" || t === "shadcn" ? t : "shadcn";
   });
 
   const toggleLocale = () => {
     const next: Locale = locale === "ar" ? "en" : "ar";
-    setCookie("ujoors_locale", next);
+    setCookie("taqam_locale", next);
     window.location.reload();
   };
 
   const toggleUiTheme = () => {
     const next: UiTheme = uiTheme === "shadcn" ? "mantine" : "shadcn";
-    setCookie("ujoors_ui_theme", next);
+    setCookie("taqam_ui_theme", next);
     window.location.reload();
   };
 

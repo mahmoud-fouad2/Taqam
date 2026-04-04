@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Button } from "@/components/ui/button";
@@ -8,10 +8,10 @@ import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
-    titleAr: "مركز المساعدة | أجور",
-    titleEn: "Help Center | Ujoors",
-    descriptionAr: "مقالات وإجابات سريعة ودليل استخدام منصة أجور.",
-    descriptionEn: "Quick answers, guides, and articles for Ujoors.",
+    titleAr: "مركز المساعدة | طاقم",
+    titleEn: "Help Center | Taqam",
+    descriptionAr: "مقالات وإجابات سريعة ودليل استخدام منصة طاقم.",
+    descriptionEn: "Quick answers, guides, and articles for Taqam.",
     path: "/help-center",
   });
 }
@@ -28,15 +28,15 @@ export default async function PublicHelpCenterPage() {
           <h1 className="text-3xl font-bold tracking-tight">{isAr ? "مركز المساعدة" : "Help Center"}</h1>
           <p className="mt-2 text-muted-foreground">
             {isAr
-              ? "إرشادات ومقالات سريعة لتبدأ بأجور بشكل احترافي."
-              : "Guides and quick articles to get started with Ujoors."}
+              ? "إرشادات ومقالات سريعة لتبدأ بطاقم بشكل احترافي."
+              : "Guides and quick articles to get started with Taqam."}
           </p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Button asChild variant="secondary">
             <Link href={`${p}/support`}>{isAr ? "الدعم الفني" : "Support"}</Link>
           </Button>
-          <Button asChild>
+          <Button asChild variant="brand">
             <Link href={`${p}/request-demo`}>{isAr ? "اطلب عرضًا" : "Request a demo"}</Link>
           </Button>
         </div>
@@ -130,7 +130,7 @@ export default async function PublicHelpCenterPage() {
             <Button asChild variant="outline">
               <Link href={`${p}/faq`}>{isAr ? "الأسئلة الشائعة" : "FAQ"}</Link>
             </Button>
-            <Button asChild>
+            <Button asChild variant="brand">
               <Link href={`${p}/request-demo`}>{isAr ? "اطلب عرضًا" : "Request a demo"}</Link>
             </Button>
           </div>

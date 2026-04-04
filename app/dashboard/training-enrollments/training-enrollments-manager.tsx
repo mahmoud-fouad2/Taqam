@@ -267,7 +267,7 @@ export function TrainingEnrollmentsManager() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={enrollment.employeeAvatar} />
+                            <AvatarImage src={enrollment.employeeAvatar} alt="" />
                             <AvatarFallback>
                               {enrollment.employeeName.split(" ").map(n => n[0]).join("")}
                             </AvatarFallback>

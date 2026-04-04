@@ -30,7 +30,7 @@ export default function MobileHeader({ dateText, avatarUrl, initials }: Props) {
         </button>
         <Link href="/m/settings">
           <Avatar className="size-10 ring-2 ring-primary/15">
-            <AvatarImage src={avatarUrl || ""} />
+            <AvatarImage src={avatarUrl || ""} alt="" />
             <AvatarFallback className="bg-primary/10 text-[13px] font-bold text-primary">
               {initials || "U"}
             </AvatarFallback>

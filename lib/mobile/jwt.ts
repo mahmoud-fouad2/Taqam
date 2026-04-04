@@ -25,7 +25,6 @@ function getSecret(): Uint8Array {
 
   if (!warnedMissingMobileJwtSecret) {
     warnedMissingMobileJwtSecret = true;
-    // eslint-disable-next-line no-console
     console.warn(
       "[mobile] MOBILE_JWT_SECRET is not set; using a development fallback secret (set MOBILE_JWT_SECRET to silence this)."
     );

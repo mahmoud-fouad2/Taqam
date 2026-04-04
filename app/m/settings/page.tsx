@@ -136,6 +136,8 @@ export default function MobileSettingsPage() {
           <button
             type="button"
             onClick={() => router.back()}
+            aria-label="الرجوع"
+            title="الرجوع"
             className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90"
           >
             <ChevronRight className="size-5 text-slate-400" />
@@ -149,7 +151,7 @@ export default function MobileSettingsPage() {
         <div className="flex flex-col items-center rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="relative">
             <Avatar className="size-24 ring-4 ring-primary/10">
-              <AvatarImage src={profile?.avatar || ""} />
+              <AvatarImage src={profile?.avatar || ""} alt="" />
               <AvatarFallback className="bg-primary/10 text-2xl font-bold text-primary">
                 {initials}
               </AvatarFallback>
@@ -158,11 +160,21 @@ export default function MobileSettingsPage() {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={avatarBusy}
+              aria-label="تغيير الصورة الشخصية"
+              title="تغيير الصورة الشخصية"
               className="absolute -bottom-1 -left-1 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-md shadow-primary/30 transition active:scale-90"
             >
               {avatarBusy ? <Loader2 className="size-3.5 animate-spin" /> : <Camera className="size-3.5" />}
             </button>
-            <input ref={fileRef} type="file" accept="image/*" onChange={onAvatarChange} className="hidden" />
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              onChange={onAvatarChange}
+              aria-label="اختيار صورة شخصية"
+              title="اختيار صورة شخصية"
+              className="hidden"
+            />
           </div>
           <h2 className="mt-4 text-[17px] font-bold text-slate-800">{fullName}</h2>
           <p className="mt-0.5 text-[13px] text-slate-400">{profile?.email}</p>

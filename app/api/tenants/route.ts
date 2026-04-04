@@ -6,6 +6,22 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { z } from "zod";
+
+const createTenantSchema = z.object({
+  name: z.string().min(1),
+  nameAr: z.string().optional(),
+  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  domain: z.string().optional(),
+  logo: z.string().optional(),
+  timezone: z.string().optional(),
+  currency: z.string().optional(),
+  weekStartDay: z.number().int().min(0).max(6).optional(),
+  plan: z.string().optional(),
+  planExpiresAt: z.string().optional(),
+  maxEmployees: z.number().int().positive().optional(),
+  settings: z.record(z.unknown()).optional(),
+});
 
 export async function GET(request: NextRequest) {
   try {
@@ -88,7 +104,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const body = await request.json();
+    const rawBody = await request.json();
+    const tenantValidation = createTenantSchema.safeParse(rawBody);
+    if (!tenantValidation.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: tenantValidation.error.flatten() }, { status: 400 });
+    }
+    const body = rawBody;
 
     // Check if slug is unique
     const existingTenant = await prisma.tenant.findFirst({

@@ -4,52 +4,25 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { PayrollPeriodStatus } from "@prisma/client";
-
-function toIsoDate(d: Date) {
-  return d.toISOString().split("T")[0];
-}
-
-function mapPeriod(period: any) {
-  return {
-    ...period,
-    startDate: toIsoDate(period.startDate),
-    endDate: toIsoDate(period.endDate),
-    paymentDate: toIsoDate(period.paymentDate),
-    status: String(period.status).toLowerCase(),
-    totalGross: Number(period.totalGross),
-    totalDeductions: Number(period.totalDeductions),
-    totalNet: Number(period.totalNet),
-  };
-}
+import { requireTenantSession } from "@/lib/api/route-helper";
+import { getPayrollPeriodById, mapPayrollPeriod, updatePayrollPeriodStatus } from "@/lib/payroll/periods";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(_request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await params;
 
-    const period = await prisma.payrollPeriod.findFirst({
-      where: { id, tenantId },
-    });
+    const period = await getPayrollPeriodById(tenantId, id);
 
     if (!period) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: mapPeriod(period) });
+    return NextResponse.json({ data: mapPayrollPeriod(period) });
   } catch (error) {
     console.error("Error fetching payroll period:", error);
     return NextResponse.json(
@@ -61,16 +34,9 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await params;
     const body = await request.json();
@@ -88,20 +54,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     const nextStatusEnum = nextStatus as PayrollPeriodStatus;
 
-    const existing = await prisma.payrollPeriod.findFirst({ where: { id, tenantId } });
-    if (!existing) {
+    const updated = await updatePayrollPeriodStatus({
+      tenantId,
+      id,
+      status: nextStatusEnum,
+      note: body?.notes,
+    });
+
+    if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const updated = await prisma.payrollPeriod.update({
-      where: { id },
-      data: {
-        status: nextStatusEnum,
-        notes: body?.notes ?? undefined,
-      },
-    });
-
-    return NextResponse.json({ data: mapPeriod(updated) });
+    return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
     console.error("Error updating payroll period:", error);
     return NextResponse.json(

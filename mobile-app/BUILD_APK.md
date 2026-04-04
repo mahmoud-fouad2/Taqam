@@ -1,5 +1,7 @@
 # 📱 بناء تطبيق البصمة (APK للأندرويد)
 
+> تنبيه: هذا الدليل يخص المسار legacy `mobile-app/` فقط. التطبيق الرسمي الجاري تطويره والتحقق منه موجود في `apps/mobile`.
+
 ## الطريقة 1: باستخدام EAS Build (موصى بها)
 
 ### المتطلبات
@@ -19,7 +21,7 @@ cd mobile-app
 
 # 4. إعداد المتغيرات البيئية
 # أنشئ ملف .env وأضف:
-echo "EXPO_PUBLIC_API_BASE_URL=https://ujoor.onrender.com" > .env
+echo "EXPO_PUBLIC_API_BASE_URL=https://YOUR-RENDER-DOMAIN" > .env
 
 # 5. إعداد EAS (أول مرة فقط)
 eas build:configure
@@ -44,7 +46,7 @@ eas build --platform android --profile preview
 cd mobile-app
 
 # 1. إعداد المتغيرات
-echo "EXPO_PUBLIC_API_BASE_URL=https://ujoor.onrender.com" > .env
+echo "EXPO_PUBLIC_API_BASE_URL=https://YOUR-RENDER-DOMAIN" > .env
 
 # 2. تثبيت التبعيات
 npm install
@@ -98,10 +100,10 @@ https://expo.dev/artifacts/eas/xxxxx.apk
 
 ```json
 {
-  "name": "Ujoors - البصمة",
+  "name": "Taqam Legacy - البصمة",
   "icon": "./assets/icon.png",
   "android": {
-    "package": "com.yourcompany.ujoors"
+    "package": "com.yourcompany.taqamlegacy"
   }
 }
 ```

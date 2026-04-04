@@ -470,7 +470,7 @@ export function ShiftsManager() {
               إضافة وردية
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
+          <DialogContent className="w-full sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>إضافة وردية جديدة</DialogTitle>
               <DialogDescription>
@@ -525,8 +525,8 @@ export function ShiftsManager() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div
-                          className="w-3 h-3 rounded-full"
-                          style={{ backgroundColor: shift.color }}
+                          className="h-3 w-3 rounded-full border border-border bg-muted"
+                          title={shift.color || "default"}
                         />
                         {getShiftIcon(shift.startTime)}
                         <div>
@@ -595,12 +595,13 @@ export function ShiftsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="تعديل"
                               onClick={() => openEditDialog(shift)}
                             >
                               <IconEdit className="h-4 w-4" />
                             </Button>
                           </DialogTrigger>
-                          <DialogContent className="sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
+                          <DialogContent className="w-full sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
                               <DialogTitle>تعديل الوردية</DialogTitle>
                               <DialogDescription>
@@ -625,7 +626,7 @@ export function ShiftsManager() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive">
+                            <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>

@@ -1,22 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  IconPlus,
-  IconEdit,
   IconEye,
   IconCheck,
-  IconX,
   IconDots,
   IconClipboardCheck,
   IconUser,
   IconUsers,
-  IconCalendar,
-  IconClock,
-  IconFileExport,
-  IconFilter,
   IconSearch,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,7 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Progress } from "@/components/ui/progress";
+import { Slider } from "@/components/ui/slider";
 import {
   Select,
   SelectContent,
@@ -51,12 +45,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Slider } from "@/components/ui/slider";
 import {
   EmployeeEvaluation,
   EvaluationReview,
@@ -67,125 +59,383 @@ import {
   getRatingByScore,
   defaultPerformanceRatings,
 } from "@/lib/types/performance";
-import { format } from "date-fns";
-import { ar } from "date-fns/locale";
+
+type RawEvaluation = {
+  id: string;
+  tenantId: string;
+  cycleId: string;
+  evaluatorId?: string | null;
+  status: string;
+  overallScore?: number | null;
+  overallRating?: string | null;
+  strengths?: string | null;
+  areasForImprovement?: string | null;
+  comments?: string | null;
+  employeeComments?: string | null;
+  submittedAt?: string | null;
+  reviewedAt?: string | null;
+  employeeAcknowledgedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  cycle?: {
+    id: string;
+    name: string;
+    nameAr?: string | null;
+    startDate?: string | null;
+    endDate?: string | null;
+  } | null;
+  employee: {
+    id: string;
+    employeeNumber: string;
+    firstName: string;
+    lastName: string;
+    firstNameAr?: string | null;
+    lastNameAr?: string | null;
+    avatar?: string | null;
+    department?: { name?: string | null; nameAr?: string | null } | null;
+    jobTitle?: { name?: string | null; nameAr?: string | null } | null;
+  };
+  evaluator?: {
+    firstName: string;
+    lastName: string;
+    firstNameAr?: string | null;
+    lastNameAr?: string | null;
+  } | null;
+};
+
+type EvaluationsResponse = {
+  evaluations?: RawEvaluation[];
+};
+
+type CyclesResponse = {
+  data?: Array<{
+    id: string;
+    name: string;
+    nameEn?: string;
+  }>;
+};
+
+type ProfileResponse = {
+  data?: {
+    role?: string;
+    employee?: { id?: string } | null;
+  };
+};
+
+type ReviewFormState = {
+  score: number;
+  comments: string;
+  strengths: string;
+  improvements: string;
+};
+
+const INITIAL_REVIEW_FORM: ReviewFormState = {
+  score: 3,
+  comments: "",
+  strengths: "",
+  improvements: "",
+};
+
+const REVIEWER_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"];
+
+function splitMultiline(value: string | null | undefined): string[] {
+  return (value || "")
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function formatDate(value?: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleDateString("ar-SA");
+}
+
+function formatDateTime(value?: string | null) {
+  if (!value) return "-";
+  return new Date(value).toLocaleString("ar-SA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function getPersonName(person?: {
+  firstName?: string | null;
+  lastName?: string | null;
+  firstNameAr?: string | null;
+  lastNameAr?: string | null;
+} | null) {
+  if (!person) return "-";
+  return `${person.firstNameAr || person.firstName || ""} ${person.lastNameAr || person.lastName || ""}`.trim() || "-";
+}
+
+function mapEvaluationStatus(item: RawEvaluation): EmployeeEvaluationStatus {
+  if (item.employeeAcknowledgedAt) return "completed";
+  if (item.status === "CANCELLED") return "cancelled";
+  if (item.status === "COMPLETED") return "pending_acknowledgment";
+  return "pending_manager_review";
+}
+
+function mapManagerReview(item: RawEvaluation): EvaluationReview | undefined {
+  if (
+    item.overallScore == null &&
+    !item.comments &&
+    !item.strengths &&
+    !item.areasForImprovement
+  ) {
+    return undefined;
+  }
+
+  return {
+    reviewType: "manager",
+    reviewerId: item.evaluatorId ?? undefined,
+    reviewerName: getPersonName(item.evaluator),
+    score: Number(item.overallScore ?? 0),
+    comments: item.comments ?? undefined,
+    strengths: splitMultiline(item.strengths),
+    improvements: splitMultiline(item.areasForImprovement),
+    submittedAt: item.reviewedAt || item.submittedAt || item.updatedAt,
+  };
+}
+
+function mapEvaluation(item: RawEvaluation): EmployeeEvaluation {
+  const managerReview = mapManagerReview(item);
+
+  return {
+    id: item.id,
+    tenantId: item.tenantId,
+    cycleId: item.cycleId,
+    cycleName: item.cycle?.nameAr || item.cycle?.name || "-",
+    employeeId: item.employee.id,
+    employeeName: getPersonName(item.employee),
+    employeeNumber: item.employee.employeeNumber,
+    employeeAvatar: item.employee.avatar ?? undefined,
+    departmentId: "",
+    departmentName: item.employee.department?.nameAr || item.employee.department?.name || "-",
+    jobTitleId: "",
+    jobTitle: item.employee.jobTitle?.nameAr || item.employee.jobTitle?.name || "-",
+    managerId: item.evaluatorId || "",
+    managerName: getPersonName(item.evaluator),
+    templateId: "",
+    templateName: undefined,
+    periodStart: item.cycle?.startDate ?? undefined,
+    periodEnd: item.cycle?.endDate ?? undefined,
+    managerReview,
+    finalScore: item.overallScore != null ? Number(item.overallScore) : undefined,
+    rating: item.overallRating ?? undefined,
+    strengths: item.strengths ?? undefined,
+    improvements: item.areasForImprovement ?? undefined,
+    managerComments: item.comments ?? undefined,
+    employeeComments: item.employeeComments ?? undefined,
+    status: mapEvaluationStatus(item),
+    managerReviewDate: item.reviewedAt || item.submittedAt || undefined,
+    acknowledgedDate: item.employeeAcknowledgedAt || undefined,
+    completedDate: item.reviewedAt || undefined,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  };
+}
 
 export function EmployeeEvaluationsManager() {
   const [evaluations, setEvaluations] = useState<EmployeeEvaluation[]>([]);
+  const [cycles, setCycles] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedEvaluation, setSelectedEvaluation] = useState<EmployeeEvaluation | null>(null);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"all" | "mine" | "assigned">("all");
   const [filterCycle, setFilterCycle] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<EmployeeEvaluationStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [reviewForm, setReviewForm] = useState<ReviewFormState>(INITIAL_REVIEW_FORM);
 
-  // Review form state
-  const [reviewForm, setReviewForm] = useState({
-    score: 0,
-    comments: "",
-    strengths: "",
-    improvements: "",
-    recommendations: "",
-  });
+  const canReviewAll = currentUserRole ? REVIEWER_ROLES.includes(currentUserRole) : false;
 
-  const filteredEvaluations = evaluations.filter((evaluation) => {
-    if (filterCycle !== "all" && evaluation.cycleId !== filterCycle) return false;
-    if (filterStatus !== "all" && evaluation.status !== filterStatus) return false;
-    if (
-      searchQuery &&
-      !evaluation.employeeName.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-      return false;
-    return true;
-  });
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [profileRes, evaluationsRes, cyclesRes] = await Promise.all([
+        fetch("/api/profile", { cache: "no-store" }),
+        fetch("/api/evaluations", { cache: "no-store" }),
+        fetch("/api/performance/cycles", { cache: "no-store" }),
+      ]);
 
-  const stats = {
-    total: evaluations.length,
-    pending: evaluations.filter((e) => e.status === "pending_self_review" || e.status === "pending_manager_review").length,
-    completed: evaluations.filter((e) => e.status === "completed").length,
-    avgScore: evaluations.filter((e) => e.finalScore).reduce((sum, e) => sum + (e.finalScore || 0), 0) / 
-      evaluations.filter((e) => e.finalScore).length || 0,
+      const profileJson = (await profileRes.json()) as ProfileResponse;
+      const evaluationsJson = (await evaluationsRes.json()) as EvaluationsResponse;
+      const cyclesJson = (await cyclesRes.json()) as CyclesResponse;
+
+      if (!profileRes.ok) {
+        throw new Error("فشل تحميل بيانات المستخدم");
+      }
+      if (!evaluationsRes.ok) {
+        throw new Error("فشل تحميل التقييمات");
+      }
+      if (!cyclesRes.ok) {
+        throw new Error("فشل تحميل دورات التقييم");
+      }
+
+      setCurrentUserId(
+        typeof profileJson.data?.employee?.id === "string" ? profileJson.data.employee.id : null
+      );
+      setCurrentUserRole(typeof profileJson.data?.role === "string" ? profileJson.data.role : null);
+
+      setEvaluations(Array.isArray(evaluationsJson.evaluations) ? evaluationsJson.evaluations.map(mapEvaluation) : []);
+      setCycles(
+        Array.isArray(cyclesJson.data)
+          ? cyclesJson.data.map((cycle) => ({ id: cycle.id, name: cycle.name || cycle.nameEn || "-" }))
+          : []
+      );
+    } catch (error) {
+      setEvaluations([]);
+      setCycles([]);
+      toast.error(error instanceof Error ? error.message : "تعذر تحميل التقييمات");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
+  const sourceEvaluations = useMemo(() => {
+    if (activeTab === "mine") {
+      return currentUserId ? evaluations.filter((evaluation) => evaluation.employeeId === currentUserId) : [];
+    }
+
+    if (activeTab === "assigned") {
+      return evaluations.filter(
+        (evaluation) => canReviewAll || (currentUserId != null && evaluation.managerId === currentUserId)
+      );
+    }
+
+    return evaluations;
+  }, [activeTab, canReviewAll, currentUserId, evaluations]);
+
+  const filteredEvaluations = useMemo(() => {
+    return sourceEvaluations.filter((evaluation) => {
+      if (filterCycle !== "all" && evaluation.cycleId !== filterCycle) return false;
+      if (filterStatus !== "all" && evaluation.status !== filterStatus) return false;
+      if (
+        searchQuery &&
+        !evaluation.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        !evaluation.jobTitle.toLowerCase().includes(searchQuery.toLowerCase())
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }, [sourceEvaluations, filterCycle, filterStatus, searchQuery]);
+
+  const stats = useMemo(() => {
+    const scored = evaluations.filter((evaluation) => evaluation.finalScore != null);
+    const avgScore =
+      scored.length > 0
+        ? scored.reduce((sum, evaluation) => sum + Number(evaluation.finalScore || 0), 0) / scored.length
+        : 0;
+
+    return {
+      total: evaluations.length,
+      inReview: evaluations.filter((evaluation) => evaluation.status === "pending_manager_review").length,
+      pendingAcknowledgment: evaluations.filter((evaluation) => evaluation.status === "pending_acknowledgment").length,
+      completed: evaluations.filter((evaluation) => evaluation.status === "completed").length,
+      avgScore,
+    };
+  }, [evaluations]);
+
+  const canReviewEvaluation = useCallback(
+    (evaluation: EmployeeEvaluation) => {
+      if (evaluation.status === "completed" || evaluation.status === "pending_acknowledgment" || evaluation.status === "cancelled") {
+        return false;
+      }
+
+      return canReviewAll || (currentUserId != null && evaluation.managerId === currentUserId);
+    },
+    [canReviewAll, currentUserId]
+  );
+
+  const canAcknowledgeEvaluation = useCallback(
+    (evaluation: EmployeeEvaluation) => {
+      return currentUserId != null && evaluation.employeeId === currentUserId && evaluation.status === "pending_acknowledgment";
+    },
+    [currentUserId]
+  );
+
+  const openView = (evaluation: EmployeeEvaluation) => {
+    setSelectedEvaluation(evaluation);
+    setIsViewDialogOpen(true);
   };
 
-  const handleStartSelfReview = (evaluation: EmployeeEvaluation) => {
+  const openReview = (evaluation: EmployeeEvaluation) => {
     setSelectedEvaluation(evaluation);
     setReviewForm({
-      score: 0,
-      comments: "",
-      strengths: "",
-      improvements: "",
-      recommendations: "",
+      score: evaluation.finalScore ?? evaluation.managerReview?.score ?? INITIAL_REVIEW_FORM.score,
+      comments: evaluation.managerComments ?? evaluation.managerReview?.comments ?? "",
+      strengths: evaluation.strengths ?? evaluation.managerReview?.strengths?.join("\n") ?? "",
+      improvements: evaluation.improvements ?? evaluation.managerReview?.improvements?.join("\n") ?? "",
     });
     setIsReviewDialogOpen(true);
   };
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!selectedEvaluation) return;
 
-    const newReview: EvaluationReview = {
-      id: `rev-${Date.now()}`,
-      evaluationId: selectedEvaluation.id,
-      reviewerId: "user-1",
-      reviewerName: "المستخدم الحالي",
-      reviewType: selectedEvaluation.status === "pending_self_review" ? "self" : "manager",
-      score: reviewForm.score,
-      comments: reviewForm.comments,
-      strengths: reviewForm.strengths.split("\n").filter(Boolean),
-      improvements: reviewForm.improvements.split("\n").filter(Boolean),
-      recommendations: reviewForm.recommendations,
-      submittedAt: new Date().toISOString(),
-    };
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/evaluations/${selectedEvaluation.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          overallScore: reviewForm.score,
+          comments: reviewForm.comments || null,
+          strengths: reviewForm.strengths || null,
+          areasForImprovement: reviewForm.improvements || null,
+          status: "COMPLETED",
+        }),
+      });
 
-    const updatedEvaluation: EmployeeEvaluation = {
-      ...selectedEvaluation,
-      status:
-        selectedEvaluation.status === "pending_self_review"
-          ? "pending_manager_review"
-          : selectedEvaluation.template?.requiresCalibration
-          ? "pending_calibration"
-          : "pending_acknowledgment",
-      selfReview:
-        selectedEvaluation.status === "pending_self_review"
-          ? newReview
-          : selectedEvaluation.selfReview,
-      managerReview:
-        selectedEvaluation.status === "pending_manager_review"
-          ? newReview
-          : selectedEvaluation.managerReview,
-      finalScore:
-        selectedEvaluation.status !== "pending_self_review"
-          ? reviewForm.score
-          : undefined,
-      updatedAt: new Date().toISOString(),
-    };
+      const json = await response.json();
+      if (!response.ok) {
+        throw new Error(json?.error || "فشل حفظ التقييم");
+      }
 
-    setEvaluations(
-      evaluations.map((e) =>
-        e.id === selectedEvaluation.id ? updatedEvaluation : e
-      )
-    );
-
-    setIsReviewDialogOpen(false);
-    setSelectedEvaluation(null);
+      toast.success("تم حفظ التقييم بنجاح");
+      setIsReviewDialogOpen(false);
+      setSelectedEvaluation(null);
+      setReviewForm(INITIAL_REVIEW_FORM);
+      await loadData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "تعذر حفظ التقييم");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleAcknowledge = (evaluationId: string) => {
-    setEvaluations(
-      evaluations.map((e) =>
-        e.id === evaluationId
-          ? {
-              ...e,
-              status: "completed" as EmployeeEvaluationStatus,
-              acknowledgedAt: new Date().toISOString(),
-            }
-          : e
-      )
-    );
-  };
+  const handleAcknowledge = async (evaluationId: string) => {
+    setIsSaving(true);
+    try {
+      const response = await fetch(`/api/evaluations/${evaluationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: "ACKNOWLEDGED" }),
+      });
+      const json = await response.json();
+      if (!response.ok) {
+        throw new Error(json?.error || "فشل تأكيد التقييم");
+      }
 
-  const handleView = (evaluation: EmployeeEvaluation) => {
-    setSelectedEvaluation(evaluation);
-    setIsViewDialogOpen(true);
+      toast.success("تم تأكيد الاطلاع على التقييم");
+      await loadData();
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "تعذر تأكيد التقييم");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getRatingLabel = (score: number) => {
@@ -195,25 +445,22 @@ export function EmployeeEvaluationsManager() {
 
   const getRatingColor = (score: number) => {
     const rating = getRatingByScore(score, defaultPerformanceRatings);
-    return rating?.color || "gray";
+    return rating?.color || "#6B7280";
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold">تقييمات الموظفين</h2>
-          <p className="text-muted-foreground">عرض وإدارة تقييمات أداء الموظفين</p>
+          <p className="text-muted-foreground">إدارة التقييمات الفعلية ومتابعة الاعتماد والتأكيد</p>
         </div>
-        <Button variant="outline">
-          <IconFileExport className="ms-2 h-4 w-4" />
-          تصدير التقارير
+        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading || isSaving}>
+          تحديث البيانات
         </Button>
       </div>
 
-      {/* Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>إجمالي التقييمات</CardDescription>
@@ -223,7 +470,13 @@ export function EmployeeEvaluationsManager() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>قيد المراجعة</CardDescription>
-            <CardTitle className="text-3xl text-orange-600">{stats.pending}</CardTitle>
+            <CardTitle className="text-3xl text-orange-600">{stats.inReview}</CardTitle>
+          </CardHeader>
+        </Card>
+        <Card>
+          <CardHeader className="pb-2">
+            <CardDescription>بانتظار التأكيد</CardDescription>
+            <CardTitle className="text-3xl text-teal-600">{stats.pendingAcknowledgment}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
@@ -235,39 +488,38 @@ export function EmployeeEvaluationsManager() {
         <Card>
           <CardHeader className="pb-2">
             <CardDescription>متوسط التقييم</CardDescription>
-            <CardTitle className="text-3xl text-blue-600">
-              {formatScore(stats.avgScore)}
-            </CardTitle>
+            <CardTitle className="text-3xl text-blue-600">{formatScore(stats.avgScore)}</CardTitle>
           </CardHeader>
         </Card>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-wrap gap-4">
-        <div className="relative flex-1 max-w-sm">
-          <IconSearch className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="relative max-w-sm flex-1">
+          <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث بالاسم..."
+            placeholder="بحث بالاسم أو المسمى الوظيفي"
             className="ps-9"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(event) => setSearchQuery(event.target.value)}
           />
         </div>
+
         <Select value={filterCycle} onValueChange={setFilterCycle}>
-          <SelectTrigger className="w-[200px]">
+          <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="دورة التقييم" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">جميع الدورات</SelectItem>
+            {cycles.map((cycle) => (
+              <SelectItem key={cycle.id} value={cycle.id}>
+                {cycle.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
-        <Select
-          value={filterStatus}
-          onValueChange={(value: EmployeeEvaluationStatus | "all") =>
-            setFilterStatus(value)
-          }
-        >
-          <SelectTrigger className="w-[200px]">
+
+        <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as EmployeeEvaluationStatus | "all")}>
+          <SelectTrigger className="w-[220px]">
             <SelectValue placeholder="الحالة" />
           </SelectTrigger>
           <SelectContent>
@@ -281,209 +533,85 @@ export function EmployeeEvaluationsManager() {
         </Select>
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="all" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "all" | "mine" | "assigned")}>
         <TabsList>
           <TabsTrigger value="all">الكل</TabsTrigger>
-          <TabsTrigger value="my-reviews">تقييماتي</TabsTrigger>
-          <TabsTrigger value="team-reviews">تقييمات الفريق</TabsTrigger>
+          <TabsTrigger value="mine">تقييماتي</TabsTrigger>
+          <TabsTrigger value="assigned">المكلّف بها</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
-          <Card>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>الموظف</TableHead>
-                  <TableHead>القسم</TableHead>
-                  <TableHead>دورة التقييم</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>التقييم الذاتي</TableHead>
-                  <TableHead>تقييم المدير</TableHead>
-                  <TableHead>التقييم النهائي</TableHead>
-                  <TableHead className="w-[100px]">الإجراءات</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredEvaluations.map((evaluation) => (
-                  <TableRow key={evaluation.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={evaluation.employeeAvatar} />
-                          <AvatarFallback>
-                            {evaluation.employeeName.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="font-medium">{evaluation.employeeName}</div>
-                          <div className="text-xs text-muted-foreground">
-                            {evaluation.jobTitle}
-                          </div>
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{evaluation.departmentName}</TableCell>
-                    <TableCell>{evaluation.cycleName}</TableCell>
-                    <TableCell>
-                      <Badge
-                        className={
-                          employeeEvaluationStatusColors[evaluation.status]
-                        }
-                      >
-                        {employeeEvaluationStatusLabels[evaluation.status]}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {evaluation.selfReview ? (
-                        <Badge variant="outline" className="bg-blue-50">
-                          {formatScore(evaluation.selfReview.score)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {evaluation.managerReview ? (
-                        <Badge variant="outline" className="bg-green-50">
-                          {formatScore(evaluation.managerReview.score)}
-                        </Badge>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {evaluation.finalScore ? (
-                        <div className="flex items-center gap-2">
-                          <Badge
-                            style={{
-                              backgroundColor: `${getRatingColor(evaluation.finalScore)}20`,
-                              color: getRatingColor(evaluation.finalScore),
-                            }}
-                          >
-                            {formatScore(evaluation.finalScore)}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {getRatingLabel(evaluation.finalScore)}
-                          </span>
-                        </div>
-                      ) : (
-                        <span className="text-muted-foreground">-</span>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <IconDots className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleView(evaluation)}>
-                            <IconEye className="ms-2 h-4 w-4" />
-                            عرض التفاصيل
-                          </DropdownMenuItem>
-                          {evaluation.status === "pending_self_review" && (
-                            <DropdownMenuItem
-                              onClick={() => handleStartSelfReview(evaluation)}
-                            >
-                              <IconEdit className="ms-2 h-4 w-4" />
-                              بدء التقييم الذاتي
-                            </DropdownMenuItem>
-                          )}
-                          {evaluation.status === "pending_manager_review" && (
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedEvaluation(evaluation);
-                                setReviewForm({
-                                  score: 0,
-                                  comments: "",
-                                  strengths: "",
-                                  improvements: "",
-                                  recommendations: "",
-                                });
-                                setIsReviewDialogOpen(true);
-                              }}
-                            >
-                              <IconClipboardCheck className="ms-2 h-4 w-4" />
-                              تقييم الموظف
-                            </DropdownMenuItem>
-                          )}
-                          {evaluation.status === "pending_acknowledgment" && (
-                            <DropdownMenuItem
-                              onClick={() => handleAcknowledge(evaluation.id)}
-                            >
-                              <IconCheck className="ms-2 h-4 w-4" />
-                              تأكيد الاستلام
-                            </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
+          <EvaluationsTable
+            evaluations={filteredEvaluations}
+            isLoading={isLoading}
+            onView={openView}
+            onReview={openReview}
+            onAcknowledge={handleAcknowledge}
+            canReviewEvaluation={canReviewEvaluation}
+            canAcknowledgeEvaluation={canAcknowledgeEvaluation}
+            getRatingLabel={getRatingLabel}
+            getRatingColor={getRatingColor}
+          />
         </TabsContent>
 
-        <TabsContent value="my-reviews">
-          <Card className="p-6">
-            <div className="text-center text-muted-foreground">
-              <IconUser className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>سيظهر هنا تقييماتك الشخصية</p>
-            </div>
-          </Card>
+        <TabsContent value="mine">
+          <EvaluationsTable
+            evaluations={filteredEvaluations}
+            isLoading={isLoading}
+            onView={openView}
+            onReview={openReview}
+            onAcknowledge={handleAcknowledge}
+            canReviewEvaluation={canReviewEvaluation}
+            canAcknowledgeEvaluation={canAcknowledgeEvaluation}
+            getRatingLabel={getRatingLabel}
+            getRatingColor={getRatingColor}
+          />
         </TabsContent>
 
-        <TabsContent value="team-reviews">
-          <Card className="p-6">
-            <div className="text-center text-muted-foreground">
-              <IconUsers className="mx-auto h-12 w-12 mb-4 opacity-50" />
-              <p>سيظهر هنا تقييمات فريقك</p>
-            </div>
-          </Card>
+        <TabsContent value="assigned">
+          <EvaluationsTable
+            evaluations={filteredEvaluations}
+            isLoading={isLoading}
+            onView={openView}
+            onReview={openReview}
+            onAcknowledge={handleAcknowledge}
+            canReviewEvaluation={canReviewEvaluation}
+            canAcknowledgeEvaluation={canAcknowledgeEvaluation}
+            getRatingLabel={getRatingLabel}
+            getRatingColor={getRatingColor}
+          />
         </TabsContent>
       </Tabs>
 
-      {/* View Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>تفاصيل التقييم</DialogTitle>
             <DialogDescription>
-              عرض تفاصيل تقييم {selectedEvaluation?.employeeName}
+              {selectedEvaluation ? `عرض تقييم ${selectedEvaluation.employeeName}` : ""}
             </DialogDescription>
           </DialogHeader>
 
           {selectedEvaluation && (
             <div className="space-y-6 py-4">
-              {/* Employee Info */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-16 w-16">
-                  <AvatarImage src={selectedEvaluation.employeeAvatar} />
+                  <AvatarImage src={selectedEvaluation.employeeAvatar} alt="" />
                   <AvatarFallback className="text-xl">
                     {selectedEvaluation.employeeName.charAt(0)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h3 className="text-xl font-semibold">
-                    {selectedEvaluation.employeeName}
-                  </h3>
+                  <h3 className="text-xl font-semibold">{selectedEvaluation.employeeName}</h3>
                   <p className="text-muted-foreground">
                     {selectedEvaluation.jobTitle} - {selectedEvaluation.departmentName}
                   </p>
-                  <Badge
-                    className={`mt-2 ${
-                      employeeEvaluationStatusColors[selectedEvaluation.status]
-                    }`}
-                  >
+                  <Badge className={`mt-2 ${employeeEvaluationStatusColors[selectedEvaluation.status]}`}>
                     {employeeEvaluationStatusLabels[selectedEvaluation.status]}
                   </Badge>
                 </div>
               </div>
 
-              {/* Cycle Info */}
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base">معلومات الدورة</CardTitle>
@@ -495,78 +623,31 @@ export function EmployeeEvaluationsManager() {
                       <p className="font-medium">{selectedEvaluation.cycleName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">النموذج</p>
-                      <p className="font-medium">{selectedEvaluation.templateName}</p>
-                    </div>
-                    <div>
                       <p className="text-sm text-muted-foreground">الفترة</p>
                       <p className="font-medium">
-                        {selectedEvaluation.periodStart && selectedEvaluation.periodEnd ? (
-                          <>
-                            {format(new Date(selectedEvaluation.periodStart), "dd/MM/yyyy")} -{" "}
-                            {format(new Date(selectedEvaluation.periodEnd), "dd/MM/yyyy")}
-                          </>
-                        ) : (
-                          "-"
-                        )}
+                        {formatDate(selectedEvaluation.periodStart)} - {formatDate(selectedEvaluation.periodEnd)}
                       </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">المراجع</p>
+                      <p className="font-medium">{selectedEvaluation.managerName || "-"}</p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
-              {/* Reviews */}
               <div className="grid gap-4 md:grid-cols-2">
-                {/* Self Review */}
                 <Card>
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
-                      <IconUser className="h-4 w-4" />
-                      التقييم الذاتي
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {selectedEvaluation.selfReview ? (
-                      <div className="space-y-3">
-                        <div className="text-center p-4 rounded-lg bg-muted">
-                          <p className="text-3xl font-bold text-blue-600">
-                            {formatScore(selectedEvaluation.selfReview.score)}
-                          </p>
-                          <p className="text-sm text-muted-foreground">
-                            {getRatingLabel(selectedEvaluation.selfReview.score)}
-                          </p>
-                        </div>
-                        {selectedEvaluation.selfReview.comments && (
-                          <div>
-                            <p className="text-sm text-muted-foreground mb-1">
-                              الملاحظات
-                            </p>
-                            <p className="text-sm">
-                              {selectedEvaluation.selfReview.comments}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="text-center text-muted-foreground py-4">
-                        لم يتم تقديم التقييم الذاتي بعد
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-
-                {/* Manager Review */}
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                      <IconUsers className="h-4 w-4" />
-                      تقييم المدير
+                      <IconClipboardCheck className="h-4 w-4" />
+                      مراجعة الأداء
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {selectedEvaluation.managerReview ? (
                       <div className="space-y-3">
-                        <div className="text-center p-4 rounded-lg bg-muted">
+                        <div className="rounded-lg bg-muted p-4 text-center">
                           <p className="text-3xl font-bold text-green-600">
                             {formatScore(selectedEvaluation.managerReview.score)}
                           </p>
@@ -576,71 +657,64 @@ export function EmployeeEvaluationsManager() {
                         </div>
                         {selectedEvaluation.managerReview.comments && (
                           <div>
-                            <p className="text-sm text-muted-foreground mb-1">
-                              الملاحظات
-                            </p>
-                            <p className="text-sm">
-                              {selectedEvaluation.managerReview.comments}
-                            </p>
+                            <p className="mb-1 text-sm text-muted-foreground">الملاحظات</p>
+                            <p className="text-sm">{selectedEvaluation.managerReview.comments}</p>
                           </div>
                         )}
-                        {selectedEvaluation.managerReview.strengths &&
-                          selectedEvaluation.managerReview.strengths.length > 0 && (
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">
-                                نقاط القوة
-                              </p>
-                              <ul className="text-sm list-disc list-inside">
-                                {selectedEvaluation.managerReview.strengths.map(
-                                  (strength, i) => (
-                                    <li key={i}>{strength}</li>
-                                  )
-                                )}
-                              </ul>
-                            </div>
-                          )}
-                        {selectedEvaluation.managerReview.improvements &&
-                          selectedEvaluation.managerReview.improvements.length > 0 && (
-                            <div>
-                              <p className="text-sm text-muted-foreground mb-1">
-                                مجالات التحسين
-                              </p>
-                              <ul className="text-sm list-disc list-inside">
-                                {selectedEvaluation.managerReview.improvements.map(
-                                  (improvement, i) => (
-                                    <li key={i}>{improvement}</li>
-                                  )
-                                )}
-                              </ul>
-                            </div>
-                          )}
+                        {selectedEvaluation.managerReview.strengths && selectedEvaluation.managerReview.strengths.length > 0 && (
+                          <div>
+                            <p className="mb-1 text-sm text-muted-foreground">نقاط القوة</p>
+                            <ul className="list-inside list-disc text-sm">
+                              {selectedEvaluation.managerReview.strengths.map((item, index) => (
+                                <li key={`${item}-${index}`}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                        {selectedEvaluation.managerReview.improvements && selectedEvaluation.managerReview.improvements.length > 0 && (
+                          <div>
+                            <p className="mb-1 text-sm text-muted-foreground">مجالات التحسين</p>
+                            <ul className="list-inside list-disc text-sm">
+                              {selectedEvaluation.managerReview.improvements.map((item, index) => (
+                                <li key={`${item}-${index}`}>{item}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
                       </div>
                     ) : (
-                      <p className="text-center text-muted-foreground py-4">
-                        لم يتم تقديم تقييم المدير بعد
-                      </p>
+                      <p className="py-4 text-center text-muted-foreground">لم يتم إدخال مراجعة بعد</p>
+                    )}
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base flex items-center gap-2">
+                      <IconUser className="h-4 w-4" />
+                      تعليقات الموظف
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {selectedEvaluation.employeeComments ? (
+                      <p className="text-sm leading-6">{selectedEvaluation.employeeComments}</p>
+                    ) : (
+                      <p className="py-4 text-center text-muted-foreground">لا توجد تعليقات من الموظف</p>
                     )}
                   </CardContent>
                 </Card>
               </div>
 
-              {/* Final Score */}
-              {selectedEvaluation.finalScore && (
+              {selectedEvaluation.finalScore != null && (
                 <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <p className="text-sm text-muted-foreground mb-2">
-                        التقييم النهائي
-                      </p>
-                      <p className="text-5xl font-bold mb-2">
-                        {formatScore(selectedEvaluation.finalScore)}
-                      </p>
+                      <p className="mb-2 text-sm text-muted-foreground">النتيجة النهائية</p>
+                      <p className="mb-2 text-5xl font-bold">{formatScore(selectedEvaluation.finalScore)}</p>
                       <Badge
-                        className="text-lg px-4 py-1"
+                        className="px-4 py-1 text-lg"
                         style={{
-                          backgroundColor: `${getRatingColor(
-                            selectedEvaluation.finalScore
-                          )}20`,
+                          backgroundColor: `${getRatingColor(selectedEvaluation.finalScore)}20`,
                           color: getRatingColor(selectedEvaluation.finalScore),
                         }}
                       >
@@ -661,95 +735,62 @@ export function EmployeeEvaluationsManager() {
         </DialogContent>
       </Dialog>
 
-      {/* Review Dialog */}
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-full max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
-              {selectedEvaluation?.status === "pending_self_review"
-                ? "التقييم الذاتي"
-                : "تقييم الموظف"}
-            </DialogTitle>
+            <DialogTitle>مراجعة التقييم</DialogTitle>
             <DialogDescription>
-              تقييم أداء {selectedEvaluation?.employeeName} لفترة{" "}
-              {selectedEvaluation?.cycleName}
+              {selectedEvaluation ? `إدخال مراجعة ${selectedEvaluation.employeeName} ضمن ${selectedEvaluation.cycleName}` : ""}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
-            {/* Score Slider */}
             <div className="space-y-4">
-              <Label>التقييم</Label>
-              <div className="text-center p-6 rounded-lg bg-muted">
-                <p className="text-5xl font-bold text-blue-600 mb-2">
-                  {formatScore(reviewForm.score)}
-                </p>
-                <p className="text-muted-foreground">
-                  {getRatingLabel(reviewForm.score)}
-                </p>
+              <Label>الدرجة النهائية</Label>
+              <div className="rounded-lg bg-muted p-6 text-center">
+                <p className="mb-2 text-5xl font-bold text-blue-600">{formatScore(reviewForm.score)}</p>
+                <p className="text-muted-foreground">{getRatingLabel(reviewForm.score)}</p>
               </div>
               <Slider
                 value={[reviewForm.score]}
-                onValueChange={([value]) =>
-                  setReviewForm({ ...reviewForm, score: value })
-                }
+                onValueChange={([value]) => setReviewForm((current) => ({ ...current, score: value }))}
                 max={5}
+                min={1}
                 step={0.1}
                 className="py-4"
               />
             </div>
 
-            {/* Comments */}
             <div className="space-y-2">
-              <Label>الملاحظات العامة</Label>
+              <Label>ملاحظات المراجع</Label>
               <Textarea
-                value={reviewForm.comments}
-                onChange={(e) =>
-                  setReviewForm({ ...reviewForm, comments: e.target.value })
-                }
-                placeholder="أضف ملاحظاتك العامة..."
                 rows={3}
+                value={reviewForm.comments}
+                onChange={(event) => setReviewForm((current) => ({ ...current, comments: event.target.value }))}
+                placeholder="أضف ملخص المراجعة"
               />
             </div>
 
-            {/* Strengths & Improvements (for manager review) */}
-            {selectedEvaluation?.status === "pending_manager_review" && (
-              <>
-                <div className="space-y-2">
-                  <Label>نقاط القوة (سطر لكل نقطة)</Label>
-                  <Textarea
-                    value={reviewForm.strengths}
-                    onChange={(e) =>
-                      setReviewForm({ ...reviewForm, strengths: e.target.value })
-                    }
-                    placeholder="أدخل نقاط القوة..."
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>مجالات التحسين (سطر لكل مجال)</Label>
-                  <Textarea
-                    value={reviewForm.improvements}
-                    onChange={(e) =>
-                      setReviewForm({ ...reviewForm, improvements: e.target.value })
-                    }
-                    placeholder="أدخل مجالات التحسين..."
-                    rows={3}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>التوصيات</Label>
-                  <Textarea
-                    value={reviewForm.recommendations}
-                    onChange={(e) =>
-                      setReviewForm({ ...reviewForm, recommendations: e.target.value })
-                    }
-                    placeholder="أدخل التوصيات..."
-                    rows={2}
-                  />
-                </div>
-              </>
-            )}
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-2">
+                <Label>نقاط القوة</Label>
+                <Textarea
+                  rows={4}
+                  value={reviewForm.strengths}
+                  onChange={(event) => setReviewForm((current) => ({ ...current, strengths: event.target.value }))}
+                  placeholder="سطر لكل نقطة"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>مجالات التحسين</Label>
+                <Textarea
+                  rows={4}
+                  value={reviewForm.improvements}
+                  onChange={(event) => setReviewForm((current) => ({ ...current, improvements: event.target.value }))}
+                  placeholder="سطر لكل نقطة"
+                />
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
@@ -758,17 +799,147 @@ export function EmployeeEvaluationsManager() {
               onClick={() => {
                 setIsReviewDialogOpen(false);
                 setSelectedEvaluation(null);
+                setReviewForm(INITIAL_REVIEW_FORM);
               }}
             >
               إلغاء
             </Button>
-            <Button onClick={handleSubmitReview} disabled={reviewForm.score === 0}>
-              <IconCheck className="ms-2 h-4 w-4" />
-              إرسال التقييم
+            <Button onClick={handleSubmitReview} disabled={isSaving}>
+              حفظ المراجعة
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+  );
+}
+
+type EvaluationsTableProps = {
+  evaluations: EmployeeEvaluation[];
+  isLoading: boolean;
+  onView: (evaluation: EmployeeEvaluation) => void;
+  onReview: (evaluation: EmployeeEvaluation) => void;
+  onAcknowledge: (evaluationId: string) => void;
+  canReviewEvaluation: (evaluation: EmployeeEvaluation) => boolean;
+  canAcknowledgeEvaluation: (evaluation: EmployeeEvaluation) => boolean;
+  getRatingLabel: (score: number) => string;
+  getRatingColor: (score: number) => string;
+};
+
+function EvaluationsTable({
+  evaluations,
+  isLoading,
+  onView,
+  onReview,
+  onAcknowledge,
+  canReviewEvaluation,
+  canAcknowledgeEvaluation,
+  getRatingLabel,
+  getRatingColor,
+}: EvaluationsTableProps) {
+  return (
+    <Card>
+      <div className="overflow-x-auto">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>الموظف</TableHead>
+            <TableHead>القسم</TableHead>
+            <TableHead>دورة التقييم</TableHead>
+            <TableHead>الحالة</TableHead>
+            <TableHead>النتيجة</TableHead>
+            <TableHead>آخر تحديث</TableHead>
+            <TableHead className="w-[100px]">الإجراءات</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {isLoading ? (
+            <TableRow>
+              <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                جاري تحميل التقييمات...
+              </TableCell>
+            </TableRow>
+          ) : evaluations.length === 0 ? (
+            <TableRow>
+              <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                لا توجد تقييمات مطابقة للمرشحات الحالية
+              </TableCell>
+            </TableRow>
+          ) : (
+            evaluations.map((evaluation) => (
+              <TableRow key={evaluation.id}>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={evaluation.employeeAvatar} alt="" />
+                      <AvatarFallback>{evaluation.employeeName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{evaluation.employeeName}</div>
+                      <div className="text-xs text-muted-foreground">{evaluation.jobTitle}</div>
+                    </div>
+                  </div>
+                </TableCell>
+                <TableCell>{evaluation.departmentName}</TableCell>
+                <TableCell>{evaluation.cycleName}</TableCell>
+                <TableCell>
+                  <Badge className={employeeEvaluationStatusColors[evaluation.status]}>
+                    {employeeEvaluationStatusLabels[evaluation.status]}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {evaluation.finalScore != null ? (
+                    <div className="flex items-center gap-2">
+                      <Badge
+                        style={{
+                          backgroundColor: `${getRatingColor(evaluation.finalScore)}20`,
+                          color: getRatingColor(evaluation.finalScore),
+                        }}
+                      >
+                        {formatScore(evaluation.finalScore)}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">{getRatingLabel(evaluation.finalScore)}</span>
+                    </div>
+                  ) : (
+                    <span className="text-muted-foreground">-</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-sm text-muted-foreground">
+                  {formatDateTime(evaluation.updatedAt)}
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" aria-label="خيارات">
+                        <IconDots className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => onView(evaluation)}>
+                        <IconEye className="ms-2 h-4 w-4" />
+                        عرض التفاصيل
+                      </DropdownMenuItem>
+                      {canReviewEvaluation(evaluation) && (
+                        <DropdownMenuItem onClick={() => onReview(evaluation)}>
+                          <IconClipboardCheck className="ms-2 h-4 w-4" />
+                          مراجعة التقييم
+                        </DropdownMenuItem>
+                      )}
+                      {canAcknowledgeEvaluation(evaluation) && (
+                        <DropdownMenuItem onClick={() => onAcknowledge(evaluation.id)}>
+                          <IconCheck className="ms-2 h-4 w-4" />
+                          تأكيد الاطلاع
+                        </DropdownMenuItem>
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </TableCell>
+              </TableRow>
+            ))
+          )}
+        </TableBody>
+      </Table>
+    </div>
+    </Card>
   );
 }

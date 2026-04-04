@@ -24,7 +24,7 @@
   - `/m/login` تسجيل دخول
   - `/m/home` بصمة دخول/خروج
   - `/m/settings` إعدادات بسيطة
-- تحديث بناء APK بحيث يفتح `https://ujoor.onrender.com/m` مباشرة.
+- تحديث بناء APK بحيث يفتح `https://YOUR-RENDER-DOMAIN/m` مباشرة أو يستخدم `MOBILE_WEB_URL` عند التهيئة.
 
 ### توصية استراتيجية
 حتى لو كان حل `/m` ممتازًا كحل سريع، الأفضل على المدى المتوسط **فصل المنتجين** أو على الأقل **فصل مدخل الموبايل** رسميًا (مسارات/دومين/هوية بصرية/جلسات) لتقليل الالتباس والتداخل.
@@ -59,7 +59,7 @@ Capacitor WebView
 ### 3.1 مصادر الـTenant Context
 يتم تحديد الـTenant بطريقتين:
 - Subdomain: `tenant.<baseDomain>`
-- Cookie: `ujoors_tenant`
+- Cookie: `taqam_tenant`
 
 كما يوجد مسار مساعد للتحديد على الدومينات التي لا تدعم subdomains (مثل Render):
 - `/t/<slug>` أو `/t/<slug>/<anyPath>`

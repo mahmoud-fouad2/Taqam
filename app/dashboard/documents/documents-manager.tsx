@@ -404,7 +404,7 @@ export function DocumentsManager() {
               رفع مستند
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>رفع مستند جديد</DialogTitle>
               <DialogDescription>
@@ -665,6 +665,7 @@ export function DocumentsManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="عرض"
                           onClick={() => {
                             setSelectedDocument(doc);
                             setIsPreviewOpen(true);
@@ -673,7 +674,7 @@ export function DocumentsManager() {
                           <IconEye className="h-4 w-4" />
                         </Button>
 
-                        <Button variant="ghost" size="icon" onClick={() => handleDownload(doc)}>
+                        <Button variant="ghost" size="icon" aria-label="تحميل" onClick={() => handleDownload(doc)}>
                           <IconDownload className="h-4 w-4" />
                         </Button>
 
@@ -682,6 +683,7 @@ export function DocumentsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="قبول"
                               className="text-green-600"
                               onClick={() => handleStatusChange(doc.id, "approved")}
                             >
@@ -690,6 +692,7 @@ export function DocumentsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="رفض"
                               className="text-red-600"
                               onClick={() => handleStatusChange(doc.id, "rejected")}
                             >
@@ -700,7 +703,7 @@ export function DocumentsManager() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" className="text-destructive">
+                            <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -808,6 +811,7 @@ export function DocumentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="عرض"
                             onClick={() => {
                               setSelectedDocument(doc);
                               setIsPreviewOpen(true);
@@ -819,6 +823,7 @@ export function DocumentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="تحميل"
                             onClick={() => handleDownload(doc)}
                           >
                             <IconDownload className="h-4 w-4" />
@@ -829,6 +834,7 @@ export function DocumentsManager() {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                aria-label="قبول"
                                 className="text-green-600"
                                 onClick={() => handleStatusChange(doc.id, "approved")}
                               >
@@ -837,6 +843,7 @@ export function DocumentsManager() {
                               <Button
                                 variant="ghost"
                                 size="icon"
+                                aria-label="رفض"
                                 className="text-red-600"
                                 onClick={() => handleStatusChange(doc.id, "rejected")}
                               >
@@ -847,7 +854,7 @@ export function DocumentsManager() {
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="text-destructive">
+                              <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
                                 <IconTrash className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
@@ -882,7 +889,7 @@ export function DocumentsManager() {
 
       {/* Preview Dialog */}
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>معاينة المستند</DialogTitle>
           </DialogHeader>

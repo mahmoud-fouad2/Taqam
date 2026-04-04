@@ -4,41 +4,21 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireTenantSession } from "@/lib/api/route-helper";
+import { sendSinglePayslip } from "@/lib/payroll/payslips";
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(_request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await params;
 
-    const existing = await prisma.payrollPayslip.findFirst({
-      where: { id, tenantId },
-      select: { id: true },
-    });
-
-    if (!existing) {
+    const updated = await sendSinglePayslip(tenantId, id);
+    if (!updated) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
-
-    const updated = await prisma.payrollPayslip.update({
-      where: { id },
-      data: {
-        status: "SENT",
-        sentAt: new Date(),
-      },
-    });
 
     return NextResponse.json({ data: { id: updated.id } });
   } catch (error) {

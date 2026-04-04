@@ -111,13 +111,13 @@ export function EmployeesList({
                   </div>
 
                   <div className="flex flex-col items-center gap-1 shrink-0">
-                    <Button variant="ghost" size="icon" onClick={() => onView(emp)} title="عرض">
+                    <Button variant="ghost" size="icon" aria-label="عرض" onClick={() => onView(emp)} title="عرض">
                       <IconEye className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onEdit(emp)} title="تعديل">
+                    <Button variant="ghost" size="icon" aria-label="تعديل" onClick={() => onEdit(emp)} title="تعديل">
                       <IconPencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" size="icon" onClick={() => onDelete(emp)} title="حذف">
+                    <Button variant="ghost" size="icon" aria-label="حذف" onClick={() => onDelete(emp)} title="حذف">
                       <IconTrash className="h-4 w-4" />
                     </Button>
                   </div>
@@ -197,13 +197,13 @@ export function EmployeesList({
                       <div className="truncate">{emp.hireDate}</div>
                       <div>
                         <div className="flex items-center gap-1 justify-start">
-                          <Button variant="ghost" size="icon" onClick={() => onView(emp)} title="عرض">
+                          <Button variant="ghost" size="icon" aria-label="عرض" onClick={() => onView(emp)} title="عرض">
                             <IconEye className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => onEdit(emp)} title="تعديل">
+                          <Button variant="ghost" size="icon" aria-label="تعديل" onClick={() => onEdit(emp)} title="تعديل">
                             <IconPencil className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => onDelete(emp)} title="حذف">
+                          <Button variant="ghost" size="icon" aria-label="حذف" onClick={() => onDelete(emp)} title="حذف">
                             <IconTrash className="h-4 w-4" />
                           </Button>
                         </div>

@@ -100,6 +100,7 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
           <Input
             id="current"
             type="password"
+            autoComplete="current-password"
             value={current}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrent(e.target.value)}
             placeholder="••••••••"
@@ -111,6 +112,7 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
           <Input
             id="next"
             type="password"
+            autoComplete="new-password"
             value={next}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setNext(e.target.value)}
             placeholder="••••••••"
@@ -122,6 +124,7 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
           <Input
             id="confirm"
             type="password"
+            autoComplete="new-password"
             value={confirm}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setConfirm(e.target.value)}
             placeholder="••••••••"

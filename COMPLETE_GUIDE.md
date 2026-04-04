@@ -2,7 +2,7 @@
 
 ## 🎯 نظرة عامة
 
-**Ujoor** هو نظام إدارة موارد بشرية (HRMS) متكامل يتضمن:
+**Taqam** هو نظام إدارة موارد بشرية (HRMS) متكامل يتضمن:
 - 🌐 لوحة تحكم ويب (Next.js)
 - 📱 تطبيق موبايل للبصمة (Expo React Native)
 - 🔐 نظام مصادقة متعدد المستويات
@@ -31,8 +31,8 @@
 ### 1. Clone المشروع
 
 ```bash
-git clone https://github.com/mahmoud-fouad2/Ujoor.git
-cd Ujoor
+git clone <your-repository-url>
+cd taqam
 ```
 
 ### 2. تثبيت Dependencies
@@ -45,7 +45,7 @@ pnpm install
 
 ```bash
 # إنشاء قاعدة بيانات PostgreSQL
-createdb ujoor_dev
+createdb taqam_dev
 
 # نسخ ملف المتغيرات البيئية
 cp .env.example .env
@@ -55,7 +55,7 @@ cp .env.example .env
 
 ```env
 # Database
-DATABASE_URL="postgresql://postgres:password@localhost:5432/ujoor_dev"
+DATABASE_URL="postgresql://postgres:password@localhost:5432/taqam_dev"
 
 # Auth Secrets (Generate new ones!)
 NEXTAUTH_SECRET="YOUR_SECRET_HERE"  # openssl rand -base64 32
@@ -69,7 +69,7 @@ MOBILE_REFRESH_TOKEN_SECRET="YOUR_REFRESH_SECRET"
 R2_ACCOUNT_ID="your-account-id"
 R2_ACCESS_KEY_ID="your-access-key"
 R2_SECRET_ACCESS_KEY="your-secret"
-R2_BUCKET_NAME="ujoor"
+R2_BUCKET_NAME="taqam"
 R2_PUBLIC_URL="https://pub-xxxxx.r2.dev"
 R2_ENDPOINT="https://xxxxx.r2.cloudflarestorage.com"
 
@@ -108,16 +108,18 @@ pnpm dev
 
 ## 📱 تشغيل تطبيق الموبايل
 
+> التطبيق الرسمي الحالي هو `apps/mobile`. مجلد `mobile-app/` محفوظ كمرجع legacy فقط.
+
 ### 1. الانتقال لمجلد التطبيق
 
 ```bash
-cd mobile-app
+cd apps/mobile
 ```
 
 ### 2. تثبيت Dependencies
 
 ```bash
-npm install
+pnpm install
 ```
 
 ### 3. إعداد Environment
@@ -135,17 +137,17 @@ echo "EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000" > .env
 
 **للأندرويد:**
 ```bash
-npm run android
+pnpm android
 ```
 
 **للآيفون (macOS فقط):**
 ```bash
-npm run ios
+pnpm ios
 ```
 
 **Expo Go (أسهل):**
 ```bash
-npm start
+pnpm start
 # امسح QR code من التطبيق
 ```
 
@@ -160,13 +162,14 @@ npm start
 ### 2. إنشاء PostgreSQL Database
 
 - اختر **New → PostgreSQL**
-- اسم: `ujoor-db`
+- اسم: `taqam-db` (أو أي اسم تختاره)
 - Region: `Frankfurt` (الأقرب للسعودية)
 - احفظ `Internal Database URL`
 
 ### 3. إنشاء Web Service
 
 - اختر **New → Web Service**
+- اسم: `taqam-web` (أو أي اسم تختاره)
 - ربط GitHub repo
 - اسم: `ujoor`
 - Runtime: `Node`
@@ -187,14 +190,14 @@ npm start
 NODE_VERSION=20
 DATABASE_URL=[Internal Database URL من الخطوة 2]
 NEXTAUTH_SECRET=[Generate new]
-NEXTAUTH_URL=https://ujoor.onrender.com
-NEXT_PUBLIC_APP_URL=https://ujoor.onrender.com
+NEXTAUTH_URL=https://YOUR-RENDER-DOMAIN
+NEXT_PUBLIC_APP_URL=https://YOUR-RENDER-DOMAIN
 MOBILE_JWT_SECRET=[Generate new]
 MOBILE_REFRESH_TOKEN_SECRET=[Generate new]
 R2_ACCOUNT_ID=[من Cloudflare]
 R2_ACCESS_KEY_ID=[من Cloudflare]
 R2_SECRET_ACCESS_KEY=[من Cloudflare]
-R2_BUCKET_NAME=ujoor
+R2_BUCKET_NAME=taqam
 R2_PUBLIC_URL=[من Cloudflare]
 R2_ENDPOINT=[من Cloudflare]
 SUPER_ADMIN_EMAIL=admin@admin.com
@@ -217,7 +220,7 @@ Render سيقوم تلقائياً بـ:
 
 ```bash
 # 1. Login
-curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
+curl -X POST https://YOUR-RENDER-DOMAIN/api/mobile/auth/login \
   -H "Content-Type: application/json" \
   -H "x-device-id: TEST-001" \
   -H "x-device-platform: android" \
@@ -226,7 +229,7 @@ curl -X POST https://ujoor.onrender.com/api/mobile/auth/login \
 # 2. احفظ token من الرد
 
 # 3. Check-in
-curl -X POST https://ujoor.onrender.com/api/mobile/attendance \
+curl -X POST https://YOUR-RENDER-DOMAIN/api/mobile/attendance \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -H "x-device-id: TEST-001" \
@@ -240,7 +243,7 @@ curl -X POST https://ujoor.onrender.com/api/mobile/attendance \
 ## 🗂️ هيكل المشروع
 
 ```
-Ujoor/
+Taqam/
 ├── app/                      # Next.js App Router
 │   ├── api/                  # API Routes
 │   │   ├── mobile/          # Mobile App APIs
@@ -252,10 +255,13 @@ Ujoor/
 │   ├── dashboard/           # Admin dashboard pages
 │   └── (guest)/            # Public pages (login)
 │
-├── mobile-app/              # React Native mobile app
-│   ├── app/                # Expo Router
-│   ├── components/         # UI components
-│   └── lib/                # API client, auth
+├── apps/
+│   └── mobile/             # Official Expo mobile workspace
+│       ├── app/            # Expo Router
+│       ├── components/     # UI components
+│       └── lib/            # API client, auth
+│
+├── mobile-app/             # Legacy Expo reference app
 │
 ├── prisma/
 │   ├── schema.prisma       # Database schema
@@ -325,7 +331,7 @@ pnpm db:generate
 
 ### Mobile app can't connect:
 ```bash
-# تحقق من API_BASE_URL في mobile-app/.env
+# تحقق من API_BASE_URL في apps/mobile/.env
 # للإيميوليتور:
 EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000
 
@@ -344,7 +350,7 @@ curl -X POST .../api/mobile/auth/refresh \
 
 ## 📞 الدعم
 
-- 📧 Email: support@ujoor.sa
+- 📧 Email: support@your-domain.com
 - 📚 Docs: راجع المجلد `docs/`
 - 🐛 Issues: GitHub Issues
 
@@ -355,5 +361,5 @@ curl -X POST .../api/mobile/auth/refresh \
 المشروع الآن **حقيقي ومكتمل**، ليس demo أو mockup!
 
 **البيانات المباشرة:**
-- URL: https://ujoor.onrender.com
+- URL: https://YOUR-RENDER-DOMAIN
 - Admin: admin@admin.com / 123456

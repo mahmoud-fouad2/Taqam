@@ -4,6 +4,12 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(6),
+});
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,23 +19,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { currentPassword, newPassword } = body;
-
-    // Validation
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: "كلمة المرور الحالية والجديدة مطلوبتان" },
-        { status: 400 }
-      );
+    const rawBody = await request.json();
+    const parsed = changePasswordSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
     }
-
-    if (newPassword.length < 6) {
-      return NextResponse.json(
-        { error: "كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل" },
-        { status: 400 }
-      );
-    }
+    const { currentPassword, newPassword } = parsed.data;
 
     // Get current user with password
     const user = await prisma.user.findUnique({

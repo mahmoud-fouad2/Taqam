@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-console.log('\n🔍 فحص نظام Ujoor HRMS...\n');
+console.log('\n🔍 فحص نظام Taqam HR Platform...\n');
 
 const checks = {
   files: [
@@ -19,7 +19,7 @@ const checks = {
     { path: 'app/dashboard/audit-logs/page.tsx', name: 'Audit Logs UI' },
     
     // Sentry
-    { path: 'sentry.client.config.ts', name: 'Sentry Client' },
+    { path: 'instrumentation-client.ts', name: 'Sentry Client' },
     { path: 'sentry.server.config.ts', name: 'Sentry Server' },
     { path: 'sentry.edge.config.ts', name: 'Sentry Edge' },
     

@@ -1,14 +1,15 @@
 #!/bin/bash
 
-BASE_URL="https://ujoor.onrender.com"
-ADMIN_EMAIL="admin@admin.com"
-ADMIN_PASSWORD="123456"
+BASE_URL="${BASE_URL:-http://localhost:3000}"
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@admin.com}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-123456}"
 DEVICE_ID="e2e-test-$(date +%s)"
-DEVICE_NAME="E2E Test Device"
+DEVICE_NAME="Taqam E2E Device"
 APP_VERSION="1.0.0"
 
 echo "🔥 بدء اختبارات E2E الحقيقية"
 echo "================================"
+echo "Base URL: $BASE_URL"
 echo ""
 
 # Test 1: Super Admin Login

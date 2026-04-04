@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { isSuperAdminRole } from "@/lib/access-control";
 import { getText } from "@/lib/i18n/text";
 import { notificationsService } from "@/lib/api";
 import type { Notification } from "@/lib/types/self-service";
@@ -43,7 +44,7 @@ export function DashboardHeaderActions({
       const tenant = document.cookie
         .split(";")
         .map((c) => c.trim())
-        .find((c) => c.startsWith("ujoors_tenant="));
+        .find((c) => c.startsWith("taqam_tenant="));
       if (mounted) setHasTenant(Boolean(tenant));
       const session = await getSession();
       if (mounted) {
@@ -78,20 +79,15 @@ export function DashboardHeaderActions({
     };
   }, [locale]);
 
-  const isSuperAdminNoTenant = role === "SUPER_ADMIN" && !hasTenant;
-  const isSuperAdminWithTenant = role === "SUPER_ADMIN" && hasTenant;
+  const isPlatformAdmin = isSuperAdminRole(role);
+  const isSuperAdminNoTenant = isPlatformAdmin && !hasTenant;
+  const isSuperAdminWithTenant = isPlatformAdmin && hasTenant;
 
   const exitTenantContext = () => {
     const maxAge = 0;
-    document.cookie = `ujoors_tenant=; path=/; max-age=${maxAge}; samesite=lax`;
-    window.location.href = "/dashboard/super-admin";
+    document.cookie = `taqam_tenant=; path=/; max-age=${maxAge}; samesite=lax`;
+    window.location.href = `${p}/dashboard/super-admin`;
   };
-  const demoTenants = [
-    { slug: "demo", labelAr: "Demo", labelEn: "Demo" },
-    { slug: "elite-tech", labelAr: "النخبة للتقنية", labelEn: "Elite Tech" },
-    { slug: "riyadh-trading", labelAr: "الرياض التجارية", labelEn: "Riyadh Trading" },
-    { slug: "future-co", labelAr: "شركة المستقبل", labelEn: "Future Co" },
-  ];
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
@@ -111,8 +107,13 @@ export function DashboardHeaderActions({
     };
 
     void load();
+
+    // Poll every 30 seconds for new notifications
+    const interval = setInterval(() => void load(), 30_000);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
     };
   }, []);
 
@@ -148,7 +149,7 @@ export function DashboardHeaderActions({
   const toggleLocale = () => {
     const next = locale === "ar" ? "en" : "ar";
     const maxAge = 60 * 60 * 24 * 365;
-    document.cookie = `ujoors_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
+    document.cookie = `taqam_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
 
     const path = window.location.pathname;
     const hasEnPrefix = path === "/en" || path.startsWith("/en/");
@@ -189,11 +190,11 @@ export function DashboardHeaderActions({
           <DropdownMenuLabel>{t.common.helpCenter}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            {isSuperAdminNoTenant ? (
+            {isPlatformAdmin ? (
               <>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin/tenants`} className="flex items-center justify-between">
-                    <span>{locale === "ar" ? "اختيار شركة" : "Choose tenant"}</span>
+                  <Link href={`${p}/dashboard/super-admin`} className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "لوحة المنصة" : "Platform dashboard"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
                     ) : (
@@ -201,22 +202,57 @@ export function DashboardHeaderActions({
                     )}
                   </Link>
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel className="text-xs text-muted-foreground">
-                  {locale === "ar" ? "اختيار سريع" : "Quick pick"}
-                </DropdownMenuLabel>
-                {demoTenants.map((tnt) => (
-                  <DropdownMenuItem key={tnt.slug} asChild>
-                    <Link href={`/t/${tnt.slug}?next=/dashboard`} className="flex items-center justify-between">
-                      <span>{locale === "ar" ? tnt.labelAr : tnt.labelEn}</span>
-                      {locale === "ar" ? (
-                        <ChevronLeft className="h-4 w-4 opacity-60" />
-                      ) : (
-                        <ChevronRight className="h-4 w-4 opacity-60" />
-                      )}
-                    </Link>
+                <DropdownMenuItem asChild>
+                  <Link href={`${p}/dashboard/super-admin/tenants`} className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "إدارة الشركات" : "Manage tenants"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`${p}/dashboard/super-admin/requests`} className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "طلبات الاشتراك" : "Subscription requests"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`${p}/dashboard/super-admin/pricing`} className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "الأسعار والباقات" : "Pricing & plans"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href={`${p}/dashboard/super-admin/settings`} className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "إعدادات المنصة" : "Platform settings"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                {isSuperAdminWithTenant ? (
+                  <DropdownMenuItem
+                    onSelect={(e: Event) => {
+                      e.preventDefault();
+                      exitTenantContext();
+                    }}
+                  >
+                    <ChevronLeft className="me-2 h-4 w-4" />
+                    {locale === "ar" ? "مسح سياق الشركة" : "Clear tenant context"}
                   </DropdownMenuItem>
-                ))}
+                ) : null}
               </>
             ) : (
               <>

@@ -3,6 +3,11 @@ import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { z } from "zod";
+import {
+  notifyTrainingEnrollmentApproved,
+  notifyTrainingEnrollmentRejected,
+  notifyTrainingCompleted,
+} from "@/lib/notifications/send";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -42,7 +47,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const existing = await prisma.trainingEnrollment.findFirst({
       where: { id, tenantId },
-      select: { id: true },
+      select: {
+        id: true,
+        status: true,
+        employee: { select: { userId: true } },
+        course: { select: { title: true } },
+      },
     });
 
     if (!existing) {
@@ -75,7 +85,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       select: { id: true, status: true, progress: true, score: true, feedback: true },
     });
 
-    return NextResponse.json({
+    const responseData = {
       data: {
         id: updated.id,
         status: updated.status,
@@ -83,7 +93,30 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         score: updated.score ? Number(updated.score.toString()) : null,
         feedback: updated.feedback,
       },
-    });
+    };
+
+    // Fire notifications (non-blocking)
+    const employeeUserId = existing.employee.userId;
+    if (employeeUserId && input.status) {
+      const courseTitle = existing.course.title;
+      const notifyMap: Record<string, () => void> = {
+        approved: () =>
+          notifyTrainingEnrollmentApproved({ tenantId, employeeUserId, courseTitle, enrollmentId: id }).catch(console.error),
+        rejected: () =>
+          notifyTrainingEnrollmentRejected({ tenantId, employeeUserId, courseTitle, enrollmentId: id }).catch(console.error),
+        completed: () =>
+          notifyTrainingCompleted({
+            tenantId,
+            employeeUserId,
+            courseTitle,
+            score: input.score ?? undefined,
+            enrollmentId: id,
+          }).catch(console.error),
+      };
+      notifyMap[input.status]?.();
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error updating training enrollment:", error);
     return NextResponse.json({ error: "Failed to update training enrollment" }, { status: 500 });

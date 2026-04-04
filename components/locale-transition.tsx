@@ -1,9 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
-const EVENT_NAME = "ujoors:locale-transition";
+const EVENT_NAME = "taqam:locale-transition";
 
 export function startLocaleTransition() {
   if (typeof window === "undefined") return;

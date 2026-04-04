@@ -3,7 +3,6 @@
 import * as React from "react";
 import {
   IconPlus,
-  IconSearch,
   IconFilter,
   IconClock,
   IconCheck,
@@ -13,6 +12,7 @@ import {
   IconHome,
   IconClockEdit,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -52,26 +52,197 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   type AttendanceRequest,
-  type AttendanceRequestType,
   type AttendanceRequestStatus,
-  requestTypeLabels,
+  type AttendanceRequestType,
   requestStatusLabels,
+  requestTypeLabels,
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
 
+type ProfileResponse = {
+  data?: {
+    role?: string;
+    employee?: { id?: string } | null;
+  };
+};
+
+type RequestsTableProps = {
+  requests: AttendanceRequest[];
+  isLoading: boolean;
+  isApprovalMode: boolean;
+  getEmployeeName: (employeeId: string) => string;
+  getTypeIcon: (type: AttendanceRequestType) => React.ReactNode;
+  getStatusVariant: (
+    status: AttendanceRequestStatus
+  ) => "default" | "secondary" | "destructive" | "outline";
+  onApprove?: (id: string) => void;
+  onReject?: (id: string) => void;
+};
+
+const APPROVER_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"];
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("ar-SA");
+}
+
+function formatDateTime(value: string) {
+  return new Date(value).toLocaleString("ar-SA", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function formatTime(value?: string) {
+  if (!value) {
+    return "-";
+  }
+
+  return new Date(value).toLocaleTimeString("ar-SA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+function toLocalIso(date: string, time?: string) {
+  if (!date || !time) {
+    return undefined;
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+  const [hour, minute] = time.split(":").map(Number);
+
+  if (
+    !Number.isFinite(year) ||
+    !Number.isFinite(month) ||
+    !Number.isFinite(day) ||
+    !Number.isFinite(hour) ||
+    !Number.isFinite(minute)
+  ) {
+    return undefined;
+  }
+
+  return new Date(year, month - 1, day, hour, minute, 0, 0).toISOString();
+}
+
+function RequestsTable({
+  requests,
+  isLoading,
+  isApprovalMode,
+  getEmployeeName,
+  getTypeIcon,
+  getStatusVariant,
+  onApprove,
+  onReject,
+}: RequestsTableProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>{isApprovalMode ? "طلبات تحتاج موافقتك" : "طلباتي"}</CardTitle>
+        <CardDescription>{requests.length} طلب</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {isApprovalMode && <TableHead>الموظف</TableHead>}
+              <TableHead>نوع الطلب</TableHead>
+              <TableHead>التاريخ</TableHead>
+              <TableHead>التفاصيل</TableHead>
+              <TableHead>السبب</TableHead>
+              <TableHead>الحالة</TableHead>
+              <TableHead>تاريخ التقديم</TableHead>
+              {isApprovalMode && <TableHead className="text-start">إجراءات</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center text-muted-foreground">
+                  جاري تحميل الطلبات...
+                </TableCell>
+              </TableRow>
+            ) : requests.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center">
+                  <IconFileDescription className="mx-auto mb-2 h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">لا توجد طلبات</p>
+                </TableCell>
+              </TableRow>
+            ) : (
+              requests.map((request) => (
+                <TableRow key={request.id}>
+                  {isApprovalMode && <TableCell className="font-medium">{getEmployeeName(request.employeeId)}</TableCell>}
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getTypeIcon(request.type)}
+                      <span>{requestTypeLabels[request.type].ar}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatDate(request.date)}</TableCell>
+                  <TableCell className="text-sm">
+                    {request.type === "check_correction" && request.requestedCheckIn && (
+                      <span>
+                        {formatTime(request.requestedCheckIn)} - {formatTime(request.requestedCheckOut)}
+                      </span>
+                    )}
+                    {request.type === "overtime" && <span>{request.overtimeHours} ساعات</span>}
+                    {request.type === "permission" && (
+                      <span>
+                        {formatTime(request.permissionStartTime)} - {formatTime(request.permissionEndTime)}
+                      </span>
+                    )}
+                    {request.type === "work_from_home" && <span>يوم كامل</span>}
+                  </TableCell>
+                  <TableCell className="max-w-[220px] truncate">{request.reason}</TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusVariant(request.status)}>
+                      {requestStatusLabels[request.status].ar}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDateTime(request.createdAt)}</TableCell>
+                  {isApprovalMode && (
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Button size="sm" onClick={() => onApprove?.(request.id)}>
+                          <IconCheck className="ms-2 h-4 w-4" />
+                          اعتماد
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={() => onReject?.(request.id)}>
+                          <IconX className="ms-2 h-4 w-4" />
+                          رفض
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function RequestsManager() {
-  const { employees, getEmployeeFullName } = useEmployees();
+  const { getEmployeeFullName } = useEmployees();
   const [requests, setRequests] = React.useState<AttendanceRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const [isRejecting, setIsRejecting] = React.useState(false);
+  const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
+  const [currentUserRole, setCurrentUserRole] = React.useState<string | null>(null);
   const [statusFilter, setStatusFilter] = React.useState<AttendanceRequestStatus | "all">("all");
   const [typeFilter, setTypeFilter] = React.useState<AttendanceRequestType | "all">("all");
-  const [isAddOpen, setIsAddOpen] = React.useState(false);
   const [activeTab, setActiveTab] = React.useState<"my" | "pending">("my");
-
-  // Form state
+  const [isAddOpen, setIsAddOpen] = React.useState(false);
+  const [rejectRequestId, setRejectRequestId] = React.useState<string | null>(null);
+  const [rejectReason, setRejectReason] = React.useState("");
   const [formData, setFormData] = React.useState({
     type: "check_correction" as AttendanceRequestType,
     date: "",
@@ -83,57 +254,89 @@ export function RequestsManager() {
     reason: "",
   });
 
-  const currentUserId = employees[0]?.id;
-  // TODO: derive from auth/roles
-  const canApprove = false;
+  const canApprove = currentUserRole ? APPROVER_ROLES.includes(currentUserRole) : false;
 
-  const fetchRequests = React.useCallback(async () => {
+  React.useEffect(() => {
+    let mounted = true;
+
+    const loadProfile = async () => {
+      try {
+        const response = await fetch("/api/profile", { cache: "no-store" });
+        const json = (await response.json()) as ProfileResponse;
+        if (!mounted) {
+          return;
+        }
+
+        setCurrentUserId(typeof json.data?.employee?.id === "string" ? json.data.employee.id : null);
+        setCurrentUserRole(typeof json.data?.role === "string" ? json.data.role : null);
+      } catch {
+        if (!mounted) {
+          return;
+        }
+
+        setCurrentUserId(null);
+        setCurrentUserRole(null);
+      }
+    };
+
+    void loadProfile();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const loadRequests = React.useCallback(async () => {
     setIsLoading(true);
     setError(null);
+
     try {
-      const res = await attendanceService.getRequests();
-      if (res.success && res.data) {
-        setRequests(res.data);
-      } else {
+      const response = await attendanceService.getRequests();
+      if (!response.success || !response.data) {
         setRequests([]);
-        setError(res.error || "فشل تحميل الطلبات");
+        setError(response.error || "فشل تحميل الطلبات");
+        return;
       }
-    } catch (e) {
+
+      setRequests(response.data);
+    } catch (loadError) {
       setRequests([]);
-      setError(e instanceof Error ? e.message : "فشل تحميل الطلبات");
+      setError(loadError instanceof Error ? loadError.message : "فشل تحميل الطلبات");
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   React.useEffect(() => {
-    fetchRequests();
-  }, [fetchRequests]);
+    void loadRequests();
+  }, [loadRequests]);
 
-  // Filter requests
-  const myRequests = currentUserId ? requests.filter((r) => r.employeeId === currentUserId) : [];
+  React.useEffect(() => {
+    if (!canApprove && activeTab === "pending") {
+      setActiveTab("my");
+    }
+  }, [activeTab, canApprove]);
+
+  const myRequests = currentUserId ? requests.filter((item) => item.employeeId === currentUserId) : [];
   const pendingApprovalRequests = requests.filter(
-    (r) => r.status === "pending" && (!currentUserId || r.employeeId !== currentUserId)
+    (item) => item.status === "pending" && (!currentUserId || item.employeeId !== currentUserId)
   );
 
   const displayedRequests = activeTab === "my" ? myRequests : pendingApprovalRequests;
-
-  const filteredRequests = displayedRequests.filter((r) => {
-    const matchesStatus = statusFilter === "all" || r.status === statusFilter;
-    const matchesType = typeFilter === "all" || r.type === typeFilter;
-    return matchesStatus && matchesType;
+  const filteredRequests = displayedRequests.filter((item) => {
+    const matchesType = typeFilter === "all" || item.type === typeFilter;
+    const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+    return matchesType && matchesStatus;
   });
 
-  // Stats
   const stats = {
     total: myRequests.length,
-    pending: myRequests.filter((r) => r.status === "pending").length,
-    approved: myRequests.filter((r) => r.status === "approved").length,
-    rejected: myRequests.filter((r) => r.status === "rejected").length,
+    pending: myRequests.filter((item) => item.status === "pending").length,
+    approved: myRequests.filter((item) => item.status === "approved").length,
+    rejected: myRequests.filter((item) => item.status === "rejected").length,
     pendingApproval: canApprove ? pendingApprovalRequests.length : 0,
   };
 
-  // Reset form
   const resetForm = () => {
     setFormData({
       type: "check_correction",
@@ -149,80 +352,111 @@ export function RequestsManager() {
 
   const handleSubmit = async () => {
     if (!currentUserId) {
-      setError("لا يوجد موظف مسجل لتقديم طلب");
+      setError("لا يوجد موظف مرتبط بالحساب الحالي");
       return;
     }
-    if (!formData.date || !formData.reason) {
+
+    if (!formData.date || !formData.reason.trim()) {
       setError("الرجاء إدخال التاريخ والسبب");
       return;
     }
 
     setIsSubmitting(true);
     setError(null);
+
     try {
-      const payload: Record<string, unknown> = {
+      const payload: Parameters<typeof attendanceService.createRequest>[0] = {
         employeeId: currentUserId,
         type: formData.type,
         date: formData.date,
-        reason: formData.reason,
+        reason: formData.reason.trim(),
       };
 
       if (formData.type === "check_correction") {
-        payload.requestedCheckIn = formData.requestedCheckIn
-          ? `${formData.date}T${formData.requestedCheckIn}:00Z`
-          : undefined;
-        payload.requestedCheckOut = formData.requestedCheckOut
-          ? `${formData.date}T${formData.requestedCheckOut}:00Z`
-          : undefined;
-      } else if (formData.type === "overtime") {
-        payload.overtimeHours = formData.overtimeHours;
-      } else if (formData.type === "permission") {
-        payload.permissionStartTime = formData.permissionStartTime;
-        payload.permissionEndTime = formData.permissionEndTime;
+        payload.requestedCheckIn = toLocalIso(formData.date, formData.requestedCheckIn);
+        payload.requestedCheckOut = toLocalIso(formData.date, formData.requestedCheckOut);
       }
 
-      const res = await attendanceService.createRequest(
-        payload as Parameters<typeof attendanceService.createRequest>[0]
-      );
+      if (formData.type === "overtime") {
+        payload.overtimeHours = formData.overtimeHours;
+      }
 
-      if (!res.success) {
-        setError(res.error || "فشل تقديم الطلب");
+      if (formData.type === "permission") {
+        payload.permissionStartTime = toLocalIso(formData.date, formData.permissionStartTime);
+        payload.permissionEndTime = toLocalIso(formData.date, formData.permissionEndTime);
+      }
+
+      const response = await attendanceService.createRequest(payload);
+      if (!response.success) {
+        setError(response.error || "فشل تقديم الطلب");
         return;
       }
 
-      await fetchRequests();
+      toast.success("تم تقديم الطلب بنجاح");
       setIsAddOpen(false);
       resetForm();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل تقديم الطلب");
+      await loadRequests();
+    } catch (submitError) {
+      setError(submitError instanceof Error ? submitError.message : "فشل تقديم الطلب");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleApproval = async (requestId: string, approved: boolean, rejectionReason?: string) => {
-    if (!canApprove) return;
+  const handleApprove = async (requestId: string) => {
+    if (!canApprove) {
+      return;
+    }
+
     setError(null);
+
     try {
-      const res = approved
-        ? await attendanceService.approveRequest(requestId)
-        : await attendanceService.rejectRequest(requestId, rejectionReason || "");
-      if (!res.success) {
-        setError(res.error || "فشل تحديث الطلب");
+      const response = await attendanceService.approveRequest(requestId);
+      if (!response.success) {
+        setError(response.error || "فشل اعتماد الطلب");
         return;
       }
-      await fetchRequests();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل تحديث الطلب");
+
+      toast.success("تم اعتماد الطلب");
+      await loadRequests();
+    } catch (approveError) {
+      setError(approveError instanceof Error ? approveError.message : "فشل اعتماد الطلب");
     }
   };
 
-  // Get employee name
-  const getEmployeeName = (employeeId: string) => {
-    return getEmployeeFullName(employeeId);
+  const handleReject = async () => {
+    if (!canApprove || !rejectRequestId) {
+      return;
+    }
+
+    if (!rejectReason.trim()) {
+      setError("الرجاء كتابة سبب الرفض");
+      return;
+    }
+
+    setIsRejecting(true);
+    setError(null);
+
+    try {
+      const response = await attendanceService.rejectRequest(rejectRequestId, rejectReason.trim());
+      if (!response.success) {
+        setError(response.error || "فشل رفض الطلب");
+        return;
+      }
+
+      toast.success("تم رفض الطلب");
+      setRejectRequestId(null);
+      setRejectReason("");
+      await loadRequests();
+    } catch (rejectError) {
+      setError(rejectError instanceof Error ? rejectError.message : "فشل رفض الطلب");
+    } finally {
+      setIsRejecting(false);
+    }
   };
 
-  // Get type icon
+  const getEmployeeName = (employeeId: string) => getEmployeeFullName(employeeId);
+
   const getTypeIcon = (type: AttendanceRequestType) => {
     switch (type) {
       case "check_correction":
@@ -236,15 +470,16 @@ export function RequestsManager() {
     }
   };
 
-  // Get status badge variant
   const getStatusVariant = (status: AttendanceRequestStatus) => {
     switch (status) {
       case "approved":
-        return "default";
+        return "default" as const;
       case "pending":
-        return "secondary";
+        return "secondary" as const;
       case "rejected":
-        return "destructive";
+        return "destructive" as const;
+      case "cancelled":
+        return "outline" as const;
     }
   };
 
@@ -256,7 +491,6 @@ export function RequestsManager() {
         </div>
       )}
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -307,8 +541,7 @@ export function RequestsManager() {
         )}
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "my" | "pending")}>
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "my" | "pending")}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>
             <TabsTrigger value="my">طلباتي</TabsTrigger>
@@ -316,7 +549,7 @@ export function RequestsManager() {
               <TabsTrigger value="pending">
                 بانتظار الموافقة
                 {stats.pendingApproval > 0 && (
-                  <Badge variant="destructive" className="me-2 h-5 w-5 p-0 justify-center">
+                  <Badge variant="destructive" className="me-2 h-5 w-5 justify-center p-0">
                     {stats.pendingApproval}
                   </Badge>
                 )}
@@ -324,13 +557,10 @@ export function RequestsManager() {
             )}
           </TabsList>
 
-          <div className="flex items-center gap-2">
-            <Select
-              value={typeFilter}
-              onValueChange={(v) => setTypeFilter(v as AttendanceRequestType | "all")}
-            >
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as AttendanceRequestType | "all")}>
               <SelectTrigger className="w-[150px]">
-                <IconFilter className="h-4 w-4 ms-2" />
+                <IconFilter className="ms-2 h-4 w-4" />
                 <SelectValue placeholder="النوع" />
               </SelectTrigger>
               <SelectContent>
@@ -343,26 +573,20 @@ export function RequestsManager() {
               </SelectContent>
             </Select>
 
-            {activeTab === "my" && (
-              <Select
-                value={statusFilter}
-                onValueChange={(v) => setStatusFilter(v as AttendanceRequestStatus | "all")}
-              >
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue placeholder="الحالة" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">كل الحالات</SelectItem>
-                  {Object.entries(requestStatusLabels).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>
-                      {label.ar}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AttendanceRequestStatus | "all")}>
+              <SelectTrigger className="w-[150px]">
+                <SelectValue placeholder="الحالة" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل الحالات</SelectItem>
+                {Object.entries(requestStatusLabels).map(([key, label]) => (
+                  <SelectItem key={key} value={key}>
+                    {label.ar}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            {/* New Request Dialog */}
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
@@ -370,22 +594,19 @@ export function RequestsManager() {
                   طلب جديد
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[500px]">
+              <DialogContent className="w-full sm:max-w-[520px]">
                 <DialogHeader>
                   <DialogTitle>طلب جديد</DialogTitle>
-                  <DialogDescription>
-                    اختر نوع الطلب وأدخل التفاصيل المطلوبة
-                  </DialogDescription>
+                  <DialogDescription>اختر نوع الطلب وأدخل البيانات المطلوبة.</DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
-                  {/* Request Type */}
                   <div className="space-y-2">
                     <Label>نوع الطلب</Label>
                     <Select
                       value={formData.type}
-                      onValueChange={(v) =>
-                        setFormData((p) => ({ ...p, type: v as AttendanceRequestType }))
+                      onValueChange={(value) =>
+                        setFormData((current) => ({ ...current, type: value as AttendanceRequestType }))
                       }
                     >
                       <SelectTrigger>
@@ -404,17 +625,15 @@ export function RequestsManager() {
                     </Select>
                   </div>
 
-                  {/* Date */}
                   <div className="space-y-2">
                     <Label>التاريخ</Label>
                     <Input
                       type="date"
                       value={formData.date}
-                      onChange={(e) => setFormData((p) => ({ ...p, date: e.target.value }))}
+                      onChange={(event) => setFormData((current) => ({ ...current, date: event.target.value }))}
                     />
                   </div>
 
-                  {/* Check Correction Fields */}
                   {formData.type === "check_correction" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -422,8 +641,8 @@ export function RequestsManager() {
                         <Input
                           type="time"
                           value={formData.requestedCheckIn}
-                          onChange={(e) =>
-                            setFormData((p) => ({ ...p, requestedCheckIn: e.target.value }))
+                          onChange={(event) =>
+                            setFormData((current) => ({ ...current, requestedCheckIn: event.target.value }))
                           }
                         />
                       </div>
@@ -432,34 +651,29 @@ export function RequestsManager() {
                         <Input
                           type="time"
                           value={formData.requestedCheckOut}
-                          onChange={(e) =>
-                            setFormData((p) => ({ ...p, requestedCheckOut: e.target.value }))
+                          onChange={(event) =>
+                            setFormData((current) => ({ ...current, requestedCheckOut: event.target.value }))
                           }
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Overtime Fields */}
                   {formData.type === "overtime" && (
                     <div className="space-y-2">
                       <Label>عدد ساعات العمل الإضافي</Label>
                       <Input
                         type="number"
-                        value={formData.overtimeHours}
-                        onChange={(e) =>
-                          setFormData((p) => ({
-                            ...p,
-                            overtimeHours: parseInt(e.target.value) || 1,
-                          }))
-                        }
                         min={1}
                         max={12}
+                        value={formData.overtimeHours}
+                        onChange={(event) =>
+                          setFormData((current) => ({ ...current, overtimeHours: Number(event.target.value || 1) }))
+                        }
                       />
                     </div>
                   )}
 
-                  {/* Permission Fields */}
                   {formData.type === "permission" && (
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
@@ -467,11 +681,8 @@ export function RequestsManager() {
                         <Input
                           type="time"
                           value={formData.permissionStartTime}
-                          onChange={(e) =>
-                            setFormData((p) => ({
-                              ...p,
-                              permissionStartTime: e.target.value,
-                            }))
+                          onChange={(event) =>
+                            setFormData((current) => ({ ...current, permissionStartTime: event.target.value }))
                           }
                         />
                       </div>
@@ -480,25 +691,21 @@ export function RequestsManager() {
                         <Input
                           type="time"
                           value={formData.permissionEndTime}
-                          onChange={(e) =>
-                            setFormData((p) => ({
-                              ...p,
-                              permissionEndTime: e.target.value,
-                            }))
+                          onChange={(event) =>
+                            setFormData((current) => ({ ...current, permissionEndTime: event.target.value }))
                           }
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Reason */}
                   <div className="space-y-2">
                     <Label>السبب</Label>
                     <Textarea
-                      value={formData.reason}
-                      onChange={(e) => setFormData((p) => ({ ...p, reason: e.target.value }))}
-                      placeholder="اكتب سبب الطلب..."
                       rows={3}
+                      value={formData.reason}
+                      onChange={(event) => setFormData((current) => ({ ...current, reason: event.target.value }))}
+                      placeholder="اكتب سبب الطلب"
                     />
                   </div>
                 </div>
@@ -507,10 +714,7 @@ export function RequestsManager() {
                   <Button variant="outline" onClick={() => setIsAddOpen(false)}>
                     إلغاء
                   </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={!formData.date || !formData.reason}
-                  >
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>
                     تقديم الطلب
                   </Button>
                 </DialogFooter>
@@ -522,162 +726,57 @@ export function RequestsManager() {
         <TabsContent value="my">
           <RequestsTable
             requests={filteredRequests}
+            isLoading={isLoading}
+            isApprovalMode={false}
             getEmployeeName={getEmployeeName}
             getTypeIcon={getTypeIcon}
             getStatusVariant={getStatusVariant}
-            isApprovalMode={false}
           />
         </TabsContent>
 
         <TabsContent value="pending">
           <RequestsTable
             requests={filteredRequests}
+            isLoading={isLoading}
+            isApprovalMode={true}
             getEmployeeName={getEmployeeName}
             getTypeIcon={getTypeIcon}
             getStatusVariant={getStatusVariant}
-            isApprovalMode={true}
-            onApprove={(id) => handleApproval(id, true)}
-            onReject={(id) => handleApproval(id, false, "مرفوض من المدير")}
+            onApprove={handleApprove}
+            onReject={(requestId) => {
+              setRejectRequestId(requestId);
+              setRejectReason("");
+            }}
           />
         </TabsContent>
       </Tabs>
+
+      <Dialog open={Boolean(rejectRequestId)} onOpenChange={(open) => !open && setRejectRequestId(null)}>
+        <DialogContent className="w-full sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>رفض الطلب</DialogTitle>
+            <DialogDescription>أدخل سبب الرفض ليظهر للموظف عند مراجعة الطلب.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="rejection-reason">سبب الرفض</Label>
+            <Textarea
+              id="rejection-reason"
+              rows={4}
+              value={rejectReason}
+              onChange={(event) => setRejectReason(event.target.value)}
+              placeholder="اكتب سبب الرفض"
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectRequestId(null)}>
+              إلغاء
+            </Button>
+            <Button variant="destructive" onClick={handleReject} disabled={isRejecting}>
+              تأكيد الرفض
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
-  );
-}
-
-// Requests Table Component
-interface RequestsTableProps {
-  requests: AttendanceRequest[];
-  getEmployeeName: (id: string) => string;
-  getTypeIcon: (type: AttendanceRequestType) => React.ReactNode;
-  getStatusVariant: (status: AttendanceRequestStatus) => "default" | "secondary" | "destructive";
-  isApprovalMode: boolean;
-  onApprove?: (id: string) => void;
-  onReject?: (id: string) => void;
-}
-
-function RequestsTable({
-  requests,
-  getEmployeeName,
-  getTypeIcon,
-  getStatusVariant,
-  isApprovalMode,
-  onApprove,
-  onReject,
-}: RequestsTableProps) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{isApprovalMode ? "طلبات تحتاج موافقتك" : "طلباتي"}</CardTitle>
-        <CardDescription>
-          {requests.length} طلب
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {isApprovalMode && <TableHead>الموظف</TableHead>}
-              <TableHead>نوع الطلب</TableHead>
-              <TableHead>التاريخ</TableHead>
-              <TableHead>التفاصيل</TableHead>
-              <TableHead>السبب</TableHead>
-              {!isApprovalMode && <TableHead>الحالة</TableHead>}
-              <TableHead>تاريخ التقديم</TableHead>
-              {isApprovalMode && <TableHead className="text-start">إجراءات</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {requests.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={isApprovalMode ? 7 : 6} className="text-center py-8">
-                  <IconFileDescription className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                  <p className="text-muted-foreground">لا توجد طلبات</p>
-                </TableCell>
-              </TableRow>
-            ) : (
-              requests.map((request) => (
-                <TableRow key={request.id}>
-                  {isApprovalMode && (
-                    <TableCell className="font-medium">
-                      {getEmployeeName(request.employeeId)}
-                    </TableCell>
-                  )}
-                  <TableCell>
-                    <div className="flex items-center gap-2">
-                      {getTypeIcon(request.type)}
-                      <span>{requestTypeLabels[request.type].ar}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(request.date).toLocaleDateString("ar-SA")}
-                  </TableCell>
-                  <TableCell className="text-sm">
-                    {request.type === "check_correction" && request.requestedCheckIn && (
-                      <span>
-                        {new Date(request.requestedCheckIn).toLocaleTimeString("ar-SA", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}{" "}
-                        -{" "}
-                        {request.requestedCheckOut &&
-                          new Date(request.requestedCheckOut).toLocaleTimeString("ar-SA", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                      </span>
-                    )}
-                    {request.type === "overtime" && (
-                      <span>{request.overtimeHours} ساعات</span>
-                    )}
-                    {request.type === "permission" && (
-                      <span>
-                        {request.permissionStartTime} - {request.permissionEndTime}
-                      </span>
-                    )}
-                    {request.type === "work_from_home" && <span>يوم كامل</span>}
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {request.reason}
-                  </TableCell>
-                  {!isApprovalMode && (
-                    <TableCell>
-                      <Badge variant={getStatusVariant(request.status)}>
-                        {requestStatusLabels[request.status].ar}
-                      </Badge>
-                    </TableCell>
-                  )}
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(request.createdAt).toLocaleDateString("ar-SA")}
-                  </TableCell>
-                  {isApprovalMode && (
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                          onClick={() => onApprove?.(request.id)}
-                        >
-                          <IconCheck className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          onClick={() => onReject?.(request.id)}
-                        >
-                          <IconX className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
   );
 }

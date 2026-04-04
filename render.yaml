@@ -3,6 +3,7 @@
 
 services:
   - type: web
+    # Keep the existing Render service identifier stable until a coordinated migration is planned.
     name: ujoor
     runtime: node
     region: frankfurt # Closest to Middle East
@@ -24,7 +25,7 @@ services:
       - key: R2_SECRET_ACCESS_KEY
         sync: false
       - key: R2_BUCKET_NAME
-        value: ujoor
+        sync: false
       - key: R2_PUBLIC_URL
         sync: false
       - key: R2_ENDPOINT
@@ -32,9 +33,9 @@ services:
       - key: NEXTAUTH_SECRET
         generateValue: true
       - key: NEXTAUTH_URL
-        value: https://ujoor.onrender.com
+        sync: false
       - key: NEXT_PUBLIC_APP_URL
-        value: https://ujoor.onrender.com
+        sync: false
       - key: NEXT_PUBLIC_RECAPTCHA_SITE_KEY
         sync: false
       - key: RECAPTCHA_SECRET_KEY
@@ -45,6 +46,7 @@ services:
         sync: false
 
 databases:
+  # Keep the existing Render database identifiers stable until a coordinated migration is planned.
   - name: ujoor-db
     region: frankfurt
     plan: starter

@@ -23,7 +23,11 @@ git push origin main
 
 **PowerShell:**
 ```powershell
-$response = Invoke-RestMethod -Uri "https://ujoor.onrender.com/api/bootstrap/super-admin" -Method POST
+$bootstrapToken = $env:SUPER_ADMIN_BOOTSTRAP_TOKEN
+$response = Invoke-RestMethod `
+  -Uri "https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin" `
+  -Method POST `
+  -Headers @{ "x-bootstrap-token" = $bootstrapToken }
 Write-Host "✅ $($response.message)" -ForegroundColor Green
 Write-Host "Email: $($response.user.email)"
 Write-Host "Role: $($response.user.role)"
@@ -31,7 +35,8 @@ Write-Host "Role: $($response.user.role)"
 
 **curl:**
 ```bash
-curl -X POST https://ujoor.onrender.com/api/bootstrap/super-admin
+curl -X POST https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin \
+  -H "x-bootstrap-token: $SUPER_ADMIN_BOOTSTRAP_TOKEN"
 ```
 
 **النتيجة المتوقعة:**
@@ -41,7 +46,7 @@ curl -X POST https://ujoor.onrender.com/api/bootstrap/super-admin
   "message": "Super admin created",
   "user": {
     "id": "clx...",
-    "email": "admin@admin.com",
+    "email": "YOUR_SUPER_ADMIN_EMAIL",
     "role": "SUPER_ADMIN",
     "status": "ACTIVE"
   }
@@ -50,11 +55,11 @@ curl -X POST https://ujoor.onrender.com/api/bootstrap/super-admin
 
 #### 3. تسجيل الدخول
 
-افتح: https://ujoor.onrender.com/login
+افتح: https://YOUR-RENDER-DOMAIN/login
 
 ```
-Email: admin@admin.com
-Password: 123456
+Email: قيمة SUPER_ADMIN_EMAIL
+Password: قيمة SUPER_ADMIN_PASSWORD
 ```
 
 ✅ **يعمل!**
@@ -78,6 +83,10 @@ git push
 
 أضف/عدّل:
 ```env
+ENABLE_SUPER_ADMIN_BOOTSTRAP=true
+SUPER_ADMIN_BOOTSTRAP_TOKEN=replace-with-a-long-random-secret
+SUPER_ADMIN_EMAIL=your-admin@example.com
+SUPER_ADMIN_PASSWORD=replace-with-a-strong-password
 SUPER_ADMIN_FORCE=1
 ```
 
@@ -90,17 +99,17 @@ SUPER_ADMIN_FORCE=1
 
 ابحث عن:
 ```
-[ensure-super-admin] Created super admin: admin@admin.com
+[ensure-super-admin] Created super admin: your-admin@example.com
 ```
 
 أو:
 ```
-[ensure-super-admin] Updated super admin password: admin@admin.com
+[ensure-super-admin] Updated super admin password: your-admin@example.com
 ```
 
 #### 4. جرب تسجيل الدخول
 
-https://ujoor.onrender.com/login
+https://YOUR-RENDER-DOMAIN/login
 
 ---
 
@@ -113,9 +122,9 @@ https://ujoor.onrender.com/login
 حفظ هذا في `run-e2e-test.ps1`:
 
 ```powershell
-# Complete E2E Test for Ujoor HRMS
+# Complete E2E Test for Taqam HR Platform
 $ErrorActionPreference = "Stop"
-$BASE_URL = "https://ujoor.onrender.com"
+$BASE_URL = "https://YOUR-RENDER-DOMAIN"
 
 Write-Host "🚀 Starting Complete E2E Test..." -ForegroundColor Green
 Write-Host "Base URL: $BASE_URL" -ForegroundColor Cyan
@@ -161,8 +170,8 @@ $adminLogin = Invoke-ApiCall -Method POST -Endpoint "/api/mobile/auth/login" `
     "x-app-version" = "1.0.0"
   } `
   -Body @{
-    email = "admin@admin.com"
-    password = "123456"
+    email = $env:SUPER_ADMIN_EMAIL
+    password = $env:SUPER_ADMIN_PASSWORD
   }
 
 $ADMIN_TOKEN = $adminLogin.data.accessToken
@@ -441,13 +450,13 @@ Write-Host "🎉 All systems operational!" -ForegroundColor Green
 
 3. ⚡ **استدعِ Bootstrap:**
    ```powershell
-   Invoke-RestMethod -Uri "https://ujoor.onrender.com/api/bootstrap/super-admin" -Method POST
+  Invoke-RestMethod -Uri "https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin" -Method POST -Headers @{ "x-bootstrap-token" = $env:SUPER_ADMIN_BOOTSTRAP_TOKEN }
    ```
 
 4. 🔐 **سجّل دخول:**
-   https://ujoor.onrender.com/login
-   - admin@admin.com
-   - 123456
+  https://YOUR-RENDER-DOMAIN/login
+  - قيمة `SUPER_ADMIN_EMAIL`
+  - قيمة `SUPER_ADMIN_PASSWORD`
 
 5. 🧪 **شغّل E2E Test:**
    ```powershell

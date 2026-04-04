@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CheckCircle2 } from "lucide-react";
@@ -13,8 +13,8 @@ import { prisma } from "@/lib/db";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/pricing",
-    titleAr: "الأسعار | باقات أجور",
-    titleEn: "Pricing | Ujoors Plans",
+    titleAr: "الأسعار | باقات طاقم",
+    titleEn: "Pricing | Taqam Plans",
     descriptionAr:
       "اختر الباقة المناسبة لحجم شركتك: Starter, Business, Enterprise. أسعار واضحة ومزايا قابلة للتوسّع.",
     descriptionEn:
@@ -150,7 +150,7 @@ export default async function PricingPage() {
                     ))}
                   </ul>
                   <Link href={`${p}/request-demo`} className="mt-6 block">
-                    <Button className="w-full" variant={plan.isPopular ? "default" : "outline"}>
+                    <Button className="w-full" variant={plan.isPopular ? "brand" : "brandOutline"}>
                       {isAr ? "طلب اشتراك" : "Request subscription"}
                     </Button>
                   </Link>

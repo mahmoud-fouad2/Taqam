@@ -1,5 +1,8 @@
 # 🎯 التقرير النهائي - Final Comprehensive Report
 
+> **ملاحظة أرشيفية:** هذا الملف يوثق حالة تاريخية وقت التنفيذ. قد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو بيانات دخول أو Bootstrap قديمة.
+> للاستخدام الحالي اعتمد على `QUICK_START.md` و `SUMMARY.md` و `TESTING_GUIDE.md` واستخدم `https://YOUR-RENDER-DOMAIN` مع `ENABLE_SUPER_ADMIN_BOOTSTRAP=true` و `SUPER_ADMIN_BOOTSTRAP_TOKEN` وترويسة `x-bootstrap-token`.
+
 ## 📅 التاريخ
 **2026-02-01** | الوقت الفعلي لتنفيذ الإصلاحات والاختبارات
 

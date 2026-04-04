@@ -19,14 +19,35 @@ if (!connectionString) {
 const adapter = new PrismaPg({ connectionString });
 const prisma = new PrismaClient({ adapter });
 
+function resolveSeedSecret(envName: string, fallbackValue: string) {
+  const value = process.env[envName];
+  if (value) {
+    return value;
+  }
+
+  const allowInsecureDefaults =
+    process.env.ALLOW_INSECURE_SEED_DEFAULTS === "true" ||
+    process.env.NODE_ENV !== "production";
+
+  if (allowInsecureDefaults) {
+    return fallbackValue;
+  }
+
+  throw new Error(
+    `${envName} must be set when running prisma seed in production. ` +
+      `Set ALLOW_INSECURE_SEED_DEFAULTS=true only for disposable environments.`
+  );
+}
+
 async function main() {
   console.log("🌱 Starting database seed...");
 
   // ============================================
   // 1. Create Super Admin
   // ============================================
-  const superAdminEmail = process.env.SUPER_ADMIN_EMAIL || "admin@ujoor.com";
-  const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD || "Admin@123456";
+  const superAdminEmail = resolveSeedSecret("SUPER_ADMIN_EMAIL", "admin@taqam.local");
+  const superAdminPassword = resolveSeedSecret("SUPER_ADMIN_PASSWORD", "Admin@123456");
+  const defaultTenantAdminPassword = resolveSeedSecret("DEFAULT_TENANT_ADMIN_PASSWORD", "Admin@123456");
 
   const existingSuperAdmin = await prisma.user.findUnique({
     where: { email: superAdminEmail },
@@ -61,28 +82,28 @@ async function main() {
       name: "Demo Company",
       nameAr: "شركة تجريبية",
       plan: "PROFESSIONAL" as const,
-      adminEmail: "admin@demo.ujoor.com",
+      adminEmail: "admin@demo.taqam.local",
     },
     {
       slug: "elite-tech",
       name: "Elite Technology Co.",
       nameAr: "شركة النخبة للتقنية",
       plan: "PROFESSIONAL" as const,
-      adminEmail: "admin@elite-tech.ujoor.com",
+      adminEmail: "admin@elite-tech.taqam.local",
     },
     {
       slug: "riyadh-trading",
       name: "Riyadh Trading Est.",
       nameAr: "مؤسسة الرياض التجارية",
       plan: "BASIC" as const,
-      adminEmail: "admin@riyadh-trading.ujoor.com",
+      adminEmail: "admin@riyadh-trading.taqam.local",
     },
     {
       slug: "future-co",
       name: "Future Company",
       nameAr: "شركة المستقبل",
       plan: "ENTERPRISE" as const,
-      adminEmail: "admin@future-co.ujoor.com",
+      adminEmail: "admin@future-co.taqam.local",
     },
   ];
 
@@ -111,7 +132,7 @@ async function main() {
         });
 
       // Create tenant admin
-      const tenantAdminPassword = await hash("Admin@123456", 12);
+      const tenantAdminPassword = await hash(defaultTenantAdminPassword, 12);
 
       const tenantAdmin = await prisma.user.create({
         data: {
@@ -236,7 +257,7 @@ async function main() {
       });
 
       console.log(`✅ Tenant created: ${tenantData.slug}`);
-      console.log(`   Admin: ${tenantData.adminEmail} / Admin@123456`);
+      console.log(`   Admin: ${tenantData.adminEmail} / ${defaultTenantAdminPassword}`);
     } else {
       console.log(`ℹ️  Tenant already exists: ${tenantData.slug}`);
     }
@@ -344,9 +365,9 @@ async function main() {
   if (!existingSettings) {
     await prisma.platformSettings.create({
       data: {
-        platformName: "أجور",
-        platformNameEn: "Ujoors",
-        supportEmail: "support@ujoor.com",
+        platformName: "طاقم",
+        platformNameEn: "Taqam",
+        supportEmail: "support@taqam.com",
         trialDays: 14,
         trialMaxEmployees: 10,
         primaryColor: "#0284c7",

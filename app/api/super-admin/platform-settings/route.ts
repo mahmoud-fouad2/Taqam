@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Platform Settings API (Super Admin Only)
  * GET  - Get platform settings
  * PUT  - Update platform settings
@@ -24,9 +24,9 @@ export async function GET() {
     if (!settings) {
       settings = await prisma.platformSettings.create({
         data: {
-          platformName: "أجور",
-          platformNameEn: "Ujoors",
-          supportEmail: "support@ujoor.com",
+          platformName: "طاقم",
+          platformNameEn: "Taqam",
+          supportEmail: "support@taqam.com",
           trialDays: 14,
           trialMaxEmployees: 10,
           primaryColor: "#0284c7",

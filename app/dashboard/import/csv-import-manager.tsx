@@ -249,7 +249,7 @@ export function CSVImportManager() {
                   استيراد من CSV
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+              <DialogContent className="w-full sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>استيراد الموظفين من CSV</DialogTitle>
                   <DialogDescription>

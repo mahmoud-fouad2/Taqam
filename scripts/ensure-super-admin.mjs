@@ -11,6 +11,12 @@ if (!connectionString) {
 const superAdminEmailRaw = process.env.SUPER_ADMIN_EMAIL;
 const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
 const force = process.env.SUPER_ADMIN_FORCE === "1" || process.env.SUPER_ADMIN_FORCE === "true";
+const bootstrapEnabled = process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "1" || process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
+
+if (!bootstrapEnabled) {
+  console.log("[ensure-super-admin] ENABLE_SUPER_ADMIN_BOOTSTRAP is not enabled; skipping.");
+  process.exit(0);
+}
 
 if (!superAdminEmailRaw || !superAdminPassword) {
   console.log(

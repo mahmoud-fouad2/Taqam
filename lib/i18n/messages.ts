@@ -1,4 +1,4 @@
-import type { AppLocale } from "./types";
+﻿import type { AppLocale } from "./types";
 
 export type WebMessageKey =
   | "common.loading"
@@ -32,7 +32,7 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
   "footer.privacy": { ar: "سياسة الخصوصية", en: "Privacy" },
   "footer.terms": { ar: "الشروط والأحكام", en: "Terms" },
   "footer.support": { ar: "الدعم", en: "Support" },
-  "footer.rights": { ar: "أجور (Ujoors). جميع الحقوق محفوظة.", en: "Ujoors. All rights reserved." },
+  "footer.rights": { ar: "طاقم (Taqam). جميع الحقوق محفوظة.", en: "Taqam. All rights reserved." },
   "footer.stack.ar": { ar: "موارد بشرية • رواتب • حضور • امتثال سعودي", en: "" },
   "footer.stack.en": { ar: "", en: "HR • Payroll • Attendance • Saudi Compliance" },
 

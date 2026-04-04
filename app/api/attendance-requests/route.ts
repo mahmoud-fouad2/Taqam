@@ -8,9 +8,66 @@ function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
 }
 
+function canManageAttendanceRequests(role: string | undefined) {
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+}
+
+function mapStatus(value: string) {
+  return value.toLowerCase();
+}
+
+function mapType(value: string) {
+  return value.toLowerCase();
+}
+
+function serializeAttendanceRequest(
+  item: {
+    id: string;
+    tenantId: string;
+    employeeId: string;
+    type: string;
+    status: string;
+    date: Date;
+    requestedCheckIn: Date | null;
+    requestedCheckOut: Date | null;
+    overtimeHours: { toString(): string } | number | null;
+    permissionStartTime: Date | null;
+    permissionEndTime: Date | null;
+    reason: string;
+    attachmentUrl: string | null;
+    approvedById: string | null;
+    approvedAt: Date | null;
+    rejectionReason: string | null;
+    createdAt: Date;
+    updatedAt: Date;
+  }
+) {
+  return {
+    id: item.id,
+    tenantId: item.tenantId,
+    employeeId: item.employeeId,
+    type: mapType(item.type),
+    status: mapStatus(item.status),
+    date: item.date.toISOString().split("T")[0],
+    requestedCheckIn: item.requestedCheckIn?.toISOString(),
+    requestedCheckOut: item.requestedCheckOut?.toISOString(),
+    overtimeHours: item.overtimeHours == null ? undefined : Number(item.overtimeHours.toString()),
+    permissionStartTime: item.permissionStartTime?.toISOString(),
+    permissionEndTime: item.permissionEndTime?.toISOString(),
+    reason: item.reason,
+    attachmentUrl: item.attachmentUrl ?? undefined,
+    approvedById: item.approvedById ?? undefined,
+    approvedAt: item.approvedAt?.toISOString(),
+    rejectionReason: item.rejectionReason ?? undefined,
+    createdAt: item.createdAt.toISOString(),
+    updatedAt: item.updatedAt.toISOString(),
+  };
+}
+
 const listQuerySchema = z.object({
   employeeId: z.string().optional(),
   status: z.string().optional(),
+  type: z.string().optional(),
 });
 
 const createSchema = z
@@ -44,6 +101,7 @@ export async function GET(request: NextRequest) {
     const parsed = listQuerySchema.safeParse({
       employeeId: searchParams.get("employeeId") ?? undefined,
       status: searchParams.get("status") ?? undefined,
+      type: searchParams.get("type") ?? undefined,
     });
 
     if (!parsed.success) {
@@ -54,7 +112,8 @@ export async function GET(request: NextRequest) {
 
     if (parsed.data.employeeId) where.employeeId = parsed.data.employeeId;
 
-    if (parsed.data.status) where.status = String(parsed.data.status).toUpperCase();
+    if (parsed.data.status) where.status = String(parsed.data.status).toUpperCase().replace(/-/g, "_");
+    if (parsed.data.type) where.type = String(parsed.data.type).toUpperCase().replace(/-/g, "_");
 
     const items = await prisma.attendanceRequest.findMany({
       where,
@@ -64,13 +123,12 @@ export async function GET(request: NextRequest) {
       },
     });
 
-    // Non-super admin users only see their own requests
-    if (!isSuperAdmin(session.user.role)) {
+    if (!canManageAttendanceRequests(session.user.role)) {
       const filtered = items.filter((r) => r.employee.userId === session.user.id);
-      return NextResponse.json({ data: { items: filtered } });
+      return NextResponse.json({ data: { items: filtered.map(serializeAttendanceRequest) } });
     }
 
-    return NextResponse.json({ data: { items } });
+    return NextResponse.json({ data: { items: items.map(serializeAttendanceRequest) } });
   } catch (error) {
     console.error("Error fetching attendance requests:", error);
     return NextResponse.json({ error: "Failed to fetch attendance requests" }, { status: 500 });
@@ -129,7 +187,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: created }, { status: 201 });
+    return NextResponse.json({ data: serializeAttendanceRequest(created) }, { status: 201 });
   } catch (error) {
     console.error("Error creating attendance request:", error);
     return NextResponse.json({ error: "Failed to create attendance request" }, { status: 500 });

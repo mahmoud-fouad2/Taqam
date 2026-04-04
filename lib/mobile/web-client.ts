@@ -26,8 +26,10 @@ export type MobileAuthState = {
   user: MobileUser;
 };
 
-const AUTH_KEY = "ujoor:mobileAuth";
-const DEVICE_ID_KEY = "ujoor:deviceId";
+const AUTH_KEY = "taqam:mobileAuth";
+const LEGACY_AUTH_KEY = "ujoor:mobileAuth";
+const DEVICE_ID_KEY = "taqam:deviceId";
+const LEGACY_DEVICE_ID_KEY = "ujoor:deviceId";
 
 function safeJsonParse<T>(value: string | null): T | null {
   if (!value) return null;
@@ -38,10 +40,24 @@ function safeJsonParse<T>(value: string | null): T | null {
   }
 }
 
+function migrateStorageValue(nextKey: string, legacyKey: string): string | null {
+  if (typeof window === "undefined") return null;
+
+  const currentValue = window.localStorage.getItem(nextKey);
+  if (currentValue) return currentValue;
+
+  const legacyValue = window.localStorage.getItem(legacyKey);
+  if (!legacyValue) return null;
+
+  window.localStorage.setItem(nextKey, legacyValue);
+  window.localStorage.removeItem(legacyKey);
+  return legacyValue;
+}
+
 export function getOrCreateDeviceId(): string {
   if (typeof window === "undefined") return "";
 
-  const existing = window.localStorage.getItem(DEVICE_ID_KEY);
+  const existing = migrateStorageValue(DEVICE_ID_KEY, LEGACY_DEVICE_ID_KEY);
   if (existing && existing.length >= 8) return existing;
 
   const generated =
@@ -58,14 +74,22 @@ export function getMobileDeviceHeaders(): Record<string, string> {
   return {
     "x-device-id": deviceId,
     "x-device-platform": "capacitor-web",
-    "x-device-name": "Ujoor Mobile",
+    "x-device-name": "Taqam Mobile",
     "x-app-version": process.env.NEXT_PUBLIC_APP_VERSION || "web",
   };
 }
 
 export function loadMobileAuth(): MobileAuthState | null {
   if (typeof window === "undefined") return null;
-  return safeJsonParse<MobileAuthState>(window.localStorage.getItem(AUTH_KEY));
+
+  const current = safeJsonParse<MobileAuthState>(window.localStorage.getItem(AUTH_KEY));
+  if (current) return current;
+
+  const migrated = safeJsonParse<MobileAuthState>(migrateStorageValue(AUTH_KEY, LEGACY_AUTH_KEY));
+  if (migrated) return migrated;
+
+  window.localStorage.removeItem(AUTH_KEY);
+  return null;
 }
 
 export function saveMobileAuth(state: MobileAuthState) {
@@ -76,6 +100,8 @@ export function saveMobileAuth(state: MobileAuthState) {
 export function clearMobileAuth() {
   if (typeof window === "undefined") return;
   window.localStorage.removeItem(AUTH_KEY);
+  window.localStorage.removeItem(LEGACY_AUTH_KEY);
+  window.localStorage.removeItem(LEGACY_DEVICE_ID_KEY);
 }
 
 export async function mobileLogin(email: string, password: string): Promise<MobileAuthState> {

@@ -7,6 +7,16 @@ import dynamic from "next/dynamic";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -60,6 +70,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
 
   const [openCreate, setOpenCreate] = React.useState(false);
   const [creating, setCreating] = React.useState(false);
+  const [locationToDelete, setLocationToDelete] = React.useState<WorkLocation | null>(null);
 
   const [form, setForm] = React.useState({
     name: "",
@@ -197,19 +208,17 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
   }
 
   async function deleteLocation(id: string) {
-    const ok = window.confirm(
-      t(locale, "هل أنت متأكد من حذف هذا الموقع؟", "Are you sure you want to delete this location?")
-    );
-    if (!ok) return;
+    setLocationToDelete(locations.find((l) => l.id === id) ?? null);
+  }
 
-    const res = await fetch(`/api/attendance/locations/${id}`, {
-      method: "DELETE",
-    });
+  async function handleDeleteConfirmed() {
+    if (!locationToDelete) return;
+    const id = locationToDelete.id;
+    setLocationToDelete(null);
+    const res = await fetch(`/api/attendance/locations/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const json = await res.json().catch(() => null);
-      toast.error(
-        json?.error ?? t(locale, "تعذر حذف الموقع.", "Failed to delete.")
-      );
+      toast.error(json?.error ?? t(locale, "تعذر حذف الموقع.", "Failed to delete."));
       return;
     }
     await loadAll();
@@ -219,6 +228,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
   const isRtl = locale === "ar";
 
   return (
+    <>
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-start">
@@ -334,7 +344,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                 {t(locale, "إضافة موقع", "Add Location")}
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[560px]">
+            <DialogContent className="w-full sm:max-w-[560px]">
               <DialogHeader>
                 <DialogTitle>
                   {t(locale, "إضافة موقع عمل", "Add Work Location")}
@@ -581,5 +591,23 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
         </CardContent>
       </Card>
     </div>
+
+    <AlertDialog open={!!locationToDelete} onOpenChange={(open) => { if (!open) setLocationToDelete(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{t(locale, "تأكيد الحذف", "Confirm Deletion")}</AlertDialogTitle>
+          <AlertDialogDescription>
+            {t(locale, `هل أنت متأكد من حذف موقع «${locationToDelete?.nameAr ?? locationToDelete?.name}»؟`, `Are you sure you want to delete «${locationToDelete?.name}»?`)}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>{t(locale, "إلغاء", "Cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => void handleDeleteConfirmed()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            {t(locale, "حذف", "Delete")}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }

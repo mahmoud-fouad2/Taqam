@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import {
   IconPlus,
 } from "@tabler/icons-react";
@@ -27,8 +28,14 @@ import { LeaveRequestsApproveDialog } from "./_components/leave-requests-dialog-
 import { LeaveRequestsRejectDialog } from "./_components/leave-requests-dialog-reject";
 import type { ApiLeaveType, UiLeaveRequest } from "./_components/leave-requests-types";
 import { mapRequestStatusToUi, toIso, toNumber, toYmd } from "./_components/leave-requests-types";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { leaveRequestSchema, type LeaveRequestFormData } from "./_components/leave-request-schema";
 
 export function LeaveRequestsManager() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { employees, departments, isLoading: isEmployeesLoading, error: employeesError } = useEmployees();
 
   const [requests, setRequests] = useState<UiLeaveRequest[]>([]);
@@ -40,11 +47,27 @@ export function LeaveRequestsManager() {
   const [isApproveDialogOpen, setIsApproveDialogOpen] = useState(false);
   const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<UiLeaveRequest | null>(null);
-  const [activeTab, setActiveTab] = useState<LeaveRequestStatus | "all">("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterDepartment, setFilterDepartment] = useState<string>("all");
   const [approvalComment, setApprovalComment] = useState("");
   const [rejectionReason, setRejectionReason] = useState("");
+
+  // URL-synced filters
+  const activeTab = (searchParams.get("tab") ?? "all") as LeaveRequestStatus | "all";
+  const searchQuery = searchParams.get("q") ?? "";
+  const filterDepartment = searchParams.get("dept") ?? "all";
+
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (value === "" || value === "all") p.delete(key);
+      else p.set(key, value);
+      router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
+  const setActiveTab = (v: LeaveRequestStatus | "all") => updateFilter("tab", v);
+  const setSearchQuery = (v: string) => updateFilter("q", v);
+  const setFilterDepartment = (v: string) => updateFilter("dept", v);
 
   const leaveTypeById = useMemo(() => {
     const map = new Map<string, ApiLeaveType>();
@@ -52,22 +75,44 @@ export function LeaveRequestsManager() {
     return map;
   }, [leaveTypes]);
 
-  // Form state for new request
-  const [formData, setFormData] = useState({
-    employeeId: "",
-    leaveTypeId: "",
-    startDate: "",
-    endDate: "",
-    reason: "",
-    isHalfDay: false,
-    halfDayPeriod: "morning" as "morning" | "afternoon",
-    delegateEmployeeId: "",
-    emergencyContact: "",
-    emergencyPhone: "",
+  // React Hook Form with Zod validation for new leave request
+  const leaveForm = useForm<LeaveRequestFormData>({
+    resolver: zodResolver(leaveRequestSchema),
+    defaultValues: {
+      employeeId: "",
+      leaveTypeId: "",
+      startDate: "",
+      endDate: "",
+      reason: "",
+      isHalfDay: false,
+      halfDayPeriod: "morning",
+      delegateEmployeeId: "",
+      emergencyContact: "",
+      emergencyPhone: "",
+    },
   });
 
+  // Form state for new request normalized for dialog compatibility.
+  const watchedFormData = leaveForm.watch();
+  const formData = {
+    employeeId: watchedFormData.employeeId ?? "",
+    leaveTypeId: watchedFormData.leaveTypeId ?? "",
+    startDate: watchedFormData.startDate ?? "",
+    endDate: watchedFormData.endDate ?? "",
+    reason: watchedFormData.reason ?? "",
+    isHalfDay: watchedFormData.isHalfDay ?? false,
+    halfDayPeriod: watchedFormData.halfDayPeriod ?? "morning",
+    delegateEmployeeId: watchedFormData.delegateEmployeeId ?? "",
+    emergencyContact: watchedFormData.emergencyContact ?? "",
+    emergencyPhone: watchedFormData.emergencyPhone ?? "",
+  };
+
+  const onFormDataChange = (next: LeaveRequestFormData) => {
+    leaveForm.reset(next);
+  };
+
   const resetForm = () => {
-    setFormData({
+    leaveForm.reset({
       employeeId: "",
       leaveTypeId: "",
       startDate: "",
@@ -163,24 +208,24 @@ export function LeaveRequestsManager() {
     void loadData();
   }, []);
 
-  const handleAddRequest = async () => {
+  const handleAddRequest = leaveForm.handleSubmit(async (data: LeaveRequestFormData) => {
     try {
       // Convert "none" to undefined for delegateEmployeeId
-      const delegateId = formData.delegateEmployeeId === "none" || !formData.delegateEmployeeId 
+      const delegateId = data.delegateEmployeeId === "none" || !data.delegateEmployeeId 
         ? undefined 
-        : formData.delegateEmployeeId;
+        : data.delegateEmployeeId;
         
       const res = await leavesApi.requests.create({
-        employeeId: formData.employeeId,
-        leaveTypeId: formData.leaveTypeId,
-        startDate: formData.startDate,
-        endDate: formData.endDate,
-        reason: formData.reason,
-        isHalfDay: formData.isHalfDay,
-        halfDayPeriod: formData.halfDayPeriod,
+        employeeId: data.employeeId,
+        leaveTypeId: data.leaveTypeId,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        reason: data.reason || "",
+        isHalfDay: data.isHalfDay,
+        halfDayPeriod: data.halfDayPeriod,
         delegateEmployeeId: delegateId,
-        emergencyContact: formData.emergencyContact || undefined,
-        emergencyPhone: formData.emergencyPhone || undefined,
+        emergencyContact: data.emergencyContact || undefined,
+        emergencyPhone: data.emergencyPhone || undefined,
       });
 
       if (!res.success) {
@@ -194,7 +239,7 @@ export function LeaveRequestsManager() {
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "فشل إنشاء طلب الإجازة");
     }
-  };
+  });
 
   const handleApprove = async () => {
     if (!selectedRequest) return;
@@ -240,6 +285,26 @@ export function LeaveRequestsManager() {
       await loadData();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "فشل إلغاء الطلب");
+    }
+  };
+
+  const handleBulkApprove = async (ids: string[]) => {
+    try {
+      await Promise.all(ids.map((id) => leavesApi.requests.approve(id)));
+      toast.success(`تمت الموافقة على ${ids.length} طلب`);
+      await loadData();
+    } catch {
+      toast.error("فشل الموافقة الجماعية");
+    }
+  };
+
+  const handleBulkReject = async (ids: string[]) => {
+    try {
+      await Promise.all(ids.map((id) => leavesApi.requests.reject(id, "رفض جماعي")));
+      toast.success(`تم رفض ${ids.length} طلب`);
+      await loadData();
+    } catch {
+      toast.error("فشل الرفض الجماعي");
     }
   };
 
@@ -327,6 +392,8 @@ export function LeaveRequestsManager() {
               setIsRejectDialogOpen(true);
             }}
             onCancel={handleCancel}
+            onBulkApprove={handleBulkApprove}
+            onBulkReject={handleBulkReject}
           />
         </CardContent>
       </Card>
@@ -337,7 +404,7 @@ export function LeaveRequestsManager() {
         employees={employees}
         leaveTypes={leaveTypes}
         formData={formData}
-        onFormDataChange={setFormData}
+        onFormDataChange={onFormDataChange}
         calculateDays={calculateDays}
         onSubmit={handleAddRequest}
       />

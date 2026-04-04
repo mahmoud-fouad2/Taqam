@@ -1,6 +1,19 @@
-# Ujoors Mobile (Android-first)
+# Legacy Mobile App Reference
 
-This is the native mobile app for Ujoors, built with **Expo + Expo Router**.
+هذا المجلد يحتوي على نسخة موبايل قديمة محفوظة كمرجع فقط.
+
+التطبيق الرسمي الجاري تشغيله والتحقق منه من الجذر هو:
+
+- `apps/mobile`
+
+هذه النسخة `mobile-app/` ليست جزءاً من سكربتات التحقق الجذرية الحالية مثل `pnpm typecheck:mobile` أو `pnpm validate:all`.
+
+## Current status
+
+- Legacy reference app built with **Expo + Expo Router**
+- Kept for code comparison and migration only
+- Running scripts from this folder now prints a legacy notice before Expo starts
+- Do not treat it as the production mobile workspace unless explicitly re-adopted
 
 ## What’s included
 

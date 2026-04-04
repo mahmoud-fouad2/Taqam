@@ -165,6 +165,17 @@ export function LeaveTypesManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ name?: string; nameEn?: string; maxDaysPerYear?: string }>({});
+
+  const validateForm = (): boolean => {
+    const errors: typeof formErrors = {};
+    if (!formData.name?.trim()) errors.name = "الاسم بالعربية مطلوب";
+    if (!formData.nameEn?.trim()) errors.nameEn = "الاسم بالإنجليزية مطلوب";
+    if (!formData.maxDaysPerYear || Number(formData.maxDaysPerYear) < 1)
+      errors.maxDaysPerYear = "يجب أن يكون الحد الأقصى يوماً واحداً على الأقل";
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // Form state
   const [formData, setFormData] = useState<Partial<LeaveType>>({
@@ -191,6 +202,7 @@ export function LeaveTypesManager() {
   });
 
   const resetForm = () => {
+    setFormErrors({});
     setFormData({
       name: "",
       nameEn: "",
@@ -239,17 +251,18 @@ export function LeaveTypesManager() {
   }, []);
 
   const handleAdd = async () => {
-    if (!formData.name?.trim() || !formData.nameEn?.trim()) {
-      toast.error("يرجى إدخال الاسم بالعربية والإنجليزية");
-      return;
-    }
+    if (!validateForm()) return;
+
+    const englishName = formData.nameEn?.trim();
+    const arabicName = formData.name?.trim();
+    if (!englishName || !arabicName) return;
 
     setIsSaving(true);
     try {
       const res = await leavesApi.types.createBackend({
-        name: formData.nameEn.trim(),
-        nameAr: formData.name.trim(),
-        code: toCode(formData.nameEn),
+        name: englishName,
+        nameAr: arabicName,
+        code: toCode(englishName),
         description: formData.description || undefined,
         defaultDays: Number(formData.maxDaysPerYear ?? 0),
         maxDays: Number(formData.maxDaysPerYear ?? 0),
@@ -280,17 +293,18 @@ export function LeaveTypesManager() {
 
   const handleEdit = async () => {
     if (!selectedType) return;
-    if (!formData.name?.trim() || !formData.nameEn?.trim()) {
-      toast.error("يرجى إدخال الاسم بالعربية والإنجليزية");
-      return;
-    }
+    if (!validateForm()) return;
+
+    const englishName = formData.nameEn?.trim();
+    const arabicName = formData.name?.trim();
+    if (!englishName || !arabicName) return;
 
     setIsSaving(true);
     try {
       const res = await leavesApi.types.updateBackend(selectedType.id, {
-        name: formData.nameEn.trim(),
-        nameAr: formData.name.trim(),
-        code: toCode(formData.nameEn),
+        name: englishName,
+        nameAr: arabicName,
+        code: toCode(englishName),
         description: formData.description || undefined,
         defaultDays: Number(formData.maxDaysPerYear ?? 0),
         maxDays: Number(formData.maxDaysPerYear ?? 0),
@@ -469,6 +483,13 @@ export function LeaveTypesManager() {
               </TableRow>
             </TableHeader>
             <TableBody>
+              {filteredTypes.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
+                    لا توجد أنواع إجازات مطابقة
+                  </TableCell>
+                </TableRow>
+              )}
               {filteredTypes.map((type) => (
                 <TableRow key={type.id}>
                   <TableCell>
@@ -532,7 +553,7 @@ export function LeaveTypesManager() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" aria-label="خيارات">
                           <IconDots className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -572,7 +593,7 @@ export function LeaveTypesManager() {
           }
         }}
       >
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {isEditDialogOpen ? "تعديل نوع الإجازة" : "إضافة نوع إجازة جديد"}
@@ -593,18 +614,32 @@ export function LeaveTypesManager() {
                   <Label>الاسم بالعربية *</Label>
                   <Input
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, name: e.target.value });
+                      if (formErrors.name) setFormErrors((p) => ({ ...p, name: undefined }));
+                    }}
                     placeholder="إجازة سنوية"
+                    className={formErrors.name ? "border-destructive" : ""}
                   />
+                  {formErrors.name && (
+                    <p className="text-xs text-destructive">{formErrors.name}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>الاسم بالإنجليزية *</Label>
                   <Input
                     value={formData.nameEn}
-                    onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
+                    onChange={(e) => {
+                      setFormData({ ...formData, nameEn: e.target.value });
+                      if (formErrors.nameEn) setFormErrors((p) => ({ ...p, nameEn: undefined }));
+                    }}
                     placeholder="Annual Leave"
                     dir="ltr"
+                    className={formErrors.nameEn ? "border-destructive" : ""}
                   />
+                  {formErrors.nameEn && (
+                    <p className="text-xs text-destructive">{formErrors.nameEn}</p>
+                  )}
                 </div>
               </div>
 
@@ -680,11 +715,16 @@ export function LeaveTypesManager() {
                   <Input
                     type="number"
                     value={formData.maxDaysPerYear}
-                    onChange={(e) =>
-                      setFormData({ ...formData, maxDaysPerYear: Number(e.target.value) })
-                    }
+                    onChange={(e) => {
+                      setFormData({ ...formData, maxDaysPerYear: Number(e.target.value) });
+                      if (formErrors.maxDaysPerYear) setFormErrors((p) => ({ ...p, maxDaysPerYear: undefined }));
+                    }}
                     min={1}
+                    className={formErrors.maxDaysPerYear ? "border-destructive" : ""}
                   />
+                  {formErrors.maxDaysPerYear && (
+                    <p className="text-xs text-destructive">{formErrors.maxDaysPerYear}</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>الحد الأدنى للطلب</Label>

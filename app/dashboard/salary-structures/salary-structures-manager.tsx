@@ -327,7 +327,7 @@ export function SalaryStructuresManager() {
               هيكل جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="w-full sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingStructure ? "تعديل هيكل الراتب" : "إنشاء هيكل راتب جديد"}
@@ -407,6 +407,7 @@ export function SalaryStructuresManager() {
                             type="button"
                             variant="ghost"
                             size="icon"
+                            aria-label="حذف المكون"
                             className="h-8 w-8 text-destructive"
                             onClick={() => removeComponent(index)}
                           >
@@ -607,6 +608,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="عرض"
                           onClick={() => setSelectedStructure(structure)}
                         >
                           <IconCurrencyRiyal className="h-4 w-4" />
@@ -614,6 +616,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="تعديل"
                           onClick={() => openEditForm(structure)}
                         >
                           <IconEdit className="h-4 w-4" />
@@ -621,6 +624,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="نسخ"
                           onClick={() => handleDuplicate(structure)}
                         >
                           <IconCopy className="h-4 w-4" />
@@ -630,6 +634,7 @@ export function SalaryStructuresManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="حذف"
                               className="text-destructive"
                               disabled={structure.isDefault}
                             >
@@ -666,7 +671,7 @@ export function SalaryStructuresManager() {
 
       {/* Preview Dialog */}
       <Dialog open={!!selectedStructure} onOpenChange={() => setSelectedStructure(null)}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>معاينة الهيكل</DialogTitle>
             <DialogDescription>{selectedStructure?.nameAr}</DialogDescription>

@@ -9,8 +9,24 @@ if (!connectionString) {
   process.exit(1);
 }
 
-const email = (process.env.SUPER_ADMIN_EMAIL || "admin@admin.com").toLowerCase();
-const password = process.env.SUPER_ADMIN_PASSWORD || "123456";
+const bootstrapEnabled =
+  process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "1" ||
+  process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
+
+if (!bootstrapEnabled) {
+  console.error("ENABLE_SUPER_ADMIN_BOOTSTRAP must be enabled to run this script");
+  process.exit(1);
+}
+
+const superAdminEmail = process.env.SUPER_ADMIN_EMAIL;
+const password = process.env.SUPER_ADMIN_PASSWORD;
+
+if (!superAdminEmail || !password) {
+  console.error("SUPER_ADMIN_EMAIL and SUPER_ADMIN_PASSWORD must be set");
+  process.exit(1);
+}
+
+const email = superAdminEmail.toLowerCase();
 
 const pool = new Pool({ connectionString, ssl: { rejectUnauthorized: false } });
 

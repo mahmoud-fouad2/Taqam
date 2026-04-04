@@ -1,22 +1,24 @@
 /**
  * Payroll Data Hook - Centralized payroll management
- * TODO: Replace with actual API calls when backend is ready
  */
 
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import type { Payslip, SalaryStructure } from "@/lib/types/payroll";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import type { Payslip, PayslipStatus, PayrollPeriodStatus, SalaryStructure } from "@/lib/types/payroll";
 import { payrollService } from "@/lib/api";
 
 interface PayrollRun {
   id: string;
   month: string;
   year: number;
-  status: "draft" | "processing" | "completed" | "paid";
+  status: PayrollPeriodStatus;
   totalAmount: number;
   employeeCount: number;
   createdAt: string;
+  startDate: string;
+  endDate: string;
+  paymentDate: string;
 }
 
 interface UsePayrollOptions {
@@ -24,7 +26,8 @@ interface UsePayrollOptions {
   departmentId?: string;
   month?: string;
   year?: number;
-  status?: "draft" | "processing" | "completed" | "paid";
+  status?: PayslipStatus;
+  periodStatus?: PayrollPeriodStatus;
 }
 
 interface PayrollSummary {
@@ -60,43 +63,77 @@ export function usePayroll(options: UsePayrollOptions = {}): UsePayrollReturn {
       const [structuresRes, periodsRes] = await Promise.all([
         payrollService.getStructures(),
         payrollService.getPeriods({
-          month: options.month ? parseInt(options.month) : undefined,
+          month: options.month ? Number(options.month) : undefined,
           year: options.year,
+          status: options.periodStatus,
         }),
       ]);
 
       if (structuresRes.success && structuresRes.data) {
         setSalaryStructures(structuresRes.data);
       }
+
       if (periodsRes.success && periodsRes.data) {
-        // Convert periods to our PayrollRun format
         const runs = periodsRes.data.map((p): PayrollRun => ({
           id: p.id,
-          month: p.name,
-          year: options.year || new Date().getFullYear(),
-          status: p.status as PayrollRun["status"],
-          totalAmount: 0,
-          employeeCount: 0,
+          month: p.nameAr || p.name,
+          year: Number(p.startDate.split("-")[0] || options.year || new Date().getFullYear()),
+          status: p.status,
+          totalAmount: p.totalNet,
+          employeeCount: p.employeeCount,
           createdAt: p.createdAt,
+          startDate: p.startDate,
+          endDate: p.endDate,
+          paymentDate: p.paymentDate,
         }));
         setPayrollRuns(runs);
+
+        if (options.employeeId) {
+          const payslipsRes = await payrollService.getEmployeePayslips(options.employeeId, {
+            year: options.year,
+            status: options.status,
+          });
+
+          if (payslipsRes.success && payslipsRes.data) {
+            setPayslips(payslipsRes.data);
+          }
+        } else {
+          const payslipResponses = await Promise.all(
+            periodsRes.data.map((period) => payrollService.getPayslips(period.id))
+          );
+
+          const allPayslips = payslipResponses.flatMap((response) =>
+            response.success && response.data ? response.data : []
+          );
+
+          setPayslips(allPayslips);
+        }
+      } else {
+        setPayrollRuns([]);
+        setPayslips([]);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : "فشل تحميل بيانات الرواتب");
     } finally {
       setIsLoading(false);
     }
-  }, [options.month, options.year]);
+  }, [options.employeeId, options.month, options.periodStatus, options.status, options.year]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
 
   const runPayroll = useCallback(async (month: string, year: number) => {
     try {
-      // TODO: Create period then process it
+      const monthNumber = Number(month);
+      const paddedMonth = String(monthNumber).padStart(2, "0");
+      const lastDay = new Date(year, monthNumber, 0).getDate();
       const createResponse = await payrollService.createPeriod({
-        name: `${month}-${year}`,
-        nameAr: `${month}-${year}`,
-        startDate: `${year}-${month.padStart(2, "0")}-01`,
-        endDate: `${year}-${month.padStart(2, "0")}-28`,
-        paymentDate: `${year}-${month.padStart(2, "0")}-28`,
+        name: `${paddedMonth}-${year}`,
+        nameAr: `${paddedMonth}-${year}`,
+        startDate: `${year}-${paddedMonth}-01`,
+        endDate: `${year}-${paddedMonth}-${String(lastDay).padStart(2, "0")}`,
+        paymentDate: `${year}-${paddedMonth}-${String(lastDay).padStart(2, "0")}`,
       });
       if (createResponse.success && createResponse.data) {
         await payrollService.processPeriod(createResponse.data.id);
@@ -109,14 +146,39 @@ export function usePayroll(options: UsePayrollOptions = {}): UsePayrollReturn {
     }
   }, [fetchData]);
 
-  const generatePayslip = useCallback(async (_employeeId: string, _month: string, _year: number) => {
+  const generatePayslip = useCallback(async (employeeId: string, month: string, year: number) => {
     try {
-      // TODO: Implement when API is ready
+      const monthNumber = Number(month);
+      const periodsResponse = await payrollService.getPeriods({ year, month: monthNumber });
+      let targetPeriod = periodsResponse.success && periodsResponse.data ? periodsResponse.data[0] : undefined;
+
+      if (!targetPeriod) {
+        await runPayroll(month, year);
+        const refreshedPeriods = await payrollService.getPeriods({ year, month: monthNumber });
+        targetPeriod = refreshedPeriods.success && refreshedPeriods.data ? refreshedPeriods.data[0] : undefined;
+      } else if (targetPeriod.status === "draft") {
+        await payrollService.processPeriod(targetPeriod.id);
+      }
+
+      if (!targetPeriod) {
+        throw new Error("تعذر إنشاء فترة الرواتب المطلوبة");
+      }
+
+      const payslipsResponse = await payrollService.getEmployeePayslips(employeeId, { year });
+      if (!payslipsResponse.success) {
+        throw new Error(payslipsResponse.error || "فشل إنشاء كشف الراتب");
+      }
+
+      const matchingPayslip = payslipsResponse.data?.find((payslip) => payslip.payrollPeriodId === targetPeriod.id);
+      if (!matchingPayslip) {
+        throw new Error("لم يتم العثور على كشف راتب للموظف في هذه الفترة");
+      }
+
       await fetchData();
     } catch (err) {
       setError(err instanceof Error ? err.message : "فشل إنشاء كشف الراتب");
     }
-  }, [fetchData]);
+  }, [fetchData, runPayroll]);
 
   const filteredPayslips = useMemo(() => {
     let result = payslips;
@@ -124,12 +186,22 @@ export function usePayroll(options: UsePayrollOptions = {}): UsePayrollReturn {
     if (options.employeeId) {
       result = result.filter((p) => p.employeeId === options.employeeId);
     }
+    if (options.departmentId) {
+      result = result.filter((p) => p.departmentId === options.departmentId);
+    }
+    if (options.month) {
+      const monthPrefix = String(options.month).padStart(2, "0");
+      result = result.filter((p) => p.periodStartDate?.split("-")[1] === monthPrefix);
+    }
+    if (options.year) {
+      result = result.filter((p) => p.periodStartDate?.startsWith(String(options.year)) ?? true);
+    }
     if (options.status) {
       result = result.filter((p) => p.status === options.status);
     }
 
     return result;
-  }, [payslips, options.employeeId, options.status]);
+  }, [payslips, options.departmentId, options.employeeId, options.month, options.status, options.year]);
 
   const summary = useMemo((): PayrollSummary => {
     const totalGross = filteredPayslips.reduce((sum, p) => sum + (p.totalEarnings || 0), 0);

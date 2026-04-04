@@ -1,5 +1,7 @@
 import crypto from "crypto";
-import type { PrismaClient } from "@prisma/client";
+import type prisma from "@/lib/db";
+
+type MobileAuthDb = Pick<typeof prisma, "mobileDevice" | "mobileRefreshToken">;
 
 const DEFAULT_REFRESH_TTL_DAYS = 30;
 
@@ -21,7 +23,6 @@ function getRefreshSecret(): string {
 
   if (!warnedMissingRefreshSecret) {
     warnedMissingRefreshSecret = true;
-    // eslint-disable-next-line no-console
     console.warn(
       "[mobile] MOBILE_REFRESH_TOKEN_SECRET is not set; using a development fallback secret (set MOBILE_REFRESH_TOKEN_SECRET to silence this)."
     );
@@ -45,7 +46,7 @@ export function getRefreshTokenExpiryDate(now = new Date()): Date {
 }
 
 export async function upsertMobileDevice(
-  prisma: PrismaClient,
+  prisma: MobileAuthDb,
   input: {
     userId: string;
     deviceId: string;
@@ -74,7 +75,7 @@ export async function upsertMobileDevice(
 }
 
 export async function mintRefreshToken(
-  prisma: PrismaClient,
+  prisma: MobileAuthDb,
   input: {
     userId: string;
     mobileDeviceId: string;
@@ -102,7 +103,7 @@ export async function mintRefreshToken(
 }
 
 export async function rotateRefreshToken(
-  prisma: PrismaClient,
+  prisma: MobileAuthDb,
   input: {
     rawRefreshToken: string;
     deviceId: string;
@@ -150,7 +151,7 @@ export async function rotateRefreshToken(
 }
 
 export async function revokeRefreshToken(
-  prisma: PrismaClient,
+  prisma: MobileAuthDb,
   input: { rawRefreshToken: string; deviceId: string }
 ): Promise<boolean> {
   const tokenHash = hashRefreshToken(input.rawRefreshToken);
@@ -173,7 +174,7 @@ export async function revokeRefreshToken(
   return true;
 }
 
-export async function revokeAllRefreshTokensForUser(prisma: PrismaClient, userId: string): Promise<number> {
+export async function revokeAllRefreshTokensForUser(prisma: MobileAuthDb, userId: string): Promise<number> {
   const res = await prisma.mobileRefreshToken.updateMany({
     where: { userId, revokedAt: null },
     data: { revokedAt: new Date() },

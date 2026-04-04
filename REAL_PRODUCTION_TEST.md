@@ -1,5 +1,8 @@
 # اختبار الإنتاج الفعلي - Real Production Testing
 
+> **ملاحظة أرشيفية:** هذا الملف يوثق خطة واختبارًا تاريخيًا للإنتاج. قد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو بيانات دخول قديمة.
+> للاستخدام الحالي اعتمد على `QUICK_START.md` و `SUMMARY.md` و `TESTING_GUIDE.md` واستخدم `https://YOUR-RENDER-DOMAIN` مع القيم الحالية من البيئة.
+
 ## المرحلة الأولى: اختبار تسجيل الدخول
 - الرابط: `https://ujoor.onrender.com/api/mobile/auth/login`
 - المستخدم: `admin@admin.com`

@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 import { Building2, Clock, CreditCard, Globe, Shield, Users } from "lucide-react";
@@ -11,12 +11,12 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/features",
-    titleAr: "مميزات أجور | منصة موارد بشرية ورواتب وحضور",
-    titleEn: "Ujoors Features | HR, Payroll & Attendance",
+    titleAr: "مميزات طاقم | منصة موارد بشرية ورواتب وحضور",
+    titleEn: "Taqam Features | HR, Payroll & Attendance",
     descriptionAr:
-      "استكشف مميزات أجور: إدارة موظفين، حضور وانصراف، رواتب، امتثال سعودي، تقارير، وصلاحيات متعددة داخل نظام متعدد الشركات.",
+      "استكشف مميزات طاقم: إدارة موظفين، حضور وانصراف، رواتب، امتثال سعودي، تقارير، وصلاحيات متعددة داخل نظام متعدد الشركات.",
     descriptionEn:
-      "Explore Ujoors features: employees, attendance, payroll, Saudi compliance, reports, RBAC, and multi-tenant architecture.",
+      "Explore Taqam features: employees, attendance, payroll, Saudi compliance, reports, RBAC, and multi-tenant architecture.",
   });
 }
 
@@ -86,7 +86,7 @@ export default async function FeaturesPage() {
     <main className="bg-background">
       <section className="container mx-auto px-4 py-14">
         <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold sm:text-4xl">{isAr ? "مميزات أجور" : "Ujoors Features"}</h1>
+          <h1 className="text-3xl font-bold sm:text-4xl">{isAr ? "مميزات طاقم" : "Taqam Features"}</h1>
           <p className="mt-3 text-muted-foreground">
             {isAr
               ? "كل ما تحتاجه لإدارة الموارد البشرية والرواتب والحضور في منصة واحدة."
@@ -94,10 +94,10 @@ export default async function FeaturesPage() {
           </p>
           <div className="mt-6 flex justify-center gap-3">
             <Link href={`${p}/pricing`}>
-              <Button>{isAr ? "عرض الأسعار" : "View pricing"}</Button>
+              <Button variant="brandOutline">{isAr ? "عرض الأسعار" : "View pricing"}</Button>
             </Link>
             <Link href={`${p}/request-demo`}>
-              <Button variant="outline">{isAr ? "طلب عرض" : "Request a demo"}</Button>
+              <Button variant="brand">{isAr ? "طلب عرض" : "Request a demo"}</Button>
             </Link>
           </div>
         </div>
@@ -139,7 +139,7 @@ export default async function FeaturesPage() {
             </p>
             <div className="mt-6">
               <Link href={`${p}/request-demo`}>
-                <Button size="lg">{isAr ? "طلب عرض تجريبي" : "Request a demo"}</Button>
+                <Button size="lg" variant="brand">{isAr ? "طلب عرض تجريبي" : "Request a demo"}</Button>
               </Link>
             </div>
           </div>

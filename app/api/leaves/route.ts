@@ -6,6 +6,19 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { notifyLeaveRequestSubmitted } from "@/lib/notifications/send";
+import { z } from "zod";
+
+const createLeaveSchema = z.object({
+  employeeId: z.string().min(1),
+  leaveTypeId: z.string().min(1),
+  startDate: z.string().min(1),
+  endDate: z.string().min(1),
+  isHalfDay: z.boolean().optional(),
+  reason: z.string().optional(),
+  attachmentUrl: z.string().optional(),
+  delegateToId: z.string().optional(),
+});
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -114,7 +127,12 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tenant required" }, { status: 400 });
     }
 
-    const body = await request.json();
+    const rawBody = await request.json();
+    const parsed = createLeaveSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
+    }
+    const body = parsed.data;
 
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
@@ -146,8 +164,26 @@ export async function POST(request: NextRequest) {
           status: "PENDING",
         },
         include: {
-          employee: true,
-          leaveType: true,
+          employee: {
+            select: {
+              userId: true,
+              firstName: true,
+              lastName: true,
+              firstNameAr: true,
+              lastNameAr: true,
+              manager: {
+                select: {
+                  userId: true,
+                },
+              },
+            },
+          },
+          leaveType: {
+            select: {
+              name: true,
+              nameAr: true,
+            },
+          },
         },
       });
 
@@ -174,6 +210,19 @@ export async function POST(request: NextRequest) {
 
       return created;
     });
+
+    if (leaveRequest.employee.manager?.userId) {
+      await notifyLeaveRequestSubmitted({
+        tenantId,
+        managerUserId: leaveRequest.employee.manager.userId,
+        employeeName:
+          `${leaveRequest.employee.firstNameAr || leaveRequest.employee.firstName} ${leaveRequest.employee.lastNameAr || leaveRequest.employee.lastName}`,
+        leaveType: leaveRequest.leaveType.nameAr || leaveRequest.leaveType.name,
+        startDate: startDate.toISOString().split("T")[0] ?? "",
+        endDate: endDate.toISOString().split("T")[0] ?? "",
+        requestId: leaveRequest.id,
+      });
+    }
 
     return NextResponse.json({ data: leaveRequest }, { status: 201 });
   } catch (error) {

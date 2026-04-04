@@ -2,20 +2,21 @@
 
 import * as React from "react";
 import {
-  IconPlus,
-  IconSearch,
-  IconFilter,
+  IconBriefcase,
+  IconCalendar,
+  IconExternalLink,
   IconEye,
+  IconFileText,
+  IconFilter,
   IconMail,
   IconPhone,
-  IconCalendar,
+  IconSearch,
   IconStar,
   IconStarFilled,
   IconUser,
-  IconBriefcase,
-  IconFileText,
-  IconExternalLink,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -55,17 +56,23 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
-  Applicant,
-  JobPosting,
-  ApplicationStatus,
-  applicationStatusLabels,
+  getApplicant,
+  getApplicants,
+  getJobPostings,
+  updateApplicantRating,
+  updateApplicantStatus,
+} from "@/lib/api/recruitment";
+import {
+  type Applicant,
   applicationStatusColors,
+  applicationStatusLabels,
+  type ApplicationStatus,
+  type JobPosting,
   sourceChannelLabels,
 } from "@/lib/types/recruitment";
-import { getApplicants, getJobPostings } from "@/lib/api/recruitment";
 
 export function ApplicantsManager() {
   const [applicants, setApplicants] = React.useState<Applicant[]>([]);
@@ -75,102 +82,137 @@ export function ApplicantsManager() {
   const [jobFilter, setJobFilter] = React.useState<string>("all");
   const [selectedApplicant, setSelectedApplicant] = React.useState<Applicant | null>(null);
   const [isViewSheetOpen, setIsViewSheetOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [updatingStatusId, setUpdatingStatusId] = React.useState<string | null>(null);
+  const [updatingRatingId, setUpdatingRatingId] = React.useState<string | null>(null);
 
-  React.useEffect(() => {
-    let isMounted = true;
-
-    const load = async () => {
-      try {
-        const [applicantsRes, jobsRes] = await Promise.all([
-          getApplicants(),
-          getJobPostings(),
-        ]);
-        if (!isMounted) return;
-        setApplicants(applicantsRes);
-        setJobs(jobsRes);
-      } catch {
-        if (!isMounted) return;
-        setApplicants([]);
-        setJobs([]);
-      }
-    };
-
-    void load();
-    return () => {
-      isMounted = false;
-    };
+  const loadData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [applicantsRes, jobsRes] = await Promise.all([getApplicants(), getJobPostings()]);
+      setApplicants(applicantsRes);
+      setJobs(jobsRes);
+    } catch (error) {
+      setApplicants([]);
+      setJobs([]);
+      toast.error(error instanceof Error ? error.message : "فشل في جلب بيانات التوظيف");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // فلترة المتقدمين
+  React.useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
   const filteredApplicants = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
     return applicants.filter((applicant) => {
-      const matchesSearch =
-        `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        applicant.jobTitle.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesQuery =
+        !query ||
+        `${applicant.firstName} ${applicant.lastName}`.toLowerCase().includes(query) ||
+        applicant.email.toLowerCase().includes(query) ||
+        applicant.jobTitle.toLowerCase().includes(query);
 
-      const matchesStatus =
-        statusFilter === "all" || applicant.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || applicant.status === statusFilter;
+      const matchesJob = jobFilter === "all" || applicant.jobPostingId === jobFilter;
 
-      const matchesJob =
-        jobFilter === "all" || applicant.jobPostingId === jobFilter;
-
-      return matchesSearch && matchesStatus && matchesJob;
+      return matchesQuery && matchesStatus && matchesJob;
     });
   }, [applicants, searchQuery, statusFilter, jobFilter]);
 
-  // إحصائيات
-  const stats = React.useMemo(() => ({
-    total: applicants.length,
-    new: applicants.filter((a) => a.status === "new").length,
-    interview: applicants.filter((a) => a.status === "interview").length,
-    hired: applicants.filter((a) => a.status === "hired").length,
-  }), [applicants]);
+  const stats = React.useMemo(
+    () => ({
+      total: applicants.length,
+      new: applicants.filter((applicant) => applicant.status === "new").length,
+      interview: applicants.filter((applicant) => applicant.status === "interview").length,
+      accepted: applicants.filter((applicant) => applicant.status === "accepted").length,
+    }),
+    [applicants]
+  );
 
-  const handleViewApplicant = (applicant: Applicant) => {
+  async function handleViewApplicant(applicant: Applicant) {
     setSelectedApplicant(applicant);
     setIsViewSheetOpen(true);
-  };
 
-  const handleStatusChange = (applicantId: string, newStatus: ApplicationStatus) => {
-    setApplicants(
-      applicants.map((a) =>
-        a.id === applicantId ? { ...a, status: newStatus } : a
-      )
-    );
-  };
+    try {
+      const freshApplicant = await getApplicant(applicant.id);
+      if (!freshApplicant) {
+        return;
+      }
 
-  const handleRatingChange = (applicantId: string, rating: number) => {
-    setApplicants(
-      applicants.map((a) =>
-        a.id === applicantId ? { ...a, rating } : a
-      )
-    );
-  };
+      setApplicants((current) =>
+        current.map((item) => (item.id === freshApplicant.id ? freshApplicant : item))
+      );
+      setSelectedApplicant(freshApplicant);
+    } catch {
+      // Keep the already selected applicant if the refresh fails.
+    }
+  }
 
-  const renderStars = (rating: number | undefined, applicantId: string) => {
+  async function handleStatusChange(applicantId: string, newStatus: ApplicationStatus) {
+    setUpdatingStatusId(applicantId);
+    try {
+      const updatedApplicant = await updateApplicantStatus(applicantId, newStatus);
+      setApplicants((current) =>
+        current.map((applicant) => (applicant.id === updatedApplicant.id ? updatedApplicant : applicant))
+      );
+
+      if (selectedApplicant?.id === updatedApplicant.id) {
+        setSelectedApplicant(updatedApplicant);
+      }
+
+      toast.success("تم تحديث حالة المتقدم");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "فشل في تحديث حالة المتقدم");
+    } finally {
+      setUpdatingStatusId(null);
+    }
+  }
+
+  async function handleRatingChange(applicantId: string, rating: number) {
+    setUpdatingRatingId(applicantId);
+    try {
+      const updatedApplicant = await updateApplicantRating(applicantId, rating);
+      setApplicants((current) =>
+        current.map((applicant) => (applicant.id === updatedApplicant.id ? updatedApplicant : applicant))
+      );
+
+      if (selectedApplicant?.id === updatedApplicant.id) {
+        setSelectedApplicant(updatedApplicant);
+      }
+
+      toast.success("تم تحديث تقييم المتقدم");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "فشل في تحديث تقييم المتقدم");
+    } finally {
+      setUpdatingRatingId(null);
+    }
+  }
+
+  function renderStars(rating: number | undefined, applicantId: string) {
+    const isUpdating = updatingRatingId === applicantId;
+
     return (
       <div className="flex gap-0.5">
         {[1, 2, 3, 4, 5].map((star) => (
           <button
             key={star}
-            onClick={() => handleRatingChange(applicantId, star)}
-            className="text-yellow-500 hover:scale-110 transition-transform"
+            type="button"
+            disabled={isUpdating}
+            onClick={() => void handleRatingChange(applicantId, star)}
+            className="text-yellow-500 transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-60"
           >
-            {rating && star <= rating ? (
-              <IconStarFilled className="h-4 w-4" />
-            ) : (
-              <IconStar className="h-4 w-4" />
-            )}
+            {rating && star <= rating ? <IconStarFilled className="h-4 w-4" /> : <IconStar className="h-4 w-4" />}
           </button>
         ))}
       </div>
     );
-  };
+  }
 
   return (
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -207,31 +249,29 @@ export function ApplicantsManager() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">تم توظيفهم</CardTitle>
+            <CardTitle className="text-sm font-medium">تم قبولهم</CardTitle>
             <IconBriefcase className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.hired}</div>
-            <p className="text-xs text-muted-foreground">موظف جديد</p>
+            <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
+            <p className="text-xs text-muted-foreground">مرشحون مقبولون</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* جدول المتقدمين */}
       <Card>
         <CardHeader>
           <CardTitle>المتقدمون للوظائف</CardTitle>
-          <CardDescription>قائمة بجميع المتقدمين وحالة طلباتهم</CardDescription>
+          <CardDescription>إدارة طلبات التقديم وتحديث الحالة والتقييم بشكل فعلي</CardDescription>
         </CardHeader>
         <CardContent>
-          {/* أدوات البحث والفلترة */}
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="بحث عن متقدم..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
               />
             </div>
@@ -264,8 +304,7 @@ export function ApplicantsManager() {
             </Select>
           </div>
 
-          {/* جدول المتقدمين */}
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -279,10 +318,10 @@ export function ApplicantsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredApplicants.length === 0 ? (
+                {!isLoading && filteredApplicants.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
-                      <p className="text-muted-foreground">لا يوجد متقدمون</p>
+                    <TableCell colSpan={7} className="py-8 text-center">
+                      <p className="text-muted-foreground">لا يوجد متقدمون مطابقون</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -292,16 +331,15 @@ export function ApplicantsManager() {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-9 w-9">
                             <AvatarFallback>
-                              {applicant.firstName[0]}{applicant.lastName[0]}
+                              {applicant.firstName[0]}
+                              {applicant.lastName[0]}
                             </AvatarFallback>
                           </Avatar>
                           <div>
                             <p className="font-medium">
                               {applicant.firstName} {applicant.lastName}
                             </p>
-                            <p className="text-xs text-muted-foreground">
-                              {applicant.email}
-                            </p>
+                            <p className="text-xs text-muted-foreground">{applicant.email}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -309,26 +347,21 @@ export function ApplicantsManager() {
                         <div>
                           <p className="font-medium">{applicant.jobTitle}</p>
                           {applicant.currentCompany && (
-                            <p className="text-xs text-muted-foreground">
-                              حالياً: {applicant.currentCompany}
-                            </p>
+                            <p className="text-xs text-muted-foreground">حالياً: {applicant.currentCompany}</p>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {sourceChannelLabels[applicant.source]}
-                        </Badge>
+                        <Badge variant="outline">{sourceChannelLabels[applicant.source]}</Badge>
                       </TableCell>
                       <TableCell>{renderStars(applicant.rating, applicant.id)}</TableCell>
                       <TableCell>
                         <Select
                           value={applicant.status}
-                          onValueChange={(value) =>
-                            handleStatusChange(applicant.id, value as ApplicationStatus)
-                          }
+                          onValueChange={(value) => void handleStatusChange(applicant.id, value as ApplicationStatus)}
+                          disabled={updatingStatusId === applicant.id}
                         >
-                          <SelectTrigger className="h-8 w-28">
+                          <SelectTrigger className="h-8 w-36">
                             <Badge className={applicationStatusColors[applicant.status]}>
                               {applicationStatusLabels[applicant.status]}
                             </Badge>
@@ -336,17 +369,13 @@ export function ApplicantsManager() {
                           <SelectContent>
                             {Object.entries(applicationStatusLabels).map(([value, label]) => (
                               <SelectItem key={value} value={value}>
-                                <Badge className={applicationStatusColors[value as ApplicationStatus]}>
-                                  {label}
-                                </Badge>
+                                <Badge className={applicationStatusColors[value as ApplicationStatus]}>{label}</Badge>
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell>
-                        {new Date(applicant.appliedAt).toLocaleDateString("ar-SA")}
-                      </TableCell>
+                      <TableCell>{new Date(applicant.appliedAt).toLocaleDateString("ar-SA")}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -355,20 +384,18 @@ export function ApplicantsManager() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewApplicant(applicant)}>
+                            <DropdownMenuItem onClick={() => void handleViewApplicant(applicant)}>
                               <IconEye className="ms-2 h-4 w-4" />
                               عرض الملف
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <IconMail className="ms-2 h-4 w-4" />
-                              إرسال بريد
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <IconCalendar className="ms-2 h-4 w-4" />
-                              جدولة مقابلة
+                            <DropdownMenuItem asChild>
+                              <a href={`mailto:${applicant.email}`}>
+                                <IconMail className="ms-2 h-4 w-4" />
+                                إرسال بريد
+                              </a>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive">
+                            <DropdownMenuItem className="text-destructive" onClick={() => void handleStatusChange(applicant.id, "rejected")}>
                               رفض الطلب
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -383,29 +410,31 @@ export function ApplicantsManager() {
         </CardContent>
       </Card>
 
-      {/* Sheet عرض تفاصيل المتقدم */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>ملف المتقدم</SheetTitle>
-            <SheetDescription>معلومات تفصيلية عن المتقدم</SheetDescription>
+            <SheetDescription>معلومات تفصيلية عن المتقدم ومسار طلبه</SheetDescription>
           </SheetHeader>
+
           {selectedApplicant && (
             <div className="space-y-6 py-4">
-              {/* معلومات أساسية */}
               <div className="flex items-start gap-4">
                 <Avatar className="h-16 w-16">
                   <AvatarFallback className="text-lg">
-                    {selectedApplicant.firstName[0]}{selectedApplicant.lastName[0]}
+                    {selectedApplicant.firstName[0]}
+                    {selectedApplicant.lastName[0]}
                   </AvatarFallback>
                 </Avatar>
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold">
                     {selectedApplicant.firstName} {selectedApplicant.lastName}
                   </h3>
-                  <p className="text-muted-foreground">{selectedApplicant.currentPosition}</p>
-                  <p className="text-sm text-muted-foreground">{selectedApplicant.currentCompany}</p>
-                  <div className="flex items-center gap-2 mt-2">
+                  <p className="text-muted-foreground">{selectedApplicant.jobTitle}</p>
+                  {selectedApplicant.currentCompany && (
+                    <p className="text-sm text-muted-foreground">{selectedApplicant.currentCompany}</p>
+                  )}
+                  <div className="mt-2 flex items-center gap-2">
                     <Badge className={applicationStatusColors[selectedApplicant.status]}>
                       {applicationStatusLabels[selectedApplicant.status]}
                     </Badge>
@@ -416,9 +445,8 @@ export function ApplicantsManager() {
 
               <Separator />
 
-              {/* معلومات الاتصال */}
               <div>
-                <h4 className="font-semibold mb-3">معلومات الاتصال</h4>
+                <h4 className="mb-3 font-semibold">معلومات الاتصال</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <IconMail className="h-4 w-4 text-muted-foreground" />
@@ -426,17 +454,37 @@ export function ApplicantsManager() {
                       {selectedApplicant.email}
                     </a>
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <IconPhone className="h-4 w-4 text-muted-foreground" />
-                    <a href={`tel:${selectedApplicant.phone}`} className="hover:underline">
-                      {selectedApplicant.phone}
-                    </a>
-                  </div>
+                  {selectedApplicant.phone && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <IconPhone className="h-4 w-4 text-muted-foreground" />
+                      <a href={`tel:${selectedApplicant.phone}`} className="hover:underline">
+                        {selectedApplicant.phone}
+                      </a>
+                    </div>
+                  )}
                   {selectedApplicant.linkedinUrl && (
                     <div className="flex items-center gap-2 text-sm">
                       <IconExternalLink className="h-4 w-4 text-muted-foreground" />
-                      <a href={selectedApplicant.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                      <a
+                        href={selectedApplicant.linkedinUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
                         LinkedIn
+                      </a>
+                    </div>
+                  )}
+                  {selectedApplicant.resumeUrl && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <IconFileText className="h-4 w-4 text-muted-foreground" />
+                      <a
+                        href={selectedApplicant.resumeUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline"
+                      >
+                        فتح السيرة الذاتية
                       </a>
                     </div>
                   )}
@@ -445,57 +493,54 @@ export function ApplicantsManager() {
 
               <Separator />
 
-              {/* تفاصيل الوظيفة */}
               <div>
-                <h4 className="font-semibold mb-3">الوظيفة المتقدم لها</h4>
-                <div className="bg-muted/50 rounded-lg p-3">
+                <h4 className="mb-3 font-semibold">تفاصيل التقديم</h4>
+                <div className="rounded-lg bg-muted/50 p-3 text-sm">
                   <p className="font-medium">{selectedApplicant.jobTitle}</p>
-                  <div className="flex gap-2 mt-2 text-sm text-muted-foreground">
+                  <div className="mt-2 flex flex-wrap gap-2 text-muted-foreground">
                     <span>المصدر: {sourceChannelLabels[selectedApplicant.source]}</span>
-                    {selectedApplicant.referredBy && (
-                      <span>• ترشيح من موظف</span>
-                    )}
+                    <span>تاريخ التقديم: {new Date(selectedApplicant.appliedAt).toLocaleDateString("ar-SA")}</span>
                   </div>
                 </div>
               </div>
 
-              {/* الخبرة والتعليم */}
-              <div>
-                <h4 className="font-semibold mb-3">المؤهلات</h4>
-                <div className="space-y-2 text-sm">
-                  {selectedApplicant.yearsOfExperience && (
-                    <p>• {selectedApplicant.yearsOfExperience} سنوات خبرة</p>
-                  )}
-                  {selectedApplicant.education && (
-                    <p>• {selectedApplicant.education}</p>
-                  )}
-                  {selectedApplicant.expectedSalary && (
-                    <p>• الراتب المتوقع: {selectedApplicant.expectedSalary.toLocaleString()} ر.س</p>
-                  )}
+              {selectedApplicant.coverLetter && (
+                <div>
+                  <h4 className="mb-3 font-semibold">خطاب التقديم</h4>
+                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.coverLetter}</p>
                 </div>
-              </div>
+              )}
 
-              {/* المهارات */}
+              {selectedApplicant.notes && (
+                <div>
+                  <h4 className="mb-3 font-semibold">ملاحظات داخلية</h4>
+                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.notes}</p>
+                </div>
+              )}
+
               {selectedApplicant.skills.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-3">المهارات</h4>
+                  <h4 className="mb-3 font-semibold">المهارات</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedApplicant.skills.map((skill, i) => (
-                      <Badge key={i} variant="secondary">{skill}</Badge>
+                    {selectedApplicant.skills.map((skill) => (
+                      <Badge key={skill} variant="secondary">
+                        {skill}
+                      </Badge>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* الإجراءات */}
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1">
+                <Button className="flex-1" onClick={() => void handleStatusChange(selectedApplicant.id, "interview")}>
                   <IconCalendar className="ms-2 h-4 w-4" />
-                  جدولة مقابلة
+                  نقل إلى المقابلة
                 </Button>
-                <Button variant="outline" className="flex-1">
-                  <IconMail className="ms-2 h-4 w-4" />
-                  إرسال رسالة
+                <Button variant="outline" className="flex-1" asChild>
+                  <a href={`mailto:${selectedApplicant.email}`}>
+                    <IconMail className="ms-2 h-4 w-4" />
+                    إرسال رسالة
+                  </a>
                 </Button>
               </div>
             </div>

@@ -413,7 +413,7 @@ export function LoansManager() {
             type="loans" 
             filters={{ status: statusFilter !== "all" ? statusFilter : "" }} 
           />
-          <Button variant="outline" size="icon" onClick={() => fetchLoans()}>
+          <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchLoans()}>
             <IconRefresh className="h-4 w-4" />
           </Button>
         </div>
@@ -431,7 +431,7 @@ export function LoansManager() {
               طلب قرض جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[500px]">
+          <DialogContent className="w-full sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>{editingLoan ? "تعديل القرض" : "طلب قرض جديد"}</DialogTitle>
               <DialogDescription>أدخل تفاصيل القرض أو السلفة</DialogDescription>
@@ -558,7 +558,7 @@ export function LoansManager() {
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
-                          <AvatarImage src={loan.employee.user.avatar || undefined} />
+                          <AvatarImage src={loan.employee.user.avatar || undefined} alt="" />
                           <AvatarFallback>
                             {loan.employee.user.firstName?.[0]}
                             {loan.employee.user.lastName?.[0]}
@@ -586,6 +586,7 @@ export function LoansManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="موافقة"
                               className="h-8 w-8 text-green-600"
                               onClick={() => handleStatusChange(loan.id, "ACTIVE")}
                               title="موافقة"
@@ -595,6 +596,7 @@ export function LoansManager() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="رفض"
                               className="h-8 w-8 text-red-600"
                               onClick={() => handleStatusChange(loan.id, "REJECTED")}
                               title="رفض"
@@ -606,6 +608,7 @@ export function LoansManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="تعديل"
                           className="h-8 w-8"
                           onClick={() => openEditForm(loan)}
                           disabled={loan.status === "COMPLETED"}
@@ -615,6 +618,7 @@ export function LoansManager() {
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="حذف"
                           className="h-8 w-8 text-destructive"
                           onClick={() => {
                             setLoanToDelete(loan);

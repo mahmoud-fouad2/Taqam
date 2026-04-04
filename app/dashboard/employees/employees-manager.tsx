@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -31,15 +32,36 @@ import type { EmployeeFormData } from "./_components/employee-form-schema";
 import { employeeSchema } from "./_components/employee-form-schema";
 
 export function EmployeesManager() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
-  const [filterDept, setFilterDept] = useState<string>("all");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  // URL-synced filters — survives refresh & can be shared as links
+  const searchQuery = searchParams.get("q") ?? "";
+  const filterDept = searchParams.get("dept") ?? "all";
+  const filterStatus = searchParams.get("status") ?? "all";
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(searchQuery);
+
+  const updateFilter = useCallback(
+    (key: string, value: string) => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (value === "" || value === "all") p.delete(key);
+      else p.set(key, value);
+      router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
+  const setSearchQuery = (v: string) => updateFilter("q", v);
+  const setFilterDept = (v: string) => updateFilter("dept", v);
+  const setFilterStatus = (v: string) => updateFilter("status", v);
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
@@ -343,7 +365,7 @@ export function EmployeesManager() {
               <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
                 استيراد CSV
               </Button>
-              <Button variant="outline" size="icon" onClick={fetchEmployees} title="تحديث">
+              <Button variant="outline" size="icon" onClick={fetchEmployees} aria-label="تحديث" title="تحديث">
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>

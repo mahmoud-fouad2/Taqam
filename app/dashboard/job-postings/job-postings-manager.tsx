@@ -2,18 +2,19 @@
 
 import * as React from "react";
 import {
+  IconBriefcase,
+  IconCurrencyDollar,
+  IconEdit,
+  IconEye,
+  IconFilter,
+  IconMapPin,
   IconPlus,
   IconSearch,
-  IconFilter,
-  IconEye,
-  IconEdit,
   IconTrash,
-  IconBriefcase,
-  IconMapPin,
-  IconClock,
   IconUsers,
-  IconCurrencyDollar,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -38,7 +39,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
   Select,
@@ -65,88 +65,272 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { departmentsService } from "@/lib/api/departments";
 import {
-  JobPosting,
-  JobStatus,
-  JobType,
-  ExperienceLevel,
-  jobStatusLabels,
-  jobStatusColors,
-  jobTypeLabels,
+  createJobPosting,
+  deleteJobPosting,
+  getJobPostings,
+  updateJobPosting,
+} from "@/lib/api/recruitment";
+import type { Department } from "@/lib/types/core-hr";
+import {
+  type ExperienceLevel,
   experienceLevelLabels,
+  type JobPosting,
+  type JobStatus,
+  jobStatusColors,
+  jobStatusLabels,
+  type JobType,
+  jobTypeLabels,
 } from "@/lib/types/recruitment";
-import { getJobPostings } from "@/lib/api/recruitment";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+
+type JobFormState = {
+  title: string;
+  titleAr: string;
+  description: string;
+  departmentId: string;
+  location: string;
+  jobType: JobType;
+  experienceLevel: ExperienceLevel;
+  salaryMin: string;
+  salaryMax: string;
+  openPositions: string;
+  requirements: string;
+  benefits: string;
+  applicationDeadline: string;
+};
+
+const emptyJobForm: JobFormState = {
+  title: "",
+  titleAr: "",
+  description: "",
+  departmentId: "",
+  location: "",
+  jobType: "full-time",
+  experienceLevel: "mid",
+  salaryMin: "",
+  salaryMax: "",
+  openPositions: "1",
+  requirements: "",
+  benefits: "",
+  applicationDeadline: "",
+};
+
+function linesToText(lines?: string[]) {
+  return (lines ?? []).join("\n");
+}
+
+function buildJobForm(job: JobPosting): JobFormState {
+  return {
+    title: job.title,
+    titleAr: job.titleEn ?? "",
+    description: job.description,
+    departmentId: job.departmentId,
+    location: job.location,
+    jobType: job.jobType,
+    experienceLevel: job.experienceLevel,
+    salaryMin: job.salaryMin?.toString() ?? "",
+    salaryMax: job.salaryMax?.toString() ?? "",
+    openPositions: job.openPositions.toString(),
+    requirements: linesToText(job.requirements),
+    benefits: linesToText(job.benefits),
+    applicationDeadline: job.applicationDeadline?.slice(0, 10) ?? "",
+  };
+}
+
+function splitLines(value: string) {
+  return value
+    .split(/\r?\n/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 export function JobPostingsManager() {
+  const locale = useClientLocale("ar");
+  const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [jobs, setJobs] = React.useState<JobPosting[]>([]);
+  const [departments, setDepartments] = React.useState<Department[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
-  const [isAddSheetOpen, setIsAddSheetOpen] = React.useState(false);
   const [selectedJob, setSelectedJob] = React.useState<JobPosting | null>(null);
+  const [editingJob, setEditingJob] = React.useState<JobPosting | null>(null);
+  const [jobForm, setJobForm] = React.useState<JobFormState>(emptyJobForm);
+  const [isFormSheetOpen, setIsFormSheetOpen] = React.useState(false);
   const [isViewSheetOpen, setIsViewSheetOpen] = React.useState(false);
   const [deleteJobId, setDeleteJobId] = React.useState<string | null>(null);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [isDeleting, setIsDeleting] = React.useState(false);
 
-  React.useEffect(() => {
-    let isMounted = true;
+  const loadData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [jobsRes, departmentsRes] = await Promise.all([
+        getJobPostings(),
+        departmentsService.getAll(),
+      ]);
 
-    const load = async () => {
-      try {
-        const res = await getJobPostings();
-        if (!isMounted) return;
-        setJobs(res);
-      } catch {
-        if (!isMounted) return;
-        setJobs([]);
+      setJobs(jobsRes);
+      setDepartments(departmentsRes.data ?? []);
+
+      if (!departmentsRes.success) {
+        toast.error(departmentsRes.error || "فشل في جلب الأقسام");
       }
-    };
-
-    void load();
-    return () => {
-      isMounted = false;
-    };
+    } catch (error) {
+      setJobs([]);
+      setDepartments([]);
+      toast.error(error instanceof Error ? error.message : "فشل في جلب بيانات التوظيف");
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // فلترة الوظائف
+  React.useEffect(() => {
+    void loadData();
+  }, [loadData]);
+
   const filteredJobs = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
     return jobs.filter((job) => {
-      const matchesSearch =
-        job.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.departmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        job.location.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesQuery =
+        !query ||
+        job.title.toLowerCase().includes(query) ||
+        (job.titleEn || "").toLowerCase().includes(query) ||
+        job.departmentName.toLowerCase().includes(query) ||
+        job.location.toLowerCase().includes(query);
 
-      const matchesStatus =
-        statusFilter === "all" || job.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || job.status === statusFilter;
 
-      return matchesSearch && matchesStatus;
+      return matchesQuery && matchesStatus;
     });
   }, [jobs, searchQuery, statusFilter]);
 
-  // إحصائيات سريعة
-  const stats = React.useMemo(() => ({
-    total: jobs.length,
-    open: jobs.filter((j) => j.status === "open").length,
-    filled: jobs.filter((j) => j.status === "filled").length,
-    totalPositions: jobs.reduce((sum, j) => sum + j.openPositions, 0),
-  }), [jobs]);
+  const stats = React.useMemo(
+    () => ({
+      total: jobs.length,
+      active: jobs.filter((job) => job.status === "active").length,
+      filled: jobs.filter((job) => job.status === "filled").length,
+      totalPositions: jobs.reduce((sum, job) => sum + job.openPositions, 0),
+    }),
+    [jobs]
+  );
 
-  const handleViewJob = (job: JobPosting) => {
-    setSelectedJob(job);
-    setIsViewSheetOpen(true);
-  };
+  function updateFormValue<K extends keyof JobFormState>(key: K, value: JobFormState[K]) {
+    setJobForm((current) => ({ ...current, [key]: value }));
+  }
 
-  const handleDeleteJob = (id: string) => {
-    setDeleteJobId(id);
-  };
+  function openCreateSheet() {
+    setEditingJob(null);
+    setJobForm(emptyJobForm);
+    setIsFormSheetOpen(true);
+  }
 
-  const confirmDeleteJob = () => {
-    if (!deleteJobId) return;
-    setJobs((prev) => prev.filter((j) => j.id !== deleteJobId));
-    setDeleteJobId(null);
-  };
+  function openEditSheet(job: JobPosting) {
+    setEditingJob(job);
+    setJobForm(buildJobForm(job));
+    setIsFormSheetOpen(true);
+  }
+
+  async function saveJob(targetStatus: JobStatus) {
+    const title = jobForm.title.trim();
+    const description = jobForm.description.trim();
+    const openPositions = Math.max(1, Number(jobForm.openPositions || 1));
+    const salaryMin = jobForm.salaryMin ? Number(jobForm.salaryMin) : undefined;
+    const salaryMax = jobForm.salaryMax ? Number(jobForm.salaryMax) : undefined;
+
+    if (title.length < 2) {
+      toast.error("يرجى إدخال مسمى وظيفي صالح");
+      return;
+    }
+
+    if (description.length < 5) {
+      toast.error("يرجى إدخال وصف وظيفة أوضح");
+      return;
+    }
+
+    if (salaryMin !== undefined && salaryMax !== undefined && salaryMin > salaryMax) {
+      toast.error("الحد الأدنى للراتب يجب أن يكون أقل من أو يساوي الحد الأقصى");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const payload: Partial<JobPosting> = {
+        title,
+        titleEn: jobForm.titleAr.trim() || undefined,
+        description,
+        departmentId: jobForm.departmentId || undefined,
+        location: jobForm.location.trim() || "غير محدد",
+        jobType: jobForm.jobType,
+        experienceLevel: jobForm.experienceLevel,
+        salaryMin,
+        salaryMax,
+        openPositions,
+        requirements: splitLines(jobForm.requirements),
+        benefits: splitLines(jobForm.benefits),
+        applicationDeadline: jobForm.applicationDeadline || undefined,
+        status: targetStatus,
+        postedDate:
+          targetStatus === "active"
+            ? editingJob?.postedDate || new Date().toISOString()
+            : editingJob?.postedDate,
+      };
+
+      const savedJob = editingJob
+        ? await updateJobPosting(editingJob.id, payload)
+        : await createJobPosting(payload);
+
+      setJobs((current) => {
+        if (editingJob) {
+          return current.map((job) => (job.id === savedJob.id ? savedJob : job));
+        }
+
+        return [savedJob, ...current];
+      });
+
+      if (selectedJob?.id === savedJob.id) {
+        setSelectedJob(savedJob);
+      }
+
+      toast.success(editingJob ? "تم تحديث الوظيفة" : "تم إنشاء الوظيفة");
+      setIsFormSheetOpen(false);
+      setEditingJob(null);
+      setJobForm(emptyJobForm);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "فشل في حفظ الوظيفة");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function confirmDeleteJob() {
+    if (!deleteJobId) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deleteJobPosting(deleteJobId);
+      setJobs((current) => current.filter((job) => job.id !== deleteJobId));
+
+      if (selectedJob?.id === deleteJobId) {
+        setSelectedJob(null);
+        setIsViewSheetOpen(false);
+      }
+
+      toast.success("تم حذف الوظيفة");
+      setDeleteJobId(null);
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "فشل في حذف الوظيفة");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   return (
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -165,7 +349,7 @@ export function JobPostingsManager() {
             <IconUsers className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.open}</div>
+            <div className="text-2xl font-bold text-green-600">{stats.active}</div>
             <p className="text-xs text-muted-foreground">تقبل طلبات التقديم</p>
           </CardContent>
         </Card>
@@ -177,7 +361,7 @@ export function JobPostingsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.filled}</div>
-            <p className="text-xs text-muted-foreground">وظيفة تم شغلها</p>
+            <p className="text-xs text-muted-foreground">وظائف مكتملة التوظيف</p>
           </CardContent>
         </Card>
 
@@ -188,150 +372,37 @@ export function JobPostingsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.totalPositions}</div>
-            <p className="text-xs text-muted-foreground">منصب متاح</p>
+            <p className="text-xs text-muted-foreground">منصب مطلوب</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* شريط البحث والفلاتر */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>الوظائف الشاغرة</CardTitle>
-              <CardDescription>إدارة إعلانات الوظائف والمناصب الشاغرة</CardDescription>
+              <CardDescription>إدارة إعلانات الوظائف وربطها ببيانات فعلية</CardDescription>
             </div>
-            <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-              <SheetTrigger asChild>
-                <Button>
-                  <IconPlus className="ms-2 h-4 w-4" />
-                  إضافة وظيفة
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-xl overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>إضافة وظيفة جديدة</SheetTitle>
-                  <SheetDescription>
-                    أدخل تفاصيل الوظيفة الشاغرة
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">المسمى الوظيفي</Label>
-                    <Input id="title" placeholder="مثال: مطور برمجيات أول" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="titleEn">المسمى الوظيفي (إنجليزي)</Label>
-                    <Input id="titleEn" placeholder="e.g. Senior Software Developer" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="department">القسم</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر القسم" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="it">تقنية المعلومات</SelectItem>
-                          <SelectItem value="hr">الموارد البشرية</SelectItem>
-                          <SelectItem value="finance">المالية</SelectItem>
-                          <SelectItem value="sales">المبيعات</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="location">الموقع</Label>
-                      <Input id="location" placeholder="مثال: الرياض" />
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="jobType">نوع الوظيفة</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر النوع" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(jobTypeLabels).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="experience">مستوى الخبرة</Label>
-                      <Select>
-                        <SelectTrigger>
-                          <SelectValue placeholder="اختر المستوى" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {Object.entries(experienceLevelLabels).map(([value, label]) => (
-                            <SelectItem key={value} value={value}>
-                              {label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label htmlFor="salaryMin">الحد الأدنى للراتب</Label>
-                      <Input id="salaryMin" type="number" placeholder="0" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label htmlFor="salaryMax">الحد الأقصى للراتب</Label>
-                      <Input id="salaryMax" type="number" placeholder="0" />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="openPositions">عدد المناصب المطلوبة</Label>
-                    <Input id="openPositions" type="number" defaultValue="1" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">وصف الوظيفة</Label>
-                    <Textarea
-                      id="description"
-                      placeholder="وصف تفصيلي للوظيفة..."
-                      rows={4}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="requirements">المتطلبات</Label>
-                    <Textarea
-                      id="requirements"
-                      placeholder="اكتب كل متطلب في سطر منفصل..."
-                      rows={3}
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="deadline">تاريخ إغلاق التقديم</Label>
-                    <Input id="deadline" type="date" />
-                  </div>
-                  <div className="flex gap-2 pt-4">
-                    <Button className="flex-1" onClick={() => setIsAddSheetOpen(false)}>
-                      حفظ كمسودة
-                    </Button>
-                    <Button variant="secondary" className="flex-1" onClick={() => setIsAddSheetOpen(false)}>
-                      نشر الوظيفة
-                    </Button>
-                  </div>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <div className="flex flex-wrap gap-2">
+              <Button variant="outline" onClick={() => void loadData()} disabled={isLoading}>
+                إعادة تحميل
+              </Button>
+              <Button onClick={openCreateSheet}>
+                <IconPlus className="ms-2 h-4 w-4" />
+                إضافة وظيفة
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
-          {/* أدوات البحث والفلترة */}
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="بحث عن وظيفة..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
               />
             </div>
@@ -351,7 +422,6 @@ export function JobPostingsManager() {
             </Select>
           </div>
 
-          {/* جدول الوظائف */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -367,10 +437,10 @@ export function JobPostingsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredJobs.length === 0 ? (
+                {!isLoading && filteredJobs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
-                      <p className="text-muted-foreground">لا توجد وظائف</p>
+                    <TableCell colSpan={8} className="py-8 text-center">
+                      <p className="text-muted-foreground">لا توجد وظائف مطابقة</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -379,9 +449,7 @@ export function JobPostingsManager() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{job.title}</p>
-                          {job.titleEn && (
-                            <p className="text-xs text-muted-foreground">{job.titleEn}</p>
-                          )}
+                          {job.titleEn && <p className="text-xs text-muted-foreground">{job.titleEn}</p>}
                         </div>
                       </TableCell>
                       <TableCell>{job.departmentName}</TableCell>
@@ -397,13 +465,9 @@ export function JobPostingsManager() {
                         <span className="text-muted-foreground">/{job.openPositions}</span>
                       </TableCell>
                       <TableCell>
-                        <Badge className={jobStatusColors[job.status]}>
-                          {jobStatusLabels[job.status]}
-                        </Badge>
+                        <Badge className={jobStatusColors[job.status]}>{jobStatusLabels[job.status]}</Badge>
                       </TableCell>
-                      <TableCell>
-                        {new Date(job.postedDate).toLocaleDateString("ar-SA")}
-                      </TableCell>
+                      <TableCell>{new Date(job.postedDate).toLocaleDateString("ar-SA")}</TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -412,18 +476,20 @@ export function JobPostingsManager() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewJob(job)}>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedJob(job);
+                                setIsViewSheetOpen(true);
+                              }}
+                            >
                               <IconEye className="ms-2 h-4 w-4" />
                               عرض التفاصيل
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditSheet(job)}>
                               <IconEdit className="ms-2 h-4 w-4" />
                               تعديل
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDeleteJob(job.id)}
-                            >
+                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteJobId(job.id)}>
                               <IconTrash className="ms-2 h-4 w-4" />
                               حذف
                             </DropdownMenuItem>
@@ -439,19 +505,206 @@ export function JobPostingsManager() {
         </CardContent>
       </Card>
 
-      {/* Sheet عرض تفاصيل الوظيفة */}
+      <Sheet open={isFormSheetOpen} onOpenChange={setIsFormSheetOpen}>
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>{editingJob ? "تعديل الوظيفة" : "إضافة وظيفة جديدة"}</SheetTitle>
+            <SheetDescription>اربط الإعلان الوظيفي ببيانات التوظيف الفعلية في النظام.</SheetDescription>
+          </SheetHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="job-title">المسمى الوظيفي</Label>
+              <Input
+                id="job-title"
+                value={jobForm.title}
+                onChange={(event) => updateFormValue("title", event.target.value)}
+                placeholder="مثال: Senior Backend Engineer"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="job-title-ar">المسمى بالعربية</Label>
+              <Input
+                id="job-title-ar"
+                value={jobForm.titleAr}
+                onChange={(event) => updateFormValue("titleAr", event.target.value)}
+                placeholder="مثال: مهندس برمجيات أول"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>القسم</Label>
+                <Select
+                  value={jobForm.departmentId || "none"}
+                  onValueChange={(value) => updateFormValue("departmentId", value === "none" ? "" : value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر القسم" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">بدون قسم محدد</SelectItem>
+                    {departments.map((department) => (
+                      <SelectItem key={department.id} value={department.id}>
+                        {department.nameAr || department.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="job-location">الموقع</Label>
+                <Input
+                  id="job-location"
+                  value={jobForm.location}
+                  onChange={(event) => updateFormValue("location", event.target.value)}
+                  placeholder="الرياض"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>نوع الوظيفة</Label>
+                <Select value={jobForm.jobType} onValueChange={(value) => updateFormValue("jobType", value as JobType)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر النوع" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(jobTypeLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="grid gap-2">
+                <Label>مستوى الخبرة</Label>
+                <Select
+                  value={jobForm.experienceLevel}
+                  onValueChange={(value) => updateFormValue("experienceLevel", value as ExperienceLevel)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر المستوى" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(experienceLevelLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="salary-min">الحد الأدنى للراتب</Label>
+                <Input
+                  id="salary-min"
+                  type="number"
+                  value={jobForm.salaryMin}
+                  onChange={(event) => updateFormValue("salaryMin", event.target.value)}
+                  placeholder="0"
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="salary-max">الحد الأقصى للراتب</Label>
+                <Input
+                  id="salary-max"
+                  type="number"
+                  value={jobForm.salaryMax}
+                  onChange={(event) => updateFormValue("salaryMax", event.target.value)}
+                  placeholder="0"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="grid gap-2">
+                <Label htmlFor="open-positions">عدد المناصب المطلوبة</Label>
+                <Input
+                  id="open-positions"
+                  type="number"
+                  min={1}
+                  value={jobForm.openPositions}
+                  onChange={(event) => updateFormValue("openPositions", event.target.value)}
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="deadline">تاريخ إغلاق التقديم</Label>
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={jobForm.applicationDeadline}
+                  onChange={(event) => updateFormValue("applicationDeadline", event.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="job-description">وصف الوظيفة</Label>
+              <Textarea
+                id="job-description"
+                value={jobForm.description}
+                onChange={(event) => updateFormValue("description", event.target.value)}
+                placeholder="وصف تفصيلي للوظيفة..."
+                rows={4}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="job-requirements">المتطلبات</Label>
+              <Textarea
+                id="job-requirements"
+                value={jobForm.requirements}
+                onChange={(event) => updateFormValue("requirements", event.target.value)}
+                placeholder="اكتب كل متطلب في سطر منفصل..."
+                rows={4}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="job-benefits">المزايا</Label>
+              <Textarea
+                id="job-benefits"
+                value={jobForm.benefits}
+                onChange={(event) => updateFormValue("benefits", event.target.value)}
+                placeholder="اكتب كل ميزة في سطر منفصل..."
+                rows={3}
+              />
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button variant="outline" className="flex-1" onClick={() => void saveJob("draft")} disabled={isSaving}>
+                {isSaving ? "جارٍ الحفظ..." : "حفظ كمسودة"}
+              </Button>
+              <Button className="flex-1" onClick={() => void saveJob("active")} disabled={isSaving}>
+                {isSaving ? "جارٍ النشر..." : editingJob ? "تحديث ونشر" : "نشر الوظيفة"}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedJob?.title}</SheetTitle>
-            <SheetDescription>{selectedJob?.titleEn}</SheetDescription>
+            <SheetDescription>{selectedJob?.titleEn || "تفاصيل الوظيفة"}</SheetDescription>
           </SheetHeader>
+
           {selectedJob && (
             <div className="space-y-6 py-4">
               <div className="flex flex-wrap gap-2">
-                <Badge className={jobStatusColors[selectedJob.status]}>
-                  {jobStatusLabels[selectedJob.status]}
-                </Badge>
+                <Badge className={jobStatusColors[selectedJob.status]}>{jobStatusLabels[selectedJob.status]}</Badge>
                 <Badge variant="outline">{jobTypeLabels[selectedJob.jobType]}</Badge>
                 <Badge variant="outline">{experienceLevelLabels[selectedJob.experienceLevel]}</Badge>
               </div>
@@ -469,51 +722,51 @@ export function JobPostingsManager() {
                   <div className="flex items-center gap-2 text-sm">
                     <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
                     <span>
-                      {selectedJob.salaryMin?.toLocaleString()} - {selectedJob.salaryMax?.toLocaleString()} {selectedJob.currency}
+                      {selectedJob.salaryMin?.toLocaleString(numLocale) || "0"} - {selectedJob.salaryMax?.toLocaleString(numLocale) || "0"} {selectedJob.currency}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <IconUsers className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedJob.openPositions} منصب متاح</span>
+                  <span>{selectedJob.openPositions} مناصب مطلوبة</span>
                 </div>
               </div>
 
               <div>
-                <h4 className="font-semibold mb-2">الوصف</h4>
+                <h4 className="mb-2 font-semibold">الوصف</h4>
                 <p className="text-sm text-muted-foreground">{selectedJob.description}</p>
               </div>
 
               {selectedJob.requirements.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">المتطلبات</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                    {selectedJob.requirements.map((req, i) => (
-                      <li key={i}>{req}</li>
+                  <h4 className="mb-2 font-semibold">المتطلبات</h4>
+                  <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                    {selectedJob.requirements.map((requirement) => (
+                      <li key={requirement}>{requirement}</li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {selectedJob.skills.length > 0 && (
+              {selectedJob.benefits.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">المهارات المطلوبة</h4>
+                  <h4 className="mb-2 font-semibold">المزايا</h4>
                   <div className="flex flex-wrap gap-2">
-                    {selectedJob.skills.map((skill, i) => (
-                      <Badge key={i} variant="secondary">{skill}</Badge>
+                    {selectedJob.benefits.map((benefit) => (
+                      <Badge key={benefit} variant="outline">
+                        {benefit}
+                      </Badge>
                     ))}
                   </div>
                 </div>
               )}
 
-              {selectedJob.benefits.length > 0 && (
+              {selectedJob.applicationDeadline && (
                 <div>
-                  <h4 className="font-semibold mb-2">المزايا</h4>
-                  <div className="flex flex-wrap gap-2">
-                    {selectedJob.benefits.map((benefit, i) => (
-                      <Badge key={i} variant="outline">{benefit}</Badge>
-                    ))}
-                  </div>
+                  <h4 className="mb-2 font-semibold">موعد إغلاق التقديم</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(selectedJob.applicationDeadline).toLocaleDateString("ar-SA")}
+                  </p>
                 </div>
               )}
             </div>
@@ -526,16 +779,17 @@ export function JobPostingsManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>حذف الوظيفة</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف هذه الوظيفة؟ لا يمكن التراجع عن هذا الإجراء.
+              هل أنت متأكد من حذف هذه الوظيفة؟ إذا كان عليها متقدمون فسيرفض النظام الحذف لحماية البيانات.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
             <AlertDialogAction
-              onClick={confirmDeleteJob}
+              onClick={() => void confirmDeleteJob()}
+              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              حذف
+              {isDeleting ? "جارٍ الحذف..." : "حذف"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

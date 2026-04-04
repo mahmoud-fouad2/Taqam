@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -35,7 +36,6 @@ export function TicketThread({
   const [body, setBody] = useState("");
   const [isInternal, setIsInternal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const title = useMemo(() => {
     return locale === "ar" ? "إضافة رد" : "Add reply";
@@ -43,7 +43,6 @@ export function TicketThread({
 
   const submit = async () => {
     setSubmitting(true);
-    setError(null);
 
     try {
       const res = await fetch(`/api/tickets/${ticketId}/messages`, {
@@ -65,8 +64,9 @@ export function TicketThread({
 
       setBody("");
       setIsInternal(false);
-    } catch (e: any) {
-      setError(e?.message || "Error");
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : (locale === "ar" ? "تعذر إرسال الرد" : "Failed to send");
+      toast.error(msg);
     } finally {
       setSubmitting(false);
     }
@@ -90,7 +90,7 @@ export function TicketThread({
                     </Badge>
                   ) : null}
                 </div>
-                <div className="mt-1 text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleString()}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{new Date(m.createdAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}</div>
               </div>
             </div>
             <div className="mt-3 whitespace-pre-wrap text-sm">{m.body}</div>
@@ -120,9 +120,7 @@ export function TicketThread({
           placeholder={locale === "ar" ? "اكتب ردك هنا..." : "Write your reply..."}
         />
 
-        {error ? <div className="mt-2 text-xs text-destructive">{error}</div> : null}
-
-        <div className="mt-3 flex justify-end">
+                <div className="mt-3 flex justify-end">
           <Button onClick={() => void submit()} disabled={submitting || body.trim().length === 0}>
             {submitting ? (locale === "ar" ? "جاري الإرسال..." : "Sending...") : locale === "ar" ? "إرسال" : "Send"}
           </Button>

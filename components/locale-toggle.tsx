@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,13 +26,13 @@ export function LocaleToggle({ variant = "ghost" }: { variant?: "ghost" | "outli
   const pathname = usePathname();
   const [locale, setLocale] = useState<Locale>(() => {
     if (typeof document === "undefined") return "ar";
-    const l = getCookie("ujoors_locale");
+    const l = getCookie("taqam_locale");
     return l === "en" || l === "ar" ? l : "ar";
   });
 
   const toggleLocale = () => {
     const next: Locale = locale === "ar" ? "en" : "ar";
-    setCookie("ujoors_locale", next);
+    setCookie("taqam_locale", next);
 
     const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
     const stripped = hasEnPrefix ? (pathname.replace(/^\/en(?=\/|$)/, "") || "/") : pathname;

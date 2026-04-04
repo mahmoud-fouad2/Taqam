@@ -1,11 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { hasRole } from "@/lib/access-control";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
 
-const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
+const ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"] as const;
+const MANAGEABLE_ROLES = new Set(["EMPLOYEE", "HR_MANAGER", "TENANT_ADMIN"]);
+
+function canAssignRole(actorRole: string | undefined, targetRole: string): boolean {
+  if (!MANAGEABLE_ROLES.has(targetRole)) {
+    return false;
+  }
+
+  if (targetRole === "TENANT_ADMIN") {
+    return actorRole === "TENANT_ADMIN";
+  }
+
+  return hasRole(actorRole, ALLOWED_ROLES);
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -20,7 +34,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
-    if (!ALLOWED_ROLES.has(session.user.role)) {
+    if (!hasRole(session.user.role, ALLOWED_ROLES)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -87,7 +101,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
-    if (!ALLOWED_ROLES.has(session.user.role)) {
+    if (!hasRole(session.user.role, ALLOWED_ROLES)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -97,6 +111,10 @@ export async function POST(request: NextRequest) {
     // Validation
     if (!firstName || !lastName || !email || !password || !role) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    if (!canAssignRole(session.user.role, role)) {
+      return NextResponse.json({ error: "غير مسموح بتعيين هذا الدور" }, { status: 403 });
     }
 
     // Check if email already exists

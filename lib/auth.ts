@@ -8,6 +8,14 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
+import {
+  hasRole as roleMatches,
+  isSuperAdminRole,
+  type LegacyUserRole,
+  type TenantDashboardRole,
+  type UserRole,
+} from "@/lib/access-control";
+import { isSuperAdminBootstrapEnabled } from "@/lib/security/bootstrap";
 import { redirect } from "next/navigation";
 
 // ============================================
@@ -64,7 +72,7 @@ export const authOptions: NextAuthOptions = {
           const bootstrapEmail = process.env.SUPER_ADMIN_EMAIL?.toLowerCase();
           const bootstrapPassword = process.env.SUPER_ADMIN_PASSWORD;
 
-          if (bootstrapEmail && bootstrapPassword) {
+          if (isSuperAdminBootstrapEnabled() && bootstrapEmail && bootstrapPassword) {
             const usersCount = await prisma.user.count();
             const isBootstrapMatch =
               usersCount === 0 &&
@@ -269,7 +277,7 @@ export const authOptions: NextAuthOptions = {
 // Types
 // ============================================
 
-export type UserRole = "SUPER_ADMIN" | "TENANT_ADMIN" | "HR_MANAGER" | "MANAGER" | "EMPLOYEE";
+export type { LegacyUserRole, TenantDashboardRole, UserRole } from "@/lib/access-control";
 
 export interface SessionUser {
   id: string;
@@ -340,15 +348,61 @@ export async function requireAuth(): Promise<SessionUser> {
 /**
  * Require specific role(s)
  */
-export async function requireRole(allowedRoles: UserRole | UserRole[]): Promise<SessionUser> {
+export async function requireRole(
+  allowedRoles: LegacyUserRole | readonly LegacyUserRole[]
+): Promise<SessionUser> {
   const user = await requireAuth();
-  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
 
-  if (!roles.includes(user.role as UserRole)) {
+  if (!roleMatches(user.role, allowedRoles)) {
     redirect("/dashboard?error=unauthorized");
   }
 
   return user;
+}
+
+/**
+ * Require platform admin only.
+ */
+export async function requirePlatformAdmin(): Promise<SessionUser & { role: "SUPER_ADMIN" }> {
+  const user = await requireAuth();
+
+  if (!isSuperAdminRole(user.role)) {
+    redirect("/dashboard?error=unauthorized");
+  }
+
+  return user as SessionUser & { role: "SUPER_ADMIN" };
+}
+
+/**
+ * Require a tenant-backed workspace and block platform-only users.
+ */
+export async function requireTenantAccess(): Promise<SessionUser & { tenantId: string }> {
+  const user = await requireAuth();
+
+  if (isSuperAdminRole(user.role)) {
+    redirect("/dashboard/super-admin");
+  }
+
+  if (!user.tenantId) {
+    redirect("/select-tenant?next=/dashboard");
+  }
+
+  return user as SessionUser & { tenantId: string };
+}
+
+/**
+ * Require a tenant-backed role for tenant dashboard modules.
+ */
+export async function requireTenantRole(
+  allowedRoles: TenantDashboardRole | readonly TenantDashboardRole[]
+): Promise<SessionUser & { role: TenantDashboardRole; tenantId: string }> {
+  const user = await requireTenantAccess();
+
+  if (!roleMatches(user.role, allowedRoles)) {
+    redirect("/dashboard?error=unauthorized");
+  }
+
+  return user as SessionUser & { role: TenantDashboardRole; tenantId: string };
 }
 
 /**
@@ -362,12 +416,11 @@ export async function isAuthenticated(): Promise<boolean> {
 /**
  * Check if user has role (without redirect)
  */
-export async function hasRole(allowedRoles: UserRole | UserRole[]): Promise<boolean> {
+export async function hasRole(allowedRoles: UserRole | readonly UserRole[]): Promise<boolean> {
   const user = await getCurrentUser();
   if (!user) return false;
 
-  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-  return roles.includes(user.role as UserRole);
+  return roleMatches(user.role, allowedRoles);
 }
 
 /**

@@ -3,12 +3,12 @@ import type { AppLanguage } from "@/lib/settings-storage";
 type Dict = Record<string, { ar: string; en: string }>;
 
 const dict: Dict = {
-  login_title: { ar: "تسجيل الدخول", en: "Sign in" },
-  login_subtitle: { ar: "ادخل بريدك وكلمة المرور.", en: "Enter your email and password." },
+  login_title: { ar: "أهلاً بك في جسر", en: "Welcome to Jisr" },
+  login_subtitle: { ar: "سجل الدخول للمتابعة", en: "Sign in to continue" },
   email_label: { ar: "البريد الإلكتروني", en: "Email" },
   password_label: { ar: "كلمة المرور", en: "Password" },
-  sign_in: { ar: "دخول", en: "Sign in" },
-  dev_base_url_hint: { ar: "ملاحظة: أثناء التطوير اضبط EXPO_PUBLIC_API_BASE_URL على عنوان السيرفر.", en: "Dev note: set EXPO_PUBLIC_API_BASE_URL to your server URL." },
+  sign_in: { ar: "تسجيل الدخول", en: "Sign in" },
+  dev_base_url_hint: { ar: "أثناء التطوير: اضبط EXPO_PUBLIC_API_BASE_URL على عنوان السيرفر.", en: "Dev: set EXPO_PUBLIC_API_BASE_URL to your server URL." },
 
   attendance_title: { ar: "الحضور", en: "Attendance" },
   attendance_subtitle: { ar: "تسجيل حضور/انصراف مع تحقق الموقع (Geofence) من السيرفر.", en: "Check in/out with server-side geofence validation." },
@@ -36,13 +36,48 @@ const dict: Dict = {
   load_more: { ar: "تحميل المزيد", en: "Load more" },
   no_more: { ar: "لا يوجد المزيد", en: "No more" },
 
+  // Requests / Leaves
+  my_requests_title: { ar: "طلباتي", en: "My requests" },
+  no_requests: { ar: "لا توجد طلبات بعد", en: "No requests yet" },
+  new_ticket_title: { ar: "تذكرة دعم جديدة", en: "New support ticket" },
+  ticket_subject_label: { ar: "الموضوع", en: "Subject" },
+  ticket_desc_label: { ar: "التفاصيل", en: "Details" },
+  ticket_subject_ph: { ar: "موضوع التذكرة...", en: "Ticket subject..." },
+  ticket_desc_ph: { ar: "اشرح مشكلتك أو استفسارك...", en: "Describe your issue or question..." },
+  submit: { ar: "إرسال", en: "Submit" },
+  cancel: { ar: "إلغاء", en: "Cancel" },
+  filter_all: { ar: "الكل", en: "All" },
+  filter_leave: { ar: "إجازات", en: "Leaves" },
+  filter_ticket: { ar: "تذاكر", en: "Tickets" },
+  filter_training: { ar: "تدريب", en: "Training" },
+  type_leave: { ar: "إجازة", en: "Leave" },
+  type_ticket: { ar: "تذكرة دعم", en: "Support ticket" },
+  type_training: { ar: "تدريب", en: "Training" },
+  status_pending: { ar: "قيد المراجعة", en: "Pending" },
+  status_approved: { ar: "موافق عليه", en: "Approved" },
+  status_rejected: { ar: "مرفوض", en: "Rejected" },
+  status_cancelled: { ar: "ملغي", en: "Cancelled" },
+  submit_success: { ar: "✓ تم إرسال طلبك بنجاح!", en: "✓ Request submitted successfully!" },
+
+  // Profile
+  profile_title: { ar: "ملفي الشخصي", en: "My profile" },
+  email_info_label: { ar: "البريد الإلكتروني", en: "Email" },
+  role_info_label: { ar: "الدور الوظيفي", en: "Role" },
+  company_info_label: { ar: "الشركة", en: "Company" },
+  language_section_title: { ar: "اللغة", en: "Language" },
+  lang_ar: { ar: "🇸🇦 العربية", en: "🇸🇦 Arabic" },
+  lang_en: { ar: "🇬🇧 English", en: "🇬🇧 English" },
+  restart_required: { ar: "سيُعاد تحميل التطبيق لتطبيق اتجاه الكتابة.", en: "The app will reload to apply text direction." },
+  signout_confirm_title: { ar: "تسجيل الخروج", en: "Sign out" },
+  signout_confirm_msg: { ar: "هل أنت متأكد من تسجيل الخروج؟", en: "Are you sure you want to sign out?" },
+  confirm: { ar: "تأكيد", en: "Confirm" },
+
   settings_title: { ar: "الإعدادات", en: "Settings" },
   logout: { ar: "تسجيل الخروج", en: "Sign out" },
   logout_all: { ar: "تسجيل الخروج من كل الأجهزة", en: "Sign out from all devices" },
   language: { ar: "اللغة", en: "Language" },
   arabic: { ar: "العربية", en: "Arabic" },
   english: { ar: "English", en: "English" },
-  restart_required: { ar: "سيتم إعادة تشغيل التطبيق لتطبيق اتجاه الكتابة (RTL).", en: "The app will reload to apply layout direction." },
 };
 
 export function t(lang: AppLanguage, key: keyof typeof dict): string {
@@ -74,4 +109,7 @@ export function humanizeApiError(lang: AppLanguage, message: string): string {
   if (found) return found[1][lang];
 
   return lang === "ar" ? (m || "حدث خطأ") : (m || "Something went wrong");
+}
+export function tStr(lang: AppLanguage, ar: string, en: string): string {
+  return lang === "ar" ? ar : en;
 }

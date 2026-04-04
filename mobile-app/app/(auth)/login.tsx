@@ -109,7 +109,7 @@ export default function LoginScreen() {
         style={{ flex: 1, paddingHorizontal: 20, paddingTop: 72 }}
       >
         <Text variant="headlineMedium" style={{ color: "white", fontWeight: "700" }}>
-          Ujoors
+          Taqam
         </Text>
         <Text style={{ color: "rgba(255,255,255,0.75)", marginTop: 8 }}>
           Sign in to your account

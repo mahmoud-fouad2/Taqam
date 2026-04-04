@@ -29,7 +29,7 @@ export function LeaveRequestsViewDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-full max-w-2xl">
         <DialogHeader>
           <DialogTitle>تفاصيل طلب الإجازة</DialogTitle>
         </DialogHeader>

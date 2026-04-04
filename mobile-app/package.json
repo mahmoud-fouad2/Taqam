@@ -1,12 +1,13 @@
 {
-  "name": "mobile-app",
+  "name": "mobile-app-legacy",
+  "description": "Legacy Expo mobile workspace kept for reference only. Use apps/mobile for active development.",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
-    "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "start": "node -e \"console.warn('Legacy workspace: use apps/mobile for active development and validation.')\" && expo start",
+    "android": "node -e \"console.warn('Legacy workspace: use apps/mobile for active development and validation.')\" && expo start --android",
+    "ios": "node -e \"console.warn('Legacy workspace: use apps/mobile for active development and validation.')\" && expo start --ios",
+    "web": "node -e \"console.warn('Legacy workspace: use apps/mobile for active development and validation.')\" && expo start --web"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

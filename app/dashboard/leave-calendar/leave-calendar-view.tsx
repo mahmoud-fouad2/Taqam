@@ -320,13 +320,13 @@ export function LeaveCalendarView() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Month Navigation */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={goToPreviousMonth}>
+              <Button variant="ghost" size="icon" aria-label="الشهر السابق" onClick={goToPreviousMonth}>
                 <IconChevronRight className="h-5 w-5" />
               </Button>
               <h3 className="text-xl font-semibold">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <Button variant="ghost" size="icon" onClick={goToNextMonth}>
+              <Button variant="ghost" size="icon" aria-label="الشهر التالي" onClick={goToNextMonth}>
                 <IconChevronLeft className="h-5 w-5" />
               </Button>
               <Button variant="outline" size="sm" onClick={goToToday}>

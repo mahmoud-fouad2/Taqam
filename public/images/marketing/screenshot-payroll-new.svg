@@ -1,0 +1,328 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="Taqam HR payroll management preview">
+  <defs>
+    <linearGradient id="outerBg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F0FDF4"/>
+      <stop offset="100%" stop-color="#DCFCE7"/>
+    </linearGradient>
+    <linearGradient id="sidebar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#312E81"/>
+      <stop offset="100%" stop-color="#3730A3"/>
+    </linearGradient>
+    <linearGradient id="purpleCardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#7C3AED"/>
+    </linearGradient>
+    <linearGradient id="greenCardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#10B981"/>
+      <stop offset="100%" stop-color="#059669"/>
+    </linearGradient>
+    <linearGradient id="blueCardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#3B82F6"/>
+    </linearGradient>
+    <linearGradient id="amberCardGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F59E0B"/>
+      <stop offset="100%" stop-color="#D97706"/>
+    </linearGradient>
+    <linearGradient id="runBtn" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+    <linearGradient id="payBarGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#8B5CF6"/>
+      <stop offset="100%" stop-color="#4F46E5"/>
+    </linearGradient>
+    <filter id="cardShadow" x="-8%" y="-8%" width="116%" height="130%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#1E1B4B" flood-opacity="0.08"/>
+    </filter>
+    <filter id="winShadow" x="-4%" y="-4%" width="108%" height="116%">
+      <feDropShadow dx="0" dy="12" stdDeviation="24" flood-color="#1E1B4B" flood-opacity="0.18"/>
+    </filter>
+    <clipPath id="winClip">
+      <rect x="40" y="40" width="1120" height="620" rx="20"/>
+    </clipPath>
+  </defs>
+
+  <!-- Outer background -->
+  <rect width="1200" height="700" fill="url(#outerBg)"/>
+  <circle cx="150" cy="120" r="200" fill="#7C3AED" opacity="0.05"/>
+  <circle cx="1100" cy="600" r="220" fill="#4F46E5" opacity="0.06"/>
+
+  <!-- Main app window -->
+  <g filter="url(#winShadow)">
+    <rect x="40" y="40" width="1120" height="620" rx="20" fill="#F8FAFC"/>
+  </g>
+
+  <!-- ── SIDEBAR ── -->
+  <rect x="40" y="40" width="220" height="620" rx="20" fill="url(#sidebar)"/>
+  <!-- sidebar right edge square corners -->
+  <rect x="220" y="40" width="20" height="620" fill="url(#sidebar)"/>
+
+  <!-- Logo area -->
+  <rect x="60" y="64" width="44" height="44" rx="12" fill="white" opacity="0.18"/>
+  <text x="82" y="91" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="700" fill="white" text-anchor="middle">ط</text>
+  <text x="120" y="84" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="700" fill="white">طاقم</text>
+  <text x="120" y="100" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#C7D2FE">HR Platform</text>
+
+  <!-- Nav items -->
+  <rect x="56" y="132" width="184" height="34" rx="8" fill="white" opacity="0.15"/>
+  <rect x="68" y="141" width="16" height="16" rx="4" fill="white" opacity="0.7"/>
+  <text x="94" y="154" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="white" font-weight="600">لوحة التحكم</text>
+
+  <rect x="68" y="180" width="16" height="16" rx="4" fill="white" opacity="0.4"/>
+  <text x="94" y="193" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#A5B4FC">الموظفون</text>
+
+  <rect x="68" y="214" width="16" height="16" rx="4" fill="white" opacity="0.4"/>
+  <text x="94" y="227" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#A5B4FC">الحضور</text>
+
+  <rect x="68" y="248" width="16" height="16" rx="4" fill="white" opacity="0.4"/>
+  <text x="94" y="261" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#A5B4FC">الإجازات</text>
+
+  <!-- Payroll active item -->
+  <rect x="56" y="274" width="184" height="34" rx="8" fill="white" opacity="0.18"/>
+  <rect x="68" y="283" width="16" height="16" rx="4" fill="white" opacity="0.85"/>
+  <text x="94" y="296" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="white" font-weight="700">الرواتب</text>
+
+  <rect x="68" y="322" width="16" height="16" rx="4" fill="white" opacity="0.4"/>
+  <text x="94" y="335" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#A5B4FC">التقارير</text>
+
+  <rect x="68" y="356" width="16" height="16" rx="4" fill="white" opacity="0.4"/>
+  <text x="94" y="369" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#A5B4FC">الإعدادات</text>
+
+  <!-- User profile at bottom of sidebar -->
+  <circle cx="80" cy="622" r="16" fill="white" opacity="0.2"/>
+  <text x="80" y="627" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="700" fill="white" text-anchor="middle">م</text>
+  <text x="102" y="618" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="white">محمود أحمد</text>
+  <text x="102" y="632" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#A5B4FC">مدير النظام</text>
+
+  <!-- ── MAIN CONTENT ── -->
+  <!-- Top bar -->
+  <rect x="260" y="40" width="900" height="72" rx="0" fill="#FFFFFF"/>
+  <rect x="260" y="108" width="900" height="1" fill="#E2E8F0"/>
+
+  <!-- Page title -->
+  <rect x="280" y="58" width="40" height="40" rx="10" fill="#8B5CF6" opacity="0.12"/>
+  <rect x="292" y="70" width="16" height="14" rx="2" fill="#7C3AED"/>
+  <rect x="294" y="74" width="12" height="4" rx="1" fill="white"/>
+  <text x="332" y="72" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="700" fill="#1E293B">كشف الرواتب</text>
+  <text x="332" y="90" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">إدارة ومعالجة الرواتب الشهرية</text>
+
+  <!-- Month selector -->
+  <rect x="700" y="62" width="130" height="32" rx="8" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="1"/>
+  <text x="755" y="83" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#475569" text-anchor="middle">يناير 2025</text>
+  <text x="820" y="83" font-family="system-ui,-apple-system,sans-serif" font-size="14" fill="#94A3B8">▾</text>
+
+  <!-- Run payroll button -->
+  <rect x="848" y="58" width="136" height="36" rx="10" fill="url(#runBtn)"/>
+  <text x="916" y="81" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="white" text-anchor="middle">تشغيل الرواتب</text>
+
+  <!-- Notification bell + avatar -->
+  <circle cx="1010" cy="76" r="14" fill="#F1F5F9"/>
+  <rect x="1004" y="69" width="12" height="10" rx="3" fill="#94A3B8"/>
+  <circle cx="1050" cy="76" r="16" fill="#7C3AED" opacity="0.15"/>
+  <text x="1050" y="81" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#7C3AED" text-anchor="middle">م</text>
+
+  <!-- ── STAT CARDS ── -->
+  <!-- Card 1: Total Payroll (purple) -->
+  <g filter="url(#cardShadow)">
+    <rect x="276" y="124" width="190" height="100" rx="14" fill="white"/>
+  </g>
+  <rect x="276" y="124" width="190" height="100" rx="14" fill="url(#purpleCardGrad)" opacity="0.06"/>
+  <rect x="276" y="124" width="190" height="4" rx="2" fill="url(#purpleCardGrad)"/>
+  <rect x="290" y="144" width="34" height="34" rx="10" fill="#7C3AED" opacity="0.12"/>
+  <rect x="300" y="154" width="14" height="12" rx="2" fill="#7C3AED"/>
+  <text x="338" y="158" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">إجمالي الرواتب</text>
+  <text x="290" y="194" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="800" fill="#1E293B">٣٧٢,٠٠٠</text>
+  <text x="290" y="210" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#10B981">↑ ٢٪ عن الشهر السابق</text>
+
+  <!-- Card 2: Employees count (blue) -->
+  <g filter="url(#cardShadow)">
+    <rect x="482" y="124" width="190" height="100" rx="14" fill="white"/>
+  </g>
+  <rect x="482" y="124" width="190" height="100" rx="14" fill="url(#blueCardGrad)" opacity="0.06"/>
+  <rect x="482" y="124" width="190" height="4" rx="2" fill="url(#blueCardGrad)"/>
+  <rect x="496" y="144" width="34" height="34" rx="10" fill="#4F46E5" opacity="0.12"/>
+  <circle cx="510" cy="157" r="5" fill="#4F46E5"/>
+  <rect x="503" y="165" width="14" height="5" rx="2.5" fill="#4F46E5"/>
+  <text x="544" y="158" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">الموظفون المعالجون</text>
+  <text x="496" y="194" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="800" fill="#1E293B">٨٤ / ٨٧</text>
+  <text x="496" y="210" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#6366F1">٣ موظفون قيد المراجعة</text>
+
+  <!-- Card 3: Paid (green) -->
+  <g filter="url(#cardShadow)">
+    <rect x="688" y="124" width="190" height="100" rx="14" fill="white"/>
+  </g>
+  <rect x="688" y="124" width="190" height="100" rx="14" fill="url(#greenCardGrad)" opacity="0.06"/>
+  <rect x="688" y="124" width="190" height="4" rx="2" fill="url(#greenCardGrad)"/>
+  <rect x="702" y="144" width="34" height="34" rx="10" fill="#10B981" opacity="0.12"/>
+  <text x="716" y="164" font-family="system-ui,-apple-system,sans-serif" font-size="16" fill="#059669" text-anchor="middle">✓</text>
+  <text x="750" y="158" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">تم الصرف</text>
+  <text x="702" y="194" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="800" fill="#1E293B">٧٨ موظف</text>
+  <text x="702" y="210" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#10B981">مكتمل ٨٩٪</text>
+
+  <!-- Card 4: Deductions (amber) -->
+  <g filter="url(#cardShadow)">
+    <rect x="894" y="124" width="190" height="100" rx="14" fill="white"/>
+  </g>
+  <rect x="894" y="124" width="190" height="100" rx="14" fill="url(#amberCardGrad)" opacity="0.06"/>
+  <rect x="894" y="124" width="190" height="4" rx="2" fill="url(#amberCardGrad)"/>
+  <rect x="908" y="144" width="34" height="34" rx="10" fill="#F59E0B" opacity="0.12"/>
+  <text x="922" y="164" font-family="system-ui,-apple-system,sans-serif" font-size="15" fill="#D97706" text-anchor="middle">%</text>
+  <text x="956" y="158" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">إجمالي الاستقطاعات</text>
+  <text x="908" y="194" font-family="system-ui,-apple-system,sans-serif" font-size="20" font-weight="800" fill="#1E293B">٢٨,٤٠٠</text>
+  <text x="908" y="210" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#F59E0B">تأمينات + ضرائب</text>
+
+  <!-- ── PAYROLL TABLE ── -->
+  <g filter="url(#cardShadow)">
+    <rect x="276" y="240" width="808" height="370" rx="14" fill="white"/>
+  </g>
+
+  <!-- Table header -->
+  <rect x="276" y="240" width="808" height="44" rx="14" fill="#F8FAFC"/>
+  <rect x="276" y="268" width="808" height="16" rx="0" fill="#F8FAFC"/>
+  <!-- Table header text -->
+  <text x="580" y="267" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#94A3B8" text-anchor="middle">البدلات</text>
+  <text x="700" y="267" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#94A3B8" text-anchor="middle">الاستقطاعات</text>
+  <text x="810" y="267" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#94A3B8" text-anchor="middle">الراتب الأساسي</text>
+  <text x="950" y="267" font-family="system-ui,-apple-machine-apple,sans-serif" font-size="11" font-weight="600" fill="#94A3B8" text-anchor="middle">الاسم</text>
+  <text x="1050" y="267" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#94A3B8" text-anchor="middle">الحالة</text>
+  <text x="310" y="267" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="600" fill="#94A3B8">صافي الراتب</text>
+
+  <!-- Divider -->
+  <rect x="276" y="284" width="808" height="1" fill="#E2E8F0"/>
+
+  <!-- Row 1 -->
+  <rect x="276" y="285" width="808" height="48" fill="white"/>
+  <circle cx="950" cy="309" r="14" fill="#EDE9FE"/>
+  <text x="950" y="314" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#7C3AED" text-anchor="middle">أ</text>
+  <text x="972" y="305" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">أحمد محمد السيد</text>
+  <text x="972" y="320" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">مهندس برمجيات</text>
+  <text x="810" y="313" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">١٢,٠٠٠</text>
+  <text x="700" y="313" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(١,٢٠٠)</text>
+  <text x="580" y="313" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">٢,٥٠٠</text>
+  <text x="420" y="313" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٣,٣٠٠</text>
+  <rect x="1020" y="298" width="54" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1047" y="314" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#16A34A" text-anchor="middle">مدفوع</text>
+  <rect x="276" y="333" width="808" height="1" fill="#F1F5F9"/>
+
+  <!-- Row 2 -->
+  <rect x="276" y="334" width="808" height="48" fill="white"/>
+  <circle cx="950" cy="358" r="14" fill="#FEF3C7"/>
+  <text x="950" y="363" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#D97706" text-anchor="middle">س</text>
+  <text x="972" y="354" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">سارة عبدالله خالد</text>
+  <text x="972" y="369" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">محاسبة مالية</text>
+  <text x="810" y="362" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">٩,٥٠٠</text>
+  <text x="700" y="362" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(٩٥٠)</text>
+  <text x="580" y="362" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">١,٨٠٠</text>
+  <text x="420" y="362" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٠,٣٥٠</text>
+  <rect x="1020" y="347" width="54" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1047" y="363" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#16A34A" text-anchor="middle">مدفوع</text>
+  <rect x="276" y="382" width="808" height="1" fill="#F1F5F9"/>
+
+  <!-- Row 3 -->
+  <rect x="276" y="383" width="808" height="48" fill="white"/>
+  <circle cx="950" cy="407" r="14" fill="#E0F2FE"/>
+  <text x="950" y="412" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#0284C7" text-anchor="middle">م</text>
+  <text x="972" y="403" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">محمد علي حسن</text>
+  <text x="972" y="418" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">مدير مبيعات</text>
+  <text x="810" y="411" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">١٥,٠٠٠</text>
+  <text x="700" y="411" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(١,٥٠٠)</text>
+  <text x="580" y="411" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">٤,٢٠٠</text>
+  <text x="420" y="411" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٧,٧٠٠</text>
+  <rect x="1020" y="396" width="54" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1047" y="412" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#16A34A" text-anchor="middle">مدفوع</text>
+  <rect x="276" y="431" width="808" height="1" fill="#F1F5F9"/>
+
+  <!-- Row 4 -->
+  <rect x="276" y="432" width="808" height="48" fill="white"/>
+  <circle cx="950" cy="456" r="14" fill="#FCE7F3"/>
+  <text x="950" y="461" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#BE185D" text-anchor="middle">ف</text>
+  <text x="972" y="452" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">فاطمة يوسف رشيد</text>
+  <text x="972" y="467" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">موارد بشرية</text>
+  <text x="810" y="460" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">١١,٠٠٠</text>
+  <text x="700" y="460" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(١,١٠٠)</text>
+  <text x="580" y="460" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">٢,٢٠٠</text>
+  <text x="420" y="460" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٢,١٠٠</text>
+  <rect x="1020" y="445" width="64" height="22" rx="11" fill="#FEF3C7"/>
+  <text x="1052" y="461" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#B45309" text-anchor="middle">قيد المراجعة</text>
+  <rect x="276" y="480" width="808" height="1" fill="#F1F5F9"/>
+
+  <!-- Row 5 -->
+  <rect x="276" y="481" width="808" height="48" fill="white"/>
+  <circle cx="950" cy="505" r="14" fill="#ECFDF5"/>
+  <text x="950" y="510" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#059669" text-anchor="middle">ع</text>
+  <text x="972" y="501" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">عمر خالد المنصور</text>
+  <text x="972" y="516" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">مطور واجهات</text>
+  <text x="810" y="509" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">١٣,٥٠٠</text>
+  <text x="700" y="509" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(١,٣٥٠)</text>
+  <text x="580" y="509" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">٣,٠٠٠</text>
+  <text x="420" y="509" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٥,١٥٠</text>
+  <rect x="1020" y="494" width="54" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1047" y="510" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#16A34A" text-anchor="middle">مدفوع</text>
+  <rect x="276" y="529" width="808" height="1" fill="#F1F5F9"/>
+
+  <!-- Row 6 -->
+  <rect x="276" y="530" width="808" height="48" fill="#FAFAFA"/>
+  <circle cx="950" cy="554" r="14" fill="#EEF2FF"/>
+  <text x="950" y="559" font-family="system-ui,-apple-system,sans-serif" font-size="10" font-weight="700" fill="#4F46E5" text-anchor="middle">ن</text>
+  <text x="972" y="550" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#1E293B">نورا أحمد البكر</text>
+  <text x="972" y="565" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8">مدير مشاريع</text>
+  <text x="810" y="558" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#1E293B" text-anchor="middle">١٤,٠٠٠</text>
+  <text x="700" y="558" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#EF4444" text-anchor="middle">(١,٤٠٠)</text>
+  <text x="580" y="558" font-family="system-ui,-apple-system,sans-serif" font-size="12" fill="#10B981" text-anchor="middle">٣,٥٠٠</text>
+  <text x="420" y="558" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#4F46E5" text-anchor="middle">١٦,١٠٠</text>
+  <rect x="1020" y="543" width="54" height="22" rx="11" fill="#DCFCE7"/>
+  <text x="1047" y="559" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#16A34A" text-anchor="middle">مدفوع</text>
+
+  <!-- Table footer / pagination -->
+  <rect x="276" y="578" width="808" height="32" rx="14" fill="#FFFFFF"/>
+  <rect x="276" y="578" width="808" height="1" fill="#E2E8F0"/>
+  <text x="300" y="599" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#94A3B8">عرض ١–٦ من أصل ٨٤ موظف</text>
+  <rect x="870" y="584" width="28" height="20" rx="5" fill="#EEF2FF"/>
+  <text x="884" y="599" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#4F46E5" text-anchor="middle">‹</text>
+  <rect x="904" y="584" width="28" height="20" rx="5" fill="#4F46E5"/>
+  <text x="918" y="599" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="white" text-anchor="middle">١</text>
+  <rect x="938" y="584" width="28" height="20" rx="5" fill="#EEF2FF"/>
+  <text x="952" y="599" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#4F46E5" text-anchor="middle">٢</text>
+  <rect x="972" y="584" width="28" height="20" rx="5" fill="#EEF2FF"/>
+  <text x="986" y="599" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#4F46E5" text-anchor="middle">›</text>
+
+  <!-- ── RIGHT PANEL: Summary ── -->
+  <g filter="url(#cardShadow)">
+    <rect x="1100" y="240" width="216" height="370" rx="14" fill="white"/>
+  </g>
+  <text x="1120" y="268" font-family="system-ui,-apple-system,sans-serif" font-size="13" font-weight="700" fill="#1E293B">ملخص الدفع</text>
+
+  <!-- Progress ring placeholder -->
+  <circle cx="1208" cy="330" r="44" fill="none" stroke="#E2E8F0" stroke-width="8"/>
+  <circle cx="1208" cy="330" r="44" fill="none" stroke="url(#payBarGrad)" stroke-width="8" stroke-linecap="round" stroke-dasharray="246 20" stroke-dashoffset="70"/>
+  <text x="1208" y="325" font-family="system-ui,-apple-system,sans-serif" font-size="16" font-weight="800" fill="#1E293B" text-anchor="middle">٨٩%</text>
+  <text x="1208" y="342" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#64748B" text-anchor="middle">مكتمل</text>
+
+  <!-- Summary items -->
+  <rect x="1115" y="388" width="186" height="1" fill="#E2E8F0"/>
+  <text x="1120" y="410" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">إجمالي الرواتب</text>
+  <text x="1295" y="410" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="700" fill="#1E293B" text-anchor="end">٣٧٢,٠٠٠</text>
+
+  <text x="1120" y="432" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">البدلات</text>
+  <text x="1295" y="432" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="700" fill="#10B981" text-anchor="end">+ ٢٢,٤٠٠</text>
+
+  <text x="1120" y="454" font-family="system-ui,-apple-system,sans-serif" font-size="11" fill="#64748B">الاستقطاعات</text>
+  <text x="1295" y="454" font-family="system-ui,-apple-system,sans-serif" font-size="11" font-weight="700" fill="#EF4444" text-anchor="end">- ٢٨,٤٠٠</text>
+
+  <rect x="1115" y="464" width="186" height="1" fill="#E2E8F0"/>
+
+  <text x="1120" y="485" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="#1E293B">صافي الصرف</text>
+  <text x="1295" y="485" font-family="system-ui,-apple-system,sans-serif" font-size="14" font-weight="800" fill="#7C3AED" text-anchor="end">٣٦٦,٠٠٠</text>
+
+  <!-- Export button -->
+  <rect x="1115" y="498" width="186" height="34" rx="10" fill="#F5F3FF"/>
+  <text x="1208" y="520" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="600" fill="#7C3AED" text-anchor="middle">تصدير PDF</text>
+
+  <!-- Pay all button -->
+  <rect x="1115" y="538" width="186" height="34" rx="10" fill="url(#runBtn)"/>
+  <text x="1208" y="560" font-family="system-ui,-apple-system,sans-serif" font-size="12" font-weight="700" fill="white" text-anchor="middle">صرف الكل</text>
+
+  <!-- Taqam watermark -->
+  <text x="1160" y="652" font-family="system-ui,-apple-system,sans-serif" font-size="10" fill="#94A3B8" text-anchor="middle" opacity="0.0">Taqam payroll preview</text>
+</svg>

@@ -21,34 +21,42 @@ function sleep(ms) {
 async function main() {
   const attempts = Number(process.env.DB_BOOTSTRAP_ATTEMPTS || 10);
   const delayMs = Number(process.env.DB_BOOTSTRAP_DELAY_MS || 3000);
+  const schemaSyncMode = process.env.PRISMA_SCHEMA_SYNC_MODE === "push" ? "push" : "migrate";
+  const bootstrapEnabled = process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
 
-  console.log(`[render-start] Starting (attempts=${attempts}, delayMs=${delayMs})`);
+  console.log(`[render-start] Starting (attempts=${attempts}, delayMs=${delayMs}, schemaSyncMode=${schemaSyncMode})`);
 
-  // 1) Push schema (no migrations folder in repo).
+  // 1) Sync schema using safe migrations by default. Explicitly opt into db push only when needed.
   let pushed = false;
   for (let i = 1; i <= attempts; i++) {
-    console.log(`[render-start] prisma db push (attempt ${i}/${attempts})`);
-    // Use prisma CLI directly.
-    const r = await run(bin("prisma"), ["db", "push", "--accept-data-loss"], { label: "db-push" });
+    const args = schemaSyncMode === "push"
+      ? ["db", "push", "--accept-data-loss"]
+      : ["migrate", "deploy"];
+    console.log(`[render-start] prisma ${args.join(" ")} (attempt ${i}/${attempts})`);
+    const r = await run(bin("prisma"), args, { label: schemaSyncMode === "push" ? "db-push" : "migrate-deploy" });
     if (r.code === 0) {
       pushed = true;
       break;
     }
     if (i < attempts) {
-      console.log(`[render-start] db push failed; retrying in ${delayMs}ms...`);
+      console.log(`[render-start] schema sync failed; retrying in ${delayMs}ms...`);
       await sleep(delayMs);
     }
   }
 
   if (!pushed) {
-    console.error("[render-start] prisma db push failed after retries; exiting.");
+    console.error("[render-start] prisma schema sync failed after retries; exiting.");
     process.exit(1);
   }
 
   // 2) Ensure bootstrap super admin.
-  const ensure = await run("node", ["scripts/ensure-super-admin.mjs"], { label: "ensure-super-admin" });
-  if (ensure.code !== 0) {
-    console.error("[render-start] ensure-super-admin failed; continuing to start app anyway.");
+  if (bootstrapEnabled) {
+    const ensure = await run("node", ["scripts/ensure-super-admin.mjs"], { label: "ensure-super-admin" });
+    if (ensure.code !== 0) {
+      console.error("[render-start] ensure-super-admin failed; continuing to start app anyway.");
+    }
+  } else {
+    console.log("[render-start] super admin bootstrap disabled; skipping ensure-super-admin.");
   }
 
   // 3) Start Next.

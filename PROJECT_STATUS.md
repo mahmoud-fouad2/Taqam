@@ -1,8 +1,10 @@
-# 📊 تقرير حالة المشروع - Ujoor HRMS
+# 📊 تقرير حالة المشروع - Taqam HR Platform
 
 **التاريخ:** 2026-02-01  
 **الحالة العامة:** ✅ جاهز للإنتاج مع تحسينات كبيرة  
 **نسبة الإنجاز:** 70% → 73% (بعد التطويرات الأخيرة)
+
+> تنبيه: هذا التقرير يحتوي على إشارات تاريخية قبل إعادة التسمية. المسار الرسمي للموبايل هو `apps/mobile` وعميل Sentry الحالي هو `instrumentation-client.ts`.
 
 ---
 
@@ -33,7 +35,7 @@
 
 #### 2. Error Monitoring & Sentry
 **الملفات:**
-- `sentry.client.config.ts`
+- `instrumentation-client.ts`
 - `sentry.server.config.ts`
 - `sentry.edge.config.ts`
 

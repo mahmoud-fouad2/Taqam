@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useFieldArray, useForm } from "react-hook-form";
@@ -95,7 +95,7 @@ export function ProfileForm({ locale }: { locale: "ar" | "en" }) {
             <FormItem>
               <FormLabel>{isRtl ? "اسم المستخدم" : "Username"}</FormLabel>
               <FormControl>
-                <Input placeholder={isRtl ? "مثال: ujoors" : "e.g. shadcn"} {...field} />
+                <Input placeholder={isRtl ? "مثال: taqam" : "e.g. shadcn"} {...field} />
               </FormControl>
               <FormDescription>
                 {isRtl

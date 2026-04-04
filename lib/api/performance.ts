@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import { apiClient, ApiResponse } from './client';
 import type {
   EvaluationTemplate,
   EvaluationCycle,
@@ -17,48 +17,252 @@ import type {
 // =====================
 
 export const evaluationTemplatesApi = {
+  async getAll(): Promise<ApiResponse<EvaluationTemplate[]>> {
+    const response = await apiClient.get<{ templates?: ApiEvaluationTemplate[] }>('/evaluations/templates');
+    if (!response.success) {
+      return { success: false, error: response.error };
+    }
+
+    return {
+      success: true,
+      data: Array.isArray(response.data?.templates)
+        ? response.data.templates.map(mapEvaluationTemplate)
+        : [],
+    };
+  },
+
   /**
    * الحصول على جميع نماذج التقييم
    */
-  getAll: () => 
-    apiClient.get<EvaluationTemplate[]>('/evaluation-templates'),
+  async getById(id: string): Promise<ApiResponse<EvaluationTemplate>> {
+    const response = await apiClient.get<ApiEvaluationTemplate>(`/evaluations/templates/${id}`);
+    if (!response.success || !response.data) {
+      return { success: false, error: response.error };
+    }
 
-  /**
-   * الحصول على نموذج بالمعرف
-   */
-  getById: (id: string) => 
-    apiClient.get<EvaluationTemplate>(`/evaluation-templates/${id}`),
+    return {
+      success: true,
+      data: mapEvaluationTemplate(response.data),
+    };
+  },
 
   /**
    * إنشاء نموذج جديد
    */
-  create: (data: Omit<EvaluationTemplate, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>) =>
-    apiClient.post<EvaluationTemplate>('/evaluation-templates', data),
+  async create(
+    data: Omit<EvaluationTemplate, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>
+  ): Promise<ApiResponse<EvaluationTemplate>> {
+    const response = await apiClient.post<{ template?: ApiEvaluationTemplate }>(
+      '/evaluations/templates',
+      buildEvaluationTemplatePayload(data)
+    );
+
+    const rawTemplate = response.data?.template;
+    if (!response.success || !rawTemplate) {
+      return { success: false, error: response.error || 'فشل إنشاء نموذج التقييم' };
+    }
+
+    return {
+      success: true,
+      data: mapEvaluationTemplate(rawTemplate),
+      message: response.message,
+    };
+  },
 
   /**
    * تحديث نموذج
    */
-  update: (id: string, data: Partial<EvaluationTemplate>) =>
-    apiClient.put<EvaluationTemplate>(`/evaluation-templates/${id}`, data),
+  async update(id: string, data: Partial<EvaluationTemplate>): Promise<ApiResponse<EvaluationTemplate>> {
+    const response = await apiClient.patch<{ template?: ApiEvaluationTemplate }>(
+      `/evaluations/templates/${id}`,
+      buildEvaluationTemplatePayload(data)
+    );
+
+    const rawTemplate = response.data?.template;
+    if (!response.success || !rawTemplate) {
+      return { success: false, error: response.error || 'فشل تحديث نموذج التقييم' };
+    }
+
+    return {
+      success: true,
+      data: mapEvaluationTemplate(rawTemplate),
+      message: response.message,
+    };
+  },
 
   /**
    * حذف نموذج
    */
-  delete: (id: string) =>
-    apiClient.delete<void>(`/evaluation-templates/${id}`),
+  delete: (id: string) => apiClient.delete<void>(`/evaluations/templates/${id}`),
 
   /**
    * نسخ نموذج
    */
-  duplicate: (id: string, name: string) =>
-    apiClient.post<EvaluationTemplate>(`/evaluation-templates/${id}/duplicate`, { name }),
+  async duplicate(id: string, name: string): Promise<ApiResponse<EvaluationTemplate>> {
+    const current = await evaluationTemplatesApi.getById(id);
+    if (!current.success || !current.data) {
+      return { success: false, error: current.error || 'القالب غير موجود' };
+    }
+
+    return evaluationTemplatesApi.create({
+      ...current.data,
+      name,
+      nameEn: current.data.nameEn ? `${current.data.nameEn} Copy` : name,
+      isDefault: false,
+    });
+  },
 
   /**
    * تعيين كافتراضي
    */
-  setDefault: (id: string) =>
-    apiClient.patch<EvaluationTemplate>(`/evaluation-templates/${id}/set-default`, {}),
+  setDefault: (id: string) => evaluationTemplatesApi.update(id, { isDefault: true }),
 };
+
+type ApiEvaluationTemplateCriterion = {
+  id?: string;
+  name?: string;
+  nameAr?: string;
+  weight?: number;
+  description?: string;
+  items?: Array<{
+    id?: string;
+    name?: string;
+    nameAr?: string;
+    weight?: number;
+    description?: string;
+  }>;
+};
+
+type ApiEvaluationTemplate = {
+  id: string;
+  tenantId: string;
+  name: string;
+  nameAr?: string | null;
+  description?: string | null;
+  isActive: boolean;
+  isDefault: boolean;
+  criteria?: ApiEvaluationTemplateCriterion[] | null;
+  ratingScale?: number | null;
+  ratingLabels?: string[] | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+function mapRatingScale(value: number | null | undefined): EvaluationTemplate['ratingScale'] {
+  if (value && value > 5) {
+    return 'numeric_10';
+  }
+
+  return 'numeric_5';
+}
+
+function mapRatingScaleToApi(value: EvaluationTemplate['ratingScale'] | undefined): number {
+  switch (value) {
+    case 'numeric_10':
+      return 10;
+    case 'percentage':
+      return 10;
+    case 'descriptive':
+      return 5;
+    case 'numeric_5':
+    default:
+      return 5;
+  }
+}
+
+function getDefaultRatingLabels(value: EvaluationTemplate['ratingScale'] | undefined): string[] {
+  if (value === 'numeric_10') {
+    return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+  }
+
+  return ['ضعيف', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'];
+}
+
+function mapEvaluationTemplate(raw: ApiEvaluationTemplate): EvaluationTemplate {
+  const sections = Array.isArray(raw.criteria)
+    ? raw.criteria.map((section, sectionIndex) => ({
+        id: section.id || `section-${sectionIndex + 1}`,
+        name: section.nameAr || section.name || 'قسم بدون عنوان',
+        description: section.description || undefined,
+        weight: Number(section.weight ?? 0),
+        order: sectionIndex + 1,
+        criteria: Array.isArray(section.items)
+          ? section.items.map((criterion, criterionIndex) => ({
+              id: criterion.id || `criterion-${criterionIndex + 1}`,
+              name: criterion.nameAr || criterion.name || 'معيار بدون عنوان',
+              description: criterion.description || undefined,
+              weight: Number(criterion.weight ?? 0),
+              order: criterionIndex + 1,
+              isRequired: true,
+            }))
+          : [],
+      }))
+    : [];
+
+  return {
+    id: raw.id,
+    tenantId: raw.tenantId,
+    name: raw.nameAr || raw.name,
+    nameEn: raw.name,
+    description: raw.description || undefined,
+    ratingScale: mapRatingScale(raw.ratingScale),
+    includesSelfReview: true,
+    includesManagerReview: true,
+    includes360Review: false,
+    requiresCalibration: true,
+    sections,
+    totalWeight: sections.reduce((sum, section) => sum + section.weight, 0),
+    isActive: raw.isActive,
+    isDefault: raw.isDefault,
+    createdAt: raw.createdAt,
+    updatedAt: raw.updatedAt,
+  };
+}
+
+function buildEvaluationTemplatePayload(data: Partial<EvaluationTemplate>) {
+  const payload: Record<string, unknown> = {};
+
+  if (data.name !== undefined) {
+    payload.name = (data.nameEn || data.name).trim();
+    payload.nameAr = data.name.trim() || null;
+  }
+
+  if (data.description !== undefined) {
+    payload.description = data.description?.trim() || null;
+  }
+
+  if (data.isActive !== undefined) {
+    payload.isActive = data.isActive;
+  }
+
+  if (data.isDefault !== undefined) {
+    payload.isDefault = data.isDefault;
+  }
+
+  if (data.ratingScale !== undefined) {
+    payload.ratingScale = mapRatingScaleToApi(data.ratingScale);
+    payload.ratingLabels = getDefaultRatingLabels(data.ratingScale);
+  }
+
+  if (data.sections !== undefined) {
+    payload.criteria = data.sections.map((section) => ({
+      id: section.id,
+      name: section.name,
+      nameAr: section.name,
+      weight: section.weight,
+      description: section.description,
+      items: section.criteria.map((criterion) => ({
+        id: criterion.id,
+        name: criterion.name,
+        nameAr: criterion.name,
+        weight: criterion.weight,
+        description: criterion.description,
+      })),
+    }));
+  }
+
+  return payload;
+}
 
 // =====================
 // Evaluation Cycles API

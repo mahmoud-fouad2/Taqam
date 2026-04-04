@@ -1,7 +1,8 @@
-"use client"
+﻿"use client"
 
 import * as React from "react"
 import {
+  IconBriefcase,
   IconChartBar,
   IconDashboard,
   IconFolder,
@@ -13,8 +14,9 @@ import {
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
-import { usePathname } from "next/navigation";
+import { isSuperAdminRole } from "@/lib/access-control";
 
+import { LogoMark } from "@/components/logo-mark";
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
 import {
@@ -30,21 +32,10 @@ import {
 
 type NavItem = { title: string; url: string; icon: any };
 
-function getCookieValue(cookieName: string): string | undefined {
-  if (typeof document === "undefined") return undefined;
-  const match = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${cookieName}=`));
-  if (!match) return undefined;
-  return decodeURIComponent(match.split("=").slice(1).join("="));
-}
-
-function getNav(locale: "ar" | "en", role?: string, hasTenant?: boolean, inPlatformAdmin?: boolean): NavItem[] {
+function getNav(locale: "ar" | "en", role?: string): NavItem[] {
   const p = locale === "en" ? "/en" : "";
 
-  // SUPER_ADMIN: when inside platform admin area, show only platform items.
-  if (role === "SUPER_ADMIN" && inPlatformAdmin) {
+  if (isSuperAdminRole(role)) {
     return [
       {
         title: locale === "ar" ? "لوحة تحكم السوبر أدمن" : "Super Admin",
@@ -74,26 +65,7 @@ function getNav(locale: "ar" | "en", role?: string, hasTenant?: boolean, inPlatf
     ];
   }
 
-  // SUPER_ADMIN without tenant context: also show platform-only.
-  if (role === "SUPER_ADMIN" && !hasTenant) {
-    return getNav(locale, role, hasTenant, true);
-  }
-
-  // When a tenant is selected (cookie/subdomain), hide platform-only pages.
-  // SUPER_ADMIN may still access them via the dedicated super-admin dashboard.
-  const platformShortcut: NavItem[] =
-    role === "SUPER_ADMIN" && hasTenant
-      ? [
-          {
-            title: locale === "ar" ? "لوحة السوبر أدمن" : "Platform Admin",
-            url: `${p}/dashboard/super-admin`,
-            icon: IconDashboard,
-          },
-        ]
-      : [];
-
   return [
-    ...platformShortcut,
     {
       title: locale === "ar" ? "الرئيسية" : "Dashboard",
       url: `${p}/dashboard`,
@@ -125,6 +97,21 @@ function getNav(locale: "ar" | "en", role?: string, hasTenant?: boolean, inPlatf
       icon: IconUsers,
     },
     {
+      title: locale === "ar" ? "الوظائف الشاغرة" : "Job Postings",
+      url: `${p}/dashboard/job-postings`,
+      icon: IconListDetails,
+    },
+    {
+      title: locale === "ar" ? "المتقدمون" : "Applicants",
+      url: `${p}/dashboard/applicants`,
+      icon: IconUsers,
+    },
+    {
+      title: locale === "ar" ? "العروض الوظيفية" : "Job Offers",
+      url: `${p}/dashboard/job-offers`,
+      icon: IconBriefcase,
+    },
+    {
       title: locale === "ar" ? "مركز المساعدة" : "Help Center",
       url: `${p}/dashboard/help-center`,
       icon: IconHelp,
@@ -145,20 +132,9 @@ function getNav(locale: "ar" | "en", role?: string, hasTenant?: boolean, inPlatf
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const locale = useClientLocale("ar");
   const p = locale === "en" ? "/en" : "";
-  const pathname = usePathname();
   const { data: session } = useSession();
   const [role, setRole] = React.useState<string | undefined>(undefined);
-  const [hasTenant, setHasTenant] = React.useState<boolean>(false);
   const [user, setUser] = React.useState<{ name: string; email: string; avatar: string } | null>(null);
-
-  React.useEffect(() => {
-    let mounted = true;
-    const tenant = getCookieValue("ujoors_tenant");
-    if (mounted) setHasTenant(Boolean(tenant));
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   React.useEffect(() => {
     const sUser = session?.user as any;
@@ -169,12 +145,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     setUser(sUser ? { name, email, avatar } : null);
   }, [session]);
 
-  const inPlatformAdmin = pathname.includes("/dashboard/super-admin");
-  const navItems = React.useMemo(
-    () => getNav(locale, role, hasTenant, inPlatformAdmin),
-    [locale, role, hasTenant, inPlatformAdmin]
-  );
-  const homeUrl = role === "SUPER_ADMIN" && inPlatformAdmin ? `${p}/dashboard/super-admin` : `${p}/dashboard`;
+  const navItems = React.useMemo(() => getNav(locale, role), [locale, role]);
+  const homeUrl = isSuperAdminRole(role) ? `${p}/dashboard/super-admin` : `${p}/dashboard`;
+  const workspaceLabel = isSuperAdminRole(role)
+    ? locale === "ar"
+      ? "إدارة المنصة"
+      : "Platform Admin"
+    : locale === "ar"
+      ? "مساحة الشركة"
+      : "Tenant Workspace";
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -187,12 +166,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <Link href={homeUrl}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <span className="text-sm font-bold">U</span>
-                </div>
+                <LogoMark frameClassName="size-8 rounded-md p-0" imageClassName="h-[18px]" />
                 <div className="grid flex-1 text-start text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-semibold">Ujoors (أجور)</span>
-                  <span className="truncate text-xs">Enterprise</span>
+                  <span className="truncate font-bold">طاقم</span>
+                  <span className="truncate text-xs text-sidebar-foreground/60">{workspaceLabel}</span>
                 </div>
               </Link>
             </SidebarMenuButton>

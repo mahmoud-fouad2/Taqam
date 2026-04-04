@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+﻿import { notFound } from "next/navigation";
 import { getRequestConfig } from "next-intl/server";
 import { cookies, headers } from "next/headers";
 
@@ -12,13 +12,13 @@ export const defaultLocale: Locale = "ar";
 // Get locale from cookie or return default
 export async function getLocale(): Promise<Locale> {
   const headerStore = await headers();
-  const headerLocale = headerStore.get("x-ujoors-locale");
+  const headerLocale = headerStore.get("x-taqam-locale");
   if (headerLocale && locales.includes(headerLocale as Locale)) {
     return headerLocale as Locale;
   }
 
   const cookieStore = await cookies();
-  const localeCookie = cookieStore.get("ujoors_locale")?.value;
+  const localeCookie = cookieStore.get("taqam_locale")?.value;
   
   if (localeCookie && locales.includes(localeCookie as Locale)) {
     return localeCookie as Locale;

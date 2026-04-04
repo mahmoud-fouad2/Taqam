@@ -1,5 +1,8 @@
 # 🔧 إصلاحات الأخطاء - Bug Fixes
 
+> **ملاحظة أرشيفية:** هذا الملف يوثق حالة تاريخية وقت التنفيذ. قد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو بيانات دخول أو Bootstrap قديمة.
+> للاستخدام الحالي اعتمد على `QUICK_START.md` و `SUMMARY.md` و `TESTING_GUIDE.md` واستخدم `https://YOUR-RENDER-DOMAIN` مع `ENABLE_SUPER_ADMIN_BOOTSTRAP=true` و `SUPER_ADMIN_BOOTSTRAP_TOKEN` وترويسة `x-bootstrap-token`.
+
 ## 🐛 الأخطاء المكتشفة والمعالجة
 
 ### 1️⃣ GET /api/tickets - 400 Bad Request ❌ → ✅

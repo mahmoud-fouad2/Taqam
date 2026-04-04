@@ -28,6 +28,7 @@
 
 ```powershell
 # اختبار تسجيل الدخول
+$BASE_URL = "https://YOUR-RENDER-DOMAIN"
 $headers = @{
     "X-Device-Id" = "test-device-001"
     "X-Device-Name" = "Test Device"
@@ -36,12 +37,12 @@ $headers = @{
 }
 
 $body = @{
-    email = "admin@admin.com"
-    password = "123456"
+  email = "YOUR_SUPER_ADMIN_EMAIL"
+  password = "YOUR_SUPER_ADMIN_PASSWORD"
 } | ConvertTo-Json
 
 Invoke-WebRequest `
-    -Uri "https://ujoor.onrender.com/api/mobile/auth/login" `
+  -Uri "$BASE_URL/api/mobile/auth/login" `
     -Method POST `
     -Headers $headers `
     -Body $body `
@@ -58,7 +59,7 @@ Invoke-WebRequest `
     "refreshToken": "...",
     "user": {
       "id": "...",
-      "email": "admin@admin.com",
+      "email": "YOUR_SUPER_ADMIN_EMAIL",
       "firstName": "Admin",
       "lastName": "User",
       "role": "SUPER_ADMIN"
@@ -93,12 +94,15 @@ Invoke-WebRequest `
    $body = @{
        nameAr = "شركة الاختبار"
        nameEn = "Test Company"
-       email = "info@test.com"
-       phone = "0501234567"
+       slug = "test-company"
+       plan = "PROFESSIONAL"
+       maxEmployees = 100
+       timezone = "Asia/Riyadh"
+       currency = "SAR"
    } | ConvertTo-Json
    
    Invoke-WebRequest `
-       -Uri "https://ujoor.onrender.com/api/companies" `
+       -Uri "$BASE_URL/api/tenants" `
        -Method POST `
        -Headers @{"Authorization" = "Bearer $accessToken"} `
        -Body $body

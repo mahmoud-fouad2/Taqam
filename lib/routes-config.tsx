@@ -187,6 +187,11 @@ export const page_routes: PageRoutesType[] = [
         icon: "Users"
       },
       {
+        title: "العروض الوظيفية",
+        href: "/dashboard/job-offers",
+        icon: "FileText"
+      },
+      {
         title: "المقابلات",
         href: "/dashboard/interviews",
         icon: "Calendar"

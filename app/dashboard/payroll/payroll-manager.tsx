@@ -79,6 +79,7 @@ import {
   formatCurrency,
   getMonthName,
 } from "@/lib/types/payroll";
+import { downloadBlob, fetchBlobOrThrow } from "@/lib/browser/download";
 import { toast } from "sonner";
 
 export function PayrollProcessingManager() {
@@ -236,6 +237,35 @@ export function PayrollProcessingManager() {
       await loadPeriods();
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "فشل تحديث حالة الفترة");
+    }
+  };
+
+  const handleSendPayslips = async (periodId: string) => {
+    try {
+      const res = await fetch(`/api/payroll/periods/${encodeURIComponent(periodId)}/send-payslips`, {
+        method: "POST",
+      });
+      const json = (await res.json()) as { data?: { sent?: number }; error?: string };
+      if (!res.ok) {
+        throw new Error(json.error || "فشل إرسال قسائم الرواتب");
+      }
+
+      toast.success(`تم إرسال ${json.data?.sent ?? 0} قسيمة راتب`);
+      await loadPeriods();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل إرسال قسائم الرواتب");
+    }
+  };
+
+  const handleDownloadBankFile = async (period: PayrollPeriod) => {
+    try {
+      const { blob, filename } = await fetchBlobOrThrow(
+        `/api/payroll/periods/${encodeURIComponent(period.id)}/bank-file?format=csv`,
+        { cache: "no-store" }
+      );
+      downloadBlob(blob, filename || `bank-file-${period.id}.csv`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "فشل تحميل ملف البنك");
     }
   };
 
@@ -539,11 +569,11 @@ export function PayrollProcessingManager() {
                           </DropdownMenuItem>
                           {period.status === "paid" && (
                             <>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleSendPayslips(period.id)}>
                                 <IconSend className="h-4 w-4 ms-2" />
                                 إرسال قسائم الرواتب
                               </DropdownMenuItem>
-                              <DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleDownloadBankFile(period)}>
                                 <IconDownload className="h-4 w-4 ms-2" />
                                 تحميل ملف البنك
                               </DropdownMenuItem>
@@ -574,7 +604,7 @@ export function PayrollProcessingManager() {
 
       {/* Period Details Dialog */}
       <Dialog open={!!selectedPeriod} onOpenChange={() => setSelectedPeriod(null)}>
-        <DialogContent className="sm:max-w-[600px]">
+        <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>تفاصيل مسير الرواتب</DialogTitle>
             <DialogDescription>{selectedPeriod?.nameAr}</DialogDescription>

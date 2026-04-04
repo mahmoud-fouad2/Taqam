@@ -1,22 +1,26 @@
 import { CalendarView } from "./calendar-view";
+import { CalendarDays } from "lucide-react";
 
 export const metadata = {
-  title: "التقويم | أجور",
+  title: "التقويم | طاقم",
   description: "عرض تقويم الحضور والانصراف",
 };
 
 export default function CalendarPage() {
   return (
-    <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">التقويم</h2>
-          <p className="text-muted-foreground">
-            عرض تقويمي لسجل الحضور والانصراف
-          </p>
+    <>
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
+            <CalendarDays className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">التقويم</h1>
+            <p className="text-sm text-muted-foreground">عرض تقويمي لسجل الحضور والانصراف</p>
+          </div>
         </div>
       </div>
       <CalendarView />
-    </div>
+    </>
   );
 }

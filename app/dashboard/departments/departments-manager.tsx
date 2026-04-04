@@ -297,7 +297,7 @@ export function DepartmentsManager() {
               <CardDescription>إدارة أقسام الشركة والهيكل التنظيمي</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" onClick={fetchDepartments} title="تحديث">
+              <Button variant="outline" size="icon" aria-label="تحديث" onClick={fetchDepartments} title="تحديث">
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>
@@ -369,12 +369,13 @@ export function DepartmentsManager() {
                       </div>
 
                       <div className="flex flex-col items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" onClick={() => handleEdit(dept)}>
+                        <Button variant="ghost" size="icon" aria-label="تعديل" onClick={() => handleEdit(dept)}>
                           <IconPencil className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
+                          aria-label="حذف"
                           onClick={() => handleDeleteClick(dept)}
                           disabled={dept.employeesCount > 0}
                         >
@@ -389,7 +390,7 @@ export function DepartmentsManager() {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block rounded-md border">
+          <div className="hidden md:block rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -435,6 +436,7 @@ export function DepartmentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="تعديل"
                             onClick={() => handleEdit(dept)}
                           >
                             <IconPencil className="h-4 w-4" />
@@ -442,6 +444,7 @@ export function DepartmentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="حذف"
                             onClick={() => handleDeleteClick(dept)}
                             disabled={dept.employeesCount > 0}
                           >
@@ -460,7 +463,7 @@ export function DepartmentsManager() {
 
       {/* Add/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingDepartment ? "تعديل القسم" : "إضافة قسم جديد"}

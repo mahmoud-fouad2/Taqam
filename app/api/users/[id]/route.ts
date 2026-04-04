@@ -1,10 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { UserRole, UserStatus } from "@prisma/client";
 import { authOptions } from "@/lib/auth";
+import { hasRole } from "@/lib/access-control";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { z } from "zod";
 
-const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
+const updateUserSchema = z.object({
+  firstName: z.string().min(1).optional(),
+  lastName: z.string().min(1).optional(),
+  email: z.string().email().optional(),
+  role: z.nativeEnum(UserRole).optional(),
+  status: z.nativeEnum(UserStatus).optional(),
+  phone: z.string().optional(),
+});
+
+const ALLOWED_ROLES = [UserRole.TENANT_ADMIN, UserRole.HR_MANAGER] as const;
+const MANAGEABLE_ROLES = new Set<UserRole>([
+  UserRole.EMPLOYEE,
+  UserRole.HR_MANAGER,
+  UserRole.TENANT_ADMIN,
+]);
+
+function canManageTargetUser(actorRole: string | undefined, targetRole: UserRole): boolean {
+  if (!MANAGEABLE_ROLES.has(targetRole)) {
+    return false;
+  }
+
+  if (targetRole === UserRole.TENANT_ADMIN) {
+    return actorRole === UserRole.TENANT_ADMIN;
+  }
+
+  return hasRole(actorRole, ALLOWED_ROLES);
+}
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -23,7 +52,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
-    if (!ALLOWED_ROLES.has(session.user.role)) {
+    if (!hasRole(session.user.role, ALLOWED_ROLES)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -78,7 +107,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
-    if (!ALLOWED_ROLES.has(session.user.role)) {
+    if (!hasRole(session.user.role, ALLOWED_ROLES)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -93,8 +122,20 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    const body = await request.json();
-    const { firstName, lastName, email, role, status, phone } = body;
+    if (!canManageTargetUser(session.user.role, existingUser.role)) {
+      return NextResponse.json({ error: "غير مسموح بتعديل هذا المستخدم" }, { status: 403 });
+    }
+
+    const rawBody = await request.json();
+    const parsed = updateUserSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
+    }
+    const { firstName, lastName, email, role, status, phone } = parsed.data;
+
+    if (role && !canManageTargetUser(session.user.role, role)) {
+      return NextResponse.json({ error: "غير مسموح بتعيين هذا الدور" }, { status: 403 });
+    }
 
     // Check if email is being changed and if it's already taken
     if (email && email.toLowerCase() !== existingUser.email.toLowerCase()) {
@@ -152,7 +193,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
-    if (!ALLOWED_ROLES.has(session.user.role)) {
+    if (!hasRole(session.user.role, ALLOWED_ROLES)) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
@@ -165,6 +206,10 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     if (!existingUser) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (!canManageTargetUser(session.user.role, existingUser.role)) {
+      return NextResponse.json({ error: "غير مسموح بحذف هذا المستخدم" }, { status: 403 });
     }
 
     // Don't allow deleting yourself

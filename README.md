@@ -1,4 +1,4 @@
-# Ujoor HR Platform
+# Taqam HR Platform
 
 نظام إدارة موارد بشرية شامل متعدد المستأجرين (Multi-tenant) مبني على:
 
@@ -14,8 +14,8 @@
 ### 1. Clone & Install
 
 ```bash
-git clone https://github.com/mahmoud-fouad2/Ujoor.git
-cd Ujoor
+git clone <your-repository-url>
+cd Jisr
 pnpm install
 ```
 
@@ -72,6 +72,12 @@ pnpm dev
 
 افتح [http://localhost:3000](http://localhost:3000)
 
+## 📱 ملاحظة الموبايل
+
+- التطبيق الرسمي الحالي للموبايل موجود في `apps/mobile`
+- المجلد `mobile-app` محفوظ كنسخة مرجعية قديمة وليس هو الـ workspace الرسمي الذي تتحقق منه أوامر الجذر
+- أمر التحقق الحالي للموبايل هو `pnpm typecheck:mobile`
+
 ## 📁 هيكل المشروع
 
 ```
@@ -90,6 +96,8 @@ pnpm dev
 ├── prisma/               # Database
 │   ├── schema.prisma     # Database schema
 │   └── seed.ts           # Seed script
+├── apps/mobile/          # Official Expo mobile workspace
+├── mobile-app/           # Legacy mobile reference workspace
 ├── hooks/                # Custom React hooks
 └── types/                # TypeScript types
 ```
@@ -122,7 +130,7 @@ pnpm dev
 ### 1. أنشئ خدمة Web Service جديدة
 
 - **Build Command**: `pnpm install && pnpm build`
-- **Start Command**: `pnpm start`
+- **Start Command**: `pnpm start:render`
 
 ### 2. أنشئ قاعدة بيانات PostgreSQL
 
@@ -140,6 +148,10 @@ R2_PUBLIC_URL=https://pub-408c0f665b964f47bcd1abfe89ac8aed.r2.dev
 NEXTAUTH_SECRET=...
 NEXTAUTH_URL=https://your-app.onrender.com
 NEXT_PUBLIC_APP_URL=https://your-app.onrender.com
+ENABLE_SUPER_ADMIN_BOOTSTRAP=true
+SUPER_ADMIN_BOOTSTRAP_TOKEN=[openssl rand -hex 32]
+SUPER_ADMIN_EMAIL=admin@your-app.com
+SUPER_ADMIN_PASSWORD=[strong password]
 NEXT_PUBLIC_RECAPTCHA_SITE_KEY=...
 RECAPTCHA_SECRET_KEY=...
 
@@ -150,6 +162,7 @@ MOBILE_REFRESH_TOKEN_SECRET=...
 # Optional
 # MOBILE_REFRESH_TOKEN_TTL_DAYS=30
 # MOBILE_CHALLENGE_TTL_SECONDS=120
+# PRISMA_SCHEMA_SYNC_MODE=push
 
 > ملاحظة reCAPTCHA: الواجهة تستخدم `react-google-recaptcha` (reCAPTCHA v2 Checkbox). إذا ظهرت رسالة
 > `ERROR for site owner: Invalid key type` فغالبًا المفاتيح تم إنشاؤها لنوع آخر (مثل v3) أو نطاق غير صحيح.
@@ -157,8 +170,10 @@ MOBILE_REFRESH_TOKEN_SECRET=...
 
 ### 4. قاعدة البيانات على Render
 
-- البناء الحالي يشغّل `prisma db push` أثناء `pnpm build` لمزامنة الـ schema تلقائيًا (مناسب لقيود Render Free Tier بدون SSH).
-- لو حابب تعتمد على migrations لاحقًا، فعّل `prisma migrate deploy` ضمن Pipeline خاصة بك.
+- `pnpm build` لم يعد يغيّر قاعدة البيانات أثناء البناء.
+- `pnpm start:render` يشغّل `prisma migrate deploy` افتراضياً عند الإقلاع.
+- إذا احتجت fallback قديم لبيئة مؤقتة فقط، اضبط `PRISMA_SCHEMA_SYNC_MODE=push` صراحة.
+- بعد إنشاء أول Super Admin، عطّل `ENABLE_SUPER_ADMIN_BOOTSTRAP` أو احذف متغيراته.
 
 ## 📜 الأوامر المتاحة
 
@@ -167,6 +182,7 @@ MOBILE_REFRESH_TOKEN_SECRET=...
 | `pnpm dev` | تشغيل بيئة التطوير |
 | `pnpm build` | بناء للإنتاج |
 | `pnpm start` | تشغيل السيرفر |
+| `pnpm validate:all` | تحقق موحد للويب والموبايل |
 | `pnpm db:push` | Push schema للـ DB |
 | `pnpm db:migrate` | إنشاء migration |
 | `pnpm db:seed` | تشغيل seed |

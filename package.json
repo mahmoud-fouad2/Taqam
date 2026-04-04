@@ -1,14 +1,16 @@
 {
-  "name": "ujoor",
+  "name": "taqam",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
     "dev:lan": "next dev --webpack --hostname 0.0.0.0",
-    "build": "prisma generate && prisma db push --accept-data-loss && next build --webpack",
+    "build": "prisma generate && next build --webpack",
     "analyze": "set ANALYZE=true&& next build --webpack",
     "start": "next start",
     "start:render": "node scripts/render-start.mjs",
+    "typecheck:mobile": "pnpm --dir apps/mobile typecheck",
+    "validate:all": "pnpm lint && pnpm test && pnpm build && pnpm typecheck:mobile",
     "cap:sync:android": "cap sync android",
     "android:open": "cap open android",
     "android:apk:debug": "cd android && gradlew.bat assembleDebug",

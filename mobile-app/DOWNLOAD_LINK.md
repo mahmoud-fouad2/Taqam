@@ -1,5 +1,7 @@
 # 📱 تطبيق البصمة - رابط تحميل APK
 
+> تنبيه: هذا المستند يخص المسار legacy `mobile-app/` فقط. المسار الرسمي الحالي هو `apps/mobile`.
+
 ## 🎯 الخيار السريع: استخدام Expo
 
 بدلاً من بناء APK يدوياً، يمكن للموظفين تحميل **Expo Go** واستخدام التطبيق مباشرة!
@@ -64,7 +66,7 @@ https://expo.dev/artifacts/eas/abc123.apk
 cd mobile-app
 
 # 1. إعداد .env
-echo 'EXPO_PUBLIC_API_BASE_URL=https://ujoor.onrender.com' > .env
+echo 'EXPO_PUBLIC_API_BASE_URL=https://YOUR-RENDER-DOMAIN' > .env
 
 # 2. Pre-build
 npx expo prebuild --platform android
@@ -96,7 +98,7 @@ ls -lh android/app/build/outputs/apk/release/
 
 مثال رابط نهائي:
 ```
-https://bit.ly/ujoor-attendance-app
+https://bit.ly/taqam-attendance-app
 ```
 
 ---
@@ -110,14 +112,14 @@ https://bit.ly/ujoor-attendance-app
 ```json
 {
   "expo": {
-    "name": "Ujoor - الحضور",
-    "slug": "ujoor-attendance",
+    "name": "Taqam Legacy - الحضور",
+    "slug": "taqam-legacy-attendance",
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png"
     },
     "android": {
-      "package": "com.yourcompany.ujoor",
+      "package": "com.yourcompany.taqamlegacy",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png"
@@ -162,7 +164,7 @@ eas build --platform android --profile production
 
 4. **بعد الموافقة:**
    - سيكون التطبيق متاح على Play Store
-   - رابط: `https://play.google.com/store/apps/details?id=com.yourcompany.ujoor`
+  - رابط: `https://play.google.com/store/apps/details?id=com.yourcompany.taqamlegacy`
 
 ---
 
@@ -171,7 +173,7 @@ eas build --platform android --profile production
 للاختبار أثناء التطوير:
 
 ```
-Server: https://ujoor.onrender.com
+Server: https://YOUR-RENDER-DOMAIN
 Email: admin@admin.com
 Password: 123456
 ```

@@ -83,8 +83,11 @@ import {
   courseTypeLabels,
   courseCategoryLabels,
 } from "@/lib/types/training";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
 export function TrainingCoursesManager() {
+  const locale = useClientLocale("ar");
+  const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [courses, setCourses] = React.useState<TrainingCourse[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
@@ -352,7 +355,7 @@ export function TrainingCoursesManager() {
               className="h-3 flex-1"
             />
             <span className="text-sm font-medium">
-              {(stats?.budgetUsed ?? 0).toLocaleString()} / {(stats?.budgetTotal ?? 0).toLocaleString()} ر.س
+              {(stats?.budgetUsed ?? 0).toLocaleString(numLocale)} / {(stats?.budgetTotal ?? 0).toLocaleString(numLocale)} ر.س
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
@@ -741,7 +744,7 @@ export function TrainingCoursesManager() {
                     <h4 className="font-semibold mb-3">المدرب</h4>
                     <div className="flex items-center gap-3">
                       <Avatar>
-                        <AvatarImage src={selectedCourse.instructor.avatar} />
+                        <AvatarImage src={selectedCourse.instructor.avatar} alt="" />
                         <AvatarFallback>
                           {selectedCourse.instructor.name.split(" ").map(n => n[0]).join("")}
                         </AvatarFallback>

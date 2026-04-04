@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
 import { AppSidebar } from "@/components/app-sidebar"
@@ -12,19 +12,18 @@ import {
 export default async function Page({ children }: { children: React.ReactNode }) {
   await requireAuth();
   const cookieStore = await cookies();
-  const locale = cookieStore.get("ujoors_locale")?.value === "en" ? "en" : "ar";
+  const locale = cookieStore.get("taqam_locale")?.value === "en" ? "en" : "ar";
   const dir = locale === "ar" ? "rtl" : "ltr";
   const sidebarSide = dir === "rtl" ? "right" : "left";
 
   return (
-    <div lang={locale} dir={dir} className="min-h-screen">
+    <div
+      className={`min-h-screen ${dir === "rtl" ? "direction-rtl" : "direction-ltr"}`}
+      data-locale={locale}
+      data-dir={dir}
+    >
       <SidebarProvider
-        style={
-          {
-            "--sidebar-width": "calc(var(--spacing) * 72)",
-            "--header-height": "calc(var(--spacing) * 12)",
-          } as React.CSSProperties
-        }
+        className="[--sidebar-width:calc(var(--spacing)*72)] [--header-height:calc(var(--spacing)*12)]"
       >
         <AppSidebar variant="inset" side={sidebarSide} />
         <SidebarInset>

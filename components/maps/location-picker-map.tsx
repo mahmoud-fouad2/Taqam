@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import "leaflet";
@@ -18,7 +18,7 @@ export type LocationPickerMapProps = {
 const DEFAULT_CENTER: [number, number] = [24.7136, 46.6753]; // Riyadh
 
 const markerIcon = L.divIcon({
-  className: "ujoors-leaflet-marker",
+  className: "taqam-leaflet-marker",
   html:
     '<div style="width:18px;height:18px;border-radius:9999px;background:#0ea5e9;border:3px solid white;box-shadow:0 6px 16px rgba(0,0,0,.25);"></div>',
   iconSize: [18, 18],

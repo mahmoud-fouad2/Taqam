@@ -1,5 +1,7 @@
 import crypto from "crypto";
-import type { PrismaClient } from "@prisma/client";
+import type prisma from "@/lib/db";
+
+type MobileChallengeDb = Pick<typeof prisma, "mobileChallenge">;
 
 const DEFAULT_TTL_SECONDS = 120;
 
@@ -14,7 +16,7 @@ export function getChallengeExpiryDate(now = new Date()): Date {
 }
 
 export async function createChallenge(
-  prisma: PrismaClient,
+  prisma: MobileChallengeDb,
   input: { userId: string; mobileDeviceId: string }
 ): Promise<{ nonce: string; expiresAt: Date }> {
   const nonce = issueNonce();
@@ -33,7 +35,7 @@ export async function createChallenge(
 }
 
 export async function consumeChallenge(
-  prisma: PrismaClient,
+  prisma: MobileChallengeDb,
   input: { nonce: string; userId: string; mobileDeviceId: string }
 ): Promise<boolean> {
   const challenge = await prisma.mobileChallenge.findUnique({

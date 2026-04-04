@@ -30,6 +30,16 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Plus, Pencil, Trash2, Star, DollarSign } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface PricingPlan {
   id: string;
@@ -83,6 +93,7 @@ export function PricingPlansManager() {
   const [editingPlan, setEditingPlan] = useState<Partial<PricingPlan> | null>(null);
   const [newFeatureAr, setNewFeatureAr] = useState("");
   const [newFeatureEn, setNewFeatureEn] = useState("");
+  const [planToDelete, setPlanToDelete] = useState<PricingPlan | null>(null);
 
   useEffect(() => {
     fetchPlans();
@@ -145,9 +156,10 @@ export function PricingPlansManager() {
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm("هل أنت متأكد من حذف هذه الباقة؟")) return;
-
+  async function confirmDelete() {
+    if (!planToDelete) return;
+    const id = planToDelete.id;
+    setPlanToDelete(null);
     try {
       const res = await fetch(`/api/super-admin/pricing-plans/${id}`, {
         method: "DELETE",
@@ -230,6 +242,7 @@ export function PricingPlansManager() {
                   <Button
                     variant="ghost"
                     size="icon"
+                    aria-label="تعديل"
                     onClick={() => openEditDialog(plan)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -237,7 +250,8 @@ export function PricingPlansManager() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => handleDelete(plan.id)}
+                    aria-label="حذف"
+                    onClick={() => setPlanToDelete(plan)}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
@@ -301,7 +315,7 @@ export function PricingPlansManager() {
 
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingPlan?.id ? "تعديل الباقة" : "باقة جديدة"}
@@ -534,6 +548,7 @@ export function PricingPlansManager() {
                         type="button"
                         variant="ghost"
                         size="icon"
+                        aria-label="حذف"
                         className="h-6 w-6"
                         onClick={() => removeFeature(i)}
                       >
@@ -563,6 +578,27 @@ export function PricingPlansManager() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={planToDelete !== null} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>حذف الباقة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل أنت متأكد من حذف باقة &quot;{planToDelete?.nameAr}&quot;؟ لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void confirmDelete()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              حذف
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -6,13 +6,17 @@
 export type EvaluationCycleStatus = 
   | 'draft'       // مسودة
   | 'active'      // نشط
+  | 'in-progress' // قيد التنفيذ
   | 'completed'   // مكتمل
+  | 'cancelled'   // ملغي
   | 'archived';   // مؤرشف
 
 export const evaluationCycleStatusLabels: Record<EvaluationCycleStatus, string> = {
   draft: 'مسودة',
   active: 'نشط',
+  'in-progress': 'قيد التنفيذ',
   completed: 'مكتمل',
+  cancelled: 'ملغي',
   archived: 'مؤرشف',
 };
 
@@ -22,6 +26,7 @@ export type EmployeeEvaluationStatus =
   | 'pending_manager_review'   // بانتظار تقييم المدير
   | 'pending_calibration'      // بانتظار المعايرة
   | 'pending_acknowledgment'   // بانتظار التأكيد
+  | 'cancelled'                // ملغي
   | 'completed';               // مكتمل
 
 export const employeeEvaluationStatusLabels: Record<EmployeeEvaluationStatus, string> = {
@@ -29,6 +34,7 @@ export const employeeEvaluationStatusLabels: Record<EmployeeEvaluationStatus, st
   pending_manager_review: 'بانتظار تقييم المدير',
   pending_calibration: 'بانتظار المعايرة',
   pending_acknowledgment: 'بانتظار التأكيد',
+  cancelled: 'ملغي',
   completed: 'مكتمل',
 };
 
@@ -95,6 +101,7 @@ export const employeeEvaluationStatusColors: Record<EmployeeEvaluationStatus, st
   pending_manager_review: 'bg-purple-100 text-purple-800',
   pending_calibration: 'bg-orange-100 text-orange-800',
   pending_acknowledgment: 'bg-teal-100 text-teal-800',
+  cancelled: 'bg-gray-100 text-gray-600',
   completed: 'bg-green-100 text-green-800',
 };
 

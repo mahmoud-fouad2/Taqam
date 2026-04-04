@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import * as React from "react";
 import {
@@ -6,12 +6,16 @@ import {
   IconSearch,
   IconEye,
   IconEdit,
+  IconTrash,
+  IconX,
   IconTarget,
   IconProgress,
   IconCheck,
-  IconUser,
   IconCalendar,
+  IconPlayerPlay,
+  IconClock,
 } from "@tabler/icons-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +41,6 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
   Select,
@@ -50,186 +53,585 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useEmployees } from "@/hooks/use-employees";
 import {
-  DevelopmentPlan,
-  DevelopmentPlanStatus,
+  developmentPlansApi,
+  type DevelopmentPlanUpsertInput,
+} from "@/lib/api/training";
+import {
+  type DevelopmentPlan,
+  type DevelopmentGoal,
+  type DevelopmentActivity,
+  type DevelopmentPlanStatus,
+  type DevelopmentPlanType,
+  type DevelopmentPlanPriority,
   developmentPlanStatusLabels,
   developmentPlanStatusColors,
+  developmentPlanTypeLabels,
+  developmentPlanPriorityLabels,
+  developmentPlanPriorityColors,
   activityTypeLabels,
 } from "@/lib/types/training";
 
-// بيانات وهمية
-const mockDevelopmentPlans: DevelopmentPlan[] = [
-  {
-    id: "plan-1",
-    employeeId: "emp-1",
-    employeeName: "أحمد محمد",
-    title: "خطة التطوير للترقية إلى مدير فريق",
-    description: "خطة شاملة لتطوير المهارات القيادية والإدارية",
-    status: "active",
-    startDate: "2024-01-01",
-    targetDate: "2024-06-30",
-    goals: [
-      {
-        id: "goal-1",
-        title: "تطوير مهارات القيادة",
-        description: "اكتساب مهارات قيادة الفريق وإدارة الأفراد",
-        targetDate: "2024-03-31",
-        status: "in-progress",
-        progress: 60,
-      },
-      {
-        id: "goal-2",
-        title: "تحسين مهارات التواصل",
-        description: "تطوير مهارات التواصل الفعّال مع الفريق",
-        targetDate: "2024-04-30",
-        status: "not-started",
-        progress: 0,
-      },
-    ],
-    activities: [
-      {
-        id: "act-1",
-        title: "دورة القيادة الفعّالة",
-        type: "course",
-        courseId: "course-1",
-        dueDate: "2024-02-28",
-        status: "completed",
-        completedDate: "2024-02-15",
-      },
-      {
-        id: "act-2",
-        title: "قراءة كتاب القيادة للمبتدئين",
-        type: "reading",
-        dueDate: "2024-03-15",
-        status: "in-progress",
-      },
-      {
-        id: "act-3",
-        title: "مشروع قيادة فريق صغير",
-        type: "project",
-        dueDate: "2024-04-30",
-        status: "pending",
-      },
-    ],
-    mentor: {
-      id: "emp-m1",
-      name: "محمد علي",
-      role: "مدير القسم",
-      email: "m.ali@company.com",
-    },
-    progress: 45,
-    createdBy: "admin",
-    createdAt: "2024-01-01T10:00:00Z",
-    updatedAt: "2024-02-15T10:00:00Z",
-  },
-  {
-    id: "plan-2",
-    employeeId: "emp-2",
-    employeeName: "سارة علي",
-    title: "خطة التطوير في تحليل البيانات",
-    status: "active",
-    startDate: "2024-02-01",
-    targetDate: "2024-08-31",
-    goals: [
-      {
-        id: "goal-3",
-        title: "إتقان Python للتحليل",
-        targetDate: "2024-04-30",
-        status: "in-progress",
-        progress: 40,
-      },
-    ],
-    activities: [
-      {
-        id: "act-4",
-        title: "دورة Python للمحللين",
-        type: "course",
-        dueDate: "2024-03-31",
-        status: "in-progress",
-      },
-    ],
-    progress: 30,
-    createdBy: "admin",
-    createdAt: "2024-02-01T10:00:00Z",
-    updatedAt: "2024-02-10T10:00:00Z",
-  },
-];
+type EditablePlanGoal = {
+  id: string;
+  title: string;
+  description: string;
+  targetDate: string;
+  status: DevelopmentGoal["status"];
+  progress: number;
+  metrics: string;
+  completedDate: string;
+};
+
+type EditablePlanActivity = {
+  id: string;
+  title: string;
+  description: string;
+  type: DevelopmentActivity["type"];
+  courseId: string;
+  dueDate: string;
+  status: DevelopmentActivity["status"];
+  completedDate: string;
+  notes: string;
+};
+
+type PlanFormState = {
+  employeeId: string;
+  title: string;
+  description: string;
+  startDate: string;
+  targetDate: string;
+  mentorId: string;
+  type: DevelopmentPlanType;
+  priority: DevelopmentPlanPriority;
+  status: DevelopmentPlanStatus;
+  goals: EditablePlanGoal[];
+  activities: EditablePlanActivity[];
+  notes: string;
+};
+
+const EMPTY_FORM: PlanFormState = {
+  employeeId: "",
+  title: "",
+  description: "",
+  startDate: "",
+  targetDate: "",
+  mentorId: "",
+  type: "individual",
+  priority: "medium",
+  status: "draft",
+  goals: [],
+  activities: [],
+  notes: "",
+};
+
+function createEditorId(prefix: string) {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}-${crypto.randomUUID()}`;
+  }
+
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+function createEmptyGoal(targetDate = ""): EditablePlanGoal {
+  return {
+    id: createEditorId("goal"),
+    title: "",
+    description: "",
+    targetDate,
+    status: "not-started",
+    progress: 0,
+    metrics: "",
+    completedDate: "",
+  };
+}
+
+function createEmptyActivity(dueDate = ""): EditablePlanActivity {
+  return {
+    id: createEditorId("activity"),
+    title: "",
+    description: "",
+    type: "other",
+    courseId: "",
+    dueDate,
+    status: "pending",
+    completedDate: "",
+    notes: "",
+  };
+}
+
+function toDateInputValue(value: string) {
+  return value ? value.slice(0, 10) : "";
+}
+
+function clampProgressValue(value: number) {
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function normalizeEditableGoal(goal: EditablePlanGoal): EditablePlanGoal {
+  const progress = clampProgressValue(goal.progress);
+
+  if (goal.status === "completed" || progress >= 100) {
+    return {
+      ...goal,
+      status: "completed",
+      progress: 100,
+      completedDate: goal.completedDate || goal.targetDate,
+    };
+  }
+
+  if (goal.status === "not-started" || progress <= 0) {
+    return {
+      ...goal,
+      status: "not-started",
+      progress: 0,
+      completedDate: "",
+    };
+  }
+
+  return {
+    ...goal,
+    status: "in-progress",
+    progress: progress || 50,
+    completedDate: "",
+  };
+}
+
+function normalizeEditableActivity(activity: EditablePlanActivity): EditablePlanActivity {
+  if (activity.status === "completed") {
+    return {
+      ...activity,
+      completedDate: activity.completedDate || activity.dueDate,
+    };
+  }
+
+  return {
+    ...activity,
+    completedDate: "",
+  };
+}
+
+function getGoalStatusLabel(status: DevelopmentGoal["status"]) {
+  switch (status) {
+    case "completed":
+      return "مكتمل";
+    case "in-progress":
+      return "قيد التنفيذ";
+    default:
+      return "لم يبدأ";
+  }
+}
+
+function getActivityStatusLabel(status: DevelopmentActivity["status"]) {
+  switch (status) {
+    case "completed":
+      return "مكتمل";
+    case "in-progress":
+      return "قيد التنفيذ";
+    case "skipped":
+      return "تم تخطيه";
+    default:
+      return "معلّق";
+  }
+}
+
+function formatDate(value: string) {
+  return new Date(value).toLocaleDateString("ar-SA");
+}
+
+function buildFormState(plan: DevelopmentPlan): PlanFormState {
+  return {
+    employeeId: plan.employeeId,
+    title: plan.title,
+    description: plan.description || "",
+    startDate: toDateInputValue(plan.startDate),
+    targetDate: toDateInputValue(plan.targetDate),
+    mentorId: plan.mentor?.id || "",
+    type: plan.type,
+    priority: plan.priority,
+    status: plan.status,
+    goals: plan.goals.map((goal) =>
+      normalizeEditableGoal({
+        id: goal.id,
+        title: goal.title,
+        description: goal.description || "",
+        targetDate: toDateInputValue(goal.targetDate) || toDateInputValue(plan.targetDate),
+        status: goal.status,
+        progress: goal.progress,
+        metrics: goal.metrics || "",
+        completedDate: toDateInputValue(goal.completedDate || ""),
+      })
+    ),
+    activities: plan.activities.map((activity) =>
+      normalizeEditableActivity({
+        id: activity.id,
+        title: activity.title,
+        description: activity.description || "",
+        type: activity.type,
+        courseId: activity.courseId || "",
+        dueDate: toDateInputValue(activity.dueDate) || toDateInputValue(plan.targetDate),
+        status: activity.status,
+        completedDate: toDateInputValue(activity.completedDate || ""),
+        notes: activity.notes || "",
+      })
+    ),
+    notes: plan.notes || "",
+  };
+}
+
+function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
+  const fallbackTargetDate = form.targetDate || form.startDate;
+
+  const goals = form.goals
+    .filter((goal) => goal.title.trim().length > 0)
+    .map((goal) => {
+      const normalizedGoal = normalizeEditableGoal({
+        ...goal,
+        targetDate: goal.targetDate || fallbackTargetDate,
+      });
+
+      return {
+        id: normalizedGoal.id,
+        title: normalizedGoal.title.trim(),
+        description: normalizedGoal.description.trim() || undefined,
+        targetDate: normalizedGoal.targetDate || fallbackTargetDate,
+        status: normalizedGoal.status,
+        progress: normalizedGoal.progress,
+        metrics: normalizedGoal.metrics.trim() || undefined,
+        completedDate:
+          normalizedGoal.status === "completed"
+            ? normalizedGoal.completedDate || normalizedGoal.targetDate || fallbackTargetDate
+            : undefined,
+      };
+    });
+
+  const activities = form.activities
+    .filter((activity) => activity.title.trim().length > 0)
+    .map((activity) => {
+      const normalizedActivity = normalizeEditableActivity({
+        ...activity,
+        dueDate: activity.dueDate || fallbackTargetDate,
+      });
+
+      return {
+        id: normalizedActivity.id,
+        title: normalizedActivity.title.trim(),
+        type: normalizedActivity.type,
+        description: normalizedActivity.description.trim() || undefined,
+        courseId: normalizedActivity.courseId.trim() || undefined,
+        dueDate: normalizedActivity.dueDate || fallbackTargetDate,
+        status: normalizedActivity.status,
+        completedDate:
+          normalizedActivity.status === "completed"
+            ? normalizedActivity.completedDate || normalizedActivity.dueDate || fallbackTargetDate
+            : undefined,
+        notes: normalizedActivity.notes.trim() || undefined,
+      };
+    });
+
+  return {
+    employeeId: form.employeeId,
+    title: form.title,
+    description: form.description || undefined,
+    startDate: form.startDate,
+    targetDate: form.targetDate,
+    mentorId: form.mentorId || undefined,
+    type: form.type,
+    priority: form.priority,
+    status: form.status,
+    goals,
+    activities,
+    notes: form.notes || undefined,
+  };
+}
+
+function getActivityStatusColor(status: string) {
+  switch (status) {
+    case "completed":
+      return "bg-green-100 text-green-800";
+    case "in-progress":
+      return "bg-blue-100 text-blue-800";
+    case "pending":
+      return "bg-gray-100 text-gray-800";
+    case "skipped":
+      return "bg-yellow-100 text-yellow-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
+
+function getGoalStatusColor(status: string) {
+  switch (status) {
+    case "completed":
+      return "bg-green-100 text-green-800";
+    case "in-progress":
+      return "bg-blue-100 text-blue-800";
+    default:
+      return "bg-gray-100 text-gray-800";
+  }
+}
 
 export function DevelopmentPlansManager() {
-  const [plans, setPlans] = React.useState<DevelopmentPlan[]>(mockDevelopmentPlans);
+  const { employees, isLoading: isEmployeesLoading } = useEmployees();
+  const [plans, setPlans] = React.useState<DevelopmentPlan[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
   const [selectedPlan, setSelectedPlan] = React.useState<DevelopmentPlan | null>(null);
+  const [editingPlan, setEditingPlan] = React.useState<DevelopmentPlan | null>(null);
+  const [form, setForm] = React.useState<PlanFormState>(EMPTY_FORM);
   const [isViewSheetOpen, setIsViewSheetOpen] = React.useState(false);
-  const [isAddSheetOpen, setIsAddSheetOpen] = React.useState(false);
+  const [isFormSheetOpen, setIsFormSheetOpen] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSaving, setIsSaving] = React.useState(false);
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
+  const [deletingId, setDeletingId] = React.useState<string | null>(null);
+  const [planToDelete, setPlanToDelete] = React.useState<DevelopmentPlan | null>(null);
+  const [error, setError] = React.useState<string | null>(null);
 
-  // فلترة الخطط
+  const loadPlans = React.useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await developmentPlansApi.getAll({ pageSize: 200 });
+      if (!response.success || !response.data) {
+        setPlans([]);
+        setError(response.error || "فشل تحميل خطط التطوير");
+        return;
+      }
+
+      setPlans(response.data.plans);
+    } catch (loadError) {
+      setPlans([]);
+      setError(loadError instanceof Error ? loadError.message : "فشل تحميل خطط التطوير");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    void loadPlans();
+  }, [loadPlans]);
+
   const filteredPlans = React.useMemo(() => {
+    const query = searchQuery.trim().toLowerCase();
+
     return plans.filter((plan) => {
       const matchesSearch =
-        plan.employeeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        plan.title.toLowerCase().includes(searchQuery.toLowerCase());
+        !query ||
+        plan.employeeName.toLowerCase().includes(query) ||
+        plan.title.toLowerCase().includes(query);
 
-      const matchesStatus =
-        statusFilter === "all" || plan.status === statusFilter;
-
+      const matchesStatus = statusFilter === "all" || plan.status === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [plans, searchQuery, statusFilter]);
 
-  // إحصائيات
-  const stats = React.useMemo(() => ({
-    total: plans.length,
-    active: plans.filter((p) => p.status === "active").length,
-    completed: plans.filter((p) => p.status === "completed").length,
-    avgProgress: Math.round(plans.reduce((sum, p) => sum + p.progress, 0) / plans.length),
-  }), [plans]);
+  const stats = React.useMemo(() => {
+    const total = plans.length;
+    const avgProgress = total > 0 ? Math.round(plans.reduce((sum, plan) => sum + plan.progress, 0) / total) : 0;
 
-  const handleViewPlan = (plan: DevelopmentPlan) => {
+    return {
+      total,
+      active: plans.filter((plan) => plan.status === "active").length,
+      pendingApproval: plans.filter((plan) => plan.status === "pending-approval").length,
+      completed: plans.filter((plan) => plan.status === "completed").length,
+      avgProgress,
+    };
+  }, [plans]);
+
+  function updateFormValue<K extends keyof PlanFormState>(key: K, value: PlanFormState[K]) {
+    setForm((current) => ({ ...current, [key]: value }));
+  }
+
+  function openCreateSheet() {
+    setEditingPlan(null);
+    setForm({
+      ...EMPTY_FORM,
+      goals: [createEmptyGoal()],
+      activities: [createEmptyActivity()],
+    });
+    setIsFormSheetOpen(true);
+  }
+
+  function openEditSheet(plan: DevelopmentPlan) {
+    setEditingPlan(plan);
+    setForm(buildFormState(plan));
+    setIsFormSheetOpen(true);
+  }
+
+  function openViewSheet(plan: DevelopmentPlan) {
     setSelectedPlan(plan);
     setIsViewSheetOpen(true);
-  };
+  }
 
-  const getActivityStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "pending":
-        return "bg-gray-100 text-gray-800";
-      case "skipped":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  function handleFormSheetOpenChange(open: boolean) {
+    setIsFormSheetOpen(open);
+    if (!open) {
+      setEditingPlan(null);
+      setForm(EMPTY_FORM);
     }
-  };
+  }
 
-  const getGoalStatusColor = (status: string) => {
-    switch (status) {
-      case "completed":
-        return "bg-green-100 text-green-800";
-      case "in-progress":
-        return "bg-blue-100 text-blue-800";
-      case "not-started":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  function addGoal() {
+    setForm((current) => ({
+      ...current,
+      goals: [...current.goals, createEmptyGoal(current.targetDate)],
+    }));
+  }
+
+  function updateGoal(goalId: string, changes: Partial<EditablePlanGoal>) {
+    setForm((current) => ({
+      ...current,
+      goals: current.goals.map((goal) =>
+        goal.id === goalId ? normalizeEditableGoal({ ...goal, ...changes }) : goal
+      ),
+    }));
+  }
+
+  function removeGoal(goalId: string) {
+    setForm((current) => ({
+      ...current,
+      goals: current.goals.filter((goal) => goal.id !== goalId),
+    }));
+  }
+
+  function addActivity() {
+    setForm((current) => ({
+      ...current,
+      activities: [...current.activities, createEmptyActivity(current.targetDate)],
+    }));
+  }
+
+  function updateActivity(activityId: string, changes: Partial<EditablePlanActivity>) {
+    setForm((current) => ({
+      ...current,
+      activities: current.activities.map((activity) =>
+        activity.id === activityId ? normalizeEditableActivity({ ...activity, ...changes }) : activity
+      ),
+    }));
+  }
+
+  function removeActivity(activityId: string) {
+    setForm((current) => ({
+      ...current,
+      activities: current.activities.filter((activity) => activity.id !== activityId),
+    }));
+  }
+
+  async function handleSave() {
+    if (!form.employeeId || form.title.trim().length < 2 || !form.startDate || !form.targetDate) {
+      toast.error("يرجى استكمال بيانات الخطة الأساسية");
+      return;
     }
-  };
+
+    setIsSaving(true);
+    setError(null);
+    try {
+      const payload = buildPayload(form);
+      const response = editingPlan
+        ? await developmentPlansApi.update(editingPlan.id, payload)
+        : await developmentPlansApi.create(payload);
+
+      if (!response.success || !response.data) {
+        toast.error(response.error || "تعذر حفظ خطة التطوير");
+        return;
+      }
+
+      toast.success(editingPlan ? "تم تحديث الخطة" : "تم إنشاء الخطة");
+      setIsFormSheetOpen(false);
+      setEditingPlan(null);
+      setForm(EMPTY_FORM);
+      await loadPlans();
+    } catch (saveError) {
+      toast.error(saveError instanceof Error ? saveError.message : "تعذر حفظ خطة التطوير");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleStatusChange(plan: DevelopmentPlan, status: DevelopmentPlanStatus) {
+    setUpdatingId(plan.id);
+    try {
+      const response = await developmentPlansApi.update(plan.id, { status });
+      if (!response.success || !response.data) {
+        toast.error(response.error || "تعذر تحديث حالة الخطة");
+        return;
+      }
+
+      toast.success("تم تحديث حالة الخطة");
+      setPlans((current) => current.map((item) => (item.id === plan.id ? response.data! : item)));
+      if (selectedPlan?.id === plan.id) {
+        setSelectedPlan(response.data);
+      }
+    } catch (statusError) {
+      toast.error(statusError instanceof Error ? statusError.message : "تعذر تحديث حالة الخطة");
+    } finally {
+      setUpdatingId(null);
+    }
+  }
+
+  async function handleDelete(plan: DevelopmentPlan) {
+    setPlanToDelete(plan);
+  }
+
+  async function confirmDelete() {
+    if (!planToDelete) return;
+    const plan = planToDelete;
+    setPlanToDelete(null);
+    setDeletingId(plan.id);
+    try {
+      const response = await developmentPlansApi.delete(plan.id);
+      if (!response.success) {
+        toast.error(response.error || "تعذر حذف الخطة");
+        return;
+      }
+
+      toast.success("تم حذف الخطة بنجاح");
+      setPlans((current) => current.filter((item) => item.id !== plan.id));
+      if (selectedPlan?.id === plan.id) {
+        setIsViewSheetOpen(false);
+        setSelectedPlan(null);
+      }
+    } catch (deleteError) {
+      toast.error(deleteError instanceof Error ? deleteError.message : "تعذر حذف الخطة");
+    } finally {
+      setDeletingId(null);
+    }
+  }
 
   return (
+    <>
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
-      <div className="grid gap-4 md:grid-cols-4">
+      {error && (
+        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+          {error}
+        </div>
+      )}
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">إجمالي الخطط</CardTitle>
@@ -254,6 +656,17 @@ export function DevelopmentPlansManager() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <IconClock className="h-4 w-4 text-yellow-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold text-yellow-600">{stats.pendingApproval}</div>
+            <p className="text-xs text-muted-foreground">بانتظار الموافقة</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">مكتملة</CardTitle>
             <IconCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
@@ -270,97 +683,37 @@ export function DevelopmentPlansManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.avgProgress}%</div>
-            <p className="text-xs text-muted-foreground">للخطط النشطة</p>
+            <p className="text-xs text-muted-foreground">لكل الخطط</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* جدول الخطط */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>خطط التطوير الوظيفي</CardTitle>
-              <CardDescription>إدارة خطط تطوير الموظفين</CardDescription>
+              <CardDescription>إدارة خطط تطوير الموظفين وربطها بالبيانات الحقيقية</CardDescription>
             </div>
-            <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
-              <SheetTrigger asChild>
-                <Button>
-                  <IconPlus className="ms-2 h-4 w-4" />
-                  خطة جديدة
-                </Button>
-              </SheetTrigger>
-              <SheetContent className="sm:max-w-lg overflow-y-auto">
-                <SheetHeader>
-                  <SheetTitle>إنشاء خطة تطوير جديدة</SheetTitle>
-                  <SheetDescription>
-                    أدخل تفاصيل خطة التطوير الوظيفي
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label>الموظف</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر الموظف" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="emp-1">أحمد محمد</SelectItem>
-                        <SelectItem value="emp-2">سارة علي</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>عنوان الخطة</Label>
-                    <Input placeholder="مثال: خطة التطوير للترقية" />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>الوصف</Label>
-                    <Textarea placeholder="وصف مختصر للخطة..." rows={3} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="grid gap-2">
-                      <Label>تاريخ البدء</Label>
-                      <Input type="date" />
-                    </div>
-                    <div className="grid gap-2">
-                      <Label>التاريخ المستهدف</Label>
-                      <Input type="date" />
-                    </div>
-                  </div>
-                  <div className="grid gap-2">
-                    <Label>المرشد (اختياري)</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="اختر المرشد" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="emp-m1">محمد علي - مدير القسم</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button className="mt-4" onClick={() => setIsAddSheetOpen(false)}>
-                    إنشاء الخطة
-                  </Button>
-                </div>
-              </SheetContent>
-            </Sheet>
+            <Button onClick={openCreateSheet}>
+              <IconPlus className="ms-2 h-4 w-4" />
+              خطة جديدة
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
-          {/* أدوات البحث والفلترة */}
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث..."
+                placeholder="بحث باسم الموظف أو عنوان الخطة"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-40">
+              <SelectTrigger className="w-full sm:w-48">
                 <SelectValue placeholder="الحالة" />
               </SelectTrigger>
               <SelectContent>
@@ -374,7 +727,6 @@ export function DevelopmentPlansManager() {
             </Select>
           </div>
 
-          {/* جدول الخطط */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
@@ -388,10 +740,16 @@ export function DevelopmentPlansManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredPlans.length === 0 ? (
+                {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8">
-                      <p className="text-muted-foreground">لا توجد خطط</p>
+                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                      جاري تحميل خطط التطوير...
+                    </TableCell>
+                  </TableRow>
+                ) : filteredPlans.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="py-8 text-center">
+                      <p className="text-muted-foreground">لا توجد خطط تطوير مطابقة</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -400,24 +758,36 @@ export function DevelopmentPlansManager() {
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
-                            <AvatarImage src={plan.employeeAvatar} />
+                            <AvatarImage src={plan.employeeAvatar} alt="" />
                             <AvatarFallback>
-                              {plan.employeeName.split(" ").map(n => n[0]).join("")}
+                              {plan.employeeName
+                                .split(" ")
+                                .map((part) => part[0])
+                                .join("")
+                                .slice(0, 2)}
                             </AvatarFallback>
                           </Avatar>
                           <span className="font-medium">{plan.employeeName}</span>
                         </div>
                       </TableCell>
-                      <TableCell>{plan.title}</TableCell>
                       <TableCell>
-                        {new Date(plan.targetDate).toLocaleDateString("ar-SA")}
+                        <div className="space-y-2">
+                          <p className="font-medium">{plan.title}</p>
+                          <div className="flex flex-wrap gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {developmentPlanTypeLabels[plan.type]}
+                            </Badge>
+                            <Badge className={developmentPlanPriorityColors[plan.priority]}>
+                              {developmentPlanPriorityLabels[plan.priority]}
+                            </Badge>
+                          </div>
+                        </div>
                       </TableCell>
+                      <TableCell>{formatDate(plan.targetDate)}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2 w-24">
+                        <div className="flex w-24 items-center gap-2">
                           <Progress value={plan.progress} className="h-2" />
-                          <span className="text-xs text-muted-foreground">
-                            {plan.progress}%
-                          </span>
+                          <span className="text-xs text-muted-foreground">{plan.progress}%</span>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -433,14 +803,73 @@ export function DevelopmentPlansManager() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleViewPlan(plan)}>
+                            <DropdownMenuItem onClick={() => openViewSheet(plan)}>
                               <IconEye className="ms-2 h-4 w-4" />
                               عرض التفاصيل
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openEditSheet(plan)}>
                               <IconEdit className="ms-2 h-4 w-4" />
                               تعديل
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {plan.status === "draft" && (
+                              <DropdownMenuItem
+                                disabled={updatingId === plan.id}
+                                onClick={() => void handleStatusChange(plan, "pending-approval")}
+                              >
+                                <IconCheck className="ms-2 h-4 w-4" />
+                                إرسال للموافقة
+                              </DropdownMenuItem>
+                            )}
+                            {plan.status !== "active" && plan.status !== "completed" && plan.status !== "cancelled" && (
+                              <DropdownMenuItem
+                                disabled={updatingId === plan.id}
+                                onClick={() => void handleStatusChange(plan, "active")}
+                              >
+                                <IconPlayerPlay className="ms-2 h-4 w-4" />
+                                بدء التنفيذ
+                              </DropdownMenuItem>
+                            )}
+                            {plan.status !== "completed" && (
+                              <DropdownMenuItem
+                                disabled={updatingId === plan.id}
+                                onClick={() => void handleStatusChange(plan, "completed")}
+                              >
+                                <IconCheck className="ms-2 h-4 w-4" />
+                                تعيين كمكتملة
+                              </DropdownMenuItem>
+                            )}
+                            {plan.status !== "cancelled" && plan.status !== "completed" && (
+                              <DropdownMenuItem
+                                disabled={updatingId === plan.id}
+                                onClick={() => void handleStatusChange(plan, "cancelled")}
+                              >
+                                <IconX className="ms-2 h-4 w-4" />
+                                إلغاء الخطة
+                              </DropdownMenuItem>
+                            )}
+                            {plan.status === "cancelled" && (
+                              <DropdownMenuItem
+                                disabled={updatingId === plan.id}
+                                onClick={() => void handleStatusChange(plan, "draft")}
+                              >
+                                <IconEdit className="ms-2 h-4 w-4" />
+                                إعادة فتح كمسودة
+                              </DropdownMenuItem>
+                            )}
+                            {plan.status !== "completed" && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  className="text-destructive focus:text-destructive"
+                                  disabled={deletingId === plan.id}
+                                  onClick={() => void handleDelete(plan)}
+                                >
+                                  <IconTrash className="ms-2 h-4 w-4" />
+                                  {deletingId === plan.id ? "جاري الحذف..." : "حذف الخطة"}
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -453,20 +882,382 @@ export function DevelopmentPlansManager() {
         </CardContent>
       </Card>
 
-      {/* Sheet عرض التفاصيل */}
+      <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
+          <SheetHeader>
+            <SheetTitle>{editingPlan ? "تعديل خطة التطوير" : "إنشاء خطة تطوير جديدة"}</SheetTitle>
+            <SheetDescription>أدخل بيانات الخطة وربطها بموظف ومرشد عند الحاجة.</SheetDescription>
+          </SheetHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>الموظف</Label>
+              <Select value={form.employeeId} onValueChange={(value) => updateFormValue("employeeId", value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder={isEmployeesLoading ? "جاري تحميل الموظفين..." : "اختر الموظف"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees.map((employee) => (
+                    <SelectItem key={employee.id} value={employee.id}>
+                      {employee.firstName} {employee.lastName}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="grid gap-2">
+              <Label>عنوان الخطة</Label>
+              <Input value={form.title} onChange={(event) => updateFormValue("title", event.target.value)} />
+            </div>
+
+            <div className="grid gap-2">
+              <Label>الوصف</Label>
+              <Textarea
+                rows={3}
+                value={form.description}
+                onChange={(event) => updateFormValue("description", event.target.value)}
+              />
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>تاريخ البدء</Label>
+                <Input type="date" value={form.startDate} onChange={(event) => updateFormValue("startDate", event.target.value)} />
+              </div>
+              <div className="grid gap-2">
+                <Label>التاريخ المستهدف</Label>
+                <Input type="date" value={form.targetDate} onChange={(event) => updateFormValue("targetDate", event.target.value)} />
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>الحالة</Label>
+                <Select value={form.status} onValueChange={(value) => updateFormValue("status", value as DevelopmentPlanStatus)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>المرشد</Label>
+                <Select value={form.mentorId || "none"} onValueChange={(value) => updateFormValue("mentorId", value === "none" ? "" : value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="اختر المرشد" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">بدون مرشد</SelectItem>
+                    {employees.map((employee) => (
+                      <SelectItem key={employee.id} value={employee.id}>
+                        {employee.firstName} {employee.lastName}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div className="grid gap-2">
+                <Label>نوع الخطة</Label>
+                <Select value={form.type} onValueChange={(value) => updateFormValue("type", value as DevelopmentPlanType)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(developmentPlanTypeLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label>الأولوية</Label>
+                <Select value={form.priority} onValueChange={(value) => updateFormValue("priority", value as DevelopmentPlanPriority)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(developmentPlanPriorityLabels).map(([value, label]) => (
+                      <SelectItem key={value} value={value}>
+                        {label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-3 rounded-lg border p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label>الأهداف</Label>
+                  <p className="text-sm text-muted-foreground">أضف كل هدف وعدّل حالته وتاريخه بشكل مستقل.</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addGoal}>
+                  <IconPlus className="ms-2 h-4 w-4" />
+                  إضافة هدف
+                </Button>
+              </div>
+
+              {form.goals.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  لا توجد أهداف مضافة بعد.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {form.goals.map((goal, index) => (
+                    <div key={goal.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium">الهدف {index + 1}</p>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeGoal(goal.id)}>
+                          <IconTrash className="ms-2 h-4 w-4" />
+                          حذف
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>العنوان</Label>
+                        <Input value={goal.title} onChange={(event) => updateGoal(goal.id, { title: event.target.value })} />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>الوصف</Label>
+                        <Textarea
+                          rows={2}
+                          value={goal.description}
+                          onChange={(event) => updateGoal(goal.id, { description: event.target.value })}
+                        />
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label>التاريخ المستهدف</Label>
+                          <Input
+                            type="date"
+                            value={goal.targetDate}
+                            onChange={(event) => updateGoal(goal.id, { targetDate: event.target.value })}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>الحالة</Label>
+                          <Select value={goal.status} onValueChange={(value) => updateGoal(goal.id, { status: value as DevelopmentGoal["status"] })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="not-started">لم يبدأ</SelectItem>
+                              <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
+                              <SelectItem value="completed">مكتمل</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label>نسبة الإنجاز</Label>
+                          <Input
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={goal.progress}
+                            onChange={(event) => updateGoal(goal.id, { progress: Number(event.target.value || 0) })}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>تاريخ الإنجاز</Label>
+                          <Input
+                            type="date"
+                            value={goal.completedDate}
+                            disabled={goal.status !== "completed"}
+                            onChange={(event) => updateGoal(goal.id, { completedDate: event.target.value })}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>مؤشرات القياس</Label>
+                        <Textarea
+                          rows={2}
+                          value={goal.metrics}
+                          onChange={(event) => updateGoal(goal.id, { metrics: event.target.value })}
+                          placeholder="مثال: إنهاء دورة، اجتياز اختبار، تسليم مشروع"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-3 rounded-lg border p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <Label>الأنشطة</Label>
+                  <p className="text-sm text-muted-foreground">أدر كل نشاط داخل الخطة مع نوعه ووصفه ومرجعه.</p>
+                </div>
+                <Button type="button" variant="outline" size="sm" onClick={addActivity}>
+                  <IconPlus className="ms-2 h-4 w-4" />
+                  إضافة نشاط
+                </Button>
+              </div>
+
+              {form.activities.length === 0 ? (
+                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                  لا توجد أنشطة مضافة بعد.
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {form.activities.map((activity, index) => (
+                    <div key={activity.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
+                      <div className="flex items-center justify-between gap-3">
+                        <p className="text-sm font-medium">النشاط {index + 1}</p>
+                        <Button type="button" variant="ghost" size="sm" onClick={() => removeActivity(activity.id)}>
+                          <IconTrash className="ms-2 h-4 w-4" />
+                          حذف
+                        </Button>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>العنوان</Label>
+                        <Input value={activity.title} onChange={(event) => updateActivity(activity.id, { title: event.target.value })} />
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label>النوع</Label>
+                          <Select value={activity.type} onValueChange={(value) => updateActivity(activity.id, { type: value as DevelopmentActivity["type"] })}>
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.entries(activityTypeLabels).map(([value, label]) => (
+                                <SelectItem key={value} value={value}>
+                                  {label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>الرابط أو المرجع</Label>
+                          <Input
+                            value={activity.courseId}
+                            onChange={(event) => updateActivity(activity.id, { courseId: event.target.value })}
+                            placeholder="رابط أو معرف الدورة/المورد"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>الوصف</Label>
+                        <Textarea
+                          rows={2}
+                          value={activity.description}
+                          onChange={(event) => updateActivity(activity.id, { description: event.target.value })}
+                        />
+                      </div>
+
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-2">
+                          <Label>الموعد المستهدف</Label>
+                          <Input
+                            type="date"
+                            value={activity.dueDate}
+                            onChange={(event) => updateActivity(activity.id, { dueDate: event.target.value })}
+                          />
+                        </div>
+                        <div className="grid gap-2">
+                          <Label>الحالة</Label>
+                          <Select
+                            value={activity.status}
+                            onValueChange={(value) => updateActivity(activity.id, { status: value as DevelopmentActivity["status"] })}
+                          >
+                            <SelectTrigger>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">معلّق</SelectItem>
+                              <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
+                              <SelectItem value="completed">مكتمل</SelectItem>
+                              <SelectItem value="skipped">تم تخطيه</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>تاريخ الإكمال</Label>
+                        <Input
+                          type="date"
+                          value={activity.completedDate}
+                          disabled={activity.status !== "completed"}
+                          onChange={(event) => updateActivity(activity.id, { completedDate: event.target.value })}
+                        />
+                      </div>
+
+                      <div className="grid gap-2">
+                        <Label>ملاحظات</Label>
+                        <Textarea
+                          rows={2}
+                          value={activity.notes}
+                          onChange={(event) => updateActivity(activity.id, { notes: event.target.value })}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="grid gap-2">
+              <Label>ملاحظات</Label>
+              <Textarea
+                rows={3}
+                value={form.notes}
+                onChange={(event) => updateFormValue("notes", event.target.value)}
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => handleFormSheetOpenChange(false)}>
+                إلغاء
+              </Button>
+              <Button onClick={() => void handleSave()} disabled={isSaving}>
+                {editingPlan ? "حفظ التعديلات" : "إنشاء الخطة"}
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
+
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedPlan?.title}</SheetTitle>
             <SheetDescription>تفاصيل خطة التطوير</SheetDescription>
           </SheetHeader>
           {selectedPlan && (
             <div className="space-y-6 py-4">
-              {/* معلومات الموظف */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
+                  <AvatarImage src={selectedPlan.employeeAvatar} alt="" />
                   <AvatarFallback>
-                    {selectedPlan.employeeName.split(" ").map(n => n[0]).join("")}
+                    {selectedPlan.employeeName
+                      .split(" ")
+                      .map((part) => part[0])
+                      .join("")
+                      .slice(0, 2)}
                   </AvatarFallback>
                 </Avatar>
                 <div>
@@ -477,41 +1268,69 @@ export function DevelopmentPlansManager() {
                 </div>
               </div>
 
-              {/* التقدم */}
               <div>
-                <div className="flex justify-between text-sm mb-2">
+                <div className="mb-2 flex justify-between text-sm">
                   <span>التقدم الكلي</span>
                   <span>{selectedPlan.progress}%</span>
                 </div>
                 <Progress value={selectedPlan.progress} className="h-3" />
               </div>
 
-              {/* التواريخ */}
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div>
                   <p className="text-muted-foreground">تاريخ البدء</p>
-                  <p className="font-medium">
-                    {new Date(selectedPlan.startDate).toLocaleDateString("ar-SA")}
-                  </p>
+                  <p className="font-medium">{formatDate(selectedPlan.startDate)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">التاريخ المستهدف</p>
-                  <p className="font-medium">
-                    {new Date(selectedPlan.targetDate).toLocaleDateString("ar-SA")}
-                  </p>
+                  <p className="font-medium">{formatDate(selectedPlan.targetDate)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">نوع الخطة</p>
+                  <p className="font-medium">{developmentPlanTypeLabels[selectedPlan.type]}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">الأولوية</p>
+                  <Badge className={developmentPlanPriorityColors[selectedPlan.priority]}>
+                    {developmentPlanPriorityLabels[selectedPlan.priority]}
+                  </Badge>
                 </div>
               </div>
 
-              {/* المرشد */}
+              {(selectedPlan.description || selectedPlan.notes) && (
+                <>
+                  <Separator />
+                  <div className="space-y-4">
+                    {selectedPlan.description && (
+                      <div>
+                        <h4 className="mb-2 font-semibold">وصف الخطة</h4>
+                        <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.description}</p>
+                      </div>
+                    )}
+                    {selectedPlan.notes && (
+                      <div>
+                        <h4 className="mb-2 font-semibold">ملاحظات عامة</h4>
+                        <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.notes}</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+
               {selectedPlan.mentor && (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">المرشد</h4>
-                    <div className="flex items-center gap-3 bg-muted/50 rounded-lg p-3">
+                    <h4 className="mb-3 font-semibold">المرشد</h4>
+                    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                       <Avatar className="h-10 w-10">
+                        <AvatarImage src={selectedPlan.mentor.avatar} alt="" />
                         <AvatarFallback>
-                          {selectedPlan.mentor.name.split(" ").map(n => n[0]).join("")}
+                          {selectedPlan.mentor.name
+                            .split(" ")
+                            .map((part) => part[0])
+                            .join("")
+                            .slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
                       <div>
@@ -525,54 +1344,60 @@ export function DevelopmentPlansManager() {
 
               <Separator />
 
-              {/* الأهداف */}
               <div>
-                <h4 className="font-semibold mb-3">الأهداف</h4>
+                <h4 className="mb-3 font-semibold">الأهداف</h4>
                 <div className="space-y-3">
-                  {selectedPlan.goals.map((goal) => (
-                    <div key={goal.id} className="border rounded-lg p-3">
-                      <div className="flex items-start justify-between mb-2">
-                        <p className="font-medium">{goal.title}</p>
-                        <Badge className={getGoalStatusColor(goal.status)}>
-                          {goal.status === "completed" ? "مكتمل" : goal.status === "in-progress" ? "قيد التنفيذ" : "لم يبدأ"}
-                        </Badge>
+                  {selectedPlan.goals.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">لا توجد أهداف مضافة لهذه الخطة</p>
+                  ) : (
+                    selectedPlan.goals.map((goal) => (
+                      <div key={goal.id} className="rounded-lg border p-3">
+                        <div className="mb-2 flex items-start justify-between gap-3">
+                          <p className="font-medium">{goal.title}</p>
+                          <Badge className={getGoalStatusColor(goal.status)}>{getGoalStatusLabel(goal.status)}</Badge>
+                        </div>
+                        {goal.description && <p className="mb-2 text-sm text-muted-foreground">{goal.description}</p>}
+                        <Progress value={goal.progress} className="h-2" />
+                        <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                          <span>الموعد: {formatDate(goal.targetDate)}</span>
+                          {goal.completedDate && <span>الإنجاز: {formatDate(goal.completedDate)}</span>}
+                          {goal.metrics && <span>القياس: {goal.metrics}</span>}
+                        </div>
                       </div>
-                      <Progress value={goal.progress} className="h-2" />
-                      <p className="text-xs text-muted-foreground mt-1">
-                        الموعد: {new Date(goal.targetDate).toLocaleDateString("ar-SA")}
-                      </p>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
               <Separator />
 
-              {/* الأنشطة */}
               <div>
-                <h4 className="font-semibold mb-3">الأنشطة</h4>
+                <h4 className="mb-3 font-semibold">الأنشطة</h4>
                 <div className="space-y-2">
-                  {selectedPlan.activities.map((activity) => (
-                    <div
-                      key={activity.id}
-                      className="flex items-center gap-3 p-2 rounded-lg border"
-                    >
-                      <Checkbox checked={activity.status === "completed"} disabled />
-                      <div className="flex-1">
-                        <p className={`text-sm ${activity.status === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                          {activity.title}
-                        </p>
-                        <div className="flex gap-2 mt-1">
-                          <Badge variant="outline" className="text-xs">
-                            {activityTypeLabels[activity.type]}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(activity.dueDate).toLocaleDateString("ar-SA")}
-                          </span>
+                  {selectedPlan.activities.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">لا توجد أنشطة مرتبطة بالخطة</p>
+                  ) : (
+                    selectedPlan.activities.map((activity) => (
+                      <div key={activity.id} className="flex items-center gap-3 rounded-lg border p-2">
+                        <Checkbox checked={activity.status === "completed"} disabled />
+                        <div className="flex-1">
+                          <p className={`text-sm ${activity.status === "completed" ? "line-through text-muted-foreground" : ""}`}>
+                            {activity.title}
+                          </p>
+                          {activity.description && <p className="mt-1 text-xs text-muted-foreground">{activity.description}</p>}
+                          <div className="mt-1 flex gap-2">
+                            <Badge variant="outline" className="text-xs">
+                              {activityTypeLabels[activity.type]}
+                            </Badge>
+                            <Badge className={getActivityStatusColor(activity.status)}>{getActivityStatusLabel(activity.status)}</Badge>
+                            <span className="text-xs text-muted-foreground">{formatDate(activity.dueDate)}</span>
+                            {activity.completedDate && <span className="text-xs text-muted-foreground">اكتمل: {formatDate(activity.completedDate)}</span>}
+                          </div>
+                          {activity.notes && <p className="mt-1 text-xs text-muted-foreground">{activity.notes}</p>}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -580,5 +1405,23 @@ export function DevelopmentPlansManager() {
         </SheetContent>
       </Sheet>
     </div>
+
+    <AlertDialog open={!!planToDelete} onOpenChange={(open) => { if (!open) setPlanToDelete(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+          <AlertDialogDescription>
+            هل أنت متأكد من حذف خطة &ldquo;{planToDelete?.title}&rdquo;؟ لا يمكن التراجع عن هذا الإجراء.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogAction onClick={() => void confirmDelete()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            حذف
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 }

@@ -8,7 +8,7 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 // ==================== PATCH - Update Interview Status ====================
 const schema = z.object({
-  status: z.enum(["scheduled", "in-progress", "completed", "cancelled", "no-show"]),
+  status: z.enum(["scheduled", "completed", "cancelled", "no-show"]),
 });
 
 function mapStatusToDb(status: string) {

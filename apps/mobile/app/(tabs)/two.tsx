@@ -102,13 +102,13 @@ export default function HistoryScreen() {
 
       <View style={styles.filtersRow}>
         <Pressable onPress={() => setFilter(7)} style={[styles.chip, days === 7 && styles.chipActive]}>
-          <Text style={styles.chipText}>{t(language, "last_7_days")}</Text>
+          <Text style={[styles.chipText, days === 7 && styles.chipTextActive]}>{t(language, "last_7_days")}</Text>
         </Pressable>
         <Pressable onPress={() => setFilter(30)} style={[styles.chip, days === 30 && styles.chipActive]}>
-          <Text style={styles.chipText}>{t(language, "last_30_days")}</Text>
+          <Text style={[styles.chipText, days === 30 && styles.chipTextActive]}>{t(language, "last_30_days")}</Text>
         </Pressable>
         <Pressable onPress={() => setFilter(90)} style={[styles.chip, days === 90 && styles.chipActive]}>
-          <Text style={styles.chipText}>{t(language, "last_90_days")}</Text>
+          <Text style={[styles.chipText, days === 90 && styles.chipTextActive]}>{t(language, "last_90_days")}</Text>
         </Pressable>
       </View>
 
@@ -139,14 +139,51 @@ export default function HistoryScreen() {
           ) : null
         }
         renderItem={({ item }) => {
-          const date = new Date(item.date).toLocaleDateString();
-          const checkIn = item.checkInTime ? new Date(item.checkInTime).toLocaleTimeString() : "—";
-          const checkOut = item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString() : "—";
+          const dateVal   = new Date(item.date);
+          const dayName   = dateVal.toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", { weekday: "short" });
+          const dateStr   = dateVal.toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", { month: "short", day: "numeric" });
+          const checkIn   = item.checkInTime  ? new Date(item.checkInTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+          const checkOut  = item.checkOutTime ? new Date(item.checkOutTime).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+
+          let durationText = "";
+          if (item.checkInTime && item.checkOutTime) {
+            const mins = Math.round((new Date(item.checkOutTime).getTime() - new Date(item.checkInTime).getTime()) / 60000);
+            if (mins > 0) {
+              const h = Math.floor(mins / 60);
+              const m = mins % 60;
+              durationText = language === "ar" ? `${h}س ${m}د` : `${h}h ${m}m`;
+            }
+          }
+
+          const hasIn  = !!item.checkInTime;
+          const hasOut = !!item.checkOutTime;
+          const accentColor = hasIn && hasOut ? "#22c55e" : hasIn ? "#3b82f6" : "#475569";
+
           return (
-            <View style={styles.card}>
-              <Text style={styles.cardTitle}>{date}</Text>
-              <Text style={styles.cardMeta}>{t(language, "last_check_in")}: {checkIn}</Text>
-              <Text style={styles.cardMeta}>{t(language, "last_check_out")}: {checkOut}</Text>
+            <View style={[styles.card, { borderLeftColor: accentColor }]}>
+              <View style={styles.cardRow}>
+                <View style={styles.dateBlock}>
+                  <Text style={styles.dayName}>{dayName}</Text>
+                  <Text style={styles.dateStr}>{dateStr}</Text>
+                </View>
+                <View style={styles.timesBlock}>
+                  <View style={styles.timeRow}>
+                    <Text style={styles.timeIcon}>🟢</Text>
+                    <Text style={styles.timeLabel}>{t(language, "last_check_in")}</Text>
+                    <Text style={styles.timeVal}>{checkIn}</Text>
+                  </View>
+                  <View style={styles.timeRow}>
+                    <Text style={styles.timeIcon}>🔴</Text>
+                    <Text style={styles.timeLabel}>{t(language, "last_check_out")}</Text>
+                    <Text style={styles.timeVal}>{checkOut}</Text>
+                  </View>
+                </View>
+                {durationText ? (
+                  <View style={styles.durationTag}>
+                    <Text style={styles.durationText}>{durationText}</Text>
+                  </View>
+                ) : null}
+              </View>
             </View>
           );
         }}
@@ -159,7 +196,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#0b1220",
+    backgroundColor: "#0a0f1e",
   },
   headerRow: {
     flexDirection: "row",
@@ -176,7 +213,7 @@ const styles = StyleSheet.create({
   filtersRow: {
     flexDirection: "row",
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   chip: {
     flex: 1,
@@ -184,18 +221,22 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#0f172a",
     alignItems: "center",
   },
   chipActive: {
-    borderColor: "rgba(34,197,94,0.45)",
-    backgroundColor: "rgba(34,197,94,0.12)",
+    borderColor: "rgba(59,130,246,0.5)",
+    backgroundColor: "rgba(59,130,246,0.15)",
   },
   chipText: {
-    color: "#fff",
-    fontWeight: "800",
+    color: "rgba(255,255,255,0.65)",
+    fontWeight: "700",
     fontSize: 12,
     textAlign: "center",
+  },
+  chipTextActive: {
+    color: "#3b82f6",
+    fontWeight: "800",
   },
   refresh: {
     paddingHorizontal: 12,
@@ -203,44 +244,98 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.15)",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#0f172a",
   },
   refreshDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   refreshText: {
     color: "#fff",
     fontWeight: "700",
+    fontSize: 13,
   },
   error: {
     color: "#f87171",
     marginBottom: 10,
+    fontSize: 13,
   },
   card: {
     padding: 14,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderLeftWidth: 3,
+    borderColor: "rgba(255,255,255,0.08)",
+    borderLeftColor: "#22c55e",
+    backgroundColor: "#0f172a",
     marginBottom: 10,
   },
-  cardTitle: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "800",
+  cardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
-  cardMeta: {
-    color: "rgba(255,255,255,0.70)",
-    marginTop: 4,
+  dateBlock: {
+    width: 44,
+    alignItems: "center",
+    marginRight: 4,
+  },
+  dayName: {
+    color: "#3b82f6",
+    fontWeight: "800",
+    fontSize: 11,
+    textTransform: "uppercase",
+  },
+  dateStr: {
+    color: "#fff",
+    fontWeight: "700",
     fontSize: 12,
+    textAlign: "center",
+  },
+  timesBlock: {
+    flex: 1,
+    gap: 4,
+  },
+  timeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
+  timeIcon: {
+    fontSize: 10,
+  },
+  timeLabel: {
+    color: "rgba(255,255,255,0.50)",
+    fontSize: 11,
+    flex: 1,
+  },
+  timeVal: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  durationTag: {
+    backgroundColor: "rgba(59,130,246,0.15)",
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: "rgba(59,130,246,0.3)",
+  },
+  durationText: {
+    color: "#3b82f6",
+    fontWeight: "800",
+    fontSize: 11,
   },
   emptyContainer: {
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 60,
   },
   empty: {
-    color: "rgba(255,255,255,0.70)",
+    color: "rgba(255,255,255,0.45)",
+    fontSize: 15,
+    marginTop: 8,
   },
   footer: {
     paddingTop: 6,
@@ -248,17 +343,18 @@ const styles = StyleSheet.create({
   },
   loadMore: {
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 13,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: "rgba(59,130,246,0.25)",
+    backgroundColor: "rgba(59,130,246,0.08)",
   },
   loadMoreDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
   },
   loadMoreText: {
-    color: "#fff",
+    color: "#3b82f6",
     fontWeight: "800",
+    fontSize: 14,
   },
 });

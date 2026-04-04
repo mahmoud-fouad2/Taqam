@@ -51,8 +51,12 @@ import {
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 
 export function AttendanceManager() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { employees, getEmployeeFullName } = useEmployees();
   const [records, setRecords] = React.useState<AttendanceRecord[]>([]);
   const [shifts, setShifts] = React.useState<{ id: string; nameAr?: string; name?: string }[]>([]);
@@ -61,9 +65,24 @@ export function AttendanceManager() {
   const [currentEmployeeId, setCurrentEmployeeId] = React.useState<string | null>(null);
   const [isProfileLoading, setIsProfileLoading] = React.useState(true);
   const [selectedDate, setSelectedDate] = React.useState(new Date());
-  const [statusFilter, setStatusFilter] = React.useState<AttendanceStatus | "all">("all");
-  const [employeeFilter, setEmployeeFilter] = React.useState<string>("all");
   const [viewMode, setViewMode] = React.useState<"day" | "month">("month");
+
+  // URL-synced filters
+  const statusFilter = (searchParams.get("status") ?? "all") as AttendanceStatus | "all";
+  const employeeFilter = searchParams.get("emp") ?? "all";
+
+  const updateFilter = React.useCallback(
+    (key: string, value: string) => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (value === "" || value === "all") p.delete(key);
+      else p.set(key, value);
+      router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+    },
+    [router, pathname, searchParams],
+  );
+
+  const setStatusFilter = (v: AttendanceStatus | "all") => updateFilter("status", v);
+  const setEmployeeFilter = (v: string) => updateFilter("emp", v);
 
   React.useEffect(() => {
     let mounted = true;
@@ -382,11 +401,11 @@ export function AttendanceManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)}>
+          <Button variant="outline" size="icon" aria-label="الشهر السابق" onClick={() => navigateMonth(-1)}>
             <IconChevronRight className="h-4 w-4" />
           </Button>
           <span className="font-medium min-w-[150px] text-center">{currentMonth}</span>
-          <Button variant="outline" size="icon" onClick={() => navigateMonth(1)}>
+          <Button variant="outline" size="icon" aria-label="الشهر التالي" onClick={() => navigateMonth(1)}>
             <IconChevronLeft className="h-4 w-4" />
           </Button>
         </div>

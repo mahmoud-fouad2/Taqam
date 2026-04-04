@@ -1,4 +1,4 @@
-import "server-only";
+﻿import "server-only";
 
 import { cookies, headers } from "next/headers";
 
@@ -18,14 +18,14 @@ export async function getTenantContext(): Promise<TenantContext> {
   // Try header first (set by proxy), then fallback to cookie
   const slug =
     headerStore.get("x-tenant-slug") ||
-    cookieStore.get("ujoors_tenant")?.value ||
+    cookieStore.get("taqam_tenant")?.value ||
     null;
 
   const locale =
-    (cookieStore.get("ujoors_locale")?.value as "ar" | "en") || "ar";
+    (cookieStore.get("taqam_locale")?.value as "ar" | "en") || "ar";
 
   const theme =
-    (cookieStore.get("ujoors_ui_theme")?.value as "shadcn" | "mantine") ||
+    (cookieStore.get("taqam_ui_theme")?.value as "shadcn" | "mantine") ||
     "shadcn";
 
   return { slug, locale, theme };

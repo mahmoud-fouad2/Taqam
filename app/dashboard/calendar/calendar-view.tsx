@@ -271,13 +271,13 @@ export function CalendarView() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={() => navigateMonth(-1)}>
+                <Button variant="outline" size="icon" aria-label="الشهر السابق" onClick={() => navigateMonth(-1)}>
                   <IconChevronRight className="h-4 w-4" />
                 </Button>
                 <span className="font-medium min-w-[150px] text-center">
                   {selectedDate.toLocaleString("ar-SA", { month: "long", year: "numeric" })}
                 </span>
-                <Button variant="outline" size="icon" onClick={() => navigateMonth(1)}>
+                <Button variant="outline" size="icon" aria-label="الشهر التالي" onClick={() => navigateMonth(1)}>
                   <IconChevronLeft className="h-4 w-4" />
                 </Button>
               </div>

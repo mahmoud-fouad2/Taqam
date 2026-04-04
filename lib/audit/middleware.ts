@@ -1,10 +1,29 @@
 /**
- * Prisma Audit Middleware
- * Automatically logs all CREATE, UPDATE, DELETE operations
+ * Prisma Audit — re-exports from extension.ts for backward compatibility.
+ * The actual implementation has moved to extension.ts (uses $extends, not $use).
+ *
+ * @deprecated import directly from "./extension" in new code.
  */
 
-import { AsyncLocalStorage } from "node:async_hooks";
-import type { Prisma, PrismaClient } from "@prisma/client";
+import {
+  setAuditContext,
+  clearAuditContext,
+  getAuditContext,
+  createAuditExtension,
+  type AuditContext,
+} from "./extension";
+
+export {
+  setAuditContext,
+  clearAuditContext,
+  getAuditContext,
+  createAuditExtension,
+  type AuditContext,
+};
+
+// ─── legacy stubs kept only to prevent import errors in untouched files ───────
+
+import type { PrismaClient } from "@prisma/client";
 import { createAuditLog, type AuditAction } from "./logger";
 
 // Map Prisma operations to audit actions
@@ -81,35 +100,6 @@ function getAuditAction(model: string, operation: string): AuditAction {
 
   // Default fallback
   return (OPERATION_MAP[operation] || "SYSTEM_CONFIG_CHANGE") as AuditAction;
-}
-
-// Context to pass tenant and user info
-interface AuditContext {
-  tenantId?: string | null;
-  userId?: string | null;
-  ipAddress?: string | null;
-  userAgent?: string | null;
-}
-
-const auditContextStore = new AsyncLocalStorage<AuditContext>();
-
-function getAuditContext(): AuditContext {
-  return auditContextStore.getStore() ?? {};
-}
-
-/**
- * Set audit context (call this from API routes)
- */
-export function setAuditContext(context: AuditContext) {
-  // Request-scoped context (safe with concurrency)
-  auditContextStore.enterWith({ ...context });
-}
-
-/**
- * Clear audit context
- */
-export function clearAuditContext() {
-  auditContextStore.enterWith({});
 }
 
 function getModelDelegate(prismaClient: PrismaClient, model: string): any {

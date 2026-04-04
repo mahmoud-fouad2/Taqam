@@ -12,8 +12,9 @@ export type DashboardStats = {
 };
 
 export async function getDashboardStats(tenantId?: string | null): Promise<DashboardStats> {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  // Use UTC date-only values to match @db.Date fields in PostgreSQL
+  const now = new Date();
+  const todayUtc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
 
   const where: { tenantId?: string } = {};
   if (tenantId) where.tenantId = tenantId;
@@ -33,10 +34,8 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
     prisma.attendanceRecord.count({
       where: {
         ...where,
-        date: {
-          gte: today,
-          lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
-        },
+        // AttendanceRecord.date is @db.Date — compare as a date-only value
+        date: todayUtc,
       },
     }),
     prisma.leaveRequest.count({ where: { ...where, status: "PENDING" } }),
@@ -44,14 +43,14 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
       where: {
         ...where,
         status: "APPROVED",
-        startDate: { lte: today },
-        endDate: { gte: today },
+        startDate: { lte: todayUtc },
+        endDate: { gte: todayUtc },
       },
     }),
     prisma.employee.count({
       where: {
         ...where,
-        hireDate: { gte: new Date(today.getFullYear(), today.getMonth(), 1) },
+        hireDate: { gte: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)) },
       },
     }),
   ]);

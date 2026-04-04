@@ -1,5 +1,8 @@
 # Real Issues Found in Server Logs
 
+> **ملاحظة أرشيفية:** هذا التحليل مبني على لوجات تاريخية وقت التنفيذ. قد تظهر داخله أسماء العلامة القديمة `Ujoor/Ujoors` أو الرابط `https://ujoor.onrender.com` أو مراجع بيئة قديمة.
+> للاستخدام الحالي اعتمد على `QUICK_START.md` و `SUMMARY.md` و `TESTING_GUIDE.md` والضبط الحالي للبيئة.
+
 ## ❌ مشاكل مكتشفة من اللوجز:
 
 ### مشكلة 1: JSON Parsing Error

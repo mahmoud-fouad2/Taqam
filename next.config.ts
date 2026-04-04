@@ -46,10 +46,10 @@ const nextConfig: NextConfig = {
             "img-src 'self' data: https: blob:",
             "font-src 'self' data: https:",
             "style-src 'self' 'unsafe-inline' https:",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+            // unsafe-eval removed; only kept for development builds if needed
+            "script-src 'self' 'unsafe-inline' https:",
             "connect-src 'self' https: wss:",
             "frame-src 'self' https://www.google.com https://recaptcha.google.com",
-            // Only meaningful when served over HTTPS.
             "upgrade-insecure-requests",
           ].join("; "),
         }
@@ -73,12 +73,28 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "**"
+        hostname: "*.r2.cloudflarestorage.com",
       },
       {
-        protocol: "http",
-        hostname: "**"
-      }
+        protocol: "https",
+        hostname: "pub-*.r2.dev",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "ma-fo.info",
+      },
+      // Add your R2 custom domain here
+      ...(process.env.R2_PUBLIC_DOMAIN
+        ? [{ protocol: "https" as const, hostname: process.env.R2_PUBLIC_DOMAIN }]
+        : []),
     ]
   }
 };

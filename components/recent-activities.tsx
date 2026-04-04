@@ -24,6 +24,12 @@ function initials(firstName?: string, lastName?: string) {
   return s || "U";
 }
 
+const STATUS_LABELS: Record<string, { ar: string; en: string; className: string }> = {
+  APPROVED: { ar: "موافق", en: "Approved", className: "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400" },
+  PENDING:  { ar: "قيد الانتظار", en: "Pending", className: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400" },
+  REJECTED: { ar: "مرفوض", en: "Rejected", className: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400" },
+};
+
 export function RecentActivities({
   locale,
   activities,
@@ -52,13 +58,13 @@ export function RecentActivities({
               <div key={activity.id} className="flex items-start gap-3">
                 {activity.user ? (
                   <Avatar className="mt-0.5 h-8 w-8">
-                    <AvatarImage src={activity.user.avatar ?? undefined} />
-                    <AvatarFallback>
+                    <AvatarImage src={activity.user.avatar ?? undefined} alt="" />
+                    <AvatarFallback className="text-xs">
                       {initials(activity.user.firstName, activity.user.lastName)}
                     </AvatarFallback>
                   </Avatar>
                 ) : (
-                  <div className="bg-muted text-muted-foreground mt-0.5 flex h-8 w-8 items-center justify-center rounded-full text-xs">
+                  <div className="bg-muted text-muted-foreground mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs">
                     {activity.type.slice(0, 1)}
                   </div>
                 )}
@@ -66,19 +72,12 @@ export function RecentActivities({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <div className="truncate text-sm font-medium">{activity.title}</div>
-                    {activity.status ? (
+                    {activity.status && STATUS_LABELS[activity.status] ? (
                       <Badge
                         variant="outline"
-                        className={cn("text-xs", {
-                          "border-green-200 bg-green-50 text-green-700":
-                            activity.status === "APPROVED",
-                          "border-orange-200 bg-orange-50 text-orange-700":
-                            activity.status === "PENDING",
-                          "border-red-200 bg-red-50 text-red-700":
-                            activity.status === "REJECTED",
-                        })}
+                        className={cn("shrink-0 text-xs", STATUS_LABELS[activity.status].className)}
                       >
-                        {activity.status}
+                        {locale === "ar" ? STATUS_LABELS[activity.status].ar : STATUS_LABELS[activity.status].en}
                       </Badge>
                     ) : null}
                   </div>

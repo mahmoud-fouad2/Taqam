@@ -15,8 +15,27 @@ import { execSync, spawn } from 'child_process';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
+function getProductionUrl() {
+  const baseUrl =
+    process.env.MOBILE_WEB_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    process.env.NEXTAUTH_URL;
+
+  if (!baseUrl) {
+    throw new Error(
+      'Set MOBILE_WEB_URL or NEXT_PUBLIC_APP_URL or NEXTAUTH_URL before building the APK.'
+    );
+  }
+
+  try {
+    return new URL('/m', baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`).toString().replace(/\/$/, '');
+  } catch {
+    throw new Error(`Invalid public app URL: ${baseUrl}`);
+  }
+}
+
 // For the Capacitor APK we want the dedicated mobile entry (login + attendance)
-const PRODUCTION_URL = 'https://ujoor.onrender.com/m';
+const PRODUCTION_URL = getProductionUrl();
 
 // قائمة المسارات المحتملة لـ JDK
 const JDK_PATHS = [

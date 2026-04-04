@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CheckCircle2 } from "lucide-react";
@@ -11,12 +11,12 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/plans",
-    titleAr: "تفاصيل الباقات | أجور",
-    titleEn: "Plan Details | Ujoors",
+    titleAr: "تفاصيل الباقات | طاقم",
+    titleEn: "Plan Details | Taqam",
     descriptionAr:
-      "تفاصيل باقات أجور: ما الذي ستحصل عليه في كل باقة، وما الإضافات المتاحة، وخيارات التوسع للشركات.",
+      "تفاصيل باقات طاقم: ما الذي ستحصل عليه في كل باقة، وما الإضافات المتاحة، وخيارات التوسع للشركات.",
     descriptionEn:
-      "Ujoors plan details: what you get in each plan, available add-ons, and scaling options.",
+      "Taqam plan details: what you get in each plan, available add-ons, and scaling options.",
   });
 }
 
@@ -111,7 +111,7 @@ export default async function PlansPage() {
               <Button variant="outline">{isAr ? "رجوع للأسعار" : "Back to pricing"}</Button>
             </Link>
             <Link href={`${prefix}/request-demo`}>
-              <Button>{isAr ? "طلب عرض" : "Request a demo"}</Button>
+              <Button variant="brand">{isAr ? "طلب عرض" : "Request a demo"}</Button>
             </Link>
           </div>
         </div>
@@ -134,7 +134,7 @@ export default async function PlansPage() {
                 </ul>
                 <div className="mt-6">
                   <Link href={`${prefix}/request-demo`}>
-                    <Button className="w-full" variant={plan.popular ? "default" : "outline"}>
+                    <Button className="w-full" variant={plan.popular ? "brand" : "brandOutline"}>
                       {isAr ? "تواصل معنا" : "Contact us"}
                     </Button>
                   </Link>

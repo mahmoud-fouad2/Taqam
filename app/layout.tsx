@@ -1,4 +1,4 @@
-import Providers from "@/components/providers";
+﻿import Providers from "@/components/providers";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -9,13 +9,13 @@ import { getAppLocale } from "@/lib/i18n/locale";
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
-    default: "Ujoors",
-    template: "%s | Ujoors",
+    default: "Taqam | طاقم",
+    template: "%s | Taqam",
   },
 };
 
 const ibmPlexSansArabic = localFont({
-  variable: "--font-ujoors-sans",
+  variable: "--font-taqam-sans",
   display: "swap",
   fallback: ["sans-serif"],
   src: [

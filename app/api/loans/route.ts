@@ -5,6 +5,7 @@ import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { Prisma } from "@prisma/client";
+import { parseLoanStatus, resolveLoanEmployeeScope } from "@/lib/payroll/loans";
 
 const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
 
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest) {
     }
 
     if (status && status !== "all") {
-      where.status = status;
+      where.status = parseLoanStatus(status) ?? status;
     }
 
     const [total, loans] = await Promise.all([
@@ -155,11 +156,23 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
+
+    const employeeScope = await resolveLoanEmployeeScope({
+      tenantId,
+      userId: session.user.id,
+      role: session.user.role,
+      requestedEmployeeId: body?.employeeId,
+    });
+
+    if (!("employeeId" in employeeScope)) {
+      return NextResponse.json({ error: employeeScope.error.message }, { status: employeeScope.error.status });
+    }
+
     const validated = loanCreateSchema.parse(body);
 
     // Check if employee exists in tenant
     const employee = await prisma.employee.findFirst({
-      where: { id: validated.employeeId, tenantId },
+      where: { id: employeeScope.employeeId || validated.employeeId, tenantId },
     });
 
     if (!employee) {
@@ -171,7 +184,7 @@ export async function POST(request: NextRequest) {
     const loan = await prisma.loan.create({
       data: {
         tenantId,
-        employeeId: validated.employeeId,
+        employeeId: employeeScope.employeeId || validated.employeeId,
         type: validated.type,
         status: "PENDING",
         amount: new Prisma.Decimal(validated.amount),
@@ -197,7 +210,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    logger.info("Loan created", { loanId: loan.id, tenantId, employeeId: validated.employeeId });
+    logger.info("Loan created", { loanId: loan.id, tenantId, employeeId: employeeScope.employeeId || validated.employeeId });
 
     return NextResponse.json({
       success: true,

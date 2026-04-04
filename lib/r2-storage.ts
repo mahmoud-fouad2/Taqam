@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Cloudflare R2 Storage Service
  * Handles file uploads/downloads to R2 bucket
  */
@@ -25,7 +25,7 @@ const R2 = new S3Client({
   },
 });
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || "ujoor";
+const BUCKET_NAME = process.env.R2_BUCKET_NAME || "taqam";
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
 export interface UploadResult {

@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from "react";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { FileText, Filter, Download, Eye, Calendar, User, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,6 +52,8 @@ interface AuditStats {
 }
 
 export default function AuditLogsManager() {
+  const locale = useClientLocale("ar");
+  const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<AuditStats | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -189,7 +192,7 @@ export default function AuditLogsManager() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stats.total.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.total.toLocaleString(numLocale)}</div>
             </CardContent>
           </Card>
 
@@ -331,6 +334,7 @@ export default function AuditLogsManager() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
@@ -343,7 +347,14 @@ export default function AuditLogsManager() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {logs.map((log) => (
+              {logs.length === 0 && !isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
+                    لا توجد سجلات تطابق التصفية الحالية
+                  </TableCell>
+                </TableRow>
+              ) : (
+              logs.map((log) => (
                 <TableRow key={log.id}>
                   <TableCell className="whitespace-nowrap">
                     <div className="flex items-center gap-2">
@@ -392,9 +403,10 @@ export default function AuditLogsManager() {
                     </Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              ))) }
             </TableBody>
           </Table>
+          </div>
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -425,7 +437,7 @@ export default function AuditLogsManager() {
 
       {/* Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="w-full max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>تفاصيل العملية</DialogTitle>
             <DialogDescription>

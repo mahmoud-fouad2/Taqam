@@ -175,7 +175,7 @@ export function SupportTicketsClient({
             <DialogTrigger asChild>
               <Button>{locale === "ar" ? "فتح تذكرة جديدة" : "New ticket"}</Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-lg">
+            <DialogContent className="w-full sm:max-w-lg">
               <DialogHeader>
                 <DialogTitle>{locale === "ar" ? "تذكرة دعم جديدة" : "New support ticket"}</DialogTitle>
               </DialogHeader>
@@ -195,6 +195,8 @@ export function SupportTicketsClient({
                     <Label htmlFor="priority">{locale === "ar" ? "الأولوية" : "Priority"}</Label>
                     <select
                       id="priority"
+                      aria-label={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
+                      title={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
                       className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                       value={priority}
                       onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
@@ -266,7 +268,7 @@ export function SupportTicketsClient({
                     </div>
 
                     <div className="text-xs text-muted-foreground">
-                      {new Date(t.lastMessageAt).toLocaleString()}
+                      {new Date(t.lastMessageAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}
                     </div>
                   </div>
                 </Link>

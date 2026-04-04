@@ -28,7 +28,7 @@ const pinoLogger = pino({
 
   base: {
     env: process.env.NODE_ENV,
-    service: "ujoor-hrms",
+    service: "taqam-hr-platform",
   },
 
   redact: {

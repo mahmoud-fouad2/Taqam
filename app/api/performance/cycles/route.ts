@@ -32,6 +32,9 @@ export async function GET(request: NextRequest) {
       orderBy: { startDate: "desc" },
       include: {
         _count: { select: { evaluations: true } },
+        evaluations: {
+          select: { status: true },
+        },
       },
     });
 
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
         status: mapCycleStatus(c.status),
         templateId: c.templateId ?? undefined,
         totalEvaluations: c._count.evaluations,
-        completedEvaluations: 0,
+        completedEvaluations: c.evaluations.filter((evaluation) => evaluation.status === "COMPLETED").length,
         targetDepartments: c.targetDepartments,
         targetEmployees: c.targetEmployees,
         createdAt: c.createdAt.toISOString(),

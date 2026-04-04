@@ -1,9 +1,9 @@
-export type MarketingLocale = "ar" | "en";
+﻿export type MarketingLocale = "ar" | "en";
 
 export function getSiteUrl(): string {
   const env = process.env.NEXT_PUBLIC_SITE_URL;
   if (env && /^https?:\/\//.test(env)) return env.replace(/\/$/, "");
-  return "https://ujoor.onrender.com";
+  return "https://taqam.com";
 }
 
 export function getMarketingLocaleFromCookie(cookieValue: string | undefined | null): MarketingLocale {

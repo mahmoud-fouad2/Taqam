@@ -1,5 +1,5 @@
-/**
- * Ujoors Multi-Tenant Utilities
+﻿/**
+ * Taqam Multi-Tenant Utilities
  * 
  * وظائف مساعدة للتعامل مع الـ Multi-tenancy
  */
@@ -52,7 +52,7 @@ export function buildTenantUrl(
   const runtimeDomain =
     baseDomain ||
     (typeof window !== "undefined" ? window.location.host : null) ||
-    process.env.UJOORS_BASE_DOMAIN ||
+    process.env.TAQAM_BASE_DOMAIN ||
     "localhost:3000";
 
   const domain = normalizeBaseDomain(runtimeDomain);
@@ -60,8 +60,8 @@ export function buildTenantUrl(
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   const mode = (
-    process.env.NEXT_PUBLIC_UJOORS_TENANT_URL_MODE ||
-    process.env.UJOORS_TENANT_URL_MODE ||
+    process.env.NEXT_PUBLIC_TAQAM_TENANT_URL_MODE ||
+    process.env.TAQAM_TENANT_URL_MODE ||
     "auto"
   ).toLowerCase();
 

@@ -1,4 +1,4 @@
-import type { AppLocale } from "./types";
+﻿import type { AppLocale } from "./types";
 
 const text = {
   ar: {
@@ -6,7 +6,7 @@ const text = {
       coming: "قريبًا",
       goToDashboard: "الذهاب للرئيسية",
       helpCenter: "مركز المساعدة",
-      academy: "أكاديمية أجور",
+      academy: "أكاديمية طاقم",
       shareIdeas: "مشاركة اقتراحات وأفكار",
       whatsNew: "ما الجديد؟",
       notifications: "الإشعارات",
@@ -19,6 +19,14 @@ const text = {
       metaTitle: "لوحة التحكم",
       metaDescription: "نظرة عامة على مؤشرات النظام والبيانات الحديثة.",
       heading: "لوحة التحكم",
+      pendingApprovalsBanner: (n: number) =>
+        n === 1 ? "لديك طلب إجازة واحد بانتظار موافقتك" : `لديك ${n} طلبات إجازة بانتظار موافقتك`,
+      reviewRequests: "مراجعة الطلبات",
+      quickActions: "إجراءات سريعة",
+      addEmployee: "إضافة موظف",
+      requestLeave: "طلب إجازة",
+      recordAttendance: "تسجيل حضور",
+      runPayroll: "تشغيل الرواتب",
     },
     sectionCards: {
       totalEmployees: "إجمالي الموظفين",
@@ -48,7 +56,7 @@ const text = {
     },
     login: {
       metaTitle: "تسجيل الدخول",
-      metaDescription: "صفحة تسجيل الدخول إلى منصة أجور.",
+      metaDescription: "صفحة تسجيل الدخول إلى منصة طاقم.",
       title: "تسجيل الدخول",
       subtitle: "سجّل الدخول باسم المؤسسة",
       email: "البريد الإلكتروني",
@@ -57,7 +65,7 @@ const text = {
       passwordPlaceholder: "كلمة المرور",
       submit: "تسجيل الدخول",
       langLabel: "اللغة",
-      rightTitle: "أجور",
+      rightTitle: "طاقم",
       rightLead: "منصة لإدارة الموارد البشرية والرواتب والحضور والإنصراف.",
       rightBullets: [
         "مسير الرواتب.",
@@ -94,7 +102,7 @@ const text = {
       coming: "Coming",
       goToDashboard: "Go to dashboard",
       helpCenter: "Help Center",
-      academy: "Ujoors Academy",
+      academy: "Taqam Academy",
       shareIdeas: "Share ideas",
       whatsNew: "What’s new",
       notifications: "Notifications",
@@ -107,6 +115,14 @@ const text = {
       metaTitle: "Dashboard",
       metaDescription: "An overview of key metrics and recent activity.",
       heading: "Dashboard",
+      pendingApprovalsBanner: (n: number) =>
+        n === 1 ? "You have 1 leave request awaiting your approval" : `You have ${n} leave requests awaiting your approval`,
+      reviewRequests: "Review requests",
+      quickActions: "Quick actions",
+      addEmployee: "Add employee",
+      requestLeave: "Request leave",
+      recordAttendance: "Record attendance",
+      runPayroll: "Run payroll",
     },
     sectionCards: {
       totalEmployees: "Total employees",
@@ -136,7 +152,7 @@ const text = {
     },
     login: {
       metaTitle: "Login",
-      metaDescription: "Login to Ujoors.",
+      metaDescription: "Login to Taqam.",
       title: "Sign in",
       subtitle: "Sign in with your organization email",
       email: "Email address",
@@ -145,7 +161,7 @@ const text = {
       passwordPlaceholder: "Password",
       submit: "Sign in",
       langLabel: "Language",
-      rightTitle: "Ujoors",
+      rightTitle: "Taqam",
       rightLead: "An HR platform for payroll, attendance, and core HR.",
       rightBullets: [
         "Payroll runs.",

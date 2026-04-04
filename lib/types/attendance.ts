@@ -112,7 +112,8 @@ export type AttendanceRequestType =
 export type AttendanceRequestStatus = 
   | "pending"   // بانتظار الموافقة
   | "approved"  // معتمد
-  | "rejected"; // مرفوض
+  | "rejected"  // مرفوض
+  | "cancelled"; // ملغي
 
 export interface AttendanceRequest {
   id: string;
@@ -187,6 +188,7 @@ export const requestStatusLabels: Record<AttendanceRequestStatus, { ar: string; 
   pending: { ar: "بانتظار الموافقة", en: "Pending" },
   approved: { ar: "معتمد", en: "Approved" },
   rejected: { ar: "مرفوض", en: "Rejected" },
+  cancelled: { ar: "ملغي", en: "Cancelled" },
 };
 
 // Day names

@@ -61,6 +61,7 @@ import { IconPlus, IconPencil, IconTrash, IconSearch } from "@tabler/icons-react
 
 import type { JobTitle } from "@/lib/types/core-hr";
 import { getLevelLabelAr } from "@/lib/types/core-hr";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
 // Validation schema
 const jobTitleSchema = z.object({
@@ -167,6 +168,8 @@ const levels = [
 ];
 
 export function JobTitlesManager() {
+  const locale = useClientLocale("ar");
+  const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [jobTitles, setJobTitles] = useState<JobTitle[]>(initialJobTitles);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -349,7 +352,7 @@ export function JobTitlesManager() {
           </div>
 
           {/* Table */}
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -388,7 +391,7 @@ export function JobTitlesManager() {
                       <TableCell>
                         {job.minSalary || job.maxSalary ? (
                           <span className="text-sm">
-                            {job.minSalary?.toLocaleString()} - {job.maxSalary?.toLocaleString()} ر.س
+                            {job.minSalary?.toLocaleString(numLocale)} - {job.maxSalary?.toLocaleString(numLocale)} ر.س
                           </span>
                         ) : (
                           "-"
@@ -402,6 +405,7 @@ export function JobTitlesManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="تعديل"
                             onClick={() => handleEdit(job)}
                           >
                             <IconPencil className="h-4 w-4" />
@@ -409,6 +413,7 @@ export function JobTitlesManager() {
                           <Button
                             variant="ghost"
                             size="icon"
+                            aria-label="حذف"
                             onClick={() => handleDeleteClick(job)}
                             disabled={job.employeesCount > 0}
                           >
@@ -427,7 +432,7 @@ export function JobTitlesManager() {
 
       {/* Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
               {editingJobTitle ? "تعديل المسمى الوظيفي" : "إضافة مسمى وظيفي جديد"}

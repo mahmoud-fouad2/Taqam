@@ -21,6 +21,16 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -75,6 +85,8 @@ export function RequestsTable() {
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [actingId, setActingId] = React.useState<string | null>(null);
+  const [rejectingId, setRejectingId] = React.useState<string | null>(null);
+  const [rejectReason, setRejectReason] = React.useState("");
 
   React.useEffect(() => {
     let mounted = true;
@@ -146,12 +158,18 @@ export function RequestsTable() {
     }
   };
 
-  const reject = async (id: string) => {
-    const reason = window.prompt("سبب الرفض (اختياري):") ?? "";
+  const reject = (id: string) => {
+    setRejectReason("");
+    setRejectingId(id);
+  };
 
+  const confirmReject = async () => {
+    if (!rejectingId) return;
+    const id = rejectingId;
+    setRejectingId(null);
     setActingId(id);
     try {
-      const res = await tenantsService.rejectRequest(id, reason);
+      const res = await tenantsService.rejectRequest(id, rejectReason);
       if (!res.success) {
         toast.error(res.error || "تعذر رفض الطلب");
         return;
@@ -166,8 +184,9 @@ export function RequestsTable() {
   };
 
   return (
-    <Table>
-      <TableHeader>
+    <>
+      <Table>
+        <TableHeader>
         <TableRow>
           <TableHead>الشركة</TableHead>
           <TableHead>بيانات التواصل</TableHead>
@@ -274,5 +293,28 @@ export function RequestsTable() {
         ))}
       </TableBody>
     </Table>
+
+    <Dialog open={!!rejectingId} onOpenChange={(open) => { if (!open) setRejectingId(null); }}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>رفض الطلب</DialogTitle>
+          <DialogDescription>يمكنك إدخال سبب الرفض أدناه (اختياري).</DialogDescription>
+        </DialogHeader>
+        <div className="space-y-2">
+          <Label htmlFor="reject-reason">سبب الرفض</Label>
+          <Input
+            id="reject-reason"
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="سبب الرفض..."
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setRejectingId(null)}>إلغاء</Button>
+          <Button variant="destructive" onClick={() => void confirmReject()}>رفض</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }

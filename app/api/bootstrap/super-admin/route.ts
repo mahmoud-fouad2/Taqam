@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import prisma from "@/lib/db";
+import {
+  hasValidSuperAdminBootstrapToken,
+  isSuperAdminBootstrapEnabled,
+} from "@/lib/security/bootstrap";
 
 /**
  * TEMPORARY BOOTSTRAP ENDPOINT
@@ -9,6 +13,17 @@ import prisma from "@/lib/db";
  */
 export async function POST(request: NextRequest) {
   try {
+    if (!isSuperAdminBootstrapEnabled()) {
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    if (!hasValidSuperAdminBootstrapToken(request.headers)) {
+      return NextResponse.json(
+        { error: "A valid bootstrap token is required" },
+        { status: 403 }
+      );
+    }
+
     // Security: Only work if env vars are set
     const envEmail = process.env.SUPER_ADMIN_EMAIL;
     const envPassword = process.env.SUPER_ADMIN_PASSWORD;

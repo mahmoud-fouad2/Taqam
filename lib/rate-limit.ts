@@ -1,3 +1,14 @@
+/**
+ * Rate Limiting Utility
+ *
+ * ⚠️  المشكلة الحالية: هذا يستخدم ذاكرة في العملية (in-process memory).
+ * في بيئة serverless أو عند تشغيل أكثر من instance، يتم إعادة ضبط العداد مع كل restart.
+ *
+ * ✅ الحل الموصى به للإنتاج:
+ *   - استخدم Redis (Upstash أو Render Redis) مع مكتبة @upstash/ratelimit
+ *   - أو استخدم Cloudflare Rate Limiting في edge level
+ */
+
 type RateLimitOptions = {
   limit: number;
   windowMs: number;
@@ -10,6 +21,19 @@ type Bucket = {
 };
 
 const buckets = new Map<string, Bucket>();
+
+// Periodically clean expired buckets to prevent memory leaks
+if (typeof setInterval !== "undefined") {
+  setInterval(
+    () => {
+      const t = Date.now();
+      for (const [key, bucket] of buckets.entries()) {
+        if (bucket.resetAt <= t) buckets.delete(key);
+      }
+    },
+    5 * 60 * 1000
+  );
+}
 
 function now() {
   return Date.now();

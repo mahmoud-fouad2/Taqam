@@ -6,38 +6,14 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-function toIsoDate(d: Date) {
-  return d.toISOString().split("T")[0];
-}
-
-function mapPeriod(period: any) {
-  return {
-    ...period,
-    startDate: toIsoDate(period.startDate),
-    endDate: toIsoDate(period.endDate),
-    paymentDate: toIsoDate(period.paymentDate),
-    status: String(period.status).toLowerCase(),
-    totalGross: Number(period.totalGross),
-    totalDeductions: Number(period.totalDeductions),
-    totalNet: Number(period.totalNet),
-  };
-}
+import { requireTenantSession } from "@/lib/api/route-helper";
+import { mapPayrollPeriod } from "@/lib/payroll/periods";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { searchParams } = new URL(request.url);
 
@@ -66,7 +42,7 @@ export async function GET(request: NextRequest) {
       orderBy: [{ startDate: "desc" }, { createdAt: "desc" }],
     });
 
-    return NextResponse.json({ data: periods.map(mapPeriod) });
+    return NextResponse.json({ data: periods.map(mapPayrollPeriod) });
   } catch (error) {
     console.error("Error fetching payroll periods:", error);
     return NextResponse.json(
@@ -78,16 +54,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireTenantSession(request);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const body = await request.json();
 
@@ -113,7 +82,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json({ data: mapPeriod(period) }, { status: 201 });
+    return NextResponse.json({ data: mapPayrollPeriod(period) }, { status: 201 });
   } catch (error) {
     console.error("Error creating payroll period:", error);
     return NextResponse.json(

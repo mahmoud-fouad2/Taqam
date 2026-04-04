@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { notifyNewAnnouncement } from "@/lib/notifications/send";
 
 export async function GET(request: NextRequest) {
   try {
@@ -87,6 +88,38 @@ export async function POST(request: NextRequest) {
         isActive: true,
       },
     });
+
+    // Fire bulk notifications (non-blocking)
+    (async () => {
+      try {
+        const userWhere: any = {
+          tenantId,
+          status: "ACTIVE",
+          id: { not: userId },
+        };
+        // If targeting specific departments, filter by employee departmentId
+        if (!body.targetAll && body.targetDeptIds?.length > 0) {
+          userWhere.employee = {
+            departmentId: { in: body.targetDeptIds },
+          };
+        }
+        const targetUsers = await prisma.user.findMany({
+          where: userWhere,
+          select: { id: true },
+        });
+        const targetUserIds = targetUsers.map((u: { id: string }) => u.id);
+        if (targetUserIds.length > 0) {
+          await notifyNewAnnouncement({
+            tenantId,
+            targetUserIds,
+            announcementTitle: body.titleAr || body.title,
+            announcementId: announcement.id,
+          });
+        }
+      } catch (err) {
+        console.error("Failed to send announcement notifications:", err);
+      }
+    })();
 
     return NextResponse.json({ data: announcement }, { status: 201 });
   } catch (error) {

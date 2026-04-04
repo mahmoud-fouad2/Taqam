@@ -16,10 +16,24 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 
+type BadgeColor = "indigo" | "blue" | "purple" | "green" | "orange" | "teal";
+
+const BADGE_CLASSES: Record<BadgeColor, string> = {
+  indigo: "bg-indigo-500/80 text-white",
+  blue: "bg-blue-500/80 text-white",
+  purple: "bg-purple-500/80 text-white",
+  green: "bg-emerald-500/80 text-white",
+  orange: "bg-orange-500/80 text-white",
+  teal: "bg-teal-500/80 text-white",
+};
+
 export type MarketingShot = {
   src: string;
   titleAr: string;
   titleEn?: string;
+  badgeAr?: string;
+  badgeEn?: string;
+  badgeColor?: BadgeColor;
 };
 
 type View = "desktop" | "mobile";
@@ -64,15 +78,28 @@ function ShotsGrid({
               priority={currentView === "desktop" ? idx === 0 : false}
               sizes="(max-width: 1024px) 100vw, 33vw"
             />
-            <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/40 via-black/0 to-black/0" />
-            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5" />
-            <div className="absolute end-3 top-3 inline-flex items-center gap-2 rounded-full bg-black/35 px-3 py-1 text-xs text-white backdrop-blur">
-              <Maximize2 className="h-3.5 w-3.5" />
-              <span>{isAr ? "معاينة" : "Preview"}</span>
+            <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/10 rounded-xl" />
+            {/* Category badge top-start */}
+            {(s.badgeAr || s.badgeEn) && (
+              <div
+                className={cn(
+                  "absolute start-3 top-3 rounded-full px-2.5 py-0.5 text-[11px] font-semibold backdrop-blur",
+                  BADGE_CLASSES[s.badgeColor ?? "indigo"]
+                )}
+              >
+                {isAr ? s.badgeAr : s.badgeEn}
+              </div>
+            )}
+            {/* Zoom icon top-end */}
+            <div className="absolute end-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/30 px-2.5 py-1 text-xs text-white backdrop-blur opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+              <Maximize2 className="h-3 w-3" />
+              <span>{isAr ? "تكبير" : "Zoom"}</span>
             </div>
-            <div className="absolute bottom-3 start-3">
-              <p className="text-sm font-semibold text-white drop-shadow">{s.titleAr}</p>
-              {s.titleEn ? <p className="text-xs text-white/80">{s.titleEn}</p> : null}
+            <div className="absolute bottom-0 start-0 end-0 px-3 pb-3 pt-8 bg-gradient-to-t from-black/55 via-black/20 to-transparent">
+              <p className="text-sm font-semibold text-white drop-shadow leading-tight">{isAr ? s.titleAr : (s.titleEn ?? s.titleAr)}</p>
+              {s.titleEn && s.titleAr !== s.titleEn && (
+                <p className="text-[11px] text-white/70 mt-0.5">{isAr ? s.titleEn : s.titleAr}</p>
+              )}
             </div>
           </div>
         </button>
@@ -135,13 +162,26 @@ export function ScreenshotsGallery({ locale, desktop, mobile }: Props) {
 
   return (
     <>
-      <div className="mt-10">
-        <Tabs value={view} onValueChange={(v) => setView(v as View)}>
-          <div className="flex items-center justify-center">
-            <TabsList>
-              <TabsTrigger value="desktop">{isAr ? "سطح المكتب" : "Desktop"}</TabsTrigger>
-              <TabsTrigger value="mobile">{isAr ? "الجوال" : "Mobile"}</TabsTrigger>
+      <div className="mt-12 pb-16">
+        <Tabs value={view} onValueChange={(v) => { setView(v as View); setActiveIndex(0); }}>
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <TabsList className="h-10">
+              <TabsTrigger value="desktop" className="gap-2">
+                {isAr ? "سطح المكتب" : "Desktop"}
+                <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums">
+                  {desktop.length}
+                </span>
+              </TabsTrigger>
+              <TabsTrigger value="mobile" className="gap-2">
+                {isAr ? "الجوال" : "Mobile"}
+                <span className="rounded-full bg-muted-foreground/15 px-1.5 py-0.5 text-[10px] font-semibold tabular-nums">
+                  {mobile.length}
+                </span>
+              </TabsTrigger>
             </TabsList>
+            <p className="text-xs text-muted-foreground">
+              {isAr ? "اضغط على أي لقطة للتكبير" : "Click any screenshot to zoom in"}
+            </p>
           </div>
           <TabsContent value="desktop">
             <ShotsGrid currentView="desktop" items={desktop} isAr={isAr} openAt={openAt} />
@@ -157,11 +197,13 @@ export function ScreenshotsGallery({ locale, desktop, mobile }: Props) {
           <div className="relative overflow-hidden rounded-lg">
             <div className="flex items-start justify-between gap-4 border-b bg-background px-5 py-4">
               <DialogHeader className="text-start">
-                <DialogTitle className="text-base sm:text-lg">{active?.titleAr}</DialogTitle>
+                <DialogTitle className="text-base sm:text-lg">
+                  {isAr ? active?.titleAr : (active?.titleEn ?? active?.titleAr)}
+                </DialogTitle>
                 <DialogDescription className="text-xs sm:text-sm">
                     {isAr
-                      ? `سطح المكتب/الجوال • استخدم الأسهم أو اسحب للتنقل • ${activeIndex + 1} / ${shots.length}`
-                      : `Desktop/Mobile • Use arrows or swipe • ${activeIndex + 1} / ${shots.length}`}
+                      ? `${active?.badgeAr ? `[${active.badgeAr}] • ` : ""}استخدم الأسهم أو اسحب للتنقل • ${activeIndex + 1} / ${shots.length}`
+                      : `${active?.badgeEn ? `[${active.badgeEn}] • ` : ""}Use arrows or swipe • ${activeIndex + 1} / ${shots.length}`}
                 </DialogDescription>
               </DialogHeader>
               <div className="flex items-center gap-2">

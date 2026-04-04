@@ -97,6 +97,7 @@ export function ChangeEmailForm({ locale }: { locale: "ar" | "en" }) {
           <Input
             id="currentPassword"
             type="password"
+            autoComplete="current-password"
             value={currentPassword}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setCurrentPassword(e.target.value)}
             placeholder="••••••••"

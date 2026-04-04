@@ -1,4 +1,5 @@
 import { IconUser } from "@tabler/icons-react";
+import { formatCurrency } from "@/lib/types/payroll";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -28,7 +29,7 @@ export function EmployeeViewDialog({
 }) {
   return (
     <Dialog open={!!employee} onOpenChange={() => onClose()}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-full sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>بيانات الموظف</DialogTitle>
         </DialogHeader>
@@ -75,7 +76,7 @@ export function EmployeeViewDialog({
               {employee.basicSalary && (
                 <div>
                   <span className="text-muted-foreground">الراتب:</span>
-                  <p className="font-medium">{employee.basicSalary.toLocaleString()} ر.س</p>
+                  <p className="font-medium">{formatCurrency(employee.basicSalary)}</p>
                 </div>
               )}
             </div>

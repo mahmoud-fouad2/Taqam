@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
-    titleAr: "الشروط والأحكام | أجور",
-    titleEn: "Terms & Conditions | Ujoors",
-    descriptionAr: "الشروط والأحكام لاستخدام منصة أجور.",
-    descriptionEn: "Terms and conditions for using Ujoors.",
+    titleAr: "الشروط والأحكام | طاقم",
+    titleEn: "Terms & Conditions | Taqam",
+    descriptionAr: "الشروط والأحكام لاستخدام منصة طاقم.",
+    descriptionEn: "Terms and conditions for using Taqam.",
     path: "/terms",
   });
 }
@@ -22,8 +22,8 @@ export default async function TermsPage() {
       <h1 className="text-3xl font-bold tracking-tight">{isAr ? "الشروط والأحكام" : "Terms & Conditions"}</h1>
       <p className="mt-3 text-muted-foreground">
         {isAr
-          ? "باستخدامك لمنصة أجور فأنت توافق على هذه الشروط."
-          : "By using Ujoors, you agree to these terms."}
+          ? "باستخدامك لمنصة طاقم فأنت توافق على هذه الشروط."
+          : "By using Taqam, you agree to these terms."}
       </p>
 
       <div className="mt-10 space-y-8 text-sm leading-7 text-muted-foreground">

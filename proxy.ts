@@ -1,4 +1,7 @@
-import { NextResponse, type NextRequest } from "next/server";
+﻿import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
+
+import { isSuperAdminRole } from "@/lib/access-control";
 
 const DEFAULT_LOCALE = "ar";
 const DEFAULT_UI_THEME = "shadcn";
@@ -42,13 +45,51 @@ function getTenantSlugFromHost(host: string, baseDomain: string): string | null 
   return null;
 }
 
-export function proxy(request: NextRequest) {
+function stripLocalePrefix(pathname: string): string {
+  return pathname.replace(/^\/(en|ar)(?=\/|$)/, "") || "/";
+}
+
+function withLocalePrefix(pathname: string, localePrefix: string): string {
+  if (!localePrefix || pathname === "/") {
+    return localePrefix || pathname;
+  }
+
+  return `${localePrefix}${pathname}`;
+}
+
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const strippedPathname = stripLocalePrefix(pathname);
+  const isEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
+  const isArPrefix = pathname === "/ar" || pathname.startsWith("/ar/");
+  const localePrefix = isEnPrefix ? "/en" : isArPrefix ? "/ar" : "";
   const host = request.headers.get("host") ?? "";
-  const baseDomain = process.env.UJOORS_BASE_DOMAIN ?? "";
+  const baseDomain = process.env.TAQAM_BASE_DOMAIN ?? "";
   const tenantSlug = getTenantSlugFromHost(host, baseDomain);
-  const tenantCookie = request.cookies.get("ujoors_tenant")?.value ?? null;
+  const tenantCookie = request.cookies.get("taqam_tenant")?.value ?? null;
   const effectiveTenant = tenantSlug || tenantCookie;
+
+  const isDashboard = strippedPathname.startsWith("/dashboard");
+  const isSuperAdmin = strippedPathname.startsWith("/dashboard/super-admin");
+  const isSharedDashboardPath =
+    strippedPathname.startsWith("/dashboard/my-profile") ||
+    strippedPathname.startsWith("/dashboard/notifications") ||
+    strippedPathname.startsWith("/dashboard/account") ||
+    strippedPathname.startsWith("/dashboard/help-center") ||
+    strippedPathname.startsWith("/dashboard/support");
+  const requestedDashboardPath = strippedPathname + (request.nextUrl.search ? request.nextUrl.search : "");
+
+  if (isDashboard) {
+    const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
+    const role = typeof token?.role === "string" ? token.role : undefined;
+
+    if (isSuperAdminRole(role) && !isSuperAdmin && !isSharedDashboardPath) {
+      const url = request.nextUrl.clone();
+      url.pathname = withLocalePrefix("/dashboard/super-admin", localePrefix);
+      url.searchParams.set("from", requestedDashboardPath);
+      return NextResponse.redirect(url);
+    }
+  }
 
   // Allow selecting tenant on non-subdomain hosts via path: /t/<tenantSlug>[/nextPath]
   // Useful for Render default domain without custom DNS.
@@ -76,7 +117,7 @@ export function proxy(request: NextRequest) {
         canonical.searchParams.delete("next");
 
         const res = NextResponse.redirect(canonical);
-        res.cookies.set("ujoors_tenant", slug, { path: "/", sameSite: "lax" });
+        res.cookies.set("taqam_tenant", slug, { path: "/", sameSite: "lax" });
         res.headers.set("x-tenant-slug", slug);
         return res;
       }
@@ -90,7 +131,7 @@ export function proxy(request: NextRequest) {
       nextHeaders.set("x-tenant-slug", slug);
 
       const res = NextResponse.rewrite(url, { request: { headers: nextHeaders } });
-      res.cookies.set("ujoors_tenant", slug, { path: "/", sameSite: "lax" });
+      res.cookies.set("taqam_tenant", slug, { path: "/", sameSite: "lax" });
       res.headers.set("x-tenant-slug", slug);
       return res;
     }
@@ -104,20 +145,18 @@ export function proxy(request: NextRequest) {
   // Locale prefixes: keep Arabic default, support /en (and /ar) for clean URLs.
   // We rewrite internally to the non-prefixed path but pass locale via request header
   // so server components/rendering pick the correct language on the same request.
-  const isEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
-  const isArPrefix = pathname === "/ar" || pathname.startsWith("/ar/");
   if (isEnPrefix || isArPrefix) {
     const locale = isEnPrefix ? "en" : "ar";
-    const stripped = pathname.replace(/^\/(en|ar)(?=\/|$)/, "") || "/";
+    const stripped = strippedPathname;
 
     const url = request.nextUrl.clone();
     url.pathname = stripped;
 
     const nextHeaders = new Headers(request.headers);
-    nextHeaders.set("x-ujoors-locale", locale);
+    nextHeaders.set("x-taqam-locale", locale);
 
     const res = NextResponse.rewrite(url, { request: { headers: nextHeaders } });
-    res.cookies.set("ujoors_locale", locale, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_locale", locale, { path: "/", sameSite: "lax" });
     return res;
   }
 
@@ -133,7 +172,7 @@ export function proxy(request: NextRequest) {
     url.searchParams.delete("next");
 
     const res = NextResponse.redirect(url);
-    res.cookies.set("ujoors_locale", lang, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_locale", lang, { path: "/", sameSite: "lax" });
     return res;
   }
 
@@ -143,21 +182,16 @@ export function proxy(request: NextRequest) {
     const nextPath = safeNextPath(request.nextUrl.searchParams.get("next")) ?? "/dashboard";
     const url = new URL(nextPath, request.url);
     const res = NextResponse.redirect(url);
-    res.cookies.set("ujoors_tenant", tenantFromQuery, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_tenant", tenantFromQuery, { path: "/", sameSite: "lax" });
     res.headers.set("x-tenant-slug", tenantFromQuery);
     return res;
   }
 
   // Dashboard needs tenant context (except super-admin area)
-  const isDashboard = pathname.startsWith("/dashboard");
-  const isSuperAdmin = pathname.startsWith("/dashboard/super-admin");
-  const isTenantOptionalDashboardPath =
-    pathname.startsWith("/dashboard/my-profile") ||
-    pathname.startsWith("/dashboard/notifications") ||
-    pathname.startsWith("/dashboard/account");
+  const isTenantOptionalDashboardPath = isSharedDashboardPath;
 
   // Root should always render the marketing landing page
-  if (pathname === "/") {
+  if (strippedPathname === "/" && !localePrefix) {
     return NextResponse.next();
   }
 
@@ -168,26 +202,26 @@ export function proxy(request: NextRequest) {
     const isLocalDev = cleanHost === "localhost" || /^[0-9.]+$/.test(cleanHost);
     if (!isLocalDev) {
       const url = request.nextUrl.clone();
-      url.pathname = "/select-tenant";
-      url.searchParams.set("next", pathname + (request.nextUrl.search ? request.nextUrl.search : ""));
+      url.pathname = withLocalePrefix("/select-tenant", localePrefix);
+      url.searchParams.set("next", requestedDashboardPath);
       return NextResponse.redirect(url);
     }
   }
 
   const res = NextResponse.next();
 
-  if (!request.cookies.get("ujoors_locale")?.value) {
-    res.cookies.set("ujoors_locale", DEFAULT_LOCALE, { path: "/", sameSite: "lax" });
+  if (!request.cookies.get("taqam_locale")?.value) {
+    res.cookies.set("taqam_locale", DEFAULT_LOCALE, { path: "/", sameSite: "lax" });
   }
 
-  if (!request.cookies.get("ujoors_ui_theme")?.value) {
-    res.cookies.set("ujoors_ui_theme", DEFAULT_UI_THEME, { path: "/", sameSite: "lax" });
+  if (!request.cookies.get("taqam_ui_theme")?.value) {
+    res.cookies.set("taqam_ui_theme", DEFAULT_UI_THEME, { path: "/", sameSite: "lax" });
   }
 
   if (effectiveTenant) {
     res.headers.set("x-tenant-slug", effectiveTenant);
     // Keep cookie in sync even when tenant comes from subdomain
-    res.cookies.set("ujoors_tenant", effectiveTenant, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_tenant", effectiveTenant, { path: "/", sameSite: "lax" });
   }
 
   return res;

@@ -71,7 +71,7 @@ export function LeaveRequestsAddDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="w-full max-w-2xl">
         <DialogHeader>
           <DialogTitle>طلب إجازة جديد</DialogTitle>
           <DialogDescription>إنشاء طلب إجازة للموظف</DialogDescription>

@@ -4,6 +4,12 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
+import { z } from "zod";
+
+const changeEmailSchema = z.object({
+  currentPassword: z.string().min(1),
+  newEmail: z.string().email(),
+});
 
 function isValidEmail(value: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
@@ -17,23 +23,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { currentPassword, newEmail } = body as {
-      currentPassword?: string;
-      newEmail?: string;
-    };
-
-    if (!currentPassword || !newEmail) {
-      return NextResponse.json(
-        { error: "كلمة المرور الحالية والبريد الإلكتروني الجديد مطلوبان" },
-        { status: 400 }
-      );
+    const rawBody = await request.json();
+    const parsed = changeEmailSchema.safeParse(rawBody);
+    if (!parsed.success) {
+      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
     }
+    const { currentPassword, newEmail } = parsed.data;
 
-    const normalizedEmail = String(newEmail).trim().toLowerCase();
-    if (!isValidEmail(normalizedEmail)) {
-      return NextResponse.json({ error: "بريد إلكتروني غير صالح" }, { status: 400 });
-    }
+    const normalizedEmail = newEmail.trim().toLowerCase();
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },

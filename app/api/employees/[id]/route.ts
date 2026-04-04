@@ -23,8 +23,8 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const employee = await prisma.employee.findUnique({
-      where: { id },
+    const employee = await prisma.employee.findFirst({
+      where: { id, deletedAt: null },
       include: {
         department: true,
         jobTitle: true,
@@ -36,6 +36,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           },
         },
         shift: true,
+        salaryRecords: {
+          orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
+          take: 1,
+        },
         user: {
           select: {
             id: true,
@@ -104,6 +108,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         gender: body.gender,
         nationality: body.nationality,
         maritalStatus: body.maritalStatus,
+        address: body.address ?? undefined,
+        emergencyContact: body.emergencyContact ?? undefined,
         departmentId: body.departmentId,
         jobTitleId: body.jobTitleId,
         managerId: body.managerId,

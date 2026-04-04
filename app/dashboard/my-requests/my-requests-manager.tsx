@@ -184,7 +184,7 @@ export default function MyRequestsManager() {
               طلب جديد
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md">
+          <DialogContent className="w-full max-w-md">
             <DialogHeader>
               <DialogTitle>تقديم طلب جديد</DialogTitle>
               <DialogDescription>اختر نوع الطلب وأدخل التفاصيل</DialogDescription>
@@ -396,7 +396,7 @@ export default function MyRequestsManager() {
 
       {/* Request Details Dialog */}
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="w-full max-w-2xl">
           <DialogHeader>
             <DialogTitle>تفاصيل الطلب</DialogTitle>
           </DialogHeader>

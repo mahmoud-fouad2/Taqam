@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { hasRole, isSuperAdminRole } from "@/lib/access-control";
 import { getAuditLogs, type AuditAction, type AuditLogFilters } from "@/lib/audit/logger";
 
 export async function GET(request: NextRequest) {
@@ -17,9 +18,12 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only SUPER_ADMIN and ADMIN can view audit logs
-    if (session.user.role !== "SUPER_ADMIN" && session.user.role !== "ADMIN") {
+    if (!hasRole(session.user.role, ["SUPER_ADMIN", "TENANT_ADMIN"])) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!isSuperAdminRole(session.user.role) && !session.user.tenantId) {
+      return NextResponse.json({ error: "Tenant required" }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -38,8 +42,7 @@ export async function GET(request: NextRequest) {
       pageSize: searchParams.get("pageSize") ? parseInt(searchParams.get("pageSize")!) : 50,
     };
 
-    // Super admin can view all tenants, others only their tenant
-    if (session.user.role !== "SUPER_ADMIN") {
+    if (!isSuperAdminRole(session.user.role)) {
       filters.tenantId = session.user.tenantId || undefined;
     }
 

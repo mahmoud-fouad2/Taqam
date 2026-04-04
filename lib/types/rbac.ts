@@ -1,10 +1,10 @@
-/**
+﻿/**
  * RBAC (Role-Based Access Control) System
  * نظام إدارة الصلاحيات والأدوار
  */
 
 // ===== Roles =====
-export type SystemRole = "super_admin"; // Ujoors internal only
+export type SystemRole = "super_admin"; // Taqam internal only
 
 export type CompanyRole = 
   | "company_admin"   // مدير الشركة - كل الصلاحيات داخل الـ tenant
@@ -69,8 +69,8 @@ export const roleDefinitions: RoleDefinition[] = [
     role: "super_admin",
     name: "Super Admin",
     nameAr: "مدير النظام",
-    description: "Full system access - Ujoors internal only",
-    descriptionAr: "صلاحيات كاملة للنظام - فريق أجور فقط",
+    description: "Full system access - Taqam internal only",
+    descriptionAr: "صلاحيات كاملة للنظام - فريق طاقم فقط",
     isSystemRole: true,
     permissions: [
       { resource: "tenants", actions: ["create", "read", "update", "delete"] },

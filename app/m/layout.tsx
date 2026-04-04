@@ -2,8 +2,8 @@ import type { Metadata, Viewport } from "next";
 import MobileBottomNav from "@/components/mobile/mobile-bottom-nav";
 
 export const metadata: Metadata = {
-  title: "Ujoor",
-  description: "Ujoor HR Mobile",
+  title: "Taqam",
+  description: "Taqam HR Mobile",
 };
 
 export const viewport: Viewport = {

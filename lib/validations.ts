@@ -31,8 +31,8 @@ export const createEmployeeSchema = z.object({
   shiftId: z.string().uuid().optional().nullable(),
   managerId: z.string().uuid().optional().nullable(),
   hireDate: z.string().datetime().optional().nullable(),
-  role: z.enum(["EMPLOYEE", "HR_MANAGER", "DEPT_MANAGER", "TENANT_ADMIN"]).default("EMPLOYEE"),
-  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERN", "PROBATION"]).default("FULL_TIME"),
+  role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]).default("EMPLOYEE"),
+  employmentType: z.enum(["FULL_TIME", "PART_TIME", "CONTRACT", "INTERN", "TEMPORARY", "PROBATION"]).default("FULL_TIME"),
   basicSalary: z.number().nonnegative().optional(),
 });
 

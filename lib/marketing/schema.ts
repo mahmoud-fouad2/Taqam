@@ -1,4 +1,4 @@
-export type MarketingLocale = "ar" | "en";
+﻿export type MarketingLocale = "ar" | "en";
 
 export type OrganizationJsonLd = {
   "@context": "https://schema.org";
@@ -55,7 +55,7 @@ export function organizationSchema(opts: { url: string }): OrganizationJsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "Ujoors",
+    name: "Taqam",
     url: opts.url,
     logo: `${opts.url}/opengraph-image`,
   };
@@ -65,7 +65,7 @@ export function websiteSchema(opts: { url: string; locale: MarketingLocale }): W
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "Ujoors",
+    name: "Taqam",
     url: opts.url,
     inLanguage: opts.locale === "ar" ? "ar-SA" : "en-US",
   };
@@ -88,7 +88,7 @@ export function softwareAppSchema(opts: {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    name: "Ujoors",
+    name: "Taqam",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     offers: {

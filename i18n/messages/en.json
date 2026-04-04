@@ -1,6 +1,6 @@
-{
+﻿{
   "common": {
-    "appName": "Ujoors",
+    "appName": "Taqam",
     "appNameAr": "أجور",
     "loading": "Loading...",
     "save": "Save",
@@ -59,7 +59,7 @@
     "forgotPassword": "Forgot password?",
     "rememberMe": "Remember me",
     "loginButton": "Sign in",
-    "noSelfSignup": "No self-registration for companies. Contact Ujoors team if you need an account.",
+    "noSelfSignup": "No self-registration for companies. Contact Taqam team if you need an account.",
     "invalidCredentials": "Invalid credentials",
     "sessionExpired": "Session expired, please login again"
   },

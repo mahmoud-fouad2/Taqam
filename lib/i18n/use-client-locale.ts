@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSyncExternalStore } from "react";
 import type { AppLocale } from "./types";
@@ -13,7 +13,7 @@ export function useClientLocale(defaultLocale: AppLocale = "ar"): AppLocale {
     () => () => {},
     () => {
       // Get locale from cookie first
-      const match = document.cookie.match(/(?:^|; )ujoors_locale=([^;]+)/);
+      const match = document.cookie.match(/(?:^|; )taqam_locale=([^;]+)/);
       const cookieValue = match?.[1];
       const cookieLocale = cookieValue === "en" ? "en" : cookieValue === "ar" ? "ar" : undefined;
 

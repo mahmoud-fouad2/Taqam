@@ -1,4 +1,4 @@
-import { ImageResponse } from "next/og";
+﻿import { ImageResponse } from "next/og";
 
 export const runtime = "edge";
 export const size = {
@@ -57,7 +57,7 @@ export default function OpenGraphImage() {
               }}
             />
             <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.1 }}>Ujoors</div>
+              <div style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.1 }}>Taqam | طاقم</div>
               <div style={{ fontSize: 20, opacity: 0.85 }}>HR • Payroll • Attendance</div>
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function OpenGraphImage() {
                 Secure
               </div>
             </div>
-            <div style={{ opacity: 0.7 }}>ujoor.onrender.com</div>
+            <div style={{ opacity: 0.7 }}>taqam.com</div>
           </div>
         </div>
       </div>

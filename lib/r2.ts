@@ -1,10 +1,10 @@
-/**
+﻿/**
  * R2 Storage Client for Cloudflare R2
  */
 
 import { S3Client } from "@aws-sdk/client-s3";
 
-export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "ujoor";
+export const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME || "taqam";
 
 export const r2Client = new S3Client({
   region: "auto",

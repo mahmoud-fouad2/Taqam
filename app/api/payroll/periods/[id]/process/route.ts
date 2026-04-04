@@ -4,72 +4,52 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { requireTenantSession } from "@/lib/api/route-helper";
+import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
+import { ensurePayslipsForPeriod, summarizePayrollPeriod } from "@/lib/payroll/payslips";
+import { getPayrollPeriodById, mapPayrollPeriod } from "@/lib/payroll/periods";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-function toIsoDate(d: Date) {
-  return d.toISOString().split("T")[0];
-}
-
-function mapPeriod(period: any) {
-  return {
-    ...period,
-    startDate: toIsoDate(period.startDate),
-    endDate: toIsoDate(period.endDate),
-    paymentDate: toIsoDate(period.paymentDate),
-    status: String(period.status).toLowerCase(),
-    totalGross: Number(period.totalGross),
-    totalDeductions: Number(period.totalDeductions),
-    totalNet: Number(period.totalNet),
-  };
-}
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const limit = 5;
+    const rl = checkRateLimit(_request, { keyPrefix: "api:payroll:process", limit, windowMs: 60 * 1000 });
+    if (!rl.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        { limit, remaining: rl.remaining, resetAt: rl.resetAt }
+      );
     }
 
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
-
+    const auth = await requireTenantSession(_request);
+    if (!auth.ok) return auth.response;
+    const { tenantId, session } = auth;
     const userId = session.user.id;
     const { id } = await params;
 
-    const existing = await prisma.payrollPeriod.findFirst({
-      where: { id, tenantId },
-    });
+    const existing = await getPayrollPeriodById(tenantId, id);
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const employees = await prisma.employee.findMany({
-      where: { tenantId, status: "ACTIVE" },
-      select: { baseSalary: true },
-    });
-
-    const totalGross = employees.reduce((sum, e) => sum + Number(e.baseSalary ?? 0), 0);
+    await ensurePayslipsForPeriod(tenantId, id);
+    const summary = await summarizePayrollPeriod(tenantId, id);
 
     const updated = await prisma.payrollPeriod.update({
       where: { id },
       data: {
         status: "PENDING_APPROVAL",
-        employeeCount: employees.length,
-        totalGross,
-        totalDeductions: 0,
-        totalNet: totalGross,
+        employeeCount: summary.employeeCount,
+        totalGross: summary.totalGross,
+        totalDeductions: summary.totalDeductions,
+        totalNet: summary.totalNet,
         processedById: userId,
         processedAt: new Date(),
       },
     });
 
-    return NextResponse.json({ data: mapPeriod(updated) });
+    return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
     console.error("Error processing payroll period:", error);
     return NextResponse.json(
