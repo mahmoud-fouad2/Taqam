@@ -10,69 +10,31 @@ export const contentType = "image/png";
 export default function TwitterImage() {
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, #0b1220 0%, #0f172a 100%)",
-          position: "relative",
-          color: "white",
-          fontFamily: "system-ui, -apple-system, Segoe UI, Roboto",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at 25% 35%, rgba(34,197,94,0.20), transparent 45%), radial-gradient(circle at 80% 25%, rgba(59,130,246,0.22), transparent 40%), radial-gradient(circle at 70% 85%, rgba(168,85,247,0.20), transparent 42%)",
-          }}
-        />
+      <div tw="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0b1220] to-[#0f172a] text-white">
+        <div tw="absolute inset-0 flex">
+          <div tw="absolute left-[130px] top-[95px] h-44 w-44 rounded-full bg-green-500/20" />
+          <div tw="absolute right-[150px] top-[85px] h-40 w-40 rounded-full bg-blue-500/20" />
+          <div tw="absolute bottom-[55px] right-[180px] h-48 w-48 rounded-full bg-purple-500/20" />
+        </div>
 
-        <div
-          style={{
-            width: 1040,
-            height: 470,
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(10, 22, 39, 0.75)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: 52,
-            boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
-            position: "relative",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 52,
-                height: 52,
-                borderRadius: 16,
-                background: "linear-gradient(90deg, #22c55e, #3b82f6, #a855f7)",
-              }}
-            />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontSize: 40, fontWeight: 800, lineHeight: 1.1 }}>Taqam | طاقم</div>
-              <div style={{ fontSize: 18, opacity: 0.85 }}>HR • Payroll • Attendance</div>
+        <div tw="relative flex h-[470px] w-[1040px] flex-col justify-between rounded-[32px] border border-white/10 bg-[#0a1627]/75 p-[52px]">
+          <div tw="flex items-center gap-4">
+            <div tw="flex h-[52px] w-[52px] rounded-2xl bg-gradient-to-r from-green-500 via-blue-500 to-purple-500" />
+            <div tw="flex flex-col">
+              <div tw="text-[40px] font-extrabold leading-tight">Taqam | طاقم</div>
+              <div tw="text-[18px] text-white/85">HR • Payroll • Attendance</div>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            <div style={{ fontSize: 46, fontWeight: 800, lineHeight: 1.1 }}>
-              HR & Payroll for Saudi businesses
-            </div>
-            <div style={{ fontSize: 24, opacity: 0.9, maxWidth: 860 }}>
+          <div tw="flex flex-col gap-3">
+            <div tw="text-[46px] font-extrabold leading-tight">HR & Payroll for Saudi businesses</div>
+            <div tw="max-w-[860px] text-[24px] leading-snug text-white/90">
               Employees, attendance, payroll, reports — Arabic/English and multi-tenant.
             </div>
           </div>
 
-          <div style={{ display: "flex", justifyContent: "space-between", opacity: 0.75, fontSize: 16 }}>
-            <div>taqam.com</div>
+          <div tw="flex justify-between text-[16px] text-white/75">
+            <div>taqam.net</div>
             <div>Request a demo</div>
           </div>
         </div>

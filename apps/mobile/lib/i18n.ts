@@ -3,7 +3,7 @@ import type { AppLanguage } from "@/lib/settings-storage";
 type Dict = Record<string, { ar: string; en: string }>;
 
 const dict: Dict = {
-  login_title: { ar: "أهلاً بك في جسر", en: "Welcome to Jisr" },
+  login_title: { ar: "أهلاً بك في طاقم", en: "Welcome to Taqam" },
   login_subtitle: { ar: "سجل الدخول للمتابعة", en: "Sign in to continue" },
   email_label: { ar: "البريد الإلكتروني", en: "Email" },
   password_label: { ar: "كلمة المرور", en: "Password" },

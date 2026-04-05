@@ -210,6 +210,21 @@
     @apply transition-transform duration-300 ease-out;
   }
 
+  /* Infinite horizontal marquee for feature cards */
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .features-marquee-track {
+    width: max-content;
+    animation: marquee 40s linear infinite;
+  }
+
+  .features-marquee-track:hover {
+    animation-play-state: paused;
+  }
+
   /* Premium subtle motion for marketing backgrounds */
   @keyframes premium-float {
     0% {
@@ -229,6 +244,10 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .features-marquee-track {
+      animation: none;
+    }
+
     .premium-float {
       animation: none;
     }

@@ -13,10 +13,10 @@ import {
   CreditCard, 
   Shield, 
   Globe,
-  CheckCircle2,
   ArrowLeft,
   BarChart3,
   Building2,
+  CheckCircle2,
   Layers,
   Star,
   Zap,
@@ -24,10 +24,10 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { redirect } from "next/navigation";
+import { FeaturesMarquee } from "@/components/marketing/features-marquee";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -191,7 +191,7 @@ export default async function LandingPage({
             <div className="mb-5 flex justify-center lg:justify-start">
               <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
                 <span className="size-1.5 animate-pulse rounded-full bg-indigo-500" />
-                {isAr ? "سحابية • متعدد الشركات • عربي / إنجليزي" : "Cloud • Multi-tenant • Arabic / English"}
+                {isAr ? "منصة سعودية • متوافقة مع GOSI وWPS ومدد • ثنائية اللغة" : "Saudi-built • GOSI, WPS & Mudad compliant • Bilingual"}
               </span>
             </div>
 
@@ -252,12 +252,12 @@ export default async function LandingPage({
             {/* Social proof numbers */}
             <div className="mt-10 flex justify-center gap-8 border-t pt-8 lg:justify-start">
               <div>
-                <p className="text-2xl font-bold">+٢٠٠</p>
+                <p className="text-2xl font-bold">+٥٠</p>
                 <p className="text-sm text-muted-foreground">{isAr ? "شركة تستخدمنا" : "Companies"}</p>
               </div>
               <div className="h-10 w-px bg-border" />
               <div>
-                <p className="text-2xl font-bold">+١٠,٠٠٠</p>
+                <p className="text-2xl font-bold">+٢٬٠٠٠</p>
                 <p className="text-sm text-muted-foreground">{isAr ? "موظف مُدار" : "Employees managed"}</p>
               </div>
               <div className="h-10 w-px bg-border" />
@@ -282,7 +282,7 @@ export default async function LandingPage({
                 </div>
                 <div className="mx-auto flex items-center gap-1.5 rounded-md bg-background/80 px-3 py-1 text-xs text-muted-foreground ring-1 ring-border/50">
                   <span className="size-1.5 rounded-full bg-green-500" />
-                  app.taqam.com
+                  app.taqam.net
                 </div>
               </div>
               <div className="aspect-[16/10] overflow-hidden bg-muted">
@@ -351,28 +351,9 @@ export default async function LandingPage({
               {isAr ? "وحدة واحدة متكاملة بدلاً من أدوات متعددة" : "One integrated platform instead of multiple disconnected tools"}
             </p>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            {features.map((feature) => (
-              <Card
-                key={feature.title}
-                className="group border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/8"
-              >
-                <CardHeader className="pb-3">
-                  <div className={`mb-3 flex h-11 w-11 items-center justify-center rounded-xl ${feature.color}`}>
-                    <feature.icon className="h-5 w-5" />
-                  </div>
-                  <CardTitle className="text-base">
-                    {isAr ? feature.title : feature.titleEn}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm leading-relaxed text-muted-foreground">
-                    {isAr ? feature.description : feature.descriptionEn}
-                  </p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+
+          <FeaturesMarquee features={features} isAr={isAr} />
+
           <div className="mt-10 text-center">
             <Link href={`${p}/features`}>
               <Button variant="outline" className="gap-2">

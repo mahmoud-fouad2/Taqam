@@ -9,59 +9,71 @@ export async function MarketingFooter() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const footerLinks = [
+    { href: `${p}/features`, label: isAr ? "المميزات" : "Features" },
+    { href: `${p}/pricing`, label: isAr ? "الأسعار" : "Pricing" },
+    { href: `${p}/plans`, label: isAr ? "الباقات" : "Plans" },
+    { href: `${p}/faq`, label: isAr ? "الأسئلة الشائعة" : "FAQ" },
+    { href: `${p}/support`, label: isAr ? "الدعم الفني" : "Support" },
+    { href: `${p}/privacy`, label: t(locale, "footer.privacy") },
+    { href: `${p}/terms`, label: t(locale, "footer.terms") },
+  ];
+  const stack = isAr ? t(locale, "footer.stack.ar") : t(locale, "footer.stack.en");
 
   return (
-    <footer className="border-t">
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid gap-6 sm:grid-cols-3 sm:items-center">
-          {/* Developer */}
-          <div className="order-3 flex justify-center sm:order-1 sm:justify-start rtl:sm:justify-end">
-            <Link
-              href="https://ma-fo.info"
-              className="inline-flex items-center gap-3 opacity-90 hover:opacity-100"
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="inline-flex items-center rounded-md bg-white/95 px-2 py-1 ring-1 ring-black/10">
-                <Image
-                  src="https://ma-fo.info/logo2.png"
-                  alt={isAr ? "شعار المطور" : "Developer logo"}
-                  width={120}
-                  height={36}
-                  className="h-7 w-auto"
-                />
-              </span>
-              <span className="text-sm text-muted-foreground">
-                {t(locale, "footer.developedBy")}
-              </span>
-            </Link>
-          </div>
+    <footer className="border-t bg-background/80">
+      <div className="container mx-auto px-4 py-8 sm:py-10">
+        <div className="flex flex-col gap-5">
+          <nav className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm text-muted-foreground sm:gap-x-5">
+            {footerLinks.map((link) => (
+              <Link key={link.href} href={link.href} className="transition hover:text-foreground">
+                {link.label}
+              </Link>
+            ))}
+          </nav>
 
-          {/* Footer nav (center) */}
-          <div className="order-2 text-center">
-            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs text-muted-foreground">
-              <Link href={`${p}/privacy`} className="hover:text-foreground">
-                {t(locale, "footer.privacy")}
+          <div className="rounded-3xl border border-border/70 bg-muted/20 px-5 py-5 shadow-sm">
+            <div className="flex flex-col items-center gap-3 text-center">
+              <Link href={p || "/"} className="inline-flex items-center justify-center transition hover:opacity-90">
+                <span className="relative h-10 w-[150px] sm:h-12 sm:w-[190px]">
+                  <Image
+                    src="/icons/logo-navbar-light-512.png"
+                    alt="Taqam"
+                    fill
+                    sizes="190px"
+                    className="object-contain dark:hidden"
+                  />
+                  <Image
+                    src="/icons/logo-navbar-dark-512.png"
+                    alt="Taqam"
+                    fill
+                    sizes="190px"
+                    className="hidden object-contain dark:block"
+                  />
+                </span>
               </Link>
-              <span className="opacity-40">•</span>
-              <Link href={`${p}/terms`} className="hover:text-foreground">
-                {t(locale, "footer.terms")}
-              </Link>
-              <span className="opacity-40">•</span>
-              <Link href={`${p}/support`} className="hover:text-foreground">
-                {t(locale, "footer.support")}
-              </Link>
+
+              <p className="max-w-2xl text-xs leading-6 text-muted-foreground sm:text-sm">
+                {isAr
+                  ? "منصة موارد بشرية ورواتب وحضور مصممة للشركات في السعودية، بواجهة ثنائية اللغة وتجربة تشغيل عملية وواضحة."
+                  : "A Saudi HR, payroll, and attendance platform with bilingual UX and a practical operating experience."}
+              </p>
+
+              <p className="text-[11px] text-muted-foreground sm:text-xs">{stack}</p>
             </div>
           </div>
 
-          {/* Copyright (right) */}
-          <div className="order-1 text-center sm:order-3 sm:text-end rtl:sm:text-start">
-            <p className="text-sm text-muted-foreground">
-              © {year} {t(locale, "footer.rights")}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {isAr ? t(locale, "footer.stack.ar") : t(locale, "footer.stack.en")}
-            </p>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-t pt-3 text-[11px] text-muted-foreground sm:text-xs">
+            <span>© {year} {t(locale, "footer.rights")}</span>
+            <span className="opacity-35">•</span>
+            <Link
+              href="https://ma-fo.info"
+              className="transition hover:text-foreground"
+              target="_blank"
+              rel="noreferrer"
+            >
+              {t(locale, "footer.developedBy")}
+            </Link>
           </div>
         </div>
       </div>

@@ -1,25 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const createMessageSchema = z.object({
   body: z.string().min(1).max(5000),
   isInternal: z.boolean().optional().default(false),
 });
 
-function isSuperAdmin(role: string | undefined) {
-  return role === "SUPER_ADMIN";
-}
-
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+
+    const { session, tenantId, isSuperAdmin: superAdmin } = auth;
 
     const body = await request.json();
     const parsed = createMessageSchema.safeParse(body);
@@ -32,10 +29,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    const superAdmin = isSuperAdmin(session.user.role);
-
     if (!superAdmin) {
-      if (!session.user.tenantId || ticket.tenantId !== session.user.tenantId) {
+      if (!tenantId || ticket.tenantId !== tenantId) {
         return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }
       if (parsed.data.isInternal) {

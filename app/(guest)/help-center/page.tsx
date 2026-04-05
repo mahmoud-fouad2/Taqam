@@ -1,20 +1,87 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 
-import { Button } from "@/components/ui/button";
+import {
+  ArrowLeft,
+  BarChart3,
+  Clock3,
+  HelpCircle,
+  LifeBuoy,
+  PlugZap,
+  Rocket,
+  ShieldCheck,
+  Users,
+  Wallet,
+} from "lucide-react";
+
+import { MarketingPageCta } from "@/components/marketing/page-cta";
+import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { marketingMetadata } from "@/lib/marketing/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     titleAr: "مركز المساعدة | طاقم",
     titleEn: "Help Center | Taqam",
-    descriptionAr: "مقالات وإجابات سريعة ودليل استخدام منصة طاقم.",
-    descriptionEn: "Quick answers, guides, and articles for Taqam.",
+    descriptionAr: "بوابة مساعدة مرتبة: أدلة الاستخدام، الأسئلة الشائعة، وصفحة دعم مستقلة للتواصل المباشر.",
+    descriptionEn: "An organized help portal with usage guides, a dedicated FAQ page, and a separate support page.",
     path: "/help-center",
   });
 }
+
+const helpTopics = [
+  {
+    icon: Rocket,
+    titleAr: "البدء والإعداد",
+    titleEn: "Getting Started",
+    descAr: "تهيئة الشركة، إضافة الموظفين، وضبط الأقسام والورديات في مسار واضح.",
+    descEn: "Set up the company, add employees, and configure departments and shifts in a clear path.",
+  },
+  {
+    icon: Clock3,
+    titleAr: "الحضور والإجازات",
+    titleEn: "Attendance & Leave",
+    descAr: "تشغيل الحضور اليومي، سياسات التأخير، وطلبات الإجازة والموافقات.",
+    descEn: "Handle daily attendance, tardiness policies, leave requests, and approvals.",
+  },
+  {
+    icon: Wallet,
+    titleAr: "الرواتب",
+    titleEn: "Payroll",
+    descAr: "تهيئة الرواتب، تشغيل المسير، وقسائم الرواتب وتصدير WPS.",
+    descEn: "Configure payroll, run payroll periods, manage payslips, and export WPS.",
+  },
+  {
+    icon: Users,
+    titleAr: "بيانات الموظفين",
+    titleEn: "Employee Records",
+    descAr: "الملفات الوظيفية، الاستيراد، والتحديثات اليومية للموظفين.",
+    descEn: "Employee records, imports, and day-to-day updates.",
+  },
+  {
+    icon: ShieldCheck,
+    titleAr: "الأدوار والحماية",
+    titleEn: "Roles & Security",
+    descAr: "الأدوار الحالية داخل النظام وكيفية ضبط الوصول التشغيلي داخل الشركة.",
+    descEn: "Current role model and how to manage operational access inside the company.",
+  },
+  {
+    icon: BarChart3,
+    titleAr: "التقارير والتصدير",
+    titleEn: "Reports & Export",
+    descAr: "لوحات المتابعة، التقارير الجاهزة، وتصدير البيانات بشكل عملي.",
+    descEn: "Operational dashboards, ready-made reports, and practical export flows.",
+  },
+];
+
+const setupSteps = [
+  { ar: "أنشئ الشركة أو انتظر تفعيلها من فريق طاقم.", en: "Create the company or wait for it to be activated by the Taqam team." },
+  { ar: "فعّل حساب مدير الشركة من رابط التفعيل المرسل إلى البريد.", en: "Activate the tenant admin account from the email activation link." },
+  { ar: "أضف المستخدمين الأساسيين وحدد الأدوار المناسبة لهم.", en: "Invite the core users and assign the right roles." },
+  { ar: "أدخل الموظفين، الأقسام، المسميات الوظيفية، والورديات.", en: "Add employees, departments, job titles, and shifts." },
+  { ar: "ابدأ التشغيل اليومي ثم راجع التقارير والطلبات من لوحة التحكم.", en: "Start daily operations, then review reports and requests from the dashboard." },
+];
 
 export default async function PublicHelpCenterPage() {
   const locale = await getAppLocale();
@@ -22,171 +89,150 @@ export default async function PublicHelpCenterPage() {
   const p = locale === "en" ? "/en" : "";
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">{isAr ? "مركز المساعدة" : "Help Center"}</h1>
-          <p className="mt-2 text-muted-foreground">
-            {isAr
-              ? "إرشادات ومقالات سريعة لتبدأ بطاقم بشكل احترافي."
-              : "Guides and quick articles to get started with Taqam."}
-          </p>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row">
-          <Button asChild variant="secondary">
-            <Link href={`${p}/support`}>{isAr ? "الدعم الفني" : "Support"}</Link>
-          </Button>
-          <Button asChild variant="brand">
-            <Link href={`${p}/request-demo`}>{isAr ? "اطلب عرضًا" : "Request a demo"}</Link>
-          </Button>
-        </div>
-      </div>
+    <main className="bg-background">
+      <MarketingPageHero
+        icon={HelpCircle}
+        badge={isAr ? "بوابة مساعدة منظمة وواضحة" : "An organized and focused help portal"}
+        title={isAr ? "مركز المساعدة" : "Help Center"}
+        description={
+          isAr
+            ? "ابدأ من الأدلة الأساسية، ثم انتقل إلى صفحة الأسئلة الشائعة أو صفحة الدعم المستقلة حسب نوع احتياجك."
+            : "Start with the core guides, then move to the dedicated FAQ page or the separate support page depending on what you need."
+        }
+        actions={[
+          { href: `${p}/faq`, label: isAr ? "الأسئلة الشائعة" : "FAQ", variant: "outline" },
+          { href: `${p}/support`, label: isAr ? "الدعم الفني" : "Support", variant: "brand" },
+        ]}
+        stats={[
+          { value: `${helpTopics.length}`, label: isAr ? "مسارات مساعدة" : "Help tracks" },
+          { value: `${setupSteps.length}`, label: isAr ? "خطوات إعداد" : "Setup steps" },
+          { value: isAr ? "منفصل" : "Dedicated", label: isAr ? "FAQ والدعم" : "FAQ & support" },
+        ]}
+      />
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "البدء" : "Getting started"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "إعداد الشركة، إضافة الموظفين، وضبط السياسات الأساسية."
-              : "Set up your company, add employees, and configure policies."}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "الحضور والانصراف" : "Attendance"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "إعداد الورديات، تسجيل الحضور، والسياسات والتنبيهات."
-              : "Shifts, check-in/out, policies, and alerts."}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "الرواتب" : "Payroll"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "إعداد الهياكل، تشغيل المسير، قسائم الرواتب، والملفات."
-              : "Structures, payroll runs, payslips, and exports."}
-          </CardContent>
-        </Card>
-      </div>
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-5 lg:grid-cols-3">
+            <Card className="border-border/80 shadow-sm">
+              <CardHeader>
+                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                  <PlugZap className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{isAr ? "أدلة الاستخدام" : "Usage guides"}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  {isAr
+                    ? "المدخل الصحيح لفهم المنصة والإعداد الأولي اليومي بدون تشتيت."
+                    : "The right starting point to understand the platform and get daily operations configured without noise."}
+                </p>
+                <a href="#guides" className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
+                  {isAr ? "استعرض الأدلة" : "Browse guides"}
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                </a>
+              </CardContent>
+            </Card>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "الأمان" : "Security"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "عزل الشركات، أدوار وصلاحيات، وتدقيق عمليات حساسة حسب الإعداد."
-              : "Tenant isolation, roles/permissions, and auditable sensitive actions."}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "الاستيراد والتصدير" : "Import & export"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "استيراد بيانات أساسية وتصدير تقارير وملفات الرواتب حسب الباقة."
-              : "Import core data and export reports/payroll files depending on plan."}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>{isAr ? "التكاملات" : "Integrations"}</CardTitle>
-          </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {isAr
-              ? "تكاملات وتخصيصات لباقة المؤسسات (API/SSO/ملفات مخصصة)."
-              : "Enterprise integrations and customizations (API/SSO/custom exports)."}
-          </CardContent>
-        </Card>
-      </div>
+            <Card className="border-border/80 shadow-sm">
+              <CardHeader>
+                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                  <HelpCircle className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{isAr ? "الأسئلة الشائعة" : "FAQ"}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  {isAr
+                    ? "صفحة منفصلة للأسئلة المتكررة والإجابات العملية بدون دمجها مع الدعم."
+                    : "A dedicated page for common questions and concise answers, separate from support."}
+                </p>
+                <Link href={`${p}/faq`} className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
+                  {isAr ? "انتقل إلى FAQ" : "Go to FAQ"}
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                </Link>
+              </CardContent>
+            </Card>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-xl border bg-card p-6">
-          <h2 className="text-lg font-semibold">{isAr ? "ابدأ خلال 10 دقائق" : "Get started in 10 minutes"}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {isAr
-              ? "خطوات سريعة تساعدك تجهز بيئة شركتك وتبدأ التشغيل."
-              : "A quick checklist to set up your workspace and go live."}
-          </p>
-          <ol className="mt-4 space-y-2 text-sm text-muted-foreground">
-            <li>{isAr ? "1) أنشئ/حدّد الشركة (Tenant)" : "1) Create/select your tenant"}</li>
-            <li>{isAr ? "2) أضف المستخدمين وحدد الأدوار" : "2) Invite users and set roles"}</li>
-            <li>{isAr ? "3) أضف الموظفين والأقسام" : "3) Add employees and departments"}</li>
-            <li>{isAr ? "4) اضبط الورديات وسياسة الحضور" : "4) Configure shifts and attendance policy"}</li>
-            <li>{isAr ? "5) جهّز هياكل الرواتب (إن لزم)" : "5) Configure payroll structures (optional)"}</li>
-          </ol>
-          <div className="mt-5 flex flex-wrap gap-2">
-            <Button asChild variant="secondary">
-              <Link href={`${p}/screenshots`}>{isAr ? "استعراض النظام" : "Product tour"}</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link href={`${p}/faq`}>{isAr ? "الأسئلة الشائعة" : "FAQ"}</Link>
-            </Button>
-            <Button asChild variant="brand">
-              <Link href={`${p}/request-demo`}>{isAr ? "اطلب عرضًا" : "Request a demo"}</Link>
-            </Button>
+            <Card className="border-border/80 shadow-sm">
+              <CardHeader>
+                <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
+                  <LifeBuoy className="h-5 w-5 text-primary" />
+                </div>
+                <CardTitle>{isAr ? "الدعم الفني" : "Support"}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  {isAr
+                    ? "صفحة مستقلة لإرسال الأعطال، طلبات التفعيل، أو أي استفسار تشغيلي مباشر."
+                    : "A separate page to submit incidents, activation requests, or direct operational questions."}
+                </p>
+                <Link href={`${p}/support`} className="inline-flex items-center gap-2 font-medium text-primary hover:underline">
+                  {isAr ? "انتقل إلى الدعم" : "Go to support"}
+                  <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
+      </section>
 
-        <div className="rounded-xl border bg-card p-6">
-          <h2 className="text-lg font-semibold">{isAr ? "مقالات شائعة" : "Popular articles"}</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            {isAr
-              ? "مواضيع متكررة تساعدك تحل المشاكل بسرعة."
-              : "Common topics that help you resolve issues quickly."}
-          </p>
-          <div className="mt-4 grid gap-3">
-            <Link href={`${p}/support`} className="rounded-lg border bg-background p-4 hover:bg-muted/40">
-              <div className="font-medium">{isAr ? "كتابة تذكرة دعم احترافية" : "How to write a great support ticket"}</div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {isAr
-                  ? "المعلومات التي نحتاجها لتسريع الحل (slug، خطوات، لقطة شاشة)."
-                  : "What we need to debug faster (slug, steps, screenshots)."}
-              </div>
-            </Link>
-            <Link href={`${p}/faq`} className="rounded-lg border bg-background p-4 hover:bg-muted/40">
-              <div className="font-medium">{isAr ? "الأمان وتعدد الشركات" : "Security & multi-tenancy"}</div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {isAr
-                  ? "كيف يتم عزل البيانات وصلاحيات المستخدمين."
-                  : "How data isolation and user roles work."}
-              </div>
-            </Link>
-            <Link href={`${p}/pricing`} className="rounded-lg border bg-background p-4 hover:bg-muted/40">
-              <div className="font-medium">{isAr ? "اختيار الباقة المناسبة" : "Choosing the right plan"}</div>
-              <div className="mt-1 text-sm text-muted-foreground">
-                {isAr
-                  ? "إرشادات عملية حسب حجم شركتك والميزات المطلوبة."
-                  : "A practical guide based on size and required modules."}
-              </div>
-            </Link>
+      <section id="guides" className="border-t bg-muted/30 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-10 max-w-2xl">
+            <h2 className="text-2xl font-bold">{isAr ? "أدلة الاستخدام" : "Usage guides"}</h2>
+            <p className="mt-2 text-muted-foreground">
+              {isAr ? "ابدأ من المسار الأقرب لمهمتك الحالية ثم أكمل الإعداد خطوة بخطوة." : "Start with the path closest to your current task, then continue the setup step by step."}
+            </p>
+          </div>
+
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {helpTopics.map((topic) => (
+              <Card key={topic.titleEn} className="group border-border/80 shadow-sm transition-shadow hover:shadow-md">
+                <CardHeader>
+                  <div className="mb-3 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 transition group-hover:bg-primary/20">
+                    <topic.icon className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-lg">{isAr ? topic.titleAr : topic.titleEn}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm leading-6 text-muted-foreground">{isAr ? topic.descAr : topic.descEn}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="mt-12 overflow-hidden rounded-3xl border bg-background">
+            <div className="border-b px-6 py-5">
+              <h3 className="text-lg font-semibold">{isAr ? "مسار الإعداد السريع" : "Quick setup path"}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {isAr ? "الخطوات الأساسية من تفعيل الحساب حتى بدء التشغيل اليومي." : "The core steps from account activation to daily operations."}
+              </p>
+            </div>
+            <ol className="divide-y">
+              {setupSteps.map((step, index) => (
+                <li key={index} className="flex items-start gap-4 px-6 py-4 text-sm">
+                  <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                    {index + 1}
+                  </span>
+                  <span className="text-foreground/80">{isAr ? step.ar : step.en}</span>
+                </li>
+              ))}
+            </ol>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div className="mt-10 rounded-xl border bg-card p-6">
-        <h2 className="text-lg font-semibold">{isAr ? "هل تحتاج مساعدة داخل النظام؟" : "Need help inside the app?"}</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {isAr
-            ? "إذا كان لديك حساب، يمكنك فتح تذكرة دعم من داخل لوحة التحكم."
-            : "If you have an account, you can open a support ticket from the dashboard."}
-        </p>
-        <div className="mt-4">
-          <Button asChild>
-            <Link href={`${p}/dashboard/help-center`}>
-              {isAr ? "الذهاب إلى مركز المساعدة في الداشبورد" : "Go to dashboard Help Center"}
-            </Link>
-          </Button>
-        </div>
-      </div>
+      <MarketingPageCta
+        title={isAr ? "هل تحتاج مسارًا مختلفًا؟" : "Need a different path?"}
+        description={
+          isAr
+            ? "استخدم صفحة FAQ للأسئلة المتكررة، أو صفحة الدعم إذا كانت لديك مشكلة فعلية أو طلب تشغيل يحتاج متابعة مباشرة."
+            : "Use the FAQ for common questions, or move to Support if you have a real incident or an operational request that needs follow-up."
+        }
+        primaryAction={{ href: `${p}/support`, label: isAr ? "فتح الدعم الفني" : "Open support" }}
+        secondaryAction={{ href: `${p}/faq`, label: isAr ? "فتح FAQ" : "Open FAQ" }}
+        tone="muted"
+      />
     </main>
   );
 }

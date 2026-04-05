@@ -10,110 +10,42 @@ export const contentType = "image/png";
 export default function OpenGraphImage() {
   return new ImageResponse(
     (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(135deg, #0b1220 0%, #0f172a 100%)",
-          position: "relative",
-          color: "white",
-          fontFamily: "system-ui, -apple-system, Segoe UI, Roboto",
-        }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background:
-              "radial-gradient(circle at 20% 30%, rgba(34,197,94,0.20), transparent 45%), radial-gradient(circle at 80% 20%, rgba(59,130,246,0.22), transparent 40%), radial-gradient(circle at 70% 80%, rgba(168,85,247,0.20), transparent 42%)",
-          }}
-        />
+      <div tw="relative flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0b1220] to-[#0f172a] text-white">
+        <div tw="absolute inset-0 flex">
+          <div tw="absolute left-[120px] top-[90px] h-48 w-48 rounded-full bg-green-500/20" />
+          <div tw="absolute right-[130px] top-[70px] h-44 w-44 rounded-full bg-blue-500/20" />
+          <div tw="absolute bottom-[80px] right-[200px] h-52 w-52 rounded-full bg-purple-500/20" />
+        </div>
 
-        <div
-          style={{
-            width: 1040,
-            height: 510,
-            borderRadius: 32,
-            border: "1px solid rgba(255,255,255,0.10)",
-            background: "rgba(10, 22, 39, 0.75)",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-between",
-            padding: 56,
-            boxShadow: "0 24px 80px rgba(0,0,0,0.45)",
-            position: "relative",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-            <div
-              style={{
-                width: 56,
-                height: 56,
-                borderRadius: 16,
-                background: "linear-gradient(90deg, #22c55e, #3b82f6, #a855f7)",
-              }}
-            />
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <div style={{ fontSize: 42, fontWeight: 800, lineHeight: 1.1 }}>Taqam | طاقم</div>
-              <div style={{ fontSize: 20, opacity: 0.85 }}>HR • Payroll • Attendance</div>
+        <div tw="relative flex h-[510px] w-[1040px] flex-col justify-between rounded-[32px] border border-white/10 bg-[#0a1627]/75 p-14">
+          <div tw="flex items-center gap-4">
+            <div tw="flex h-14 w-14 rounded-2xl bg-gradient-to-r from-green-500 via-blue-500 to-purple-500" />
+            <div tw="flex flex-col">
+              <div tw="text-[42px] font-extrabold leading-tight">Taqam | طاقم</div>
+              <div tw="text-[20px] text-white/85">HR • Payroll • Attendance</div>
             </div>
           </div>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <div style={{ fontSize: 48, fontWeight: 800, lineHeight: 1.1 }}>
-              منصة موارد بشرية ورواتب
-            </div>
-            <div style={{ fontSize: 26, opacity: 0.9, maxWidth: 820 }}>
+          <div tw="flex flex-col gap-3">
+            <div tw="text-[48px] font-extrabold leading-tight">منصة موارد بشرية ورواتب</div>
+            <div tw="max-w-[820px] text-[26px] leading-snug text-white/90">
               إدارة الموظفين، الحضور، الرواتب، وتقارير احترافية — عربي/إنجليزي ومتعدد الشركات.
             </div>
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: 12,
-              alignItems: "center",
-              justifyContent: "space-between",
-              opacity: 0.9,
-              fontSize: 18,
-            }}
-          >
-            <div style={{ display: "flex", gap: 12 }}>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: 999,
-                  background: "rgba(34,197,94,0.12)",
-                  border: "1px solid rgba(34,197,94,0.25)",
-                }}
-              >
+          <div tw="flex items-center justify-between text-[18px] text-white/90">
+            <div tw="flex gap-3">
+              <div tw="rounded-full border border-green-500/25 bg-green-500/12 px-[14px] py-[10px]">
                 Multi-tenant
               </div>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: 999,
-                  background: "rgba(59,130,246,0.12)",
-                  border: "1px solid rgba(59,130,246,0.25)",
-                }}
-              >
+              <div tw="rounded-full border border-blue-500/25 bg-blue-500/12 px-[14px] py-[10px]">
                 Saudi-ready
               </div>
-              <div
-                style={{
-                  padding: "10px 14px",
-                  borderRadius: 999,
-                  background: "rgba(168,85,247,0.12)",
-                  border: "1px solid rgba(168,85,247,0.25)",
-                }}
-              >
+              <div tw="rounded-full border border-purple-500/25 bg-purple-500/12 px-[14px] py-[10px]">
                 Secure
               </div>
             </div>
-            <div style={{ opacity: 0.7 }}>taqam.com</div>
+            <div tw="text-white/70">taqam.net</div>
           </div>
         </div>
       </div>

@@ -1,10 +1,10 @@
 # Real E2E Tests - Full Integration Test
 # This script will create a complete workflow end-to-end
 
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $Results = @()
 
-function Log-Result {
+function Write-TestResult {
     param([string]$Test, [bool]$Success, [string]$Message = "")
     $status = if ($Success) { "✅" } else { "❌" }
     Write-Host "$status $Test" -ForegroundColor $(if ($Success) { "Green" } else { "Red" })
@@ -35,15 +35,14 @@ try {
     if ($response.StatusCode -eq 200) {
         $data = $response.Content | ConvertFrom-Json
         $AccessToken = $data.data.accessToken
-        $RefreshToken = $data.data.refreshToken
         
-        Log-Result "Super Admin Login" $true "Token: $($AccessToken.Substring(0,20))..."
+        Write-TestResult "Super Admin Login" $true "Token: $($AccessToken.Substring(0,20))..."
     } else {
-        Log-Result "Super Admin Login" $false "Status: $($response.StatusCode)"
+        Write-TestResult "Super Admin Login" $false "Status: $($response.StatusCode)"
         exit
     }
 } catch {
-    Log-Result "Super Admin Login" $false "Exception: $_"
+    Write-TestResult "Super Admin Login" $false "Exception: $_"
     exit
 }
 
@@ -56,12 +55,12 @@ try {
     
     if ($response.StatusCode -eq 200) {
         $data = $response.Content | ConvertFrom-Json
-        Log-Result "Health Check" ($data.status -eq "ok") "DB Users: $($data.database.userCount)"
+        Write-TestResult "Health Check" ($data.status -eq "ok") "DB Users: $($data.database.userCount)"
     } else {
-        Log-Result "Health Check" $false "Status: $($response.StatusCode)"
+        Write-TestResult "Health Check" $false "Status: $($response.StatusCode)"
     }
 } catch {
-    Log-Result "Health Check" $false "Exception: $_"
+    Write-TestResult "Health Check" $false "Exception: $_"
 }
 
 # ============================================

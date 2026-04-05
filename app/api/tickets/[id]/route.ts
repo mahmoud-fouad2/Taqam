@@ -1,12 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-
-function isSuperAdmin(role: string | undefined) {
-  return role === "SUPER_ADMIN";
-}
+import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const updateSchema = z.object({
   status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
@@ -17,17 +12,16 @@ const updateSchema = z.object({
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) {
+      return auth.response;
     }
 
+    const { tenantId, isSuperAdmin: superAdmin } = auth;
+
     const where: any = { id };
-    if (!isSuperAdmin(session.user.role)) {
-      if (!session.user.tenantId) {
-        return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
-      }
-      where.tenantId = session.user.tenantId;
+    if (!superAdmin) {
+      where.tenantId = tenantId;
     }
 
     const ticket = await prisma.supportTicket.findFirst({
@@ -59,10 +53,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+
+    const { tenantId, isSuperAdmin: superAdmin } = auth;
 
     const body = await request.json();
     const parsed = updateSchema.safeParse(body);
@@ -70,15 +66,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
     }
 
-    const superAdmin = isSuperAdmin(session.user.role);
-
     const existing = await prisma.supportTicket.findUnique({ where: { id } });
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
     if (!superAdmin) {
-      if (!session.user.tenantId || existing.tenantId !== session.user.tenantId) {
+      if (!tenantId || existing.tenantId !== tenantId) {
         return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }
     }

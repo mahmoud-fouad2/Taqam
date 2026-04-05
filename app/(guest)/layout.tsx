@@ -17,21 +17,17 @@ export default async function GuestLayout({
   const ratingValue = Number(process.env.NEXT_PUBLIC_RATING_VALUE);
   const ratingCount = Number(process.env.NEXT_PUBLIC_RATING_COUNT);
   const hasRating = Number.isFinite(ratingValue) && Number.isFinite(ratingCount) && ratingCount > 0;
+  const softwareAppJsonLd = softwareAppSchema({
+    url: base,
+    pricingUrl: `${base}/pricing`,
+    ...(hasRating ? { ratingValue, ratingCount } : {}),
+  });
 
   return (
     <div className="relative min-h-screen">
       <JsonLd data={organizationSchema({ url: base })} />
       <JsonLd data={websiteSchema({ url: base, locale })} />
-      <JsonLd
-        data={
-          softwareAppSchema({
-            url: base,
-            pricingUrl: `${base}/pricing`,
-            ratingValue: hasRating ? ratingValue : undefined,
-            ratingCount: hasRating ? ratingCount : undefined,
-          })
-        }
-      />
+      <JsonLd data={softwareAppJsonLd} />
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="absolute -top-24 start-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl premium-float" />
         <div className="absolute top-40 -start-24 h-[420px] w-[420px] rounded-full bg-blue-500/10 blur-3xl premium-float" />

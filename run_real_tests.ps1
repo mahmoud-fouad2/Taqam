@@ -1,4 +1,4 @@
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $SuperAdminEmail = "admin@admin.com"
 $SuperAdminPassword = "123456"
 

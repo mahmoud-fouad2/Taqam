@@ -5,7 +5,7 @@ Write-Host "`n╔═════════════════════
 Write-Host "║     ACTUAL PRODUCTION SERVER TESTS - REAL DATA    ║" -ForegroundColor Magenta
 Write-Host "╚════════════════════════════════════════════════════╝`n" -ForegroundColor Magenta
 
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $results = @()
 
 # Test 1: Simple Health Check (No Auth Needed)

@@ -1,6 +1,6 @@
 param(
-  [string]$BaseUrl = "https://ujoor.onrender.com",
-  [string]$TenantAdminEmail = "admin@demo.ujoor.com",
+  [string]$BaseUrl = "https://taqam.net",
+  [string]$TenantAdminEmail = "admin@demo.taqam.net",
   [string]$TenantAdminPassword = "Admin@123456",
   [string]$EmployeePassword = "Test12345!"
 )
@@ -9,7 +9,7 @@ $ErrorActionPreference = "Stop"
 
 $runId = ([Guid]::NewGuid().ToString('N')).Substring(0, 8)
 $employeeEmail = "employee+$runId@example.com"
-$cookie = Join-Path $env:TEMP "ujoor-prod-$runId.cookies.txt"
+$cookie = Join-Path $env:TEMP "taqam-prod-$runId.cookies.txt"
 Remove-Item -Force -ErrorAction SilentlyContinue $cookie
 
 function Write-Utf8File {
@@ -144,7 +144,7 @@ $userPayload = @{
   role      = 'EMPLOYEE'
   phone     = '0500000002'
 } | ConvertTo-Json -Compress
-$userPayloadFile = Join-Path $env:TEMP "ujoor-prod-$runId.user.json"
+$userPayloadFile = Join-Path $env:TEMP "taqam-prod-$runId.user.json"
 Remove-Item -Force -ErrorAction SilentlyContinue $userPayloadFile
 Write-Utf8File -Path $userPayloadFile -Content $userPayload
 $userResp = Invoke-CurlJsonWithStatus -Args @('-sS','-i','-X','POST','-c',$cookie,'-b',$cookie,'-H','Content-Type: application/json','--data-binary',"@$userPayloadFile","$BaseUrl/api/users")
@@ -164,7 +164,7 @@ $empPayload = @{
   hireDate        = (Get-Date).ToString('yyyy-MM-dd')
   employmentType  = 'FULL_TIME'
 } | ConvertTo-Json -Compress
-$empPayloadFile = Join-Path $env:TEMP "ujoor-prod-$runId.emp.json"
+$empPayloadFile = Join-Path $env:TEMP "taqam-prod-$runId.emp.json"
 Remove-Item -Force -ErrorAction SilentlyContinue $empPayloadFile
 Write-Utf8File -Path $empPayloadFile -Content $empPayload
 $empRaw = (& curl.exe -sS -i -X POST -c $cookie -b $cookie -H 'Content-Type: application/json' --data-binary "@$empPayloadFile" "$BaseUrl/api/employees")
@@ -184,7 +184,7 @@ $employeeId = $empRes.data.id
 Write-Host "[4/5] Mobile login + attendance check-in/out" -ForegroundColor Cyan
 $deviceId = "demo-device-$runId"
 $loginPayload = @{ email = $employeeEmail; password = $EmployeePassword } | ConvertTo-Json -Compress
-$loginPayloadFile = Join-Path $env:TEMP "ujoor-prod-$runId.mobile-login.json"
+$loginPayloadFile = Join-Path $env:TEMP "taqam-prod-$runId.mobile-login.json"
 Remove-Item -Force -ErrorAction SilentlyContinue $loginPayloadFile
 Write-Utf8File -Path $loginPayloadFile -Content $loginPayload
 $loginRes = (& curl.exe -sS -X POST -H 'Content-Type: application/json' -H "x-device-id: $deviceId" -H 'x-device-platform: android' -H 'x-device-name: e2e' -H 'x-app-version: 1.0.0' --data-binary "@$loginPayloadFile" "$BaseUrl/api/mobile/auth/login") | ConvertFrom-Json
@@ -202,7 +202,7 @@ $today = Get-Today
 if ($today.data.status -eq 'NONE') {
   $nonce = (New-Challenge).data.nonce
   $attPayload = @{ type = 'check-in' } | ConvertTo-Json -Compress
-  $attPayloadFile = Join-Path $env:TEMP "ujoor-prod-$runId.att-in.json"
+  $attPayloadFile = Join-Path $env:TEMP "taqam-prod-$runId.att-in.json"
   Remove-Item -Force -ErrorAction SilentlyContinue $attPayloadFile
   Write-Utf8File -Path $attPayloadFile -Content $attPayload
   $null = (& curl.exe -sS -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $accessToken" -H "x-device-id: $deviceId" -H "x-mobile-challenge: $nonce" --data-binary "@$attPayloadFile" "$BaseUrl/api/mobile/attendance") | ConvertFrom-Json
@@ -212,7 +212,7 @@ $today2 = Get-Today
 if ($today2.data.status -eq 'CHECKED_IN') {
   $nonce2 = (New-Challenge).data.nonce
   $attPayload2 = @{ type = 'check-out' } | ConvertTo-Json -Compress
-  $attPayload2File = Join-Path $env:TEMP "ujoor-prod-$runId.att-out.json"
+  $attPayload2File = Join-Path $env:TEMP "taqam-prod-$runId.att-out.json"
   Remove-Item -Force -ErrorAction SilentlyContinue $attPayload2File
   Write-Utf8File -Path $attPayload2File -Content $attPayload2
   $null = (& curl.exe -sS -X POST -H 'Content-Type: application/json' -H "Authorization: Bearer $accessToken" -H "x-device-id: $deviceId" -H "x-mobile-challenge: $nonce2" --data-binary "@$attPayload2File" "$BaseUrl/api/mobile/attendance") | ConvertFrom-Json

@@ -1,8 +1,10 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Layers3, Rocket, ShieldCheck, Sparkles } from "lucide-react";
 
+import { MarketingPageCta } from "@/components/marketing/page-cta";
+import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { marketingMetadata } from "@/lib/marketing/seo";
@@ -24,50 +26,84 @@ const planDetails = [
   {
     nameAr: "الأساسية",
     nameEn: "Starter",
+    tagAr: "مثالية للشركات الناشئة",
+    tagEn: "Perfect for growing teams",
     highlightsAr: [
-      "إعداد سريع خلال يوم واحد",
-      "موظفين + أقسام + مسميات",
-      "حضور وانصراف + إجازات",
-      "تقارير أساسية",
+      "إعداد كامل خلال يوم عمل",
+      "ملفات الموظفين + الأقسام + المسميات الوظيفية",
+      "حضور وانصراف مع ورديات مرنة",
+      "إدارة الإجازات وأرصدتها تلقائياً",
+      "تسجيل حضور من التطبيق",
+      "التقارير الأساسية",
+      "استيراد بيانات من Excel",
+      "واجهة عربية / إنجليزية كاملة",
     ],
     highlightsEn: [
-      "Fast setup in one day",
-      "Employees, departments, and job titles",
-      "Time & attendance + leave",
+      "Full setup in one business day",
+      "Employee profiles, departments & job titles",
+      "Attendance with flexible shifts",
+      "Leave management with automatic balances",
+      "Mobile check-in via the app",
       "Basic reports",
+      "Excel data import",
+      "Full Arabic / English interface",
     ],
   },
   {
     nameAr: "الأعمال",
     nameEn: "Business",
+    tagAr: "الأكثر طلباً للشركات المتوسطة",
+    tagEn: "Most popular for mid-sized companies",
     highlightsAr: [
       "كل مميزات الأساسية",
-      "تشغيل الرواتب",
+      "مسير الرواتب الشهرية والدورية",
+      "كشوف رواتب بتنسيق احترافي",
       "تصدير ملفات WPS",
-      "صلاحيات متقدمة + سجلات",
+      "هياكل الرواتب + الاستحقاقات والاستقطاعات",
+      "صلاحيات وأدوار متقدمة",
+      "سجلات التدقيق للعمليات الحساسة",
+      "تقييم الأداء وخطط التطوير",
+      "إدارة التوظيف والمقابلات",
+      "الدعم الفني المتقدم",
     ],
     highlightsEn: [
       "Everything in Starter",
-      "Payroll run",
+      "Monthly and periodic payroll runs",
+      "Professional payslip generation",
       "WPS file export",
-      "Advanced roles + audit logs",
+      "Salary structures, allowances & deductions",
+      "Advanced roles & permissions",
+      "Audit logs for sensitive actions",
+      "Performance reviews & development plans",
+      "Recruitment & interview management",
+      "Priority support",
     ],
     popular: true,
   },
   {
     nameAr: "المؤسسات",
     nameEn: "Enterprise",
+    tagAr: "للشركات الكبيرة والمؤسسات",
+    tagEn: "For large companies and enterprises",
     highlightsAr: [
-      "تكاملات مخصصة (GOSI/WPS/…)",
-      "SLA مخصص",
-      "مدير حساب",
-      "تخصيصات واجهة وتقارير",
+      "كل مميزات الأعمال",
+      "تكاملات مخصصة (GOSI / WPS / ERP)",
+      "واجهة وتقارير حسب هوية شركتك",
+      "SLA مخصص لضمان الاستجابة",
+      "مدير حساب مخصص",
+      "نشر على بنية تحتية مخصصة",
+      "API Access حسب العقد",
+      "تدريب فريق HR",
     ],
     highlightsEn: [
-      "Custom integrations (GOSI/WPS/…)",
-      "Custom SLA",
+      "Everything in Business",
+      "Custom integrations (GOSI / WPS / ERP)",
+      "Custom UI and reporting to match your brand",
+      "Custom SLA guarantee",
       "Dedicated account manager",
-      "Custom UI and reporting",
+      "Custom infrastructure deployment",
+      "API access per contract",
+      "HR team training",
     ],
   },
 ];
@@ -95,74 +131,126 @@ export default async function PlansPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
+  const totalHighlights = planDetails.reduce((sum, plan) => sum + plan.highlightsAr.length, 0);
 
   return (
     <main className="bg-background">
-      <section className="container mx-auto px-4 py-14">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold sm:text-4xl">{isAr ? "تفاصيل الباقات" : "Plan details"}</h1>
-          <p className="mt-3 text-muted-foreground">
-            {isAr
-              ? "هنا التفاصيل بشكل واضح—ولو محتاج تخصيصات على شركتك، بنرتبها معاك."
-              : "Clear details for each plan—if you need customization, we’ll tailor it to you."}
-          </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Link href={`${prefix}/pricing`}>
-              <Button variant="outline">{isAr ? "رجوع للأسعار" : "Back to pricing"}</Button>
-            </Link>
-            <Link href={`${prefix}/request-demo`}>
-              <Button variant="brand">{isAr ? "طلب عرض" : "Request a demo"}</Button>
-            </Link>
-          </div>
-        </div>
+      <MarketingPageHero
+        icon={Layers3}
+        badge={isAr ? "3 باقات واضحة وقابلة للتوسع" : "3 clear plans built to scale"}
+        title={isAr ? "اختَر الباقة المناسبة لحجم شركتك" : "Choose the right plan for your company"}
+        description={
+          isAr
+            ? "كل باقة مبنية على احتياج فعلي: تشغيل سريع، وضوح في المميزات، ومسار توسّع طبيعي كلما كبرت الشركة."
+            : "Each plan is built around a real operating need: fast launch, clear features, and a natural upgrade path as you grow."
+        }
+        actions={[
+          { href: `${prefix}/pricing`, label: isAr ? "مقارنة الأسعار" : "Compare pricing", variant: "outline" },
+          { href: `${prefix}/request-demo`, label: isAr ? "طلب عرض تجريبي" : "Request a demo", variant: "brand" },
+        ]}
+        stats={[
+          { value: "3", label: isAr ? "باقات أساسية" : "Core plans" },
+          { value: "1", label: isAr ? "يوم عمل للإعداد" : "Business day setup" },
+          { value: `${totalHighlights}+`, label: isAr ? "ميزة موضحة" : "Listed capabilities" },
+        ]}
+      />
 
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
-          {planDetails.map((plan) => (
-            <Card key={plan.nameEn} className={plan.popular ? "border-primary shadow-lg" : ""}>
-              <CardHeader>
-                <CardTitle className="text-xl">{isAr ? plan.nameAr : plan.nameEn}</CardTitle>
-                <p className="text-sm text-muted-foreground">{isAr ? plan.nameEn : plan.nameAr}</p>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-3">
-                  {(isAr ? plan.highlightsAr : plan.highlightsEn).map((h) => (
-                    <li key={h} className="flex items-center gap-2">
-                      <CheckCircle2 className="h-4 w-4 text-primary" />
-                      <span className="text-sm">{h}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-6">
-                  <Link href={`${prefix}/request-demo`}>
-                    <Button className="w-full" variant={plan.popular ? "brand" : "brandOutline"}>
-                      {isAr ? "تواصل معنا" : "Contact us"}
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 max-w-2xl">
+            <h2 className="text-2xl font-bold">{isAr ? "تفاصيل كل باقة" : "Plan breakdown"}</h2>
+            <p className="mt-2 text-muted-foreground">
+              {isAr
+                ? "المحتوى هنا مكتوب بلغة تشغيلية واضحة، عشان تعرف بالضبط ماذا ستحصل عليه في كل مستوى."
+                : "Each plan is written in operational terms, so you can quickly see what is included at every level."}
+            </p>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            {planDetails.map((plan) => {
+              const PlanIcon =
+                plan.nameEn === "Starter" ? Rocket : plan.nameEn === "Business" ? Sparkles : ShieldCheck;
+
+              return (
+                <Card
+                  key={plan.nameEn}
+                  className={
+                    plan.popular
+                      ? "relative overflow-hidden border-primary/40 shadow-lg shadow-primary/10"
+                      : "relative overflow-hidden border-border/80 shadow-sm"
+                  }
+                >
+                  {plan.popular ? (
+                    <div className="absolute end-5 top-5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                      {isAr ? "الأكثر طلبًا" : "Most popular"}
+                    </div>
+                  ) : null}
+                  <CardHeader className="pb-4">
+                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                      <PlanIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.nameEn}</CardTitle>
+                    <p className="text-sm font-medium text-primary">{isAr ? plan.tagAr : plan.tagEn}</p>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-3">
+                      {(isAr ? plan.highlightsAr : plan.highlightsEn).map((highlight) => (
+                        <li key={highlight} className="flex items-start gap-3">
+                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span className="text-sm leading-6 text-foreground/90">{highlight}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <div className="mt-8">
+                      <Link href={`${prefix}/request-demo`}>
+                        <Button className="w-full" variant={plan.popular ? "brand" : "brandOutline"}>
+                          {isAr ? "ناقش هذه الباقة" : "Discuss this plan"}
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <section className="border-t bg-muted/30 py-14">
+      <section className="border-t bg-muted/30 py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold">{isAr ? "إضافات اختيارية" : "Optional add-ons"}</h2>
-            <p className="text-sm text-muted-foreground">
-              {isAr ? "خدمات تساعدك في الإطلاق السريع والتوسع." : "Services to help you launch faster and scale."}
+          <div className="mb-8 max-w-2xl">
+            <h2 className="text-2xl font-bold">{isAr ? "إضافات اختيارية حسب الاحتياج" : "Optional add-ons"}</h2>
+            <p className="mt-2 text-muted-foreground">
+              {isAr
+                ? "خدمات إضافية تساعدك في سرعة الإطلاق أو ربط المنصة بعملياتك الحالية."
+                : "Additional services to help you launch faster or connect the platform to your current workflows."}
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {addons.map((a) => (
-              <div key={a.en} className="rounded-lg border bg-background p-4">
-                <p className="text-sm">{isAr ? a.ar : a.en}</p>
+            {addons.map((addon) => (
+              <div key={addon.en} className="rounded-2xl border bg-background p-5 shadow-sm">
+                <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                  <CheckCircle2 className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-sm leading-6">{isAr ? addon.ar : addon.en}</p>
               </div>
             ))}
           </div>
+
         </div>
       </section>
+
+      <MarketingPageCta
+        title={isAr ? "غير متأكد أي باقة تناسبك؟" : "Not sure which plan fits best?"}
+        description={
+          isAr
+            ? "شاركنا عدد الموظفين، وهل تحتاج الرواتب فقط أم المنصة كاملة، وسنرشّح لك الباقة الأنسب بدون تعقيد تجاري زائد."
+            : "Tell us your headcount and whether you need payroll only or the full platform, and we will recommend the right plan without the usual sales noise."
+        }
+        primaryAction={{ href: `${prefix}/request-demo`, label: isAr ? "اطلب توصية مخصصة" : "Get a tailored recommendation" }}
+        secondaryAction={{ href: `${prefix}/features`, label: isAr ? "استعرض المميزات" : "Explore features" }}
+      />
     </main>
   );
 }

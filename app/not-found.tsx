@@ -1,28 +1,41 @@
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FileQuestion } from "lucide-react";
+import { NotFoundShell } from "@/components/marketing/not-found-shell";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
+  const p = locale === "en" ? "/en" : "";
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-        <FileQuestion className="h-10 w-10 text-muted-foreground" />
-      </div>
-      <div className="space-y-2">
-        <h1 className="text-5xl font-bold tracking-tight text-foreground">404</h1>
-        <h2 className="text-2xl font-semibold">الصفحة غير موجودة</h2>
-        <p className="max-w-md text-muted-foreground">
-          عذراً، الصفحة التي تبحث عنها غير موجودة أو ربما تم نقلها.
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <Button asChild>
-          <Link href="/">العودة للرئيسية</Link>
-        </Button>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard">لوحة التحكم</Link>
-        </Button>
-      </div>
-    </div>
+    <NotFoundShell
+      code="404"
+      compact={false}
+      description={
+        isAr
+          ? "الرابط الذي فتحته غير موجود الآن أو تم نقله إلى مسار أحدث. استخدم الاختصارات التالية للوصول السريع إلى أهم الأسطح العامة والتشغيلية."
+          : "The link you opened does not exist right now or has moved to a newer route. Use the shortcuts below to jump back into the main public and operational surfaces."
+      }
+      eyebrow={isAr ? "تعذر العثور على الصفحة المطلوبة" : "We couldn't find this page"}
+      primaryAction={{ href: `${p}/`, label: isAr ? "العودة للرئيسية" : "Back home" }}
+      quickLinks={[
+        {
+          href: `${p}/careers`,
+          title: isAr ? "بوابة الوظائف" : "Careers portal",
+          description: isAr ? "اكتشف الوظائف المفتوحة لدى الشركات العاملة على طاقم." : "Browse active openings across companies running on Taqam.",
+        },
+        {
+          href: `${p}/help-center`,
+          title: isAr ? "مركز المساعدة" : "Help center",
+          description: isAr ? "أدلة الإعداد والاستخدام والتشغيل في مكان واحد." : "Setup, usage, and operational guidance in one place.",
+        },
+        {
+          href: `${p}/dashboard`,
+          title: isAr ? "لوحة التحكم" : "Dashboard",
+          description: isAr ? "ارجع مباشرة إلى مساحة العمل إذا كنت مسجل الدخول." : "Jump back to the workspace if you are already signed in.",
+        },
+      ]}
+      secondaryAction={{ href: `${p}/support`, label: isAr ? "تواصل مع الدعم" : "Contact support", variant: "outline" }}
+      title={isAr ? "هذه الصفحة لم تعد هنا" : "This page is no longer here"}
+    />
   );
 }

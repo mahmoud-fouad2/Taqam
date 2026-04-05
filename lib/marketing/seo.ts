@@ -9,6 +9,11 @@ type SeoCopy = {
   descriptionAr: string;
   descriptionEn: string;
   path: string;
+  keywordsAr?: string[];
+  keywordsEn?: string[];
+  noIndex?: boolean;
+  sectionAr?: string;
+  sectionEn?: string;
 };
 
 export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
@@ -20,6 +25,9 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
   const locale = headerLocale === "en" || headerLocale === "ar" ? headerLocale : localeFromCookie;
   const title = locale === "ar" ? copy.titleAr : copy.titleEn;
   const description = locale === "ar" ? copy.descriptionAr : copy.descriptionEn;
+  const pageKeywords = locale === "ar" ? copy.keywordsAr ?? [] : copy.keywordsEn ?? [];
+  const section = locale === "ar" ? copy.sectionAr : copy.sectionEn;
+  const noIndex = copy.noIndex === true;
 
   const base = getSiteUrl();
   const path = copy.path.startsWith("/") ? copy.path : `/${copy.path}`;
@@ -55,7 +63,16 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       "نظام HR سعودي",
       "HR software Saudi",
       "حضور وانصراف",
+      ...pageKeywords,
     ],
+    category: section ?? (locale === "ar" ? "منصة موارد بشرية سعودية" : "Saudi HR platform"),
+    classification: locale === "ar" ? "إدارة الموارد البشرية والرواتب والحضور" : "HR, payroll, and attendance software",
+    referrer: "origin-when-cross-origin",
+    formatDetection: {
+      email: false,
+      address: false,
+      telephone: false,
+    },
     openGraph: {
       type: "website",
       url,
@@ -69,7 +86,7 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
           url: `${base}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: "Taqam",
+          alt: `${title} | Taqam`,
         },
       ],
     },
@@ -80,15 +97,26 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       images: [`${base}/twitter-image`],
     },
     robots: {
-      index: true,
-      follow: true,
+      index: !noIndex,
+      follow: !noIndex,
+      nocache: noIndex,
+      googleBot: {
+        index: !noIndex,
+        follow: !noIndex,
+        noimageindex: noIndex,
+        "max-image-preview": noIndex ? "none" : "large",
+        "max-snippet": noIndex ? 0 : -1,
+        "max-video-preview": noIndex ? 0 : -1,
+      },
     },
+    authors: [{ name: "Taqam" }],
     creator: "Taqam",
     publisher: "Taqam",
     other: {
       "application-name": "Taqam",
       "apple-mobile-web-app-title": "Taqam",
-      "theme-color": "#0b1220",
+      "theme-color": "#ffffff",
+      "color-scheme": "light dark",
     },
   };
 }

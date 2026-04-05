@@ -162,6 +162,16 @@ export default function TenantDetailsPage({ params }: PageProps) {
               فتح لوحة الشركة
             </a>
           </Button>
+          <Button variant="outline" asChild>
+            <a
+              href={buildTenantUrl(tenant.slug, "/careers")}
+              target="_blank"
+              rel="noreferrer"
+            >
+              <ExternalLink className="me-2 h-4 w-4" />
+              بوابة التوظيف العامة
+            </a>
+          </Button>
         </div>
       </div>
 
@@ -230,6 +240,17 @@ export default function TenantDetailsPage({ params }: PageProps) {
                     <p className="font-medium">
                       <code className="rounded bg-muted px-2 py-1">
                         {buildTenantUrl(tenant.slug, "/dashboard")}
+                      </code>
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <div>
+                    <p className="text-sm text-muted-foreground">رابط بوابة التوظيف</p>
+                    <p className="font-medium">
+                      <code className="rounded bg-muted px-2 py-1">
+                        {buildTenantUrl(tenant.slug, "/careers")}
                       </code>
                     </p>
                   </div>

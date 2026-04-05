@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { hash } from "bcryptjs";
+import { randomBytes } from "node:crypto";
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { createActionToken } from "@/lib/security/action-tokens";
+import { getAppBaseUrl, sendEmail } from "@/lib/email";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 
 function mapPlanFromDb(plan: unknown): Tenant["plan"] {
@@ -26,6 +30,18 @@ function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "")
     .slice(0, 30);
+}
+
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) {
+    return { firstName: parts[0] ?? "Tenant", lastName: "Admin" };
+  }
+
+  return {
+    firstName: parts[0]!,
+    lastName: parts.slice(1).join(" "),
+  };
 }
 
 function mapTenant(t: any): Tenant {
@@ -86,36 +102,151 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     slug = `${baseSlug}-${i}`.slice(0, 30);
   }
 
-  const tenant = await prisma.tenant.create({
-    data: {
-      name: body.name ?? item.companyName,
-      nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
-      slug,
-      plan: item.plan,
-      status: "ACTIVE",
-      settings: {
-        defaultLocale: body.defaultLocale ?? "ar",
-        defaultTheme: body.defaultTheme ?? "shadcn",
-      },
-      planExpiresAt: item.plan === "TRIAL" ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) : null,
-    },
-    include: {
-      _count: { select: { users: true, employees: true } },
-    },
+  const adminEmail = item.contactEmail.trim().toLowerCase();
+  const existingUser = await prisma.user.findUnique({
+    where: { email: adminEmail },
+    select: { id: true },
   });
 
-  await prisma.tenantRequest.update({
-    where: { id },
-    data: {
-      status: "APPROVED",
-      processedAt: new Date(),
-      processedById: session.user.id ?? null,
-      tenantId: tenant.id,
-      rejectionReason: null,
-    },
+  if (existingUser) {
+    return NextResponse.json(
+      { error: "Contact email already belongs to an existing user" },
+      { status: 409 }
+    );
+  }
+
+  const { firstName, lastName } = splitName(item.contactName);
+  const randomPassword = randomBytes(24).toString("hex");
+  const passwordHash = await hash(randomPassword, 12);
+
+  const { tenant, adminUser } = await prisma.$transaction(async (tx) => {
+    const createdTenant = await tx.tenant.create({
+      data: {
+        name: body.name ?? item.companyName,
+        nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
+        slug,
+        plan: item.plan,
+        status: "ACTIVE",
+        settings: {
+          defaultLocale: body.defaultLocale ?? "ar",
+          defaultTheme: body.defaultTheme ?? "shadcn",
+        },
+        planExpiresAt: item.plan === "TRIAL" ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) : null,
+      },
+    });
+
+    await tx.organizationProfile.create({
+      data: {
+        tenantId: createdTenant.id,
+        name: body.name ?? item.companyName,
+        nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
+        email: adminEmail,
+        phone: item.contactPhone ?? null,
+        country: "SA",
+      },
+    });
+
+    const createdAdmin = await tx.user.create({
+      data: {
+        email: adminEmail,
+        password: passwordHash,
+        firstName,
+        lastName,
+        role: "TENANT_ADMIN",
+        status: "PENDING_VERIFICATION",
+        permissions: [],
+        tenantId: createdTenant.id,
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        passwordChangedAt: true,
+      },
+    });
+
+    await tx.tenantRequest.update({
+      where: { id },
+      data: {
+        status: "APPROVED",
+        processedAt: new Date(),
+        processedById: session.user.id ?? null,
+        tenantId: createdTenant.id,
+        rejectionReason: null,
+      },
+    });
+
+    await tx.auditLog.create({
+      data: {
+        tenantId: createdTenant.id,
+        userId: session.user.id ?? null,
+        action: "TENANT_REQUEST_APPROVED",
+        entity: "Tenant",
+        entityId: createdTenant.id,
+      },
+    });
+
+    const tenantWithCounts = await tx.tenant.findUnique({
+      where: { id: createdTenant.id },
+      include: {
+        _count: { select: { users: true, employees: true } },
+      },
+    });
+
+    return { tenant: tenantWithCounts!, adminUser: createdAdmin };
   });
+
+  const activationToken = await createActionToken(
+    {
+      type: "tenant-admin-activation",
+      userId: adminUser.id,
+      email: adminUser.email,
+      tenantId: tenant.id,
+      passwordChangedAt: adminUser.passwordChangedAt?.toISOString() ?? null,
+    },
+    "72h"
+  );
+
+  const activationUrl = `${getAppBaseUrl()}/reset-password?token=${encodeURIComponent(activationToken)}`;
+
+  let activationEmailSent = false;
+  try {
+    const emailResult = await sendEmail({
+      to: adminUser.email,
+      subject: `تفعيل حساب مدير الشركة | ${tenant.nameAr ?? tenant.name}`,
+      text: [
+        `مرحبًا ${item.contactName}`,
+        `تمت الموافقة على طلب شركتك ${tenant.nameAr ?? tenant.name}.`,
+        `فعّل حسابك من الرابط التالي:`,
+        activationUrl,
+      ].join("\n\n"),
+      html: `
+        <div style="font-family:Arial,sans-serif;line-height:1.8;color:#111827">
+          <h2 style="margin:0 0 16px">تمت الموافقة على طلب شركتك</h2>
+          <p>مرحبًا ${item.contactName}،</p>
+          <p>تم إنشاء مساحة شركتك <strong>${tenant.nameAr ?? tenant.name}</strong> بنجاح على طاقم.</p>
+          <p>لتفعيل حساب مدير الشركة وتحديد كلمة المرور، استخدم الزر التالي:</p>
+          <p style="margin:24px 0">
+            <a href="${activationUrl}" style="display:inline-block;padding:12px 20px;border-radius:12px;background:#0ea5e9;color:#fff;text-decoration:none;font-weight:700">تفعيل الحساب</a>
+          </p>
+          <p>إذا لم يعمل الزر، استخدم هذا الرابط مباشرة:</p>
+          <p><a href="${activationUrl}">${activationUrl}</a></p>
+        </div>
+      `,
+      replyTo: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? undefined,
+    });
+    activationEmailSent = emailResult.sent;
+  } catch {
+    activationEmailSent = false;
+  }
 
   return NextResponse.json({
     data: mapTenant(tenant),
+    activation: {
+      email: adminUser.email,
+      sent: activationEmailSent,
+      activationUrl,
+    },
   });
 }

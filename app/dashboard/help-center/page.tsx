@@ -19,55 +19,72 @@ export default async function HelpCenterPage() {
         <h1 className="text-2xl font-bold">{t.common.helpCenter}</h1>
         <p className="text-muted-foreground">
           {locale === "ar"
-            ? "ابحث عن إجابات سريعة أو تواصل مع الدعم."
-            : "Find quick answers or contact support."}
+            ? "بوابة موحدة تربط بين مركز المساعدة العام، التذاكر، وروابط العمل داخل لوحة الشركة أو السوبر أدمن."
+            : "A unified hub linking the public help center, support tickets, and the right workspace routes for tenant or super-admin users."}
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         <Card>
           <CardHeader>
-            <CardTitle>{locale === "ar" ? "البدء" : "Getting started"}</CardTitle>
+            <CardTitle>{locale === "ar" ? "الموارد العامة" : "Public resources"}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {locale === "ar"
-              ? "إعداد الشركة، إضافة الموظفين، وضبط السياسات."
-              : "Set up your company, add employees, and configure policies."}
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <Link className="block text-primary hover:underline" href={`${p}/help-center`}>
+              {locale === "ar" ? "مركز المساعدة العام" : "Public help center"}
+            </Link>
+            <Link className="block text-primary hover:underline" href={`${p}/pricing`}>
+              {locale === "ar" ? "الأسعار والباقات" : "Pricing and plans"}
+            </Link>
+            <Link className="block text-primary hover:underline" href={`${p}/request-demo`}>
+              {locale === "ar" ? "طلب عرض تجريبي" : "Request a demo"}
+            </Link>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{locale === "ar" ? "الموارد البشرية" : "HR"}</CardTitle>
+            <CardTitle>{locale === "ar" ? "لوحة الشركة" : "Tenant workspace"}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {locale === "ar"
-              ? "الهيكل التنظيمي، الملفات، التوظيف، والتقييم."
-              : "Org structure, documents, hiring, and performance."}
+          <CardContent className="space-y-2 text-sm text-muted-foreground">
+            <Link className="block text-primary hover:underline" href={`${p}/dashboard/employees`}>
+              {locale === "ar" ? "إدارة الموظفين" : "Employees"}
+            </Link>
+            <Link className="block text-primary hover:underline" href={`${p}/dashboard/attendance`}>
+              {locale === "ar" ? "الحضور والانصراف" : "Attendance"}
+            </Link>
+            <Link className="block text-primary hover:underline" href={`${p}/dashboard/payroll`}>
+              {locale === "ar" ? "الرواتب" : "Payroll"}
+            </Link>
           </CardContent>
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{locale === "ar" ? "الرواتب" : "Payroll"}</CardTitle>
+            <CardTitle>{locale === "ar" ? "الدعم والتذاكر" : "Support and tickets"}</CardTitle>
           </CardHeader>
-          <CardContent className="text-sm text-muted-foreground">
-            {locale === "ar"
-              ? "مسير الرواتب، القسائم، والخصومات والإضافات."
-              : "Runs, payslips, deductions and allowances."}
+          <CardContent className="space-y-3 text-sm text-muted-foreground">
+            <p>
+              {locale === "ar"
+                ? "لو المشكلة تشغيلية داخل الحساب، ارفع تذكرة من لوحة الدعم لتبقى الحالة مرتبطة بالشركة والمستخدم المتأثر."
+                : "If the issue is operational inside the account, open a ticket so the case stays linked to the affected company and user."}
+            </p>
+            <Button asChild size="sm">
+              <Link href={`${p}/dashboard/support`}>{locale === "ar" ? "فتح / متابعة التذاكر" : "Open / track tickets"}</Link>
+            </Button>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{locale === "ar" ? "روابط سريعة" : "Quick links"}</CardTitle>
+          <CardTitle>{locale === "ar" ? "مسارات العمل الصحيحة" : "Correct work paths"}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm">
           <div className="grid gap-2 md:grid-cols-2">
-            <Link className="text-primary hover:underline" href={`${p}/dashboard/employees`}>
-              {locale === "ar" ? "إدارة الموظفين" : "Employees"}
+            <Link className="text-primary hover:underline" href={`${p}/dashboard/help-center`}>
+              {locale === "ar" ? "مساعدة داخلية للداشبورد" : "In-app help center"}
             </Link>
-            <Link className="text-primary hover:underline" href={`${p}/dashboard/attendance`}>
-              {locale === "ar" ? "الحضور والانصراف" : "Attendance"}
+            <Link className="text-primary hover:underline" href={`${p}/faq`}>
+              {locale === "ar" ? "الأسئلة الشائعة العامة" : "Public FAQ"}
             </Link>
             <Link className="text-primary hover:underline" href={`${p}/dashboard/leave-requests`}>
               {locale === "ar" ? "طلبات الإجازات" : "Leave requests"}
@@ -91,7 +108,7 @@ export default async function HelpCenterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{locale === "ar" ? "أسئلة شائعة" : "FAQ"}</CardTitle>
+          <CardTitle>{locale === "ar" ? "تمييز مهم بين الأسطح" : "Important surface distinction"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm text-muted-foreground">
           <div>
@@ -103,29 +120,13 @@ export default async function HelpCenterPage() {
             </p>
           </div>
           <div>
-            <p className="font-medium text-foreground">{locale === "ar" ? "لماذا أرى أخطاء 401؟" : "Why do I see 401 errors?"}</p>
+            <p className="font-medium text-foreground">{locale === "ar" ? "متى أستخدم السوبر أدمن ومتى أستخدم لوحة الشركة؟" : "When do I use super-admin vs tenant dashboard?"}</p>
             <p>
               {locale === "ar"
-                ? "أخطاء 401 تظهر عندما يتم استدعاء صفحات/واجهات API خاصة بشركة (Tenant) بدون سياق شركة. استخدم لوحة السوبر أدمن لإدارة المنصة، ولوحة الشركة لإدارة بيانات الشركة."
-                : "401 happens when tenant-only pages/APIs are called without a tenant context. Use the platform (Super Admin) dashboard for platform management, and a tenant dashboard for tenant data."}
+                ? "السوبر أدمن لإدارة المنصة والشركات والباقات. لوحة الشركة لإدارة الموظفين والحضور والرواتب داخل شركة محددة."
+                : "Use super-admin for platform, tenant, and plan management. Use a tenant dashboard for employees, attendance, payroll, and company-specific operations."}
             </p>
           </div>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{locale === "ar" ? "الدعم الفني" : "Support"}</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-muted-foreground">
-            {locale === "ar"
-              ? "إذا واجهت مشكلة داخل النظام، افتح تذكرة دعم وسيتم متابعتها من فريقنا."
-              : "If you hit an issue, open a support ticket and our team will follow up."}
-          </p>
-          <Button asChild>
-            <Link href={`${p}/dashboard/support`}>{locale === "ar" ? "فتح / متابعة التذاكر" : "Open / view tickets"}</Link>
-          </Button>
         </CardContent>
       </Card>
     </div>

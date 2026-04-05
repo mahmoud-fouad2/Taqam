@@ -8,11 +8,18 @@ export default defineConfig([
             "**/.next/**",
             "**/dist/**",
             "**/build/**",
+            "**/android/**",
             "android/**",
+            "**/mobile-app/**",
             "mobile-app/**",
+            "**/apps/mobile/**",
             "apps/mobile/**",
+            "**/tmp/**",
             "tmp/**",
         ],
+        linterOptions: {
+            reportUnusedDisableDirectives: "error",
+        },
     },
     {
         extends: [...nextCoreWebVitals],

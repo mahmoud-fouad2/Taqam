@@ -74,7 +74,7 @@ d:\Mahmoud\hghvadt\Jisr\
 │       └── audit-logs/
 │           ├── audit-logs-manager.tsx  ← NEW: UI Component
 │           └── page.tsx       ← NEW: Page
-├── sentry.client.config.ts    ← NEW: Sentry client
+├── instrumentation-client.ts  ← NEW: Sentry client
 ├── sentry.server.config.ts    ← NEW: Sentry server
 ├── sentry.edge.config.ts      ← NEW: Sentry edge
 ├── FEATURES_AUDIT.md          ← NEW: تدقيق الميزات

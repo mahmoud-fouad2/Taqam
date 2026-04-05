@@ -29,7 +29,7 @@ export async function GET() {
       hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       hasSuperAdminEmail: !!process.env.SUPER_ADMIN_EMAIL,
-      hasSuperAdminPassword: !!process.env.SUPER_ADMIN_PASSWORD,
+      hasSupportEmail: !!process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
     },
   });
 }

@@ -8,6 +8,16 @@ const DEFAULT_UI_THEME = "shadcn";
 
 const RESERVED_SUBDOMAINS = new Set(["www", "admin", "app", "api"]);
 
+const isProduction = process.env.NODE_ENV === "production";
+
+function sharedCookieOptions() {
+  return { path: "/", sameSite: "lax" as const, secure: isProduction };
+}
+
+function tenantCookieOptions() {
+  return { path: "/", sameSite: "strict" as const, secure: isProduction };
+}
+
 function isValidTenantSlug(value: string): boolean {
   return /^[a-z0-9-]{3,30}$/.test(value);
 }
@@ -117,7 +127,7 @@ export async function proxy(request: NextRequest) {
         canonical.searchParams.delete("next");
 
         const res = NextResponse.redirect(canonical);
-        res.cookies.set("taqam_tenant", slug, { path: "/", sameSite: "lax" });
+        res.cookies.set("taqam_tenant", slug, tenantCookieOptions());
         res.headers.set("x-tenant-slug", slug);
         return res;
       }
@@ -131,7 +141,7 @@ export async function proxy(request: NextRequest) {
       nextHeaders.set("x-tenant-slug", slug);
 
       const res = NextResponse.rewrite(url, { request: { headers: nextHeaders } });
-      res.cookies.set("taqam_tenant", slug, { path: "/", sameSite: "lax" });
+      res.cookies.set("taqam_tenant", slug, tenantCookieOptions());
       res.headers.set("x-tenant-slug", slug);
       return res;
     }
@@ -156,7 +166,7 @@ export async function proxy(request: NextRequest) {
     nextHeaders.set("x-taqam-locale", locale);
 
     const res = NextResponse.rewrite(url, { request: { headers: nextHeaders } });
-    res.cookies.set("taqam_locale", locale, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_locale", locale, sharedCookieOptions());
     return res;
   }
 
@@ -172,7 +182,7 @@ export async function proxy(request: NextRequest) {
     url.searchParams.delete("next");
 
     const res = NextResponse.redirect(url);
-    res.cookies.set("taqam_locale", lang, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_locale", lang, sharedCookieOptions());
     return res;
   }
 
@@ -182,7 +192,7 @@ export async function proxy(request: NextRequest) {
     const nextPath = safeNextPath(request.nextUrl.searchParams.get("next")) ?? "/dashboard";
     const url = new URL(nextPath, request.url);
     const res = NextResponse.redirect(url);
-    res.cookies.set("taqam_tenant", tenantFromQuery, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_tenant", tenantFromQuery, tenantCookieOptions());
     res.headers.set("x-tenant-slug", tenantFromQuery);
     return res;
   }
@@ -211,17 +221,17 @@ export async function proxy(request: NextRequest) {
   const res = NextResponse.next();
 
   if (!request.cookies.get("taqam_locale")?.value) {
-    res.cookies.set("taqam_locale", DEFAULT_LOCALE, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_locale", DEFAULT_LOCALE, sharedCookieOptions());
   }
 
   if (!request.cookies.get("taqam_ui_theme")?.value) {
-    res.cookies.set("taqam_ui_theme", DEFAULT_UI_THEME, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_ui_theme", DEFAULT_UI_THEME, sharedCookieOptions());
   }
 
   if (effectiveTenant) {
     res.headers.set("x-tenant-slug", effectiveTenant);
     // Keep cookie in sync even when tenant comes from subdomain
-    res.cookies.set("taqam_tenant", effectiveTenant, { path: "/", sameSite: "lax" });
+    res.cookies.set("taqam_tenant", effectiveTenant, tenantCookieOptions());
   }
 
   return res;

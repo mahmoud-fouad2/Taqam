@@ -1,116 +1,163 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 
+import { Clock3, HelpCircle, LifeBuoy, Mail } from "lucide-react";
+
+import { MarketingPageCta } from "@/components/marketing/page-cta";
+import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { marketingMetadata } from "@/lib/marketing/seo";
+import { ContactForm } from "../help-center/contact-form";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     path: "/support",
     titleAr: "الدعم الفني | طاقم",
     titleEn: "Support | Taqam",
-    descriptionAr: "قنوات الدعم الفني، ساعات العمل، وسياسة الاستجابة حسب الباقة.",
-    descriptionEn: "Support channels, working hours, and response policy based on plan.",
+    descriptionAr: "راسل فريق دعم طاقم مباشرة وتابع مشكلتك أو استفسارك من صفحة مستقلة وواضحة.",
+    descriptionEn: "Reach Taqam support directly from a dedicated page for technical issues and inquiries.",
   });
 }
 
-export default async function SupportPage() {
+const issueCopy = {
+  "plan-expired": {
+    ar: "انتهى اشتراك الشركة الحالي. استخدم هذه الصفحة للتواصل معنا لتجديد الخدمة أو إعادة التفعيل.",
+    en: "The current company subscription has expired. Use this page to contact us for renewal or reactivation.",
+  },
+  "tenant-inactive": {
+    ar: "مساحة الشركة غير نشطة حاليًا. اكتب لنا وسنتابع حالة التفعيل معك.",
+    en: "The company workspace is currently inactive. Contact us and we will help you restore access.",
+  },
+  "tenant-missing": {
+    ar: "لم نتمكن من تحديد الشركة المرتبطة بحسابك. اكتب لنا تفاصيل الحساب وسنساعدك على الربط الصحيح.",
+    en: "We could not determine which company is linked to your account. Send us the account details and we will help you reconnect it correctly.",
+  },
+} as const;
+
+export default async function SupportPage({
+  searchParams,
+}: {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
-  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@taqam.com";
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? "support@taqam.net";
+  const sp = searchParams ? await searchParams : undefined;
+  const issue = typeof sp?.issue === "string" ? sp.issue : null;
+  const highlightedIssue = issue && issue in issueCopy ? issueCopy[issue as keyof typeof issueCopy] : null;
 
   return (
     <main className="bg-background">
-      <section className="container mx-auto px-4 py-14">
-        <div className="mx-auto max-w-3xl text-center">
-          <h1 className="text-3xl font-bold sm:text-4xl">{isAr ? "الدعم الفني" : "Support"}</h1>
-          <p className="mt-3 text-muted-foreground">
-            {isAr
-              ? "قنوات التواصل وسياسة الاستجابة بشكل واضح — عشان حل المشاكل يبقى أسرع."
-              : "Contact channels and response policy — so issues get resolved faster."}
-          </p>
-          <div className="mt-6 flex justify-center gap-3">
-            <Link href={`${p}/request-demo`}>
-              <Button variant="brand">{isAr ? "طلب تواصل" : "Contact us"}</Button>
-            </Link>
-            <Link href={`${p}/faq`}>
-              <Button variant="outline">{isAr ? "الأسئلة الشائعة" : "FAQ"}</Button>
-            </Link>
-            <Link href={`${p}/help-center`}>
-              <Button variant="secondary">{isAr ? "مركز المساعدة" : "Help Center"}</Button>
-            </Link>
+      <MarketingPageHero
+        icon={LifeBuoy}
+        badge={isAr ? "قناة دعم مباشرة وواضحة" : "A direct and focused support channel"}
+        title={isAr ? "الدعم الفني" : "Support"}
+        description={
+          isAr
+            ? "صفحة مستقلة للتواصل المباشر مع فريق طاقم بخصوص الأعطال، التفعيل، أو أي استفسار تشغيلي يحتاج متابعة حقيقية."
+            : "A dedicated page to contact the Taqam team directly for incidents, activation help, or operational questions that need real follow-up."
+        }
+        actions={[
+          { href: `${p}/help-center`, label: isAr ? "العودة لمركز المساعدة" : "Back to help center", variant: "outline" },
+          { href: `${p}/faq`, label: isAr ? "الأسئلة الشائعة" : "FAQ", variant: "ghost" },
+        ]}
+        stats={[
+          { value: supportEmail, label: isAr ? "قناة البريد" : "Email channel" },
+          { value: isAr ? "الأحد - الخميس" : "Sun - Thu", label: isAr ? "أيام المتابعة" : "Support days" },
+          { value: "9-6", label: isAr ? "توقيت السعودية" : "KSA hours" },
+        ]}
+      />
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          {highlightedIssue ? (
+            <div className="mb-8 rounded-2xl border border-primary/20 bg-primary/5 px-5 py-4 text-sm leading-7 text-foreground/85">
+              {isAr ? highlightedIssue.ar : highlightedIssue.en}
+            </div>
+          ) : null}
+
+          <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
+            <ContactForm supportEmail={supportEmail} isAr={isAr} />
+
+            <div className="space-y-4">
+              <Card className="border-border/80">
+                <CardHeader className="pb-3">
+                  <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Mail className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">{isAr ? "البريد الإلكتروني" : "Email support"}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>
+                    {isAr
+                      ? "ارسل المشكلة أو الطلب بالتفاصيل والملفات اللازمة، وسيتابعها الفريق حتى الإغلاق."
+                      : "Send the issue or request with the relevant details and files, and the team will follow it through closure."}
+                  </p>
+                  <a href={`mailto:${supportEmail}`} className="inline-flex rounded-full border bg-background px-3 py-1.5 text-foreground transition hover:bg-muted">
+                    {supportEmail}
+                  </a>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/80">
+                <CardHeader className="pb-3">
+                  <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <Clock3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">{isAr ? "ساعات المتابعة" : "Support window"}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2 text-sm text-muted-foreground">
+                  <p>{isAr ? "الأحد – الخميس: 9:00 ص – 6:00 م بتوقيت السعودية." : "Sunday – Thursday: 9:00 AM – 6:00 PM KSA time."}</p>
+                  <p>
+                    {isAr
+                      ? "لو أرسلت خارج ساعات العمل، سيتولى الفريق المتابعة في أول نافذة تشغيل متاحة."
+                      : "If you send outside working hours, the team will follow up in the next available operating window."}
+                  </p>
+                </CardContent>
+              </Card>
+
+              <Card className="border-border/80">
+                <CardHeader className="pb-3">
+                  <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                    <HelpCircle className="h-5 w-5 text-primary" />
+                  </div>
+                  <CardTitle className="text-base">{isAr ? "قبل فتح طلب جديد" : "Before opening a new case"}</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3 text-sm text-muted-foreground">
+                  <p>
+                    {isAr
+                      ? "راجع مركز المساعدة للأساسيات، والـ FAQ للأسئلة المتكررة، ثم استخدم هذه الصفحة للمشكلات الفعلية أو طلبات التفعيل والدعم."
+                      : "Check the help center for basics and the FAQ for common questions, then use this page for real incidents, activation, and support requests."}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    <Link href={`${p}/help-center`}>
+                      <Button size="sm" variant="outline">{isAr ? "مركز المساعدة" : "Help Center"}</Button>
+                    </Link>
+                    <Link href={`${p}/faq`}>
+                      <Button size="sm" variant="outline">{isAr ? "FAQ" : "FAQ"}</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
         </div>
-
-        <div className="mx-auto mt-10 grid max-w-4xl gap-6 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>{isAr ? "قنوات التواصل" : "Contact channels"}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>
-                {isAr ? "البريد" : "Email"}: {" "}
-                <a className="text-foreground underline" href={`mailto:${supportEmail}`}>
-                  {supportEmail}
-                </a>
-              </p>
-              <p>
-                {isAr
-                  ? "لو عندك شركة بالفعل: شاركنا اسم الشركة (slug) + وصف المشكلة + لقطة شاشة (إن أمكن)."
-                  : "If you already have a tenant: share the company slug + a clear issue description + a screenshot (if possible)."}
-              </p>
-              <p>
-                {isAr
-                  ? "معلومة مهمة: لو المشكلة خاصة بالموبايل، أرسل أيضًا x-device-id وإصدار التطبيق."
-                  : "Tip: for mobile issues, include x-device-id and app version."}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>{isAr ? "ساعات العمل" : "Working hours"}</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-sm text-muted-foreground">
-              <p>
-                {isAr
-                  ? "الأحد – الخميس: 9:00 ص إلى 6:00 م (بتوقيت السعودية)"
-                  : "Sun – Thu: 9:00 AM to 6:00 PM (KSA time)"}
-              </p>
-              <p>
-                {isAr
-                  ? "الاستجابة تختلف حسب الباقة، ويمكن إضافة SLA مخصص لباقة المؤسسات."
-                  : "Response times vary by plan; Enterprise can include custom SLA."}
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="mx-auto mt-6 max-w-4xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>{isAr ? "سياسة الاستجابة (مبدئية)" : "Response policy (baseline)"}</CardTitle>
-            </CardHeader>
-            <CardContent className="grid gap-3 text-sm text-muted-foreground md:grid-cols-3">
-              <div className="rounded-lg border bg-background p-4">
-                <p className="font-medium text-foreground">Starter</p>
-                <p className="mt-1">{isAr ? "خلال 48 ساعة عمل" : "Within 48 business hours"}</p>
-              </div>
-              <div className="rounded-lg border bg-background p-4">
-                <p className="font-medium text-foreground">Business</p>
-                <p className="mt-1">{isAr ? "خلال 24 ساعة عمل" : "Within 24 business hours"}</p>
-              </div>
-              <div className="rounded-lg border bg-background p-4">
-                <p className="font-medium text-foreground">Enterprise</p>
-                <p className="mt-1">{isAr ? "SLA مخصص + قناة مباشرة" : "Custom SLA + direct channel"}</p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </section>
+
+      <MarketingPageCta
+        title={isAr ? "قبل إرسال طلب جديد" : "Before sending a new request"}
+        description={
+          isAr
+            ? "إذا كانت المشكلة متكررة أو مرتبطة بالإعداد الأولي، راجع مركز المساعدة أو FAQ أولًا ثم افتح الطلب هنا لو احتجت متابعة مباشرة."
+            : "If the issue is recurring or linked to initial setup, check the help center or FAQ first, then open a request here if you still need direct follow-up."
+        }
+        primaryAction={{ href: `${p}/help-center`, label: isAr ? "مركز المساعدة" : "Help Center" }}
+        secondaryAction={{ href: `${p}/faq`, label: isAr ? "FAQ" : "FAQ" }}
+        tone="muted"
+      />
     </main>
   );
 }

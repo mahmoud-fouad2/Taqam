@@ -31,7 +31,7 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
   "footer.developedBy": { ar: "تطوير: ma-fo.info", en: "Developed by ma-fo.info" },
   "footer.privacy": { ar: "سياسة الخصوصية", en: "Privacy" },
   "footer.terms": { ar: "الشروط والأحكام", en: "Terms" },
-  "footer.support": { ar: "الدعم", en: "Support" },
+  "footer.support": { ar: "المساعدة", en: "Help" },
   "footer.rights": { ar: "طاقم (Taqam). جميع الحقوق محفوظة.", en: "Taqam. All rights reserved." },
   "footer.stack.ar": { ar: "موارد بشرية • رواتب • حضور • امتثال سعودي", en: "" },
   "footer.stack.en": { ar: "", en: "HR • Payroll • Attendance • Saudi Compliance" },

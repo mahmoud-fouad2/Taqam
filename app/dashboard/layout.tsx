@@ -1,4 +1,5 @@
-﻿import React from "react";
+﻿import type { Metadata } from "next";
+import React from "react";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
 import { AppSidebar } from "@/components/app-sidebar"
@@ -8,6 +9,24 @@ import {
   SidebarInset,
   SidebarProvider,
 } from "@/components/ui/sidebar"
+
+export const metadata: Metadata = {
+  title: {
+    default: "Dashboard | Taqam",
+    template: "%s | Dashboard | Taqam",
+  },
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    googleBot: {
+      index: false,
+      follow: false,
+      noimageindex: true,
+      noarchive: true,
+    },
+  },
+};
 
 export default async function Page({ children }: { children: React.ReactNode }) {
   await requireAuth();

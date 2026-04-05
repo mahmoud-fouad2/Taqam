@@ -226,6 +226,40 @@ export default async function SuperAdminPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5" />
+            الربط بين الواجهة والمنصة
+          </CardTitle>
+          <CardDescription>روابط مباشرة بين الواجهة العامة ولوحات التشغيل الداخلية</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+            <Link href="/help-center" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
+              <p className="font-medium">مركز المساعدة العام</p>
+              <p className="mt-1 text-sm text-muted-foreground">راجع المحتوى العام وقنوات التواصل كما يراها العميل.</p>
+            </Link>
+            <Link href="/careers" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
+              <p className="font-medium">بوابة الوظائف العامة</p>
+              <p className="mt-1 text-sm text-muted-foreground">راجع الوظائف المجمعة وصفحات الشركات العامة كما يراها المرشحون.</p>
+            </Link>
+            <Link href="/pricing" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
+              <p className="font-medium">الأسعار والباقات</p>
+              <p className="mt-1 text-sm text-muted-foreground">تحقق من توافق الباقات العامة مع إعدادات المنصة الداخلية.</p>
+            </Link>
+            <Link href="/dashboard/support" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
+              <p className="font-medium">تذاكر الدعم</p>
+              <p className="mt-1 text-sm text-muted-foreground">متابعة الحالات المفتوحة من الشركات داخل الداشبورد.</p>
+            </Link>
+            <Link href="/dashboard/help-center" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
+              <p className="font-medium">مساعدة داخلية</p>
+              <p className="mt-1 text-sm text-muted-foreground">اختصارات التشغيل والتمييز بين صلاحيات الشركة والسوبر أدمن.</p>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

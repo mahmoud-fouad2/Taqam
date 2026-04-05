@@ -16,6 +16,12 @@ import {
   type UserRole,
 } from "@/lib/access-control";
 import { isSuperAdminBootstrapEnabled } from "@/lib/security/bootstrap";
+import {
+  getTenantAccessIssue,
+  getTenantAccessMessage,
+  getTenantIssueQueryValue,
+  validateTenantAccess,
+} from "@/lib/tenant-access";
 import { redirect } from "next/navigation";
 
 // ============================================
@@ -48,6 +54,7 @@ export const authOptions: NextAuthOptions = {
                 slug: true,
                 status: true,
                 plan: true,
+                planExpiresAt: true,
               },
             },
             employee: {
@@ -160,13 +167,15 @@ export const authOptions: NextAuthOptions = {
           throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
         }
 
-        // Check tenant status (if not super admin)
-        if (user.tenant && user.tenant.status !== "ACTIVE") {
-          logger.auth("login_failed", user.id, {
-            reason: "tenant_inactive",
-            tenantId: user.tenantId,
-          });
-          throw new Error("حساب المنشأة معطل. تواصل مع الدعم الفني");
+        if (!isSuperAdminRole(user.role)) {
+          const tenantIssue = getTenantAccessIssue(user.tenantId ? user.tenant : null);
+          if (tenantIssue) {
+            logger.auth("login_failed", user.id, {
+              reason: tenantIssue,
+              tenantId: user.tenantId,
+            });
+            throw new Error(getTenantAccessMessage(tenantIssue, "ar"));
+          }
         }
 
         // Reset failed attempts and update last login
@@ -299,6 +308,7 @@ export interface SessionTenant {
   slug: string;
   status: string;
   plan: string;
+  planExpiresAt?: string | Date | null;
 }
 
 export interface SessionEmployee {
@@ -340,6 +350,13 @@ export async function requireAuth(): Promise<SessionUser> {
 
   if (!user) {
     redirect("/login");
+  }
+
+   if (!isSuperAdminRole(user.role)) {
+    const tenantAccess = await validateTenantAccess(user.tenantId);
+    if (!tenantAccess.ok) {
+      redirect(`/support?issue=${getTenantIssueQueryValue(tenantAccess.issue)}`);
+    }
   }
 
   return user;

@@ -257,7 +257,7 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
               </tbody>
             </table>
             <div class="footer">
-              تم إنشاء هذا التقرير بواسطة نظام جسر لإدارة الموارد البشرية
+              تم إنشاء هذا التقرير بواسطة منصة طاقم لإدارة الموارد البشرية
             </div>
           </body>
           </html>

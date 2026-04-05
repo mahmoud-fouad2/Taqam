@@ -1,5 +1,5 @@
 # Complete E2E Integration Tests
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 $Tests = @()
 
@@ -186,11 +186,11 @@ $report += @"
 
 ## 🔗 الروابط المهمة
 
-- 🌐 **موقع المشروع**: https://ujoor.onrender.com
-- 📊 **لوحة التحكم**: https://ujoor.onrender.com/dashboard
-- 🏥 **فحص الصحة**: https://ujoor.onrender.com/api/health
-- 📱 **تطبيق الموبايل**: https://ujoor.onrender.com/api/mobile/auth/login
-- 👤 **الملف الشخصي**: https://ujoor.onrender.com/dashboard/settings/profile
+- 🌐 **موقع المشروع**: https://taqam.net
+- 📊 **لوحة التحكم**: https://taqam.net/dashboard
+- 🏥 **فحص الصحة**: https://taqam.net/api/health
+- 📱 **تطبيق الموبايل**: https://taqam.net/api/mobile/auth/login
+- 👤 **الملف الشخصي**: https://taqam.net/dashboard/settings/profile
 
 ## ✨ النتيجة النهائية
 

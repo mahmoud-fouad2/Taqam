@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 
@@ -11,6 +12,9 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const pathname = usePathname();
+  const isEn = pathname === "/en/dashboard" || pathname.startsWith("/en/");
+
   useEffect(() => {
     console.error("[Dashboard Error]", error);
   }, [error]);
@@ -21,20 +25,26 @@ export default function DashboardError({
         <AlertCircle className="h-8 w-8 text-destructive" />
       </div>
       <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight">حدث خطأ غير متوقع</h2>
+        <h2 className="text-2xl font-bold tracking-tight">
+          {isEn ? "An unexpected error occurred" : "حدث خطأ غير متوقع"}
+        </h2>
         <p className="max-w-md text-muted-foreground">
           {error.message
             ? `${error.message}`
-            : "حدث خطأ ما أثناء تحميل هذه الصفحة. يرجى المحاولة مجدداً."}
+            : isEn
+              ? "Something went wrong while loading this page. Please try again."
+              : "حدث خطأ ما أثناء تحميل هذه الصفحة. يرجى المحاولة مجددًا."}
         </p>
         {error.digest && (
-          <p className="text-xs text-muted-foreground/60">رمز الخطأ: {error.digest}</p>
+          <p className="text-xs text-muted-foreground/60">
+            {isEn ? "Error code:" : "رمز الخطأ:"} {error.digest}
+          </p>
         )}
       </div>
       <div className="flex gap-3">
-        <Button onClick={reset}>إعادة المحاولة</Button>
-        <Button variant="outline" onClick={() => (window.location.href = "/dashboard")}>
-          العودة للرئيسية
+        <Button onClick={reset}>{isEn ? "Try again" : "إعادة المحاولة"}</Button>
+        <Button variant="outline" onClick={() => (window.location.href = isEn ? "/en/dashboard" : "/dashboard")}>
+          {isEn ? "Back to dashboard" : "العودة للوحة التحكم"}
         </Button>
       </div>
     </div>

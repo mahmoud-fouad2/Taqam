@@ -176,8 +176,8 @@ export default function ProfileScreen() {
       {/* App info */}
       <View style={styles.appInfo}>
         <BrandLogo style={{ alignItems: "center", marginBottom: 8 }} />
-        <Text style={styles.appVer}>Jisr v{APP_VERSION}</Text>
-        <Text style={styles.appCopy}>© 2025 Jisr. All rights reserved.</Text>
+        <Text style={styles.appVer}>Taqam v{APP_VERSION}</Text>
+        <Text style={styles.appCopy}>© 2025 Taqam. All rights reserved.</Text>
       </View>
     </ScrollView>
   );

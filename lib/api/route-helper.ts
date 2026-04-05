@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { getTenantAccessMessage, validateTenantAccess } from "@/lib/tenant-access";
 
 export type AuthenticatedSession = {
   user: {
@@ -27,6 +28,14 @@ type RouteResult =
 type TenantRouteResult =
   | { ok: true; session: AuthenticatedSession; tenantId: string }
   | { ok: false; response: NextResponse };
+
+type TenantOrSuperAdminRouteResult =
+  | { ok: true; session: AuthenticatedSession; tenantId: string | null; isSuperAdmin: boolean }
+  | { ok: false; response: NextResponse };
+
+function isSuperAdminRole(role: string | undefined) {
+  return role === "SUPER_ADMIN";
+}
 
 /**
  * Verify session exists — for routes that don't require a tenant
@@ -65,7 +74,66 @@ export async function requireTenantSession(
     };
   }
 
+  const tenantAccess = await validateTenantAccess(tenantId);
+  if (!tenantAccess.ok) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          error: getTenantAccessMessage(tenantAccess.issue, "ar"),
+          code: tenantAccess.issue.toUpperCase(),
+        },
+        { status: 403 }
+      ),
+    };
+  }
+
   return { ok: true, session, tenantId };
+}
+
+/**
+ * Verify session and tenant access, while still allowing super admins.
+ */
+export async function requireTenantOrSuperAdminSession(
+  req: NextRequest
+): Promise<TenantOrSuperAdminRouteResult> {
+  const sessionResult = await requireSession(req);
+  if (!sessionResult.ok) return sessionResult;
+
+  const { session } = sessionResult;
+
+  if (isSuperAdminRole(session.user.role)) {
+    return {
+      ok: true,
+      session,
+      tenantId: session.user.tenantId ?? null,
+      isSuperAdmin: true,
+    };
+  }
+
+  const tenantId = session.user.tenantId;
+  if (!tenantId) {
+    return {
+      ok: false,
+      response: NextResponse.json({ error: "Tenant context required" }, { status: 400 }),
+    };
+  }
+
+  const tenantAccess = await validateTenantAccess(tenantId);
+  if (!tenantAccess.ok) {
+    return {
+      ok: false,
+      response: NextResponse.json(
+        {
+          error: getTenantAccessMessage(tenantAccess.issue, "ar"),
+          code: tenantAccess.issue.toUpperCase(),
+        },
+        { status: 403 }
+      ),
+    };
+  }
+
+  return { ok: true, session, tenantId, isSuperAdmin: false };
 }
 
 /**

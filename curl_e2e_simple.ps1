@@ -1,4 +1,4 @@
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $DeviceId = "test-$(Get-Random 10000)"
 
 Write-Host "`n========== REAL CURL E2E TESTS ==========" -ForegroundColor Cyan

@@ -1,17 +1,17 @@
 {
   "expo": {
-    "name": "Jisr",
-    "slug": "jisr",
+    "name": "Taqam",
+    "slug": "taqam",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/brand/icon.png",
-    "scheme": "jisr",
+    "scheme": "taqam",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/brand/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#0a0f1e"
+      "backgroundColor": "#ffffff"
     },
     "ios": {
       "supportsTablet": true,

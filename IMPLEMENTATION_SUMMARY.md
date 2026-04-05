@@ -42,7 +42,7 @@
 ### 2. ✅ Error Monitoring & Sentry Integration (100% Complete)
 
 **الملفات المُنشأة:**
-- `sentry.client.config.ts` - إعدادات Sentry للعميل
+- `instrumentation-client.ts` - إعدادات Sentry للعميل
 - `sentry.server.config.ts` - إعدادات Sentry للخادم
 - `sentry.edge.config.ts` - إعدادات Sentry للـ Edge Functions
 - `/lib/logger.ts` (محسّن) - دمج Pino + Sentry

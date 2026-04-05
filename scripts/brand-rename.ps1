@@ -12,9 +12,9 @@ function Invoke-BrandRename($path) {
   $c = $c.Replace("Ujoors", "Taqam")
   $c = $c.Replace("ujoors", "taqam")
   $c = $c.Replace("UJOORS", "TAQAM")
-  $c = $c.Replace("ujoor.onrender.com", "taqam.com")
+  $c = $c.Replace("ujoor.onrender.com", "taqam.net")
   $c = $c.Replace('"ujoor"', '"taqam"')
-  $c = $c.Replace("ujoor.com", "taqam.com")
+  $c = $c.Replace("ujoor.com", "taqam.net")
   $c = $c.Replace("app_name_ar: ajwaar", "app_name_ar: taqam")
   if ($c -ne $orig) {
     [System.IO.File]::WriteAllText($path, $c, [System.Text.Encoding]::UTF8)

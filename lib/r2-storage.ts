@@ -28,6 +28,16 @@ const R2 = new S3Client({
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "taqam";
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
+export function isR2Configured() {
+  return Boolean(
+    (process.env.R2_ENDPOINT || process.env.R2_ACCOUNT_ID) &&
+      process.env.R2_ACCESS_KEY_ID &&
+      process.env.R2_SECRET_ACCESS_KEY &&
+      process.env.R2_BUCKET_NAME &&
+      process.env.R2_PUBLIC_URL
+  );
+}
+
 export interface UploadResult {
   success: boolean;
   key?: string;
@@ -265,6 +275,7 @@ export const r2Storage = {
   getPublicUrl,
   isAllowedFileType,
   isAllowedFileSize,
+  isR2Configured,
   generateFileKey,
 };
 

@@ -2,7 +2,7 @@
 # E2E اختبارات حقيقية - 2026-02-01
 # ===================================
 
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $SuperAdminEmail = "admin@admin.com"
 $SuperAdminPassword = "123456"
 
@@ -399,9 +399,9 @@ $reportContent += @"
 
 ## 🔗 الروابط المهمة
 
-- 📱 Dashboard: https://ujoor.onrender.com
-- 🏥 Health Check: https://ujoor.onrender.com/api/health
-- 🔑 Mobile Auth: https://ujoor.onrender.com/api/mobile/auth/login
+- 📱 Dashboard: https://taqam.net
+- 🏥 Health Check: https://taqam.net/api/health
+- 🔑 Mobile Auth: https://taqam.net/api/mobile/auth/login
 
 ## ✨ النتيجة النهائية
 تم اختبار جميع الـ APIs بنجاح والمشروع جاهز 100% للاستخدام!

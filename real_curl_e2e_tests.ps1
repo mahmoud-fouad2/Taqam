@@ -1,7 +1,7 @@
 #!/usr/bin/env powershell
 # Real Integration Tests using Curl
 
-$BaseUrl = "https://ujoor.onrender.com"
+$BaseUrl = "https://taqam.net"
 $DeviceId = "test-$(Get-Random 10000)"
 $DeviceName = "Test Device"
 $AppVersion = "1.0.0"

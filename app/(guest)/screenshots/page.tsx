@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { ScreenshotsGallery } from "./gallery";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { LayoutDashboard, Users, DollarSign, Clock, BarChart3, Smartphone } from "lucide-react";
@@ -138,6 +139,7 @@ const features = [
 export default async function ScreenshotsPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
+  const p = locale === "en" ? "/en" : "";
 
   return (
     <main className="bg-background">
@@ -228,6 +230,17 @@ export default async function ScreenshotsPage() {
           <ScreenshotsGallery locale={locale} desktop={desktopShots} mobile={mobileShots} />
         </div>
       </section>
+
+      <MarketingPageCta
+        title={isAr ? "هل تريد رؤية نفس المسارات على شركتك؟" : "Want to see the same flows on your company data?"}
+        description={
+          isAr
+            ? "نرتب لك Demo عملي مبني على عدد الموظفين، الرواتب، والحضور داخل شركتك بدل مجرد استعراض عام للواجهة."
+            : "We can run a practical demo around your employee count, payroll flow, and attendance setup instead of just a generic UI tour."
+        }
+        primaryAction={{ href: `${p}/request-demo`, label: isAr ? "احجز عرضًا عمليًا" : "Book a practical demo" }}
+        secondaryAction={{ href: `${p}/pricing`, label: isAr ? "راجع الأسعار" : "Review pricing" }}
+      />
     </main>
   );
 }

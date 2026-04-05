@@ -26,7 +26,7 @@ export async function GET() {
         data: {
           platformName: "طاقم",
           platformNameEn: "Taqam",
-          supportEmail: "support@taqam.com",
+          supportEmail: "support@taqam.net",
           trialDays: 14,
           trialMaxEmployees: 10,
           primaryColor: "#0284c7",

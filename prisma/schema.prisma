@@ -1,4 +1,4 @@
-// Prisma Schema for Ujoor HR Platform
+// Prisma schema for Taqam HR platform
 // Multi-tenant HR management system
 
 generator client {
@@ -2086,9 +2086,9 @@ model PlatformSettings {
   id                String   @id @default(cuid())
   
   // General
-  platformName      String   @default("أجور")
-  platformNameEn    String   @default("Ujoors")
-  supportEmail      String   @default("support@ujoor.com")
+  platformName      String   @default("طاقم")
+  platformNameEn    String   @default("Taqam")
+  supportEmail      String   @default("support@taqam.net")
   supportPhone      String?
   
   // Trial Settings

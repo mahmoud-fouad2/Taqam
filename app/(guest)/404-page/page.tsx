@@ -1,39 +1,44 @@
-import { Button } from "@/components/ui/button";
+import { NotFoundShell } from "@/components/marketing/not-found-shell";
 import { generateMeta } from "@/lib/utils";
-import { ArrowRight } from "lucide-react";
+import { getAppLocale } from "@/lib/i18n/locale";
 import { Metadata } from "next";
-import Image from "next/image";
 
 export async function generateMetadata(): Promise<Metadata> {
   return generateMeta({
-    title: "404 Error Page",
-    description:
-      "This is an example of a template for 404 error pages. Built with technologies like Tailwind CSS, Next.js, React and Shadcn.",
+    title: "404",
+    description: "Page not found.",
   });
 }
 
-export default function Error404() {
-  return (
-    <div className="grid h-screen items-center bg-background pb-8 lg:grid-cols-2 lg:pb-0">
-      <div className="text-center">
-        <p className="text-base font-semibold text-muted-foreground">404</p>
-        <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl">
-          Page not found
-        </h1>
-        <p className="mt-6 text-base leading-7 text-muted-foreground">
-          Sorry, we couldn’t find the page you’re looking for.
-        </p>
-        <div className="mt-10 flex items-center justify-center gap-x-2">
-          <Button size="lg">Go back home</Button>
-          <Button size="lg" variant="ghost">
-            Contact support <ArrowRight className="ms-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+export default async function Error404() {
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
+  const p = locale === "en" ? "/en" : "";
 
-      <div className="hidden lg:block">
-        <Image src="/images/404.svg" alt="Login visual" width={720} height={520} className="object-contain" />
-      </div>
-    </div>
+  return (
+    <NotFoundShell
+      code="404"
+      description={
+        isAr
+          ? "هذه نسخة الهبوط العامة من صفحة 404. استخدمها عندما تريد تحويل المرشح أو الزائر إلى المسارات الصحيحة بدل فقده داخل رابط مكسور."
+          : "This is the public landing version of the 404 experience, designed to redirect a visitor into the right paths instead of leaving them on a dead URL."
+      }
+      eyebrow={isAr ? "صفحة غير موجودة" : "Page not found"}
+      primaryAction={{ href: p || "/", label: isAr ? "العودة للرئيسية" : "Go back home" }}
+      quickLinks={[
+        {
+          href: `${p}/careers`,
+          title: isAr ? "بوابة الوظائف" : "Careers portal",
+          description: isAr ? "الوصول السريع إلى كل الوظائف المفتوحة والتقديم عليها." : "Jump into live roles and apply directly.",
+        },
+        {
+          href: `${p}/help-center`,
+          title: isAr ? "مركز المساعدة" : "Help center",
+          description: isAr ? "أدلة الاستخدام والإعداد والرد على الأسئلة الشائعة." : "Usage, setup, and FAQ guidance in one place.",
+        },
+      ]}
+      secondaryAction={{ href: `${p}/help-center`, label: isAr ? "مركز المساعدة" : "Help center", variant: "outline" }}
+      title={isAr ? "تعذر العثور على الصفحة المطلوبة" : "We couldn't find the requested page"}
+    />
   );
 }

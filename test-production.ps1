@@ -2,7 +2,7 @@
 <#
 .SYNOPSIS
 اختبار الإنتاج الفعلي للنظام على Render
-Real Production Testing for Ujoor on Render Free Tier
+Real Production Testing for Taqam on Render Free Tier
 
 .DESCRIPTION
 هذا السكريبت يختبر جميع العمليات الأساسية على الخادم الحي:
@@ -13,7 +13,7 @@ Real Production Testing for Ujoor on Render Free Tier
 - التحقق من البيانات (Verify Data)
 #>
 
-$baseUrl = "https://ujoor.onrender.com"
+$baseUrl = "https://taqam.net"
 $adminEmail = "admin@admin.com"
 $adminPassword = "123456"
 $maxRetries = 3
@@ -28,7 +28,7 @@ $config = @{
 }
 
 # Helper functions
-function Log-Test {
+function Write-TestLog {
     param(
         [string]$TestName,
         [string]$Status,
@@ -74,7 +74,7 @@ function Wait-ForServer {
         Write-Host "محاولة $i/$MaxAttempts..." -ForegroundColor Yellow
         
         try {
-            $response = Invoke-WebRequest -Uri "$baseUrl/api/health" -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
+            $null = Invoke-WebRequest -Uri "$baseUrl/api/health" -TimeoutSec 5 -UseBasicParsing -ErrorAction Stop
             Write-Host "✓ الخادم يعمل الآن!" -ForegroundColor Green
             return $true
         } catch {
@@ -134,7 +134,7 @@ function Invoke-API {
 # Main Tests
 Write-Host "`n╔════════════════════════════════════════════════════╗" -ForegroundColor Magenta
 Write-Host "║  اختبار الإنتاج الفعلي - Real Production Tests     ║" -ForegroundColor Magenta
-Write-Host "║  Ujoor HRMS on Render Free Tier                    ║" -ForegroundColor Magenta
+Write-Host "║  Taqam HRMS on Render Free Tier                    ║" -ForegroundColor Magenta
 Write-Host "╚════════════════════════════════════════════════════╝" -ForegroundColor Magenta
 
 Write-Host "`nالخادم: $baseUrl" -ForegroundColor Cyan
@@ -142,12 +142,12 @@ Write-Host "الوقت: $(Get-Date)" -ForegroundColor Gray
 
 # Step 1: Check Server Availability
 Write-Host "`n=== Step 1: التحقق من توفر الخادم ===" -ForegroundColor Cyan
-if (-not (Wait-ForServer)) {
-    Log-Test "توفر الخادم" "FAIL" "الخادم غير متاح"
+if (-not (Wait-ForServer -Delay $retryDelay)) {
+    Write-TestLog "توفر الخادم" "FAIL" "الخادم غير متاح"
     Write-Host "`nلا يمكن المتابعة - الخادم غير متاح" -ForegroundColor Red
     exit 1
 }
-Log-Test "توفر الخادم" "PASS" "الخادم يستجيب للطلبات"
+Write-TestLog "توفر الخادم" "PASS" "الخادم يستجيب للطلبات"
 
 # Step 2: Test Login
 Write-Host "`n=== Step 2: اختبار تسجيل الدخول ===" -ForegroundColor Cyan
@@ -168,10 +168,10 @@ $loginResult = Invoke-API "POST" "/api/mobile/auth/login" $loginBody $loginHeade
 
 if ($loginResult.Success -and $loginResult.StatusCode -eq 200) {
     $accessToken = $loginResult.Content.data.accessToken
-    Log-Test "تسجيل الدخول" "PASS" "تم الحصول على Access Token"
+    Write-TestLog "تسجيل الدخول" "PASS" "تم الحصول على Access Token"
     Write-Host "  Token Length: $($accessToken.Length) chars" -ForegroundColor Gray
 } else {
-    Log-Test "تسجيل الدخول" "FAIL" $loginResult.Error
+    Write-TestLog "تسجيل الدخول" "FAIL" $loginResult.Error
     exit 1
 }
 
@@ -197,9 +197,9 @@ $companyResult = Invoke-API "POST" "/api/companies" $companyBody $companyHeaders
 
 if ($companyResult.Success) {
     $companyId = $companyResult.Content.data.id
-    Log-Test "إنشاء شركة" "PASS" "Company ID: $companyId"
+    Write-TestLog "إنشاء شركة" "PASS" "Company ID: $companyId"
 } else {
-    Log-Test "إنشاء شركة" "FAIL" $companyResult.Error
+    Write-TestLog "إنشاء شركة" "FAIL" $companyResult.Error
     $companyId = $null
 }
 
@@ -212,17 +212,17 @@ if ($companyId) {
     
     if ($listResult.Success) {
         $count = $listResult.Content.data.items.Count
-        Log-Test "قائمة الشركات" "PASS" "عدد الشركات: $count"
+        Write-TestLog "قائمة الشركات" "PASS" "عدد الشركات: $count"
         
         # Check if our company is in the list
         $foundCompany = $listResult.Content.data.items | Where-Object { $_.id -eq $companyId }
         if ($foundCompany) {
-            Log-Test "التحقق من الشركة المنشأة" "PASS" "تم العثور على الشركة في قاعدة البيانات"
+            Write-TestLog "التحقق من الشركة المنشأة" "PASS" "تم العثور على الشركة في قاعدة البيانات"
         } else {
-            Log-Test "التحقق من الشركة المنشأة" "FAIL" "لم يتم العثور على الشركة"
+            Write-TestLog "التحقق من الشركة المنشأة" "FAIL" "لم يتم العثور على الشركة"
         }
     } else {
-        Log-Test "قائمة الشركات" "FAIL" $listResult.Error
+        Write-TestLog "قائمة الشركات" "FAIL" $listResult.Error
     }
 }
 

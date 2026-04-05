@@ -42,7 +42,7 @@ async function fetchWithTimeout(url, opts = {}) {
       ...opts,
       signal: controller.signal,
       headers: {
-        "user-agent": "ujoor-smoke/1.0",
+        "user-agent": "taqam-smoke/1.0",
         ...(opts.headers || {}),
       },
     });

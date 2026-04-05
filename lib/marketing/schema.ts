@@ -6,6 +6,7 @@ export type OrganizationJsonLd = {
   name: string;
   url: string;
   logo?: string;
+  description?: string;
   sameAs?: string[];
 };
 
@@ -14,6 +15,7 @@ export type WebSiteJsonLd = {
   "@type": "WebSite";
   name: string;
   url: string;
+  description?: string;
   inLanguage?: string;
 };
 
@@ -21,8 +23,11 @@ export type SoftwareApplicationJsonLd = {
   "@context": "https://schema.org";
   "@type": "SoftwareApplication";
   name: string;
+  url?: string;
+  description?: string;
   applicationCategory: string;
   operatingSystem: string;
+  availableLanguage?: string[];
   offers?: {
     "@type": "Offer";
     priceCurrency: string;
@@ -52,12 +57,19 @@ export type FaqPageJsonLd = {
 };
 
 export function organizationSchema(opts: { url: string }): OrganizationJsonLd {
+  const sameAs = (process.env.NEXT_PUBLIC_ORGANIZATION_SAME_AS ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "Taqam",
     url: opts.url,
-    logo: `${opts.url}/opengraph-image`,
+    logo: `${opts.url}/icons/logo-navbar-light-1200.png`,
+    description: "Saudi HR, payroll, attendance, and workforce operations platform.",
+    ...(sameAs.length > 0 ? { sameAs } : {}),
   };
 }
 
@@ -67,6 +79,7 @@ export function websiteSchema(opts: { url: string; locale: MarketingLocale }): W
     "@type": "WebSite",
     name: "Taqam",
     url: opts.url,
+    description: "Taqam is a bilingual Saudi HR platform for payroll, attendance, and employee operations.",
     inLanguage: opts.locale === "ar" ? "ar-SA" : "en-US",
   };
 }
@@ -89,8 +102,11 @@ export function softwareAppSchema(opts: {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Taqam",
+    url: opts.url,
+    description: "HR, payroll, attendance, leave, and workforce operations platform built for Saudi Arabia.",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
+    availableLanguage: ["ar", "en"],
     offers: {
       "@type": "Offer",
       priceCurrency: "SAR",

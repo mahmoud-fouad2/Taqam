@@ -1,27 +1,43 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { FileQuestion } from "lucide-react";
 
-export default function DashboardNotFound() {
+import { NotFoundShell } from "@/components/marketing/not-found-shell";
+import { Button } from "@/components/ui/button";
+import { getAppLocale } from "@/lib/i18n/locale";
+
+export default async function DashboardNotFound() {
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
+  const p = locale === "en" ? "/en" : "";
+
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-        <FileQuestion className="h-8 w-8 text-muted-foreground" />
-      </div>
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold tracking-tight">الصفحة غير موجودة</h2>
-        <p className="max-w-md text-muted-foreground">
-          عذراً، هذه الصفحة غير موجودة أو ليس لديك صلاحية الوصول إليها.
-        </p>
-      </div>
-      <div className="flex gap-3">
-        <Button asChild>
-          <Link href="/dashboard">العودة للوحة التحكم</Link>
-        </Button>
-        <Button variant="outline" onClick={() => window.history.back()} type="button">
-          رجوع
-        </Button>
-      </div>
-    </div>
+    <NotFoundShell
+      compact
+      description={
+        isAr
+          ? "المسار الذي حاولت فتحه داخل الداشبورد غير موجود أو نُقل إلى وحدة أخرى. استخدم الروابط التالية للرجوع بسرعة إلى الأسطح التشغيلية الصحيحة."
+          : "The dashboard route you tried to open is missing or has moved to another module. Use these shortcuts to get back to the right operational surfaces."
+      }
+      eyebrow={isAr ? "خطأ مسار داخل لوحة التحكم" : "Dashboard route not found"}
+      primaryAction={{ href: `${p}/dashboard`, label: isAr ? "العودة للوحة التحكم" : "Back to dashboard", variant: "brand" }}
+      quickLinks={[
+        {
+          href: `${p}/dashboard/help-center`,
+          title: isAr ? "مركز المساعدة الداخلي" : "In-app help center",
+          description: isAr ? "اختصارات التشغيل الصحيحة والتمييز بين أسطح المنصة." : "Correct operational paths and distinctions between platform surfaces.",
+        },
+        {
+          href: `${p}/dashboard/support`,
+          title: isAr ? "الدعم والتذاكر" : "Support & tickets",
+          description: isAr ? "افتح أو تابع الحالات المرتبطة بالشركة أو المستخدمين." : "Open or track cases tied to the tenant or affected users.",
+        },
+        {
+          href: `${p}/dashboard/job-postings`,
+          title: isAr ? "التوظيف والكارير بورتال" : "Recruitment & careers",
+          description: isAr ? "إدارة الوظائف الشاغرة وروابط البوابة العامة للشركة." : "Manage open roles and the tenant's public careers portal links.",
+        },
+      ]}
+      secondaryAction={{ href: `${p}/dashboard/help-center`, label: isAr ? "مركز المساعدة" : "Help center", variant: "outline" }}
+      title={isAr ? "هذه الصفحة ليست ضمن المسار الحالي" : "This page is not in the current route tree"}
+    />
   );
 }

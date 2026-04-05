@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -90,13 +91,12 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
           <Label htmlFor="password" className="text-sm font-medium">
             {labels.password}
           </Label>
-          <a
-            href="#"
+          <Link
+            href={locale === "en" ? "/en/forgot-password" : "/forgot-password"}
             className="text-xs text-muted-foreground hover:text-primary hover:underline"
-            tabIndex={-1}
           >
             {locale === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
-          </a>
+          </Link>
         </div>
         <div className="relative">
           <Input

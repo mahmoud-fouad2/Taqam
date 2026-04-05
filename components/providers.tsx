@@ -17,7 +17,7 @@ export default function Providers({
 }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
         <AppDirectionProvider dir={dir}>
           {children}
           <ConsoleNoiseGuard />

@@ -9,6 +9,7 @@ import { issueMobileAccessToken } from "@/lib/mobile/jwt";
 import { mintRefreshToken, upsertMobileDevice } from "@/lib/mobile/refresh-tokens";
 import { setMobileRefreshCookie } from "@/lib/mobile/cookies";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
+import { getTenantAccessIssue, getTenantAccessMessage } from "@/lib/tenant-access";
 
 const schema = z.object({
   email: z.string().email(),
@@ -78,7 +79,15 @@ export async function POST(request: NextRequest) {
         failedLoginAttempts: true,
         password: true,
         tenant: {
-          select: { id: true, slug: true, name: true, nameAr: true, status: true, plan: true },
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            nameAr: true,
+            status: true,
+            plan: true,
+            planExpiresAt: true,
+          },
         },
         employee: { select: { id: true } },
       },
@@ -112,9 +121,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (user.tenant && user.tenant.status !== "ACTIVE" && user.role !== "SUPER_ADMIN") {
+    const tenantIssue = user.role !== "SUPER_ADMIN"
+      ? getTenantAccessIssue(user.tenantId ? user.tenant : null)
+      : null;
+
+    if (tenantIssue) {
       return withRateLimitHeaders(
-        NextResponse.json({ error: "Tenant is not active" }, { status: 403 }),
+        NextResponse.json({ error: getTenantAccessMessage(tenantIssue, "en") }, { status: 403 }),
         { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
       );
     }

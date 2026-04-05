@@ -13,6 +13,13 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/api/",
           "/dashboard/",
+          "/login",
+          "/register",
+          "/select-tenant",
+          "/t/",
+          "/m/",
+          "/404-page",
+          "/500-page",
           "/_next/",
         ],
       },

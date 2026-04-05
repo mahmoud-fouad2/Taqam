@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const listQuerySchema = z.object({
   page: z.coerce.number().int().positive().default(1).catch(1),
@@ -19,16 +18,14 @@ const createSchema = z.object({
   message: z.string().min(3).max(5000),
 });
 
-function isSuperAdmin(role: string | undefined) {
-  return role === "SUPER_ADMIN";
-}
-
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) {
+      return auth.response;
     }
+
+    const { tenantId, isSuperAdmin: superAdmin } = auth;
 
     const { searchParams } = new URL(request.url);
     const parsed = listQuerySchema.safeParse({
@@ -43,22 +40,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Invalid query" }, { status: 400 });
     }
 
-    const { page, limit, status, priority, tenantId } = parsed.data;
+    const { page, limit, status, priority, tenantId: tenantFilter } = parsed.data;
     const skip = (page - 1) * limit;
 
     const where: any = {};
     if (status) where.status = status;
     if (priority) where.priority = priority;
 
-    const superAdmin = isSuperAdmin(session.user.role);
-
     if (superAdmin) {
-      if (tenantId) where.tenantId = tenantId;
+      if (tenantFilter) where.tenantId = tenantFilter;
     } else {
-      if (!session.user.tenantId) {
-        return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
-      }
-      where.tenantId = session.user.tenantId;
+      where.tenantId = tenantId;
     }
 
     const [items, total] = await Promise.all([
@@ -99,14 +91,12 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) {
+      return auth.response;
     }
 
-    if (!session.user.tenantId && !isSuperAdmin(session.user.role)) {
-      return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
-    }
+    const { session, tenantId } = auth;
 
     const body = await request.json();
     const parsed = createSchema.safeParse(body);
@@ -115,8 +105,6 @@ export async function POST(request: NextRequest) {
     }
 
     const now = new Date();
-    const tenantId = session.user.tenantId;
-
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant tickets must be created within a tenant" }, { status: 400 });
     }

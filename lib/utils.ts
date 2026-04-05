@@ -16,15 +16,56 @@ export function generateAvatarFallback(string: string) {
 export function generateMeta({
   title,
   description,
+  noIndex = true,
 }: {
   title: string;
   description: string;
+  noIndex?: boolean;
 }): Metadata {
   return {
     title: `${title} | طاقم`,
-    description: description,
+    description,
+    robots: noIndex
+      ? {
+          index: false,
+          follow: false,
+          nocache: true,
+          googleBot: {
+            index: false,
+            follow: false,
+            noimageindex: true,
+            noarchive: true,
+          },
+        }
+      : {
+          index: true,
+          follow: true,
+          googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+          },
+        },
+    creator: "Taqam",
+    publisher: "Taqam",
     openGraph: {
-      images: [`/seo.jpg`]
-    }
+      title,
+      description,
+      siteName: "Taqam",
+      images: [
+        {
+          url: "/seo.jpg",
+          alt: `${title} | Taqam`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: ["/seo.jpg"],
+    },
   };
 }

@@ -22,7 +22,7 @@ export function LocaleTransitionOverlay() {
 
   useEffect(() => {
     if (!active) return;
-    const t = window.setTimeout(() => setActive(false), 260);
+    const t = window.setTimeout(() => setActive(false), 400);
     return () => window.clearTimeout(t);
   }, [pathname, active]);
 
@@ -30,9 +30,11 @@ export function LocaleTransitionOverlay() {
     <div
       aria-hidden="true"
       className={
-        "pointer-events-none fixed inset-0 z-[9999] bg-background/80 backdrop-blur-sm " +
-        "transition-opacity duration-200 " +
-        (active ? "opacity-100" : "opacity-0")
+        "pointer-events-none fixed inset-0 z-[9999] transition-[opacity,backdrop-filter] duration-300 ease-in-out " +
+        "bg-background/90 " +
+        (active
+          ? "opacity-100 [backdrop-filter:blur(8px)_saturate(0.4)]"
+          : "opacity-0 [backdrop-filter:blur(0px)_saturate(1)]")
       }
     />
   );
