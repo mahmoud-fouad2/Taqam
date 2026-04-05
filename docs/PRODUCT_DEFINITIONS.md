@@ -134,9 +134,11 @@ Cookie: ujoors_session
 
 ```
 d:\Mahmoud\hghvadt\Jisr\
-├── UJOORS_PLATFORM_COMPLETE_PLAN.md  ← الخطة (لا تُحذف!)
 ├── docs/
-│   └── PRODUCT_DEFINITIONS.md        ← هذا الملف
+│   ├── PRODUCT_DEFINITIONS.md        ← هذا الملف
+│   └── archive/
+│       └── plans/
+│           └── UJOORS_PLATFORM_COMPLETE_PLAN.md  ← الخطة المؤرشفة
 ├── i18n/
 │   ├── messages/ar.json              ← ترجمات عربية
 │   ├── messages/en.json              ← ترجمات إنجليزية

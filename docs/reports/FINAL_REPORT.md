@@ -83,7 +83,7 @@ const adapter = new PrismaPg({ connectionString: connString });
   - Connection pooling configuration
   
 ✓ Commit #2: Documentation (d9aa453)
-  - test-production.ps1
+   - scripts/manual-tests/test-production.ps1
   - TESTING_GUIDE.md
   - DEPLOYMENT_SUMMARY.md
   - REAL_PRODUCTION_TEST.md
@@ -100,7 +100,7 @@ const adapter = new PrismaPg({ connectionString: connString });
 
 #### الملفات المنشأة:
 
-1. **test-production.ps1** (450+ سطر)
+1. **scripts/manual-tests/test-production.ps1** (450+ سطر)
    - اختبار شامل لـ API
    - اختبار تسجيل الدخول
    - اختبار إنشاء شركة
@@ -153,7 +153,7 @@ d9aa453 - docs: Add comprehensive production testing and deployment documentatio
 
 ### الملفات المضافة
 ```
-✓ test-production.ps1 (450 lines)
+✓ scripts/manual-tests/test-production.ps1 (450 lines)
 ✓ TESTING_GUIDE.md (120 lines)
 ✓ DEPLOYMENT_SUMMARY.md (180 lines)
 ✓ REAL_PRODUCTION_TEST.md (45 lines)
@@ -180,7 +180,7 @@ d9aa453 - docs: Add comprehensive production testing and deployment documentatio
 1. **انتظر 2-5 دقائق** لإكمال البناء على Render
 2. **شغل الاختبار:**
    ```powershell
-   .\test-production.ps1
+   .\scripts\manual-tests\test-production.ps1
    ```
 3. **راقب النتائج** وتحقق من:
    - ✓ Login endpoint يعمل

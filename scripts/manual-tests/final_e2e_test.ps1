@@ -142,5 +142,15 @@ $report += @"
 **الحالة**: 🟢 يعمل بشكل صحيح
 "@
 
-Set-Content -Path "d:\Mahmoud\hghvadt\Jisr\E2E_REAL_TEST_RESULTS.md" -Value $report -Encoding UTF8
-Write-Host "📄 تم حفظ التقرير في: E2E_REAL_TEST_RESULTS.md`n" -ForegroundColor Green
+$RepoRoot = @(
+    (Join-Path $PSScriptRoot '..\..'),
+    (Join-Path $PSScriptRoot '..'),
+    $PSScriptRoot
+) | Where-Object { Test-Path (Join-Path $_ 'package.json') } | Select-Object -First 1
+$ReportsDir = Join-Path $RepoRoot 'docs\reports'
+$ReportRelativePath = 'docs/reports/E2E_REAL_TEST_RESULTS.md'
+$ReportPath = Join-Path $ReportsDir 'E2E_REAL_TEST_RESULTS.md'
+
+New-Item -ItemType Directory -Path $ReportsDir -Force | Out-Null
+Set-Content -Path $ReportPath -Value $report -Encoding UTF8
+Write-Host "📄 تم حفظ التقرير في: $ReportRelativePath`n" -ForegroundColor Green

@@ -95,7 +95,7 @@ Total changes: +17 insertions, -2 deletions
 
 ### الملفات المنشأة للتوثيق
 ```
-test-production.ps1      - اختبار الإنتاج المفصل
+scripts/manual-tests/test-production.ps1 - اختبار الإنتاج المفصل
 TESTING_GUIDE.md         - دليل تشغيل الاختبارات
 REAL_PRODUCTION_TEST.md  - خطة الاختبار
 SERVER_ISSUES_ANALYSIS.md - تحليل المشاكل الأصلية
@@ -121,7 +121,7 @@ SERVER_ISSUES_ANALYSIS.md - تحليل المشاكل الأصلية
 
 ### 1️⃣ اختبار تسجيل الدخول (بعد انتهاء البناء)
 ```powershell
-.\test-production.ps1
+.\scripts\manual-tests\test-production.ps1
 ```
 
 **النتيجة المتوقعة**:
@@ -193,7 +193,7 @@ SERVER_ISSUES_ANALYSIS.md - تحليل المشاكل الأصلية
 1. **انتظر 2-5 دقائق** لانتهاء البناء على Render
 2. **شغل الاختبار**:
    ```powershell
-   .\test-production.ps1
+  .\scripts\manual-tests\test-production.ps1
    ```
 3. **تحقق من النتائج**
 4. **راقب لوجات Render** للتأكد من عدم ظهور أخطاء

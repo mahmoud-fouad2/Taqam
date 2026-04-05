@@ -21,7 +21,7 @@
 
 | الملف | الوصف |
 |------|-------|
-| `test-production.ps1` | سكريبت اختبار شامل (450+ سطر) |
+| `scripts/manual-tests/test-production.ps1` | سكريبت اختبار شامل (450+ سطر) |
 | `TESTING_GUIDE.md` | دليل تشغيل الاختبارات |
 | `DEPLOYMENT_SUMMARY.md` | ملخص العمل والتعديلات |
 | `FINAL_REPORT.md` | تقرير شامل عن كل شيء |
@@ -45,7 +45,7 @@
 
 2. **تشغيل الاختبار:**
    ```powershell
-   .\test-production.ps1
+   .\scripts\manual-tests\test-production.ps1
    ```
 
 3. **التحقق من النتائج** - يجب أن تظهر:

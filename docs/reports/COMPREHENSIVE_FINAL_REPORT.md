@@ -188,7 +188,7 @@ Component Status:
 
 2. **اختبر الإصلاحات**
    ```bash
-   .\test-production.ps1
+   .\scripts\manual-tests\test-production.ps1
    ```
 
 3. **تحقق من النتائج**

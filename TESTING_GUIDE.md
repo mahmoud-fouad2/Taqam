@@ -19,9 +19,9 @@
 
 ### 2️⃣ تشغيل الاختبارات الفعلية
 ```powershell
-# انسخ واحفظ محتوى test-production.ps1
+# شغّل السكريبت من مجلد scripts/manual-tests
 # ثم شغله بعد انتهاء البناء
-.\test-production.ps1
+.\scripts\manual-tests\test-production.ps1
 ```
 
 أو تشغيل اختبار يدوي:
