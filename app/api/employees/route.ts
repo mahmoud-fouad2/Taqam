@@ -10,6 +10,8 @@ import { requireTenantSession, requireRole, parsePagination } from "@/lib/api/ro
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { z } from "zod";
 
+const EMPLOYEE_LIST_ROLES = new Set(["TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
+
 const createEmployeeRequiredSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
@@ -21,7 +23,11 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await requireTenantSession(request);
     if (!auth.ok) return auth.response;
-    const { tenantId } = auth;
+    const { tenantId, session } = auth;
+
+    if (!EMPLOYEE_LIST_ROLES.has(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { searchParams } = new URL(request.url);
     const { page, limit, skip } = parsePagination(searchParams, 100);

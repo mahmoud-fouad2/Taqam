@@ -12,6 +12,10 @@ function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
 }
 
+function canManageLeaveRequests(role: string | undefined) {
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -38,6 +42,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       include: {
         employee: {
           include: {
+            user: {
+              select: {
+                id: true,
+              },
+            },
             department: true,
             jobTitle: true,
           },
@@ -48,6 +57,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     if (!leaveRequest) {
       return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
+    }
+
+    if (!canManageLeaveRequests(session.user.role) && leaveRequest.employee.user?.id !== session.user.id) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     return NextResponse.json({ data: leaveRequest });
@@ -104,10 +117,17 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
     }
 
+    const canManage = canManageLeaveRequests(session.user.role);
+    const isSelf = existing.employee.userId === session.user.id;
+
     // Handle approval/rejection
     const actionRaw = typeof body.action === "string" ? body.action : "";
     const action = actionRaw.toLowerCase();
     if (action === "approve" || action === "reject") {
+      if (!canManage) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
       const year = existing.startDate.getFullYear();
       const totalDays = Number(existing.totalDays);
 
@@ -163,6 +183,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ data: leaveRequest });
     }
 
+    if (!canManage && !isSelf) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
     // Regular update
     const leaveRequest = await prisma.leaveRequest.update({
       where: { id },
@@ -207,6 +231,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (!existing) {
       return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
+    }
+
+    if (!canManageLeaveRequests(session.user.role)) {
+      const requesterEmployee = await prisma.employee.findFirst({
+        where: { tenantId: existing.tenantId, userId: session.user.id },
+        select: { id: true },
+      });
+
+      if (!requesterEmployee || requesterEmployee.id !== existing.employeeId) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
     }
 
     if (existing.status !== "PENDING") {

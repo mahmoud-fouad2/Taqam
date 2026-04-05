@@ -40,7 +40,7 @@ const userSchema = z.object({
   lastName: z.string().min(2, "اسم العائلة مطلوب (حرفين على الأقل)"),
   email: z.string().email("البريد الإلكتروني غير صالح"),
   password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-  role: z.enum(["EMPLOYEE", "HR_MANAGER", "TENANT_ADMIN"], {
+  role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"], {
     required_error: "الدور مطلوب",
   }),
   phone: z.string().optional(),
@@ -103,6 +103,7 @@ export default function AddUserPage() {
   const roleOptions = [
     { value: "EMPLOYEE", label: isRtl ? "موظف" : "Employee" },
     { value: "HR_MANAGER", label: isRtl ? "مدير الموارد البشرية" : "HR Manager" },
+    { value: "MANAGER", label: isRtl ? "مدير" : "Manager" },
     { value: "TENANT_ADMIN", label: isRtl ? "مدير الشركة" : "Tenant Admin" },
   ];
 

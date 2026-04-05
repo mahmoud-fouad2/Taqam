@@ -7,7 +7,7 @@ import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
 
 const ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"] as const;
-const MANAGEABLE_ROLES = new Set(["EMPLOYEE", "HR_MANAGER", "TENANT_ADMIN"]);
+const MANAGEABLE_ROLES = new Set(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]);
 
 function canAssignRole(actorRole: string | undefined, targetRole: string): boolean {
   if (!MANAGEABLE_ROLES.has(targetRole)) {

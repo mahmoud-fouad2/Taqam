@@ -20,6 +20,7 @@ const ALLOWED_ROLES = [UserRole.TENANT_ADMIN, UserRole.HR_MANAGER] as const;
 const MANAGEABLE_ROLES = new Set<UserRole>([
   UserRole.EMPLOYEE,
   UserRole.HR_MANAGER,
+  UserRole.MANAGER,
   UserRole.TENANT_ADMIN,
 ]);
 

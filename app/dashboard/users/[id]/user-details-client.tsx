@@ -85,6 +85,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
     if (role === "SUPER_ADMIN") return "مدير النظام";
     if (role === "TENANT_ADMIN") return "مدير الشركة";
     if (role === "HR_MANAGER") return "مدير الموارد البشرية";
+    if (role === "MANAGER") return "مدير";
     if (role === "EMPLOYEE") return "موظف";
     return role;
   };

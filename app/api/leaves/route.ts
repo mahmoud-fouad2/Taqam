@@ -24,6 +24,14 @@ function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
 }
 
+function canManageLeaveRequests(role: string | undefined) {
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+}
+
+function canCreateLeaveForOthers(role: string | undefined) {
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER";
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -53,7 +61,22 @@ export async function GET(request: NextRequest) {
 
     where.tenantId = tenantId;
 
-    if (employeeId) {
+    if (!canManageLeaveRequests(session.user.role)) {
+      const requesterEmployee = await prisma.employee.findFirst({
+        where: { tenantId, userId: session.user.id },
+        select: { id: true },
+      });
+
+      if (!requesterEmployee) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      if (employeeId && employeeId !== requesterEmployee.id) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      where.employeeId = requesterEmployee.id;
+    } else if (employeeId) {
       where.employeeId = employeeId;
     }
 
@@ -133,6 +156,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
     }
     const body = parsed.data;
+
+    if (!canCreateLeaveForOthers(session.user.role)) {
+      const requesterEmployee = await prisma.employee.findFirst({
+        where: { tenantId, userId: session.user.id },
+        select: { id: true },
+      });
+
+      if (!requesterEmployee || requesterEmployee.id !== body.employeeId) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    }
 
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);

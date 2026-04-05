@@ -10,6 +10,33 @@ import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+const EMPLOYEE_VIEW_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
+const EMPLOYEE_MANAGE_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
+
+function canViewEmployee(role: string | undefined) {
+  return EMPLOYEE_VIEW_ROLES.has(role ?? "");
+}
+
+function canManageEmployee(role: string | undefined) {
+  return EMPLOYEE_MANAGE_ROLES.has(role ?? "");
+}
+
+function buildSelfEmployeeUpdate(body: Record<string, any>) {
+  return {
+    firstNameAr: body.firstNameAr,
+    lastNameAr: body.lastNameAr,
+    email: body.email,
+    phone: body.phone,
+    nationalId: body.nationalId,
+    dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
+    gender: body.gender,
+    nationality: body.nationality,
+    maritalStatus: body.maritalStatus,
+    address: body.address ?? undefined,
+    emergencyContact: body.emergencyContact ?? undefined,
+  };
+}
+
 interface RouteParams {
   params: Promise<{ id: string }>;
 }
@@ -60,6 +87,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    if (!canViewEmployee(session.user.role) && employee.user?.id !== session.user.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     return NextResponse.json({ data: employee });
   } catch (error) {
     console.error("Error fetching employee:", error);
@@ -84,6 +115,11 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Verify employee exists and belongs to tenant
     const existing = await prisma.employee.findUnique({
       where: { id },
+      select: {
+        id: true,
+        tenantId: true,
+        userId: true,
+      },
     });
 
     if (!existing) {
@@ -94,31 +130,42 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    const isPrivilegedManager = canManageEmployee(session.user.role);
+    const isSelf = existing.userId === session.user.id;
+
+    if (!isPrivilegedManager && !isSelf) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    const data = isPrivilegedManager
+      ? {
+          firstName: body.firstName,
+          lastName: body.lastName,
+          firstNameAr: body.firstNameAr,
+          lastNameAr: body.lastNameAr,
+          email: body.email,
+          phone: body.phone,
+          nationalId: body.nationalId,
+          dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
+          gender: body.gender,
+          nationality: body.nationality,
+          maritalStatus: body.maritalStatus,
+          address: body.address ?? undefined,
+          emergencyContact: body.emergencyContact ?? undefined,
+          departmentId: body.departmentId,
+          jobTitleId: body.jobTitleId,
+          managerId: body.managerId,
+          employmentType: body.employmentType,
+          status: body.status,
+          shiftId: body.shiftId,
+          workLocation: body.workLocation,
+          baseSalary: body.baseSalary,
+        }
+      : buildSelfEmployeeUpdate(body);
+
     const employee = await prisma.employee.update({
       where: { id },
-      data: {
-        firstName: body.firstName,
-        lastName: body.lastName,
-        firstNameAr: body.firstNameAr,
-        lastNameAr: body.lastNameAr,
-        email: body.email,
-        phone: body.phone,
-        nationalId: body.nationalId,
-        dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
-        gender: body.gender,
-        nationality: body.nationality,
-        maritalStatus: body.maritalStatus,
-        address: body.address ?? undefined,
-        emergencyContact: body.emergencyContact ?? undefined,
-        departmentId: body.departmentId,
-        jobTitleId: body.jobTitleId,
-        managerId: body.managerId,
-        employmentType: body.employmentType,
-        status: body.status,
-        shiftId: body.shiftId,
-        workLocation: body.workLocation,
-        baseSalary: body.baseSalary,
-      },
+      data,
       include: {
         department: true,
         jobTitle: true,
@@ -146,6 +193,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const existing = await prisma.employee.findUnique({
       where: { id },
+      select: {
+        id: true,
+        tenantId: true,
+        status: true,
+      },
     });
 
     if (!existing) {
@@ -154,6 +206,10 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (session.user.tenantId && existing.tenantId !== session.user.tenantId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (!canManageEmployee(session.user.role)) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     // Two-step delete:

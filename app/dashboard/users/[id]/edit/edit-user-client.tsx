@@ -38,7 +38,7 @@ const userSchema = z.object({
   firstName: z.string().min(2, "الاسم الأول مطلوب"),
   lastName: z.string().min(2, "اسم العائلة مطلوب"),
   email: z.string().email("البريد الإلكتروني غير صالح"),
-  role: z.enum(["EMPLOYEE", "HR_MANAGER", "TENANT_ADMIN"]),
+  role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_VERIFICATION"]),
   phone: z.string().optional(),
 });
@@ -106,6 +106,7 @@ export default function EditUserClient({ user, locale }: Props) {
   const roleOptions = [
     { value: "EMPLOYEE", label: isRtl ? "موظف" : "Employee" },
     { value: "HR_MANAGER", label: isRtl ? "مدير الموارد البشرية" : "HR Manager" },
+    { value: "MANAGER", label: isRtl ? "مدير" : "Manager" },
     { value: "TENANT_ADMIN", label: isRtl ? "مدير الشركة" : "Tenant Admin" },
   ];
 
