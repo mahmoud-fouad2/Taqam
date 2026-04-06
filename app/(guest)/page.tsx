@@ -21,6 +21,7 @@ import {
   Star,
   Zap,
   Lock,
+  PlayCircle,
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -160,6 +161,12 @@ const trustItems = [
   { icon: Star, labelAr: "دعم فني على مدار الساعة", labelEn: "24/7 technical support" },
 ];
 
+const heroMediaItems = [
+  { src: "/images/marketing/screenshot-dashboard.svg?v=2", labelAr: "لوحة التحكم", labelEn: "Dashboard" },
+  { src: "/images/marketing/screenshot-employees.svg?v=2", labelAr: "الموظفون", labelEn: "Employees" },
+  { src: "/images/marketing/screenshot-payroll-new.svg?v=2", labelAr: "الرواتب", labelEn: "Payroll" },
+];
+
 export default async function LandingPage({
   searchParams,
 }: {
@@ -285,41 +292,59 @@ export default async function LandingPage({
                   app.taqam.net
                 </div>
               </div>
-              <div className="aspect-[16/10] overflow-hidden bg-muted">
-                <Image
-                  src="/images/marketing/screenshot-dashboard.svg?v=2"
-                  alt={isAr ? "لوحة تحكم طاقم" : "Taqam dashboard"}
-                  unoptimized
-                  width={1200}
-                  height={700}
+              <div className="relative aspect-[16/10] overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.24),_transparent_50%),linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.82))]">
+                <video
+                  autoPlay
                   className="h-full w-full object-cover"
-                  priority
-                />
+                  loop
+                  muted
+                  playsInline
+                  poster="/images/marketing/screenshot-dashboard.svg"
+                  preload="metadata"
+                >
+                  <source src="/videos/hero-square.mp4" type="video/mp4" />
+                </video>
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/65 via-slate-950/10 to-transparent" />
+                <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4 text-white sm:px-5">
+                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur-md">
+                    <PlayCircle className="h-3.5 w-3.5" />
+                    <span>{isAr ? "جولة مرئية داخل المنصة" : "Platform video tour"}</span>
+                  </div>
+                  <div className="rounded-full border border-white/15 bg-black/25 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md">
+                    {isAr ? "تشغيل تلقائي" : "Autoplay"}
+                  </div>
+                </div>
+                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-4 pb-4 text-white sm:px-5 sm:pb-5">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">
+                      {isAr ? "معاينة تشغيلية" : "Live preview"}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold sm:text-base">
+                      {isAr ? "شاهد تجربة طاقم بدلًا من لقطة ثابتة" : "See the product in motion, not just a static screenshot"}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Mini screenshots row */}
             <div className="mt-3 grid grid-cols-3 gap-3">
-              {[
-                { src: "/preview.png", labelAr: "لوحة التحكم", labelEn: "Dashboard" },
-                { src: "/images/marketing/screenshot-employees.svg?v=2", labelAr: "الموظفون", labelEn: "Employees" },
-                { src: "/images/marketing/screenshot-payroll-new.svg?v=2", labelAr: "الرواتب", labelEn: "Payroll" },
-              ].map((item) => (
+              {heroMediaItems.map((item) => (
                 <Link
                   key={item.src}
                   href={`${p}/screenshots`}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <Image
                     src={item.src}
                     alt={isAr ? item.labelAr : item.labelEn}
-                    unoptimized={item.src.endsWith(".svg")}
+                    unoptimized={item.src.includes(".svg")}
                     fill
                     sizes="180px"
                     className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
-                  <span className="absolute bottom-1.5 start-2 text-[10px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
+                  <span className="absolute bottom-2 start-2 rounded-full border border-white/15 bg-black/35 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm transition-colors group-hover:bg-black/50">
                     {isAr ? item.labelAr : item.labelEn}
                   </span>
                 </Link>

@@ -16,10 +16,18 @@ function run(cmd, args, { label } = {}) {
 
 async function main() {
   const bootstrapEnabled = process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
+  const skipStartupMigrations = process.env.SKIP_STARTUP_MIGRATIONS === "true";
 
-  // Migrations run in preDeployCommand on Render before this script starts.
-  // Skipping duplicate migrate here to save memory and startup time.
-  console.log("[render-start] schema migrations handled by preDeployCommand; skipping.");
+  if (skipStartupMigrations) {
+    console.log("[render-start] startup migrations disabled; relying on preDeployCommand.");
+  } else {
+    console.log("[render-start] Running prisma migrate deploy as a startup safety net...");
+    const migrate = await run(bin("prisma"), ["migrate", "deploy"], { label: "prisma-migrate-deploy" });
+    if (migrate.code !== 0) {
+      console.error("[render-start] prisma migrate deploy failed; refusing to start app.");
+      process.exit(migrate.code);
+    }
+  }
 
   // 2) Ensure bootstrap super admin.
   if (bootstrapEnabled) {
