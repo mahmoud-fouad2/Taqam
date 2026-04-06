@@ -12,7 +12,7 @@ export function mapPayrollPeriod(period: any) {
     startDate: toIsoDate(period.startDate),
     endDate: toIsoDate(period.endDate),
     paymentDate: toIsoDate(period.paymentDate),
-    status: String(period.status).toLowerCase(),
+    status: String(period.status).toUpperCase(),
     totalGross: Number(period.totalGross),
     totalDeductions: Number(period.totalDeductions),
     totalNet: Number(period.totalNet),

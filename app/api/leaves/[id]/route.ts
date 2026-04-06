@@ -12,6 +12,10 @@ function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
 }
 
+function mapLeaveRequest(r: any) {
+  return { ...r, totalDays: Number(r.totalDays) };
+}
+
 function canManageLeaveRequests(role: string | undefined) {
   return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
 }
@@ -63,7 +67,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json({ data: leaveRequest });
+    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
   } catch (error) {
     console.error("Error fetching leave request:", error);
     return NextResponse.json(
@@ -180,7 +184,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         });
       }
 
-      return NextResponse.json({ data: leaveRequest });
+      return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
     }
 
     if (!canManage && !isSelf) {
@@ -198,7 +202,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       },
     });
 
-    return NextResponse.json({ data: leaveRequest });
+    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
   } catch (error) {
     console.error("Error updating leave request:", error);
     return NextResponse.json(

@@ -13,7 +13,12 @@ export async function GET(request: NextRequest) {
   try {
     const auth = await requireTenantSession(request);
     if (!auth.ok) return auth.response;
-    const { tenantId } = auth;
+    const { tenantId, session } = auth;
+
+    const PAYROLL_READ_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+    if (!PAYROLL_READ_ROLES.includes(session.user.role ?? "")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const { searchParams } = new URL(request.url);
 
@@ -56,7 +61,12 @@ export async function POST(request: NextRequest) {
   try {
     const auth = await requireTenantSession(request);
     if (!auth.ok) return auth.response;
-    const { tenantId } = auth;
+    const { tenantId, session } = auth;
+
+    const PAYROLL_WRITE_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+    if (!PAYROLL_WRITE_ROLES.includes(session.user.role ?? "")) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
 
     const body = await request.json();
 

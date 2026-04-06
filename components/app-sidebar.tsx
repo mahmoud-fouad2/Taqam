@@ -65,6 +65,131 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
     ];
   }
 
+  if (role === "EMPLOYEE") {
+    return [
+      {
+        title: locale === "ar" ? "الرئيسية" : "Dashboard",
+        url: `${p}/dashboard`,
+        icon: IconDashboard,
+      },
+      {
+        title: locale === "ar" ? "طلباتي" : "My Requests",
+        url: `${p}/dashboard/my-requests`,
+        icon: IconListDetails,
+      },
+      {
+        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
+        url: `${p}/dashboard/help-center`,
+        icon: IconHelp,
+      },
+      {
+        title: locale === "ar" ? "الدعم الفني" : "Support",
+        url: `${p}/dashboard/support`,
+        icon: IconMessageCircle,
+      },
+      {
+        title: locale === "ar" ? "إعدادات النظام" : "Settings",
+        url: `${p}/dashboard/settings`,
+        icon: IconFolder,
+      },
+    ];
+  }
+
+  if (role === "MANAGER") {
+    return [
+      {
+        title: locale === "ar" ? "الرئيسية" : "Dashboard",
+        url: `${p}/dashboard`,
+        icon: IconDashboard,
+      },
+      {
+        title: locale === "ar" ? "الموظفون" : "Employees",
+        url: `${p}/dashboard/employees`,
+        icon: IconUsers,
+      },
+      {
+        title: locale === "ar" ? "الطلبات" : "Requests",
+        url: `${p}/dashboard/requests`,
+        icon: IconListDetails,
+      },
+      {
+        title: locale === "ar" ? "طلباتي" : "My Requests",
+        url: `${p}/dashboard/my-requests`,
+        icon: IconChartBar,
+      },
+      {
+        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
+        url: `${p}/dashboard/help-center`,
+        icon: IconHelp,
+      },
+      {
+        title: locale === "ar" ? "الدعم الفني" : "Support",
+        url: `${p}/dashboard/support`,
+        icon: IconMessageCircle,
+      },
+      {
+        title: locale === "ar" ? "إعدادات النظام" : "Settings",
+        url: `${p}/dashboard/settings`,
+        icon: IconFolder,
+      },
+    ];
+  }
+
+  if (role === "HR_MANAGER") {
+    return [
+      {
+        title: locale === "ar" ? "الرئيسية" : "Dashboard",
+        url: `${p}/dashboard`,
+        icon: IconDashboard,
+      },
+      {
+        title: locale === "ar" ? "الموظفون" : "Employees",
+        url: `${p}/dashboard/employees`,
+        icon: IconUsers,
+      },
+      {
+        title: locale === "ar" ? "الأقسام" : "Departments",
+        url: `${p}/dashboard/departments`,
+        icon: IconFolder,
+      },
+      {
+        title: locale === "ar" ? "المسميات الوظيفية" : "Job Titles",
+        url: `${p}/dashboard/job-titles`,
+        icon: IconBriefcase,
+      },
+      {
+        title: locale === "ar" ? "المستخدمون" : "Users",
+        url: `${p}/dashboard/users`,
+        icon: IconUsers,
+      },
+      {
+        title: locale === "ar" ? "الطلبات" : "Requests",
+        url: `${p}/dashboard/requests`,
+        icon: IconListDetails,
+      },
+      {
+        title: locale === "ar" ? "التقارير" : "Reports",
+        url: `${p}/dashboard/reports`,
+        icon: IconChartBar,
+      },
+      {
+        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
+        url: `${p}/dashboard/help-center`,
+        icon: IconHelp,
+      },
+      {
+        title: locale === "ar" ? "الدعم الفني" : "Support",
+        url: `${p}/dashboard/support`,
+        icon: IconMessageCircle,
+      },
+      {
+        title: locale === "ar" ? "إعدادات النظام" : "Settings",
+        url: `${p}/dashboard/settings`,
+        icon: IconFolder,
+      },
+    ];
+  }
+
   return [
     {
       title: locale === "ar" ? "الرئيسية" : "Dashboard",

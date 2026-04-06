@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
           avatar: true,
           role: true,
           status: true,
+          tenantId: true,
           lastLoginAt: true,
           createdAt: true,
         },
@@ -148,6 +149,7 @@ export async function POST(request: NextRequest) {
         lastName: true,
         role: true,
         status: true,
+        tenantId: true,
       },
     });
 

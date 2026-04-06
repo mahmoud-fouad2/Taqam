@@ -24,6 +24,10 @@ function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
 }
 
+function mapLeaveRequest(r: any) {
+  return { ...r, totalDays: Number(r.totalDays) };
+}
+
 function canManageLeaveRequests(role: string | undefined) {
   return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
 }
@@ -119,7 +123,7 @@ export async function GET(request: NextRequest) {
     ]);
 
     return NextResponse.json({
-      data: requests,
+      data: requests.map(mapLeaveRequest),
       pagination: {
         page,
         limit,
@@ -258,7 +262,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return NextResponse.json({ data: leaveRequest }, { status: 201 });
+    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) }, { status: 201 });
   } catch (error) {
     console.error("Error creating leave request:", error);
     return NextResponse.json(
