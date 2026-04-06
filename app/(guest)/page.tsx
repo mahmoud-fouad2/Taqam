@@ -248,13 +248,13 @@ const testimonials = [
   },
 ];
 
-const integrationBadges = [
-  { name: "GOSI", descAr: "التأمينات الاجتماعية", descEn: "Social Insurance", icon: Shield, color: "bg-green-600" },
-  { name: "WPS", descAr: "نظام حماية الأجور", descEn: "Wage Protection", icon: CreditCard, color: "bg-blue-600" },
-  { name: "مدد", descAr: "إدارة العمالة الوافدة", descEn: "Expat Labour", icon: Users, color: "bg-indigo-600" },
-  { name: "مقيم", descAr: "خدمات الإقامة", descEn: "Residency Services", icon: Globe, color: "bg-purple-600" },
-  { name: "مستفيد", descAr: "التوظيف والتدريب", descEn: "Employment Portal", icon: Building2, color: "bg-teal-600" },
-  { name: "SAP", descAr: "تكامل ERP", descEn: "ERP Integration", icon: Layers, color: "bg-slate-600" },
+const integrations = [
+  { id: "gosi",    name: "GOSI",    descAr: "التأمينات الاجتماعية", descEn: "Social Insurance",    fill: "#1B7B4B", fontSize: 12 },
+  { id: "wps",     name: "WPS",     descAr: "نظام حماية الأجور",    descEn: "Wage Protection",     fill: "#005BAA", fontSize: 13 },
+  { id: "mudad",   name: "مدد",     descAr: "إدارة العمالة الوافدة",descEn: "Expat Labour Mgmt",   fill: "#D4480A", fontSize: 15 },
+  { id: "muqeem",  name: "مقيم",    descAr: "خدمات الإقامة",        descEn: "Residency Services",  fill: "#1A3670", fontSize: 13 },
+  { id: "mustafid",name: "مستفيد", descAr: "التوظيف والتدريب",     descEn: "Employment Portal",   fill: "#007850", fontSize: 10 },
+  { id: "sap",     name: "SAP",     descAr: "تكامل ERP",             descEn: "ERP Integration",     fill: "#0070F2", fontSize: 13 },
 ];
 
 export default async function LandingPage({
@@ -384,17 +384,16 @@ export default async function LandingPage({
               </div>
               <HeroVideo
                 src="/videos/hero-square.mp4"
-                poster="/images/marketing/screenshot-dashboard.svg"
               />
             </div>
 
             {/* Mini screenshots row */}
-            <div className="mt-3 grid grid-cols-3 gap-3">
+            <div className="mt-2 grid grid-cols-3 gap-1.5">
               {heroMediaItems.map((item) => (
                 <Link
                   key={item.src}
                   href={`${p}/screenshots`}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-xl border bg-muted shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-md"
                 >
                   <Image
                     src={item.src}
@@ -480,72 +479,77 @@ export default async function LandingPage({
       </section>
 
       {/* ── PERSONAS ─────────────────────────────────────────── */}
-      <section className="overflow-hidden py-24">
-        <div className="container mx-auto px-4">
-          <div className="mb-14 text-center">
-            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-              {isAr ? "لمن طاقم؟" : "Who is Taqam for?"}
-            </span>
-            <h2 className="text-3xl font-bold sm:text-4xl">
-              {isAr ? "مصمم لكل دور في فريقك" : "Built for every role in your team"}
-            </h2>
-            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-              {isAr
-                ? "سواء كنت مديراً تنفيذياً أو متخصص موارد بشرية أو موظفاً — طاقم يخدم احتياجاتك"
-                : "Whether you're an executive, HR specialist, or employee — Taqam serves your needs"}
-            </p>
-          </div>
-
-          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-            {personas.map((persona) => {
-              const PersonaIcon = persona.icon;
-              return (
-                <div
-                  key={persona.roleEn}
-                  className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
-                >
-                  <div className="relative h-52 overflow-hidden">
-                    <Image
-                      src={persona.photo}
-                      alt={isAr ? persona.roleAr : persona.roleEn}
-                      fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      unoptimized
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                    <div className="absolute bottom-0 start-0 p-4">
-                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white ${persona.badge}`}>
-                        <PersonaIcon className="h-3.5 w-3.5" />
-                        {isAr ? persona.roleAr : persona.roleEn}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="p-5">
-                    <h3 className="mb-2 text-base font-bold">{isAr ? persona.titleAr : persona.titleEn}</h3>
-                    <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-                      {isAr ? persona.descAr : persona.descEn}
-                    </p>
-                    <ul className="space-y-2">
-                      {persona.features.map((f) => (
-                        <li key={f.en} className="flex items-start gap-2 text-xs text-muted-foreground">
-                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-                          {isAr ? f.ar : f.en}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      <section className="overflow-hidden border-t">
+        <div className="container mx-auto px-4 py-16 text-center">
+          <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+            {isAr ? "لمن طاقم؟" : "Who is Taqam for?"}
+          </span>
+          <h2 className="text-3xl font-bold sm:text-4xl">
+            {isAr ? "مصمم لكل دور في فريقك" : "Built for every role in your team"}
+          </h2>
         </div>
+
+        {personas.map((persona, i) => {
+          const PersonaIcon = persona.icon;
+          return (
+            <div
+              key={persona.roleEn}
+              className={`flex flex-col lg:flex-row ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""} ${i % 2 === 0 ? "bg-muted/20" : "bg-background"}`}
+            >
+              {/* Photo */}
+              <div className="relative h-64 shrink-0 overflow-hidden lg:h-[440px] lg:w-[45%]">
+                <Image
+                  src={persona.photo}
+                  alt={isAr ? persona.roleAr : persona.roleEn}
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 45vw"
+                  className="object-cover"
+                  unoptimized
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <span className="pointer-events-none absolute bottom-4 end-4 select-none text-[6rem] font-black leading-none text-white/[0.07]">
+                  0{i + 1}
+                </span>
+                <div className="absolute bottom-5 start-5">
+                  <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-white shadow-lg ${persona.badge}`}>
+                    <PersonaIcon className="h-3.5 w-3.5" />
+                    {isAr ? persona.roleAr : persona.roleEn}
+                  </span>
+                </div>
+              </div>
+
+              {/* Text */}
+              <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-14 xl:px-20">
+                <p className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-primary/70">
+                  {`0${i + 1} — ${isAr ? persona.roleAr : persona.roleEn}`}
+                </p>
+                <h3 className="text-2xl font-bold leading-snug lg:text-3xl">
+                  {isAr ? persona.titleAr : persona.titleEn}
+                </h3>
+                <p className="mt-4 leading-relaxed text-muted-foreground">
+                  {isAr ? persona.descAr : persona.descEn}
+                </p>
+                <ul className="mt-7 space-y-3.5">
+                  {persona.features.map((f) => (
+                    <li key={f.en} className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                        <CheckCircle2 className="h-3 w-3 text-primary" />
+                      </div>
+                      <span className="text-sm text-muted-foreground">{isAr ? f.ar : f.en}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          );
+        })}
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       <section className="bg-slate-950 py-24 text-white dark:bg-black">
         <div className="container mx-auto px-4">
-          <div className="mb-14 text-center">
+          {/* Header */}
+          <div className="mb-16 text-center">
             <span className="mb-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/70">
               {isAr ? "قصص النجاح" : "Success stories"}
             </span>
@@ -554,29 +558,73 @@ export default async function LandingPage({
             </h2>
           </div>
 
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {testimonials.map((t) => (
+          {/* Featured hero quote */}
+          <div className="mx-auto mb-16 max-w-3xl text-center">
+            <svg
+              aria-hidden="true"
+              className="mx-auto mb-6 h-12 w-12 text-indigo-400 opacity-60"
+              fill="currentColor"
+              viewBox="0 0 32 32"
+            >
+              <path d="M10 6C5.6 6 2 9.6 2 14c0 4 2.7 7.4 6.5 8.3L6 26h4l3.5-6c.3-.6.5-1.3.5-2V6H10zm14 0c-4.4 0-8 3.6-8 8 0 4 2.7 7.4 6.5 8.3L20 26h4l3.5-6c.3-.6.5-1.3.5-2V6h-4z" />
+            </svg>
+            <blockquote className="text-xl font-light italic leading-relaxed text-white/90 sm:text-2xl">
+              {isAr ? testimonials[0].quoteAr : testimonials[0].quoteEn}
+            </blockquote>
+            <div className="mt-9 flex items-center justify-center gap-4">
+              <Image
+                alt={isAr ? testimonials[0].nameAr : testimonials[0].nameEn}
+                className="rounded-full object-cover ring-2 ring-indigo-500/50"
+                height={52}
+                src={testimonials[0].avatar}
+                unoptimized
+                width={52}
+              />
+              <div className="text-start">
+                <p className="font-semibold text-white">
+                  {isAr ? testimonials[0].nameAr : testimonials[0].nameEn}
+                </p>
+                <p className="text-sm text-white/60">
+                  {isAr ? testimonials[0].roleAr : testimonials[0].roleEn}
+                </p>
+                <div className="mt-1.5 flex gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="h-3 w-3 fill-amber-400 text-amber-400" />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Two compact testimonials */}
+          <div className="grid gap-5 border-t border-white/10 pt-12 sm:grid-cols-2">
+            {testimonials.slice(1).map((t) => (
               <div
                 key={t.nameEn}
-                className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:bg-white/[0.08]"
+                className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:bg-white/[0.08]"
               >
-                <p className="mb-1 font-serif text-3xl leading-none text-indigo-400">"</p>
-                <p className="mb-6 flex-1 text-sm leading-relaxed text-white/85">
-                  {isAr ? t.quoteAr : t.quoteEn}
-                </p>
-                <div className="flex items-center gap-3">
-                  <Image
-                    src={t.avatar}
-                    alt={isAr ? t.nameAr : t.nameEn}
-                    width={40}
-                    height={40}
-                    className="rounded-full object-cover ring-2 ring-white/20"
-                    unoptimized
-                  />
-                  <div>
-                    <p className="text-sm font-semibold text-white">{isAr ? t.nameAr : t.nameEn}</p>
-                    <p className="text-xs text-white/60">{isAr ? t.roleAr : t.roleEn}</p>
-                  </div>
+                <Image
+                  alt={isAr ? t.nameAr : t.nameEn}
+                  className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white/15"
+                  height={48}
+                  src={t.avatar}
+                  unoptimized
+                  width={48}
+                />
+                <div>
+                  <svg
+                    aria-hidden="true"
+                    className="mb-2 h-5 w-5 text-indigo-400/60"
+                    fill="currentColor"
+                    viewBox="0 0 32 32"
+                  >
+                    <path d="M10 6C5.6 6 2 9.6 2 14c0 4 2.7 7.4 6.5 8.3L6 26h4l3.5-6c.3-.6.5-1.3.5-2V6H10zm14 0c-4.4 0-8 3.6-8 8 0 4 2.7 7.4 6.5 8.3L20 26h4l3.5-6c.3-.6.5-1.3.5-2V6h-4z" />
+                  </svg>
+                  <p className="text-sm leading-relaxed text-white/80">
+                    {isAr ? t.quoteAr : t.quoteEn}
+                  </p>
+                  <p className="mt-3 text-sm font-semibold text-white">{isAr ? t.nameAr : t.nameEn}</p>
+                  <p className="text-xs text-white/60">{isAr ? t.roleAr : t.roleEn}</p>
                 </div>
               </div>
             ))}
@@ -690,24 +738,40 @@ export default async function LandingPage({
                 : "Taqam connects directly with Saudi government entities and accounting systems"}
             </p>
           </div>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            {integrationBadges.map((int) => {
-              const IntIcon = int.icon;
-              return (
-                <div
-                  key={int.name}
-                  className="flex items-center gap-2.5 rounded-xl border bg-card px-5 py-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4">
+            {integrations.map((item) => (
+              <div
+                key={item.id}
+                className="group flex flex-col items-center gap-2.5 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+              >
+                <svg
+                  aria-label={item.name}
+                  height="48"
+                  role="img"
+                  viewBox="0 0 48 48"
+                  width="48"
+                  className="rounded-xl shadow-sm"
                 >
-                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${int.color}`}>
-                    <IntIcon className="h-4 w-4 text-white" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold">{int.name}</p>
-                    <p className="text-xs text-muted-foreground">{isAr ? int.descAr : int.descEn}</p>
-                  </div>
-                </div>
-              );
-            })}
+                  <rect width="48" height="48" rx="10" fill={item.fill} />
+                  <text
+                    dominantBaseline="middle"
+                    fill="white"
+                    fontFamily="system-ui,-apple-system,Arial,sans-serif"
+                    fontSize={item.fontSize}
+                    fontWeight="700"
+                    textAnchor="middle"
+                    x="24"
+                    y="25"
+                  >
+                    {item.name}
+                  </text>
+                </svg>
+                <p className="text-center text-xs font-semibold">{item.name}</p>
+                <p className="text-center text-[10px] leading-tight text-muted-foreground">
+                  {isAr ? item.descAr : item.descEn}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>

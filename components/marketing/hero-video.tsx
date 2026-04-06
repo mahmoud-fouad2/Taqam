@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 import { Volume2, VolumeX } from "lucide-react";
 
-export function HeroVideo({ src, poster }: { src: string; poster?: string }) {
+export function HeroVideo({ src }: { src: string }) {
   const [muted, setMuted] = useState(true);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -16,7 +16,7 @@ export function HeroVideo({ src, poster }: { src: string; poster?: string }) {
   }
 
   return (
-    <div className="relative aspect-[16/10] overflow-hidden">
+    <div className="relative aspect-square overflow-hidden">
       <video
         ref={videoRef}
         autoPlay
@@ -24,8 +24,7 @@ export function HeroVideo({ src, poster }: { src: string; poster?: string }) {
         loop
         muted
         playsInline
-        poster={poster}
-        preload="metadata"
+        preload="auto"
       >
         <source src={src} type="video/mp4" />
       </video>

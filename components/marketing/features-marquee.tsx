@@ -64,17 +64,17 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
         ))}
       </div>
 
-      <div className="features-orbit-stage relative hidden h-[42rem] overflow-hidden lg:block">
+      <div className="features-orbit-stage relative hidden h-[36rem] overflow-hidden lg:block">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.08),transparent_48%)]" />
         <div className="pointer-events-none absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-border/70 to-transparent" />
-        <div className="pointer-events-none absolute start-1/2 top-1/2 h-[17rem] w-[17rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15 bg-background/85 shadow-[0_25px_80px_-45px_rgba(15,23,42,0.45)] backdrop-blur-sm" />
-        <div className="pointer-events-none absolute start-1/2 top-1/2 h-[30rem] w-[56rem] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-border/60" />
+        <div className="pointer-events-none absolute start-1/2 top-1/2 h-[13rem] w-[13rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/15 bg-background/85 shadow-[0_25px_80px_-45px_rgba(15,23,42,0.45)] backdrop-blur-sm" />
+        <div className="pointer-events-none absolute start-1/2 top-1/2 h-[20rem] w-[38rem] -translate-x-1/2 -translate-y-1/2 rounded-[999px] border border-border/60" />
 
-        <div className="absolute start-1/2 top-1/2 z-10 flex h-[13rem] w-[13rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full text-center">
+        <div className="absolute start-1/2 top-1/2 z-10 flex h-[10rem] w-[10rem] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full text-center">
           <span className="rounded-full bg-primary/10 px-3 py-1 text-[11px] font-semibold text-primary">
             {isAr ? "منصة موحدة" : "Unified Platform"}
           </span>
-          <p className="mt-4 text-2xl font-bold tracking-tight text-foreground">
+          <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
             {isAr ? "طاقم" : "Taqam"}
           </p>
           <p className="mt-2 max-w-[10rem] text-xs leading-5 text-muted-foreground">
@@ -84,7 +84,7 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
           </p>
         </div>
 
-        <div className="features-orbit-rotator absolute start-1/2 top-1/2 h-0 w-0 [--orbit-duration:34s] [--orbit-radius:20rem] xl:[--orbit-radius:24rem]">
+        <div className="features-orbit-rotator absolute start-1/2 top-1/2 h-0 w-0 [--orbit-duration:34s] [--orbit-radius:13rem] xl:[--orbit-radius:15rem]">
           {features.map((feature) => {
             return (
               <div
@@ -96,7 +96,7 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
                     <FeatureCard
                       feature={feature}
                       isAr={isAr}
-                      className="features-orbit-card w-72"
+                      className="features-orbit-card w-52"
                     />
                   </div>
                 </div>
