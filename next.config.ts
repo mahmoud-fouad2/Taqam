@@ -8,8 +8,13 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === "true",
 });
 
+const enableSentryWebpackPlugin = process.env.DISABLE_SENTRY_BUILD !== "true";
+
 const nextConfig: NextConfig = {
   output: "standalone",
+  experimental: {
+    optimizePackageImports: ["lucide-react", "@tabler/icons-react", "@radix-ui/react-icons"],
+  },
   async headers() {
     const isProd = process.env.NODE_ENV === "production";
 
@@ -104,7 +109,9 @@ const nextConfigWithIntl = withNextIntl(nextConfig);
 
 const nextConfigWithAnalyzer = withBundleAnalyzer(nextConfigWithIntl);
 
-export default withSentryConfig(nextConfigWithAnalyzer, {
-  silent: true,
-});
+export default enableSentryWebpackPlugin
+  ? withSentryConfig(nextConfigWithAnalyzer, {
+      silent: true,
+    })
+  : nextConfigWithAnalyzer;
 

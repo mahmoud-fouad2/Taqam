@@ -33,6 +33,10 @@ services:
         sync: false
       - key: NEXTAUTH_SECRET
         generateValue: true
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=384
+      - key: DISABLE_SENTRY_BUILD
+        value: "true"
       - key: NEXTAUTH_URL
         sync: false
       - key: NEXT_PUBLIC_APP_URL
