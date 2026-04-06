@@ -210,18 +210,56 @@
     @apply transition-transform duration-300 ease-out;
   }
 
-  /* Infinite horizontal marquee for feature cards */
-  @keyframes marquee {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+  /* Orbital feature carousel for landing page */
+  @keyframes features-orbit-spin {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(360deg);
+    }
   }
 
-  .features-marquee-track {
-    width: max-content;
-    animation: marquee 40s linear infinite;
+  @keyframes features-orbit-counter-spin {
+    from {
+      transform: translate(-50%, -50%) rotate(0deg);
+    }
+    to {
+      transform: translate(-50%, -50%) rotate(-360deg);
+    }
   }
 
-  .features-marquee-track:hover {
+  .features-orbit-stage {
+    perspective: 1400px;
+  }
+
+  .features-orbit-rotator {
+    animation: features-orbit-spin var(--orbit-duration, 34s) linear infinite;
+    will-change: transform;
+  }
+
+  .features-orbit-node {
+    transform: rotate(var(--orbit-angle)) translateX(var(--orbit-radius, 20rem));
+    transform-origin: center;
+  }
+
+  .features-orbit-node:nth-child(1) { --orbit-angle: 0deg; }
+  .features-orbit-node:nth-child(2) { --orbit-angle: 45deg; }
+  .features-orbit-node:nth-child(3) { --orbit-angle: 90deg; }
+  .features-orbit-node:nth-child(4) { --orbit-angle: 135deg; }
+  .features-orbit-node:nth-child(5) { --orbit-angle: 180deg; }
+  .features-orbit-node:nth-child(6) { --orbit-angle: 225deg; }
+  .features-orbit-node:nth-child(7) { --orbit-angle: 270deg; }
+  .features-orbit-node:nth-child(8) { --orbit-angle: 315deg; }
+
+  .features-orbit-card-shell {
+    transform: translate(-50%, -50%);
+    animation: features-orbit-counter-spin var(--orbit-duration, 34s) linear infinite;
+    will-change: transform;
+  }
+
+  .features-orbit-stage:hover .features-orbit-rotator,
+  .features-orbit-stage:hover .features-orbit-card-shell {
     animation-play-state: paused;
   }
 
@@ -244,7 +282,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .features-marquee-track {
+    .features-orbit-rotator,
+    .features-orbit-card-shell {
       animation: none;
     }
 

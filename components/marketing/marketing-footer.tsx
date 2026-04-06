@@ -20,9 +20,7 @@ export async function MarketingFooter() {
     ? ["الموظفون", "الرواتب", "الحضور"]
     : ["People", "Payroll", "Attendance"];
   const rights = isAr ? "طاقم. جميع الحقوق محفوظة." : "Taqam. All rights reserved.";
-  const supportLine = isAr
-    ? "واجهة عربية وإنجليزية بتجربة تشغيل عملية للشركات السعودية."
-    : "Arabic and English workspace with a practical operating experience.";
+  const supportLine = t(locale, "footer.developedBy");
 
   return (
     <footer className="border-t bg-background/95">

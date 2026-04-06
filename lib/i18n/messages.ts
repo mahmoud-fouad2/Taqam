@@ -28,7 +28,7 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
   "common.loading": { ar: "جاري التحميل…", en: "Loading…" },
   "common.loadingAr": { ar: "جاري التحميل...", en: "Loading..." },
 
-  "footer.developedBy": { ar: "تطوير: ma-fo.info", en: "Developed by ma-fo.info" },
+  "footer.developedBy": { ar: "المطور: ma-fo.info", en: "Developer: ma-fo.info" },
   "footer.privacy": { ar: "سياسة الخصوصية", en: "Privacy" },
   "footer.terms": { ar: "الشروط والأحكام", en: "Terms" },
   "footer.support": { ar: "المساعدة", en: "Help" },
