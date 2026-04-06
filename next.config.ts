@@ -9,9 +9,13 @@ const withBundleAnalyzer = bundleAnalyzer({
 });
 
 const enableSentryWebpackPlugin = process.env.DISABLE_SENTRY_BUILD !== "true";
+const skipBuildValidation = process.env.SKIP_BUILD_VALIDATION === "true";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  typescript: {
+    ignoreBuildErrors: skipBuildValidation,
+  },
   experimental: {
     optimizePackageImports: ["lucide-react", "@tabler/icons-react", "@radix-ui/react-icons"],
   },
