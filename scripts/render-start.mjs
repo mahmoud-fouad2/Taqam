@@ -14,40 +14,12 @@ function run(cmd, args, { label } = {}) {
   });
 }
 
-function sleep(ms) {
-  return new Promise((r) => setTimeout(r, ms));
-}
-
 async function main() {
-  const attempts = Number(process.env.DB_BOOTSTRAP_ATTEMPTS || 10);
-  const delayMs = Number(process.env.DB_BOOTSTRAP_DELAY_MS || 3000);
-  const schemaSyncMode = process.env.PRISMA_SCHEMA_SYNC_MODE === "push" ? "push" : "migrate";
   const bootstrapEnabled = process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
 
-  console.log(`[render-start] Starting (attempts=${attempts}, delayMs=${delayMs}, schemaSyncMode=${schemaSyncMode})`);
-
-  // 1) Sync schema using safe migrations by default. Explicitly opt into db push only when needed.
-  let pushed = false;
-  for (let i = 1; i <= attempts; i++) {
-    const args = schemaSyncMode === "push"
-      ? ["db", "push", "--accept-data-loss"]
-      : ["migrate", "deploy"];
-    console.log(`[render-start] prisma ${args.join(" ")} (attempt ${i}/${attempts})`);
-    const r = await run(bin("prisma"), args, { label: schemaSyncMode === "push" ? "db-push" : "migrate-deploy" });
-    if (r.code === 0) {
-      pushed = true;
-      break;
-    }
-    if (i < attempts) {
-      console.log(`[render-start] schema sync failed; retrying in ${delayMs}ms...`);
-      await sleep(delayMs);
-    }
-  }
-
-  if (!pushed) {
-    console.error("[render-start] prisma schema sync failed after retries; exiting.");
-    process.exit(1);
-  }
+  // Migrations run in preDeployCommand on Render before this script starts.
+  // Skipping duplicate migrate here to save memory and startup time.
+  console.log("[render-start] schema migrations handled by preDeployCommand; skipping.");
 
   // 2) Ensure bootstrap super admin.
   if (bootstrapEnabled) {
