@@ -167,6 +167,96 @@ const heroMediaItems = [
   { src: "/images/marketing/screenshot-payroll-new.svg?v=2", labelAr: "الرواتب", labelEn: "Payroll" },
 ];
 
+const personas = [
+  {
+    roleAr: "مدير الموارد البشرية",
+    roleEn: "HR Manager",
+    icon: Users,
+    badge: "bg-indigo-600/90",
+    titleAr: "تحكم كامل في الهيكل التنظيمي والرواتب",
+    titleEn: "Full control of org structure & payroll",
+    descAr: "أدر ملفات الموظفين ومسير الرواتب والإجازات من لوحة تحكم واحدة متكاملة.",
+    descEn: "Manage employee files, payroll, and leaves from one integrated dashboard.",
+    photo: "https://images.pexels.com/photos/8154232/pexels-photo-8154232.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    features: [
+      { ar: "مسير رواتب تلقائي متوافق مع GOSI", en: "Automated payroll with GOSI compliance" },
+      { ar: "موافقة فورية على الإجازات والطلبات", en: "Instant leave and request approvals" },
+      { ar: "تقارير HR قابلة للتصدير", en: "Exportable HR reports" },
+    ],
+  },
+  {
+    roleAr: "المدير التنفيذي",
+    roleEn: "CEO / Finance",
+    icon: BarChart3,
+    badge: "bg-blue-600/90",
+    titleAr: "رؤية تنفيذية شاملة لكل المؤشرات",
+    titleEn: "Complete executive visibility of all KPIs",
+    descAr: "تابع أداء الفريق ومؤشرات الامتثال والتكاليف من لوحة بيانات تنفيذية لحظية.",
+    descEn: "Monitor team performance, compliance and costs from a real-time executive dashboard.",
+    photo: "https://images.pexels.com/photos/7993560/pexels-photo-7993560.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    features: [
+      { ar: "لوحات بيانات تنفيذية لحظية", en: "Real-time executive dashboards" },
+      { ar: "تقارير التكاليف والامتثال للوائح", en: "Cost & regulatory compliance reports" },
+      { ar: "تنبيهات ذكية للمواعيد والمستحقات", en: "Smart deadline & entitlement alerts" },
+    ],
+  },
+  {
+    roleAr: "الموظف",
+    roleEn: "Employee",
+    icon: Clock,
+    badge: "bg-emerald-600/90",
+    titleAr: "كل ما تحتاجه من جوالك مباشرةً",
+    titleEn: "Everything you need from your phone",
+    descAr: "سجّل حضورك واطلب إجازتك وراجع قسيمة راتبك — كل ذلك من تطبيق طاقم.",
+    descEn: "Clock in, request leave, and view your payslip — all from the Taqam mobile app.",
+    photo: "https://images.pexels.com/photos/5206297/pexels-photo-5206297.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    features: [
+      { ar: "تسجيل الحضور والانصراف بسهولة", en: "Easy attendance check-in/out" },
+      { ar: "طلبات الإجازة ومتابعة الرصيد", en: "Leave requests with balance tracking" },
+      { ar: "قسيمة الراتب والمستحقات", en: "Payslip and entitlements view" },
+    ],
+  },
+];
+
+const testimonials = [
+  {
+    quoteAr: "طاقم غيّر طريقة إدارة رواتبنا تماماً. مسير الرواتب الذي كان يستغرق ٣ أيام بات يتم في أقل من ساعة.",
+    quoteEn: "Taqam completely changed how we manage payroll. What used to take 3 days now takes less than an hour.",
+    nameAr: "سارة الشهراني",
+    nameEn: "Sarah Al-Shahrani",
+    roleAr: "مدير الموارد البشرية — شركة الباحة للمقاولات",
+    roleEn: "HR Manager — Al-Baha Contracting Co.",
+    avatar: "https://images.pexels.com/photos/8154420/pexels-photo-8154420.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
+  },
+  {
+    quoteAr: "التكامل مع GOSI ومدد وفّر علينا ساعات من العمل اليدوي شهرياً. الدعم الفني متاح دائماً وباحترافية عالية.",
+    quoteEn: "Integration with GOSI and Mudad saved us hours of manual work monthly. Support is always professional.",
+    nameAr: "نورة الغامدي",
+    nameEn: "Noura Al-Ghamdi",
+    roleAr: "مديرة شؤون الموظفين — مجموعة سدير التجارية",
+    roleEn: "People Director — Sudair Trading Group",
+    avatar: "https://images.pexels.com/photos/9218636/pexels-photo-9218636.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
+  },
+  {
+    quoteAr: "أقدر أتابع حضور وإجازات فريقي كامل من جوالي في أي وقت. طاقم جعل حياتي كمدير أسهل بكثير.",
+    quoteEn: "I can track my whole team's attendance and leaves from my phone at any time. Taqam made my life much easier.",
+    nameAr: "خالد العتيبي",
+    nameEn: "Khalid Al-Otaibi",
+    roleAr: "المدير التنفيذي — مركز الخبر للتقنية",
+    roleEn: "CEO — Al-Khobar Tech Center",
+    avatar: "https://images.pexels.com/photos/6700380/pexels-photo-6700380.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop",
+  },
+];
+
+const integrationBadges = [
+  { name: "GOSI", descAr: "التأمينات الاجتماعية", descEn: "Social Insurance", icon: Shield, color: "bg-green-600" },
+  { name: "WPS", descAr: "نظام حماية الأجور", descEn: "Wage Protection", icon: CreditCard, color: "bg-blue-600" },
+  { name: "مدد", descAr: "إدارة العمالة الوافدة", descEn: "Expat Labour", icon: Users, color: "bg-indigo-600" },
+  { name: "مقيم", descAr: "خدمات الإقامة", descEn: "Residency Services", icon: Globe, color: "bg-purple-600" },
+  { name: "مستفيد", descAr: "التوظيف والتدريب", descEn: "Employment Portal", icon: Building2, color: "bg-teal-600" },
+  { name: "SAP", descAr: "تكامل ERP", descEn: "ERP Integration", icon: Layers, color: "bg-slate-600" },
+];
+
 export default async function LandingPage({
   searchParams,
 }: {
@@ -333,6 +423,34 @@ export default async function LandingPage({
         </div>
       </section>
 
+      {/* ── COMPLIANCE BAR ──────────────────────────────────── */}
+      <div className="border-y bg-muted/30 py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
+            <p className="shrink-0 text-xs font-medium uppercase tracking-widest text-muted-foreground">
+              {isAr ? "متوافق رسمياً مع" : "Officially compliant with"}
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
+              {[
+                { name: "GOSI", icon: Shield, color: "text-green-600" },
+                { name: "WPS", icon: CreditCard, color: "text-blue-600" },
+                { name: isAr ? "مدد" : "Mudad", icon: Users, color: "text-indigo-600" },
+                { name: isAr ? "مقيم" : "Muqeem", icon: Globe, color: "text-purple-600" },
+                { name: isAr ? "مستفيد" : "Mustafid", icon: Building2, color: "text-teal-600" },
+              ].map(({ name, icon: Icon, color }) => (
+                <div
+                  key={name}
+                  className="flex items-center gap-1.5 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground"
+                >
+                  <Icon className={`h-3.5 w-3.5 ${color}`} />
+                  <span>{name}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* ── FEATURES ─────────────────────────────────────────── */}
       <section id="features" className="border-t bg-muted/30 py-20">
         <div className="container mx-auto px-4">
@@ -357,6 +475,125 @@ export default async function LandingPage({
                 <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── PERSONAS ─────────────────────────────────────────── */}
+      <section className="overflow-hidden py-24">
+        <div className="container mx-auto px-4">
+          <div className="mb-14 text-center">
+            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+              {isAr ? "لمن طاقم؟" : "Who is Taqam for?"}
+            </span>
+            <h2 className="text-3xl font-bold sm:text-4xl">
+              {isAr ? "مصمم لكل دور في فريقك" : "Built for every role in your team"}
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
+              {isAr
+                ? "سواء كنت مديراً تنفيذياً أو متخصص موارد بشرية أو موظفاً — طاقم يخدم احتياجاتك"
+                : "Whether you're an executive, HR specialist, or employee — Taqam serves your needs"}
+            </p>
+          </div>
+
+          <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
+            {personas.map((persona) => {
+              const PersonaIcon = persona.icon;
+              return (
+                <div
+                  key={persona.roleEn}
+                  className="group overflow-hidden rounded-2xl border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl"
+                >
+                  <div className="relative h-52 overflow-hidden">
+                    <Image
+                      src={persona.photo}
+                      alt={isAr ? persona.roleAr : persona.roleEn}
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 start-0 p-4">
+                      <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold text-white ${persona.badge}`}>
+                        <PersonaIcon className="h-3.5 w-3.5" />
+                        {isAr ? persona.roleAr : persona.roleEn}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="mb-2 text-base font-bold">{isAr ? persona.titleAr : persona.titleEn}</h3>
+                    <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
+                      {isAr ? persona.descAr : persona.descEn}
+                    </p>
+                    <ul className="space-y-2">
+                      {persona.features.map((f) => (
+                        <li key={f.en} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+                          {isAr ? f.ar : f.en}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── TESTIMONIALS ─────────────────────────────────────── */}
+      <section className="bg-slate-950 py-24 text-white dark:bg-black">
+        <div className="container mx-auto px-4">
+          <div className="mb-14 text-center">
+            <span className="mb-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/70">
+              {isAr ? "قصص النجاح" : "Success stories"}
+            </span>
+            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+              {isAr ? "لماذا يثق عملاؤنا بطاقم؟" : "Why do customers trust Taqam?"}
+            </h2>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {testimonials.map((t) => (
+              <div
+                key={t.nameEn}
+                className="flex flex-col rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:bg-white/[0.08]"
+              >
+                <p className="mb-1 font-serif text-3xl leading-none text-indigo-400">"</p>
+                <p className="mb-6 flex-1 text-sm leading-relaxed text-white/85">
+                  {isAr ? t.quoteAr : t.quoteEn}
+                </p>
+                <div className="flex items-center gap-3">
+                  <Image
+                    src={t.avatar}
+                    alt={isAr ? t.nameAr : t.nameEn}
+                    width={40}
+                    height={40}
+                    className="rounded-full object-cover ring-2 ring-white/20"
+                    unoptimized
+                  />
+                  <div>
+                    <p className="text-sm font-semibold text-white">{isAr ? t.nameAr : t.nameEn}</p>
+                    <p className="text-xs text-white/60">{isAr ? t.roleAr : t.roleEn}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Stats strip */}
+          <div className="mt-16 grid gap-8 border-t border-white/10 pt-14 text-center sm:grid-cols-3">
+            {[
+              { numAr: "+٤٠", numEn: "40+", labelAr: "شركة سعودية", labelEn: "Saudi companies" },
+              { numAr: "+١,٢٠٠", numEn: "1,200+", labelAr: "موظف مُدار يومياً", labelEn: "daily managed employees" },
+              { numAr: "< يوم", numEn: "< 1 day", labelAr: "للإعداد الكامل", labelEn: "full setup time" },
+            ].map((s) => (
+              <div key={s.labelEn}>
+                <p className="text-4xl font-extrabold text-white">{isAr ? s.numAr : s.numEn}</p>
+                <p className="mt-2 text-sm text-white/60">{isAr ? s.labelAr : s.labelEn}</p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -436,6 +673,41 @@ export default async function LandingPage({
                 <ChevronRight className="h-4 w-4 rtl:rotate-180" />
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── INTEGRATIONS ─────────────────────────────────────── */}
+      <section className="border-t bg-muted/20 py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-10 text-center">
+            <h3 className="text-xl font-bold">
+              {isAr ? "يتكامل مع الأنظمة التي تعرفها" : "Integrates with the systems you know"}
+            </h3>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {isAr
+                ? "طاقم يربط مباشرةً مع الجهات الحكومية السعودية وأنظمة المحاسبة"
+                : "Taqam connects directly with Saudi government entities and accounting systems"}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            {integrationBadges.map((int) => {
+              const IntIcon = int.icon;
+              return (
+                <div
+                  key={int.name}
+                  className="flex items-center gap-2.5 rounded-xl border bg-card px-5 py-3.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
+                >
+                  <div className={`flex h-8 w-8 items-center justify-center rounded-lg ${int.color}`}>
+                    <IntIcon className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold">{int.name}</p>
+                    <p className="text-xs text-muted-foreground">{isAr ? int.descAr : int.descEn}</p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
