@@ -13,7 +13,7 @@ import prisma from "@/lib/db";
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const limit = 5;
-    const rl = checkRateLimit(_request, { keyPrefix: "api:payroll:process", limit, windowMs: 60 * 1000 });
+    const rl = await checkRateLimit(_request, { keyPrefix: "api:payroll:process", limit, windowMs: 60 * 1000 });
     if (!rl.allowed) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 }),

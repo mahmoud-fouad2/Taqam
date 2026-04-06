@@ -13,7 +13,7 @@ const schema = z.object({
 
 export async function POST(request: NextRequest) {
   const limit = 8;
-  const limitInfo = checkRateLimit(request, {
+  const limitInfo = await checkRateLimit(request, {
     keyPrefix: "public:forgot_password",
     limit,
     windowMs: 15 * 60 * 1000,

@@ -1,12 +1,12 @@
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
 /**
  * Rate Limiting Utility
  *
- * ⚠️  المشكلة الحالية: هذا يستخدم ذاكرة في العملية (in-process memory).
- * في بيئة serverless أو عند تشغيل أكثر من instance، يتم إعادة ضبط العداد مع كل restart.
- *
- * ✅ الحل الموصى به للإنتاج:
- *   - استخدم Redis (Upstash أو Render Redis) مع مكتبة @upstash/ratelimit
- *   - أو استخدم Cloudflare Rate Limiting في edge level
+ * Production uses Upstash Redis when configured.
+ * Local development and CI fall back to in-process memory so the app keeps working
+ * without external infrastructure.
  */
 
 type RateLimitOptions = {
@@ -21,6 +21,11 @@ type Bucket = {
 };
 
 const buckets = new Map<string, Bucket>();
+const limiterCache = new Map<string, Ratelimit>();
+const ephemeralCache = new Map<string, number>();
+
+let redisClient: Redis | null | undefined;
+let warnedAboutRateLimitFallback = false;
 
 // Periodically clean expired buckets to prevent memory leaks
 if (typeof setInterval !== "undefined") {
@@ -39,6 +44,61 @@ function now() {
   return Date.now();
 }
 
+function getRedisClient() {
+  if (redisClient !== undefined) {
+    return redisClient;
+  }
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    redisClient = null;
+    return redisClient;
+  }
+
+  redisClient = new Redis({ url, token });
+  return redisClient;
+}
+
+function windowToDuration(windowMs: number): Parameters<typeof Ratelimit.fixedWindow>[1] {
+  const seconds = Math.max(1, Math.ceil(windowMs / 1000));
+  return `${seconds} s` as Parameters<typeof Ratelimit.fixedWindow>[1];
+}
+
+function getDistributedLimiter(options: RateLimitOptions) {
+  const redis = getRedisClient();
+  if (!redis) {
+    return null;
+  }
+
+  const cacheKey = `${options.keyPrefix}:${options.limit}:${options.windowMs}`;
+  const existing = limiterCache.get(cacheKey);
+  if (existing) {
+    return existing;
+  }
+
+  const limiter = new Ratelimit({
+    redis,
+    limiter: Ratelimit.fixedWindow(options.limit, windowToDuration(options.windowMs)),
+    prefix: options.keyPrefix,
+    analytics: false,
+    ephemeralCache,
+  });
+
+  limiterCache.set(cacheKey, limiter);
+  return limiter;
+}
+
+function warnAboutRateLimitFallback(error: unknown) {
+  if (warnedAboutRateLimitFallback || process.env.NODE_ENV === "test") {
+    return;
+  }
+
+  warnedAboutRateLimitFallback = true;
+  console.warn("[rate-limit] Falling back to in-memory limiter", error);
+}
+
 export function getClientIp(req: Request): string {
   // Prefer x-forwarded-for (Render / proxies)
   const xff = req.headers.get("x-forwarded-for");
@@ -53,7 +113,7 @@ export function getClientIp(req: Request): string {
   return "unknown";
 }
 
-export function checkRateLimit(req: Request, options: RateLimitOptions): {
+function checkRateLimitInMemory(req: Request, options: RateLimitOptions): {
   allowed: boolean;
   remaining: number;
   resetAt: number;
@@ -77,6 +137,31 @@ export function checkRateLimit(req: Request, options: RateLimitOptions): {
   existing.count += 1;
   buckets.set(key, existing);
   return { allowed: true, remaining: Math.max(0, options.limit - existing.count), resetAt: existing.resetAt };
+}
+
+export async function checkRateLimit(req: Request, options: RateLimitOptions): Promise<{
+  allowed: boolean;
+  remaining: number;
+  resetAt: number;
+}> {
+  const identifier = getClientIp(req);
+  const distributedLimiter = getDistributedLimiter(options);
+
+  if (!distributedLimiter) {
+    return checkRateLimitInMemory(req, options);
+  }
+
+  try {
+    const result = await distributedLimiter.limit(identifier);
+    return {
+      allowed: result.success,
+      remaining: result.remaining,
+      resetAt: result.reset,
+    };
+  } catch (error) {
+    warnAboutRateLimitFallback(error);
+    return checkRateLimitInMemory(req, options);
+  }
 }
 
 export function withRateLimitHeaders<T extends Response>(

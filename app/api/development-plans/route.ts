@@ -242,7 +242,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const limit = 30;
-    const rl = checkRateLimit(request, { keyPrefix: "api:dev-plans:create", limit, windowMs: 60 * 1000 });
+    const rl = await checkRateLimit(request, { keyPrefix: "api:dev-plans:create", limit, windowMs: 60 * 1000 });
     if (!rl.allowed) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "طلبات كثيرة جداً" }, { status: 429 }),

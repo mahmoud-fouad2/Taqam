@@ -17,7 +17,7 @@ const ALLOWED_RESUME_TYPES = [
 ];
 
 export async function POST(request: NextRequest) {
-  const rate = checkRateLimit(request, RATE_LIMIT);
+  const rate = await checkRateLimit(request, RATE_LIMIT);
   if (!rate.allowed) {
     return withRateLimitHeaders(
       NextResponse.json({ error: "Too many requests" }, { status: 429 }),

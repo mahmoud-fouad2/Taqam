@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   IconDownload,
   IconUpload,
@@ -64,14 +65,52 @@ interface ImportRow {
   status: "valid" | "error" | "warning";
   errors: string[];
   warnings: string[];
+  importState?: "pending" | "success" | "error";
+  importMessage?: string | null;
+}
+
+function normalizeCsvValue(value: string | undefined) {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeCsvEnum(value: string | undefined) {
+  return normalizeCsvValue(value)?.toUpperCase().replace(/[-\s]+/g, "_");
+}
+
+function buildEmployeeImportPayload(row: ImportRow) {
+  const firstNameAr = normalizeCsvValue(row.data.firstNameAr);
+  const lastNameAr = normalizeCsvValue(row.data.lastNameAr);
+  const firstNameEn = normalizeCsvValue(row.data.firstNameEn);
+  const lastNameEn = normalizeCsvValue(row.data.lastNameEn);
+  const salary = normalizeCsvValue(row.data.basicSalary);
+
+  return {
+    firstName: firstNameEn ?? firstNameAr ?? "",
+    lastName: lastNameEn ?? lastNameAr ?? "",
+    firstNameAr,
+    lastNameAr,
+    email: normalizeCsvValue(row.data.email) ?? "",
+    phone: normalizeCsvValue(row.data.phone),
+    nationalId: normalizeCsvValue(row.data.nationalId),
+    dateOfBirth: normalizeCsvValue(row.data.dateOfBirth),
+    gender: normalizeCsvEnum(row.data.gender),
+    hireDate: normalizeCsvValue(row.data.hireDate) ?? "",
+    departmentCode: normalizeCsvValue(row.data.departmentCode),
+    jobTitleCode: normalizeCsvValue(row.data.jobTitleCode),
+    branchCode: normalizeCsvValue(row.data.branchCode),
+    baseSalary: salary ? Number(salary) : undefined,
+  };
 }
 
 export function CSVImportManager() {
+  const router = useRouter();
   const [isImportOpen, setIsImportOpen] = React.useState(false);
   const [importFile, setImportFile] = React.useState<File | null>(null);
   const [importProgress, setImportProgress] = React.useState(0);
-  const [importStatus, setImportStatus] = React.useState<"idle" | "validating" | "importing" | "complete" | "error">("idle");
+  const [importStatus, setImportStatus] = React.useState<"idle" | "validating" | "importing" | "complete" | "imported" | "error">("idle");
   const [parsedRows, setParsedRows] = React.useState<ImportRow[]>([]);
+  const [importSummary, setImportSummary] = React.useState<{ succeeded: number; failed: number } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Generate CSV template
@@ -105,6 +144,7 @@ export function CSVImportManager() {
 
     setImportStatus("validating");
     setImportProgress(0);
+    setImportSummary(null);
 
     const text = await importFile.text();
     const lines = text.split("\n").filter((line) => line.trim());
@@ -148,7 +188,7 @@ export function CSVImportManager() {
 
       // Validate gender
       if (data.gender && !["male", "female"].includes(data.gender.toLowerCase())) {
-        warnings.push("قيمة الجنس يجب أن تكون male أو female");
+        errors.push("قيمة الجنس يجب أن تكون male أو female");
       }
 
       // Validate salary
@@ -162,6 +202,8 @@ export function CSVImportManager() {
         status: errors.length > 0 ? "error" : warnings.length > 0 ? "warning" : "valid",
         errors,
         warnings,
+        importState: "pending",
+        importMessage: null,
       });
 
       setImportProgress(Math.round((i / (lines.length - 1)) * 100));
@@ -171,21 +213,67 @@ export function CSVImportManager() {
     setImportStatus("complete");
   };
 
-  // Perform import (mock)
   const performImport = async () => {
+    if (importStatus === "importing") return;
+
     setImportStatus("importing");
     setImportProgress(0);
+    setImportSummary(null);
 
-    const validRows = parsedRows.filter((r) => r.status !== "error");
-    
-    for (let i = 0; i < validRows.length; i++) {
-      // Simulate API call delay
-      await new Promise((resolve) => setTimeout(resolve, 100));
-      setImportProgress(Math.round(((i + 1) / validRows.length) * 100));
+    const importableRows = parsedRows.filter((row) => row.status !== "error");
+    const nextRows = parsedRows.map((row) => ({
+      ...row,
+      importState: row.status === "error" ? row.importState : "pending",
+      importMessage: row.status === "error" ? row.importMessage : null,
+    }));
+
+    let succeeded = 0;
+    let failed = 0;
+
+    for (let i = 0; i < importableRows.length; i++) {
+      const row = importableRows[i];
+      const rowIndex = nextRows.findIndex((candidate) => candidate.rowNumber === row.rowNumber);
+
+      try {
+        const response = await fetch("/api/employees", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(buildEmployeeImportPayload(row)),
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          throw new Error(payload?.error ?? "فشل استيراد هذا الصف");
+        }
+
+        nextRows[rowIndex] = {
+          ...nextRows[rowIndex],
+          importState: "success",
+          importMessage: "تم الاستيراد بنجاح",
+        };
+        succeeded += 1;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "حدث خطأ أثناء الاستيراد";
+        nextRows[rowIndex] = {
+          ...nextRows[rowIndex],
+          importState: "error",
+          importMessage: message,
+          errors: nextRows[rowIndex].errors.includes(message)
+            ? nextRows[rowIndex].errors
+            : [...nextRows[rowIndex].errors, message],
+        };
+        failed += 1;
+      }
+
+      setParsedRows([...nextRows]);
+      setImportProgress(Math.round(((i + 1) / importableRows.length) * 100));
     }
 
-    setImportStatus("complete");
-    // In real implementation, would show success message and refresh employee list
+    setImportSummary({ succeeded, failed });
+    setImportStatus("imported");
+    router.refresh();
   };
 
   // Stats
@@ -194,6 +282,9 @@ export function CSVImportManager() {
     valid: parsedRows.filter((r) => r.status === "valid").length,
     warnings: parsedRows.filter((r) => r.status === "warning").length,
     errors: parsedRows.filter((r) => r.status === "error").length,
+    ready: parsedRows.filter((r) => r.status !== "error").length,
+    imported: parsedRows.filter((r) => r.importState === "success").length,
+    importFailures: parsedRows.filter((r) => r.importState === "error").length,
   };
 
   const resetImport = () => {
@@ -201,6 +292,7 @@ export function CSVImportManager() {
     setImportProgress(0);
     setImportStatus("idle");
     setParsedRows([]);
+    setImportSummary(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -309,6 +401,13 @@ export function CSVImportManager() {
                       </div>
                     )}
 
+                    {importStatus === "importing" && (
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">جاري استيراد الموظفين...</p>
+                        <Progress value={importProgress} />
+                      </div>
+                    )}
+
                     {/* Validation Results */}
                     {importStatus === "complete" && parsedRows.length > 0 && (
                       <div className="space-y-4">
@@ -342,6 +441,22 @@ export function CSVImportManager() {
                         )}
                       </div>
                     )}
+
+                    {importStatus === "imported" && importSummary && (
+                      <Alert variant={importSummary.failed > 0 ? "destructive" : "default"}>
+                        {importSummary.failed > 0 ? (
+                          <IconAlertTriangle className="h-4 w-4" />
+                        ) : (
+                          <IconCheck className="h-4 w-4" />
+                        )}
+                        <AlertTitle>
+                          {importSummary.failed > 0 ? "اكتمل الاستيراد مع بعض الإخفاقات" : "تم استيراد الموظفين بنجاح"}
+                        </AlertTitle>
+                        <AlertDescription>
+                          تم استيراد {importSummary.succeeded} صف بنجاح، وفشل {importSummary.failed} صف.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </TabsContent>
 
                   <TabsContent value="preview">
@@ -362,19 +477,29 @@ export function CSVImportManager() {
                             <TableRow key={row.rowNumber}>
                               <TableCell className="font-mono">{row.rowNumber}</TableCell>
                               <TableCell>
-                                {row.status === "valid" && (
+                                {row.importState === "success" ? (
+                                  <Badge variant="default" className="bg-emerald-600">
+                                    <IconCheck className="h-3 w-3 ms-1" />
+                                    تم الاستيراد
+                                  </Badge>
+                                ) : row.importState === "error" && importStatus === "imported" ? (
+                                  <Badge variant="destructive">
+                                    <IconX className="h-3 w-3 ms-1" />
+                                    فشل الاستيراد
+                                  </Badge>
+                                ) : row.status === "valid" ? (
                                   <Badge variant="default" className="bg-green-500">
                                     <IconCheck className="h-3 w-3 ms-1" />
                                     صحيح
                                   </Badge>
-                                )}
-                                {row.status === "warning" && (
+                                ) : null}
+                                {row.importState !== "success" && row.status === "warning" && (
                                   <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
                                     <IconAlertTriangle className="h-3 w-3 ms-1" />
                                     تحذير
                                   </Badge>
                                 )}
-                                {row.status === "error" && (
+                                {row.importState !== "success" && row.status === "error" && (
                                   <Badge variant="destructive">
                                     <IconX className="h-3 w-3 ms-1" />
                                     خطأ
@@ -397,6 +522,9 @@ export function CSVImportManager() {
                                 {row.warnings.length > 0 && (
                                   <p className="text-yellow-600">{row.warnings.join(", ")}</p>
                                 )}
+                                {row.importState === "success" && row.importMessage ? (
+                                  <p className="text-emerald-600">{row.importMessage}</p>
+                                ) : null}
                               </TableCell>
                             </TableRow>
                           ))}
@@ -415,9 +543,9 @@ export function CSVImportManager() {
                       التحقق من البيانات
                     </Button>
                   )}
-                  {importStatus === "complete" && stats.valid > 0 && (
+                  {importStatus === "complete" && stats.ready > 0 && (
                     <Button onClick={performImport}>
-                      استيراد {stats.valid} موظف
+                      استيراد {stats.ready} موظف
                     </Button>
                   )}
                 </DialogFooter>

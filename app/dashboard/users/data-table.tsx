@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -58,9 +59,8 @@ export type User = {
   lastLoginAt?: string | null;
 };
 
-// TODO: Replace with API calls for users CRUD operations
-
 export default function UsersDataTable({ data }: { data: User[] }) {
+  const router = useRouter();
   const [locale, setLocale] = React.useState<"ar" | "en">("ar");
   const [mounted, setMounted] = React.useState(false);
   
@@ -77,10 +77,43 @@ export default function UsersDataTable({ data }: { data: User[] }) {
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+  const [deletingUserId, setDeletingUserId] = React.useState<string | null>(null);
+  const [actionError, setActionError] = React.useState<string | null>(null);
 
-  // TODO: Replace with API call to delete user
-  const handleDelete = (userId: string) => {
-    setTableData((prev) => prev.filter((u) => u.id !== userId));
+  const handleDelete = async (userId: string) => {
+    const confirmed = window.confirm(
+      isRtl ? "هل تريد حذف هذا المستخدم؟" : "Do you want to delete this user?"
+    );
+
+    if (!confirmed || deletingUserId) {
+      return;
+    }
+
+    setActionError(null);
+    setDeletingUserId(userId);
+
+    try {
+      const response = await fetch(`/api/users/${userId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const payload = await response.json().catch(() => null);
+      if (!response.ok) {
+        throw new Error(payload?.error ?? (isRtl ? "تعذر حذف المستخدم" : "Failed to delete user"));
+      }
+
+      setTableData((prev) => prev.filter((user) => user.id !== userId));
+      router.refresh();
+    } catch (error) {
+      setActionError(
+        error instanceof Error ? error.message : isRtl ? "حدث خطأ غير متوقع" : "Unexpected error"
+      );
+    } finally {
+      setDeletingUserId(null);
+    }
   };
 
   const statusLabel = (value: string) => {
@@ -254,12 +287,19 @@ export default function UsersDataTable({ data }: { data: User[] }) {
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem
+                  disabled={deletingUserId === row.original.id}
                   onSelect={(e) => {
                     e.preventDefault();
-                    handleDelete(row.original.id);
+                    void handleDelete(row.original.id);
                   }}
                 >
-                  {isRtl ? "حذف" : "Delete"}
+                  {deletingUserId === row.original.id
+                    ? isRtl
+                      ? "جارٍ الحذف..."
+                      : "Deleting..."
+                    : isRtl
+                      ? "حذف"
+                      : "Delete"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -268,7 +308,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRtl, tableData]);
+  }, [deletingUserId, isRtl, router, tableData]);
 
   const table = useReactTable({
     data: tableData,
@@ -493,6 +533,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {actionError ? <p className="mb-4 text-sm text-destructive">{actionError}</p> : null}
         <Table className="border-t">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

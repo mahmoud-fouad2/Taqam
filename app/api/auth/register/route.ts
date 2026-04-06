@@ -26,7 +26,7 @@ function splitName(name: string): { firstName: string; lastName: string } {
 export async function POST(req: NextRequest) {
   try {
     const limit = 10;
-    const limitInfo = checkRateLimit(req, {
+    const limitInfo = await checkRateLimit(req, {
       keyPrefix: "web:auth:register",
       limit,
       windowMs: 15 * 60 * 1000,

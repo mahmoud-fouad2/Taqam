@@ -10,7 +10,7 @@ import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 export async function POST(request: NextRequest) {
   try {
     const limit = 20;
-    const limitInfo = checkRateLimit(request, {
+    const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:logout_all",
       limit,
       windowMs: 5 * 60 * 1000,

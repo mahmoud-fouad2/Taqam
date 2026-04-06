@@ -56,7 +56,7 @@ async function verifyRecaptcha(token: string) {
 export async function POST(req: NextRequest) {
   try {
     const limit = 10;
-    const limitInfo = checkRateLimit(req, {
+    const limitInfo = await checkRateLimit(req, {
       keyPrefix: "public:tenant_requests",
       limit,
       windowMs: 15 * 60 * 1000,

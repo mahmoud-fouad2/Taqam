@@ -46,7 +46,7 @@ export async function POST(req: Request, ctx: RouteContext) {
 	}
 
 	const limit = 10;
-	const limitInfo = checkRateLimit(req, {
+	const limitInfo = await checkRateLimit(req, {
 		keyPrefix: "web:auth:credentials",
 		limit,
 		windowMs: 5 * 60 * 1000,

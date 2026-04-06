@@ -5,6 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { EmploymentType, Gender } from "@prisma/client";
 import prisma from "@/lib/db";
 import { requireTenantSession, requireRole, parsePagination } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
@@ -18,6 +19,27 @@ const createEmployeeRequiredSchema = z.object({
   email: z.string().email(),
   hireDate: z.string().min(1),
 });
+
+function normalizeOptionalString(value: unknown) {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function normalizeEnumValue<T extends string>(value: unknown, allowed: readonly T[]) {
+  const normalized = normalizeOptionalString(value)
+    ?.toUpperCase()
+    .replace(/[-\s]+/g, "_") as T | undefined;
+
+  if (!normalized) {
+    return undefined;
+  }
+
+  return allowed.includes(normalized) ? normalized : undefined;
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -102,8 +124,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const limit = 20;
-    const rl = checkRateLimit(request, { keyPrefix: "api:employees:create", limit, windowMs: 60 * 1000 });
+    const limit = 120;
+    const rl = await checkRateLimit(request, { keyPrefix: "api:employees:create", limit, windowMs: 60 * 1000 });
     if (!rl.allowed) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 }),
@@ -146,7 +168,35 @@ export async function POST(request: NextRequest) {
     }
     const body = rawBody;
 
-    const userId = body.userId ? String(body.userId) : null;
+    const userId = normalizeOptionalString(body.userId);
+    const departmentId = normalizeOptionalString(body.departmentId);
+    const jobTitleId = normalizeOptionalString(body.jobTitleId);
+    const managerId = normalizeOptionalString(body.managerId);
+    const shiftId = normalizeOptionalString(body.shiftId);
+    const branchId = normalizeOptionalString(body.branchId);
+
+    const departmentCode = normalizeOptionalString(body.departmentCode);
+    const jobTitleCode = normalizeOptionalString(body.jobTitleCode);
+    const branchCode = normalizeOptionalString(body.branchCode);
+
+    const gender = normalizeEnumValue(body.gender, Object.values(Gender));
+    if (body.gender && !gender) {
+      return NextResponse.json({ error: "Invalid gender value" }, { status: 400 });
+    }
+
+    const employmentType =
+      normalizeEnumValue(body.employmentType, Object.values(EmploymentType)) ?? EmploymentType.FULL_TIME;
+
+    const baseSalaryValue = body.baseSalary;
+    const normalizedBaseSalary =
+      baseSalaryValue === undefined || baseSalaryValue === null || baseSalaryValue === ""
+        ? undefined
+        : Number(baseSalaryValue);
+
+    if (normalizedBaseSalary !== undefined && Number.isNaN(normalizedBaseSalary)) {
+      return NextResponse.json({ error: "Invalid baseSalary value" }, { status: 400 });
+    }
+
     if (userId) {
       const user = await prisma.user.findFirst({
         where: { id: userId, tenantId },
@@ -163,6 +213,39 @@ export async function POST(request: NextRequest) {
       if (alreadyLinked) {
         return NextResponse.json({ error: "User is already linked to an employee" }, { status: 400 });
       }
+    }
+
+    const [department, jobTitle, branch] = await Promise.all([
+      !departmentId && departmentCode
+        ? prisma.department.findFirst({
+            where: { tenantId, code: departmentCode, isActive: true },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+      !jobTitleId && jobTitleCode
+        ? prisma.jobTitle.findFirst({
+            where: { tenantId, code: jobTitleCode, isActive: true },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+      !branchId && branchCode
+        ? prisma.branch.findFirst({
+            where: { tenantId, code: branchCode, isActive: true },
+            select: { id: true },
+          })
+        : Promise.resolve(null),
+    ]);
+
+    if (!departmentId && departmentCode && !department) {
+      return NextResponse.json({ error: `Unknown department code: ${departmentCode}` }, { status: 400 });
+    }
+
+    if (!jobTitleId && jobTitleCode && !jobTitle) {
+      return NextResponse.json({ error: `Unknown job title code: ${jobTitleCode}` }, { status: 400 });
+    }
+
+    if (!branchId && branchCode && !branch) {
+      return NextResponse.json({ error: `Unknown branch code: ${branchCode}` }, { status: 400 });
     }
 
     // Generate employee number
@@ -216,18 +299,19 @@ export async function POST(request: NextRequest) {
         phone: body.phone,
         nationalId: body.nationalId,
         dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
-        gender: body.gender,
+        gender,
         nationality: body.nationality,
         maritalStatus: body.maritalStatus,
-        departmentId: body.departmentId,
-        jobTitleId: body.jobTitleId,
-        managerId: body.managerId,
+        departmentId: departmentId ?? department?.id,
+        jobTitleId: jobTitleId ?? jobTitle?.id,
+        managerId,
         hireDate: new Date(body.hireDate),
-        employmentType: body.employmentType || "FULL_TIME",
+        employmentType,
         status: "ACTIVE",
-        shiftId: body.shiftId,
+        shiftId,
         workLocation: body.workLocation,
-        baseSalary: body.baseSalary,
+        baseSalary: normalizedBaseSalary,
+        branchId: branchId ?? branch?.id,
           },
           include: {
             department: true,

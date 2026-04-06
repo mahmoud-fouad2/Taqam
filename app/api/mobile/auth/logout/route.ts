@@ -15,7 +15,7 @@ const schema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const limit = 30;
-    const limitInfo = checkRateLimit(request, {
+    const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:logout",
       limit,
       windowMs: 5 * 60 * 1000,

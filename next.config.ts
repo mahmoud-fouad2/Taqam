@@ -10,9 +10,10 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const enableSentryWebpackPlugin = process.env.DISABLE_SENTRY_BUILD !== "true";
 const skipBuildValidation = process.env.SKIP_BUILD_VALIDATION === "true";
+const disableStandaloneOutput = process.env.NEXT_DISABLE_STANDALONE_OUTPUT === "true";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  ...(disableStandaloneOutput ? {} : { output: "standalone" as const }),
   typescript: {
     ignoreBuildErrors: skipBuildValidation,
   },

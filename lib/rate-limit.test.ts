@@ -10,9 +10,11 @@ function makeReq(ip: string): NextRequest {
 describe("checkRateLimit", () => {
   afterEach(() => {
     vi.useRealTimers();
+    delete process.env.UPSTASH_REDIS_REST_URL;
+    delete process.env.UPSTASH_REDIS_REST_TOKEN;
   });
 
-  it("allows up to the limit and then blocks", () => {
+  it("allows up to the limit and then blocks", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
 
@@ -21,16 +23,16 @@ describe("checkRateLimit", () => {
     const limit = 3;
     const windowMs = 1000;
 
-    expect(checkRateLimit(req, { keyPrefix: "t", limit, windowMs }).allowed).toBe(true);
-    expect(checkRateLimit(req, { keyPrefix: "t", limit, windowMs }).allowed).toBe(true);
-    expect(checkRateLimit(req, { keyPrefix: "t", limit, windowMs }).allowed).toBe(true);
+    expect((await checkRateLimit(req, { keyPrefix: "t", limit, windowMs })).allowed).toBe(true);
+    expect((await checkRateLimit(req, { keyPrefix: "t", limit, windowMs })).allowed).toBe(true);
+    expect((await checkRateLimit(req, { keyPrefix: "t", limit, windowMs })).allowed).toBe(true);
 
-    const blocked = checkRateLimit(req, { keyPrefix: "t", limit, windowMs });
+    const blocked = await checkRateLimit(req, { keyPrefix: "t", limit, windowMs });
     expect(blocked.allowed).toBe(false);
     expect(blocked.remaining).toBe(0);
   });
 
-  it("resets after the window", () => {
+  it("resets after the window", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
 
@@ -39,11 +41,11 @@ describe("checkRateLimit", () => {
     const limit = 1;
     const windowMs = 1000;
 
-    expect(checkRateLimit(req, { keyPrefix: "t2", limit, windowMs }).allowed).toBe(true);
-    expect(checkRateLimit(req, { keyPrefix: "t2", limit, windowMs }).allowed).toBe(false);
+    expect((await checkRateLimit(req, { keyPrefix: "t2", limit, windowMs })).allowed).toBe(true);
+    expect((await checkRateLimit(req, { keyPrefix: "t2", limit, windowMs })).allowed).toBe(false);
 
     vi.setSystemTime(new Date("2025-01-01T00:00:02Z"));
 
-    expect(checkRateLimit(req, { keyPrefix: "t2", limit, windowMs }).allowed).toBe(true);
+    expect((await checkRateLimit(req, { keyPrefix: "t2", limit, windowMs })).allowed).toBe(true);
   });
 });
