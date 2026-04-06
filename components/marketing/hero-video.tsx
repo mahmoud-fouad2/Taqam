@@ -1,0 +1,43 @@
+"use client";
+
+import { useRef, useState } from "react";
+
+import { Volume2, VolumeX } from "lucide-react";
+
+export function HeroVideo({ src, poster }: { src: string; poster?: string }) {
+  const [muted, setMuted] = useState(true);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  function toggleMute() {
+    const v = videoRef.current;
+    if (!v) return;
+    v.muted = !muted;
+    setMuted((prev) => !prev);
+  }
+
+  return (
+    <div className="relative aspect-[16/10] overflow-hidden">
+      <video
+        ref={videoRef}
+        autoPlay
+        className="h-full w-full object-cover"
+        loop
+        muted
+        playsInline
+        poster={poster}
+        preload="metadata"
+      >
+        <source src={src} type="video/mp4" />
+      </video>
+
+      <button
+        aria-label={muted ? "تفعيل الصوت" : "كتم الصوت"}
+        onClick={toggleMute}
+        type="button"
+        className="absolute bottom-3 end-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+      >
+        {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
+      </button>
+    </div>
+  );
+}

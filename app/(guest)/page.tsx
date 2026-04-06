@@ -21,7 +21,6 @@ import {
   Star,
   Zap,
   Lock,
-  PlayCircle,
   ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,7 @@ import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { redirect } from "next/navigation";
 import { FeaturesMarquee } from "@/components/marketing/features-marquee";
+import { HeroVideo } from "@/components/marketing/hero-video";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -256,22 +256,22 @@ export default async function LandingPage({
               </Link>
             </div>
 
-            {/* Social proof numbers */}
-            <div className="mt-10 flex justify-center gap-8 border-t pt-8 lg:justify-start">
-              <div>
-                <p className="text-2xl font-bold">+٥٠</p>
-                <p className="text-sm text-muted-foreground">{isAr ? "شركة تستخدمنا" : "Companies"}</p>
-              </div>
-              <div className="h-10 w-px bg-border" />
-              <div>
-                <p className="text-2xl font-bold">+٢٬٠٠٠</p>
-                <p className="text-sm text-muted-foreground">{isAr ? "موظف مُدار" : "Employees managed"}</p>
-              </div>
-              <div className="h-10 w-px bg-border" />
-              <div>
-                <p className="text-2xl font-bold">٩٩.٩٪</p>
-                <p className="text-sm text-muted-foreground">{isAr ? "وقت التشغيل" : "Uptime SLA"}</p>
-              </div>
+            {/* Social proof stats */}
+            <div className="mt-8 flex flex-wrap justify-center gap-2 border-t pt-6 lg:justify-start">
+              {[
+                { valueAr: "+٤٠", valueEn: "40+", labelAr: "شركة سعودية", labelEn: "Saudi companies", dot: "bg-indigo-500" },
+                { valueAr: "+١٢٠٠", valueEn: "1,200+", labelAr: "موظف مُدار", labelEn: "employees managed", dot: "bg-blue-500" },
+                { valueAr: "< يوم", valueEn: "< 1 day", labelAr: "للإعداد الكامل", labelEn: "full setup", dot: "bg-emerald-500" },
+              ].map((s) => (
+                <div
+                  key={s.labelEn}
+                  className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3.5 py-2 text-sm"
+                >
+                  <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} />
+                  <span className="font-semibold text-foreground">{isAr ? s.valueAr : s.valueEn}</span>
+                  <span className="text-muted-foreground">{isAr ? s.labelAr : s.labelEn}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -292,39 +292,10 @@ export default async function LandingPage({
                   app.taqam.net
                 </div>
               </div>
-              <div className="relative aspect-[16/10] overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(99,102,241,0.24),_transparent_50%),linear-gradient(135deg,rgba(15,23,42,0.96),rgba(30,41,59,0.82))]">
-                <video
-                  autoPlay
-                  className="h-full w-full object-cover"
-                  loop
-                  muted
-                  playsInline
-                  poster="/images/marketing/screenshot-dashboard.svg"
-                  preload="metadata"
-                >
-                  <source src="/videos/hero-square.mp4" type="video/mp4" />
-                </video>
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-slate-950/65 via-slate-950/10 to-transparent" />
-                <div className="absolute inset-x-0 top-0 flex items-center justify-between px-4 py-4 text-white sm:px-5">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium backdrop-blur-md">
-                    <PlayCircle className="h-3.5 w-3.5" />
-                    <span>{isAr ? "جولة مرئية داخل المنصة" : "Platform video tour"}</span>
-                  </div>
-                  <div className="rounded-full border border-white/15 bg-black/25 px-2.5 py-1 text-[11px] font-medium text-white/90 backdrop-blur-md">
-                    {isAr ? "تشغيل تلقائي" : "Autoplay"}
-                  </div>
-                </div>
-                <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 px-4 pb-4 text-white sm:px-5 sm:pb-5">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-white/70">
-                      {isAr ? "معاينة تشغيلية" : "Live preview"}
-                    </p>
-                    <p className="mt-1 text-sm font-semibold sm:text-base">
-                      {isAr ? "شاهد تجربة طاقم بدلًا من لقطة ثابتة" : "See the product in motion, not just a static screenshot"}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <HeroVideo
+                src="/videos/hero-square.mp4"
+                poster="/images/marketing/screenshot-dashboard.svg"
+              />
             </div>
 
             {/* Mini screenshots row */}
