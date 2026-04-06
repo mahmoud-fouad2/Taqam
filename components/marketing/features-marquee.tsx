@@ -91,12 +91,14 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
                 key={feature.titleEn}
                 className="features-orbit-node absolute start-0 top-0"
               >
-                <div className="features-orbit-card-shell">
-                  <FeatureCard
-                    feature={feature}
-                    isAr={isAr}
-                    className="features-orbit-card w-72"
-                  />
+                <div className="features-orbit-unangle">
+                  <div className="features-orbit-card-shell">
+                    <FeatureCard
+                      feature={feature}
+                      isAr={isAr}
+                      className="features-orbit-card w-72"
+                    />
+                  </div>
                 </div>
               </div>
             );

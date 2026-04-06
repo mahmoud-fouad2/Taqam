@@ -222,10 +222,10 @@
 
   @keyframes features-orbit-counter-spin {
     from {
-      transform: translate(-50%, -50%) rotate(0deg);
+      transform: rotate(0deg);
     }
     to {
-      transform: translate(-50%, -50%) rotate(-360deg);
+      transform: rotate(-360deg);
     }
   }
 
@@ -252,8 +252,15 @@
   .features-orbit-node:nth-child(7) { --orbit-angle: 270deg; }
   .features-orbit-node:nth-child(8) { --orbit-angle: 315deg; }
 
+  /* Cancels the per-card static angle so cards stay visually upright */
+  .features-orbit-unangle {
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform: translate(-50%, -50%) rotate(calc(-1 * var(--orbit-angle, 0deg)));
+  }
+
   .features-orbit-card-shell {
-    transform: translate(-50%, -50%);
     animation: features-orbit-counter-spin var(--orbit-duration, 34s) linear infinite;
     will-change: transform;
   }

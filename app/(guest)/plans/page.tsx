@@ -26,6 +26,8 @@ const planDetails = [
   {
     nameAr: "الأساسية",
     nameEn: "Starter",
+    sizeAr: "من 5 إلى 10 موظفين",
+    sizeEn: "5–10 employees",
     tagAr: "مثالية للشركات الناشئة",
     tagEn: "Perfect for growing teams",
     highlightsAr: [
@@ -52,6 +54,8 @@ const planDetails = [
   {
     nameAr: "الأعمال",
     nameEn: "Business",
+    sizeAr: "من 10 إلى 25 موظفًا",
+    sizeEn: "10–25 employees",
     tagAr: "الأكثر طلباً للشركات المتوسطة",
     tagEn: "Most popular for mid-sized companies",
     highlightsAr: [
@@ -83,6 +87,8 @@ const planDetails = [
   {
     nameAr: "المؤسسات",
     nameEn: "Enterprise",
+    sizeAr: "من 25 إلى 100+ موظف",
+    sizeEn: "25–100+ employees",
     tagAr: "للشركات الكبيرة والمؤسسات",
     tagEn: "For large companies and enterprises",
     highlightsAr: [
@@ -110,20 +116,20 @@ const planDetails = [
 
 const addons = [
   {
-    ar: "استيراد بيانات من Excel / CSV",
-    en: "Import data from Excel / CSV",
+    ar: "إعداد وهجرة البيانات (متاح لكل الباقات)",
+    en: "Data migration & setup (any plan)",
   },
   {
-    ar: "تدريب فريق الموارد البشرية",
-    en: "HR team training",
+    ar: "تدريب فريق HR منفصل عن الباقة",
+    en: "Standalone HR team training",
   },
   {
-    ar: "تخصيص تقارير ولوحات",
-    en: "Custom reports & dashboards",
+    ar: "دعم تقني ميداني (زيارات مباشرة)",
+    en: "On-site technical support visits",
   },
   {
-    ar: "تكاملات خارجية حسب الطلب",
-    en: "Third-party integrations on request",
+    ar: "تخصيص قوالب الرواتب وهوية الشركة",
+    en: "Payslip templates & brand customisation",
   },
 ];
 
@@ -190,7 +196,10 @@ export default async function PlansPage() {
                       <PlanIcon className="h-6 w-6 text-primary" />
                     </div>
                     <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.nameEn}</CardTitle>
-                    <p className="text-sm font-medium text-primary">{isAr ? plan.tagAr : plan.tagEn}</p>
+                    <p className="mt-1 inline-flex items-center rounded-full border border-border/60 bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
+                      {isAr ? plan.sizeAr : plan.sizeEn}
+                    </p>
+                    <p className="mt-1 text-sm font-medium text-primary">{isAr ? plan.tagAr : plan.tagEn}</p>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">

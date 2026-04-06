@@ -114,27 +114,28 @@ const plans = [
     name: "Starter",
     nameAr: "الأساسية",
     price: "499",
-    employees: "حتى 25 موظف",
-    employeesEn: "Up to 25 employees",
+    sizeAr: "من 5 إلى 10 موظفين",
+    sizeEn: "5–10 employees",
     features: [
-      { ar: "إدارة الموظفين", en: "Employee management" },
-      { ar: "الحضور والانصراف", en: "Time & attendance" },
-      { ar: "إدارة الإجازات", en: "Leave management" },
-      { ar: "التقارير الأساسية", en: "Basic reports" },
+      { ar: "ملفات الموظفين والهيكل التنظيمي", en: "Employee profiles & org chart" },
+      { ar: "الحضور والانصراف والورديات", en: "Time & attendance with shifts" },
+      { ar: "إدارة الإجازات والأرصدة", en: "Leave management & balances" },
+      { ar: "تسجيل الحضور من التطبيق", en: "Mobile app check-in" },
+      { ar: "التقارير الأساسية (PDF / Excel)", en: "Basic reports (PDF / Excel)" },
     ],
   },
   {
     name: "Business",
     nameAr: "الأعمال",
     price: "999",
-    employees: "حتى 100 موظف",
-    employeesEn: "Up to 100 employees",
+    sizeAr: "من 10 إلى 25 موظفًا",
+    sizeEn: "10–25 employees",
     features: [
       { ar: "كل مميزات الأساسية", en: "All Starter features" },
-      { ar: "كشف الرواتب الكامل", en: "Full payroll processing" },
-      { ar: "تصدير WPS", en: "WPS export" },
-      { ar: "تكامل GOSI", en: "GOSI integration" },
-      { ar: "دعم فني متقدم", en: "Priority support" },
+      { ar: "مسير الرواتب + تصدير WPS", en: "Payroll processing + WPS export" },
+      { ar: "تكامل GOSI والاستحقاقات", en: "GOSI integration & allowances" },
+      { ar: "تقييم الأداء والتوظيف", en: "Performance reviews & recruitment" },
+      { ar: "أدوار متقدمة + سجلات تدقيق", en: "Advanced roles + audit logs" },
     ],
     popular: true,
   },
@@ -143,14 +144,13 @@ const plans = [
     nameAr: "المؤسسات",
     price: "تواصل معنا",
     priceEn: "Contact us",
-    employees: "غير محدود",
-    employeesEn: "Unlimited employees",
+    sizeAr: "من 25 إلى 100+ موظف",
+    sizeEn: "25–100+ employees",
     features: [
       { ar: "كل مميزات الأعمال", en: "All Business features" },
-      { ar: "تكاملات مخصصة", en: "Custom integrations" },
-      { ar: "API كامل", en: "Full API access" },
-      { ar: "مدير حساب مخصص", en: "Dedicated account manager" },
-      { ar: "اتفاقية SLA مخصصة", en: "Custom SLA agreement" },
+      { ar: "تكاملات مخصصة (مدد / ERP)", en: "Custom integrations (Mudad / ERP)" },
+      { ar: "مدير حساب مخصص + SLA", en: "Dedicated account manager + SLA" },
+      { ar: "وصول API + تقارير مخصصة", en: "API access + custom reporting" },
     ],
   },
 ];
@@ -432,7 +432,7 @@ export default async function LandingPage({
                       )}
                     </div>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      {isAr ? plan.employees : plan.employeesEn}
+                      {isAr ? plan.sizeAr : plan.sizeEn}
                     </p>
                   </div>
 

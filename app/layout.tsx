@@ -51,6 +51,8 @@ export const metadata: Metadata = {
   other: {
     "mobile-web-app-capable": "yes",
   },
+  authors: [{ name: "ma-fo.info", url: "https://ma-fo.info" }],
+  creator: "ma-fo.info",
 };
 
 export const viewport: Viewport = {

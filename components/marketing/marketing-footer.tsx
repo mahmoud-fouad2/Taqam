@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 import { LogoMark } from "@/components/logo-mark";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -63,7 +64,22 @@ export async function MarketingFooter() {
 
           <div className="flex flex-col gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <span>© {year} {rights}</span>
-            <span>{supportLine}</span>
+            <Link
+              href="https://ma-fo.info"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-80"
+            >
+              <Image
+                src="https://ma-fo.info/favicon.ico"
+                alt="ma-fo.info"
+                width={14}
+                height={14}
+                className="rounded-sm"
+                unoptimized
+              />
+              <span>{supportLine}</span>
+            </Link>
           </div>
         </div>
       </div>
