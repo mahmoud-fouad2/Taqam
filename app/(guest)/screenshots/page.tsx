@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 const desktopShots = [
   {
-    src: "/preview.png",
+    src: "/images/marketing/screenshot-reports.svg?v=2",
     titleAr: "لوحة التحكم",
     titleEn: "Dashboard",
     badgeAr: "HR",
@@ -25,7 +25,7 @@ const desktopShots = [
     badgeColor: "indigo" as const,
   },
   {
-    src: "/preview2.png",
+    src: "/images/marketing/screenshot-analytics.svg?v=2",
     titleAr: "التقارير والتحليلات",
     titleEn: "Reports & insights",
     badgeAr: "تقارير",
@@ -131,8 +131,8 @@ const features = [
     color: "text-teal-600 bg-teal-500/10",
     labelAr: "تطبيق الجوال",
     labelEn: "Mobile App",
-    descAr: "iOS و Android — جاهز قريباً",
-    descEn: "iOS & Android — coming soon",
+    descAr: "تجربة ميدانية للموظف والمدير",
+    descEn: "Mobile workflows for employees and managers",
   },
 ];
 
@@ -189,29 +189,27 @@ export default async function ScreenshotsPage() {
           </div>
 
           {/* Stats row */}
-          <div className="mx-auto mt-8 flex max-w-lg justify-center gap-8 text-center">
-            <div>
+          <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3 rounded-2xl border bg-background/80 p-3 text-center shadow-sm backdrop-blur-sm sm:gap-4 sm:p-4">
+            <div className="rounded-xl bg-muted/40 px-3 py-4">
               <p className="text-2xl font-bold text-foreground">٨+</p>
               <p className="text-xs text-muted-foreground">{isAr ? "لقطات شاشة" : "Screenshots"}</p>
             </div>
-            <div className="h-10 w-px bg-border" />
-            <div>
+            <div className="rounded-xl bg-muted/40 px-3 py-4">
               <p className="text-2xl font-bold text-foreground">٦</p>
               <p className="text-xs text-muted-foreground">{isAr ? "وحدات وظيفية" : "Feature modules"}</p>
             </div>
-            <div className="h-10 w-px bg-border" />
-            <div>
+            <div className="rounded-xl bg-muted/40 px-3 py-4">
               <p className="text-2xl font-bold text-foreground">٢</p>
               <p className="text-xs text-muted-foreground">{isAr ? "منصة (ويب + جوال)" : "Platforms (web + mobile)"}</p>
             </div>
           </div>
 
           {/* Feature highlights */}
-          <div className="mx-auto mt-10 grid max-w-4xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <div className="mx-auto mt-10 grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             {features.map((f) => (
               <div
                 key={f.labelEn}
-                className="flex flex-col items-center gap-2 rounded-xl border bg-card p-3 text-center shadow-sm transition-shadow hover:shadow-md"
+                className="flex flex-col items-center gap-2 rounded-2xl border border-border/70 bg-background/80 p-3.5 text-center shadow-sm backdrop-blur-sm transition-all hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className={`flex size-9 items-center justify-center rounded-lg ${f.color}`}>
                   <f.icon className="size-4" />
