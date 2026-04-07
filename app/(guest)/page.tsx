@@ -545,24 +545,24 @@ export default async function LandingPage({
       </div>
 
       {/* ── FEATURES ─────────────────────────────────────────── */}
-      <section id="features" className="relative border-t py-28">
+      <section id="features" className="relative border-t py-20 sm:py-24 lg:py-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.5),rgba(255,255,255,1)_40%,rgba(248,250,252,0.3))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.4),rgba(2,6,23,0.7)_40%,rgba(15,23,42,0.3))]" />
         <FadeIn direction="up" className="container mx-auto px-4">
-          <div className="mb-16 text-center">
+          <div className="mb-12 text-center sm:mb-14 lg:mb-16">
             <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               {isAr ? "المميزات" : "Features"}
             </span>
-            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
+            <h2 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
               {isAr ? "كل ما تحتاجه لإدارة فريقك" : "Everything to run your team"}
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground/80">
+            <p className="mx-auto mt-3 max-w-xl text-base text-muted-foreground/80 sm:mt-4 sm:text-lg">
               {isAr ? "وحدة واحدة متكاملة بدلاً من أدوات متعددة" : "One integrated platform instead of multiple disconnected tools"}
             </p>
           </div>
 
           <FeaturesMarquee features={features} isAr={isAr} />
 
-          <div className="mt-10 text-center">
+          <div className="mt-8 text-center sm:mt-10">
             <Link href={`${p}/features`}>
               <Button variant="outline" className="gap-2">
                 {isAr ? "اكتشف كل المميزات" : "Explore all features"}

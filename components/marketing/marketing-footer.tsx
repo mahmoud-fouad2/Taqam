@@ -43,22 +43,22 @@ export async function MarketingFooter() {
 
   return (
     <footer className="border-t bg-background/95">
-        <div className="container mx-auto px-4 py-8 sm:py-12">
-          <div className="flex flex-col gap-6 rounded-[2.5rem] border border-border/40 bg-card/60 px-6 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:border-border/80 hover:shadow-xl sm:px-8 sm:py-8 lg:px-12">
-            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-start gap-4 sm:gap-5">
-                <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-80">
-                <LogoMark frameClassName="size-12 rounded-2xl p-0 dark:ring-white/10" imageClassName="h-7" />
+      <div className="container mx-auto max-w-6xl px-4 py-6 sm:py-8">
+        <div className="flex flex-col gap-4 rounded-[2rem] border border-border/40 bg-card/60 px-5 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:border-border/80 hover:shadow-xl sm:px-6 sm:py-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-start gap-3.5 sm:gap-4">
+              <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-80">
+                <LogoMark frameClassName="size-11 rounded-[1.125rem] p-0 dark:ring-white/10" imageClassName="h-[26px]" />
               </Link>
 
-              <div className="space-y-2 text-start">
+              <div className="space-y-1.5 text-start">
                 <p className="text-sm font-semibold text-foreground sm:text-base">
                   {isAr ? "طاقم" : "Taqam"}
                 </p>
-                <p className="max-w-xl text-sm leading-6 text-muted-foreground">
+                <p className="max-w-lg text-sm leading-6 text-muted-foreground">
                   {summary}
                 </p>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {highlights.map((item) => (
                     <span
                       key={item}
@@ -68,35 +68,37 @@ export async function MarketingFooter() {
                     </span>
                   ))}
                 </div>
-
-                <a
-                  href={downloadHref}
-                  download="taqam-android.apk"
-                  className="group mt-3 inline-flex items-center gap-2.5 rounded-xl border border-border/60 bg-background/90 px-3 py-2 shadow-sm transition hover:border-primary/30 hover:bg-primary/5"
-                  aria-label={isAr ? "تحميل تطبيق طاقم للأندرويد" : "Download the Taqam Android app"}
-                >
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 dark:bg-white/10">
-                    <GooglePlayIcon className="h-4.5 w-4.5" />
-                  </div>
-                  <div className="min-w-0 text-start">
-                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      Android
-                    </p>
-                    <p className="truncate text-xs font-semibold text-foreground">
-                      {isAr ? "تحميل التطبيق" : "Download app"}
-                    </p>
-                  </div>
-                </a>
               </div>
             </div>
 
-            <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground md:max-w-xs md:justify-end">
-              {legalLinks.map((link) => (
-                <Link key={link.href} href={link.href} className="transition hover:text-foreground">
-                  {link.label}
-                </Link>
-              ))}
-            </nav>
+            <div className="flex flex-col gap-3 lg:min-w-[14rem] lg:items-end">
+              <nav className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground lg:justify-end">
+                {legalLinks.map((link) => (
+                  <Link key={link.href} href={link.href} className="transition hover:text-foreground">
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <a
+                href={downloadHref}
+                download="taqam-android.apk"
+                className="group inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background/90 px-3 py-1.5 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 lg:self-end"
+                aria-label={isAr ? "تحميل تطبيق طاقم للأندرويد" : "Download the Taqam Android app"}
+              >
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 dark:bg-white/10">
+                  <GooglePlayIcon className="h-[18px] w-[18px]" />
+                </div>
+                <div className="min-w-0 text-start">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    Android
+                  </p>
+                  <p className="truncate text-xs font-semibold text-foreground">
+                    {isAr ? "تحميل التطبيق" : "Download app"}
+                  </p>
+                </div>
+              </a>
+            </div>
           </div>
 
           <div className="flex flex-col gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
