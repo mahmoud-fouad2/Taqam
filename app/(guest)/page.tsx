@@ -390,25 +390,26 @@ export default async function LandingPage({
 
   return (
     <main className="min-h-[calc(100vh-8rem)] bg-background">
-      {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden pb-12 pt-20 sm:pt-28">
-        {/* Ambient glow backdrop */}
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.18),transparent_70%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.25),transparent_70%)]" />
-          <div className="absolute start-0 top-20 h-72 w-72 rounded-full bg-indigo-500/[0.07] blur-[120px]" />
-          <div className="absolute end-0 top-32 h-64 w-64 rounded-full bg-sky-500/[0.07] blur-[100px]" />
-        </div>
-        <div className="container mx-auto px-4">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          {/* Left: copy */}
-          <div className="text-center lg:text-start">
-            {/* Badge */}
-            <div className="mb-5 flex justify-center lg:justify-start">
-              <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
-                <span className="size-1.5 animate-pulse rounded-full bg-indigo-500" />
-                {isAr ? "منصة سعودية • متوافقة مع GOSI وWPS ومدد • ثنائية اللغة" : "Saudi-built • GOSI, WPS & Mudad compliant • Bilingual"}
-              </span>
-            </div>
+      <StaggerContainer>
+        {/* ── HERO ─────────────────────────────────────────────── */}
+        <section className="relative overflow-hidden pb-12 pt-20 sm:pt-28">
+          {/* Ambient glow backdrop */}
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.18),transparent_70%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.25),transparent_70%)]" />
+            <div className="absolute start-0 top-20 h-72 w-72 rounded-full bg-indigo-500/[0.07] blur-[120px]" />
+            <div className="absolute end-0 top-32 h-64 w-64 rounded-full bg-sky-500/[0.07] blur-[100px]" />
+          </div>
+          <div className="container mx-auto px-4">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
+            {/* Left: copy */}
+            <StaggerItem direction="right" className="text-center lg:text-start">
+              {/* Badge */}
+              <div className="mb-5 flex justify-center lg:justify-start">
+                <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
+                  <span className="size-1.5 animate-pulse rounded-full bg-indigo-500" />
+                  {isAr ? "منصة سعودية • متوافقة مع GOSI وWPS ومدد • ثنائية اللغة" : "Saudi-built • GOSI, WPS & Mudad compliant • Bilingual"}
+                </span>
+              </div>
 
             <h1 className="text-5xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
               {isAr ? (
@@ -486,10 +487,10 @@ export default async function LandingPage({
                 </div>
               ))}
             </div>
-          </div>
+          </StaggerItem>
 
           {/* Right: screenshots panel */}
-          <div className="relative mx-auto w-full max-w-xl">
+          <StaggerItem direction="left" className="relative mx-auto w-full max-w-xl">
             <div className="pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-blue-500/12 to-purple-500/12 blur-[100px]" />
 
             {/* Main browser-frame screenshot */}
@@ -509,10 +510,11 @@ export default async function LandingPage({
                 src="/videos/hero-square.mp4"
               />
             </div>
-          </div>
+          </StaggerItem>
         </div>
         </div>
       </section>
+      </StaggerContainer>
 
       {/* ── COMPLIANCE BAR ──────────────────────────────────── */}
       <div className="border-y border-border/50 bg-muted/20 py-5 backdrop-blur-sm">
@@ -545,7 +547,7 @@ export default async function LandingPage({
       {/* ── FEATURES ─────────────────────────────────────────── */}
       <section id="features" className="relative border-t py-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.5),rgba(255,255,255,1)_40%,rgba(248,250,252,0.3))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.4),rgba(2,6,23,0.7)_40%,rgba(15,23,42,0.3))]" />
-        <div className="container mx-auto px-4">
+        <FadeIn direction="up" className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               {isAr ? "المميزات" : "Features"}
@@ -568,13 +570,13 @@ export default async function LandingPage({
               </Button>
             </Link>
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* ── PERSONAS ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-t py-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.6),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.5),rgba(2,6,23,0.7)_50%)]" />
-        <div className="container mx-auto px-4 text-center">
+        <FadeIn direction="up" className="container mx-auto px-4 text-center">
           <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
             {isAr ? "لمن طاقم؟" : "Who is Taqam for?"}
           </span>
@@ -621,13 +623,13 @@ export default async function LandingPage({
               </div>
             ))}
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
       <section className="relative bg-slate-950 py-28 text-white dark:bg-black">
         <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,rgba(99,102,241,0.12),transparent_60%)]" />
-        <div className="container relative mx-auto px-4">
+        <FadeIn direction="up" className="container relative mx-auto px-4">
           {/* Header */}
           <div className="mb-20 text-center">
             <span className="mb-4 inline-block rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white/70">
@@ -750,12 +752,12 @@ export default async function LandingPage({
               );
             })}
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────── */}
       <section id="pricing" className="py-28">
-        <div className="container mx-auto px-4">
+        <FadeIn direction="up" className="container mx-auto px-4">
           <div className="mb-16 text-center">
             <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               {isAr ? "الأسعار" : "Pricing"}
@@ -829,12 +831,12 @@ export default async function LandingPage({
               </Button>
             </Link>
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* ── INTEGRATIONS ─────────────────────────────────────── */}
       <section className="border-t bg-muted/10 py-24">
-        <div className="container mx-auto px-4">
+        <FadeIn direction="up" className="container mx-auto px-4">
           <div className="mb-10 text-center">
             <h3 className="text-xl font-bold">
               {isAr ? "يتكامل مع الأنظمة التي تعرفها" : "Integrates with the systems you know"}
@@ -880,14 +882,14 @@ export default async function LandingPage({
               </div>
             ))}
           </div>
-        </div>
+        </FadeIn>
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-t py-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-sky-50 via-white to-indigo-100/80 dark:from-indigo-600 dark:via-blue-600 dark:to-purple-700" />
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_-20%,rgba(59,130,246,0.14),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]" />
-        <div className="container mx-auto px-4 text-center">
+        <FadeIn className="container mx-auto px-4 text-center">
           <div className="mx-auto max-w-2xl">
             <p className="mb-3 text-sm font-semibold uppercase tracking-widest text-sky-700/80 dark:text-white/70">
               {isAr ? "ابدأ اليوم" : "Get started today"}
@@ -917,7 +919,7 @@ export default async function LandingPage({
               {isAr ? "لا حاجة لبطاقة ائتمانية • إعداد في 24 ساعة • دعم فني مجاني" : "No credit card required • Setup in 24h • Free technical support"}
             </p>
           </div>
-        </div>
+        </FadeIn>
       </section>
     </main>
   );
