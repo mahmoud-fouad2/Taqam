@@ -5,12 +5,12 @@ import { LogoMark } from "@/components/logo-mark";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { t } from "@/lib/i18n/messages";
 
-function GooglePlayIcon() {
+function GooglePlayIcon({ className }: { className?: string }) {
   return (
     <svg
       aria-hidden="true"
       viewBox="0 0 64 64"
-      className="h-10 w-10 shrink-0"
+      className={className ?? "h-10 w-10 shrink-0"}
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
@@ -72,21 +72,18 @@ export async function MarketingFooter() {
                 <a
                   href={downloadHref}
                   download="taqam-android.apk"
-                  className="group mt-3 inline-flex w-full max-w-sm items-center gap-3 rounded-2xl border border-emerald-500/20 bg-background px-3 py-3 shadow-sm transition hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                  className="group mt-3 inline-flex items-center gap-2.5 rounded-xl border border-border/60 bg-background/90 px-3 py-2 shadow-sm transition hover:border-primary/30 hover:bg-primary/5"
                   aria-label={isAr ? "تحميل تطبيق طاقم للأندرويد" : "Download the Taqam Android app"}
                 >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/15">
-                    <GooglePlayIcon />
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 dark:bg-white/10">
+                    <GooglePlayIcon className="h-4.5 w-4.5" />
                   </div>
                   <div className="min-w-0 text-start">
-                    <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                      Google Play
+                    <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                      Android
                     </p>
-                    <p className="truncate text-sm font-semibold text-foreground sm:text-base">
-                      {isAr ? "تحميل تطبيق طاقم مباشرة" : "Download Taqam directly"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {isAr ? "APK داخلي من نفس الموقع" : "Internal APK download from this site"}
+                    <p className="truncate text-xs font-semibold text-foreground">
+                      {isAr ? "تحميل التطبيق" : "Download app"}
                     </p>
                   </div>
                 </a>

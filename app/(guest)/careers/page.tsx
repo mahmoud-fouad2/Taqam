@@ -53,21 +53,21 @@ export default async function CareersPage({
 
   return (
     <main className="bg-background pb-20">
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-background to-background py-16 sm:py-20">
+      <section className="relative overflow-hidden border-b pb-20 pt-20 sm:pt-28">
         <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-x-0 top-0 h-72 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_60%)]" />
-          <div className="absolute -left-10 top-24 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl" />
-          <div className="absolute -right-10 top-12 h-64 w-64 rounded-full bg-indigo-500/10 blur-3xl" />
+          <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.14),transparent_65%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.22),transparent_65%)]" />
+          <div className="absolute start-0 top-20 h-64 w-64 rounded-full bg-indigo-500/[0.06] blur-[100px]" />
+          <div className="absolute end-0 top-32 h-56 w-56 rounded-full bg-sky-500/[0.06] blur-[80px]" />
         </div>
 
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-5 gap-2 rounded-full px-4 py-1.5 text-xs" variant="secondary">
+            <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               <Sparkles className="h-3.5 w-3.5" />
               {isAr ? "بوابة وظائف مجمعة لكل الشركات على طاقم" : "Unified careers portal across Taqam companies"}
-            </Badge>
+            </span>
 
-            <h1 className="text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
               {isAr ? "اكتشف فرصك التالية من بوابة توظيف واحدة" : "Discover your next move from one careers portal"}
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
@@ -77,22 +77,22 @@ export default async function CareersPage({
             </p>
 
             <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <Card className="border-border/70 bg-card/70">
-                <CardContent className="p-5">
-                  <div className="text-3xl font-black text-primary">{nf.format(jobs.length)}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{isAr ? "وظيفة مفتوحة الآن" : "Active job openings"}</p>
+              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.length)}</div>
+                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "وظيفة مفتوحة الآن" : "Active job openings"}</p>
                 </CardContent>
               </Card>
-              <Card className="border-border/70 bg-card/70">
-                <CardContent className="p-5">
-                  <div className="text-3xl font-black text-primary">{nf.format(tenantCount)}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{isAr ? "شركة لديها توظيف نشط" : "Hiring companies"}</p>
+              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="text-3xl font-extrabold text-primary">{nf.format(tenantCount)}</div>
+                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "شركة لديها توظيف نشط" : "Hiring companies"}</p>
                 </CardContent>
               </Card>
-              <Card className="border-border/70 bg-card/70">
-                <CardContent className="p-5">
-                  <div className="text-3xl font-black text-primary">{nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{isAr ? "مقاعد وظيفية معلنة" : "Advertised positions"}</p>
+              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                <CardContent className="p-6">
+                  <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}</div>
+                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "مقاعد وظيفية معلنة" : "Advertised positions"}</p>
                 </CardContent>
               </Card>
             </div>
@@ -179,11 +179,14 @@ export default async function CareersPage({
         )}
       </section>
 
-      <section className="border-t bg-muted/20 py-16">
+      <section className="relative border-t py-24">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.3),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.5)_50%)]" />
         <div className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
-          <Card className="border-border/70 bg-card/80">
-            <CardContent className="space-y-3 p-6">
-              <Building2 className="h-8 w-8 text-primary" />
+          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <CardContent className="space-y-3 p-7">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
+                <Building2 className="h-5 w-5 text-primary" />
+              </div>
               <h3 className="text-lg font-semibold">{isAr ? "بوابة خاصة بكل شركة" : "Dedicated portal per company"}</h3>
               <p className="text-sm leading-7 text-muted-foreground">
                 {isAr
@@ -192,9 +195,11 @@ export default async function CareersPage({
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/70 bg-card/80">
-            <CardContent className="space-y-3 p-6">
-              <BriefcaseBusiness className="h-8 w-8 text-primary" />
+          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <CardContent className="space-y-3 p-7">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
+                <BriefcaseBusiness className="h-5 w-5 text-primary" />
+              </div>
               <h3 className="text-lg font-semibold">{isAr ? "مجمّع وظائف المنصة" : "Platform-wide jobs hub"}</h3>
               <p className="text-sm leading-7 text-muted-foreground">
                 {isAr
@@ -203,9 +208,11 @@ export default async function CareersPage({
               </p>
             </CardContent>
           </Card>
-          <Card className="border-border/70 bg-card/80">
-            <CardContent className="space-y-3 p-6">
-              <Sparkles className="h-8 w-8 text-primary" />
+          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+            <CardContent className="space-y-3 p-7">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
+                <Sparkles className="h-5 w-5 text-primary" />
+              </div>
               <h3 className="text-lg font-semibold">{isAr ? "تقديم مباشر ومتكامل" : "Direct integrated applications"}</h3>
               <p className="text-sm leading-7 text-muted-foreground">
                 {isAr

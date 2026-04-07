@@ -69,10 +69,11 @@ export function MarketingPageHero({
   const styles = toneClasses[tone];
 
   return (
-    <section className={cn("relative overflow-hidden border-b py-16 sm:py-20", styles.section, className)}>
+    <section className={cn("relative overflow-hidden border-b pb-20 pt-20 sm:pt-28", styles.section, className)}>
       <div className="pointer-events-none absolute inset-0 -z-10">
-        <div className={cn("absolute left-1/4 top-8 h-64 w-64 rounded-full blur-3xl", styles.orbPrimary)} />
-        <div className={cn("absolute right-1/4 top-16 h-56 w-56 rounded-full blur-3xl", styles.orbSecondary)} />
+        <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.12),transparent_65%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.2),transparent_65%)]" />
+        <div className={cn("absolute start-1/4 top-8 h-64 w-64 rounded-full blur-[100px]", styles.orbPrimary)} />
+        <div className={cn("absolute end-1/4 top-16 h-56 w-56 rounded-full blur-[80px]", styles.orbSecondary)} />
       </div>
 
       <div className="container mx-auto px-4">
@@ -84,13 +85,13 @@ export function MarketingPageHero({
           ) : null}
 
           {badge ? (
-            <span className={cn("inline-flex rounded-full border px-4 py-1.5 text-sm font-medium", styles.badge)}>
+            <span className={cn("inline-flex rounded-full border px-4 py-1.5 text-xs font-semibold", styles.badge)}>
               {badge}
             </span>
           ) : null}
 
-          <h1 className="mt-5 text-4xl font-black tracking-tight sm:text-5xl">{title}</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">{description}</p>
+          <h1 className="mt-5 text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">{title}</h1>
+          <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground/80">{description}</p>
 
           {actions.length > 0 ? (
             <div className="mt-7 flex flex-wrap justify-center gap-3">
@@ -107,7 +108,7 @@ export function MarketingPageHero({
           {stats.length > 0 ? (
             <div
               className={cn(
-                "mx-auto mt-10 grid gap-4 rounded-3xl border bg-card/80 p-6 shadow-sm backdrop-blur",
+                "mx-auto mt-12 grid gap-4 rounded-[2rem] border border-border/50 bg-card/80 p-7 shadow-sm backdrop-blur-sm",
                 stats.length === 1 && "max-w-sm",
                 stats.length === 2 && "max-w-xl md:grid-cols-2",
                 stats.length >= 3 && "max-w-3xl md:grid-cols-3"
@@ -115,8 +116,8 @@ export function MarketingPageHero({
             >
               {stats.map((stat) => (
                 <div key={`${stat.value}:${stat.label}`}>
-                  <div className="text-3xl font-bold text-primary">{stat.value}</div>
-                  <p className="mt-1 text-sm text-muted-foreground">{stat.label}</p>
+                  <div className="text-3xl font-extrabold text-primary">{stat.value}</div>
+                  <p className="mt-1.5 text-sm text-muted-foreground/80">{stat.label}</p>
                 </div>
               ))}
             </div>

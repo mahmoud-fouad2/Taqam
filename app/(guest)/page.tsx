@@ -177,7 +177,26 @@ const personas = [
     titleEn: "Full control of org structure & payroll",
     descAr: "أدر ملفات الموظفين ومسير الرواتب والإجازات من لوحة تحكم واحدة متكاملة.",
     descEn: "Manage employee files, payroll, and leaves from one integrated dashboard.",
-    photo: "https://images.pexels.com/photos/8154232/pexels-photo-8154232.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    surface: "from-indigo-500/14 via-white to-sky-500/10 dark:from-indigo-500/18 dark:via-slate-900 dark:to-sky-500/10",
+    visualCaptionAr: "ملفات الموظفين والموافقات والرواتب في مشهد واحد واضح لفريق الموارد البشرية.",
+    visualCaptionEn: "Employee records, approvals, and payroll sit together in one clear HR workspace.",
+    visuals: {
+      primary: {
+        src: "/images/marketing/screenshot-employees.svg?v=2",
+        labelAr: "ملفات الموظفين",
+        labelEn: "Employee records",
+      },
+      secondary: {
+        src: "/images/marketing/screenshot-payroll-new.svg?v=2",
+        labelAr: "الرواتب",
+        labelEn: "Payroll",
+      },
+      tertiary: {
+        src: "/images/marketing/mobile-employees.svg?v=2",
+        labelAr: "تطبيق الموظف",
+        labelEn: "Employee app",
+      },
+    },
     features: [
       { ar: "مسير رواتب تلقائي متوافق مع GOSI", en: "Automated payroll with GOSI compliance" },
       { ar: "موافقة فورية على الإجازات والطلبات", en: "Instant leave and request approvals" },
@@ -193,7 +212,26 @@ const personas = [
     titleEn: "Complete executive visibility of all KPIs",
     descAr: "تابع أداء الفريق ومؤشرات الامتثال والتكاليف من لوحة بيانات تنفيذية لحظية.",
     descEn: "Monitor team performance, compliance and costs from a real-time executive dashboard.",
-    photo: "https://images.pexels.com/photos/7993560/pexels-photo-7993560.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    surface: "from-blue-500/14 via-white to-indigo-500/10 dark:from-blue-500/18 dark:via-slate-900 dark:to-indigo-500/12",
+    visualCaptionAr: "لوحات تنفيذية وتقارير وتحليلات لحظية تساعد الإدارة على اتخاذ القرار بسرعة.",
+    visualCaptionEn: "Executive dashboards, reports, and live analytics help leadership make faster decisions.",
+    visuals: {
+      primary: {
+        src: "/images/marketing/screenshot-dashboard.svg?v=2",
+        labelAr: "لوحة التحكم",
+        labelEn: "Dashboard",
+      },
+      secondary: {
+        src: "/images/marketing/screenshot-analytics.svg?v=2",
+        labelAr: "التحليلات",
+        labelEn: "Analytics",
+      },
+      tertiary: {
+        src: "/images/marketing/screenshot-reports.svg?v=2",
+        labelAr: "التقارير",
+        labelEn: "Reports",
+      },
+    },
     features: [
       { ar: "لوحات بيانات تنفيذية لحظية", en: "Real-time executive dashboards" },
       { ar: "تقارير التكاليف والامتثال للوائح", en: "Cost & regulatory compliance reports" },
@@ -209,7 +247,26 @@ const personas = [
     titleEn: "Everything you need from your phone",
     descAr: "سجّل حضورك واطلب إجازتك وراجع قسيمة راتبك — كل ذلك من تطبيق طاقم.",
     descEn: "Clock in, request leave, and view your payslip — all from the Taqam mobile app.",
-    photo: "https://images.pexels.com/photos/5206297/pexels-photo-5206297.jpeg?auto=compress&cs=tinysrgb&w=600&h=420&fit=crop",
+    surface: "from-emerald-500/14 via-white to-teal-500/12 dark:from-emerald-500/18 dark:via-slate-900 dark:to-teal-500/12",
+    visualCaptionAr: "مسار يومي واضح للموظف: حضور، طلبات، ورواتب من شاشة جوال واحدة.",
+    visualCaptionEn: "A clear daily employee flow: attendance, requests, and payroll from one mobile screen.",
+    visuals: {
+      primary: {
+        src: "/images/marketing/mobile-dashboard.svg?v=2",
+        labelAr: "الصفحة الرئيسية",
+        labelEn: "Mobile home",
+      },
+      secondary: {
+        src: "/images/marketing/mobile-payroll.svg?v=2",
+        labelAr: "الرواتب",
+        labelEn: "Payslip",
+      },
+      tertiary: {
+        src: "/images/marketing/mobile-employees.svg?v=2",
+        labelAr: "طلبات الموظف",
+        labelEn: "Employee requests",
+      },
+    },
     features: [
       { ar: "تسجيل الحضور والانصراف بسهولة", en: "Easy attendance check-in/out" },
       { ar: "طلبات الإجازة ومتابعة الرصيد", en: "Leave requests with balance tracking" },
@@ -217,6 +274,65 @@ const personas = [
     ],
   },
 ];
+
+type Persona = (typeof personas)[number];
+
+function PersonaVisualPanel({ persona, isAr }: { persona: Persona; isAr: boolean }) {
+  const visualCards = [
+    {
+      ...persona.visuals.primary,
+      shellClassName: "absolute start-2 top-3 h-[15rem] w-[66%] overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/90 shadow-[0_24px_48px_-28px_rgba(15,23,42,0.4)] ring-1 ring-black/5 dark:border-white/10 dark:bg-slate-950/90",
+      imageClassName: "object-cover",
+    },
+    {
+      ...persona.visuals.secondary,
+      shellClassName: "absolute end-0 top-16 h-[10rem] w-[38%] overflow-hidden rounded-[2rem] border border-white/70 bg-white/90 shadow-[0_20px_40px_-24px_rgba(15,23,42,0.35)] ring-1 ring-black/5 rotate-2 dark:border-white/10 dark:bg-slate-950/90",
+      imageClassName: "object-cover",
+    },
+    {
+      ...persona.visuals.tertiary,
+      shellClassName: "absolute bottom-2 start-10 h-[10rem] w-[44%] overflow-hidden rounded-[999px] border border-white/70 bg-white/95 shadow-[0_18px_38px_-24px_rgba(15,23,42,0.35)] ring-1 ring-black/5 -rotate-3 dark:border-white/10 dark:bg-slate-950/95",
+      imageClassName: "object-contain p-3",
+    },
+  ];
+
+  return (
+    <div className="relative min-h-[24rem] overflow-hidden p-6 sm:p-8 lg:min-h-[28rem]">
+      <div className={`absolute inset-0 bg-gradient-to-br ${persona.surface}`} />
+      <div className="absolute start-10 top-6 h-24 w-24 rounded-full bg-primary/10 blur-3xl" />
+      <div className="absolute end-10 bottom-10 h-24 w-24 rounded-full bg-sky-500/10 blur-3xl" />
+
+      <div className="relative h-full min-h-[21rem]">
+        {visualCards.map((visual) => (
+          <div key={visual.labelEn} className={visual.shellClassName}>
+            <div className="relative h-full w-full bg-muted/30">
+              <Image
+                src={visual.src}
+                alt={isAr ? visual.labelAr : visual.labelEn}
+                fill
+                sizes="(max-width: 1024px) 100vw, 34vw"
+                unoptimized={visual.src.includes(".svg")}
+                className={visual.imageClassName}
+              />
+              <div className="absolute inset-x-3 bottom-3">
+                <span className="inline-flex rounded-full border border-white/15 bg-slate-950/65 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur-sm">
+                  {isAr ? visual.labelAr : visual.labelEn}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        <div className="absolute bottom-0 end-0 max-w-[13rem] rounded-[1.8rem] border border-white/70 bg-white/92 p-4 shadow-[0_20px_44px_-28px_rgba(15,23,42,0.42)] backdrop-blur dark:border-white/10 dark:bg-slate-950/92">
+          <p className="text-xs font-semibold text-primary">{isAr ? persona.roleAr : persona.roleEn}</p>
+          <p className="mt-1.5 text-sm leading-6 text-foreground">
+            {isAr ? persona.visualCaptionAr : persona.visualCaptionEn}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const testimonials = [
   {
@@ -280,7 +396,14 @@ export default async function LandingPage({
   return (
     <main className="min-h-[calc(100vh-8rem)] bg-background">
       {/* ── HERO ─────────────────────────────────────────────── */}
-      <section className="container mx-auto px-4 pb-8 pt-16 sm:pt-20">
+      <section className="relative overflow-hidden pb-12 pt-20 sm:pt-28">
+        {/* Ambient glow backdrop */}
+        <div className="pointer-events-none absolute inset-0 -z-10">
+          <div className="absolute inset-x-0 top-0 h-[36rem] bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.18),transparent_70%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_-5%,rgba(99,102,241,0.25),transparent_70%)]" />
+          <div className="absolute start-0 top-20 h-72 w-72 rounded-full bg-indigo-500/[0.07] blur-[120px]" />
+          <div className="absolute end-0 top-32 h-64 w-64 rounded-full bg-sky-500/[0.07] blur-[100px]" />
+        </div>
+        <div className="container mx-auto px-4">
         <div className="grid items-center gap-12 lg:grid-cols-2">
           {/* Left: copy */}
           <div className="text-center lg:text-start">
@@ -292,7 +415,7 @@ export default async function LandingPage({
               </span>
             </div>
 
-            <h1 className="text-4xl font-extrabold leading-tight tracking-tight sm:text-5xl lg:text-6xl">
+            <h1 className="text-5xl font-extrabold leading-[1.08] tracking-tight sm:text-6xl lg:text-7xl">
               {isAr ? (
                 <>
                   منصة إدارة{" "}
@@ -314,7 +437,7 @@ export default async function LandingPage({
               )}
             </h1>
 
-            <p className="mx-auto mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground lg:mx-0">
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground/80 lg:mx-0">
               {isAr
                 ? "طاقم منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية كاملة وامتثال للأنظمة المحلية."
                 : "Taqam is a modern cloud platform to manage employees, attendance, and payroll—optimized for Saudi compliance with full Arabic/English RTL UX."}
@@ -346,19 +469,30 @@ export default async function LandingPage({
               </Link>
             </div>
 
-            {/* Social proof stats */}
+            {/* Trust proof pills */}
             <div className="mt-8 flex flex-wrap justify-center gap-2 border-t pt-6 lg:justify-start">
               {[
-                { valueAr: "+٤٠", valueEn: "40+", labelAr: "شركة سعودية", labelEn: "Saudi companies", dot: "bg-indigo-500" },
-                { valueAr: "+١٢٠٠", valueEn: "1,200+", labelAr: "موظف مُدار", labelEn: "employees managed", dot: "bg-blue-500" },
-                { valueAr: "< يوم", valueEn: "< 1 day", labelAr: "للإعداد الكامل", labelEn: "full setup", dot: "bg-emerald-500" },
+                {
+                  labelAr: "تشغيل عربي / إنجليزي كامل",
+                  labelEn: "Full Arabic / English operations",
+                  dot: "bg-indigo-500",
+                },
+                {
+                  labelAr: "الموظفون والحضور والرواتب في مكان واحد",
+                  labelEn: "Employees, attendance, and payroll in one place",
+                  dot: "bg-blue-500",
+                },
+                {
+                  labelAr: "ويب + جوال للإدارة والموظفين",
+                  labelEn: "Web + mobile for admins and employees",
+                  dot: "bg-emerald-500",
+                },
               ].map((s) => (
                 <div
                   key={s.labelEn}
                   className="flex items-center gap-2 rounded-full border border-border/60 bg-muted/40 px-3.5 py-2 text-sm"
                 >
                   <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${s.dot}`} />
-                  <span className="font-semibold text-foreground">{isAr ? s.valueAr : s.valueEn}</span>
                   <span className="text-muted-foreground">{isAr ? s.labelAr : s.labelEn}</span>
                 </div>
               ))}
@@ -367,10 +501,10 @@ export default async function LandingPage({
 
           {/* Right: screenshots panel */}
           <div className="relative mx-auto w-full max-w-xl">
-            <div className="pointer-events-none absolute -inset-8 -z-10 rounded-[2.5rem] bg-gradient-to-br from-indigo-500/15 via-blue-500/10 to-purple-500/10 blur-3xl" />
+            <div className="pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-blue-500/12 to-purple-500/12 blur-[80px]" />
 
             {/* Main browser-frame screenshot */}
-            <div className="overflow-hidden rounded-2xl border bg-card shadow-2xl shadow-black/12 ring-1 ring-black/5">
+            <div className="overflow-hidden rounded-3xl border border-white/60 bg-card/95 shadow-[0_40px_80px_-30px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur-sm dark:border-white/10 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)]">
               <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2.5">
                 <div className="flex gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
@@ -420,10 +554,11 @@ export default async function LandingPage({
             </div>
           </div>
         </div>
+        </div>
       </section>
 
       {/* ── COMPLIANCE BAR ──────────────────────────────────── */}
-      <div className="border-y bg-muted/30 py-4">
+      <div className="border-y border-border/50 bg-muted/20 py-5 backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2">
             <p className="shrink-0 text-xs font-medium uppercase tracking-widest text-muted-foreground">
@@ -451,16 +586,17 @@ export default async function LandingPage({
       </div>
 
       {/* ── FEATURES ─────────────────────────────────────────── */}
-      <section id="features" className="border-t bg-muted/30 py-20">
+      <section id="features" className="relative border-t py-28">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.5),rgba(255,255,255,1)_40%,rgba(248,250,252,0.3))] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.4),rgba(2,6,23,0.7)_40%,rgba(15,23,42,0.3))]" />
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          <div className="mb-16 text-center">
+            <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               {isAr ? "المميزات" : "Features"}
             </span>
-            <h2 className="text-3xl font-bold sm:text-4xl">
+            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
               {isAr ? "كل ما تحتاجه لإدارة فريقك" : "Everything to run your team"}
             </h2>
-            <p className="mt-3 text-muted-foreground">
+            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground/80">
               {isAr ? "وحدة واحدة متكاملة بدلاً من أدوات متعددة" : "One integrated platform instead of multiple disconnected tools"}
             </p>
           </div>
@@ -479,81 +615,68 @@ export default async function LandingPage({
       </section>
 
       {/* ── PERSONAS ─────────────────────────────────────────── */}
-      <section className="overflow-hidden border-t">
-        <div className="container mx-auto px-4 py-16 text-center">
-          <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+      <section className="relative overflow-hidden border-t py-28">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.6),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.5),rgba(2,6,23,0.7)_50%)]" />
+        <div className="container mx-auto px-4 text-center">
+          <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
             {isAr ? "لمن طاقم؟" : "Who is Taqam for?"}
           </span>
-          <h2 className="text-3xl font-bold sm:text-4xl">
+          <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
             {isAr ? "مصمم لكل دور في فريقك" : "Built for every role in your team"}
           </h2>
-        </div>
+          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">
+            {isAr
+              ? "بدل صور عامة منفصلة عن المنتج، كل دور هنا مرتبط بلقطات فعلية أقرب لطريقة استخدامه داخل المنصة."
+              : "Instead of generic stock imagery, each role is paired with product visuals closer to the way that team actually works inside Taqam."}
+          </p>
 
-        {personas.map((persona, i) => {
-          const PersonaIcon = persona.icon;
-          return (
-            <div
-              key={persona.roleEn}
-              className={`flex flex-col lg:flex-row ${i % 2 !== 0 ? "lg:flex-row-reverse" : ""} ${i % 2 === 0 ? "bg-muted/20" : "bg-background"}`}
-            >
-              {/* Photo */}
-              <div className="relative h-64 shrink-0 overflow-hidden lg:h-[440px] lg:w-[45%]">
-                <Image
-                  src={persona.photo}
-                  alt={isAr ? persona.roleAr : persona.roleEn}
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 45vw"
-                  className="object-cover"
-                  unoptimized
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <span className="pointer-events-none absolute bottom-4 end-4 select-none text-[6rem] font-black leading-none text-white/[0.07]">
-                  0{i + 1}
-                </span>
-                <div className="absolute bottom-5 start-5">
-                  <span className={`inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold text-white shadow-lg ${persona.badge}`}>
-                    <PersonaIcon className="h-3.5 w-3.5" />
-                    {isAr ? persona.roleAr : persona.roleEn}
-                  </span>
+          <div className="mt-12 space-y-6 text-start">
+            {personas.map((persona, i) => (
+              <div
+                key={persona.roleEn}
+                className="grid overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/80 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.45)] backdrop-blur-sm lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]"
+              >
+                <div className={`${i % 2 === 0 ? "order-1" : "order-1 lg:order-2"} flex flex-1 flex-col justify-center px-6 py-10 lg:px-12 xl:px-16`}>
+                  <p className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-primary/70">
+                    {`0${i + 1} — ${isAr ? persona.roleAr : persona.roleEn}`}
+                  </p>
+                  <h3 className="text-2xl font-bold leading-snug lg:text-3xl">
+                    {isAr ? persona.titleAr : persona.titleEn}
+                  </h3>
+                  <p className="mt-4 leading-relaxed text-muted-foreground">
+                    {isAr ? persona.descAr : persona.descEn}
+                  </p>
+                  <ul className="mt-7 space-y-3.5">
+                    {persona.features.map((f) => (
+                      <li key={f.en} className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <CheckCircle2 className="h-3 w-3 text-primary" />
+                        </div>
+                        <span className="text-sm text-muted-foreground">{isAr ? f.ar : f.en}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={i % 2 === 0 ? "order-2" : "order-2 lg:order-1"}>
+                  <PersonaVisualPanel persona={persona} isAr={isAr} />
                 </div>
               </div>
-
-              {/* Text */}
-              <div className="flex flex-1 flex-col justify-center px-6 py-12 lg:px-14 xl:px-20">
-                <p className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-primary/70">
-                  {`0${i + 1} — ${isAr ? persona.roleAr : persona.roleEn}`}
-                </p>
-                <h3 className="text-2xl font-bold leading-snug lg:text-3xl">
-                  {isAr ? persona.titleAr : persona.titleEn}
-                </h3>
-                <p className="mt-4 leading-relaxed text-muted-foreground">
-                  {isAr ? persona.descAr : persona.descEn}
-                </p>
-                <ul className="mt-7 space-y-3.5">
-                  {persona.features.map((f) => (
-                    <li key={f.en} className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                        <CheckCircle2 className="h-3 w-3 text-primary" />
-                      </div>
-                      <span className="text-sm text-muted-foreground">{isAr ? f.ar : f.en}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          );
-        })}
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* ── TESTIMONIALS ─────────────────────────────────────── */}
-      <section className="bg-slate-950 py-24 text-white dark:bg-black">
-        <div className="container mx-auto px-4">
+      <section className="relative bg-slate-950 py-28 text-white dark:bg-black">
+        <div className="pointer-events-none absolute inset-0 -z-0 bg-[radial-gradient(ellipse_50%_40%_at_50%_0%,rgba(99,102,241,0.12),transparent_60%)]" />
+        <div className="container relative mx-auto px-4">
           {/* Header */}
-          <div className="mb-16 text-center">
-            <span className="mb-3 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-white/70">
+          <div className="mb-20 text-center">
+            <span className="mb-4 inline-block rounded-full border border-white/10 bg-white/[0.06] px-4 py-1.5 text-xs font-semibold uppercase tracking-widest text-white/70">
               {isAr ? "قصص النجاح" : "Success stories"}
             </span>
-            <h2 className="text-3xl font-bold text-white sm:text-4xl">
+            <h2 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl">
               {isAr ? "لماذا يثق عملاؤنا بطاقم؟" : "Why do customers trust Taqam?"}
             </h2>
           </div>
@@ -630,33 +753,60 @@ export default async function LandingPage({
             ))}
           </div>
 
-          {/* Stats strip */}
-          <div className="mt-16 grid gap-8 border-t border-white/10 pt-14 text-center sm:grid-cols-3">
+          {/* Proof strip */}
+          <div className="mt-16 grid gap-4 border-t border-white/10 pt-12 sm:grid-cols-3">
             {[
-              { numAr: "+٤٠", numEn: "40+", labelAr: "شركة سعودية", labelEn: "Saudi companies" },
-              { numAr: "+١,٢٠٠", numEn: "1,200+", labelAr: "موظف مُدار يومياً", labelEn: "daily managed employees" },
-              { numAr: "< يوم", numEn: "< 1 day", labelAr: "للإعداد الكامل", labelEn: "full setup time" },
-            ].map((s) => (
-              <div key={s.labelEn}>
-                <p className="text-4xl font-extrabold text-white">{isAr ? s.numAr : s.numEn}</p>
-                <p className="mt-2 text-sm text-white/60">{isAr ? s.labelAr : s.labelEn}</p>
-              </div>
-            ))}
+              {
+                icon: Layers,
+                titleAr: "تشغيل موحد",
+                titleEn: "Unified operations",
+                descAr: "الموظفون والحضور والرواتب في نفس المسار بدل التنقل بين أدوات منفصلة.",
+                descEn: "Employees, attendance, and payroll stay in one flow instead of separate tools.",
+              },
+              {
+                icon: Globe,
+                titleAr: "واجهة عربية أصلية",
+                titleEn: "Arabic-first experience",
+                descAr: "تجربة RTL كاملة مع نسخة إنجليزية جاهزة للإدارة والموظفين.",
+                descEn: "Full RTL experience with an English-ready flow for admins and employees.",
+              },
+              {
+                icon: Zap,
+                titleAr: "اعتماد أسرع داخل الفريق",
+                titleEn: "Faster team adoption",
+                descAr: "نفس المنصة تغطي الإدارة المكتبية والجوال اليومي بدون تعقيد بصري زائد.",
+                descEn: "The same product covers desktop admin work and daily mobile use without visual clutter.",
+              },
+            ].map((item) => {
+              const ItemIcon = item.icon;
+              return (
+                <div
+                  key={item.titleEn}
+                  className="rounded-[2rem] border border-white/10 bg-white/5 p-6 text-start backdrop-blur-sm"
+                >
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-indigo-300">
+                    <ItemIcon className="h-5 w-5" />
+                  </div>
+                  <p className="mt-4 text-lg font-semibold text-white">{isAr ? item.titleAr : item.titleEn}</p>
+                  <p className="mt-2 text-sm leading-7 text-white/65">{isAr ? item.descAr : item.descEn}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
 
       {/* ── PRICING ──────────────────────────────────────────── */}
-      <section id="pricing" className="py-20">
+      <section id="pricing" className="py-28">
         <div className="container mx-auto px-4">
-          <div className="mb-12 text-center">
-            <span className="mb-3 inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+          <div className="mb-16 text-center">
+            <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
               {isAr ? "الأسعار" : "Pricing"}
             </span>
-            <h2 className="text-3xl font-bold sm:text-4xl">
+            <h2 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
               {isAr ? "باقات تناسب كل حجم" : "Plans for every team size"}
             </h2>
-            <p className="mt-3 text-muted-foreground">
+            <p className="mx-auto mt-4 max-w-lg text-lg text-muted-foreground/80">
               {isAr ? "ابدأ مجانًا، ادفع عند النمو" : "Start free, pay as you grow"}
             </p>
           </div>
@@ -664,8 +814,8 @@ export default async function LandingPage({
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex flex-col overflow-hidden rounded-2xl border bg-card shadow-sm transition-shadow hover:shadow-xl ${
-                  plan.popular ? "border-primary ring-2 ring-primary/20 shadow-lg" : ""
+                className={`relative flex flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card/90 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                  plan.popular ? "border-primary/40 ring-2 ring-primary/20 shadow-lg" : ""
                 }`}
               >
                 {plan.popular && (
@@ -726,7 +876,7 @@ export default async function LandingPage({
       </section>
 
       {/* ── INTEGRATIONS ─────────────────────────────────────── */}
-      <section className="border-t bg-muted/20 py-16">
+      <section className="border-t bg-muted/10 py-24">
         <div className="container mx-auto px-4">
           <div className="mb-10 text-center">
             <h3 className="text-xl font-bold">
@@ -742,7 +892,7 @@ export default async function LandingPage({
             {integrations.map((item) => (
               <div
                 key={item.id}
-                className="group flex flex-col items-center gap-2.5 rounded-2xl border bg-card p-4 shadow-sm transition-all hover:-translate-y-1 hover:shadow-md"
+                className="group flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-border/50 bg-card/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg"
               >
                 <svg
                   aria-label={item.name}
@@ -777,7 +927,7 @@ export default async function LandingPage({
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden border-t py-20">
+      <section className="relative overflow-hidden border-t py-28">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-br from-sky-50 via-white to-indigo-100/80 dark:from-indigo-600 dark:via-blue-600 dark:to-purple-700" />
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_50%_-20%,rgba(59,130,246,0.14),transparent_60%)] dark:bg-[radial-gradient(ellipse_at_50%_-20%,rgba(255,255,255,0.15),transparent_60%)]" />
         <div className="container mx-auto px-4 text-center">

@@ -36,16 +36,16 @@ export function MarketingPageCta({
   return (
     <section
       className={cn(
-        "border-t py-16",
-        tone === "gradient" ? "bg-gradient-to-b from-primary/5 to-background" : "bg-muted/30",
+        "border-t py-24",
+        tone === "gradient" ? "bg-gradient-to-b from-primary/5 to-background" : "bg-muted/20",
         className
       )}
     >
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl rounded-3xl border bg-card p-8 text-center shadow-sm sm:p-10">
+        <div className="mx-auto max-w-3xl rounded-[2.5rem] border border-border/50 bg-card/90 p-10 text-center shadow-sm backdrop-blur-sm sm:p-14">
           {Icon ? (
-            <div className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10">
-              <Icon className="h-6 w-6 text-primary" />
+            <div className="mx-auto mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.07]">
+              <Icon className="h-7 w-7 text-primary" />
             </div>
           ) : null}
 
@@ -55,10 +55,10 @@ export function MarketingPageCta({
             </span>
           ) : null}
 
-          <h2 className="mt-4 text-2xl font-bold sm:text-3xl">{title}</h2>
-          <p className="mx-auto mt-3 max-w-2xl text-muted-foreground">{description}</p>
+          <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground/80">{description}</p>
 
-          <div className="mt-6 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href={primaryAction.href}>
               <Button size={primaryAction.size ?? "lg"} variant={primaryAction.variant ?? "brand"}>
                 {primaryAction.label}
