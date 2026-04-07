@@ -3,7 +3,7 @@
 This repo is a **Next.js** application (API routes + DB + auth), so it **cannot be exported as a fully-offline static app**.
 The APK we build here is a **WebView wrapper** that loads the app from a server URL.
 
-For the actively maintained Expo mobile app, use `apps/mobile`. This document only covers the Capacitor WebView wrapper configured at the repo root.
+For the actively maintained Expo mobile app, use `apps/mobile`. See `apps/mobile/ANDROID_BUILD.md` for the official native APK/AAB build path. This document only covers the Capacitor WebView wrapper configured at the repo root.
 
 ## Prerequisites (Windows)
 

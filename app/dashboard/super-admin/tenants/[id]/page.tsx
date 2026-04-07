@@ -19,6 +19,7 @@ import {
   ExternalLink,
   History
 } from "lucide-react";
+import { apiClient } from "@/lib/api/client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,125 @@ function getStatusMeta(status: string) {
   );
 }
 
+type BadgeVariant = "default" | "secondary" | "destructive" | "outline";
+
+type TenantUser = {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: string;
+  status: string;
+  createdAt: string;
+  lastLoginAt: string | null;
+  employee: {
+    id: string;
+    employeeNumber: string;
+  } | null;
+};
+
+type TenantAuditLog = {
+  id: string;
+  action: string;
+  entity: string;
+  entityId: string | null;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string | null;
+    email: string | null;
+  } | null;
+};
+
+const userStatusConfig: Record<string, { label: string; variant: BadgeVariant }> = {
+  ACTIVE: { label: "نشط", variant: "default" },
+  INACTIVE: { label: "غير نشط", variant: "secondary" },
+  SUSPENDED: { label: "موقوف", variant: "destructive" },
+  PENDING_VERIFICATION: { label: "بانتظار التفعيل", variant: "outline" },
+};
+
+const roleLabels: Record<string, string> = {
+  SUPER_ADMIN: "مدير المنصة",
+  TENANT_ADMIN: "مدير الشركة",
+  HR_MANAGER: "مدير الموارد البشرية",
+  MANAGER: "مدير",
+  EMPLOYEE: "موظف",
+};
+
+const rolePriority: Record<string, number> = {
+  TENANT_ADMIN: 0,
+  HR_MANAGER: 1,
+  MANAGER: 2,
+  EMPLOYEE: 3,
+  SUPER_ADMIN: 4,
+};
+
+const auditActionLabels: Record<string, string> = {
+  LOGIN: "تسجيل دخول",
+  LOGOUT: "تسجيل خروج",
+  LOGIN_FAILED: "محاولة دخول فاشلة",
+  PASSWORD_CHANGED: "تغيير كلمة المرور",
+  PASSWORD_RESET: "إعادة تعيين كلمة المرور",
+  TOKEN_REFRESH: "تجديد الجلسة",
+  USER_CREATE: "إنشاء مستخدم",
+  USER_UPDATE: "تحديث مستخدم",
+  USER_DELETE: "حذف مستخدم",
+  USER_SUSPEND: "إيقاف مستخدم",
+  USER_ACTIVATE: "تفعيل مستخدم",
+  EMPLOYEE_CREATE: "إنشاء موظف",
+  EMPLOYEE_UPDATE: "تحديث موظف",
+  EMPLOYEE_DELETE: "حذف موظف",
+  EMPLOYEE_BULK_IMPORT: "استيراد جماعي للموظفين",
+  EMPLOYEE_STATUS_CHANGE: "تغيير حالة موظف",
+  DATA_IMPORT: "استيراد بيانات",
+  DATA_EXPORT: "تصدير بيانات",
+  SETTINGS_UPDATE: "تحديث الإعدادات",
+  PAYROLL_PROCESS: "معالجة الرواتب",
+};
+
+const auditEntityLabels: Record<string, string> = {
+  User: "المستخدم",
+  Employee: "الموظف",
+  Tenant: "الشركة",
+  DevelopmentPlan: "خطة التطوير",
+  PayrollPeriod: "فترة الرواتب",
+  MobileSession: "جلسة الجوال",
+  MobileRefreshToken: "جلسة الجوال",
+  Settings: "الإعدادات",
+};
+
+function getUserStatusMeta(status: string) {
+  return userStatusConfig[status] ?? { label: status, variant: "outline" as const };
+}
+
+function getUserDisplayName(user: Pick<TenantUser, "firstName" | "lastName" | "email">) {
+  const fullName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim();
+  return fullName || user.email;
+}
+
+function getRoleLabel(role: string) {
+  return roleLabels[role] ?? role;
+}
+
+function formatAuditAction(action: string) {
+  return auditActionLabels[action] ?? action.replaceAll("_", " ");
+}
+
+function formatAuditEntity(entity: string) {
+  return auditEntityLabels[entity] ?? entity;
+}
+
+function formatDateTime(value: string | null | undefined) {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("ar-SA");
+}
+
+function formatCompactId(value: string | null | undefined) {
+  if (!value) return null;
+  if (value.length <= 12) return value;
+  return `${value.slice(0, 8)}...`;
+}
+
 interface PageProps {
   params: Promise<{ id: string }>;
 }
@@ -51,8 +171,12 @@ interface PageProps {
 export default function TenantDetailsPage({ params }: PageProps) {
   const [id, setId] = React.useState<string | null>(null);
   const [tenant, setTenant] = React.useState<Tenant | null>(null);
+  const [tenantUsers, setTenantUsers] = React.useState<TenantUser[]>([]);
+  const [auditLogs, setAuditLogs] = React.useState<TenantAuditLog[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [usersError, setUsersError] = React.useState<string | null>(null);
+  const [auditError, setAuditError] = React.useState<string | null>(null);
 
   // Resolve params Promise
   React.useEffect(() => {
@@ -65,18 +189,50 @@ export default function TenantDetailsPage({ params }: PageProps) {
     (async () => {
       setIsLoading(true);
       setError(null);
+      setUsersError(null);
+      setAuditError(null);
       try {
-        const res = await tenantsService.getById(id);
+        const [tenantRes, usersRes, auditRes] = await Promise.all([
+          tenantsService.getById(id),
+          apiClient.get<TenantUser[]>(`/admin/tenants/${id}/users`),
+          apiClient.get<TenantAuditLog[]>("/audit-logs", {
+            params: { tenantId: id, pageSize: 20 },
+          }),
+        ]);
+
         if (!mounted) return;
-        if (res.success && res.data) {
-          setTenant(res.data);
+
+        if (tenantRes.success && tenantRes.data) {
+          setTenant(tenantRes.data);
         } else {
           setTenant(null);
-          setError(res.error || "تعذر تحميل بيانات الشركة");
+          setError(tenantRes.error || "تعذر تحميل بيانات الشركة");
+        }
+
+        if (usersRes.success && Array.isArray(usersRes.data)) {
+          setTenantUsers(
+            [...usersRes.data].sort((left, right) => {
+              const roleDelta = (rolePriority[left.role] ?? 99) - (rolePriority[right.role] ?? 99);
+              if (roleDelta !== 0) return roleDelta;
+              return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
+            })
+          );
+        } else {
+          setTenantUsers([]);
+          setUsersError(usersRes.error || "تعذر تحميل المستخدمين");
+        }
+
+        if (auditRes.success && Array.isArray(auditRes.data)) {
+          setAuditLogs(auditRes.data);
+        } else {
+          setAuditLogs([]);
+          setAuditError(auditRes.error || "تعذر تحميل سجل التغييرات");
         }
       } catch (e) {
         if (!mounted) return;
         setTenant(null);
+        setTenantUsers([]);
+        setAuditLogs([]);
         setError(e instanceof Error ? e.message : "تعذر تحميل بيانات الشركة");
       } finally {
         if (mounted) setIsLoading(false);
@@ -118,6 +274,9 @@ export default function TenantDetailsPage({ params }: PageProps) {
       </div>
     );
   }
+
+  const activeUsersCount = tenantUsers.filter((user) => user.status === "ACTIVE").length;
+  const adminUsersCount = tenantUsers.filter((user) => user.role === "TENANT_ADMIN").length;
 
   return (
     <div className="space-y-6">
@@ -339,13 +498,70 @@ export default function TenantDetailsPage({ params }: PageProps) {
             <CardHeader>
               <CardTitle>مستخدمي الشركة</CardTitle>
               <CardDescription>
-                قائمة المستخدمين المسجلين في هذه الشركة
+                الحسابات المرتبطة بهذه الشركة مع الحالة وآخر تسجيل دخول
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم إضافة جدول المستخدمين لاحقًا
-              </p>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-3">
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
+                  <p className="mt-2 text-2xl font-bold">{tenant.usersCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">الحسابات النشطة</p>
+                  <p className="mt-2 text-2xl font-bold">{activeUsersCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-sm text-muted-foreground">مدراء الشركة</p>
+                  <p className="mt-2 text-2xl font-bold">{adminUsersCount}</p>
+                </div>
+              </div>
+
+              {usersError && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  {usersError}
+                </div>
+              )}
+
+              {!usersError && tenantUsers.length === 0 && (
+                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                  لا توجد حسابات مستخدمين مرتبطة بهذه الشركة حتى الآن.
+                </div>
+              )}
+
+              {tenantUsers.length > 0 && (
+                <div className="space-y-3">
+                  {tenantUsers.map((user) => {
+                    const meta = getUserStatusMeta(user.status);
+                    return (
+                      <div key={user.id} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium">{getUserDisplayName(user)}</p>
+                            <Badge variant="outline">{getRoleLabel(user.role)}</Badge>
+                            <Badge variant={meta.variant}>{meta.label}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground" dir="ltr">{user.email}</p>
+                          {user.employee?.employeeNumber && (
+                            <p className="text-xs text-muted-foreground">
+                              الرقم الوظيفي: {user.employee.employeeNumber}
+                            </p>
+                          )}
+                        </div>
+
+                        <div className="space-y-1 text-sm text-muted-foreground md:text-end">
+                          <p>أضيف الحساب: {formatDateTime(user.createdAt)}</p>
+                          <p>
+                            {user.lastLoginAt
+                              ? `آخر دخول: ${formatDateTime(user.lastLoginAt)}`
+                              : "لا يوجد تسجيل دخول بعد"}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -361,40 +577,48 @@ export default function TenantDetailsPage({ params }: PageProps) {
                 جميع التغييرات التي تمت على هذه الشركة
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {/* Mock audit entries */}
-                <div className="flex items-start gap-4 border-b pb-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                    <Building2 className="h-4 w-4 text-primary" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">تم إنشاء الشركة</p>
-                    <p className="text-sm text-muted-foreground">
-                      بواسطة Super Admin
-                    </p>
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {new Date(tenant.createdAt).toLocaleString("ar-SA")}
-                  </span>
+            <CardContent className="space-y-4">
+              {auditError && (
+                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                  {auditError}
                 </div>
-                {tenant.suspendedAt && (
-                  <div className="flex items-start gap-4 border-b pb-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10">
-                      <Building2 className="h-4 w-4 text-destructive" />
+              )}
+
+              {!auditError && auditLogs.length === 0 && (
+                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
+                  لا توجد أحداث مسجلة لهذه الشركة حتى الآن.
+                </div>
+              )}
+
+              {auditLogs.length > 0 && (
+                <div className="space-y-3">
+                  {auditLogs.map((entry) => (
+                    <div key={entry.id} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-start md:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
+                          <History className="h-4 w-4 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium">{formatAuditAction(entry.action)}</p>
+                            <Badge variant="outline">{formatAuditEntity(entry.entity)}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {entry.user?.name || entry.user?.email
+                              ? `بواسطة ${entry.user?.name || entry.user?.email}`
+                              : "بدون مستخدم مرتبط"}
+                            {entry.entityId ? ` • المعرف: ${formatCompactId(entry.entityId)}` : ""}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="text-sm text-muted-foreground md:text-end">
+                        {formatDateTime(entry.createdAt)}
+                      </span>
                     </div>
-                    <div className="flex-1">
-                      <p className="font-medium">تم إيقاف الشركة</p>
-                      <p className="text-sm text-muted-foreground">
-                        السبب: {tenant.suspendedReason}
-                      </p>
-                    </div>
-                    <span className="text-sm text-muted-foreground">
-                      {new Date(tenant.suspendedAt).toLocaleString("ar-SA")}
-                    </span>
-                  </div>
-                )}
-              </div>
+                  ))}
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

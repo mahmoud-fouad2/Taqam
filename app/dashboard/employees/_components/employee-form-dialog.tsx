@@ -321,7 +321,7 @@ export function EmployeeFormDialog({
                   )}
                 />
                 <p className="text-sm text-muted-foreground">
-                  سيتم إضافة المزيد من تفاصيل الراتب والبدلات في Phase 5 (Payroll).
+                  يحفظ هذا النموذج الراتب الأساسي ضمن بيانات الموظف الحالية، بينما تُدار التفاصيل البنكية وسجل الرواتب من مسارات الرواتب المخصصة.
                 </p>
               </TabsContent>
             </Tabs>

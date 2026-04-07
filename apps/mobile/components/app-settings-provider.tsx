@@ -3,24 +3,36 @@ import { I18nManager } from "react-native";
 import * as Updates from "expo-updates";
 
 import type { AppLanguage } from "@/lib/settings-storage";
-import { getStoredLanguage, setStoredLanguage } from "@/lib/settings-storage";
+import {
+  getStoredBiometricsEnabled,
+  getStoredLanguage,
+  setStoredBiometricsEnabled,
+  setStoredLanguage,
+} from "@/lib/settings-storage";
 
 type AppSettings = {
   language: AppLanguage;
   setLanguage: (lang: AppLanguage) => Promise<void>;
+  biometricsEnabled: boolean;
+  setBiometricsEnabled: (enabled: boolean) => Promise<void>;
 };
 
 const SettingsContext = createContext<AppSettings | null>(null);
 
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<AppLanguage>("ar");
+  const [biometricsEnabled, setBiometricsEnabledState] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const stored = await getStoredLanguage();
+      const [storedLanguage, storedBiometrics] = await Promise.all([
+        getStoredLanguage(),
+        getStoredBiometricsEnabled(),
+      ]);
       if (!mounted) return;
-      if (stored) setLanguageState(stored);
+      if (storedLanguage) setLanguageState(storedLanguage);
+      if (storedBiometrics !== null) setBiometricsEnabledState(storedBiometrics);
     })();
     return () => {
       mounted = false;
@@ -44,7 +56,15 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     }
   };
 
-  const value = useMemo<AppSettings>(() => ({ language, setLanguage }), [language]);
+  const setBiometricsEnabled = async (enabled: boolean) => {
+    await setStoredBiometricsEnabled(enabled);
+    setBiometricsEnabledState(enabled);
+  };
+
+  const value = useMemo<AppSettings>(
+    () => ({ language, setLanguage, biometricsEnabled, setBiometricsEnabled }),
+    [biometricsEnabled, language],
+  );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }

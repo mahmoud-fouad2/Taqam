@@ -16,7 +16,7 @@ export function BrandLogo({ style }: { style?: StyleProp<ViewStyle> }) {
         source={source}
         resizeMode="contain"
         style={{ width: 160, height: 48 }}
-        accessibilityLabel="Logo"
+        accessibilityLabel="طاقم - Taqam"
       />
     </View>
   );

@@ -27,7 +27,7 @@ type TodayStatus = {
 
 export default function AttendanceScreen() {
   const { accessToken, user, authFetch } = useAuth();
-  const { language } = useAppSettings();
+  const { language, biometricsEnabled } = useAppSettings();
   const [busy, setBusy] = useState(false);
   const [last, setLast] = useState<LastResult | null>(null);
   const [today, setToday] = useState<TodayStatus | null>(null);
@@ -71,17 +71,19 @@ export default function AttendanceScreen() {
     setLocationIssue(null);
 
     try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      if (biometricsEnabled) {
+        const hasHardware = await LocalAuthentication.hasHardwareAsync();
+        const isEnrolled = await LocalAuthentication.isEnrolledAsync();
 
-      if (hasHardware && isEnrolled) {
-        const res = await LocalAuthentication.authenticateAsync({
-          promptMessage: type === "check-in" ? (language === "ar" ? "تأكيد البصمة لتسجيل الحضور" : "Confirm biometrics to check in") : (language === "ar" ? "تأكيد البصمة لتسجيل الانصراف" : "Confirm biometrics to check out"),
-          cancelLabel: "إلغاء",
-          disableDeviceFallback: false,
-        });
-        if (!res.success) {
-          throw new Error(language === "ar" ? "لم يتم تأكيد البصمة" : "Biometric verification failed");
+        if (hasHardware && isEnrolled) {
+          const res = await LocalAuthentication.authenticateAsync({
+            promptMessage: type === "check-in" ? (language === "ar" ? "تأكيد البصمة لتسجيل الحضور" : "Confirm biometrics to check in") : (language === "ar" ? "تأكيد البصمة لتسجيل الانصراف" : "Confirm biometrics to check out"),
+            cancelLabel: "إلغاء",
+            disableDeviceFallback: false,
+          });
+          if (!res.success) {
+            throw new Error(language === "ar" ? "لم يتم تأكيد البصمة" : "Biometric verification failed");
+          }
         }
       }
 

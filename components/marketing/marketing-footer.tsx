@@ -5,6 +5,23 @@ import { LogoMark } from "@/components/logo-mark";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { t } from "@/lib/i18n/messages";
 
+function GooglePlayIcon() {
+  return (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 64 64"
+      className="h-10 w-10 shrink-0"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M11 10.5C11 8.887 12.837 7.967 14.128 8.93L37.877 26.651L26.853 37.676L11 10.5Z" fill="#00C2FF" />
+      <path d="M11 10.5L26.853 37.676L11.042 53.487C9.781 52.68 9 51.291 9 49.793V14.12C9 12.782 9.623 11.523 10.686 10.714L11 10.5Z" fill="#00D084" />
+      <path d="M26.853 37.676L37.877 26.651L49.397 35.246C51.121 36.533 50.965 39.153 49.103 40.228L34.113 48.886C31.908 50.16 29.088 49.531 27.623 47.447L26.853 37.676Z" fill="#FFD43B" />
+      <path d="M37.877 26.651L14.128 8.93C15.23 8.109 16.69 7.994 17.909 8.633L49.092 24.987C50.932 25.952 51.103 28.507 49.407 29.72L37.877 26.651Z" fill="#FF5A5F" />
+    </svg>
+  );
+}
+
 export async function MarketingFooter() {
   const year = new Date().getFullYear();
   const locale = await getAppLocale();
@@ -22,6 +39,7 @@ export async function MarketingFooter() {
     : ["People", "Payroll", "Attendance"];
   const rights = isAr ? "طاقم. جميع الحقوق محفوظة." : "Taqam. All rights reserved.";
   const supportLine = t(locale, "footer.developedBy");
+  const downloadHref = "/downloads/taqam-android.apk";
 
   return (
     <footer className="border-t bg-background/95">
@@ -50,6 +68,28 @@ export async function MarketingFooter() {
                     </span>
                   ))}
                 </div>
+
+                <a
+                  href={downloadHref}
+                  download="taqam-android.apk"
+                  className="group mt-3 inline-flex w-full max-w-sm items-center gap-3 rounded-2xl border border-emerald-500/20 bg-background px-3 py-3 shadow-sm transition hover:border-emerald-500/40 hover:bg-emerald-500/5"
+                  aria-label={isAr ? "تحميل تطبيق طاقم للأندرويد" : "Download the Taqam Android app"}
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 ring-1 ring-emerald-500/15">
+                    <GooglePlayIcon />
+                  </div>
+                  <div className="min-w-0 text-start">
+                    <p className="text-[11px] font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                      Google Play
+                    </p>
+                    <p className="truncate text-sm font-semibold text-foreground sm:text-base">
+                      {isAr ? "تحميل تطبيق طاقم مباشرة" : "Download Taqam directly"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {isAr ? "APK داخلي من نفس الموقع" : "Internal APK download from this site"}
+                    </p>
+                  </div>
+                </a>
               </div>
             </div>
 
