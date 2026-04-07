@@ -43,11 +43,11 @@ export async function MarketingFooter() {
 
   return (
     <footer className="border-t bg-background/95">
-      <div className="container mx-auto px-4 py-6 sm:py-8">
-        <div className="flex flex-col gap-4 rounded-3xl border border-border/70 bg-muted/20 px-4 py-4 shadow-sm sm:px-5 sm:py-5">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-start gap-3 sm:gap-4">
-              <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-90">
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+          <div className="flex flex-col gap-6 rounded-[2.5rem] border border-border/40 bg-card/60 px-6 py-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:border-border/80 hover:shadow-xl sm:px-8 sm:py-8 lg:px-12">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-4 sm:gap-5">
+                <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-80">
                 <LogoMark frameClassName="size-12 rounded-2xl p-0 dark:ring-white/10" imageClassName="h-7" />
               </Link>
 
