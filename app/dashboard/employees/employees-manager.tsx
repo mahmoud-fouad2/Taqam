@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { toast } from "sonner";
-
+import { toast } from "sonner";import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -35,11 +34,8 @@ export function EmployeesManager() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [jobTitles, setJobTitles] = useState<JobTitle[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // URL-synced filters — survives refresh & can be shared as links
@@ -69,49 +65,42 @@ export function EmployeesManager() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
 
-  // Fetch data from API
-  const fetchEmployees = useCallback(async () => {
-    try {
+  // Fetch data from API using React Query
+  const { data: employees = [], isLoading: isLoadingEmployees, refetch: refetchEmployees } = useQuery({
+    queryKey: ["employees"],
+    queryFn: async () => {
       const res = await employeesService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch employees");
-      setEmployees(res.data || []);
-    } catch (error) {
-      console.error("Error fetching employees:", error);
-      toast.error("فشل في جلب بيانات الموظفين");
-    }
-  }, []);
+      return res.data || [];
+    },
+  });
 
-  const fetchDepartments = useCallback(async () => {
-    try {
+  const { data: departments = [], isLoading: isLoadingDepartments } = useQuery({
+    queryKey: ["departments"],
+    queryFn: async () => {
       const res = await departmentsService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch departments");
-      setDepartments(res.data || []);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-    }
-  }, []);
+      return res.data || [];
+    },
+  });
 
-  const fetchJobTitles = useCallback(async () => {
-    try {
+  const { data: jobTitles = [], isLoading: isLoadingJobTitles } = useQuery({
+    queryKey: ["jobTitles"],
+    queryFn: async () => {
       const res = await jobTitlesService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch job titles");
-      setJobTitles(res.data || []);
-    } catch (error) {
-      console.error("Error fetching job titles:", error);
-    }
-  }, []);
+      return res.data || [];
+    },
+  });
+
+  const loading = isLoadingEmployees || isLoadingDepartments || isLoadingJobTitles;
+
+  const fetchEmployees = async () => {
+    await refetchEmployees();
+  };
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await Promise.all([fetchEmployees(), fetchDepartments(), fetchJobTitles()]);
-      setLoading(false);
-    };
-    loadData();
-  }, [fetchEmployees, fetchDepartments, fetchJobTitles]);
-
-  useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 200);
+    const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 200);      
     return () => clearTimeout(t);
   }, [searchQuery]);
 

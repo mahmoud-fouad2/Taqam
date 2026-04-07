@@ -7,6 +7,7 @@ import { LocaleTransitionOverlay } from "./locale-transition";
 import { RouteProgress } from "./route-progress";
 import { ConsoleNoiseGuard } from "./console-noise-guard";
 import { AppDirectionProvider } from "./direction-context";
+import { QueryProvider } from "./query-provider";
 
 export default function Providers({
   children,
@@ -17,15 +18,17 @@ export default function Providers({
 }) {
   return (
     <SessionProvider>
-      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
-        <AppDirectionProvider dir={dir}>
-          {children}
-          <ConsoleNoiseGuard />
-          <RouteProgress />
-          <LocaleTransitionOverlay />
-          <Toaster />
-        </AppDirectionProvider>
-      </ThemeProvider>
+      <QueryProvider>
+        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+          <AppDirectionProvider dir={dir}>
+            {children}
+            <ConsoleNoiseGuard />
+            <RouteProgress />
+            <LocaleTransitionOverlay />
+            <Toaster />
+          </AppDirectionProvider>
+        </ThemeProvider>
+      </QueryProvider>
     </SessionProvider>
   );
 }
