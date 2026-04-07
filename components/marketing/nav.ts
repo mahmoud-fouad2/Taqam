@@ -11,7 +11,7 @@ export const marketingNav: MarketingNavItem[] = [
   { href: "/careers", labelAr: "الوظائف", labelEn: "Careers" },
   { href: "/pricing", labelAr: "الأسعار", labelEn: "Pricing" },
   { href: "/plans", labelAr: "الباقات", labelEn: "Plans" },
-  { href: "/screenshots", labelAr: "استعراض النظام", labelEn: "Product Tour" },
+
   {
     href: "/help-center",
     labelAr: "المساعدة",

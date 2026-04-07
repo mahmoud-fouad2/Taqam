@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Taqam Landing Page
  * الصفحة الرئيسية للمنصة
  */
@@ -489,11 +489,11 @@ export default async function LandingPage({
 
           {/* Right: screenshots panel */}
           <div className="relative mx-auto w-full max-w-xl">
-            <div className="pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-blue-500/12 to-purple-500/12 blur-[80px]" />
+            <div className="pointer-events-none absolute -inset-12 -z-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/20 via-blue-500/12 to-purple-500/12 blur-[100px]" />
 
             {/* Main browser-frame screenshot */}
-            <div className="overflow-hidden rounded-3xl border border-white/60 bg-card/95 shadow-[0_40px_80px_-30px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur-sm dark:border-white/10 dark:shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)]">
-              <div className="flex items-center gap-2 border-b bg-muted/50 px-4 py-2.5">
+            <div className="group overflow-hidden rounded-[2.5rem] border border-white/60 bg-card/60 shadow-[0_40px_100px_-30px_rgba(15,23,42,0.35)] ring-1 ring-black/5 backdrop-blur-xl transition-all duration-700 hover:-translate-y-2 hover:shadow-[0_60px_120px_-30px_rgba(15,23,42,0.45)] dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_40px_100px_-30px_rgba(0,0,0,0.6)]">
+              <div className="flex items-center gap-2 border-b border-border/40 bg-muted/30 px-4 py-3 backdrop-blur-md">
                 <div className="flex gap-1.5">
                   <span className="h-2.5 w-2.5 rounded-full bg-red-400/80" />
                   <span className="h-2.5 w-2.5 rounded-full bg-yellow-400/80" />
@@ -590,7 +590,7 @@ export default async function LandingPage({
             {personas.map((persona, i) => (
               <div
                 key={persona.roleEn}
-                className="grid overflow-hidden rounded-[2.75rem] border border-border/70 bg-card/80 shadow-[0_28px_80px_-52px_rgba(15,23,42,0.45)] backdrop-blur-sm lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]"
+                className="group relative grid overflow-hidden rounded-[2.75rem] border border-border/40 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-500 hover:border-border/80 hover:bg-card/95 hover:shadow-xl lg:grid-cols-[minmax(0,1fr)_minmax(0,0.95fr)]"
               >
                 <div className={`${i % 2 === 0 ? "order-1" : "order-1 lg:order-2"} flex flex-1 flex-col justify-center px-6 py-10 lg:px-12 xl:px-16`}>
                   <p className="mb-3 text-xs font-bold uppercase tracking-[0.15em] text-primary/70">
@@ -680,7 +680,7 @@ export default async function LandingPage({
             {testimonials.slice(1).map((t) => (
               <div
                 key={t.nameEn}
-                className="flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm transition-colors hover:bg-white/[0.08]"
+                className="group flex gap-5 rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:border-white/15 hover:bg-white/[0.06] hover:shadow-[0_24px_40px_-15px_rgba(0,0,0,0.5)]"
               >
                 <Image
                   alt={isAr ? t.nameAr : t.nameEn}
@@ -770,7 +770,7 @@ export default async function LandingPage({
             {plans.map((plan) => (
               <div
                 key={plan.name}
-                className={`relative flex flex-col overflow-hidden rounded-[2rem] border border-border/60 bg-card/90 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
+                className={`group relative flex flex-col overflow-hidden rounded-[2.5rem] border border-border/40 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:shadow-xl hover:border-border/80 ${
                   plan.popular ? "border-primary/40 ring-2 ring-primary/20 shadow-lg" : ""
                 }`}
               >
@@ -848,7 +848,7 @@ export default async function LandingPage({
             {integrations.map((item) => (
               <div
                 key={item.id}
-                className="group flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-border/50 bg-card/90 p-5 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg"
+                className="group flex flex-col items-center gap-2.5 rounded-[1.75rem] border border-border/40 bg-card/60 p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg hover:border-border/80"
               >
                 <svg
                   aria-label={item.name}
@@ -921,3 +921,7 @@ export default async function LandingPage({
     </main>
   );
 }
+
+
+
+
