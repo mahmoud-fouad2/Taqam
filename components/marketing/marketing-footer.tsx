@@ -43,9 +43,9 @@ export async function MarketingFooter() {
 
   return (
     <footer className="border-t bg-background/95">
-      <div className="container mx-auto max-w-6xl px-4 py-6 sm:py-8">
-        <div className="flex flex-col gap-4 rounded-[2rem] border border-border/40 bg-card/60 px-5 py-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:border-border/80 hover:shadow-xl sm:px-6 sm:py-6 lg:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      <div className="mx-auto w-full max-w-[96rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
+        <div className="flex flex-col gap-3 rounded-[2.25rem] border border-border/40 bg-card/60 px-6 py-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:border-border/80 hover:shadow-xl sm:px-8 sm:py-[1.125rem] lg:px-10 xl:px-12">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-start gap-3.5 sm:gap-4">
               <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-80">
                 <LogoMark frameClassName="size-11 rounded-[1.125rem] p-0 dark:ring-white/10" imageClassName="h-[26px]" />
@@ -55,7 +55,7 @@ export async function MarketingFooter() {
                 <p className="text-sm font-semibold text-foreground sm:text-base">
                   {isAr ? "طاقم" : "Taqam"}
                 </p>
-                <p className="max-w-lg text-sm leading-6 text-muted-foreground">
+                <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
                   {summary}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
@@ -71,7 +71,7 @@ export async function MarketingFooter() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-3 lg:min-w-[14rem] lg:items-end">
+            <div className="flex flex-col gap-2 lg:min-w-[16rem] lg:items-end">
               <nav className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-muted-foreground lg:justify-end">
                 {legalLinks.map((link) => (
                   <Link key={link.href} href={link.href} className="transition hover:text-foreground">
@@ -83,7 +83,7 @@ export async function MarketingFooter() {
               <a
                 href={downloadHref}
                 download="taqam-android.apk"
-                className="group inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background/90 px-3 py-1.5 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 lg:self-end"
+                className="group inline-flex items-center gap-2 rounded-xl border border-border/60 bg-background/90 px-3.5 py-1.5 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 lg:self-end"
                 aria-label={isAr ? "تحميل تطبيق طاقم للأندرويد" : "Download the Taqam Android app"}
               >
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-950 dark:bg-white/10">
@@ -101,7 +101,7 @@ export async function MarketingFooter() {
             </div>
           </div>
 
-          <div className="flex flex-col gap-2 border-t border-border/60 pt-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-2 border-t border-border/60 pt-2 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
             <span>© {year} {rights}</span>
             <Link
               href="https://ma-fo.info"
