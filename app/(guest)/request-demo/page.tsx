@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Request Demo / Subscription Request Page
  * صفحة طلب اشتراك / عرض تجريبي
  */
@@ -57,8 +57,8 @@ export default async function RequestDemoPage() {
       <section className="container mx-auto px-4 py-14 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,.95fr)]">
           <div className="mx-auto w-full max-w-2xl lg:mx-0">
-            <div className="mb-8">
-              <LogoMark className="mb-5" frameClassName="rounded-2xl p-0 shadow-md" imageClassName="h-16" />
+              <div className="mb-8">
+              <LogoMark className="mb-5" frameClassName="rounded-2xl p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-white dark:ring-white/20" imageClassName="h-16" />
               <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
                 {isAr ? "عرض سريع • تهيئة مخصصة • دعم مباشر" : "Fast demo • Tailored setup • Direct support"}
               </span>
@@ -150,3 +150,4 @@ export default async function RequestDemoPage() {
     </main>
   );
 }
+
