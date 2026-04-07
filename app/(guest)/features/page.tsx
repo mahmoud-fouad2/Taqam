@@ -389,13 +389,6 @@ export default async function FeaturesPage() {
       <StaggerContainer>
         <MarketingPageHero
           icon={Sparkles}
-          badge={isAr ? "تشغيل منظّم بالكامل" : "Fully streamlined operations"}
-          title={isAr ? "نظام واحد بدل أدوات متفرقة" : "One system instead of scattered tools"}
-          description={isAr ? "تخلى عن تعقيد الجداول والملفات الخارجية، طاقم يجمع رحلة موظفيك من التعيين حتى الرواتب في مسار واحد متناسق بصرياً وتشغيلياً." : "Drop the complexity of spreadsheets. Taqam unifies your employee journey—from hiring to payroll—into one cohesive flow."}
-        />
-
-        <MarketingPageHero
-          icon={Sparkles}
           badge={isAr ? "منصة موارد بشرية متكاملة" : "All-in-one HR platform"}
           title={isAr ? "نظام تشغيل فعلي للموارد البشرية" : "A real operating system for HR"}
           description={
@@ -596,4 +589,5 @@ export default async function FeaturesPage() {
     </main>
   );
 }
+
 

@@ -101,21 +101,27 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
                   : "Instead of overlapping rotating cards, every module now sits around one clear center that represents the real operating workspace."}
               </p>
 
-              <div className="mt-5 overflow-hidden rounded-[2rem] border border-border/70 bg-white shadow-[0_22px_48px_-28px_rgba(15,23,42,0.35)] ring-1 ring-black/5 dark:bg-card">
-                <div className="flex items-center justify-between border-b bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-                  <span>{isAr ? "مساحة العمل الأساسية" : "Core workspace"}</span>
-                  <span className="rounded-full bg-emerald-500/10 px-2 py-1 font-semibold text-emerald-600">
-                    {isAr ? "مباشر" : "Live"}
-                  </span>
-                </div>
-                <div className="relative aspect-[4/5] bg-muted/30">
+<div className="mt-8 flex justify-center py-6">
+                <div className="relative flex h-32 w-32 items-center justify-center rounded-[2.5rem] bg-white shadow-[0_0_80px_-15px_rgba(59,130,246,0.3)] ring-1 ring-border/50 dark:bg-slate-900">
+                  {/* Concentric pulsing rings */}
+                  <div className="absolute inset-0 animate-ping rounded-[2.5rem] ring-1 ring-primary/20" style={{ animationDuration: '3s' }} />
+                  <div className="absolute -inset-4 rounded-[3.5rem] ring-1 ring-primary/10" />
+                  <div className="absolute -inset-8 rounded-[4.5rem] ring-1 ring-primary/5" />
+                  
+                  {/* The Logo */}
                   <Image
-                    src="/images/marketing/screenshot-dashboard.svg?v=2"
-                    alt={isAr ? "لوحة التحكم في طاقم" : "Taqam dashboard"}
-                    fill
-                    sizes="360px"
-                    unoptimized
-                    className="object-cover"
+                    src="/logo-tight.jpeg"
+                    alt={isAr ? "شعار طاقم" : "Taqam Logo"}
+                    width={100}
+                    height={100}
+                    className="h-16 w-auto object-contain dark:hidden"
+                  />
+                  <Image
+                    src="/logo-dark.png"
+                    alt={isAr ? "شعار طاقم" : "Taqam Logo"}
+                    width={100}
+                    height={100}
+                    className="hidden h-16 w-auto object-contain dark:block"
                   />
                 </div>
               </div>

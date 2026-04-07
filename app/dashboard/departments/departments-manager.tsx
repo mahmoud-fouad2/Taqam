@@ -69,6 +69,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPlus, IconPencil, IconTrash, IconSearch, IconRefresh } from "@tabler/icons-react";
+import { useQuery } from "@tanstack/react-query";
 
 import type { Department, DepartmentCreateInput } from "@/lib/types/core-hr";
 
@@ -84,8 +85,6 @@ const departmentSchema = z.object({
 type DepartmentFormData = z.infer<typeof departmentSchema>;
 
 export function DepartmentsManager() {
-  const [departments, setDepartments] = useState<Department[]>([]);
-  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -93,27 +92,16 @@ export function DepartmentsManager() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
 
-  // Fetch departments from API
-  const fetchDepartments = useCallback(async () => {
-    try {
+  // Fetch departments from API using React Query
+  const { data: departments = [], isLoading: loading, refetch: fetchDepartments } = useQuery<Department[]>({
+    queryKey: ["departments"],
+    queryFn: async () => {
       const res = await fetch("/api/departments");
       if (!res.ok) throw new Error("Failed to fetch departments");
       const data = await res.json();
-      setDepartments(data.data || []);
-    } catch (error) {
-      console.error("Error fetching departments:", error);
-      toast.error("فشل في جلب بيانات الأقسام");
-    }
-  }, []);
-
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true);
-      await fetchDepartments();
-      setLoading(false);
-    };
-    loadData();
-  }, [fetchDepartments]);
+      return data.data || [];
+    },
+  });
 
   const form = useForm<DepartmentFormData>({
     resolver: zodResolver(departmentSchema),
@@ -297,7 +285,7 @@ export function DepartmentsManager() {
               <CardDescription>إدارة أقسام الشركة والهيكل التنظيمي</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" aria-label="تحديث" onClick={fetchDepartments} title="تحديث">
+              <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchDepartments()} title="تحديث">
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>

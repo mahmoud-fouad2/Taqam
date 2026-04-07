@@ -4,8 +4,7 @@
 
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import type { Employee, Department } from "@/lib/types/core-hr";
 
 const INITIAL_EMPLOYEES: Employee[] = [];
@@ -129,14 +128,16 @@ interface UseEmployeesReturn {
 }
 
 export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesReturn {
-  const {
-    data,
-    isLoading,
-    error: queryError,
-    refetch,
-  } = useQuery({
-    queryKey: ["useEmployees", options.departmentId, options.status, options.search],
-    queryFn: async () => {
+  const [employees, setEmployees] = useState<Employee[]>(INITIAL_EMPLOYEES);
+  const [departments, setDepartments] = useState<Department[]>(INITIAL_DEPARTMENTS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
       const [empRes, deptRes] = await Promise.all([
         fetch(
           `/api/employees?limit=1000&search=${encodeURIComponent(options.search || "")}` +
@@ -151,9 +152,10 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
                         ? "TERMINATED"
                         : "ACTIVE"
                 )}`
-              : "")
+              : ""),
+          { cache: "no-store" }
         ),
-        fetch("/api/departments"),
+        fetch("/api/departments", { cache: "no-store" }),
       ]);
 
       const empJson = (await empRes.json()) as EmployeesApiResponse;
@@ -167,17 +169,22 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
       }
 
       const mappedEmployees = Array.isArray(empJson.data) ? empJson.data.map(mapEmployeeFromApi) : [];
+      setEmployees(mappedEmployees);
+
       const mappedDepartments = Array.isArray(deptJson.data)
         ? deptJson.data.map((d) => mapDepartmentFromApi(d, mappedEmployees))
         : [];
+      setDepartments(mappedDepartments);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "فشل تحميل البيانات");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options.departmentId, options.status, options.search]);
 
-      return { employees: mappedEmployees, departments: mappedDepartments };
-    },
-  });
-
-  const employees = data?.employees || INITIAL_EMPLOYEES;
-  const departments = data?.departments || INITIAL_DEPARTMENTS;
-  const error = queryError instanceof Error ? queryError.message : queryError ? "فشل تحميل البيانات" : null;
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const getEmployeeById = useCallback(
     (id: string) => employees.find((e) => e.id === id),
@@ -231,7 +238,7 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
     departments,
     isLoading,
     error,
-    refetch: async () => { await refetch(); },
+    refetch: fetchData,
     getEmployeeById,
     getEmployeeFullName,
     getDepartmentById,

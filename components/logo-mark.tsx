@@ -19,7 +19,7 @@ export function LogoMark({
     <span className={cn("inline-flex shrink-0", className)}>
       <span
         className={cn(
-          "inline-flex items-center justify-center overflow-hidden rounded-xl bg-white p-0 shadow-sm ring-1 ring-black/10 dark:bg-white dark:ring-white/20",
+          "inline-flex items-center justify-center overflow-hidden rounded-xl bg-transparent p-0",
           frameClassName
         )}
       >
@@ -28,7 +28,14 @@ export function LogoMark({
           alt={alt}
           width={877}
           height={496}
-          className={cn("block h-10 w-auto max-w-none", imageClassName)}
+          className={cn("block h-10 w-auto max-w-none dark:hidden", imageClassName)}
+        />
+        <Image
+          src="/logo-dark.png"
+          alt={alt}
+          width={877}
+          height={496}
+          className={cn("hidden h-10 w-auto max-w-none dark:block", imageClassName)}
         />
       </span>
     </span>
