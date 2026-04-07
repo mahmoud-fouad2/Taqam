@@ -210,66 +210,6 @@
     @apply transition-transform duration-300 ease-out;
   }
 
-  /* Orbital feature carousel for landing page */
-  @keyframes features-orbit-spin {
-    from {
-      transform: translate(-50%, -50%) rotate(0deg);
-    }
-    to {
-      transform: translate(-50%, -50%) rotate(360deg);
-    }
-  }
-
-  @keyframes features-orbit-counter-spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(-360deg);
-    }
-  }
-
-  .features-orbit-stage {
-    perspective: 1400px;
-  }
-
-  .features-orbit-rotator {
-    animation: features-orbit-spin var(--orbit-duration, 34s) linear infinite;
-    will-change: transform;
-  }
-
-  .features-orbit-node {
-    transform: rotate(var(--orbit-angle)) translateX(var(--orbit-radius, 20rem));
-    transform-origin: center;
-  }
-
-  .features-orbit-node:nth-child(1) { --orbit-angle: 0deg; }
-  .features-orbit-node:nth-child(2) { --orbit-angle: 45deg; }
-  .features-orbit-node:nth-child(3) { --orbit-angle: 90deg; }
-  .features-orbit-node:nth-child(4) { --orbit-angle: 135deg; }
-  .features-orbit-node:nth-child(5) { --orbit-angle: 180deg; }
-  .features-orbit-node:nth-child(6) { --orbit-angle: 225deg; }
-  .features-orbit-node:nth-child(7) { --orbit-angle: 270deg; }
-  .features-orbit-node:nth-child(8) { --orbit-angle: 315deg; }
-
-  /* Cancels the per-card static angle so cards stay visually upright */
-  .features-orbit-unangle {
-    position: absolute;
-    left: 0;
-    top: 0;
-    transform: translate(-50%, -50%) rotate(calc(-1 * var(--orbit-angle, 0deg)));
-  }
-
-  .features-orbit-card-shell {
-    animation: features-orbit-counter-spin var(--orbit-duration, 34s) linear infinite;
-    will-change: transform;
-  }
-
-  .features-orbit-stage:hover .features-orbit-rotator,
-  .features-orbit-stage:hover .features-orbit-card-shell {
-    animation-play-state: paused;
-  }
-
   /* Premium subtle motion for marketing backgrounds */
   @keyframes premium-float {
     0% {
@@ -289,11 +229,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .features-orbit-rotator,
-    .features-orbit-card-shell {
-      animation: none;
-    }
-
     .premium-float {
       animation: none;
     }
