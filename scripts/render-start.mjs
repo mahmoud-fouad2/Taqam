@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 
 function bin(name) {
@@ -41,7 +42,17 @@ async function main() {
 
   // 3) Start Next.
   console.log("[render-start] Starting Next.js...");
-  const next = await run(bin("next"), ["start"], { label: "next-start" });
+  const standaloneServer = ".next/standalone/server.js";
+  const useStandalone = process.env.NEXT_DISABLE_STANDALONE_OUTPUT !== "true" && existsSync(standaloneServer);
+
+  if (useStandalone) {
+    console.log(`[render-start] Detected standalone output; starting ${standaloneServer} ...`);
+  }
+
+  const next = useStandalone
+    ? await run("node", [standaloneServer], { label: "next-standalone" })
+    : await run(bin("next"), ["start"], { label: "next-start" });
+
   process.exit(next.code);
 }
 

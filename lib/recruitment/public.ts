@@ -291,8 +291,10 @@ export async function listPublicJobPostings(filters: PublicJobPostingFilters = {
 export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, "tenantSlug"> = {}): Promise<PublicJobFiltersCatalog> {
   const where = buildActivePublicJobsWhere({ tenantSlug: scope.tenantSlug });
 
-  const [locationRows, jobTypeRows, departments] = await prisma.$transaction([
-    prisma.jobPosting.findMany({
+  try {
+    // Keep these reads outside a transaction to avoid pooled Postgres transaction-start failures
+    // on low-resource production environments while still returning the same filter catalog.
+    const locationRows = await prisma.jobPosting.findMany({
       where: {
         ...where,
         location: {
@@ -306,8 +308,9 @@ export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, 
       orderBy: {
         location: "asc",
       },
-    }),
-    prisma.jobPosting.findMany({
+    });
+
+    const jobTypeRows = await prisma.jobPosting.findMany({
       where,
       select: {
         jobType: true,
@@ -316,8 +319,9 @@ export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, 
       orderBy: {
         jobType: "asc",
       },
-    }),
-    prisma.department.findMany({
+    });
+
+    const departments = await prisma.department.findMany({
       where: {
         jobPostings: {
           some: where,
@@ -331,21 +335,29 @@ export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, 
       orderBy: {
         name: "asc",
       },
-    }),
-  ]);
+    });
 
-  const locations = Array.from(new Set(locationRows.map((row) => row.location?.trim()).filter(Boolean) as string[])).sort((left, right) =>
-    left.localeCompare(right, "ar")
-  );
-  const jobTypes = PUBLIC_JOB_TYPE_OPTIONS.filter((option) => jobTypeRows.some((row) => row.jobType === option.dbValue)).map(
-    (option) => option.value
-  );
+    const locations = Array.from(new Set(locationRows.map((row) => row.location?.trim()).filter(Boolean) as string[])).sort((left, right) =>
+      left.localeCompare(right, "ar")
+    );
+    const jobTypes = PUBLIC_JOB_TYPE_OPTIONS.filter((option) => jobTypeRows.some((row) => row.jobType === option.dbValue)).map(
+      (option) => option.value
+    );
 
-  return {
-    locations,
-    departments,
-    jobTypes,
-  };
+    return {
+      locations,
+      departments,
+      jobTypes,
+    };
+  } catch (error) {
+    console.error("[public jobs] failed to build filters catalog", error);
+
+    return {
+      locations: [],
+      departments: [],
+      jobTypes: [],
+    };
+  }
 }
 
 export async function getPublicJobPostingById(id: string, tenantSlug?: string) {

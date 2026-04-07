@@ -38,7 +38,6 @@ export async function MarketingFooter() {
     ? ["الموظفون", "الرواتب", "الحضور"]
     : ["People", "Payroll", "Attendance"];
   const rights = isAr ? "طاقم. جميع الحقوق محفوظة." : "Taqam. All rights reserved.";
-  const supportLine = t(locale, "footer.developedBy");
   const downloadHref = "/downloads/taqam-android.apk";
 
   return (
@@ -110,14 +109,14 @@ export async function MarketingFooter() {
               className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-80"
             >
               <Image
-                src="https://ma-fo.info/favicon.ico"
-                alt="ma-fo.info"
-                width={14}
-                height={14}
-                className="rounded-sm"
+                src="https://ma-fo.info/logo2.png"
+                alt="Ma-Fo"
+                width={22}
+                height={22}
+                className="h-[22px] w-auto object-contain"
                 unoptimized
               />
-              <span>{supportLine}</span>
+              <span>Development By Ma-Fo</span>
             </Link>
           </div>
         </div>
