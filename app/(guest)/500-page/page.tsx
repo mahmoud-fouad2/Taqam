@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { FadeIn } from "@/components/ui/fade-in";
 import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { Metadata } from "next";
@@ -18,7 +19,8 @@ export default async function Error404() {
   const p = locale === "en" ? "/en" : "";
 
   return (
-    <div className="grid h-screen items-center bg-background pb-8 lg:grid-cols-2 lg:pb-0">
+    <FadeIn direction="up">
+      <div className="grid h-screen items-center bg-background pb-8 lg:grid-cols-2 lg:pb-0">
       <div className="text-center">
         <p className="text-base font-semibold text-muted-foreground">500</p>
         <h1 className="mt-4 text-3xl font-bold tracking-tight md:text-5xl lg:text-7xl">
@@ -42,6 +44,7 @@ export default async function Error404() {
       <div className="col-span-1 hidden lg:block">
         <Image src="/images/500.svg" alt="Login visual" width={720} height={520} className="object-contain" />
       </div>
-    </div>
+      </div>
+    </FadeIn>
   );
 }

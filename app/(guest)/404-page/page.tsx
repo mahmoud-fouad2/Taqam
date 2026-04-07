@@ -1,4 +1,5 @@
 import { NotFoundShell } from "@/components/marketing/not-found-shell";
+import { FadeIn } from "@/components/ui/fade-in";
 import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { Metadata } from "next";
@@ -16,8 +17,9 @@ export default async function Error404() {
   const p = locale === "en" ? "/en" : "";
 
   return (
-    <NotFoundShell
-      code="404"
+    <FadeIn direction="up">
+      <NotFoundShell
+        code="404"
       description={
         isAr
           ? "هذه نسخة الهبوط العامة من صفحة 404. استخدمها عندما تريد تحويل المرشح أو الزائر إلى المسارات الصحيحة بدل فقده داخل رابط مكسور."
@@ -39,6 +41,7 @@ export default async function Error404() {
       ]}
       secondaryAction={{ href: `${p}/help-center`, label: isAr ? "مركز المساعدة" : "Help center", variant: "outline" }}
       title={isAr ? "تعذر العثور على الصفحة المطلوبة" : "We couldn't find the requested page"}
-    />
+      />
+    </FadeIn>
   );
 }

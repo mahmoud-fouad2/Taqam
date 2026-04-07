@@ -5,6 +5,7 @@ import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
 import { LocaleToggle } from "@/components/locale-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { FadeIn } from "@/components/ui/fade-in";
 
 import { RegisterForm } from "./register-form";
 
@@ -28,41 +29,43 @@ export default async function RegisterPage() {
       </div>
 
       <div className="flex w-full items-center justify-center lg:w-1/2">
-        <div className="w-full max-w-md space-y-8 px-4">
-          <div className={`flex gap-2 ${locale === "ar" ? "justify-start" : "justify-end"}`}>
-            <ThemeToggle variant="ghost" />
-            <LocaleToggle variant="ghost" />
-          </div>
+        <FadeIn direction="up">
+          <div className="w-full max-w-md space-y-8 px-4">
+            <div className={`flex gap-2 ${locale === "ar" ? "justify-start" : "justify-end"}`}>
+              <ThemeToggle variant="ghost" />
+              <LocaleToggle variant="ghost" />
+            </div>
 
-          <div className="text-center">
-            <h2 className="mt-6 text-3xl font-bold text-gray-900">{t.register.title}</h2>
-            <p className="mt-2 text-sm text-gray-600">{t.register.subtitle}</p>
-          </div>
+            <div className="text-center">
+              <h2 className="mt-6 text-3xl font-bold text-gray-900">{t.register.title}</h2>
+              <p className="mt-2 text-sm text-gray-600">{t.register.subtitle}</p>
+            </div>
 
-          <div className="mt-8 space-y-6">
-            <RegisterForm
-              locale={locale}
-              labels={{
-                name: t.register.name,
-                namePlaceholder: t.register.namePlaceholder,
-                email: t.register.email,
-                emailPlaceholder: t.register.emailPlaceholder,
-                password: t.register.password,
-                passwordPlaceholder: t.register.passwordPlaceholder,
-                submit: t.register.submit,
-              }}
-            />
-          </div>
+            <div className="mt-8 space-y-6">
+              <RegisterForm
+                locale={locale}
+                labels={{
+                  name: t.register.name,
+                  namePlaceholder: t.register.namePlaceholder,
+                  email: t.register.email,
+                  emailPlaceholder: t.register.emailPlaceholder,
+                  password: t.register.password,
+                  passwordPlaceholder: t.register.passwordPlaceholder,
+                  submit: t.register.submit,
+                }}
+              />
+            </div>
 
-          <div className="mt-6">
-            <p className="mt-6 text-center text-sm text-gray-600">
-              {t.register.alreadyHaveAccount}{" "}
-              <a href="/login" className="text-primary hover:underline">
-                {t.register.loginLink}
-              </a>
-            </p>
+            <div className="mt-6">
+              <p className="mt-6 text-center text-sm text-gray-600">
+                {t.register.alreadyHaveAccount}{" "}
+                <a href="/login" className="text-primary hover:underline">
+                  {t.register.loginLink}
+                </a>
+              </p>
+            </div>
           </div>
-        </div>
+        </FadeIn>
       </div>
     </div>
   );

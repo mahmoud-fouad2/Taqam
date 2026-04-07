@@ -11,6 +11,7 @@ import { LogoMark } from "@/components/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscriptionRequestForm } from "./subscription-request-form";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 
@@ -57,32 +58,37 @@ export default async function RequestDemoPage() {
       <section className="container mx-auto px-4 py-14 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,.95fr)]">
           <div className="mx-auto w-full max-w-2xl lg:mx-0">
+            <FadeIn>
               <div className="mb-8">
-              <LogoMark className="mb-5" frameClassName="rounded-2xl p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-white dark:ring-white/20" imageClassName="h-16" />
-              <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
-                {isAr ? "عرض سريع • تهيئة مخصصة • دعم مباشر" : "Fast demo • Tailored setup • Direct support"}
-              </span>
-              <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                {isAr ? "اطلب عرضًا يوضح كيف ستعمل طاقم داخل شركتك" : "Request a demo tailored to how Taqam fits your company"}
-              </h1>
-              <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
-                {isAr
-                  ? "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال."
-                  : "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."}
-              </p>
-            </div>
+                <LogoMark className="mb-5" frameClassName="rounded-2xl p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-white dark:ring-white/20" imageClassName="h-16" />
+                <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
+                  {isAr ? "عرض سريع • تهيئة مخصصة • دعم مباشر" : "Fast demo • Tailored setup • Direct support"}
+                </span>
+                <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+                  {isAr ? "اطلب عرضًا يوضح كيف ستعمل طاقم داخل شركتك" : "Request a demo tailored to how Taqam fits your company"}
+                </h1>
+                <p className="mt-4 max-w-xl text-base leading-7 text-muted-foreground">
+                  {isAr
+                    ? "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال."
+                    : "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."}
+                </p>
+              </div>
+            </FadeIn>
 
-            <Card className="overflow-hidden rounded-[1.75rem] border-border/70 shadow-xl shadow-black/5">
-              <CardHeader className="border-b bg-muted/30 px-6 py-6 sm:px-8">
-                <CardTitle className="text-xl">{isAr ? "بيانات الشركة" : "Company details"}</CardTitle>
-                <CardDescription>{isAr ? "جميع الحقول المطلوبة معلمة بـ *" : "Required fields are marked with *"}</CardDescription>
-              </CardHeader>
-              <CardContent className="px-6 py-6 sm:px-8 sm:py-8">
-                <SubscriptionRequestForm locale={locale} />
-              </CardContent>
-            </Card>
+            <FadeIn>
+              <Card className="overflow-hidden rounded-[1.75rem] border-border/70 shadow-xl shadow-black/5">
+                <CardHeader className="border-b bg-muted/30 px-6 py-6 sm:px-8">
+                  <CardTitle className="text-xl">{isAr ? "بيانات الشركة" : "Company details"}</CardTitle>
+                  <CardDescription>{isAr ? "جميع الحقول المطلوبة معلمة بـ *" : "Required fields are marked with *"}</CardDescription>
+                </CardHeader>
+                <CardContent className="px-6 py-6 sm:px-8 sm:py-8">
+                  <SubscriptionRequestForm locale={locale} />
+                </CardContent>
+              </Card>
+            </FadeIn>
 
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <FadeIn>
+              <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
                 {isAr ? "عندك حساب بالفعل؟ يمكنك الدخول مباشرة." : "Already have an account? You can sign in directly."}
               </p>
@@ -95,6 +101,7 @@ export default async function RequestDemoPage() {
                 </Button>
               </div>
             </div>
+            </FadeIn>
           </div>
 
           <aside className="relative hidden overflow-hidden rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-indigo-50/70 p-8 text-slate-950 shadow-xl shadow-sky-100/40 lg:block dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:shadow-none">
@@ -102,33 +109,38 @@ export default async function RequestDemoPage() {
             <div className="marketing-grid-pattern absolute inset-0 opacity-[0.04] dark:opacity-[0.05]" />
 
             <div className="relative">
-              <LogoMark className="mb-6" frameClassName="rounded-xl p-0" imageClassName="h-10" />
-              <h2 className="text-3xl font-bold leading-tight">
-                {isAr ? "Demo عملي يركز على ما يهم فريقك" : "A practical demo focused on what matters to your team"}
-              </h2>
-              <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 dark:text-white/70">
-                {isAr
-                  ? "بدلاً من عرض عام، نجهز الجلسة على أساس عدد الموظفين، التعقيد التشغيلي، والخطوات التي تريد أتمتتها أولاً."
-                  : "Instead of a generic tour, we shape the session around employee count, operational complexity, and the workflows you want to automate first."}
-              </p>
+              <FadeIn>
+                <LogoMark className="mb-6" frameClassName="rounded-xl p-0" imageClassName="h-10" />
+                <h2 className="text-3xl font-bold leading-tight">
+                  {isAr ? "Demo عملي يركز على ما يهم فريقك" : "A practical demo focused on what matters to your team"}
+                </h2>
+                <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 dark:text-white/70">
+                  {isAr
+                    ? "بدلاً من عرض عام، نجهز الجلسة على أساس عدد الموظفين، التعقيد التشغيلي، والخطوات التي تريد أتمتتها أولاً."
+                    : "Instead of a generic tour, we shape the session around employee count, operational complexity, and the workflows you want to automate first."}
+                </p>
+              </FadeIn>
 
-              <div className="mt-8 space-y-4">
+              <StaggerContainer className="mt-8 space-y-4">
                 {highlights.map((item) => (
-                  <div key={item.title} className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/15 text-sky-700 dark:text-sky-300">
-                        <item.icon className="h-5 w-5" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</h3>
-                        <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-white/65">{item.description}</p>
+                  <StaggerItem key={item.title}>
+                    <div className="rounded-2xl border border-slate-200/70 bg-white/75 p-4 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 flex h-10 w-10 items-center justify-center rounded-xl bg-sky-500/15 text-sky-700 dark:text-sky-300">
+                          <item.icon className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{item.title}</h3>
+                          <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-white/65">{item.description}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
 
-              <div className="mt-8 rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
+              <FadeIn>
+                <div className="mt-8 rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
                 <p className="text-sm font-semibold text-slate-900 dark:text-white">
                   {isAr ? "هل تريد مراجعة الباقات أولاً؟" : "Prefer to review plans first?"}
                 </p>
@@ -143,6 +155,7 @@ export default async function RequestDemoPage() {
                   </Button>
                 </div>
               </div>
+              </FadeIn>
             </div>
           </aside>
         </div>

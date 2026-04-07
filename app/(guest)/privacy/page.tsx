@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { ShieldCheck } from "lucide-react";
 
+import { FadeIn } from "@/components/ui/fade-in";
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { marketingMetadata } from "@/lib/marketing/seo";
@@ -25,7 +26,8 @@ export default async function PrivacyPage() {
   const contactEmail = "privacy@taqam.net";
 
   return (
-    <main className="bg-background">
+    <FadeIn direction="up">
+      <main className="bg-background">
       <MarketingPageHero
         icon={ShieldCheck}
         badge={isAr ? "البيانات، الاستخدام، والحقوق" : "Data, usage, and rights"}
@@ -221,5 +223,6 @@ export default async function PrivacyPage() {
         secondaryAction={{ href: `${p}/help-center`, label: isAr ? "مركز المساعدة" : "Help Center" }}
       />
     </main>
+    </FadeIn>
   );
 }

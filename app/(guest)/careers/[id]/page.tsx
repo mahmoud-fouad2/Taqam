@@ -12,6 +12,8 @@ import { getSiteUrl } from "@/lib/marketing/site";
 import { getPublicExperienceLevelLabel, getPublicJobTypeLabel } from "@/lib/recruitment/public-meta";
 import { getPublicJobPostingById } from "@/lib/recruitment/public";
 
+import { FadeIn } from "@/components/ui/fade-in";
+
 type PageProps = {
   params: Promise<{ id: string }>;
 };
@@ -89,8 +91,9 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
   const companyName = job.tenantNameAr || job.tenantName;
 
   return (
-    <main className="bg-background pb-20">
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-background to-background py-16">
+    <FadeIn direction="up">
+      <main className="bg-background pb-20">
+        <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-background to-background py-16">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute right-1/4 top-8 h-60 w-60 rounded-full bg-blue-500/10 blur-3xl" />
@@ -252,5 +255,6 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
         </div>
       </section>
     </main>
+    </FadeIn>
   );
 }

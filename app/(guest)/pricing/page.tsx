@@ -8,6 +8,7 @@ import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { prisma } from "@/lib/db";
@@ -118,38 +119,42 @@ export default async function PricingPage() {
 
   return (
     <main className="bg-background">
-      <MarketingPageHero
-        icon={CircleDollarSign}
-        badge={isAr ? "أسعار واضحة بدون تعقيد" : "Clear pricing without the clutter"}
-        title={isAr ? "الأسعار" : "Pricing"}
-        description={
-          isAr
-            ? "باقات مرنة للشركات الصغيرة والمتوسطة والمؤسسات، مع انتقال واضح بين المستويات بدل قوائم أسعار معقدة."
-            : "Flexible plans for small teams, growing businesses, and enterprises, with a clear path between tiers instead of noisy pricing tables."
-        }
-        actions={[
-          { href: `${p}/plans`, label: isAr ? "تفاصيل الباقات" : "Plan details", variant: "outline" },
-          { href: `${p}/request-demo`, label: isAr ? "احجز عرضًا تجريبيًا" : "Book a demo", variant: "brand" },
-        ]}
-        stats={[
-          { value: `${plans.length}`, label: isAr ? "خطط متاحة" : "Available plans" },
-          { value: startingPrice != null ? `${startingPrice}` : isAr ? "حسب الطلب" : "Custom", label: isAr ? "سعر البداية الشهري" : "Starting monthly price" },
-          { value: `${comparison.length}+`, label: isAr ? "عنصر مقارنة" : "Comparison points" },
-        ]}
-      />
+      <FadeIn>
+        <MarketingPageHero
+          icon={CircleDollarSign}
+          badge={isAr ? "أسعار واضحة بدون تعقيد" : "Clear pricing without the clutter"}
+          title={isAr ? "الأسعار" : "Pricing"}
+          description={
+            isAr
+              ? "باقات مرنة للشركات الصغيرة والمتوسطة والمؤسسات، مع انتقال واضح بين المستويات بدل قوائم أسعار معقدة."
+              : "Flexible plans for small teams, growing businesses, and enterprises, with a clear path between tiers instead of noisy pricing tables."
+          }
+          actions={[
+            { href: `${p}/plans`, label: isAr ? "تفاصيل الباقات" : "Plan details", variant: "outline" },
+            { href: `${p}/request-demo`, label: isAr ? "احجز عرضًا تجريبيًا" : "Book a demo", variant: "brand" },
+          ]}
+          stats={[
+            { value: `${plans.length}`, label: isAr ? "خطط متاحة" : "Available plans" },
+            { value: startingPrice != null ? `${startingPrice}` : isAr ? "حسب الطلب" : "Custom", label: isAr ? "سعر البداية الشهري" : "Starting monthly price" },
+            { value: `${comparison.length}+`, label: isAr ? "عنصر مقارنة" : "Comparison points" },
+          ]}
+        />
+      </FadeIn>
 
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-8 max-w-2xl">
-            <h2 className="text-2xl font-bold">{isAr ? "الباقات المتاحة" : "Available plans"}</h2>
-            <p className="mt-2 text-muted-foreground">
-              {isAr
-                ? "كل بطاقة توضح مستوى الخدمة والسعة والميزات الأساسية بشكل مباشر."
-                : "Each card shows the service level, capacity, and core capabilities in a direct way."}
-            </p>
-          </div>
+          <FadeIn>
+            <div className="mb-8 max-w-2xl">
+              <h2 className="text-2xl font-bold">{isAr ? "الباقات المتاحة" : "Available plans"}</h2>
+              <p className="mt-2 text-muted-foreground">
+                {isAr
+                  ? "كل بطاقة توضح مستوى الخدمة والسعة والميزات الأساسية بشكل مباشر."
+                  : "Each card shows the service level, capacity, and core capabilities in a direct way."}
+              </p>
+            </div>
+          </FadeIn>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <StaggerContainer className="grid gap-6 lg:grid-cols-3">
             {plans.map((plan) => {
               const price = plan.priceMonthly != null ? Number(plan.priceMonthly) : null;
               const priceText = price != null ? String(price) : isAr ? "تواصل معنا" : "Contact us";
@@ -158,64 +163,66 @@ export default async function PricingPage() {
               const PlanIcon = plan.isPopular ? Sparkles : price == null ? ShieldCheck : CircleDollarSign;
 
               return (
-                <Card
-                  key={plan.name}
-                  className={
-                    plan.isPopular
-                      ? "relative overflow-hidden border-primary/40 shadow-lg shadow-primary/10"
-                      : "relative overflow-hidden border-border/80 shadow-sm"
-                  }
-                >
-                  {plan.isPopular ? (
-                    <div className="absolute end-5 top-5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-                      {isAr ? "الأكثر طلبًا" : "Most popular"}
-                    </div>
-                  ) : null}
-                  <CardHeader className="pb-4">
-                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                      <PlanIcon className="h-6 w-6 text-primary" />
-                    </div>
-                    <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.name}</CardTitle>
-                    <CardDescription>{isAr ? plan.name : plan.nameAr}</CardDescription>
-                    <div className="mt-4 flex items-end justify-between gap-3">
-                      <div>
-                        <div className="text-4xl font-bold tracking-tight">{priceText}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {price != null ? (isAr ? `ريال / شهر` : `${plan.currency} / month`) : employeesText}
-                        </div>
+                <StaggerItem key={plan.name}>
+                  <Card
+                    className={
+                      plan.isPopular
+                        ? "relative overflow-hidden border-primary/40 shadow-lg shadow-primary/10 h-full flex flex-col"
+                        : "relative overflow-hidden border-border/80 shadow-sm h-full flex flex-col"
+                    }
+                  >
+                    {plan.isPopular ? (
+                      <div className="absolute end-5 top-5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                        {isAr ? "الأكثر طلبًا" : "Most popular"}
                       </div>
-                      {price != null ? (
-                        <div className="rounded-full border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
-                          {employeesText}
+                    ) : null}
+                    <CardHeader className="pb-4">
+                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+                        <PlanIcon className="h-6 w-6 text-primary" />
+                      </div>
+                      <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.name}</CardTitle>
+                      <CardDescription>{isAr ? plan.name : plan.nameAr}</CardDescription>
+                      <div className="mt-4 flex items-end justify-between gap-3">
+                        <div>
+                          <div className="text-4xl font-bold tracking-tight">{priceText}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {price != null ? (isAr ? `ريال / شهر` : `${plan.currency} / month`) : employeesText}
+                          </div>
                         </div>
-                      ) : null}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3">
-                      {features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3">
-                          <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                          <span className="text-sm leading-6">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link href={`${p}/request-demo`} className="mt-8 block">
-                      <Button className="w-full" variant={plan.isPopular ? "brand" : "brandOutline"}>
-                        {isAr ? "طلب اشتراك" : "Request subscription"}
-                      </Button>
-                    </Link>
-                  </CardContent>
-                </Card>
+                        {price != null ? (
+                          <div className="rounded-full border bg-muted/50 px-3 py-1 text-xs text-muted-foreground">
+                            {employeesText}
+                          </div>
+                        ) : null}
+                      </div>
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col justify-between">
+                      <ul className="space-y-3">
+                        {features.map((feature) => (
+                          <li key={feature} className="flex items-start gap-3">
+                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                            <span className="text-sm leading-6">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      <Link href={`${p}/request-demo`} className="mt-8 block">
+                        <Button className="w-full" variant={plan.isPopular ? "brand" : "brandOutline"}>
+                          {isAr ? "طلب اشتراك" : "Request subscription"}
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                </StaggerItem>
               );
             })}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       <section className="border-t bg-muted/30 py-16">
         <div className="container mx-auto px-4">
-          <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <FadeIn>
+            <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="max-w-2xl">
               <h2 className="text-2xl font-bold">{isAr ? "مقارنة سريعة" : "Quick comparison"}</h2>
               <p className="mt-2 text-muted-foreground">
@@ -228,9 +235,11 @@ export default async function PricingPage() {
               {isAr ? "قابل للتخصيص حسب نطاق المشروع" : "Can be tailored to project scope"}
             </div>
           </div>
+          </FadeIn>
 
-          <div className="overflow-hidden rounded-3xl border bg-background shadow-sm">
-            <Table>
+          <FadeIn>
+            <div className="overflow-hidden rounded-3xl border bg-background shadow-sm">
+              <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>{isAr ? "الميزة" : "Feature"}</TableHead>
@@ -269,12 +278,14 @@ export default async function PricingPage() {
               </TableBody>
             </Table>
           </div>
+          </FadeIn>
 
         </div>
       </section>
 
-      <MarketingPageCta
-        title={isAr ? "تحتاج عرض سعر مختلف؟" : "Need a custom commercial offer?"}
+      <FadeIn>
+        <MarketingPageCta
+          title={isAr ? "تحتاج عرض سعر مختلف؟" : "Need a custom commercial offer?"}
         description={
           isAr
             ? "إذا كان عندك عدد موظفين كبير، أو تحتاج نشر خاص أو تكاملات خارجية، نجهز لك عرضًا يناسب شكل التشغيل الحقيقي عندك."
@@ -283,6 +294,7 @@ export default async function PricingPage() {
         primaryAction={{ href: `${p}/request-demo`, label: isAr ? "اطلب عرض سعر مخصص" : "Request custom pricing" }}
         secondaryAction={{ href: `${p}/plans`, label: isAr ? "راجع تفاصيل الباقات" : "Review plan details" }}
       />
+      </FadeIn>
     </main>
   );
 }

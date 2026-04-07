@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { Clock3, HelpCircle, Headphones, LifeBuoy, Mail, MessageSquare, Phone, Shield } from "lucide-react";
 
+import { FadeIn } from "@/components/ui/fade-in";
 import { Button } from "@/components/ui/button";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
@@ -81,7 +82,8 @@ export default async function SupportPage({
       : null;
 
   return (
-    <main className="bg-background">
+    <FadeIn direction="up">
+      <main className="bg-background">
       {/* ── HERO ── */}
       <section className="relative overflow-hidden border-b pb-20 pt-20 sm:pt-28">
         <div className="pointer-events-none absolute inset-0 -z-10">
@@ -276,6 +278,7 @@ export default async function SupportPage({
         </div>
       </section>
     </main>
+    </FadeIn>
   );
 }
 

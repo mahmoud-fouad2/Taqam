@@ -14,6 +14,8 @@ import { getSiteUrl } from "@/lib/marketing/site";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
 import { getPublicCareersTenantBySlug, listPublicJobFilters, listPublicJobPostings } from "@/lib/recruitment/public";
 
+import { FadeIn } from "@/components/ui/fade-in";
+
 type PageProps = {
   params: Promise<{ slug: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -90,8 +92,9 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
   const hasFilters = Boolean(query || location || departmentId || jobType);
 
   return (
-    <main className="bg-background pb-20">
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-background to-background py-16 sm:py-20">
+    <FadeIn direction="up">
+      <main className="bg-background pb-20">
+        <section className="relative overflow-hidden border-b bg-gradient-to-b from-primary/10 via-background to-background py-16 sm:py-20">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-0 h-72 w-72 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute inset-x-0 top-0 h-80 bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.12),transparent_58%)]" />
@@ -243,5 +246,6 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
         </div>
       </section>
     </main>
+    </FadeIn>
   );
 }

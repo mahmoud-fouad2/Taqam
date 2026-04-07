@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { FadeIn } from "@/components/ui/fade-in";
 import { ResetPasswordForm } from "./reset-password-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -27,20 +28,22 @@ export default async function ResetPasswordPage({
 
   return (
     <main className="min-h-[calc(100vh-8rem)] bg-background py-16">
-      <div className="container mx-auto max-w-2xl px-4">
-        <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold tracking-tight">
-            {isAr ? "تعيين كلمة المرور" : "Set your password"}
-          </h1>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            {isAr
-              ? "أكمل تعيين كلمة المرور لتفعيل الحساب أو استعادة الوصول بأمان."
-              : "Finish setting your password to activate the account or restore access securely."}
-          </p>
-        </div>
+      <FadeIn direction="up">
+        <div className="container mx-auto max-w-2xl px-4">
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold tracking-tight">
+              {isAr ? "تعيين كلمة المرور" : "Set your password"}
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+              {isAr
+                ? "أكمل تعيين كلمة المرور لتفعيل الحساب أو استعادة الوصول بأمان."
+                : "Finish setting your password to activate the account or restore access securely."}
+            </p>
+          </div>
 
-        <ResetPasswordForm locale={locale} token={token} />
-      </div>
+          <ResetPasswordForm locale={locale} token={token} />
+        </div>
+      </FadeIn>
     </main>
   );
 }

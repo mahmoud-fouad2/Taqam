@@ -28,6 +28,7 @@ import {
 
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { cn } from "@/lib/utils";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -385,96 +386,105 @@ export default async function FeaturesPage() {
 
   return (
     <main className="bg-background">
-      <MarketingPageHero
-        icon={Sparkles}
-        badge={isAr ? "منصة موارد بشرية متكاملة" : "All-in-one HR platform"}
-        title={isAr ? "نظام تشغيل فعلي للموارد البشرية" : "A real operating system for HR"}
-        description={
-          isAr
-            ? "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف."
-            : "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment."
-        }
-        actions={[
-          { href: `${p}/request-demo`, label: isAr ? "اطلب عرضًا عمليًا" : "Request a practical demo", variant: "brand" },
-          { href: `${p}/screenshots`, label: isAr ? "استعرض الواجهات" : "Browse screenshots", variant: "outline" },
-        ]}
-        stats={[
-          { value: `${totalFeatures}+`, label: isAr ? "ميزة مترابطة" : "Connected capabilities" },
-          { value: `${featureSections.length}`, label: isAr ? "مسارات تشغيل" : "Operational suites" },
-          { value: isAr ? "عربي + إنجليزي" : "Arabic + English", label: isAr ? "واجهة ثنائية اللغة" : "Bilingual experience" },
-        ]}
-        tone="indigo"
-      />
+      <StaggerContainer>
+        <MarketingPageHero
+          icon={Sparkles}
+          badge={isAr ? "تشغيل منظّم بالكامل" : "Fully streamlined operations"}
+          title={isAr ? "نظام واحد بدل أدوات متفرقة" : "One system instead of scattered tools"}
+          description={isAr ? "تخلى عن تعقيد الجداول والملفات الخارجية، طاقم يجمع رحلة موظفيك من التعيين حتى الرواتب في مسار واحد متناسق بصرياً وتشغيلياً." : "Drop the complexity of spreadsheets. Taqam unifies your employee journey—from hiring to payroll—into one cohesive flow."}
+        />
 
-      <section className="border-b bg-gradient-to-b from-background to-muted/30 py-14 sm:py-18">
-        <div className="container mx-auto px-4">
-          <div className="rounded-[32px] border border-border/70 bg-background/80 p-6 shadow-[0_28px_80px_-40px_rgba(79,70,229,0.18)] backdrop-blur-sm sm:p-8 lg:p-10">
-            <div className="grid gap-6 lg:grid-cols-[1.1fr_1.35fr] lg:items-start">
-              <div className="rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.16),transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,242,255,0.95))] p-6 sm:p-8">
-                <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700/70">
-                  {isAr ? "بنية المنصة" : "Platform anatomy"}
-                </p>
-                <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
-                  {isAr ? "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها" : "One platform instead of six disconnected tools"}
-                </h2>
-                <p className="mt-4 max-w-xl leading-8 text-slate-600">
-                  {isAr
-                    ? "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط."
-                    : "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system."}
-                </p>
-                <div className="mt-8 grid gap-3 sm:grid-cols-2">
-                  {platformHighlights.map((highlight) => (
-                    <div
-                      key={highlight.titleEn}
-                      className="rounded-2xl border border-white/70 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]"
-                    >
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
-                        <highlight.icon className="h-4 w-4" />
+        <MarketingPageHero
+          icon={Sparkles}
+          badge={isAr ? "منصة موارد بشرية متكاملة" : "All-in-one HR platform"}
+          title={isAr ? "نظام تشغيل فعلي للموارد البشرية" : "A real operating system for HR"}
+          description={
+            isAr
+              ? "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف."
+              : "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment."
+          }
+          actions={[
+            { href: `${p}/request-demo`, label: isAr ? "اطلب عرضًا عمليًا" : "Request a practical demo", variant: "brand" },
+            { href: `${p}/screenshots`, label: isAr ? "استعرض الواجهات" : "Browse screenshots", variant: "outline" },
+          ]}
+          stats={[
+            { value: `${totalFeatures}+`, label: isAr ? "ميزة مترابطة" : "Connected capabilities" },
+            { value: `${featureSections.length}`, label: isAr ? "مسارات تشغيل" : "Operational suites" },
+            { value: isAr ? "عربي + إنجليزي" : "Arabic + English", label: isAr ? "واجهة ثنائية اللغة" : "Bilingual experience" },
+          ]}
+          tone="indigo"
+        />
+
+        <section className="border-b bg-gradient-to-b from-background to-muted/30 py-14 sm:py-18">
+          <div className="container mx-auto px-4">
+            <StaggerItem direction="up" className="rounded-[32px] border border-border/70 bg-background/80 p-6 shadow-[0_28px_80px_-40px_rgba(79,70,229,0.18)] backdrop-blur-sm sm:p-8 lg:p-10">
+              <div className="grid gap-6 lg:grid-cols-[1.1fr_1.35fr] lg:items-start">
+                <div className="rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.16),transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,242,255,0.95))] p-6 sm:p-8 dark:bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.16),transparent_42%),linear-gradient(135deg,rgba(15,23,42,0.98),rgba(2,6,23,0.95))]">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700/70">
+                    {isAr ? "بنية المنصة" : "Platform anatomy"}
+                  </p>
+                  <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
+                    {isAr ? "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها" : "One platform instead of six disconnected tools"}
+                  </h2>
+                  <p className="mt-4 max-w-xl leading-8 text-slate-600 dark:text-slate-400">
+                    {isAr
+                      ? "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط."
+                      : "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system."}
+                  </p>
+                  <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                    {platformHighlights.map((highlight) => (
+                      <div
+                        key={highlight.titleEn}
+                        className="rounded-2xl border border-white/70 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]"
+                      >
+                        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
+                          <highlight.icon className="h-4 w-4" />
+                        </div>
+                        <h3 className="mt-4 text-sm font-bold text-slate-950 dark:text-zinc-100">
+                          {isAr ? highlight.titleAr : highlight.titleEn}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-zinc-400">
+                          {isAr ? highlight.descAr : highlight.descEn}
+                        </p>
                       </div>
-                      <h3 className="mt-4 text-sm font-bold text-slate-950">
-                        {isAr ? highlight.titleAr : highlight.titleEn}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-600">
-                        {isAr ? highlight.descAr : highlight.descEn}
-                      </p>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {featureSections.map((section, idx) => {
+                    const theme = suiteThemes[idx % suiteThemes.length];
+
+                    return (
+                      <StaggerItem
+                        direction="up"
+                        key={section.titleEn}
+                        className="group rounded-[28px] border border-border/70 bg-background/85 p-5 shadow-[0_22px_60px_-34px_rgba(15,23,42,0.18)] transition-transform duration-300 hover:-translate-y-1"
+                      >
+                        <div className={cn("inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold", theme.badge)}>
+                          {String(idx + 1).padStart(2, "0")}
+                        </div>
+                        <h3 className="mt-4 text-lg font-bold tracking-tight">
+                          {isAr ? section.titleAr : section.titleEn}
+                        </h3>
+                        <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                          {isAr ? section.summaryAr : section.summaryEn}
+                        </p>
+                        <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-foreground/70">
+                          <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
+                          {isAr ? `${section.items.length} مكونات داخل هذا المسار` : `${section.items.length} capabilities in this suite`}
+                        </div>
+                      </StaggerItem>
+                    );
+                  })}
                 </div>
               </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                {featureSections.map((section, idx) => {
-                  const theme = suiteThemes[idx % suiteThemes.length];
-
-                  return (
-                    <article
-                      key={section.titleEn}
-                      className="group rounded-[28px] border border-border/70 bg-background/85 p-5 shadow-[0_22px_60px_-34px_rgba(15,23,42,0.18)] transition-transform duration-300 hover:-translate-y-1"
-                    >
-                      <div className={cn("inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold", theme.badge)}>
-                        {String(idx + 1).padStart(2, "0")}
-                      </div>
-                      <h3 className="mt-4 text-lg font-bold tracking-tight">
-                        {isAr ? section.titleAr : section.titleEn}
-                      </h3>
-                      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                        {isAr ? section.summaryAr : section.summaryEn}
-                      </p>
-                      <div className="mt-4 flex items-center gap-2 text-xs font-semibold text-foreground/70">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-primary" />
-                        {isAr ? `${section.items.length} مكونات داخل هذا المسار` : `${section.items.length} capabilities in this suite`}
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </div>
+            </StaggerItem>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {featureSections.map((section, sectionIndex) => {
-        const theme = suiteThemes[sectionIndex % suiteThemes.length];
+        {featureSections.map((section, sectionIndex) => {
+          const theme = suiteThemes[sectionIndex % suiteThemes.length];
         const SectionIcon = section.items[0]?.icon ?? Sparkles;
         const reverse = sectionIndex % 2 === 1;
 
@@ -537,7 +547,8 @@ export default async function FeaturesPage() {
 
                 <div className="space-y-4">
                   {section.items.map((item, itemIndex) => (
-                    <article
+                    <StaggerItem
+                      direction="up"
                       key={item.titleEn}
                       className="group relative overflow-hidden rounded-[28px] border border-border/70 bg-background/90 p-5 shadow-[0_22px_56px_-36px_rgba(15,23,42,0.16)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_72px_-38px_rgba(79,70,229,0.18)] sm:p-6"
                     >
@@ -561,7 +572,7 @@ export default async function FeaturesPage() {
                         </div>
                         <ArrowUpRight className="mt-1 hidden h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground sm:block" />
                       </div>
-                    </article>
+                    </StaggerItem>
                   ))}
                 </div>
               </div>
@@ -581,6 +592,7 @@ export default async function FeaturesPage() {
         secondaryAction={{ href: `${p}/plans`, label: isAr ? "راجع الباقات" : "Review plans" }}
         tone="muted"
       />
+      </StaggerContainer>
     </main>
   );
 }

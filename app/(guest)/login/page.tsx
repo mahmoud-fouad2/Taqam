@@ -4,6 +4,7 @@ import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
 import { Metadata } from "next";
+import { FadeIn } from "@/components/ui/fade-in";
 import { LoginForm } from "./login-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -24,26 +25,28 @@ export default async function LoginPageV1() {
       <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
         {/* Left: form */}
         <div className="relative flex items-center justify-center px-6 py-10 lg:px-12">
-          <div className="w-full max-w-md">
-            <div className="text-center">
-              <div className="mb-6 flex justify-center">
-                <LogoMark frameClassName="rounded-2xl p-0 shadow-md" imageClassName="h-16" />
+          <FadeIn direction="up">
+            <div className="w-full max-w-md">
+              <div className="text-center">
+                <div className="mb-6 flex justify-center">
+                  <LogoMark frameClassName="rounded-2xl p-0 shadow-md" imageClassName="h-16" />
+                </div>
+                <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
+                <p className="mt-2 text-sm text-muted-foreground">{t.login.subtitle}</p>
               </div>
-              <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
-              <p className="mt-2 text-sm text-muted-foreground">{t.login.subtitle}</p>
-            </div>
 
-            <LoginForm
-              locale={locale}
-              labels={{
-                email: t.login.email,
-                emailPlaceholder: t.login.emailPlaceholder,
-                password: t.login.password,
-                passwordPlaceholder: t.login.passwordPlaceholder,
-                submit: t.login.submit,
-              }}
-            />
-          </div>
+              <LoginForm
+                locale={locale}
+                labels={{
+                  email: t.login.email,
+                  emailPlaceholder: t.login.emailPlaceholder,
+                  password: t.login.password,
+                  passwordPlaceholder: t.login.passwordPlaceholder,
+                  submit: t.login.submit,
+                }}
+              />
+            </div>
+          </FadeIn>
         </div>
 
         {/* Right: dark marketing panel */}

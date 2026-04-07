@@ -1,6 +1,7 @@
 ﻿import type { Metadata } from "next";
 import { FileText } from "lucide-react";
 
+import { FadeIn } from "@/components/ui/fade-in";
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { marketingMetadata } from "@/lib/marketing/seo";
@@ -24,7 +25,8 @@ export default async function TermsPage() {
   const legalEmail = "legal@taqam.net";
 
   return (
-    <main className="bg-background">
+    <FadeIn direction="up">
+      <main className="bg-background">
       <MarketingPageHero
         icon={FileText}
         badge={isAr ? "الاستخدام، الاشتراك، والمسؤولية" : "Use, subscription, and liability"}
@@ -213,5 +215,6 @@ export default async function TermsPage() {
         secondaryAction={{ href: `${p}/pricing`, label: isAr ? "الأسعار والباقات" : "Pricing & plans" }}
       />
     </main>
+    </FadeIn>
   );
 }

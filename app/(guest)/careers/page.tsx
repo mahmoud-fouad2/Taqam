@@ -8,6 +8,7 @@ import { PublicJobCard } from "@/components/recruitment/public-job-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
@@ -54,6 +55,7 @@ export default async function CareersPage({
 
   return (
     <main className="bg-background pb-20">
+      <StaggerContainer>
       <section className="relative overflow-hidden border-b pb-20 pt-20 sm:pt-28">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.14),transparent_65%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.22),transparent_65%)]" />
@@ -63,7 +65,7 @@ export default async function CareersPage({
 
         <div className="container mx-auto px-4">
           <div className="grid items-center gap-12 lg:grid-cols-2 lg:pb-8">
-            <div className="text-center lg:text-start">
+            <StaggerItem direction="right" className="text-center lg:text-start">
               <span className="mb-5 flex justify-center lg:justify-start">
                 <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
                   <Sparkles className="h-3.5 w-3.5" />
@@ -100,10 +102,10 @@ export default async function CareersPage({
                   </CardContent>
                 </Card>
               </div>
-            </div>
+            </StaggerItem>
 
             {/* Visual */}
-            <div className="relative mx-auto hidden w-full max-w-md lg:block">
+            <StaggerItem direction="left" className="relative mx-auto hidden w-full max-w-md lg:block">
               {/* Decorative shapes */}
               <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-gradient-to-tr from-amber-200 to-rose-200 blur-2xl dark:from-amber-900/40 dark:to-rose-900/40" />
               <div className="pointer-events-none absolute -end-10 bottom-10 -z-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
@@ -133,10 +135,10 @@ export default async function CareersPage({
                   </div>
                 </div>
               </div>
-            </div>
+            </StaggerItem>
           </div>
 
-          <div className="mx-auto max-w-4xl pt-8">
+          <StaggerItem direction="up" className="mx-auto max-w-4xl pt-8">
             <PublicJobFilters
               basePath={`${p}/careers`}
               key={`careers-filters:${query}:${location}:${departmentId}:${jobType}`}
@@ -156,11 +158,12 @@ export default async function CareersPage({
               locations={filters.locations.map((value) => ({ value, label: value }))}
               searchPlaceholder={isAr ? "ابحث بالمسمى الوظيفي، المدينة أو اسم الشركة" : "Search by role, city, or company"}
             />
-          </div>
+          </StaggerItem>
         </div>
       </section>
 
       <section className="container mx-auto px-4 py-14">
+        <FadeIn direction="up">
         <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold">{isAr ? "الفرص المتاحة الآن" : "Open roles right now"}</h2>
@@ -195,8 +198,10 @@ export default async function CareersPage({
             </Button>
           </div>
         </div>
+        </FadeIn>
 
         {jobs.length === 0 ? (
+          <FadeIn direction="up">
           <Empty className="border py-16">
             <EmptyMedia variant="icon">
               <BriefcaseBusiness />
@@ -210,18 +215,21 @@ export default async function CareersPage({
               </EmptyDescription>
             </EmptyHeader>
           </Empty>
+          </FadeIn>
         ) : (
-          <div className="grid gap-5 lg:grid-cols-2">
+          <StaggerContainer className="grid gap-5 lg:grid-cols-2">
             {jobs.map((job) => (
-              <PublicJobCard key={job.id} job={job} locale={locale} />
+              <StaggerItem direction="up" key={job.id}>
+                <PublicJobCard job={job} locale={locale} />
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
       </section>
 
       <section className="relative border-t py-24">
         <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.3),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.5)_50%)]" />
-        <div className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
+        <FadeIn direction="up" className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
           <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
             <CardContent className="space-y-3 p-7">
               <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
@@ -261,9 +269,9 @@ export default async function CareersPage({
               </p>
             </CardContent>
           </Card>
-        </div>
+        </FadeIn>
       </section>
+      </StaggerContainer>
     </main>
   );
 }
-

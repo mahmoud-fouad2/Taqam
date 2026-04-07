@@ -8,6 +8,7 @@ import type { Metadata } from "next";
 import { TenantAccess } from "@/components/tenant-access";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { FadeIn } from "@/components/ui/fade-in";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -46,24 +47,26 @@ export default async function SelectTenantPage({
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-12">
-      <div className="rounded-2xl border bg-card p-6 shadow-sm">
-        <h1 className="text-2xl font-bold">{isAr ? "اختيار الشركة" : "Select tenant"}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {isAr
-            ? "لازم تختار شركتك (Tenant) قبل الدخول للداشبورد على هذا الدومين."
-            : "You must select your tenant before entering the dashboard on this domain."}
-        </p>
+      <FadeIn direction="up">
+        <div className="rounded-2xl border bg-card p-6 shadow-sm">
+          <h1 className="text-2xl font-bold">{isAr ? "اختيار الشركة" : "Select tenant"}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {isAr
+              ? "لازم تختار شركتك (Tenant) قبل الدخول للداشبورد على هذا الدومين."
+              : "You must select your tenant before entering the dashboard on this domain."}
+          </p>
 
-        <div className="mt-6">
-          <TenantAccess nextPath={nextPath} locale={locale} presets={demoTenants} />
+          <div className="mt-6">
+            <TenantAccess nextPath={nextPath} locale={locale} presets={demoTenants} />
+          </div>
+
+          <p className="mt-6 text-xs text-muted-foreground">
+            {isAr
+              ? "ملاحظة: للموبايل استخدم مدخل الجوال /m ولا تحتاج اختيار الشركة."
+              : "Note: For mobile use /m; tenant selection is not required."}
+          </p>
         </div>
-
-        <p className="mt-6 text-xs text-muted-foreground">
-          {isAr
-            ? "ملاحظة: للموبايل استخدم مدخل الجوال /m ولا تحتاج اختيار الشركة."
-            : "Note: For mobile use /m; tenant selection is not required."}
-        </p>
-      </div>
+      </FadeIn>
     </main>
   );
 }
