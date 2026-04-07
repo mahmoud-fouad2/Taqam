@@ -104,8 +104,8 @@ export default async function RequestDemoPage() {
             </FadeIn>
           </div>
 
-          <aside className="relative hidden overflow-hidden rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-indigo-50/70 p-8 text-slate-950 shadow-xl shadow-sky-100/40 lg:block dark:border-white/10 dark:bg-neutral-950 dark:text-white dark:shadow-none">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200/70 via-white to-indigo-100/70 dark:from-indigo-900/60 dark:via-neutral-950 dark:to-neutral-950" />
+          <aside className="relative hidden overflow-hidden rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-indigo-50/70 p-8 text-slate-950 shadow-xl shadow-sky-100/40 lg:block dark:border-white/10 dark:from-neutral-950 dark:via-neutral-900 dark:to-slate-900 dark:text-white dark:shadow-none">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200/70 via-sky-50/50 to-indigo-100/70 dark:from-indigo-900/20 dark:via-transparent dark:to-transparent" />
             <div className="marketing-grid-pattern absolute inset-0 opacity-[0.04] dark:opacity-[0.05]" />
 
             <div className="relative">

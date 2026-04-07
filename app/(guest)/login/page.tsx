@@ -50,8 +50,8 @@ export default async function LoginPageV1() {
         </div>
 
         {/* Right: dark marketing panel */}
-        <div className="relative hidden overflow-hidden rounded-s-[2rem] border-s border-border/60 bg-gradient-to-br from-sky-50 via-white to-indigo-50/80 lg:block dark:border-white/10 dark:bg-neutral-950">
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200/80 via-white to-indigo-100/70 dark:from-indigo-900/60 dark:via-neutral-950 dark:to-neutral-950" />
+        <div className="relative hidden overflow-hidden rounded-s-[2rem] border-s border-border/60 bg-gradient-to-br from-sky-50 via-white to-indigo-50/80 lg:block dark:border-white/10 dark:from-neutral-950 dark:via-neutral-900 dark:to-slate-900">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200/80 via-sky-50/50 to-indigo-100/70 dark:from-indigo-900/20 dark:via-transparent dark:to-transparent" />
           <div className="marketing-grid-pattern absolute inset-0 opacity-[0.03] dark:opacity-[0.03]" />
 
           <div className="relative flex h-full flex-col justify-center px-14">
