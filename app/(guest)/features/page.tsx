@@ -328,7 +328,7 @@ const featureSections: FeatureSection[] = [
 const suiteThemes = [
   {
     panel: "bg-gradient-to-br from-indigo-100 via-white to-indigo-50",
-    badge: "border-indigo-200 bg-white/80 text-indigo-700",
+    badge: "border-indigo-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-indigo-700",
     iconWrap: "bg-indigo-600 text-white",
     itemIcon: "border-indigo-200 bg-indigo-50 text-indigo-700",
     ribbon: "bg-indigo-500",
@@ -336,7 +336,7 @@ const suiteThemes = [
   },
   {
     panel: "bg-gradient-to-br from-blue-100 via-white to-cyan-50",
-    badge: "border-blue-200 bg-white/80 text-blue-700",
+    badge: "border-blue-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-blue-700",
     iconWrap: "bg-blue-600 text-white",
     itemIcon: "border-blue-200 bg-blue-50 text-blue-700",
     ribbon: "bg-blue-500",
@@ -344,7 +344,7 @@ const suiteThemes = [
   },
   {
     panel: "bg-gradient-to-br from-violet-100 via-white to-fuchsia-50",
-    badge: "border-violet-200 bg-white/80 text-violet-700",
+    badge: "border-violet-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-violet-700",
     iconWrap: "bg-violet-600 text-white",
     itemIcon: "border-violet-200 bg-violet-50 text-violet-700",
     ribbon: "bg-violet-500",
@@ -352,7 +352,7 @@ const suiteThemes = [
   },
   {
     panel: "bg-gradient-to-br from-emerald-100 via-white to-teal-50",
-    badge: "border-emerald-200 bg-white/80 text-emerald-700",
+    badge: "border-emerald-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-emerald-700",
     iconWrap: "bg-emerald-600 text-white",
     itemIcon: "border-emerald-200 bg-emerald-50 text-emerald-700",
     ribbon: "bg-emerald-500",
@@ -360,7 +360,7 @@ const suiteThemes = [
   },
   {
     panel: "bg-gradient-to-br from-amber-100 via-white to-orange-50",
-    badge: "border-amber-200 bg-white/80 text-amber-700",
+    badge: "border-amber-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-amber-700",
     iconWrap: "bg-amber-500 text-white",
     itemIcon: "border-amber-200 bg-amber-50 text-amber-700",
     ribbon: "bg-amber-500",
@@ -368,7 +368,7 @@ const suiteThemes = [
   },
   {
     panel: "bg-gradient-to-br from-slate-200 via-white to-slate-100",
-    badge: "border-slate-300 bg-white/80 text-slate-700",
+    badge: "border-slate-300 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-slate-700",
     iconWrap: "bg-slate-900 text-white",
     itemIcon: "border-slate-200 bg-slate-50 text-slate-700",
     ribbon: "bg-slate-500",
@@ -426,7 +426,7 @@ export default async function FeaturesPage() {
                   {platformHighlights.map((highlight) => (
                     <div
                       key={highlight.titleEn}
-                      className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]"
+                      className="rounded-2xl border border-white/70 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]"
                     >
                       <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
                         <highlight.icon className="h-4 w-4" />
@@ -504,7 +504,7 @@ export default async function FeaturesPage() {
                     {isAr ? section.summaryAr : section.summaryEn}
                   </p>
 
-                  <div className="mt-8 rounded-[28px] border border-white/70 bg-white/75 p-5 shadow-[0_22px_44px_-34px_rgba(15,23,42,0.24)] backdrop-blur">
+                  <div className="mt-8 rounded-[28px] border border-white/70 bg-white/75 p-5 dark:bg-slate-900/60 dark:border-white/10 shadow-[0_22px_44px_-34px_rgba(15,23,42,0.24)] backdrop-blur">
                     <div className="flex items-baseline gap-3">
                       <span className="text-3xl font-black text-slate-950">{section.items.length}</span>
                       <p className="text-sm text-slate-600">
@@ -527,7 +527,7 @@ export default async function FeaturesPage() {
                     {section.items.map((item) => (
                       <span
                         key={item.titleEn}
-                        className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700"
+                        className="rounded-full border border-white/70 bg-white/70 px-3 dark:bg-card/40 dark:backdrop-blur-md dark:border-white/10 dark:text-slate-300 py-1.5 text-xs font-medium text-slate-700"
                       >
                         {isAr ? item.titleAr : item.titleEn}
                       </span>
@@ -584,3 +584,4 @@ export default async function FeaturesPage() {
     </main>
   );
 }
+

@@ -29,6 +29,7 @@ import { getAppLocale } from "@/lib/i18n/locale";
 import { redirect } from "next/navigation";
 import { FeaturesMarquee } from "@/components/marketing/features-marquee";
 import { HeroVideo } from "@/components/marketing/hero-video";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({

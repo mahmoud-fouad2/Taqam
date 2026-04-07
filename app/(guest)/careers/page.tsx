@@ -108,7 +108,7 @@ export default async function CareersPage({
               <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-gradient-to-tr from-amber-200 to-rose-200 blur-2xl dark:from-amber-900/40 dark:to-rose-900/40" />
               <div className="pointer-events-none absolute -end-10 bottom-10 -z-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
               
-              <div className="relative overflow-hidden rounded-[2.5rem] rounded-bl-[6rem] rounded-tr-[6rem] border-[6px] border-white/60 bg-white/90 shadow-2xl dark:border-white/10 dark:bg-card/90">
+              <div className="relative overflow-hidden rounded-[2.5rem] rounded-bl-[6rem] rounded-tr-[6rem] border-[4px] border-white/60 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
                 <div className="relative aspect-[4/5] w-full">
                   <Image
                     src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80"
@@ -122,7 +122,7 @@ export default async function CareersPage({
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -end-6 bottom-16 rounded-2xl border border-white/60 bg-white/95 p-3.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-card/95">
+              <div className="absolute -end-6 bottom-16 rounded-2xl border border-white/60 bg-card/60 p-3.5 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-inner">
                     <BriefcaseBusiness className="h-5 w-5" />
@@ -266,3 +266,4 @@ export default async function CareersPage({
     </main>
   );
 }
+
