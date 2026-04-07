@@ -33,8 +33,8 @@ export function LogoMark({
         <Image
           src="/logo-dark.png"
           alt={alt}
-          width={877}
-          height={496}
+          width={1536}
+          height={1024}
           className={cn("hidden h-10 w-auto max-w-none dark:block", imageClassName)}
         />
       </span>

@@ -1,6 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import * as Sentry from "@sentry/nextjs";
+
+import { ErrorScreen } from "@/components/error-screen";
 
 export default function GlobalError({
   error,
@@ -9,13 +12,21 @@ export default function GlobalError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
-  Sentry.captureException(error);
+  useEffect(() => {
+    Sentry.captureException(error);
+  }, [error]);
+
+  const locale = typeof document !== "undefined" && document.documentElement.lang === "en" ? "en" : "ar";
 
   return (
     <html>
       <body>
-        <h2>Something went wrong</h2>
-        <button onClick={() => reset()}>Try again</button>
+        <ErrorScreen
+          locale={locale}
+          digest={error.digest}
+          description={error.message || undefined}
+          reset={reset}
+        />
       </body>
     </html>
   );

@@ -8,7 +8,7 @@ const dict: Dict = {
   email_label: { ar: "البريد الإلكتروني", en: "Email" },
   password_label: { ar: "كلمة المرور", en: "Password" },
   sign_in: { ar: "تسجيل الدخول", en: "Sign in" },
-  dev_base_url_hint: { ar: "أثناء التطوير: اضبط EXPO_PUBLIC_API_BASE_URL على عنوان السيرفر.", en: "Dev: set EXPO_PUBLIC_API_BASE_URL to your server URL." },
+  dev_base_url_hint: { ar: "أثناء التطوير: اضبط EXPO_PUBLIC_API_BASE_URL على عنوان السيرفر. في بناء الإنتاج سيُستخدم https://taqam.net افتراضيًا إذا لم تضبط قيمة صريحة.", en: "In development, set EXPO_PUBLIC_API_BASE_URL to your server URL. Production builds fall back to https://taqam.net if no explicit value is provided." },
 
   attendance_title: { ar: "الحضور", en: "Attendance" },
   attendance_subtitle: { ar: "تسجيل حضور/انصراف مع تحقق الموقع (Geofence) من السيرفر.", en: "Check in/out with server-side geofence validation." },

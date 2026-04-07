@@ -40,7 +40,6 @@ export function MarketingHeader() {
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
     startLocaleTransition();
     router.push(target);
-    router.refresh();
   };
 
   const localeHref = (href: string) =>

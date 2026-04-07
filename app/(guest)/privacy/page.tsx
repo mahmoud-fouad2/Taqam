@@ -1,122 +1,346 @@
-import type { Metadata } from 'next';
-import { ShieldCheck, LinkIcon } from 'lucide-react';
-import { FadeIn, StaggerContainer, StaggerItem } from '@/components/ui/fade-in';
-import { MarketingPageHero } from '@/components/marketing/page-hero';
-import { marketingMetadata } from '@/lib/marketing/seo';
-import { getAppLocale } from '@/lib/i18n/locale';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
+import type { Metadata } from "next";
+import type { LucideIcon } from "lucide-react";
+import {
+  Clock3,
+  Database,
+  Eye,
+  FileLock2,
+  Mail,
+  Share2,
+  ShieldCheck,
+  UserCheck,
+} from "lucide-react";
+
+import { MarketingPageCta } from "@/components/marketing/page-cta";
+import { MarketingPageHero } from "@/components/marketing/page-hero";
+import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
+import { getAppLocale } from "@/lib/i18n/locale";
+import { marketingMetadata } from "@/lib/marketing/seo";
+
+type PrivacySection = {
+  id: string;
+  icon: LucideIcon;
+  iconClassName: string;
+  titleAr: string;
+  titleEn: string;
+  summaryAr: string;
+  summaryEn: string;
+  bulletsAr: string[];
+  bulletsEn: string[];
+  noteAr?: string;
+  noteEn?: string;
+};
+
+const privacySections: PrivacySection[] = [
+  {
+    id: "data-scope",
+    icon: Database,
+    iconClassName: "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+    titleAr: "البيانات التي نعالجها",
+    titleEn: "Data We Process",
+    summaryAr:
+      "نحن نعالج فقط البيانات اللازمة لتشغيل الحسابات، إدارة فرق العمل، وتقديم الدعم الفني بشكل موثوق.",
+    summaryEn:
+      "We only process the data needed to operate accounts, manage workspaces, and deliver reliable support.",
+    bulletsAr: [
+      "بيانات الحساب مثل الاسم، البريد الإلكتروني، الجوال، والدور الوظيفي داخل المنصة.",
+      "بيانات الشركة التي يضيفها العميل مثل الموظفين، الإدارات، الرواتب، والحضور بحسب الباقة المفعلة.",
+      "بيانات الاستخدام التقنية مثل عنوان IP، نوع الجهاز، والمتصفح وسجلات النشاط المرتبطة بالأمان والاستقرار.",
+      "بيانات المراسلات والدعم عندما يرسل العميل استفسارًا أو بلاغًا أو يطلب تفعيل خدمة إضافية.",
+    ],
+    bulletsEn: [
+      "Account data such as name, email, phone number, and in-product role.",
+      "Company-managed data like employees, departments, payroll, and attendance based on the active plan.",
+      "Technical usage data such as IP address, device/browser type, and activity logs tied to security and stability.",
+      "Support correspondence when a customer submits a question, incident, or activation request.",
+    ],
+  },
+  {
+    id: "processing-purpose",
+    icon: Eye,
+    iconClassName: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    titleAr: "أغراض المعالجة والاستخدام",
+    titleEn: "Why We Use Your Data",
+    summaryAr:
+      "تُستخدم البيانات لتشغيل الخدمة كما طلبها العميل، وليس لأي بيع أو استغلال إعلاني أو مشاركة عشوائية.",
+    summaryEn:
+      "Data is used to deliver the service requested by the customer, not for resale, ad targeting, or arbitrary sharing.",
+    bulletsAr: [
+      "تسجيل الدخول، إدارة الصلاحيات، وتشغيل مسارات الموارد البشرية والرواتب والحضور والتقارير.",
+      "تحسين الأداء، تحليل الأعطال، ومنع إساءة الاستخدام أو المحاولات غير المصرح بها.",
+      "إرسال الإشعارات التشغيلية والتنبيهات المهمة المتعلقة بالحساب، الأمان، أو توافر الخدمة.",
+      "الالتزام بالمتطلبات النظامية أو التعاقدية عندما يكون ذلك مطلوبًا بشكل واضح ومحدد.",
+    ],
+    bulletsEn: [
+      "Authentication, permissioning, and operation of HR, payroll, attendance, and reporting workflows.",
+      "Performance improvement, issue diagnosis, and prevention of abuse or unauthorized attempts.",
+      "Operational notifications and important alerts about the account, security, or service availability.",
+      "Compliance with legal or contractual obligations when clearly required.",
+    ],
+  },
+  {
+    id: "security-controls",
+    icon: FileLock2,
+    iconClassName: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
+    titleAr: "إجراءات الحماية والأمان",
+    titleEn: "Security Controls",
+    summaryAr:
+      "نطبق ضوابط تقنية وتشغيلية متعددة الطبقات لحماية بيانات كل عميل وعزلها عن بقية البيئات داخل المنصة.",
+    summaryEn:
+      "We apply layered technical and operational controls to protect customer data and isolate it from other platform tenants.",
+    bulletsAr: [
+      "تشفير الاتصال عبر HTTPS/TLS، واستخدام ممارسات تخزين آمنة للبيانات الحساسة وبيانات الجلسات.",
+      "عزل بيانات كل شركة داخل نموذج متعدد المستأجرين مع فحوص صلاحيات على مستوى المستخدم والجهة.",
+      "تسجيل العمليات الحساسة ومراجعتها عند الحاجة الأمنية أو التشغيلية.",
+      "نسخ احتياطية وإجراءات استعادة تساعد على استمرارية الخدمة وتقليل فقدان البيانات عند الحوادث.",
+    ],
+    bulletsEn: [
+      "HTTPS/TLS encryption in transit and secure storage practices for sensitive data and session artifacts.",
+      "Tenant isolation with permission checks at the user and organization levels.",
+      "Logging and review of sensitive actions when needed for security or operations.",
+      "Backups and recovery procedures that support continuity and reduce data-loss risk during incidents.",
+    ],
+    noteAr: "لا يوجد نظام أمني مضمون بنسبة 100%، لكننا نعمل على تقليل المخاطر بشكل مستمر وتحديث الضوابط عند الحاجة.",
+    noteEn: "No system is guaranteed to be 100% secure, but we continuously reduce risk and update controls when needed.",
+  },
+  {
+    id: "sharing-disclosure",
+    icon: Share2,
+    iconClassName: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    titleAr: "المشاركة والإفصاح",
+    titleEn: "Sharing and Disclosure",
+    summaryAr:
+      "لا نبيع بيانات العملاء، ولا نشاركها إلا في حدود تشغيل الخدمة أو الامتثال النظامي أو بناءً على توجيه العميل.",
+    summaryEn:
+      "We do not sell customer data and only disclose it when needed to operate the service, meet legal obligations, or act on customer instruction.",
+    bulletsAr: [
+      "قد نستخدم مزودي خدمات موثوقين للبنية التحتية، الرسائل، أو التخزين بما يخدم تشغيل المنصة فقط.",
+      "قد يتم الإفصاح عند وجود طلب قانوني نافذ أو متطلب تنظيمي واضح من جهة مختصة.",
+      "يمكن للعميل تصدير بياناته أو ربطها بتكاملات يعتمدها بنفسه وفق إعدادات الخدمة المفعلة.",
+    ],
+    bulletsEn: [
+      "We may rely on trusted infrastructure, messaging, or storage vendors solely to operate the platform.",
+      "We may disclose data when required by a valid legal request or a clear regulatory obligation.",
+      "Customers may export their own data or connect approved integrations through enabled service settings.",
+    ],
+  },
+  {
+    id: "retention",
+    icon: Clock3,
+    iconClassName: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
+    titleAr: "مدة الاحتفاظ والحذف",
+    titleEn: "Retention and Deletion",
+    summaryAr:
+      "نحتفظ بالبيانات طوال مدة الاشتراك النشط، ثم نتعامل معها وفق فترة احتفاظ معقولة مرتبطة بالدعم والالتزامات النظامية.",
+    summaryEn:
+      "We retain data during the active subscription period, then handle it through a reasonable retention window tied to support and legal obligations.",
+    bulletsAr: [
+      "تبقى بيانات التشغيل والحساب متاحة طوال فترة الاشتراك واستخدام الخدمة من قبل العميل.",
+      "عند الإلغاء أو الإيقاف النهائي، يمكن الاحتفاظ بالبيانات لفترة محدودة لأغراض التصدير، الدعم، أو الالتزامات النظامية.",
+      "بعد انتهاء فترة الاحتفاظ المعتمدة، تُحذف البيانات أو تُزال هويتها بحسب نوعها ومتطلبات النظام.",
+    ],
+    bulletsEn: [
+      "Operational and account data remains available throughout the active subscription period.",
+      "After cancellation or final termination, data may be kept for a limited time for export, support, or legal obligations.",
+      "After the retention window ends, data is deleted or de-identified depending on its type and compliance needs.",
+    ],
+    noteAr: "الفترة التشغيلية المرجعية للحذف بعد الإلغاء لا تتجاوز عادة 90 يومًا ما لم يوجد التزام قانوني مختلف.",
+    noteEn: "The standard post-cancellation deletion window is generally no longer than 90 days unless a different legal obligation applies.",
+  },
+  {
+    id: "rights-contact",
+    icon: UserCheck,
+    iconClassName: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+    titleAr: "حقوق العميل والتواصل",
+    titleEn: "Customer Rights and Contact",
+    summaryAr:
+      "يستطيع العميل طلب الوصول إلى بياناته أو تصحيحها أو طلب تصديرها أو مناقشة أي استفسار يتعلق بالخصوصية عبر قنواتنا الرسمية.",
+    summaryEn:
+      "Customers can request access, correction, export, or discuss any privacy concern through our official channels.",
+    bulletsAr: [
+      "طلب نسخة أو تصدير من البيانات التي يديرها الحساب وفق الإمكانات المتاحة في الباقة أو عبر الدعم.",
+      "طلب تصحيح البيانات غير الدقيقة أو تحديثها عندما تكون تحت إدارة المنصة أو ضمن سجلات الحساب.",
+      "التواصل بشأن أي استفسار خصوصية أو بلاغ أمني عبر privacy@taqam.net أو support@taqam.net.",
+    ],
+    bulletsEn: [
+      "Request a copy or export of account-managed data through plan capabilities or support.",
+      "Request correction or updates for inaccurate data when it is maintained by the platform or account records.",
+      "Contact us about any privacy question or security concern via privacy@taqam.net or support@taqam.net.",
+    ],
+  },
+];
+
+const privacyHighlights = [
+  {
+    labelAr: "قناة الخصوصية",
+    labelEn: "Privacy channel",
+    value: "privacy@taqam.net",
+  },
+  {
+    labelAr: "الحذف المرجعي",
+    labelEn: "Reference deletion window",
+    valueAr: "حتى 90 يومًا بعد الإلغاء",
+    valueEn: "Up to 90 days after cancellation",
+  },
+  {
+    labelAr: "العزل",
+    labelEn: "Isolation",
+    valueAr: "لكل شركة بيئتها وصلاحياتها",
+    valueEn: "Each tenant has its own scoped workspace",
+  },
+];
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
-    titleAr: 'سياسة الخصوصية | طاقم',
-    titleEn: 'Privacy Policy | Taqam',
-    descriptionAr: 'تعرف على كيفية حماية منصة طاقم لبيانات شركتك وكيفية معالجتها.',
-    descriptionEn: 'Understand how Taqam protects your company data and processes it.',
-    path: '',
+    titleAr: "سياسة الخصوصية | طاقم",
+    titleEn: "Privacy Policy | Taqam",
+    descriptionAr: "كيف تجمع طاقم بيانات الحسابات والشركات، وكيف تستخدمها وتحميها وتتعامل مع طلبات الخصوصية.",
+    descriptionEn: "How Taqam collects account and company data, how it uses and protects it, and how privacy requests are handled.",
+    path: "/privacy",
   });
 }
 
-export default async function Page() {
+export default async function PrivacyPage() {
   const locale = await getAppLocale();
-  const isAr = locale === 'ar';
-  const p = locale === 'en' ? '/en' : '';
-  const dir = isAr ? 'rtl' : 'ltr';
+  const isAr = locale === "ar";
+  const p = locale === "en" ? "/en" : "";
+  const dir = isAr ? "rtl" : "ltr";
+  const lastUpdated = isAr ? "7 أبريل 2026" : "April 7, 2026";
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-background to-muted/30" dir={dir}>
-      <MarketingPageHero
-        icon={ShieldCheck}
-        badge={isAr ? 'القانونية' : 'Legal'}
-        title={isAr ? 'سياسة الخصوصية' : 'Privacy Policy'}
-        description={isAr ? 'تعرف على كيفية حماية منصة طاقم لبيانات شركتك وكيفية معالجتها.' : 'Understand how Taqam protects your company data and processes it.'}
-        actions={[
-          { href: `${p}/support`, label: isAr ? 'تواصل معنا' : 'Contact us', variant: 'outline' },
-          { href: `${p}/request-demo`, label: isAr ? 'اطلب عرضًا' : 'Request demo', variant: 'brand' },
-        ]}
-      />
+    <main className="bg-background" dir={dir}>
+      <FadeIn>
+        <MarketingPageHero
+          icon={ShieldCheck}
+          badge={isAr ? "الخصوصية والشفافية" : "Privacy and transparency"}
+          title={isAr ? "سياسة الخصوصية" : "Privacy Policy"}
+          description={
+            isAr
+              ? "تشرح هذه الصفحة ما الذي نعالجه من بيانات، ولماذا نستخدمه، وكيف نحميه، وما القنوات المتاحة للتواصل معنا بخصوص الخصوصية."
+              : "This page explains what data we process, why we use it, how we protect it, and how you can contact us about privacy matters."
+          }
+          actions={[
+            { href: `${p}/support`, label: isAr ? "التواصل مع الدعم" : "Contact support", variant: "outline" },
+            { href: `${p}/request-demo`, label: isAr ? "اطلب عرضًا" : "Request a demo", variant: "brand" },
+          ]}
+          stats={[
+            { value: lastUpdated, label: isAr ? "آخر تحديث" : "Last updated" },
+            { value: `${privacySections.length}`, label: isAr ? "محاور رئيسية" : "Core sections" },
+            { value: "privacy@taqam.net", label: isAr ? "قناة الخصوصية" : "Privacy channel" },
+          ]}
+        />
+      </FadeIn>
 
-      <div className="container mx-auto max-w-4xl px-4 py-12">
-        <StaggerContainer className="space-y-8">
-          
-          <StaggerItem key="0">
-            <section className="relative overflow-hidden rounded-3xl border bg-card/40 backdrop-blur-sm p-8 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
-              <div className="absolute -end-8 -top-8 text-9xl opacity-[0.02] mix-blend-overlay pointer-events-none">
-                <ShieldCheck className="h-full w-full" />
+      <section className="container mx-auto px-4 py-14">
+        <div className="grid gap-8 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start">
+          <FadeIn direction="up">
+            <div className="space-y-4 lg:sticky lg:top-24">
+              <div className="rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  {isAr ? "لمحة سريعة" : "At a glance"}
+                </p>
+                <div className="mt-4 space-y-3">
+                  {privacyHighlights.map((item) => (
+                    <div key={item.labelEn} className="rounded-2xl border border-border/50 bg-background/70 px-4 py-3">
+                      <p className="text-xs font-medium text-muted-foreground">
+                        {isAr ? item.labelAr : item.labelEn}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {isAr ? item.valueAr ?? item.value : item.valueEn ?? item.value}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-foreground">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
-                  1
-                </span>
-                {isAr ? 'المعلومات التي نجمعها' : 'Information We Collect'}
-              </h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p key="0" className="leading-relaxed">{isAr ? 'نجمع البيانات الأساسية لتوفير الخدمة بشكل مثالي:' : 'نجمع البيانات الأساسية لتوفير الخدمة بشكل مثالي:'}</p><ul key="1" className="ms-4 list-disc space-y-2 pe-4 marker:text-primary/40"><li key="0">{isAr ? 'بيانات الحساب: الاسم، البريد الإلكتروني، واسم الشركة وموثوقيتها.' : 'بيانات الحساب: الاسم، البريد الإلكتروني، واسم الشركة وموثوقيتها.'}</li><li key="1">{isAr ? 'بيانات الموظفين: والتي تبقى في بيئة معزولة تماماً تتبع لمعايير الأمان المتقدمة.' : 'بيانات الموظفين: والتي تبقى في بيئة معزولة تماماً تتبع لمعايير الأمان المتقدمة.'}</li></ul>
-              </div>
-            </section>
-          </StaggerItem>
-          <StaggerItem key="1">
-            <section className="relative overflow-hidden rounded-3xl border bg-card/40 backdrop-blur-sm p-8 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
-              <div className="absolute -end-8 -top-8 text-9xl opacity-[0.02] mix-blend-overlay pointer-events-none">
-                <ShieldCheck className="h-full w-full" />
-              </div>
-              <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-foreground">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
-                  2
-                </span>
-                {isAr ? 'كيف نستخدم البيانات للشركات' : 'How We Use Company Data'}
-              </h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p key="0" className="leading-relaxed">{isAr ? 'تستخدم طاقم البيانات حصرياً من أجل الغرض الذي أُنشئت له عبر:' : 'تستخدم طاقم البيانات حصرياً من أجل الغرض الذي أُنشئت له عبر:'}</p><ul key="1" className="ms-4 list-disc space-y-2 pe-4 marker:text-primary/40"><li key="0">{isAr ? 'توفير استقرار الخدمة ومعالجة الرواتب بدقة عالية ومزايا متوافقة.' : 'توفير استقرار الخدمة ومعالجة الرواتب بدقة عالية ومزايا متوافقة.'}</li><li key="1">{isAr ? 'التواصل مع المشرفين بخصوص التحديثات والتنبيهات الدورية.' : 'التواصل مع المشرفين بخصوص التحديثات والتنبيهات الدورية.'}</li></ul>
-              </div>
-            </section>
-          </StaggerItem>
-          <StaggerItem key="2">
-            <section className="relative overflow-hidden rounded-3xl border bg-card/40 backdrop-blur-sm p-8 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
-              <div className="absolute -end-8 -top-8 text-9xl opacity-[0.02] mix-blend-overlay pointer-events-none">
-                <ShieldCheck className="h-full w-full" />
-              </div>
-              <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-foreground">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
-                  3
-                </span>
-                {isAr ? 'الحماية والأمان المتكامل' : 'Integrated Protection & Security'}
-              </h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p key="0" className="leading-relaxed">{isAr ? 'نستخدم معايير تشفير متقدمة (TLS/HTTPS) بالإضافة إلى العزل الكامل (Multi-tenant isolation) لضمان أعلى مستويات الأمان والاستقرار.' : 'نستخدم معايير تشفير متقدمة (TLS/HTTPS) بالإضافة إلى العزل الكامل (Multi-tenant isolation) لضمان أعلى مستويات الأمان والاستقرار.'}</p>
-              </div>
-            </section>
-          </StaggerItem>
-          <StaggerItem key="3">
-            <section className="relative overflow-hidden rounded-3xl border bg-card/40 backdrop-blur-sm p-8 shadow-sm transition-all hover:border-primary/50 hover:shadow-md">
-              <div className="absolute -end-8 -top-8 text-9xl opacity-[0.02] mix-blend-overlay pointer-events-none">
-                <ShieldCheck className="h-full w-full" />
-              </div>
-              <h2 className="mb-6 flex items-center gap-3 text-xl font-bold text-foreground">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-sm font-semibold text-primary">
-                  4
-                </span>
-                {isAr ? 'مشاركة البيانات' : 'Data Sharing'}
-              </h2>
-              <div className="space-y-4 text-muted-foreground">
-                <p key="0" className="leading-relaxed">{isAr ? 'نحن لا نبيع أي بيانات أو نشاركها لأغراض تسويقية مطلقاً. فقط نشاركها في الاستثناءات التالية:' : 'نحن لا نبيع أي بيانات أو نشاركها لأغراض تسويقية مطلقاً. فقط نشاركها في الاستثناءات التالية:'}</p><ul key="1" className="ms-4 list-disc space-y-2 pe-4 marker:text-primary/40"><li key="0">{isAr ? 'تكاملات دفع مرخصة وتتم بموافقتكم.' : 'تكاملات دفع مرخصة وتتم بموافقتكم.'}</li><li key="1">{isAr ? 'جهات حكومية وتنظيمية، عندما يكون هناك طلب رسمي وقانوني واضح.' : 'جهات حكومية وتنظيمية، عندما يكون هناك طلب رسمي وقانوني واضح.'}</li></ul>
-              </div>
-            </section>
-          </StaggerItem>
-        </StaggerContainer>
 
-        <FadeIn direction="up">
-          <div className="mt-12 rounded-3xl border bg-gradient-to-b from-primary/10 to-transparent p-12 text-center shadow-lg dark:from-primary/20 dark:to-transparent">
-            <h3 className="mb-3 text-2xl font-bold">{isAr ? 'أسئلة؟' : 'Questions?'}</h3>
-            <p className="mb-6 text-muted-foreground">
-              {isAr ? 'فريقنا جاهز للمساعدة في أي استفسارات' : 'Our team is ready to help with any inquiries'}
-            </p>
-            <Button asChild size="lg" className="rounded-full px-8 shadow-md">
-              <Link href={`${p}/support`}>{isAr ? 'اتصل بنا' : 'Contact Us'}</Link>
-            </Button>
-          </div>
-        </FadeIn>
-      </div>
+              <nav className="rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+                  {isAr ? "التنقل داخل الصفحة" : "On this page"}
+                </p>
+                <div className="mt-4 space-y-2">
+                  {privacySections.map((section, index) => (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
+                    >
+                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                        {index + 1}
+                      </span>
+                      <span>{isAr ? section.titleAr : section.titleEn}</span>
+                    </a>
+                  ))}
+                </div>
+              </nav>
+            </div>
+          </FadeIn>
+
+          <StaggerContainer className="space-y-6">
+            {privacySections.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <StaggerItem key={section.id}>
+                  <section
+                    id={section.id}
+                    className="scroll-mt-24 rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm sm:p-8"
+                  >
+                    <div className="flex flex-wrap items-center gap-4">
+                      <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${section.iconClassName}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                          {isAr ? `القسم ${index + 1}` : `Section ${index + 1}`}
+                        </p>
+                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+                          {isAr ? section.titleAr : section.titleEn}
+                        </h2>
+                      </div>
+                    </div>
+
+                    <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-[15px]">
+                      {isAr ? section.summaryAr : section.summaryEn}
+                    </p>
+
+                    <ul className="mt-6 space-y-3">
+                      {(isAr ? section.bulletsAr : section.bulletsEn).map((bullet) => (
+                        <li
+                          key={bullet}
+                          className="flex items-start gap-3 rounded-2xl border border-border/40 bg-background/60 px-4 py-3 text-sm leading-7 text-foreground/90"
+                        >
+                          <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary/60" />
+                          <span>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    {section.noteAr || section.noteEn ? (
+                      <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-7 text-foreground/85">
+                        {isAr ? section.noteAr : section.noteEn}
+                      </div>
+                    ) : null}
+                  </section>
+                </StaggerItem>
+              );
+            })}
+          </StaggerContainer>
+        </div>
+      </section>
+
+      <FadeIn>
+        <MarketingPageCta
+          icon={Mail}
+          badge={isAr ? "خصوصية الحساب والبيانات" : "Account and data privacy"}
+          title={isAr ? "هل لديك استفسار بخصوص الخصوصية؟" : "Have a privacy question?"}
+          description={
+            isAr
+              ? "إذا كنت تحتاج توضيحًا إضافيًا أو طلبًا متعلقًا بالبيانات، راسلنا وسنوجّه الحالة إلى القناة المناسبة داخل فريق طاقم."
+              : "If you need clarification or have a data-related request, contact us and we will route it through the appropriate Taqam channel."
+          }
+          primaryAction={{ href: `${p}/support`, label: isAr ? "فتح طلب دعم" : "Open a support request", variant: "brand" }}
+          secondaryAction={{ href: "mailto:privacy@taqam.net", label: isAr ? "مراسلة الخصوصية" : "Email privacy", variant: "outline" }}
+        />
+      </FadeIn>
     </main>
   );
 }

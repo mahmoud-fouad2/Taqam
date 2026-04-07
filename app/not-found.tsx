@@ -10,6 +10,7 @@ export default async function NotFound() {
     <NotFoundShell
       code="404"
       compact={false}
+      locale={isAr ? "ar" : "en"}
       description={
         isAr
           ? "الرابط الذي فتحته غير موجود الآن أو تم نقله إلى مسار أحدث. استخدم الاختصارات التالية للوصول السريع إلى أهم الأسطح العامة والتشغيلية."

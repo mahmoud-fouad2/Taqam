@@ -40,7 +40,6 @@ export function LocaleToggle({ variant = "ghost" }: { variant?: "ghost" | "outli
 
     startLocaleTransition();
     router.push(target);
-    router.refresh();
   };
 
   return (

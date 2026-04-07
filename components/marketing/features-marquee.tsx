@@ -101,10 +101,10 @@ export function FeaturesMarquee({ features, isAr, className }: FeaturesMarqueePr
                   : "Instead of overlapping rotating cards, every module now sits around one clear center that represents the real operating workspace."}
               </p>
 
-<div className="mt-8 flex justify-center py-6">
+              <div className="mt-8 flex justify-center py-6">
                 <div className="relative flex h-32 w-32 items-center justify-center rounded-[2.5rem] bg-white shadow-[0_0_80px_-15px_rgba(59,130,246,0.3)] ring-1 ring-border/50 dark:bg-slate-900">
                   {/* Concentric pulsing rings */}
-                  <div className="absolute inset-0 animate-ping rounded-[2.5rem] ring-1 ring-primary/20" style={{ animationDuration: '3s' }} />
+                  <div className="absolute inset-0 animate-[ping_3s_cubic-bezier(0,0,0.2,1)_infinite] rounded-[2.5rem] ring-1 ring-primary/20" />
                   <div className="absolute -inset-4 rounded-[3.5rem] ring-1 ring-primary/10" />
                   <div className="absolute -inset-8 rounded-[4.5rem] ring-1 ring-primary/5" />
                   

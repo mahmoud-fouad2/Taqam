@@ -5,6 +5,7 @@
 ## Current Layout
 
 - `../README.md` و `../QUICK_START.md` و `../SETUP_GUIDE.md` و `../SUMMARY.md`: الوثائق التشغيلية الأساسية.
+- `FINAL_DEVELOPMENT_GUIDE.md`: المرجع النهائي المحدث للحالة الحالية وخطوط التطوير اللاحقة.
 - `reports/`: تقارير تاريخية، نتائج اختبارات، وملخصات تنفيذ سابقة.
 - `archive/plans/`: خطط قديمة محفوظة للرجوع إليها فقط.
 

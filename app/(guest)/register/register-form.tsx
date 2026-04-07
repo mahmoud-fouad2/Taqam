@@ -58,8 +58,7 @@ export function RegisterForm({ locale, labels }: RegisterFormProps) {
         return;
       }
 
-      router.push("/login");
-      router.refresh();
+      router.replace(locale === "en" ? "/en/login" : "/login");
     } finally {
       setIsLoading(false);
     }

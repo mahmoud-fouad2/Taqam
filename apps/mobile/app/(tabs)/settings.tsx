@@ -100,9 +100,12 @@ export default function SettingsScreen() {
     },
     {
       label: tStr(language, "مصدر الإعداد", "Config source"),
-      value: apiInfo.source === "env"
-        ? tStr(language, "ملف البيئة EXPO_PUBLIC_API_BASE_URL", "EXPO_PUBLIC_API_BASE_URL")
-        : tStr(language, "Fallback محلي مؤقت", "Temporary localhost fallback"),
+      value:
+        apiInfo.source === "env"
+          ? tStr(language, "ملف البيئة EXPO_PUBLIC_API_BASE_URL", "EXPO_PUBLIC_API_BASE_URL")
+          : apiInfo.source === "default"
+            ? tStr(language, "الافتراضي الإنتاجي المدمج (taqam.net)", "Built-in production default (taqam.net)")
+            : tStr(language, "Fallback محلي مؤقت", "Temporary localhost fallback"),
       isWarning: apiInfo.isLocalFallback,
     },
   ];

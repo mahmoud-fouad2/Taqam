@@ -328,52 +328,52 @@ const featureSections: FeatureSection[] = [
 
 const suiteThemes = [
   {
-    panel: "bg-gradient-to-br from-indigo-100 via-white to-indigo-50",
-    badge: "border-indigo-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-indigo-700",
+    panel: "bg-gradient-to-br from-indigo-100 via-white to-indigo-50 dark:from-slate-950 dark:via-slate-900 dark:to-indigo-950/70",
+    badge: "border-indigo-200 bg-white/80 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-200",
     iconWrap: "bg-indigo-600 text-white",
-    itemIcon: "border-indigo-200 bg-indigo-50 text-indigo-700",
+    itemIcon: "border-indigo-200 bg-indigo-50 text-indigo-700 dark:border-indigo-500/20 dark:bg-indigo-500/10 dark:text-indigo-200",
     ribbon: "bg-indigo-500",
-    index: "bg-indigo-50 text-indigo-700",
+    index: "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-200",
   },
   {
-    panel: "bg-gradient-to-br from-blue-100 via-white to-cyan-50",
-    badge: "border-blue-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-blue-700",
+    panel: "bg-gradient-to-br from-blue-100 via-white to-cyan-50 dark:from-slate-950 dark:via-slate-900 dark:to-cyan-950/70",
+    badge: "border-blue-200 bg-white/80 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200",
     iconWrap: "bg-blue-600 text-white",
-    itemIcon: "border-blue-200 bg-blue-50 text-blue-700",
+    itemIcon: "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-500/20 dark:bg-blue-500/10 dark:text-blue-200",
     ribbon: "bg-blue-500",
-    index: "bg-blue-50 text-blue-700",
+    index: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-200",
   },
   {
-    panel: "bg-gradient-to-br from-violet-100 via-white to-fuchsia-50",
-    badge: "border-violet-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-violet-700",
+    panel: "bg-gradient-to-br from-violet-100 via-white to-fuchsia-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950/70",
+    badge: "border-violet-200 bg-white/80 text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-200",
     iconWrap: "bg-violet-600 text-white",
-    itemIcon: "border-violet-200 bg-violet-50 text-violet-700",
+    itemIcon: "border-violet-200 bg-violet-50 text-violet-700 dark:border-violet-500/20 dark:bg-violet-500/10 dark:text-violet-200",
     ribbon: "bg-violet-500",
-    index: "bg-violet-50 text-violet-700",
+    index: "bg-violet-50 text-violet-700 dark:bg-violet-500/10 dark:text-violet-200",
   },
   {
-    panel: "bg-gradient-to-br from-emerald-100 via-white to-teal-50",
-    badge: "border-emerald-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-emerald-700",
+    panel: "bg-gradient-to-br from-emerald-100 via-white to-teal-50 dark:from-slate-950 dark:via-slate-900 dark:to-emerald-950/70",
+    badge: "border-emerald-200 bg-white/80 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200",
     iconWrap: "bg-emerald-600 text-white",
-    itemIcon: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    itemIcon: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200",
     ribbon: "bg-emerald-500",
-    index: "bg-emerald-50 text-emerald-700",
+    index: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200",
   },
   {
-    panel: "bg-gradient-to-br from-amber-100 via-white to-orange-50",
-    badge: "border-amber-200 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-amber-700",
+    panel: "bg-gradient-to-br from-amber-100 via-white to-orange-50 dark:from-slate-950 dark:via-slate-900 dark:to-amber-950/70",
+    badge: "border-amber-200 bg-white/80 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200",
     iconWrap: "bg-amber-500 text-white",
-    itemIcon: "border-amber-200 bg-amber-50 text-amber-700",
+    itemIcon: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-200",
     ribbon: "bg-amber-500",
-    index: "bg-amber-50 text-amber-700",
+    index: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200",
   },
   {
-    panel: "bg-gradient-to-br from-slate-200 via-white to-slate-100",
-    badge: "border-slate-300 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md text-slate-700",
+    panel: "bg-gradient-to-br from-slate-200 via-white to-slate-100 dark:from-slate-950 dark:via-slate-900 dark:to-slate-800",
+    badge: "border-slate-300 bg-white/80 text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-slate-200",
     iconWrap: "bg-slate-900 text-white",
-    itemIcon: "border-slate-200 bg-slate-50 text-slate-700",
+    itemIcon: "border-slate-200 bg-slate-50 text-slate-700 dark:border-white/15 dark:bg-white/5 dark:text-slate-200",
     ribbon: "bg-slate-500",
-    index: "bg-slate-100 text-slate-700",
+    index: "bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-200",
   },
 ];
 
@@ -413,7 +413,7 @@ export default async function FeaturesPage() {
             <StaggerItem direction="up" className="rounded-[32px] border border-border/70 bg-background/80 p-6 shadow-[0_28px_80px_-40px_rgba(79,70,229,0.18)] backdrop-blur-sm sm:p-8 lg:p-10">
               <div className="grid gap-6 lg:grid-cols-[1.1fr_1.35fr] lg:items-start">
                 <div className="rounded-[28px] bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.16),transparent_42%),linear-gradient(135deg,rgba(255,255,255,0.98),rgba(238,242,255,0.95))] p-6 sm:p-8 dark:bg-[radial-gradient(circle_at_top_left,rgba(79,70,229,0.16),transparent_42%),linear-gradient(135deg,rgba(15,23,42,0.98),rgba(2,6,23,0.95))]">
-                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700/70">
+                  <p className="text-xs font-bold uppercase tracking-[0.18em] text-indigo-700/70 dark:text-indigo-300/80">
                     {isAr ? "بنية المنصة" : "Platform anatomy"}
                   </p>
                   <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
@@ -428,7 +428,7 @@ export default async function FeaturesPage() {
                     {platformHighlights.map((highlight) => (
                       <div
                         key={highlight.titleEn}
-                        className="rounded-2xl border border-white/70 bg-white/80 dark:bg-card/40 dark:backdrop-blur-md p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)]"
+                        className="rounded-2xl border border-white/70 bg-white/80 p-4 shadow-[0_18px_36px_-28px_rgba(15,23,42,0.26)] dark:border-white/10 dark:bg-slate-950/80 dark:backdrop-blur-md"
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 text-white shadow-sm">
                           <highlight.icon className="h-4 w-4" />
@@ -503,14 +503,14 @@ export default async function FeaturesPage() {
                     </div>
                   </div>
 
-                  <p className="mt-5 leading-8 text-slate-700">
+                  <p className="mt-5 leading-8 text-slate-700 dark:text-slate-300">
                     {isAr ? section.summaryAr : section.summaryEn}
                   </p>
 
-                  <div className="mt-8 rounded-[28px] border border-white/70 bg-white/75 p-5 dark:bg-slate-900/60 dark:border-white/10 shadow-[0_22px_44px_-34px_rgba(15,23,42,0.24)] backdrop-blur">
+                  <div className="mt-8 rounded-[28px] border border-white/70 bg-white/75 p-5 shadow-[0_22px_44px_-34px_rgba(15,23,42,0.24)] backdrop-blur dark:border-white/10 dark:bg-slate-950/80">
                     <div className="flex items-baseline gap-3">
-                      <span className="text-3xl font-black text-slate-950">{section.items.length}</span>
-                      <p className="text-sm text-slate-600">
+                      <span className="text-3xl font-black text-slate-950 dark:text-white">{section.items.length}</span>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
                         {isAr ? "عناصر تشغيل داخل هذا المسار" : "operational building blocks in this suite"}
                       </p>
                     </div>
@@ -520,7 +520,7 @@ export default async function FeaturesPage() {
                           <div className={cn("mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full", theme.index)}>
                             <CheckCircle2 className="h-3.5 w-3.5" />
                           </div>
-                          <p className="text-sm leading-6 text-slate-700">{isAr ? outcome.ar : outcome.en}</p>
+                          <p className="text-sm leading-6 text-slate-700 dark:text-slate-300">{isAr ? outcome.ar : outcome.en}</p>
                         </div>
                       ))}
                     </div>
@@ -530,7 +530,7 @@ export default async function FeaturesPage() {
                     {section.items.map((item) => (
                       <span
                         key={item.titleEn}
-                        className="rounded-full border border-white/70 bg-white/70 px-3 dark:bg-card/40 dark:backdrop-blur-md dark:border-white/10 dark:text-slate-300 py-1.5 text-xs font-medium text-slate-700"
+                        className="rounded-full border border-white/70 bg-white/70 px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-white/10 dark:bg-slate-950/80 dark:text-slate-300 dark:backdrop-blur-md"
                       >
                         {isAr ? item.titleAr : item.titleEn}
                       </span>

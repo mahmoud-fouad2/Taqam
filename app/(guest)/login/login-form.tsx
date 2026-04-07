@@ -58,10 +58,9 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         return;
       }
 
-    const session = await getSession();
-    const role = (session?.user as any)?.role as string | undefined;
-    router.push(role === "SUPER_ADMIN" ? "/dashboard/super-admin" : "/dashboard");
-      router.refresh();
+      const session = await getSession();
+      const role = (session?.user as any)?.role as string | undefined;
+      router.replace(role === "SUPER_ADMIN" ? "/dashboard/super-admin" : "/dashboard");
     } finally {
       setIsLoading(false);
     }

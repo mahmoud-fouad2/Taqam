@@ -12,6 +12,7 @@ export default async function DashboardNotFound() {
   return (
     <NotFoundShell
       compact
+      locale={isAr ? "ar" : "en"}
       description={
         isAr
           ? "المسار الذي حاولت فتحه داخل الداشبورد غير موجود أو نُقل إلى وحدة أخرى. استخدم الروابط التالية للرجوع بسرعة إلى الأسطح التشغيلية الصحيحة."
