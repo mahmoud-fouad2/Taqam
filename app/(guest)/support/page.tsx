@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -139,29 +139,32 @@ export default async function SupportPage({
 
             {/* Visual — product screenshot */}
             <div className="relative mx-auto hidden w-full max-w-sm lg:block">
-              <div className="pointer-events-none absolute -inset-10 -z-10 rounded-[3rem] bg-gradient-to-br from-indigo-500/15 via-blue-500/10 to-purple-500/10 blur-[60px]" />
-              <div className="overflow-hidden rounded-[2rem] border border-white/60 bg-white/90 shadow-[0_32px_64px_-28px_rgba(15,23,42,0.3)] ring-1 ring-black/5 dark:border-white/10 dark:bg-card/90">
-                <div className="relative aspect-[3/4]">
+              {/* Decorative glows */}
+              <div className="pointer-events-none absolute -inset-6 -z-10 bg-gradient-to-tr from-sky-300 via-indigo-200 to-purple-200 blur-2xl dark:from-sky-900/50 dark:via-indigo-900/50 dark:to-purple-900/50" />
+              <div className="pointer-events-none absolute -start-10 top-10 -z-10 h-32 w-32 rounded-full bg-emerald-400/20 blur-3xl" />
+              
+              <div className="relative overflow-hidden rounded-[2.5rem] rounded-tl-[6rem] rounded-br-[6rem] border-[6px] border-white/60 bg-white/90 shadow-2xl dark:border-white/10 dark:bg-card/90">
+                <div className="relative aspect-[3/4] w-full">
                   <Image
-                    src="/images/marketing/screenshot-employees.svg?v=2"
-                    alt={isAr ? "إدارة الموظفين" : "Employee management"}
+                    src="https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=800&q=80"
+                    alt={isAr ? "الدعم الفني" : "Technical support"}
                     fill
                     sizes="380px"
-                    unoptimized
-                    className="object-cover"
+                    className="object-cover transition-transform duration-700 hover:scale-105"
                   />
+                  <div className="absolute inset-0 bg-gradient-to-tr from-indigo-900/30 to-transparent" />
                 </div>
               </div>
 
               {/* Floating badge */}
-              <div className="absolute -start-4 top-12 rounded-2xl border border-white/60 bg-white/95 p-3 shadow-lg backdrop-blur dark:border-white/10 dark:bg-card/95">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500/10">
-                    <LifeBuoy className="h-4 w-4 text-emerald-600" />
+              <div className="absolute -start-8 top-16 rounded-2xl border border-white/60 bg-white/95 p-3.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-card/95">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-inner">
+                    <Headphones className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold">{isAr ? "فريق متاح" : "Team available"}</p>
-                    <p className="text-[10px] text-muted-foreground">{isAr ? "رد خلال 24 ساعة" : "Reply within 24h"}</p>
+                    <p className="text-sm font-bold text-foreground">{isAr ? "فريق خبراء متاح" : "Expert team available"}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{isAr ? "رد سريع خلال 24 ساعة" : "Quick reply within 24h"}</p>
                   </div>
                 </div>
               </div>
@@ -202,24 +205,25 @@ export default async function SupportPage({
                 return (
                   <div
                     key={channel.titleEn}
-                    className="rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
+                    className="group relative overflow-hidden rounded-[2.5rem] border border-border/40 bg-card/60 p-8 shadow-sm backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:border-border/80 hover:bg-card/95 hover:shadow-xl"
                   >
-                    <div className={`mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br ${channel.color}`}>
-                      <ChannelIcon className="h-5 w-5" />
-                    </div>
-                    <h3 className="text-base font-bold">{isAr ? channel.titleAr : channel.titleEn}</h3>
-                    <p className="mt-2 text-sm leading-7 text-muted-foreground">
-                      {isAr ? channel.descAr : channel.descEn}
-                    </p>
-                    {channel.icon === Mail && (
-                      <a
-                        href={`mailto:${supportEmail}`}
-                        className="mt-3 inline-flex rounded-full border border-border/60 bg-background/80 px-3.5 py-1.5 text-sm font-medium text-foreground transition hover:bg-muted"
-                      >
-                        {supportEmail}
-                      </a>
-                    )}
-                    {channel.icon === Shield && (
+                      <div className={`mb-5 flex h-14 w-14 items-center justify-center rounded-[1.25rem] shadow-inner bg-gradient-to-br ${channel.color}`}>
+                        <ChannelIcon className="h-6 w-6" />
+                      </div>
+                      <h3 className="text-xl font-bold tracking-tight">{isAr ? channel.titleAr : channel.titleEn}</h3>
+                      <p className="mt-3 text-[15px] leading-relaxed text-muted-foreground">
+                        {isAr ? channel.descAr : channel.descEn}
+                      </p>
+                      {channel.icon === Mail && (
+                        <a
+                          href={`mailto:${supportEmail}`}
+                          className="mt-5 inline-flex items-center gap-2 rounded-full border border-border/60 bg-background/80 px-4 py-2 text-sm font-medium text-foreground transition duration-300 hover:scale-105 hover:bg-muted"
+                        >
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          {supportEmail}
+                        </a>
+                      )}
+                      {channel.icon === Shield && (
                       <div className="mt-4 flex flex-wrap gap-2">
                         <Link href={`${p}/help-center`}>
                           <Button size="sm" variant="outline" className="rounded-lg">
@@ -274,3 +278,4 @@ export default async function SupportPage({
     </main>
   );
 }
+

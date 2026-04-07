@@ -161,12 +161,6 @@ const trustItems = [
   { icon: Star, labelAr: "دعم فني على مدار الساعة", labelEn: "24/7 technical support" },
 ];
 
-const heroMediaItems = [
-  { src: "/images/marketing/screenshot-dashboard.svg?v=2", labelAr: "لوحة التحكم", labelEn: "Dashboard" },
-  { src: "/images/marketing/screenshot-employees.svg?v=2", labelAr: "الموظفون", labelEn: "Employees" },
-  { src: "/images/marketing/screenshot-payroll-new.svg?v=2", labelAr: "الرواتب", labelEn: "Payroll" },
-];
-
 const personas = [
   {
     roleAr: "مدير الموارد البشرية",
@@ -461,12 +455,6 @@ export default async function LandingPage({
                   <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 </Button>
               </Link>
-              <Link href={`${p}/screenshots`}>
-                <Button size="lg" variant="brandOutline" className="h-12 gap-2 px-6 text-base">
-                  <ChevronRight className="h-4 w-4" />
-                  {isAr ? "استعراض المنصة" : "Product tour"}
-                </Button>
-              </Link>
             </div>
 
             {/* Trust proof pills */}
@@ -519,38 +507,6 @@ export default async function LandingPage({
               <HeroVideo
                 src="/videos/hero-square.mp4"
               />
-            </div>
-
-            {/* Mini screenshots row */}
-            <div className="mt-2 grid grid-cols-3 gap-1.5">
-              {heroMediaItems.map((item) => (
-                <Link
-                  key={item.src}
-                  href={`${p}/screenshots`}
-                  className="group relative aspect-[4/3] overflow-hidden rounded-lg border bg-muted shadow-sm ring-1 ring-black/5 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <Image
-                    src={item.src}
-                    alt={isAr ? item.labelAr : item.labelEn}
-                    unoptimized={item.src.includes(".svg")}
-                    fill
-                    sizes="180px"
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
-                  <span className="absolute bottom-2 start-2 rounded-full border border-white/15 bg-black/35 px-2 py-1 text-[10px] font-semibold text-white backdrop-blur-sm transition-colors group-hover:bg-black/50">
-                    {isAr ? item.labelAr : item.labelEn}
-                  </span>
-                </Link>
-              ))}
-            </div>
-
-            {/* "View all" link */}
-            <div className="mt-3 text-center">
-              <Link href={`${p}/screenshots`} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground">
-                {isAr ? "عرض كل اللقطات" : "View all screenshots"}
-                <ChevronRight className="h-3 w-3 rtl:rotate-180" />
-              </Link>
             </div>
           </div>
         </div>

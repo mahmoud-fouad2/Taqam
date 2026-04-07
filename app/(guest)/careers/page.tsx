@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { BriefcaseBusiness, Building2, Sparkles } from "lucide-react";
 
 import { PublicJobFilters } from "@/components/recruitment/public-job-filters";
@@ -61,42 +62,81 @@ export default async function CareersPage({
         </div>
 
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-4xl text-center">
-            <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
-              <Sparkles className="h-3.5 w-3.5" />
-              {isAr ? "بوابة وظائف مجمعة لكل الشركات على طاقم" : "Unified careers portal across Taqam companies"}
-            </span>
+          <div className="grid items-center gap-12 lg:grid-cols-2 lg:pb-8">
+            <div className="text-center lg:text-start">
+              <span className="mb-5 flex justify-center lg:justify-start">
+                <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
+                  <Sparkles className="h-3.5 w-3.5" />
+                  {isAr ? "بوابة وظائف مجمعة لكل الشركات على طاقم" : "Unified careers portal across Taqam companies"}
+                </span>
+              </span>
 
-            <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-              {isAr ? "اكتشف فرصك التالية من بوابة توظيف واحدة" : "Discover your next move from one careers portal"}
-            </h1>
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-              {isAr
-                ? "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة."
-                : "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."}
-            </p>
+              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                {isAr ? "اكتشف فرصك التالية من بوابة توظيف واحدة" : "Discover your next move from one careers portal"}
+              </h1>
+              <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground lg:mx-0">
+                {isAr
+                  ? "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة."
+                  : "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."}
+              </p>
 
-            <div className="mt-8 grid gap-3 sm:grid-cols-3">
-              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.length)}</div>
-                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "وظيفة مفتوحة الآن" : "Active job openings"}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="text-3xl font-extrabold text-primary">{nf.format(tenantCount)}</div>
-                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "شركة لديها توظيف نشط" : "Hiring companies"}</p>
-                </CardContent>
-              </Card>
-              <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                <CardContent className="p-6">
-                  <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}</div>
-                  <p className="mt-1.5 text-sm text-muted-foreground/80">{isAr ? "مقاعد وظيفية معلنة" : "Advertised positions"}</p>
-                </CardContent>
-              </Card>
+              <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                  <CardContent className="p-5">
+                    <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.length)}</div>
+                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "وظيفة مفتوحة الآن" : "Active openings"}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                  <CardContent className="p-5">
+                    <div className="text-3xl font-extrabold text-primary">{nf.format(tenantCount)}</div>
+                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "شركة توظف" : "Hiring companies"}</p>
+                  </CardContent>
+                </Card>
+                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                  <CardContent className="p-5">
+                    <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}</div>
+                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "مقاعد معلنة" : "Positions"}</p>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
 
+            {/* Visual */}
+            <div className="relative mx-auto hidden w-full max-w-md lg:block">
+              {/* Decorative shapes */}
+              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-gradient-to-tr from-amber-200 to-rose-200 blur-2xl dark:from-amber-900/40 dark:to-rose-900/40" />
+              <div className="pointer-events-none absolute -end-10 bottom-10 -z-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
+              
+              <div className="relative overflow-hidden rounded-[2.5rem] rounded-bl-[6rem] rounded-tr-[6rem] border-[6px] border-white/60 bg-white/90 shadow-2xl dark:border-white/10 dark:bg-card/90">
+                <div className="relative aspect-[4/5] w-full">
+                  <Image
+                    src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80"
+                    alt={isAr ? "التوظيف والمستقبل" : "Careers and future"}
+                    fill
+                    sizes="420px"
+                    className="object-cover transition-transform duration-700 hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent" />
+                </div>
+              </div>
+
+              {/* Floating badge */}
+              <div className="absolute -end-6 bottom-16 rounded-2xl border border-white/60 bg-white/95 p-3.5 shadow-xl backdrop-blur-md dark:border-white/10 dark:bg-card/95">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-inner">
+                    <BriefcaseBusiness className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-foreground">{isAr ? "فرص لا تنتهي" : "Endless opportunities"}</p>
+                    <p className="text-xs font-medium text-muted-foreground">{isAr ? "التحق بأفضل الشركات" : "Join the best companies"}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="mx-auto max-w-4xl pt-8">
             <PublicJobFilters
               basePath={`${p}/careers`}
               key={`careers-filters:${query}:${location}:${departmentId}:${jobType}`}
