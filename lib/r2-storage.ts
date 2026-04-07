@@ -12,6 +12,8 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
+import { getStorageRuntimeStatus } from "@/lib/runtime-integrations";
+
 // R2 Client Configuration
 const R2_ENDPOINT = process.env.R2_ENDPOINT || 
   `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
@@ -25,17 +27,11 @@ const R2 = new S3Client({
   },
 });
 
-const BUCKET_NAME = process.env.R2_BUCKET_NAME || "taqam";
+const BUCKET_NAME = process.env.R2_BUCKET_NAME || "";
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
 export function isR2Configured() {
-  return Boolean(
-    (process.env.R2_ENDPOINT || process.env.R2_ACCOUNT_ID) &&
-      process.env.R2_ACCESS_KEY_ID &&
-      process.env.R2_SECRET_ACCESS_KEY &&
-      process.env.R2_BUCKET_NAME &&
-      process.env.R2_PUBLIC_URL
-  );
+  return getStorageRuntimeStatus().configured;
 }
 
 export interface UploadResult {

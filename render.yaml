@@ -49,9 +49,9 @@ services:
       - key: NEXT_PUBLIC_SUPPORT_EMAIL
         sync: false
       - key: NEXT_PUBLIC_RECAPTCHA_SITE_KEY
-        value: 6Leoa6ssAAAAAFAZxIP_lhX-IVrrnswROVJZnsyb
+        sync: false
       - key: RECAPTCHA_SECRET_KEY
-        value: 6Leoa6ssAAAAAPNZcKy7BCRnN46EYu7hjwSknLNb
+        sync: false
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT

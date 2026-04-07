@@ -6,8 +6,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { r2Client, R2_BUCKET_NAME } from "@/lib/r2";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { isR2Configured, uploadFile } from "@/lib/r2-storage";
+
 type PrismaDocumentCategory =
   | "PERSONAL"
   | "EMPLOYMENT"
@@ -51,10 +51,6 @@ function normalizeDocumentCategory(value: string): PrismaDocumentCategory | null
     default:
       return null;
   }
-}
-
-function generateId(): string {
-  return Math.random().toString(36).substring(2) + Date.now().toString(36);
 }
 
 export async function GET(request: NextRequest) {
@@ -131,6 +127,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Tenant required" }, { status: 400 });
     }
 
+    if (!isR2Configured()) {
+      return NextResponse.json({ error: "Document storage is not configured" }, { status: 503 });
+    }
+
     const formData = (await request.formData()) as unknown as globalThis.FormData;
     const file = formData.get("file") as File;
     const employeeId = formData.get("employeeId") as string;
@@ -149,26 +149,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique file key
-    const fileExt = file.name.split(".").pop();
-    const fileKey = `documents/${tenantId}/${employeeId}/${generateId()}.${fileExt}`;
-
-    // Upload to R2
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const upload = await uploadFile(buffer, file.name, file.type, tenantId, `documents/${employeeId}`);
 
-    await r2Client.send(
-      new PutObjectCommand({
-        Bucket: R2_BUCKET_NAME,
-        Key: fileKey,
-        Body: buffer,
-        ContentType: file.type,
-      })
-    );
-
-    // Get public URL
-    const publicUrl = process.env.R2_PUBLIC_URL;
-    const fileUrl = `${publicUrl}/${fileKey}`;
+    if (!upload.success || !upload.key || !upload.url) {
+      return NextResponse.json({ error: upload.error || "Failed to upload document" }, { status: 500 });
+    }
 
     // Create document record
     const document = await prisma.document.create({
@@ -176,11 +163,11 @@ export async function POST(request: NextRequest) {
         tenantId,
         employeeId,
         uploadedById: userId,
-        fileName: fileKey,
+        fileName: upload.key,
         originalName: file.name,
         mimeType: file.type,
         size: file.size,
-        url: fileUrl,
+        url: upload.url,
         title,
         titleAr,
         category,

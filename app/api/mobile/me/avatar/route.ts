@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/db";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
-import { uploadFile } from "@/lib/r2-storage";
+import { isR2Configured, uploadFile } from "@/lib/r2-storage";
 
 export async function POST(request: NextRequest) {
   const payloadOrRes = await requireMobileEmployeeAuthWithDevice(request);
@@ -22,6 +22,10 @@ export async function POST(request: NextRequest) {
 
     if (file.size > 3 * 1024 * 1024) {
       return NextResponse.json({ error: "File too large" }, { status: 400 });
+    }
+
+    if (!isR2Configured()) {
+      return NextResponse.json({ error: "Avatar storage is not configured" }, { status: 503 });
     }
 
     const bytes = await file.arrayBuffer();

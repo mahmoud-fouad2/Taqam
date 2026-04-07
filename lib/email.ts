@@ -1,4 +1,5 @@
 import { logger } from "@/lib/logger";
+import { getEmailRuntimeStatus } from "@/lib/runtime-integrations";
 
 type SendEmailInput = {
   to: string | string[];
@@ -11,10 +12,7 @@ type SendEmailInput = {
 let transporterPromise: Promise<any> | null = null;
 
 export function isEmailConfigured() {
-  return Boolean(
-    process.env.SMTP_URL ||
-      (process.env.SMTP_HOST && process.env.SMTP_PORT && process.env.SMTP_FROM)
-  );
+  return getEmailRuntimeStatus().configured;
 }
 
 export function getAppBaseUrl() {

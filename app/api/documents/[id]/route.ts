@@ -6,8 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { r2Client, R2_BUCKET_NAME } from "@/lib/r2";
-import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { deleteFile } from "@/lib/r2-storage";
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -143,12 +142,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Delete from R2 if fileName exists (it's the key)
     if (existingDocument.fileName) {
       try {
-        await r2Client.send(
-          new DeleteObjectCommand({
-            Bucket: R2_BUCKET_NAME,
-            Key: existingDocument.fileName,
-          })
-        );
+        await deleteFile(existingDocument.fileName);
       } catch (r2Error) {
         console.error("Error deleting file from R2:", r2Error);
         // Continue with database deletion even if R2 fails
