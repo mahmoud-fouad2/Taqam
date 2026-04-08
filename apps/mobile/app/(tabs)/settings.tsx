@@ -112,7 +112,7 @@ export default function SettingsScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <BrandLogo style={styles.logo} />
+      <BrandLogo style={styles.logo} variant="light" />
 
       <View style={styles.heroCard}>
         <Text style={styles.title}>{t(language, "settings_title")}</Text>
@@ -241,7 +241,7 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0b1220",
+    backgroundColor: "#f8fafc",
   },
   content: {
     padding: 16,
@@ -254,26 +254,26 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   heroCard: {
-    backgroundColor: "rgba(15,23,42,0.92)",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(59,130,246,0.24)",
+    borderColor: "#dbeafe",
     borderRadius: 18,
     padding: 18,
   },
   card: {
-    backgroundColor: "rgba(255,255,255,0.04)",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "#e2e8f0",
     borderRadius: 16,
     padding: 16,
   },
   title: {
-    color: "#fff",
+    color: "#0f172a",
     fontSize: 18,
     fontWeight: "900",
   },
   heroText: {
-    color: "rgba(255,255,255,0.70)",
+    color: "#64748b",
     marginTop: 6,
     lineHeight: 20,
   },
@@ -283,27 +283,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   logout: {
-    backgroundColor: "rgba(248,113,113,0.18)",
+    backgroundColor: "#fef2f2",
     borderWidth: 1,
-    borderColor: "rgba(248,113,113,0.35)",
+    borderColor: "#fecaca",
   },
   logoutAll: {
     marginTop: 10,
-    backgroundColor: "rgba(248,113,113,0.10)",
+    backgroundColor: "#fef2f2",
     borderWidth: 1,
-    borderColor: "rgba(248,113,113,0.25)",
+    borderColor: "#fecaca",
   },
   buttonText: {
-    color: "#fff",
+    color: "#dc2626",
     fontWeight: "800",
   },
   msg: {
     marginTop: 10,
-    color: "rgba(255,255,255,0.70)",
+    color: "#64748b",
     fontSize: 12,
   },
   sectionTitle: {
-    color: "rgba(255,255,255,0.85)",
+    color: "#0f172a",
     fontWeight: "800",
     marginBottom: 10,
   },
@@ -316,8 +316,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    backgroundColor: "rgba(255,255,255,0.03)",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
     borderRadius: 14,
     padding: 14,
   },
@@ -331,12 +331,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   preferenceTitle: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "800",
     marginBottom: 4,
   },
   preferenceMeta: {
-    color: "rgba(255,255,255,0.62)",
+    color: "#64748b",
     fontSize: 12,
     lineHeight: 18,
   },
@@ -344,23 +344,23 @@ const styles = StyleSheet.create({
     width: 54,
     height: 30,
     borderRadius: 999,
-    backgroundColor: "rgba(148,163,184,0.28)",
+    backgroundColor: "#cbd5e1",
     padding: 4,
     alignItems: "flex-start",
     justifyContent: "center",
   },
   toggleTrackActive: {
     alignItems: "flex-end",
-    backgroundColor: "rgba(34,197,94,0.34)",
+    backgroundColor: "#4ade80",
   },
   toggleTrackDisabled: {
-    backgroundColor: "rgba(71,85,105,0.35)",
+    backgroundColor: "#e2e8f0",
   },
   toggleThumb: {
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
   },
   toggleThumbActive: {
     backgroundColor: "#ffffff",
@@ -377,57 +377,57 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
     alignItems: "center",
   },
   langBtnActive: {
-    borderColor: "rgba(34,197,94,0.45)",
-    backgroundColor: "rgba(34,197,94,0.12)",
+    borderColor: "#4ade80",
+    backgroundColor: "#f0fdf4",
   },
   langText: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "800",
   },
   restartHint: {
     marginTop: 10,
-    color: "rgba(255,255,255,0.60)",
+    color: "#94a3b8",
     fontSize: 12,
   },
   infoRow: {
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.06)",
+    borderBottomColor: "#f1f5f9",
   },
   infoRowRtl: {
     alignItems: "flex-end",
   },
   infoLabel: {
-    color: "rgba(255,255,255,0.58)",
+    color: "#94a3b8",
     fontSize: 12,
     marginBottom: 4,
   },
   infoValue: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "700",
   },
   warningText: {
-    color: "#fbbf24",
+    color: "#d97706",
   },
   warningBanner: {
     marginTop: 12,
     borderRadius: 12,
     padding: 12,
-    backgroundColor: "rgba(251,191,36,0.12)",
-    color: "#fcd34d",
+    backgroundColor: "#fffbeb",
+    color: "#92400e",
     lineHeight: 20,
   },
   successBanner: {
     marginTop: 12,
     borderRadius: 12,
     padding: 12,
-    backgroundColor: "rgba(34,197,94,0.12)",
-    color: "#86efac",
+    backgroundColor: "#f0fdf4",
+    color: "#166534",
     lineHeight: 20,
   },
 });

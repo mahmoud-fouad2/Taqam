@@ -96,7 +96,7 @@ export default function HistoryScreen() {
       <View style={styles.headerRow}>
         <Text style={styles.title}>{t(language, "history_title")}</Text>
         <Pressable onPress={() => void load({ reset: true, nextPage: 1 })} disabled={busy} style={[styles.refresh, busy && styles.refreshDisabled]}>
-          {busy ? <ActivityIndicator color="#fff" /> : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
+          {busy ? <ActivityIndicator color="#3b82f6" /> : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
         </Pressable>
       </View>
 
@@ -130,7 +130,7 @@ export default function HistoryScreen() {
                 style={[styles.loadMore, (!hasMore || busy || loadingMore) && styles.loadMoreDisabled]}
               >
                 {loadingMore ? (
-                  <ActivityIndicator color="#fff" />
+                  <ActivityIndicator color="#3b82f6" />
                 ) : (
                   <Text style={styles.loadMoreText}>{hasMore ? t(language, "load_more") : t(language, "no_more")}</Text>
                 )}
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#0a0f1e",
+    backgroundColor: "#f8fafc",
   },
   headerRow: {
     flexDirection: "row",
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   title: {
-    color: "#fff",
+    color: "#0f172a",
     fontSize: 22,
     fontWeight: "800",
   },
@@ -220,16 +220,16 @@ const styles = StyleSheet.create({
     paddingVertical: 9,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "#0f172a",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
     alignItems: "center",
   },
   chipActive: {
     borderColor: "rgba(59,130,246,0.5)",
-    backgroundColor: "rgba(59,130,246,0.15)",
+    backgroundColor: "rgba(59,130,246,0.08)",
   },
   chipText: {
-    color: "rgba(255,255,255,0.65)",
+    color: "#64748b",
     fontWeight: "700",
     fontSize: 12,
     textAlign: "center",
@@ -243,19 +243,19 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    backgroundColor: "#0f172a",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#ffffff",
   },
   refreshDisabled: {
     opacity: 0.5,
   },
   refreshText: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "700",
     fontSize: 13,
   },
   error: {
-    color: "#f87171",
+    color: "#ef4444",
     marginBottom: 10,
     fontSize: 13,
   },
@@ -264,9 +264,9 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
     borderLeftWidth: 3,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "#e2e8f0",
     borderLeftColor: "#22c55e",
-    backgroundColor: "#0f172a",
+    backgroundColor: "#ffffff",
     marginBottom: 10,
   },
   cardRow: {
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
   dateStr: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "700",
     fontSize: 12,
     textAlign: "center",
@@ -304,22 +304,22 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   timeLabel: {
-    color: "rgba(255,255,255,0.50)",
+    color: "#94a3b8",
     fontSize: 11,
     flex: 1,
   },
   timeVal: {
-    color: "#fff",
+    color: "#0f172a",
     fontWeight: "700",
     fontSize: 12,
   },
   durationTag: {
-    backgroundColor: "rgba(59,130,246,0.15)",
+    backgroundColor: "rgba(59,130,246,0.08)",
     borderRadius: 8,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderWidth: 1,
-    borderColor: "rgba(59,130,246,0.3)",
+    borderColor: "rgba(59,130,246,0.20)",
   },
   durationText: {
     color: "#3b82f6",
@@ -333,7 +333,7 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   empty: {
-    color: "rgba(255,255,255,0.45)",
+    color: "#94a3b8",
     fontSize: 15,
     marginTop: 8,
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(59,130,246,0.25)",
-    backgroundColor: "rgba(59,130,246,0.08)",
+    backgroundColor: "rgba(59,130,246,0.06)",
   },
   loadMoreDisabled: {
     opacity: 0.5,

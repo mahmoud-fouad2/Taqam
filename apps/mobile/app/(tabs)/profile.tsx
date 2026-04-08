@@ -175,7 +175,7 @@ export default function ProfileScreen() {
 
       {/* App info */}
       <View style={styles.appInfo}>
-        <BrandLogo style={{ alignItems: "center", marginBottom: 8 }} />
+        <BrandLogo style={{ alignItems: "center", marginBottom: 8 }} variant="light" />
         <Text style={styles.appVer}>Taqam v{APP_VERSION}</Text>
         <Text style={styles.appCopy}>© 2025 Taqam. All rights reserved.</Text>
       </View>
@@ -184,7 +184,7 @@ export default function ProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#0a0f1e" },
+  root: { flex: 1, backgroundColor: "#f8fafc" },
   scrollContent: { paddingBottom: 50 },
   rtlText: { textAlign: "right" },
 
@@ -197,32 +197,32 @@ const styles = StyleSheet.create({
     width: 84,
     height: 84,
     borderRadius: 42,
-    backgroundColor: "#1e3a5f",
+    backgroundColor: "rgba(59,130,246,0.10)",
     borderWidth: 3,
-    borderColor: "rgba(59,130,246,0.45)",
+    borderColor: "rgba(59,130,246,0.30)",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 14,
     shadowColor: "#3b82f6",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.30,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
-    elevation: 6,
+    elevation: 4,
   },
   avatarText: {
-    color: "#60a5fa",
+    color: "#3b82f6",
     fontSize: 28,
     fontWeight: "900",
   },
   fullName: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 22,
     fontWeight: "800",
     textAlign: "center",
     marginBottom: 4,
   },
   tenantName: {
-    color: "rgba(255,255,255,0.45)",
+    color: "#64748b",
     fontSize: 14,
     textAlign: "center",
   },
@@ -230,15 +230,15 @@ const styles = StyleSheet.create({
   section: {
     marginHorizontal: 16,
     marginBottom: 14,
-    backgroundColor: "#0f172a",
+    backgroundColor: "#ffffff",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)",
+    borderColor: "#e2e8f0",
     gap: 12,
   },
   sectionTitle: {
-    color: "rgba(255,255,255,0.38)",
+    color: "#94a3b8",
     fontSize: 11,
     fontWeight: "700",
     textTransform: "uppercase",
@@ -252,8 +252,8 @@ const styles = StyleSheet.create({
   },
   infoIcon: { fontSize: 17, marginTop: 2 },
   infoContent: { flex: 1, gap: 2 },
-  infoLabel: { color: "rgba(255,255,255,0.40)", fontSize: 12, fontWeight: "600" },
-  infoValue: { color: "#f1f5f9", fontSize: 14, fontWeight: "600" },
+  infoLabel: { color: "#94a3b8", fontSize: 12, fontWeight: "600" },
+  infoValue: { color: "#0f172a", fontSize: 14, fontWeight: "600" },
 
   langRow: { flexDirection: "row", gap: 10 },
   langBtn: {
@@ -261,51 +261,51 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.09)",
-    backgroundColor: "rgba(255,255,255,0.04)",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f8fafc",
     alignItems: "center",
   },
   langBtnActive: {
     borderColor: "rgba(59,130,246,0.50)",
-    backgroundColor: "rgba(59,130,246,0.12)",
+    backgroundColor: "rgba(59,130,246,0.08)",
   },
-  langBtnText: { color: "rgba(255,255,255,0.50)", fontWeight: "700", fontSize: 13 },
+  langBtnText: { color: "#64748b", fontWeight: "700", fontSize: 13 },
   langBtnTextActive: { color: "#3b82f6" },
-  restartHint: { color: "rgba(255,255,255,0.30)", fontSize: 12, lineHeight: 18 },
+  restartHint: { color: "#94a3b8", fontSize: 12, lineHeight: 18 },
 
   msgBox: {
-    backgroundColor: "rgba(239,68,68,0.10)",
+    backgroundColor: "rgba(239,68,68,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.25)",
+    borderColor: "rgba(239,68,68,0.20)",
     borderRadius: 10,
     padding: 10,
   },
-  msgText: { color: "#f87171", fontSize: 13 },
+  msgText: { color: "#ef4444", fontSize: 13 },
 
   signOutBtn: {
-    backgroundColor: "rgba(239,68,68,0.13)",
+    backgroundColor: "rgba(239,68,68,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.28)",
+    borderColor: "rgba(239,68,68,0.20)",
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",
   },
-  signOutText: { color: "#f87171", fontWeight: "800", fontSize: 15 },
+  signOutText: { color: "#ef4444", fontWeight: "800", fontSize: 15 },
 
   signOutAllBtn: {
-    backgroundColor: "rgba(239,68,68,0.06)",
+    backgroundColor: "rgba(239,68,68,0.04)",
     borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.13)",
+    borderColor: "rgba(239,68,68,0.10)",
     borderRadius: 12,
     paddingVertical: 12,
     alignItems: "center",
   },
-  signOutAllText: { color: "rgba(248,113,113,0.60)", fontWeight: "700", fontSize: 13 },
+  signOutAllText: { color: "rgba(239,68,68,0.60)", fontWeight: "700", fontSize: 13 },
 
   appInfo: {
     alignItems: "center",
     paddingVertical: 20,
   },
-  appVer: { color: "rgba(255,255,255,0.30)", fontSize: 12, textAlign: "center", marginBottom: 3 },
-  appCopy: { color: "rgba(255,255,255,0.18)", fontSize: 11, textAlign: "center" },
+  appVer: { color: "#94a3b8", fontSize: 12, textAlign: "center", marginBottom: 3 },
+  appCopy: { color: "#cbd5e1", fontSize: 11, textAlign: "center" },
 });

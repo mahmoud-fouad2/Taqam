@@ -1,13 +1,12 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 
-import { useColorScheme } from '@/components/useColorScheme';
-import { AuthProvider, useAuth } from '@/components/auth-provider';
+import { AuthProvider } from '@/components/auth-provider';
 import { AppSettingsProvider } from '@/components/app-settings-provider';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { OfflineBanner } from '@/components/offline-banner';
@@ -50,10 +49,8 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={DefaultTheme}>
       <AppSettingsProvider>
         <AuthProvider>
           <PushHooks />

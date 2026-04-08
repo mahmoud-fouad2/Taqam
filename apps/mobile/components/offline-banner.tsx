@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import * as Network from "expo-network";
 
-import { useLocale } from "@/components/locale-provider";
+import { useAppSettings } from "@/components/app-settings-provider";
 
 export function OfflineBanner() {
-  const { lang } = useLocale();
+  const { language } = useAppSettings();
   const [isOffline, setIsOffline] = useState(false);
 
   useEffect(() => {
@@ -25,7 +25,7 @@ export function OfflineBanner() {
   if (!isOffline) return null;
 
   const message =
-    lang === "ar" ? "لا يوجد اتصال بالإنترنت" : "No internet connection";
+    language === "ar" ? "لا يوجد اتصال بالإنترنت" : "No internet connection";
 
   return (
     <View style={styles.banner}>

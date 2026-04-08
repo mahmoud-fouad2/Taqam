@@ -178,7 +178,7 @@ export default function AttendanceScreen() {
             style={[styles.refreshBtn, (loadingToday || busy) && { opacity: 0.5 }]}
           >
             {loadingToday
-              ? <ActivityIndicator color="#fff" size="small" />
+              ? <ActivityIndicator color="#3b82f6" size="small" />
               : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
           </Pressable>
         </View>
@@ -221,7 +221,7 @@ export default function AttendanceScreen() {
             pressed && canCheckOut && { opacity: 0.88, transform: [{ scale: 0.98 }] },
           ]}
         >
-          {busy ? <ActivityIndicator color="#fff" /> : <Text style={[styles.buttonText, styles.buttonTextAlt]}>{t(language, "check_out")}</Text>}
+          {busy ? <ActivityIndicator color="#0f172a" /> : <Text style={[styles.buttonText, styles.buttonTextAlt]}>{t(language, "check_out")}</Text>}
         </Pressable>
       </View>
 
@@ -258,36 +258,36 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: "#0a0f1e",
+    backgroundColor: "#f8fafc",
   },
   header: {
     marginTop: 8,
     marginBottom: 16,
   },
   title: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 24,
     fontWeight: "800",
     marginBottom: 4,
   },
   todayDate: {
-    color: "rgba(255,255,255,0.45)",
+    color: "#64748b",
     fontSize: 13,
   },
   statusCard: {
     marginBottom: 16,
     padding: 16,
     borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.09)",
+    borderColor: "#e2e8f0",
   },
   statusCardGreen: {
-    borderColor: "rgba(34,197,94,0.25)",
+    borderColor: "rgba(34,197,94,0.35)",
     backgroundColor: "rgba(34,197,94,0.06)",
   },
   statusCardBlue: {
-    borderColor: "rgba(59,130,246,0.25)",
+    borderColor: "rgba(59,130,246,0.35)",
     backgroundColor: "rgba(59,130,246,0.06)",
   },
   statusRow: {
@@ -303,9 +303,9 @@ const styles = StyleSheet.create({
   },
   dotGreen: { backgroundColor: "#22c55e" },
   dotBlue:  { backgroundColor: "#3b82f6" },
-  dotGray:  { backgroundColor: "rgba(255,255,255,0.25)" },
+  dotGray:  { backgroundColor: "#cbd5e1" },
   statusLabel: {
-    color: "rgba(255,255,255,0.65)",
+    color: "#64748b",
     fontWeight: "700",
     flex: 1,
   },
@@ -314,12 +314,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 10,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: "#e2e8f0",
+    backgroundColor: "#f1f5f9",
   },
-  refreshText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+  refreshText: { color: "#0f172a", fontWeight: "700", fontSize: 12 },
   statusValue: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 19,
     fontWeight: "900",
     marginBottom: 14,
@@ -332,17 +332,17 @@ const styles = StyleSheet.create({
   timeDivider: {
     width: 1,
     height: 28,
-    backgroundColor: "rgba(255,255,255,0.10)",
+    backgroundColor: "#e2e8f0",
     marginHorizontal: 12,
   },
   timeLabel: {
-    color: "rgba(255,255,255,0.45)",
+    color: "#94a3b8",
     fontSize: 11,
     fontWeight: "600",
     marginBottom: 3,
   },
   timeValue: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 15,
     fontWeight: "800",
   },
@@ -367,9 +367,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   checkOut: {
-    backgroundColor: "#1e293b",
+    backgroundColor: "#f1f5f9",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "#e2e8f0",
   },
   buttonDisabled: {
     opacity: 0.38,
@@ -377,12 +377,12 @@ const styles = StyleSheet.create({
     elevation: 0,
   },
   buttonText: {
-    color: "#0b1220",
+    color: "#ffffff",
     fontWeight: "800",
     fontSize: 15,
   },
   buttonTextAlt: {
-    color: "#f1f5f9",
+    color: "#0f172a",
   },
   alert: {
     padding: 14,
@@ -392,14 +392,14 @@ const styles = StyleSheet.create({
   },
   alertOk: {
     backgroundColor: "rgba(34,197,94,0.10)",
-    borderColor: "rgba(34,197,94,0.28)",
+    borderColor: "rgba(34,197,94,0.30)",
   },
   alertErr: {
     backgroundColor: "rgba(239,68,68,0.10)",
-    borderColor: "rgba(239,68,68,0.28)",
+    borderColor: "rgba(239,68,68,0.30)",
   },
   alertText: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontWeight: "700",
     fontSize: 14,
   },
@@ -416,23 +416,23 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   smallBtnPrimary: {
-    backgroundColor: "rgba(59,130,246,0.18)",
-    borderColor: "rgba(59,130,246,0.35)",
+    backgroundColor: "rgba(59,130,246,0.12)",
+    borderColor: "rgba(59,130,246,0.30)",
   },
   smallBtnSecondary: {
-    backgroundColor: "rgba(255,255,255,0.06)",
-    borderColor: "rgba(255,255,255,0.12)",
+    backgroundColor: "#f1f5f9",
+    borderColor: "#e2e8f0",
   },
-  smallBtnText: { color: "#fff", fontWeight: "700", fontSize: 12 },
+  smallBtnText: { color: "#3b82f6", fontWeight: "700", fontSize: 12 },
   note: {
     padding: 12,
     borderRadius: 12,
     backgroundColor: "rgba(59,130,246,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(59,130,246,0.13)",
+    borderColor: "rgba(59,130,246,0.15)",
   },
   noteText: {
-    color: "rgba(255,255,255,0.45)",
+    color: "#64748b",
     fontSize: 12,
     lineHeight: 18,
   },

@@ -31,8 +31,17 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
         getStoredBiometricsEnabled(),
       ]);
       if (!mounted) return;
-      if (storedLanguage) setLanguageState(storedLanguage);
+      const lang = storedLanguage ?? "ar";
+      setLanguageState(lang);
       if (storedBiometrics !== null) setBiometricsEnabledState(storedBiometrics);
+
+      // Ensure RTL matches current language on every cold start
+      const shouldBeRtl = lang === "ar";
+      if (I18nManager.isRTL !== shouldBeRtl) {
+        I18nManager.allowRTL(true);
+        I18nManager.forceRTL(shouldBeRtl);
+        try { await Updates.reloadAsync(); } catch { /* user can restart manually */ }
+      }
     })();
     return () => {
       mounted = false;
