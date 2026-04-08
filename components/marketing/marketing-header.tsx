@@ -1,16 +1,16 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LocaleToggle } from "@/components/locale-toggle";
 import { cn } from "@/lib/utils";
 import { marketingNav } from "@/components/marketing/nav";
-import { startLocaleTransition } from "@/components/locale-transition";
 
 function getLocaleFromCookie(): "ar" | "en" {
   if (typeof document === "undefined") return "ar";
@@ -20,7 +20,6 @@ function getLocaleFromCookie(): "ar" | "en" {
 
 export function MarketingHeader() {
   const pathname = usePathname();
-  const router = useRouter();
   const [locale, setLocale] = React.useState<"ar" | "en">("ar");
   const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
 
@@ -30,17 +29,6 @@ export function MarketingHeader() {
   React.useEffect(() => {
     setLocale(getLocaleFromCookie());
   }, []);
-
-  const toggleLocale = () => {
-    const next = locale === "ar" ? "en" : "ar";
-    document.cookie = `taqam_locale=${next}; path=/; samesite=lax`;
-    setLocale(next);
-    const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
-    const stripped = hasEnPrefix ? (pathname.replace(/^\/en(?=\/|$)/, "") || "/") : pathname;
-    const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
-    startLocaleTransition();
-    router.push(target);
-  };
 
   const localeHref = (href: string) =>
     locale === "en" ? (href === "/" ? "/en" : `/en${href}`) : href;
@@ -125,9 +113,7 @@ export function MarketingHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle variant="ghost" />
-          <Button variant="ghost" size="sm" onClick={toggleLocale}>
-            {locale === "ar" ? "English" : "العربية"}
-          </Button>
+          <LocaleToggle />
           <Link href={localeHref("/login")}>
             <Button variant="brandOutline" size="sm">
               {locale === "ar" ? "تسجيل الدخول" : "Login"}

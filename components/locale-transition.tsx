@@ -1,41 +1,81 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const EVENT_NAME = "taqam:locale-transition";
 
-export function startLocaleTransition() {
+export function startLocaleTransition(onCovered?: () => void) {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(EVENT_NAME));
+  window.dispatchEvent(
+    new CustomEvent<{ onCovered?: () => void }>(EVENT_NAME, {
+      detail: { onCovered },
+    })
+  );
 }
+
+type Phase = "idle" | "in" | "out";
 
 export function LocaleTransitionOverlay() {
   const pathname = usePathname();
-  const [active, setActive] = useState(false);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const prevPath = useRef(pathname);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimer = () => {
+    if (timerRef.current !== null) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+  };
 
   useEffect(() => {
-    const onStart = () => setActive(true);
-    window.addEventListener(EVENT_NAME, onStart);
-    return () => window.removeEventListener(EVENT_NAME, onStart);
+    const handler = (e: Event) => {
+      const cb = (e as CustomEvent<{ onCovered?: () => void }>).detail?.onCovered;
+      clearTimer();
+      setPhase("in");
+      // After the slide-in animation completes, trigger navigation
+      if (cb) {
+        timerRef.current = setTimeout(cb, 280);
+      }
+    };
+    window.addEventListener(EVENT_NAME, handler);
+    return () => {
+      window.removeEventListener(EVENT_NAME, handler);
+      clearTimer();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // When pathname changes while panel is covering → slide out
   useEffect(() => {
-    if (!active) return;
-    const t = window.setTimeout(() => setActive(false), 400);
-    return () => window.clearTimeout(t);
-  }, [pathname, active]);
+    if (phase !== "in") {
+      prevPath.current = pathname;
+      return;
+    }
+    if (pathname !== prevPath.current) {
+      prevPath.current = pathname;
+      clearTimer();
+      setPhase("out");
+      timerRef.current = setTimeout(() => setPhase("idle"), 300);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, phase]);
 
   return (
     <div
       aria-hidden="true"
-      className={
-        "pointer-events-none fixed inset-0 z-[9999] transition-[opacity,backdrop-filter] duration-300 ease-in-out " +
-        "bg-background/90 " +
-        (active
-          ? "opacity-100 [backdrop-filter:blur(8px)_saturate(0.4)]"
-          : "opacity-0 [backdrop-filter:blur(0px)_saturate(1)]")
-      }
+      style={{ willChange: "transform" }}
+      className={[
+        "pointer-events-none fixed inset-0 z-[9999]",
+        "bg-primary",
+        "transition-transform duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
+        phase === "idle"
+          ? "translate-x-full"
+          : phase === "in"
+            ? "translate-x-0"
+            : "-translate-x-full",
+      ].join(" ")}
     />
   );
 }

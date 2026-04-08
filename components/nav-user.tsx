@@ -1,6 +1,7 @@
 ﻿"use client"
 
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { startLocaleTransition } from "@/components/locale-transition";
 import {
   IconDotsVertical,
   IconLogout,
@@ -50,7 +51,7 @@ export function NavUser({
     const next = locale === "ar" ? "en" : "ar";
     const maxAge = 60 * 60 * 24 * 365;
     document.cookie = `taqam_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
-    window.location.reload();
+    startLocaleTransition(() => window.location.reload());
   };
 
   const toggleTheme = () => {
@@ -139,8 +140,11 @@ export function NavUser({
                 toggleLocale();
               }}>
                 <span className="inline-flex items-center gap-2">
-                  <span className="inline-flex size-5 items-center justify-center rounded bg-muted text-xs font-semibold">
-                    {locale === "ar" ? "EN" : "AR"}
+                  {/* Mini pill showing current locale */}
+                  <span dir="ltr" className="inline-flex h-5 w-[42px] shrink-0 items-center rounded-full bg-muted ring-1 ring-border/50 px-0.5">
+                    <span className={`flex-1 text-center text-[9px] font-bold ${locale === "ar" ? "text-foreground" : "text-muted-foreground/40"}`}>AR</span>
+                    <span className="mx-0.5 h-3 w-px bg-border/60" />
+                    <span className={`flex-1 text-center text-[9px] font-bold ${locale === "en" ? "text-foreground" : "text-muted-foreground/40"}`}>EN</span>
                   </span>
                   {locale === "ar" ? "English" : "العربية"}
                 </span>

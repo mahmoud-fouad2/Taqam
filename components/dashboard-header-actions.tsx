@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Bell, HelpCircle, LogOut, User, KeyRound, ChevronLeft, ChevronRight, Moon, Sun, Mail } from "lucide-react";
 import { getSession } from "next-auth/react";
 import { useTheme } from "next-themes";
+import { startLocaleTransition } from "@/components/locale-transition";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -156,7 +157,7 @@ export function DashboardHeaderActions({
     const stripped = hasEnPrefix ? (path.replace(/^\/en(?=\/|$)/, "") || "/") : path;
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
 
-    window.location.href = `${target}${window.location.search}`;
+    startLocaleTransition(() => { window.location.href = `${target}${window.location.search}`; });
   };
 
   const toggleTheme = () => {
@@ -455,8 +456,11 @@ export function DashboardHeaderActions({
               }}
             >
               <span className="inline-flex items-center gap-2">
-                <span className="inline-flex size-5 items-center justify-center rounded bg-muted text-xs font-semibold">
-                  {locale === "ar" ? "EN" : "AR"}
+                {/* Mini pill showing current locale */}
+                <span dir="ltr" className="inline-flex h-5 w-[42px] shrink-0 items-center rounded-full bg-muted ring-1 ring-border/50 px-0.5">
+                  <span className={`flex-1 text-center text-[9px] font-bold ${locale === "ar" ? "text-foreground" : "text-muted-foreground/40"}`}>AR</span>
+                  <span className="mx-0.5 h-3 w-px bg-border/60" />
+                  <span className={`flex-1 text-center text-[9px] font-bold ${locale === "en" ? "text-foreground" : "text-muted-foreground/40"}`}>EN</span>
                 </span>
                 {locale === "ar" ? "English" : "العربية"}
               </span>
