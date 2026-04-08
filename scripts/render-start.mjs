@@ -1,4 +1,3 @@
-import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 
 function bin(name) {
@@ -46,13 +45,11 @@ async function main() {
   }
 
   // 3) Start Next.
-  console.log("[render-start] Starting Next.js...");
-  const standaloneServer = ".next/standalone/server.js";
-  const useStandalone = process.env.NEXT_DISABLE_STANDALONE_OUTPUT !== "true" && existsSync(standaloneServer);
-
-  if (useStandalone) {
-    console.log(`[render-start] Detected standalone output; starting ${standaloneServer} ...`);
-  }
+  // Always use `next start` — never standalone server.js. Standalone mode on
+  // Render requires manually copying .next/static, public, and native binaries
+  // into .next/standalone, which is fragile and has caused persistent 404s.
+  // `next start` serves everything correctly from the .next directory directly.
+  console.log("[render-start] Starting Next.js via next start...");
 
   // Force HOSTNAME=0.0.0.0 so Next binds on all interfaces.
   // Render sets HOSTNAME to the pod's internal hostname; inheriting it makes
@@ -60,15 +57,13 @@ async function main() {
   const nextEnv = {
     ...process.env,
     HOSTNAME: "0.0.0.0",
-    ...(useStandalone && !process.env.NEXT_SHARP_PATH
+    // Help Next.js locate sharp for image optimization in non-standalone mode.
+    ...(!process.env.NEXT_SHARP_PATH
       ? { NEXT_SHARP_PATH: "/opt/render/project/src/node_modules/sharp" }
       : {}),
   };
 
-  const next = useStandalone
-    ? await run("node", [standaloneServer], { label: "next-standalone", env: nextEnv })
-    : await run(bin("next"), ["start", "--hostname", "0.0.0.0"], { label: "next-start", env: nextEnv });
-
+  const next = await run(bin("next"), ["start", "--hostname", "0.0.0.0"], { label: "next-start", env: nextEnv });
   process.exit(next.code);
 }
 
