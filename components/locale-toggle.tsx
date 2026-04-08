@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { startLocaleTransition } from "@/components/locale-transition";
 
@@ -33,7 +33,6 @@ export function LocaleToggle({
   className?: string;
   variant?: string;
 }) {
-  const router = useRouter();
   const pathname = usePathname();
   const [locale, setLocale] = useState<Locale>(() => {
     if (typeof document === "undefined") return "ar";
@@ -50,8 +49,8 @@ export function LocaleToggle({
     const stripped = hasEnPrefix ? (pathname.replace(/^\/en(?=\/|$)/, "") || "/") : pathname;
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
 
-    // Slide curtain in, then navigate once fully covered
-    startLocaleTransition(() => router.push(target));
+    // Hard navigation → forces full server re-render with new locale cookie
+    startLocaleTransition(() => { window.location.href = target; });
   };
 
   return (

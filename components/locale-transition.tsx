@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+import { LogoMark } from "@/components/logo-mark";
 
 const EVENT_NAME = "taqam:locale-transition";
 
@@ -76,6 +78,20 @@ export function LocaleTransitionOverlay() {
             ? "translate-x-0"
             : "-translate-x-full",
       ].join(" ")}
-    />
+    >
+      {/* Logo centered on the curtain — fades in once fully covering */}
+      <div
+        className={cn(
+          "absolute inset-0 flex items-center justify-center",
+          "transition-all duration-200 ease-out",
+          phase === "in" ? "opacity-100 scale-100" : "opacity-0 scale-90",
+        )}
+      >
+        <LogoMark
+          imageClassName="h-20 brightness-0 invert"
+          frameClassName="rounded-2xl p-0"
+        />
+      </div>
+    </div>
   );
 }
