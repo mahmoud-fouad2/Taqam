@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { LogoMark } from "@/components/logo-mark";
 
 const EVENT_NAME = "taqam:locale-transition";
 
@@ -87,9 +86,11 @@ export function LocaleTransitionOverlay() {
           phase === "in" ? "opacity-100 scale-100" : "opacity-0 scale-90",
         )}
       >
-        <LogoMark
-          imageClassName="h-20 brightness-0 invert"
-          frameClassName="rounded-2xl p-0"
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/logo-dark.png"
+          alt="Taqam"
+          style={{ height: 72, width: "auto", filter: "brightness(0) invert(1)" }}
         />
       </div>
     </div>
