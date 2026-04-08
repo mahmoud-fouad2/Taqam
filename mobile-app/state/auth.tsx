@@ -30,9 +30,9 @@ type AuthState = {
   refreshSession: () => Promise<string | null>;
 };
 
-const ACCESS_KEY = "ujoors_access_token";
-const REFRESH_KEY = "ujoors_refresh_token";
-const BIO_KEY = "ujoors_bio_enabled";
+const ACCESS_KEY = "taqam_access_token";
+const REFRESH_KEY = "taqam_refresh_token";
+const BIO_KEY = "taqam_bio_enabled";
 
 const AuthContext = createContext<AuthState | null>(null);
 
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!refreshToken) return null;
 
     if (biometricsEnabled) {
-      const ok = await promptBiometrics("Unlock Ujoors");
+      const ok = await promptBiometrics("Unlock Taqam");
       if (!ok) {
         await signOut();
         return null;

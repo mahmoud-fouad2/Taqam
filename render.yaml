@@ -4,7 +4,7 @@
 services:
   - type: web
     # Keep the existing Render service identifier stable until a coordinated migration is planned.
-    name: ujoor
+    name: taqam
     runtime: node
     region: frankfurt # Closest to Middle East
     plan: starter
