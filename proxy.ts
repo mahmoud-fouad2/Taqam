@@ -132,6 +132,24 @@ export async function proxy(request: NextRequest) {
         return res;
       }
 
+      // Public-facing App Router pages under /t/[slug]/ must NOT be rewritten —
+      // they have their own page.tsx files and need the slug from URL params.
+      const PUBLIC_TENANT_PATHNAMES = ["/careers"];
+      const isPublicTenantPath =
+        nextPathFromPath !== null &&
+        PUBLIC_TENANT_PATHNAMES.some(
+          (p) => nextPathFromPath === p || nextPathFromPath.startsWith(`${p}/`)
+        );
+
+      if (isPublicTenantPath) {
+        const nextHeaders = new Headers(request.headers);
+        nextHeaders.set("x-tenant-slug", slug);
+        const res = NextResponse.next({ request: { headers: nextHeaders } });
+        res.cookies.set("taqam_tenant", slug, tenantCookieOptions());
+        res.headers.set("x-tenant-slug", slug);
+        return res;
+      }
+
       // Rewrite internally while keeping the /t/<slug>/... URL in the browser.
       const targetPath = nextPathFromPath ?? "/dashboard";
       const url = request.nextUrl.clone();

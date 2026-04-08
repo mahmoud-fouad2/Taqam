@@ -16,7 +16,6 @@ export default function robots(): MetadataRoute.Robots {
           "/login",
           "/register",
           "/select-tenant",
-          "/t/",
           "/m/",
           "/404-page",
           "/500-page",

@@ -15,7 +15,6 @@ const marketingPages: EntrySpec[] = [
   { path: "/careers", changeFrequency: "daily", priority: 0.8 },
   { path: "/pricing", changeFrequency: "weekly", priority: 0.8 },
   { path: "/plans", changeFrequency: "weekly", priority: 0.7 },
-  { path: "/screenshots", changeFrequency: "monthly", priority: 0.7 },
   { path: "/faq", changeFrequency: "monthly", priority: 0.6 },
   { path: "/help-center", changeFrequency: "monthly", priority: 0.6 },
   { path: "/support", changeFrequency: "monthly", priority: 0.6 },
