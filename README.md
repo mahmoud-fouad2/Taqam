@@ -1,202 +1,87 @@
-# Taqam HR Platform
+# طاقم — منصة إدارة الموارد البشرية
 
-نظام إدارة موارد بشرية شامل متعدد المستأجرين (Multi-tenant) مبني على:
+<div align="center">
 
-- **Frontend**: Next.js 16 + React 19 + TailwindCSS + shadcn/ui
-- **Backend**: Next.js API Routes + Prisma ORM
-- **Database**: PostgreSQL (Render)
-- **Storage**: Cloudflare R2
-- **Auth**: NextAuth.js (Credentials)
-- **Hosting**: Render
+**نظام موارد بشرية متكامل مصمم للشركات التي تريد أن تُركّز على نموّها لا على إدارة أوراقها.**
 
-## 🚀 البدء السريع
+[🌐 taqam.net](https://taqam.net) &nbsp;|&nbsp; [📧 تواصل معنا](https://taqam.net/contact)
 
-### 1. Clone & Install
+---
 
-```bash
-git clone <your-repository-url>
-cd Jisr
-pnpm install
-```
+</div>
 
-### 2. إعداد المتغيرات البيئية
+## ما هو طاقم؟
 
-```bash
-cp .env.example .env
-```
+طاقم منصة SaaS عربية متكاملة لإدارة الموارد البشرية، تجمع كل ما تحتاجه الشركة في مكان واحد: من تسجيل أول موظف حتى صرف الرواتب ومتابعة الأداء — بدون تعقيد، وبدون جداول بيانات متفرقة.
 
-أضف القيم التالية في `.env`:
+تعمل المنصة على الويب والجوال، وتدعم اللغتين العربية والإنجليزية بشكل كامل.
 
-```env
-# Database
-DATABASE_URL="postgresql://..."
+---
 
-# R2 Storage
-R2_ACCESS_KEY_ID="..."
-R2_SECRET_ACCESS_KEY="..."
+## لماذا طاقم؟
 
-# Auth
-NEXTAUTH_SECRET="..." # openssl rand -base64 32
+| المشكلة | طاقم يحلّها |
+|--------|------------|
+| بيانات الموظفين مبعثرة في ملفات وواتساب | ملف موظف واحد يضم كل شيء |
+| الحضور يُسجَّل يدوياً أو بأجهزة منفصلة | تسجيل حضور من الجوال مع GPS |
+| الرواتب تحسب بالإكسيل وتستغرق أياماً | حساب تلقائي مربوط بالحضور والإجازات |
+| طلبات الإجازة عبر الواتساب أو الورق | مسار رقمي كامل من الطلب حتى الموافقة |
+| التوظيف بلا نظام أو متابعة | خط مرئي من الإعلان حتى عرض التوظيف |
 
-# Mobile Auth (Bearer JWT)
-# استخدم قيمة قوية (32+ بايت). مثال (Node): node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
-MOBILE_JWT_SECRET="..."
+---
 
-# Mobile Refresh Tokens (hashing/rotation)
-# سر مختلف عن MOBILE_JWT_SECRET
-MOBILE_REFRESH_TOKEN_SECRET="..."
+## المميزات
 
-# Optional
-# MOBILE_REFRESH_TOKEN_TTL_DAYS=30
-# MOBILE_CHALLENGE_TTL_SECONDS=120
-```
+### 👥 إدارة الموظفين
+ملف موظف كامل: البيانات الشخصية، العقد، الوثائق، تاريخ التوظيف، الأقسام والوردات — كل شيء في مكان واحد قابل للبحث والتصفية.
 
-### 3. إعداد قاعدة البيانات
+### ⏱️ الحضور والانصراف
+تسجيل حضور من تطبيق الجوال مع التحقق من الموقع الجغرافي. تقارير يومية وشهرية تلقائية. دعم الورديات المتعددة.
 
-```bash
-# Push schema to database
-pnpm db:push
+### 💰 الرواتب
+حساب الرواتب مربوط مباشرةً ببيانات الحضور والإجازات. مراجعة تفصيلية قبل الإرسال. تصدير جاهز للمحاسبة.
 
-# Or run migrations
-pnpm db:migrate
+### 🏖️ الإجازات والغيابات
+طلبات إجازة من الجوال، موافقة المدير بنقرة، رصيد تلقائي، وتقرير واضح للموارد البشرية.
 
-# Seed initial data
-pnpm db:seed
-```
+### 📊 تقييم الأداء
+دورات تقييم قابلة للتخصيص، معايير وأهداف واضحة، وتقارير ترقى بالقرار الإداري.
 
-### 4. تشغيل المشروع
+### 🎓 التدريب والتطوير
+خطط تدريبية، متابعة الحضور، وربط التدريب بمسار الترقي الوظيفي.
 
-```bash
-pnpm dev
-```
+### 🔍 التوظيف
+نشر الوظائف على بوابة عامة، استقبال الطلبات، جدولة المقابلات، ومتابعة كل مرحلة حتى عرض التوظيف.
 
-افتح [http://localhost:3000](http://localhost:3000)
+### 📱 تطبيق الجوال
+تطبيق Android كامل للموظفين: حضور، إجازات، راتب، وإشعارات — بدون الحاجة لفتح الكمبيوتر.
 
-## 📱 ملاحظة الموبايل
+### 🔐 صلاحيات متعددة المستويات
+تحكم دقيق في الصلاحيات: مدير النظام، مدير المنشأة، مدير الموارد البشرية، مدير القسم، والموظف.
 
-- التطبيق الرسمي الحالي للموبايل موجود في `apps/mobile`
-- المجلد `mobile-app` محفوظ كنسخة مرجعية قديمة وليس هو الـ workspace الرسمي الذي تتحقق منه أوامر الجذر
-- أمر التحقق الحالي للموبايل هو `pnpm typecheck:mobile`
+### 🌐 متعدد الشركات (Multi-tenant)
+كل شركة لها بيئة مستقلة وآمنة تماماً. مثالي للمجموعات والشركات متعددة الفروع.
 
-## 📁 هيكل المشروع
+---
 
-```
-├── app/                    # Next.js App Router
-│   ├── api/               # API Routes
-│   ├── dashboard/         # Dashboard pages
-│   └── (guest)/           # Public pages (login, register)
-├── components/            # React components
-│   ├── ui/               # shadcn/ui components
-│   └── layout/           # Layout components
-├── lib/                   # Utilities & services
-│   ├── api/              # API client services
-│   ├── auth.ts           # NextAuth config
-│   ├── db.ts             # Prisma client
-│   └── r2-storage.ts     # R2 storage service
-├── prisma/               # Database
-│   ├── schema.prisma     # Database schema
-│   └── seed.ts           # Seed script
-├── apps/mobile/          # Official Expo mobile workspace
-├── mobile-app/           # Legacy mobile reference workspace
-├── hooks/                # Custom React hooks
-└── types/                # TypeScript types
-```
+## المنصة تعمل على
 
-## 📚 خريطة التوثيق
+🌍 **الويب** — من أي متصفح على أي جهاز  
+📱 **Android** — تحميل مباشر من [taqam.net](https://taqam.net)  
+🌐 **عربي وإنجليزي** — واجهة كاملة في اللغتين مع دعم RTL
 
-- الوثائق التشغيلية الحالية تبقى في جذر المشروع مثل `QUICK_START.md` و `SETUP_GUIDE.md` و `SUMMARY.md`.
-- المرجع التقني الأحدث والأدق للحالة الحالية موجود في `docs/FINAL_DEVELOPMENT_GUIDE.md`.
-- التقارير التاريخية ونتائج الاختبارات المؤرشفة موجودة في `docs/reports/`.
-- الخطط القديمة المؤرشفة موجودة في `docs/archive/plans/`.
-- سكربتات الاختبار اليدوية موجودة في `scripts/manual-tests/`.
-- راجع `docs/README.md` للحصول على فهرس مختصر للوثائق.
+---
 
-## 🔐 الأدوار والصلاحيات
+## للشركات المهتمة
 
-| الدور | الوصف |
-|-------|-------|
-| `SUPER_ADMIN` | مدير النظام الرئيسي |
-| `TENANT_ADMIN` | مدير المنشأة |
-| `HR_MANAGER` | مدير الموارد البشرية |
-| `MANAGER` | مدير القسم |
-| `EMPLOYEE` | موظف |
+للاستفسار عن الأسعار أو طلب عرض تجريبي، تواصل عبر [taqam.net](https://taqam.net) أو تفضل بزيارة المنصة مباشرة.
 
-## 🗄️ قاعدة البيانات
+---
 
-### Models الرئيسية:
+<div align="center">
 
-- **Tenant**: المنشآت
-- **User**: المستخدمين
-- **Employee**: الموظفين
-- **Department**: الأقسام
-- **Shift**: الورديات
-- **AttendanceRecord**: سجلات الحضور
-- **LeaveRequest**: طلبات الإجازات
-- **Document**: المستندات
+**© 2024–2026 Mahmoud Fouad. جميع الحقوق محفوظة.**  
+هذا البرنامج ملكية خاصة. يُحظر نسخه أو توزيعه أو استخدامه تجارياً دون إذن كتابي مسبق.  
+راجع ملف [LICENSE](./LICENSE) للتفاصيل الكاملة.
 
-## 🚢 النشر على Render
-
-### 1. أنشئ خدمة Web Service جديدة
-
-- **Build Command**: `pnpm install && pnpm build`
-- **Start Command**: `pnpm start:render`
-
-### 2. أنشئ قاعدة بيانات PostgreSQL
-
-- انسخ `DATABASE_URL` وأضفه في Environment Variables
-
-### 3. أضف المتغيرات البيئية
-
-```
-DATABASE_URL=...
-R2_ACCOUNT_ID=de95c4f37b252fdb5c22a69ed3d7d3a1
-R2_ACCESS_KEY_ID=...
-R2_SECRET_ACCESS_KEY=...
-R2_BUCKET_NAME=ujoor
-R2_PUBLIC_URL=https://pub-408c0f665b964f47bcd1abfe89ac8aed.r2.dev
-NEXTAUTH_SECRET=...
-NEXTAUTH_URL=https://your-app.onrender.com
-NEXT_PUBLIC_APP_URL=https://your-app.onrender.com
-ENABLE_SUPER_ADMIN_BOOTSTRAP=true
-SUPER_ADMIN_BOOTSTRAP_TOKEN=[openssl rand -hex 32]
-SUPER_ADMIN_EMAIL=admin@your-app.com
-SUPER_ADMIN_PASSWORD=[strong password]
-NEXT_PUBLIC_RECAPTCHA_SITE_KEY=...
-RECAPTCHA_SECRET_KEY=...
-
-# Mobile Auth
-MOBILE_JWT_SECRET=...
-MOBILE_REFRESH_TOKEN_SECRET=...
-
-# Optional
-# MOBILE_REFRESH_TOKEN_TTL_DAYS=30
-# MOBILE_CHALLENGE_TTL_SECONDS=120
-# PRISMA_SCHEMA_SYNC_MODE=push
-
-> ملاحظة reCAPTCHA: الواجهة تستخدم `react-google-recaptcha` (reCAPTCHA v2 Checkbox). إذا ظهرت رسالة
-> `ERROR for site owner: Invalid key type` فغالبًا المفاتيح تم إنشاؤها لنوع آخر (مثل v3) أو نطاق غير صحيح.
-```
-
-### 4. قاعدة البيانات على Render
-
-- `pnpm build` لم يعد يغيّر قاعدة البيانات أثناء البناء.
-- `pnpm start:render` يشغّل `prisma migrate deploy` افتراضياً عند الإقلاع.
-- إذا احتجت fallback قديم لبيئة مؤقتة فقط، اضبط `PRISMA_SCHEMA_SYNC_MODE=push` صراحة.
-- بعد إنشاء أول Super Admin، عطّل `ENABLE_SUPER_ADMIN_BOOTSTRAP` أو احذف متغيراته.
-
-## 📜 الأوامر المتاحة
-
-| الأمر | الوصف |
-|-------|-------|
-| `pnpm dev` | تشغيل بيئة التطوير |
-| `pnpm build` | بناء للإنتاج |
-| `pnpm start` | تشغيل السيرفر |
-| `pnpm validate:all` | تحقق موحد للويب والموبايل |
-| `pnpm db:push` | Push schema للـ DB |
-| `pnpm db:migrate` | إنشاء migration |
-| `pnpm db:seed` | تشغيل seed |
-| `pnpm db:studio` | فتح Prisma Studio |
-
-## 📝 License
-
-MIT
+</div>
