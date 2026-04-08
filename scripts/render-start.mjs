@@ -54,14 +54,10 @@ async function main() {
     console.log(`[render-start] Detected standalone output; starting ${standaloneServer} ...`);
   }
 
-  // Force HOSTNAME=0.0.0.0 so the standalone server binds on all interfaces.
-  // Render sets HOSTNAME to the pod's internal hostname; if Next.js inherits it,
-  // the server only listens on that specific hostname and Render's load balancer
-  // cannot reach it, causing a persistent 502 even though the service shows "live".
-  //
-  // Also set NEXT_SHARP_PATH so the standalone server can find the sharp native
-  // binary for image optimization (without it, /_next/image returns null).
-  const standaloneEnv = {
+  // Force HOSTNAME=0.0.0.0 so Next binds on all interfaces.
+  // Render sets HOSTNAME to the pod's internal hostname; inheriting it makes
+  // the process unreachable from Render's load balancer.
+  const nextEnv = {
     ...process.env,
     HOSTNAME: "0.0.0.0",
     ...(useStandalone && !process.env.NEXT_SHARP_PATH
@@ -70,8 +66,8 @@ async function main() {
   };
 
   const next = useStandalone
-    ? await run("node", [standaloneServer], { label: "next-standalone", env: standaloneEnv })
-    : await run(bin("next"), ["start"], { label: "next-start" });
+    ? await run("node", [standaloneServer], { label: "next-standalone", env: nextEnv })
+    : await run(bin("next"), ["start", "--hostname", "0.0.0.0"], { label: "next-start", env: nextEnv });
 
   process.exit(next.code);
 }

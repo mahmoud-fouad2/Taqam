@@ -8,7 +8,7 @@ services:
     runtime: node
     region: frankfurt # Closest to Middle East
     plan: starter
-    buildCommand: npm install -g pnpm && pnpm install && SKIP_BUILD_VALIDATION=true NODE_OPTIONS=--max-old-space-size=448 pnpm build:render && cp -r .next/static .next/standalone/.next/static && cp -r public .next/standalone/public && cp -r node_modules/sharp .next/standalone/node_modules/sharp
+    buildCommand: npm install -g pnpm && pnpm install && SKIP_BUILD_VALIDATION=true NEXT_DISABLE_STANDALONE_OUTPUT=true NODE_OPTIONS=--max-old-space-size=448 pnpm build:render
     startCommand: pnpm start:render
     healthCheckPath: /api/health
     envVars:
@@ -35,6 +35,8 @@ services:
       - key: NODE_OPTIONS
         value: --max-old-space-size=384
       - key: DISABLE_SENTRY_BUILD
+        value: "true"
+      - key: NEXT_DISABLE_STANDALONE_OUTPUT
         value: "true"
       - key: SKIP_BUILD_VALIDATION
         value: "true"
