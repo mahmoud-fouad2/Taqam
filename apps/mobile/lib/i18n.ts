@@ -88,6 +88,10 @@ export function humanizeApiError(lang: AppLanguage, message: string): string {
   const m = message || "";
 
   const map: Array<[string, { ar: string; en: string }]> = [
+    ["مخصص للموظفين", { ar: "هذا التطبيق مخصص للموظفين فقط", en: "This app is for employees only" }],
+    ["employees only", { ar: "هذا التطبيق مخصص للموظفين فقط", en: "This app is for employees only" }],
+    ["Account is temporarily locked", { ar: "الحساب مقفل مؤقتاً، حاول بعد 30 دقيقة", en: "Account temporarily locked, try again in 30 min" }],
+    ["Account is disabled", { ar: "الحساب موقوف", en: "Account is disabled" }],
     ["Unauthorized", { ar: "غير مصرح", en: "Unauthorized" }],
     ["Missing device", { ar: "بيانات الجهاز غير متاحة", en: "Device info missing" }],
     ["Device mismatch", { ar: "الجهاز غير مطابق", en: "Device mismatch" }],

@@ -7,8 +7,10 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
-import { AuthProvider } from '@/components/auth-provider';
+import { AuthProvider, useAuth } from '@/components/auth-provider';
 import { AppSettingsProvider } from '@/components/app-settings-provider';
+import { usePushNotifications } from '@/hooks/use-push-notifications';
+import { OfflineBanner } from '@/components/offline-banner';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -54,6 +56,8 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AppSettingsProvider>
         <AuthProvider>
+          <PushHooks />
+          <OfflineBanner />
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
@@ -64,4 +68,9 @@ function RootLayoutNav() {
       </AppSettingsProvider>
     </ThemeProvider>
   );
+}
+
+function PushHooks() {
+  usePushNotifications();
+  return null;
 }

@@ -53,7 +53,7 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="history"
         options={{
           title: isAr ? 'السجل' : 'History',
           tabBarIcon: ({ color }) => <TabIcon name="clock-o" color={color} />,

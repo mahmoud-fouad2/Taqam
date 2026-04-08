@@ -5,11 +5,13 @@ import {
   Modal,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
   View,
 } from "react-native";
+import DateTimePicker, { type DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
@@ -18,6 +20,20 @@ import { humanizeApiError } from "@/lib/i18n";
 type ReqStatus = "pending" | "approved" | "rejected" | "cancelled";
 type ReqType = "leave" | "ticket" | "training";
 type FilterType = "all" | ReqType;
+
+// ─── Leave types ─────────────────────────────────────────────────────────────
+type LeaveType = {
+  id: string;
+  name: string;
+  nameAr: string | null;
+  code: string;
+  isPaid: boolean;
+  requiresAttachment: boolean;
+  defaultDays: number;
+  color: string;
+};
+
+type SheetMode = "choose" | "leave" | "ticket";
 
 type RequestItem = {
   id: string;
@@ -46,6 +62,16 @@ function fmtDate(iso: string, lang: "ar" | "en"): string {
   }
 }
 
+function fmtDatePicker(d: Date, lang: "ar" | "en"): string {
+  return d.toLocaleDateString(lang === "ar" ? "ar-SA" : "en-US", {
+    year: "numeric", month: "short", day: "numeric",
+  });
+}
+
+function toIsoDate(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
 function typeLabel(tp: ReqType, lang: "ar" | "en"): string {
   const m: Record<ReqType, { ar: string; en: string }> = {
     leave:    { ar: "إجازة",      en: "Leave" },
@@ -70,19 +96,34 @@ export default function RequestsScreen() {
   const { language } = useAppSettings();
   const isRtl = language === "ar";
 
+  // List state
   const [items, setItems]     = useState<RequestItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState<string | null>(null);
   const [filter, setFilter]   = useState<FilterType>("all");
 
-  // Modal state
-  const [showModal, setShowModal]       = useState(false);
-  const [newTitle, setNewTitle]         = useState("");
-  const [newDesc, setNewDesc]           = useState("");
-  const [submitting, setSubmitting]     = useState(false);
-  const [submitError, setSubmitError]   = useState<string | null>(null);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
+  // Sheet state
+  const [showSheet, setShowSheet]     = useState(false);
+  const [sheetMode, setSheetMode]     = useState<SheetMode>("choose");
+  const [submitting, setSubmitting]   = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [submitOk, setSubmitOk]       = useState(false);
 
+  // Ticket form
+  const [ticketTitle, setTicketTitle] = useState("");
+  const [ticketDesc, setTicketDesc]   = useState("");
+
+  // Leave form
+  const [leaveTypes, setLeaveTypes]           = useState<LeaveType[]>([]);
+  const [leaveTypesLoading, setLeaveTypesLoading] = useState(false);
+  const [selectedLeaveType, setSelectedLeaveType] = useState<LeaveType | null>(null);
+  const [startDate, setStartDate]             = useState<Date>(new Date());
+  const [endDate, setEndDate]                 = useState<Date>(new Date());
+  const [showStartPicker, setShowStartPicker] = useState(false);
+  const [showEndPicker, setShowEndPicker]     = useState(false);
+  const [leaveReason, setLeaveReason]         = useState("");
+
+  // ── Load requests list ──────────────────────────────────────────────────
   const load = useCallback(async () => {
     if (!accessToken) return;
     setLoading(true);
@@ -99,16 +140,44 @@ export default function RequestsScreen() {
 
   useEffect(() => { void load(); }, [load]);
 
-  const filtered = filter === "all" ? items : items.filter((i) => i.type === filter);
+  // ── Load leave types ────────────────────────────────────────────────────
+  const loadLeaveTypes = useCallback(async () => {
+    if (leaveTypes.length > 0) return;
+    setLeaveTypesLoading(true);
+    try {
+      const res = await authFetch<{ data: LeaveType[] }>("/api/mobile/leaves/types");
+      setLeaveTypes(res?.data ?? []);
+      if (res?.data?.length > 0) setSelectedLeaveType(res.data[0]);
+    } catch {
+      // non-fatal
+    } finally {
+      setLeaveTypesLoading(false);
+    }
+  }, [authFetch, leaveTypes.length]);
 
-  const openModal = () => {
-    setNewTitle(""); setNewDesc(""); setSubmitError(null); setSubmitSuccess(false);
-    setShowModal(true);
+  // ── Open sheet ──────────────────────────────────────────────────────────
+  const openSheet = () => {
+    setSheetMode("choose");
+    setSubmitError(null);
+    setSubmitOk(false);
+    setTicketTitle("");
+    setTicketDesc("");
+    setLeaveReason("");
+    const today = new Date();
+    setStartDate(today);
+    setEndDate(today);
+    setShowSheet(true);
   };
 
+  const pickMode = (mode: "leave" | "ticket") => {
+    setSheetMode(mode);
+    if (mode === "leave") void loadLeaveTypes();
+  };
+
+  // ── Submit ticket ───────────────────────────────────────────────────────
   const submitTicket = async () => {
-    const trimTitle = newTitle.trim();
-    const trimDesc  = newDesc.trim();
+    const trimTitle = ticketTitle.trim();
+    const trimDesc  = ticketDesc.trim();
     if (!trimTitle || !trimDesc) {
       setSubmitError(isRtl ? "الرجاء ملء جميع الحقول" : "Please fill all fields");
       return;
@@ -120,15 +189,60 @@ export default function RequestsScreen() {
         method: "POST",
         body: JSON.stringify({ type: "ticket", title: trimTitle, description: trimDesc }),
       });
-      setSubmitSuccess(true);
+      setSubmitOk(true);
       void load();
-      setTimeout(() => setShowModal(false), 1400);
+      setTimeout(() => setShowSheet(false), 1400);
     } catch (e: any) {
       setSubmitError(humanizeApiError(language, e?.message ?? ""));
     } finally {
       setSubmitting(false);
     }
   };
+
+  // ── Submit leave ────────────────────────────────────────────────────────
+  const submitLeave = async () => {
+    if (!selectedLeaveType) {
+      setSubmitError(isRtl ? "يرجى اختيار نوع الإجازة" : "Please select a leave type");
+      return;
+    }
+    if (endDate < startDate) {
+      setSubmitError(isRtl ? "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء" : "End date must be after start date");
+      return;
+    }
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await authFetch("/api/mobile/leaves", {
+        method: "POST",
+        body: JSON.stringify({
+          leaveTypeId: selectedLeaveType.id,
+          startDate: toIsoDate(startDate),
+          endDate: toIsoDate(endDate),
+          reason: leaveReason.trim() || undefined,
+        }),
+      });
+      setSubmitOk(true);
+      void load();
+      setTimeout(() => setShowSheet(false), 1400);
+    } catch (e: any) {
+      setSubmitError(humanizeApiError(language, e?.message ?? ""));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ── Date pickers ─────────────────────────────────────────────────────────
+  const onChangeStart = (_: DateTimePickerEvent, d?: Date) => {
+    setShowStartPicker(Platform.OS === "ios");
+    if (d) { setStartDate(d); if (d > endDate) setEndDate(d); }
+  };
+
+  const onChangeEnd = (_: DateTimePickerEvent, d?: Date) => {
+    setShowEndPicker(Platform.OS === "ios");
+    if (d) setEndDate(d);
+  };
+
+  const filtered = filter === "all" ? items : items.filter((i) => i.type === filter);
 
   const FILTERS: { key: FilterType; ar: string; en: string }[] = [
     { key: "all",      ar: "الكل",   en: "All" },
@@ -196,47 +310,209 @@ export default function RequestsScreen() {
         />
       )}
 
-      {/* Floating action button */}
+      {/* FAB */}
       <Pressable
-        onPress={openModal}
+        onPress={openSheet}
         style={({ pressed }) => [styles.fab, pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] }]}
       >
         <Text style={styles.fabPlus}>+</Text>
       </Pressable>
 
-      {/* New ticket bottom sheet modal */}
+      {/* Bottom sheet */}
       <Modal
-        visible={showModal}
+        visible={showSheet}
         transparent
         animationType="slide"
-        onRequestClose={() => setShowModal(false)}
+        onRequestClose={() => setShowSheet(false)}
       >
         <View style={styles.overlay}>
           <View style={styles.sheet}>
-            {/* Header */}
-            <View style={[styles.sheetHeader, isRtl && { flexDirection: "row-reverse" }]}>
-              <Text style={[styles.sheetTitle, { textAlign: isRtl ? "right" : "left" }]}>
-                {isRtl ? "تذكرة دعم جديدة" : "New support ticket"}
-              </Text>
-              <Pressable onPress={() => setShowModal(false)} hitSlop={10}>
-                <Text style={styles.closeBtn}>✕</Text>
-              </Pressable>
-            </View>
 
-            {submitSuccess ? (
+            {/* ── Success ── */}
+            {submitOk ? (
               <View style={styles.successBox}>
                 <Text style={styles.successText}>
                   {isRtl ? "✓ تم إرسال طلبك بنجاح!" : "✓ Submitted successfully!"}
                 </Text>
               </View>
-            ) : (
+
+            ) : sheetMode === "choose" ? (
+              /* ── Choose type ── */
               <>
+                <View style={[styles.sheetHeader, isRtl && { flexDirection: "row-reverse" }]}>
+                  <Text style={[styles.sheetTitle, { textAlign: isRtl ? "right" : "left" }]}>
+                    {isRtl ? "طلب جديد" : "New request"}
+                  </Text>
+                  <Pressable onPress={() => setShowSheet(false)} hitSlop={10}>
+                    <Text style={styles.closeBtn}>✕</Text>
+                  </Pressable>
+                </View>
+                <Pressable onPress={() => pickMode("leave")} style={styles.choiceCard}>
+                  <Text style={styles.choiceIcon}>🌴</Text>
+                  <View style={styles.choiceText}>
+                    <Text style={styles.choiceTitle}>{isRtl ? "طلب إجازة" : "Leave request"}</Text>
+                    <Text style={styles.choiceSub}>{isRtl ? "سنوية، مرضية، بدون راتب..." : "Annual, sick, unpaid..."}</Text>
+                  </View>
+                  <Text style={styles.choiceArrow}>›</Text>
+                </Pressable>
+                <Pressable onPress={() => pickMode("ticket")} style={styles.choiceCard}>
+                  <Text style={styles.choiceIcon}>🎫</Text>
+                  <View style={styles.choiceText}>
+                    <Text style={styles.choiceTitle}>{isRtl ? "تذكرة دعم" : "Support ticket"}</Text>
+                    <Text style={styles.choiceSub}>{isRtl ? "استفسار أو مشكلة" : "Question or issue"}</Text>
+                  </View>
+                  <Text style={styles.choiceArrow}>›</Text>
+                </Pressable>
+              </>
+
+            ) : sheetMode === "leave" ? (
+              /* ── Leave form ── */
+              <>
+                <View style={[styles.sheetHeader, isRtl && { flexDirection: "row-reverse" }]}>
+                  <Pressable onPress={() => setSheetMode("choose")} hitSlop={10}>
+                    <Text style={styles.backText}>{isRtl ? "‹ رجوع" : "‹ Back"}</Text>
+                  </Pressable>
+                  <Text style={[styles.sheetTitle, { flex: 1, textAlign: "center" }]}>
+                    {isRtl ? "طلب إجازة" : "Leave request"}
+                  </Text>
+                  <Pressable onPress={() => setShowSheet(false)} hitSlop={10}>
+                    <Text style={styles.closeBtn}>✕</Text>
+                  </Pressable>
+                </View>
+
+                <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+                  {/* Leave type */}
+                  <Text style={[styles.fieldLabel, { textAlign: isRtl ? "right" : "left" }]}>
+                    {isRtl ? "نوع الإجازة" : "Leave type"}
+                  </Text>
+                  {leaveTypesLoading ? (
+                    <ActivityIndicator color="#3b82f6" style={{ marginVertical: 12 }} />
+                  ) : leaveTypes.length === 0 ? (
+                    <Text style={styles.noTypesText}>{isRtl ? "لا توجد أنواع إجازات" : "No leave types available"}</Text>
+                  ) : (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: 4 }}>
+                      <View style={{ flexDirection: "row", gap: 8 }}>
+                        {leaveTypes.map((lt) => (
+                          <Pressable
+                            key={lt.id}
+                            onPress={() => setSelectedLeaveType(lt)}
+                            style={[
+                              styles.leaveTypeChip,
+                              selectedLeaveType?.id === lt.id && { borderColor: lt.color, backgroundColor: lt.color + "22" },
+                            ]}
+                          >
+                            <Text style={[styles.leaveTypeText, selectedLeaveType?.id === lt.id && { color: lt.color }]}>
+                              {(isRtl ? lt.nameAr : null) ?? lt.name}
+                            </Text>
+                            {lt.isPaid ? null : (
+                              <Text style={styles.unpaidTag}>{isRtl ? "بدون راتب" : "Unpaid"}</Text>
+                            )}
+                          </Pressable>
+                        ))}
+                      </View>
+                    </ScrollView>
+                  )}
+
+                  {/* Date range */}
+                  <View style={[{ flexDirection: "row", gap: 12, marginTop: 4 }, isRtl && { flexDirection: "row-reverse" }]}>
+                    <View style={{ flex: 1, gap: 6 }}>
+                      <Text style={[styles.fieldLabel, { textAlign: isRtl ? "right" : "left" }]}>
+                        {isRtl ? "من" : "From"}
+                      </Text>
+                      <Pressable onPress={() => setShowStartPicker(true)} style={styles.datePressable}>
+                        <Text style={styles.dateText}>{fmtDatePicker(startDate, language)}</Text>
+                        <Text>📅</Text>
+                      </Pressable>
+                      {showStartPicker && (
+                        <DateTimePicker
+                          value={startDate}
+                          mode="date"
+                          display={Platform.OS === "ios" ? "spinner" : "default"}
+                          minimumDate={new Date()}
+                          onChange={onChangeStart}
+                        />
+                      )}
+                    </View>
+                    <View style={{ flex: 1, gap: 6 }}>
+                      <Text style={[styles.fieldLabel, { textAlign: isRtl ? "right" : "left" }]}>
+                        {isRtl ? "إلى" : "To"}
+                      </Text>
+                      <Pressable onPress={() => setShowEndPicker(true)} style={styles.datePressable}>
+                        <Text style={styles.dateText}>{fmtDatePicker(endDate, language)}</Text>
+                        <Text>📅</Text>
+                      </Pressable>
+                      {showEndPicker && (
+                        <DateTimePicker
+                          value={endDate}
+                          mode="date"
+                          display={Platform.OS === "ios" ? "spinner" : "default"}
+                          minimumDate={startDate}
+                          onChange={onChangeEnd}
+                        />
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Reason */}
+                  <Text style={[styles.fieldLabel, { textAlign: isRtl ? "right" : "left", marginTop: 4 }]}>
+                    {isRtl ? "السبب (اختياري)" : "Reason (optional)"}
+                  </Text>
+                  <TextInput
+                    value={leaveReason}
+                    onChangeText={setLeaveReason}
+                    placeholder={isRtl ? "سبب الإجازة..." : "Reason for leave..."}
+                    placeholderTextColor="rgba(255,255,255,0.28)"
+                    multiline
+                    numberOfLines={3}
+                    style={[styles.sheetInput, styles.sheetTextarea, { textAlign: isRtl ? "right" : "left" }]}
+                  />
+
+                  {submitError ? (
+                    <Text style={[styles.errorText, { textAlign: isRtl ? "right" : "left", marginHorizontal: 0 }]}>
+                      {submitError}
+                    </Text>
+                  ) : null}
+
+                  <View style={[styles.sheetActions, isRtl && { flexDirection: "row-reverse" }]}>
+                    <Pressable onPress={() => setShowSheet(false)} style={[styles.sheetBtn, styles.cancelBtn]}>
+                      <Text style={styles.cancelBtnText}>{isRtl ? "إلغاء" : "Cancel"}</Text>
+                    </Pressable>
+                    <Pressable
+                      onPress={() => void submitLeave()}
+                      disabled={submitting || !selectedLeaveType}
+                      style={[styles.sheetBtn, styles.submitBtn, (submitting || !selectedLeaveType) && styles.submitBtnDisabled]}
+                    >
+                      {submitting ? (
+                        <ActivityIndicator color="#fff" size="small" />
+                      ) : (
+                        <Text style={styles.submitBtnText}>{isRtl ? "إرسال الطلب" : "Submit"}</Text>
+                      )}
+                    </Pressable>
+                  </View>
+                </ScrollView>
+              </>
+
+            ) : (
+              /* ── Ticket form ── */
+              <>
+                <View style={[styles.sheetHeader, isRtl && { flexDirection: "row-reverse" }]}>
+                  <Pressable onPress={() => setSheetMode("choose")} hitSlop={10}>
+                    <Text style={styles.backText}>{isRtl ? "‹ رجوع" : "‹ Back"}</Text>
+                  </Pressable>
+                  <Text style={[styles.sheetTitle, { flex: 1, textAlign: "center" }]}>
+                    {isRtl ? "تذكرة دعم" : "Support ticket"}
+                  </Text>
+                  <Pressable onPress={() => setShowSheet(false)} hitSlop={10}>
+                    <Text style={styles.closeBtn}>✕</Text>
+                  </Pressable>
+                </View>
+
                 <Text style={[styles.fieldLabel, { textAlign: isRtl ? "right" : "left" }]}>
                   {isRtl ? "الموضوع" : "Subject"}
                 </Text>
                 <TextInput
-                  value={newTitle}
-                  onChangeText={setNewTitle}
+                  value={ticketTitle}
+                  onChangeText={setTicketTitle}
                   placeholder={isRtl ? "موضوع التذكرة..." : "Ticket subject..."}
                   placeholderTextColor="rgba(255,255,255,0.28)"
                   style={[styles.sheetInput, { textAlign: isRtl ? "right" : "left" }]}
@@ -246,8 +522,8 @@ export default function RequestsScreen() {
                   {isRtl ? "التفاصيل" : "Details"}
                 </Text>
                 <TextInput
-                  value={newDesc}
-                  onChangeText={setNewDesc}
+                  value={ticketDesc}
+                  onChangeText={setTicketDesc}
                   placeholder={isRtl ? "اشرح مشكلتك أو استفسارك..." : "Describe your issue..."}
                   placeholderTextColor="rgba(255,255,255,0.28)"
                   multiline
@@ -256,23 +532,21 @@ export default function RequestsScreen() {
                 />
 
                 {submitError ? (
-                  <Text style={[styles.errorText, { textAlign: isRtl ? "right" : "left" }]}>{submitError}</Text>
+                  <Text style={[styles.errorText, { textAlign: isRtl ? "right" : "left", marginHorizontal: 0 }]}>
+                    {submitError}
+                  </Text>
                 ) : null}
 
                 <View style={[styles.sheetActions, isRtl && { flexDirection: "row-reverse" }]}>
-                  <Pressable
-                    onPress={() => setShowModal(false)}
-                    style={[styles.sheetBtn, styles.cancelBtn]}
-                  >
+                  <Pressable onPress={() => setShowSheet(false)} style={[styles.sheetBtn, styles.cancelBtn]}>
                     <Text style={styles.cancelBtnText}>{isRtl ? "إلغاء" : "Cancel"}</Text>
                   </Pressable>
                   <Pressable
                     onPress={() => void submitTicket()}
-                    disabled={submitting || !newTitle.trim() || !newDesc.trim()}
+                    disabled={submitting || !ticketTitle.trim() || !ticketDesc.trim()}
                     style={[
-                      styles.sheetBtn,
-                      styles.submitBtn,
-                      (submitting || !newTitle.trim() || !newDesc.trim()) && styles.submitBtnDisabled,
+                      styles.sheetBtn, styles.submitBtn,
+                      (submitting || !ticketTitle.trim() || !ticketDesc.trim()) && styles.submitBtnDisabled,
                     ]}
                   >
                     {submitting ? (
@@ -284,6 +558,7 @@ export default function RequestsScreen() {
                 </View>
               </>
             )}
+
           </View>
         </View>
       </Modal>
@@ -385,6 +660,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "rgba(255,255,255,0.09)",
     gap: 14,
+    maxHeight: "90%",
   },
   sheetHeader: {
     flexDirection: "row",
@@ -393,7 +669,50 @@ const styles = StyleSheet.create({
   },
   sheetTitle: { color: "#f1f5f9", fontSize: 18, fontWeight: "800" },
   closeBtn: { color: "rgba(255,255,255,0.45)", fontSize: 18, padding: 4 },
+  backText: { color: "#3b82f6", fontSize: 14, fontWeight: "700" },
   fieldLabel: { color: "rgba(255,255,255,0.65)", fontSize: 13, fontWeight: "600" },
+  // Choice cards
+  choiceCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1e293b",
+    borderRadius: 16,
+    padding: 16,
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  choiceIcon: { fontSize: 28 },
+  choiceText: { flex: 1 },
+  choiceTitle: { color: "#f1f5f9", fontSize: 16, fontWeight: "700" },
+  choiceSub: { color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 2 },
+  choiceArrow: { color: "rgba(255,255,255,0.30)", fontSize: 22 },
+  // Leave types
+  leaveTypeChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(255,255,255,0.04)",
+    alignItems: "center",
+  },
+  leaveTypeText: { color: "rgba(255,255,255,0.80)", fontWeight: "700", fontSize: 13 },
+  unpaidTag: { color: "#94a3b8", fontSize: 10, marginTop: 2, fontWeight: "600" },
+  noTypesText: { color: "rgba(255,255,255,0.40)", fontSize: 14, marginVertical: 8 },
+  // Date
+  datePressable: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "#1e293b",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.09)",
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  dateText: { color: "#f1f5f9", fontSize: 13, fontWeight: "700" },
   sheetInput: {
     backgroundColor: "#1e293b",
     borderWidth: 1,

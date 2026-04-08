@@ -43,6 +43,14 @@
     "plugins": [
       "expo-router",
       [
+        "expo-notifications",
+        {
+          "icon": "./assets/brand/icon.png",
+          "color": "#3b82f6",
+          "sounds": []
+        }
+      ],
+      [
         "expo-local-authentication",
         {
           "faceIDPermission": "Taqam uses device biometrics to confirm attendance actions securely."

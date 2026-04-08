@@ -277,6 +277,10 @@ model MobileDevice {
   lastSeenAt DateTime?
   attestedAt DateTime?
 
+  // Expo push token for remote notifications
+  pushToken          String?
+  pushTokenUpdatedAt DateTime?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
