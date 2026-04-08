@@ -58,7 +58,16 @@ async function main() {
   // Render sets HOSTNAME to the pod's internal hostname; if Next.js inherits it,
   // the server only listens on that specific hostname and Render's load balancer
   // cannot reach it, causing a persistent 502 even though the service shows "live".
-  const standaloneEnv = { ...process.env, HOSTNAME: "0.0.0.0" };
+  //
+  // Also set NEXT_SHARP_PATH so the standalone server can find the sharp native
+  // binary for image optimization (without it, /_next/image returns null).
+  const standaloneEnv = {
+    ...process.env,
+    HOSTNAME: "0.0.0.0",
+    ...(useStandalone && !process.env.NEXT_SHARP_PATH
+      ? { NEXT_SHARP_PATH: "/opt/render/project/src/node_modules/sharp" }
+      : {}),
+  };
 
   const next = useStandalone
     ? await run("node", [standaloneServer], { label: "next-standalone", env: standaloneEnv })
