@@ -8,9 +8,9 @@ function bin(name) {
   return `node_modules/.bin/${name}${ext}`;
 }
 
-function run(cmd, args, { label } = {}) {
+function run(cmd, args, { label, env } = {}) {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { stdio: "inherit" });
+    const child = spawn(cmd, args, { stdio: "inherit", env: env ?? process.env });
     child.on("close", (code) => resolve({ code: code ?? 1, label }));
   });
 }
@@ -54,8 +54,14 @@ async function main() {
     console.log(`[render-start] Detected standalone output; starting ${standaloneServer} ...`);
   }
 
+  // Force HOSTNAME=0.0.0.0 so the standalone server binds on all interfaces.
+  // Render sets HOSTNAME to the pod's internal hostname; if Next.js inherits it,
+  // the server only listens on that specific hostname and Render's load balancer
+  // cannot reach it, causing a persistent 502 even though the service shows "live".
+  const standaloneEnv = { ...process.env, HOSTNAME: "0.0.0.0" };
+
   const next = useStandalone
-    ? await run("node", [standaloneServer], { label: "next-standalone" })
+    ? await run("node", [standaloneServer], { label: "next-standalone", env: standaloneEnv })
     : await run(bin("next"), ["start"], { label: "next-start" });
 
   process.exit(next.code);
