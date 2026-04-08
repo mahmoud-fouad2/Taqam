@@ -103,6 +103,14 @@ export function humanizeApiError(lang: AppLanguage, message: string): string {
     ["Already checked in today", { ar: "تم تسجيل الحضور بالفعل اليوم", en: "Already checked in today" }],
     ["Already checked out today", { ar: "تم تسجيل الانصراف بالفعل اليوم", en: "Already checked out today" }],
     ["Must check in first", { ar: "يجب تسجيل الحضور أولاً", en: "You must check in first" }],
+    ["Invalid input", { ar: "بيانات غير صالحة", en: "Invalid input" }],
+    ["invalid_payload", { ar: "بيانات غير صالحة", en: "Invalid input" }],
+    ["invalid payload", { ar: "بيانات غير صالحة", en: "Invalid input" }],
+    ["Validation", { ar: "خطأ في البيانات المدخلة", en: "Validation error" }],
+    ["credentials", { ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة", en: "Incorrect email or password" }],
+    ["not found", { ar: "البيانات غير موجودة", en: "Not found" }],
+    ["Network", { ar: "لا يوجد اتصال بالإنترنت", en: "Network error" }],
+    ["fetch", { ar: "تعذّر الاتصال بالسيرفر", en: "Could not reach server" }],
   ];
 
   const found = map.find(([needle]) => m.includes(needle));

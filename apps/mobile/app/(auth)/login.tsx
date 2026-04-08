@@ -128,8 +128,15 @@ export default function LoginScreen() {
           </Pressable>
         </View>
 
-        {/* Dev hint */}
-        <Text style={[styles.hint, isRtl && styles.rtlText]}>{t(language, "dev_base_url_hint")}</Text>
+        {/* Dev hint — only visible in dev builds */}
+        {__DEV__ && (
+          <Text style={[styles.hint, isRtl && styles.rtlText]}>{t(language, "dev_base_url_hint")}</Text>
+        )}
+
+        {/* Copyright */}
+        <Text style={[styles.copyright, isRtl && styles.rtlText]}>
+          {language === "ar" ? "© 2025 طاقم. جميع الحقوق محفوظة." : "© 2025 Taqam. All rights reserved."}
+        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -257,6 +264,13 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.25)",
     fontSize: 11,
     textAlign: "center",
+    lineHeight: 18,
+  },
+  copyright: {
+    color: "rgba(255,255,255,0.22)",
+    fontSize: 11,
+    textAlign: "center",
+    marginTop: 6,
     lineHeight: 18,
   },
 });
