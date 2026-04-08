@@ -45,7 +45,21 @@ export const authOptions: NextAuthOptions = {
 
         const user = await prisma.user.findUnique({
           where: { email: normalizedEmail },
-          include: {
+          select: {
+            id: true,
+            email: true,
+            password: true,
+            firstName: true,
+            lastName: true,
+            avatar: true,
+            role: true,
+            permissions: true,
+            tenantId: true,
+            status: true,
+            lastLoginAt: true,
+            passwordChangedAt: true,
+            failedLoginAttempts: true,
+            lockedUntil: true,
             tenant: {
               select: {
                 id: true,
@@ -147,7 +161,7 @@ export const authOptions: NextAuthOptions = {
 
         if (!isPasswordValid) {
           // Increment failed attempts
-          await prisma.user.update({
+          await prisma.user.updateMany({
             where: { id: user.id },
             data: {
               failedLoginAttempts: { increment: 1 },
@@ -179,7 +193,7 @@ export const authOptions: NextAuthOptions = {
         }
 
         // Reset failed attempts and update last login
-        await prisma.user.update({
+        await prisma.user.updateMany({
           where: { id: user.id },
           data: {
             failedLoginAttempts: 0,

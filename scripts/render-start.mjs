@@ -25,8 +25,13 @@ async function main() {
     console.log("[render-start] Running prisma migrate deploy as a startup safety net...");
     const migrate = await run(bin("prisma"), ["migrate", "deploy"], { label: "prisma-migrate-deploy" });
     if (migrate.code !== 0) {
-      console.error("[render-start] prisma migrate deploy failed; refusing to start app.");
-      process.exit(migrate.code);
+      // Do NOT exit — a transient DB unreachability (e.g. Neon cold start, network blip)
+      // must not create a crash loop. The app itself handles DB errors gracefully per-request.
+      console.error(
+        "[render-start] prisma migrate deploy failed (exit code " +
+          migrate.code +
+          "); starting app anyway. Check DB connectivity if this persists."
+      );
     }
   }
 

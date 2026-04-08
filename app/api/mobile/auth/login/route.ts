@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     const passwordOk = await compare(parsed.data.password, user.password);
     if (!passwordOk) {
-      await prisma.user.update({
+      await prisma.user.updateMany({
         where: { id: user.id },
         data: {
           failedLoginAttempts: { increment: 1 },
@@ -158,7 +158,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await prisma.user.update({
+    await prisma.user.updateMany({
       where: { id: user.id },
       data: {
         failedLoginAttempts: 0,

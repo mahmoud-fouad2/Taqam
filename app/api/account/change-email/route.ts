@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "البريد الإلكتروني مستخدم بالفعل" }, { status: 400 });
     }
 
-    await prisma.user.update({
+    await prisma.user.updateMany({
       where: { id: session.user.id },
       data: { email: normalizedEmail },
     });

@@ -125,7 +125,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: true, message: "لا يوجد تغيير" });
     }
 
-    await prisma.user.update({
+    await prisma.user.updateMany({
       where: { id: admin.id },
       data,
     });
