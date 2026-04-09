@@ -17,6 +17,7 @@ import DateTimePicker, { DateTimePickerEvent } from "@react-native-community/dat
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
 import { t, humanizeApiError, tStr } from "@/lib/i18n";
+import { SkeletonCard } from "@/components/ui";
 
 const BRAND = "#3b82f6";
 
@@ -189,9 +190,11 @@ export default function LeavesScreen() {
   // ─────────────────── Render ───────────────────
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={BRAND} />
-        <Text style={styles.loadingText}>{t(language, "loading")}</Text>
+      <View style={{ flex: 1, backgroundColor: "#f8fafc", padding: 16, gap: 12, paddingTop: 40 }}>
+        <SkeletonCard style={{ height: 80 }} />
+        <SkeletonCard style={{ height: 80 }} />
+        <SkeletonCard style={{ height: 120 }} />
+        <SkeletonCard style={{ height: 120 }} />
       </View>
     );
   }

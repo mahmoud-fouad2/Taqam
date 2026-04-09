@@ -7,6 +7,8 @@ import * as LocalAuthentication from "expo-local-authentication";
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
 import { humanizeApiError, t, tStr } from "@/lib/i18n";
+import { useTheme } from "@/theme";
+import { Skeleton, SkeletonCard } from "@/components/ui";
 
 const BRAND = "#3b82f6";
 
@@ -264,6 +266,12 @@ export default function AttendanceScreen() {
       ) : null}
 
       {/* Dashboard Summary */}
+      {loadingToday && !dashboard && (
+        <View style={styles.dashSection}>
+          <SkeletonCard style={{ height: 100, marginBottom: 10 }} />
+          <SkeletonCard style={{ height: 60 }} />
+        </View>
+      )}
       {dashboard && (
         <View style={styles.dashSection}>
           {/* Leave balances */}

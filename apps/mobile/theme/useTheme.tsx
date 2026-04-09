@@ -34,9 +34,7 @@ const ThemeContext = createContext<ThemeContextValue>({
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const systemScheme = useColorScheme();
-  // Respect app-level preference if one is set, else fall back to system
-  const settings = useAppSettings() as any;
-  const themeMode: ThemeMode = settings?.themeMode ?? "system";
+  const { themeMode } = useAppSettings();
 
   const isDark = useMemo(() => {
     if (themeMode === "light") return false;

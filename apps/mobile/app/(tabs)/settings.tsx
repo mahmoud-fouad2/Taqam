@@ -1,14 +1,17 @@
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 
 import Constants from "expo-constants";
 import * as LocalAuthentication from "expo-local-authentication";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 import { BrandLogo } from "@/components/brand-logo";
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
 import { getApiBaseUrlInfo } from "@/lib/config";
 import { humanizeApiError, t, tStr } from "@/lib/i18n";
+import { useTheme } from "@/theme";
+import type { ThemeMode } from "@/lib/settings-storage";
 
 type BiometricState = "loading" | "ready" | "not-enrolled" | "unsupported";
 
@@ -17,7 +20,8 @@ const APP_PACKAGE = Constants.expoConfig?.android?.package ?? Constants.expoConf
 
 export default function SettingsScreen() {
   const { user, signOut, accessToken, authFetch } = useAuth();
-  const { language, setLanguage, biometricsEnabled, setBiometricsEnabled } = useAppSettings();
+  const { language, setLanguage, biometricsEnabled, setBiometricsEnabled, themeMode, setThemeMode } = useAppSettings();
+  const { colors, isDark, spacing, radius } = useTheme();
   const [message, setMessage] = useState<string | null>(null);
   const [biometricState, setBiometricState] = useState<BiometricState>("loading");
   const isRtl = language === "ar";
@@ -110,21 +114,65 @@ export default function SettingsScreen() {
     },
   ];
 
-  return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <BrandLogo style={styles.logo} variant="light" />
+  const themeModes: { mode: ThemeMode; icon: "sun-o" | "moon-o" | "cog"; labelAr: string; labelEn: string }[] = [
+    { mode: "system", icon: "cog", labelAr: "تلقائي", labelEn: "Auto" },
+    { mode: "light", icon: "sun-o", labelAr: "فاتح", labelEn: "Light" },
+    { mode: "dark", icon: "moon-o", labelAr: "داكن", labelEn: "Dark" },
+  ];
 
-      <View style={styles.heroCard}>
-        <Text style={styles.title}>{t(language, "settings_title")}</Text>
-        <Text style={[styles.heroText, isRtl && styles.rtlText]}>
+  return (
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ padding: spacing.md, paddingBottom: 28, gap: 12 }}
+    >
+      <BrandLogo style={{ alignItems: "center", marginTop: 10, marginBottom: 2 }} variant={isDark ? "dark" : "light"} />
+
+      {/* Hero */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary + "30", borderRadius: 18, padding: 18 }}>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: "900" }}>{t(language, "settings_title")}</Text>
+        <Text style={[{ color: colors.textSecondary, marginTop: 6, lineHeight: 20 }, isRtl && { textAlign: "right" }]}>
           {user
             ? `${user.firstName} ${user.lastName} • ${user.email}`
             : tStr(language, "غير مسجل الدخول", "Not signed in")}
         </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={[styles.sectionTitle, isRtl && styles.rtlText]}>
+      {/* Dark Mode */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md }}>
+        <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
+          {tStr(language, "المظهر", "Appearance")}
+        </Text>
+        <View style={[{ flexDirection: "row", gap: 8 }, isRtl && { flexDirection: "row-reverse" }]}>
+          {themeModes.map((tm) => {
+            const active = themeMode === tm.mode;
+            return (
+              <Pressable
+                key={tm.mode}
+                onPress={() => void setThemeMode(tm.mode)}
+                style={{
+                  flex: 1,
+                  paddingVertical: 12,
+                  borderRadius: radius.md,
+                  borderWidth: 1,
+                  alignItems: "center",
+                  gap: 4,
+                  borderColor: active ? colors.primary + "80" : colors.border,
+                  backgroundColor: active ? colors.primaryLight : colors.surfaceSecondary,
+                }}
+              >
+                <FontAwesome name={tm.icon} size={18} color={active ? colors.primary : colors.textMuted} />
+                <Text style={{ color: active ? colors.primary : colors.textSecondary, fontWeight: "700", fontSize: 12 }}>
+                  {isRtl ? tm.labelAr : tm.labelEn}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Security */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md }}>
+        <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
           {tStr(language, "الأمان والتحقق", "Security and verification")}
         </Text>
 
@@ -132,83 +180,124 @@ export default function SettingsScreen() {
           onPress={() => void toggleBiometrics()}
           disabled={biometricState !== "ready"}
           style={[
-            styles.preferenceRow,
-            isRtl && styles.preferenceRowRtl,
-            biometricState !== "ready" && styles.preferenceRowDisabled,
+            {
+              flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 12,
+              borderWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceSecondary,
+              borderRadius: 14, padding: 14,
+            },
+            isRtl && { flexDirection: "row-reverse" },
+            biometricState !== "ready" && { opacity: 0.72 },
           ]}
         >
-          <View style={styles.preferenceCopy}>
-            <Text style={[styles.preferenceTitle, isRtl && styles.rtlText]}>
+          <View style={{ flex: 1 }}>
+            <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 4 }, isRtl && { textAlign: "right" }]}>
               {tStr(language, "تأكيد الحضور بالبصمة", "Biometric attendance confirmation")}
             </Text>
-            <Text style={[styles.preferenceMeta, isRtl && styles.rtlText]}>{biometricStatusText}</Text>
+            <Text style={[{ color: colors.textSecondary, fontSize: 12, lineHeight: 18 }, isRtl && { textAlign: "right" }]}>
+              {biometricStatusText}
+            </Text>
           </View>
 
           <View
-            style={[
-              styles.toggleTrack,
-              biometricsEnabled && biometricState === "ready" && styles.toggleTrackActive,
-              biometricState !== "ready" && styles.toggleTrackDisabled,
-            ]}
+            style={{
+              width: 54, height: 30, borderRadius: 999, padding: 4, justifyContent: "center",
+              alignItems: biometricsEnabled && biometricState === "ready" ? "flex-end" : "flex-start",
+              backgroundColor: biometricsEnabled && biometricState === "ready" ? colors.success : colors.border,
+            }}
           >
-            <View
-              style={[
-                styles.toggleThumb,
-                biometricsEnabled && biometricState === "ready" && styles.toggleThumbActive,
-              ]}
-            />
+            <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: "#ffffff" }} />
           </View>
         </Pressable>
       </View>
 
-      <View style={styles.card}>
-        <Text style={[styles.sectionTitle, isRtl && styles.rtlText]}>{t(language, "language")}</Text>
-        <View style={[styles.langRow, isRtl && styles.langRowRtl]}>
+      {/* Language */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md }}>
+        <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
+          {t(language, "language")}
+        </Text>
+        <View style={[{ flexDirection: "row", gap: 10 }, isRtl && { flexDirection: "row-reverse" }]}>
           <Pressable
             onPress={() => void setLanguage("ar")}
-            style={[styles.langBtn, language === "ar" && styles.langBtnActive]}
+            style={{
+              flex: 1, paddingVertical: 10, borderRadius: radius.md, borderWidth: 1, alignItems: "center",
+              borderColor: language === "ar" ? colors.primary + "80" : colors.border,
+              backgroundColor: language === "ar" ? colors.primaryLight : colors.surfaceSecondary,
+            }}
           >
-            <Text style={styles.langText}>{t(language, "arabic")}</Text>
+            <Text style={{ color: language === "ar" ? colors.primary : colors.text, fontWeight: "800" }}>
+              {t(language, "arabic")}
+            </Text>
           </Pressable>
           <Pressable
             onPress={() => void setLanguage("en")}
-            style={[styles.langBtn, language === "en" && styles.langBtnActive]}
+            style={{
+              flex: 1, paddingVertical: 10, borderRadius: radius.md, borderWidth: 1, alignItems: "center",
+              borderColor: language === "en" ? colors.primary + "80" : colors.border,
+              backgroundColor: language === "en" ? colors.primaryLight : colors.surfaceSecondary,
+            }}
           >
-            <Text style={styles.langText}>{t(language, "english")}</Text>
+            <Text style={{ color: language === "en" ? colors.primary : colors.text, fontWeight: "800" }}>
+              {t(language, "english")}
+            </Text>
           </Pressable>
         </View>
-        <Text style={[styles.restartHint, isRtl && styles.rtlText]}>{t(language, "restart_required")}</Text>
+        <Text style={[{ marginTop: 10, color: colors.textMuted, fontSize: 12 }, isRtl && { textAlign: "right" }]}>
+          {t(language, "restart_required")}
+        </Text>
       </View>
 
-      <View style={styles.card}>
-        <Text style={[styles.sectionTitle, isRtl && styles.rtlText]}>
+      {/* Session */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md }}>
+        <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
           {tStr(language, "الجلسة", "Session")}
         </Text>
 
-        <Pressable onPress={() => void signOut()} style={[styles.button, styles.logout]}>
-          <Text style={styles.buttonText}>{t(language, "logout")}</Text>
+        <Pressable
+          onPress={() => void signOut()}
+          style={{
+            borderRadius: radius.md, paddingVertical: 12, alignItems: "center",
+            backgroundColor: colors.errorLight, borderWidth: 1, borderColor: colors.error + "30",
+          }}
+        >
+          <Text style={{ color: colors.error, fontWeight: "800" }}>{t(language, "logout")}</Text>
         </Pressable>
 
-        <Pressable onPress={() => void signOutAll()} style={[styles.button, styles.logoutAll]}>
-          <Text style={styles.buttonText}>{t(language, "logout_all")}</Text>
+        <Pressable
+          onPress={() => void signOutAll()}
+          style={{
+            marginTop: 10, borderRadius: radius.md, paddingVertical: 12, alignItems: "center",
+            backgroundColor: colors.errorLight, borderWidth: 1, borderColor: colors.error + "20",
+          }}
+        >
+          <Text style={{ color: colors.error, fontWeight: "800" }}>{t(language, "logout_all")}</Text>
         </Pressable>
 
-        {message ? <Text style={[styles.msg, isRtl && styles.rtlText]}>{message}</Text> : null}
+        {message ? (
+          <Text style={[{ marginTop: 10, color: colors.textSecondary, fontSize: 12 }, isRtl && { textAlign: "right" }]}>
+            {message}
+          </Text>
+        ) : null}
       </View>
 
-      <View style={styles.card}>
-        <Text style={[styles.sectionTitle, isRtl && styles.rtlText]}>
+      {/* Diagnostics */}
+      <View style={{ backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.border, borderRadius: radius.lg, padding: spacing.md }}>
+        <Text style={[{ color: colors.text, fontWeight: "800", marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
           {tStr(language, "تشخيص التشغيل", "Runtime diagnostics")}
         </Text>
 
         {diagnostics.map((item) => (
-          <View key={item.label} style={[styles.infoRow, isRtl && styles.infoRowRtl]}>
-            <Text style={[styles.infoLabel, isRtl && styles.rtlText]}>{item.label}</Text>
+          <View
+            key={item.label}
+            style={[{ paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: colors.borderLight }, isRtl && { alignItems: "flex-end" }]}
+          >
+            <Text style={[{ color: colors.textMuted, fontSize: 12, marginBottom: 4 }, isRtl && { textAlign: "right" }]}>
+              {item.label}
+            </Text>
             <Text
               style={[
-                styles.infoValue,
-                isRtl && styles.rtlText,
-                item.isWarning && styles.warningText,
+                { color: colors.text, fontWeight: "700" },
+                isRtl && { textAlign: "right" },
+                item.isWarning && { color: colors.warning },
               ]}
             >
               {item.value}
@@ -217,7 +306,7 @@ export default function SettingsScreen() {
         ))}
 
         {apiInfo.isLocalFallback ? (
-          <Text style={[styles.warningBanner, isRtl && styles.rtlText]}>
+          <Text style={[{ marginTop: 12, borderRadius: radius.md, padding: 12, backgroundColor: colors.warningLight, color: colors.warning, lineHeight: 20 }, isRtl && { textAlign: "right" }]}>
             {tStr(
               language,
               "هذا البناء ما زال يعتمد على localhost كاحتياط. اضبط EXPO_PUBLIC_API_BASE_URL قبل مشاركة التطبيق خارج جهاز التطوير.",
@@ -225,7 +314,7 @@ export default function SettingsScreen() {
             )}
           </Text>
         ) : (
-          <Text style={[styles.successBanner, isRtl && styles.rtlText]}>
+          <Text style={[{ marginTop: 12, borderRadius: radius.md, padding: 12, backgroundColor: colors.successLight, color: colors.success, lineHeight: 20 }, isRtl && { textAlign: "right" }]}>
             {tStr(
               language,
               "التطبيق مربوط حاليًا بعنوان خادم صريح ويمكن مراجعته من هذه الشاشة.",
@@ -237,197 +326,3 @@ export default function SettingsScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8fafc",
-  },
-  content: {
-    padding: 16,
-    paddingBottom: 28,
-    gap: 12,
-  },
-  logo: {
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 2,
-  },
-  heroCard: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#dbeafe",
-    borderRadius: 18,
-    padding: 18,
-  },
-  card: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 16,
-    padding: 16,
-  },
-  title: {
-    color: "#0f172a",
-    fontSize: 18,
-    fontWeight: "900",
-  },
-  heroText: {
-    color: "#64748b",
-    marginTop: 6,
-    lineHeight: 20,
-  },
-  button: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    alignItems: "center",
-  },
-  logout: {
-    backgroundColor: "#fef2f2",
-    borderWidth: 1,
-    borderColor: "#fecaca",
-  },
-  logoutAll: {
-    marginTop: 10,
-    backgroundColor: "#fef2f2",
-    borderWidth: 1,
-    borderColor: "#fecaca",
-  },
-  buttonText: {
-    color: "#dc2626",
-    fontWeight: "800",
-  },
-  msg: {
-    marginTop: 10,
-    color: "#64748b",
-    fontSize: 12,
-  },
-  sectionTitle: {
-    color: "#0f172a",
-    fontWeight: "800",
-    marginBottom: 10,
-  },
-  rtlText: {
-    textAlign: "right",
-  },
-  preferenceRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    backgroundColor: "#f8fafc",
-    borderRadius: 14,
-    padding: 14,
-  },
-  preferenceRowRtl: {
-    flexDirection: "row-reverse",
-  },
-  preferenceRowDisabled: {
-    opacity: 0.72,
-  },
-  preferenceCopy: {
-    flex: 1,
-  },
-  preferenceTitle: {
-    color: "#0f172a",
-    fontWeight: "800",
-    marginBottom: 4,
-  },
-  preferenceMeta: {
-    color: "#64748b",
-    fontSize: 12,
-    lineHeight: 18,
-  },
-  toggleTrack: {
-    width: 54,
-    height: 30,
-    borderRadius: 999,
-    backgroundColor: "#cbd5e1",
-    padding: 4,
-    alignItems: "flex-start",
-    justifyContent: "center",
-  },
-  toggleTrackActive: {
-    alignItems: "flex-end",
-    backgroundColor: "#4ade80",
-  },
-  toggleTrackDisabled: {
-    backgroundColor: "#e2e8f0",
-  },
-  toggleThumb: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#ffffff",
-  },
-  toggleThumbActive: {
-    backgroundColor: "#ffffff",
-  },
-  langRow: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  langRowRtl: {
-    flexDirection: "row-reverse",
-  },
-  langBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    backgroundColor: "#f8fafc",
-    alignItems: "center",
-  },
-  langBtnActive: {
-    borderColor: "#4ade80",
-    backgroundColor: "#f0fdf4",
-  },
-  langText: {
-    color: "#0f172a",
-    fontWeight: "800",
-  },
-  restartHint: {
-    marginTop: 10,
-    color: "#94a3b8",
-    fontSize: 12,
-  },
-  infoRow: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#f1f5f9",
-  },
-  infoRowRtl: {
-    alignItems: "flex-end",
-  },
-  infoLabel: {
-    color: "#94a3b8",
-    fontSize: 12,
-    marginBottom: 4,
-  },
-  infoValue: {
-    color: "#0f172a",
-    fontWeight: "700",
-  },
-  warningText: {
-    color: "#d97706",
-  },
-  warningBanner: {
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: "#fffbeb",
-    color: "#92400e",
-    lineHeight: 20,
-  },
-  successBanner: {
-    marginTop: 12,
-    borderRadius: 12,
-    padding: 12,
-    backgroundColor: "#f0fdf4",
-    color: "#166534",
-    lineHeight: 20,
-  },
-});

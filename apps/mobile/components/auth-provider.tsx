@@ -28,6 +28,7 @@ type AuthState = {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   authFetch: <T = any>(pathname: string, init?: RequestInit) => Promise<T>;
+  refreshUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState | null>(null);
@@ -172,6 +173,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(nextUser);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    const token = accessToken ?? (await getStoredAccessToken());
+    if (!token) return;
+    try {
+      const me = await apiFetch("/api/mobile/me", { token });
+      if (me?.data) setUser(me.data as User);
+    } catch {
+      // silently fail
+    }
+  }, [accessToken]);
+
   const signOut = useCallback(async () => {
     try {
       const currentRefresh = await getStoredRefreshToken();
@@ -191,8 +203,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const value = useMemo<AuthState>(
-    () => ({ loading, accessToken, refreshToken, user, signIn, signOut, authFetch }),
-    [loading, accessToken, refreshToken, user, signIn, signOut, authFetch]
+    () => ({ loading, accessToken, refreshToken, user, signIn, signOut, authFetch, refreshUser }),
+    [loading, accessToken, refreshToken, user, signIn, signOut, authFetch, refreshUser]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

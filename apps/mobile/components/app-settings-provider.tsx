@@ -2,12 +2,14 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import { I18nManager } from "react-native";
 import * as Updates from "expo-updates";
 
-import type { AppLanguage } from "@/lib/settings-storage";
+import type { AppLanguage, ThemeMode } from "@/lib/settings-storage";
 import {
   getStoredBiometricsEnabled,
   getStoredLanguage,
+  getStoredThemeMode,
   setStoredBiometricsEnabled,
   setStoredLanguage,
+  setStoredThemeMode,
 } from "@/lib/settings-storage";
 
 type AppSettings = {
@@ -15,6 +17,8 @@ type AppSettings = {
   setLanguage: (lang: AppLanguage) => Promise<void>;
   biometricsEnabled: boolean;
   setBiometricsEnabled: (enabled: boolean) => Promise<void>;
+  themeMode: ThemeMode;
+  setThemeMode: (mode: ThemeMode) => Promise<void>;
 };
 
 const SettingsContext = createContext<AppSettings | null>(null);
@@ -22,18 +26,21 @@ const SettingsContext = createContext<AppSettings | null>(null);
 export function AppSettingsProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<AppLanguage>("ar");
   const [biometricsEnabled, setBiometricsEnabledState] = useState(true);
+  const [themeMode, setThemeModeState] = useState<ThemeMode>("system");
 
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const [storedLanguage, storedBiometrics] = await Promise.all([
+      const [storedLanguage, storedBiometrics, storedTheme] = await Promise.all([
         getStoredLanguage(),
         getStoredBiometricsEnabled(),
+        getStoredThemeMode(),
       ]);
       if (!mounted) return;
       const lang = storedLanguage ?? "ar";
       setLanguageState(lang);
       if (storedBiometrics !== null) setBiometricsEnabledState(storedBiometrics);
+      if (storedTheme) setThemeModeState(storedTheme);
 
       // Ensure RTL matches current language on every cold start
       const shouldBeRtl = lang === "ar";
@@ -70,9 +77,14 @@ export function AppSettingsProvider({ children }: { children: React.ReactNode })
     setBiometricsEnabledState(enabled);
   };
 
+  const setThemeMode = async (mode: ThemeMode) => {
+    await setStoredThemeMode(mode);
+    setThemeModeState(mode);
+  };
+
   const value = useMemo<AppSettings>(
-    () => ({ language, setLanguage, biometricsEnabled, setBiometricsEnabled }),
-    [biometricsEnabled, language],
+    () => ({ language, setLanguage, biometricsEnabled, setBiometricsEnabled, themeMode, setThemeMode }),
+    [biometricsEnabled, language, themeMode],
   );
 
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
