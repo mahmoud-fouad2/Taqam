@@ -3,6 +3,63 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
+/* ── GET /api/mobile/leaves — list employee's leave requests ── */
+export async function GET(request: NextRequest) {
+  const payloadOrRes = await requireMobileEmployeeAuthWithDevice(request);
+  if (payloadOrRes instanceof NextResponse) return payloadOrRes;
+
+  try {
+    const url = new URL(request.url);
+    const page = Math.max(1, Number(url.searchParams.get("page")) || 1);
+    const limit = Math.min(100, Math.max(1, Number(url.searchParams.get("limit")) || 20));
+    const statusFilter = url.searchParams.get("status")?.toUpperCase();
+    const validStatuses = ["PENDING", "APPROVED", "REJECTED", "CANCELLED"];
+
+    const where: any = {
+      tenantId: payloadOrRes.tenantId,
+      employeeId: payloadOrRes.employeeId,
+    };
+    if (statusFilter && validStatuses.includes(statusFilter)) {
+      where.status = statusFilter;
+    }
+
+    const [items, total] = await Promise.all([
+      prisma.leaveRequest.findMany({
+        where,
+        include: {
+          leaveType: { select: { name: true, nameAr: true, color: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.leaveRequest.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      data: {
+        items: items.map((r) => ({
+          id: r.id,
+          leaveTypeName: r.leaveType.nameAr || r.leaveType.name,
+          leaveTypeColor: r.leaveType.color,
+          startDate: r.startDate.toISOString().slice(0, 10),
+          endDate: r.endDate.toISOString().slice(0, 10),
+          totalDays: Number(r.totalDays),
+          reason: r.reason,
+          status: r.status.toLowerCase(),
+          createdAt: r.createdAt.toISOString(),
+        })),
+        page,
+        limit,
+        total,
+      },
+    });
+  } catch (error) {
+    console.error("Mobile leaves GET error:", error);
+    return NextResponse.json({ error: "Failed to fetch leave requests" }, { status: 500 });
+  }
+}
+
 const createSchema = z.object({
   leaveTypeId: z.string().min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format must be YYYY-MM-DD"),

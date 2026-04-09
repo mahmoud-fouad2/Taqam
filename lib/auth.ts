@@ -234,6 +234,39 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
 
+  events: {
+    async signOut(message) {
+      try {
+        const token = (message as any)?.token as any;
+        const session = (message as any)?.session as any;
+
+        const userId =
+          (typeof token?.id === "string" && token.id) ||
+          (typeof session?.user?.id === "string" && session.user.id) ||
+          undefined;
+
+        const tenantIdRaw = token?.tenantId ?? session?.user?.tenantId ?? null;
+        const tenantId = typeof tenantIdRaw === "string" ? tenantIdRaw : null;
+
+        if (!userId) return;
+
+        await prisma.auditLog.create({
+          data: {
+            tenantId,
+            userId,
+            action: "LOGOUT",
+            entity: "User",
+            entityId: userId,
+          },
+        });
+
+        logger.auth("logout", userId, { tenantId });
+      } catch (error) {
+        logger.error("Logout audit log failed", undefined, error);
+      }
+    },
+  },
+
   callbacks: {
     async jwt({ token, user, trigger, session }) {
       // Initial sign in

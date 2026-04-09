@@ -110,7 +110,39 @@ export async function GET(request: NextRequest) {
 
     const where: any = { tenantId };
 
-    if (parsed.data.employeeId) where.employeeId = parsed.data.employeeId;
+    const requesterEmployee = await prisma.employee.findFirst({
+      where: { tenantId, userId: session.user.id },
+      select: { id: true, userId: true },
+    });
+
+    if (session.user.role === "MANAGER") {
+      if (!requesterEmployee) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      where.OR = [
+        { employeeId: requesterEmployee.id },
+        { employee: { managerId: requesterEmployee.id } }
+      ];
+      
+      if (parsed.data.employeeId) {
+        where.employeeId = parsed.data.employeeId;
+      }
+    } else if (!canManageAttendanceRequests(session.user.role)) {
+      if (requesterEmployee) {
+        where.employeeId = requesterEmployee.id;
+      } else {
+        where.employeeId = "NOT_FOUND";
+      }
+      
+      if (parsed.data.employeeId && parsed.data.employeeId !== requesterEmployee?.id) {
+         return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+    } else {
+      if (parsed.data.employeeId) {
+        where.employeeId = parsed.data.employeeId;
+      }
+    }
 
     if (parsed.data.status) where.status = String(parsed.data.status).toUpperCase().replace(/-/g, "_");
     if (parsed.data.type) where.type = String(parsed.data.type).toUpperCase().replace(/-/g, "_");
@@ -122,11 +154,6 @@ export async function GET(request: NextRequest) {
         employee: { select: { id: true, firstName: true, lastName: true, firstNameAr: true, lastNameAr: true, userId: true } },
       },
     });
-
-    if (!canManageAttendanceRequests(session.user.role)) {
-      const filtered = items.filter((r) => r.employee.userId === session.user.id);
-      return NextResponse.json({ data: { items: filtered.map(serializeAttendanceRequest) } });
-    }
 
     return NextResponse.json({ data: { items: items.map(serializeAttendanceRequest) } });
   } catch (error) {

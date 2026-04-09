@@ -260,7 +260,7 @@ export async function POST(request: NextRequest) {
     }
 
     // RBAC: only managers and above can create development plans
-    const allowedRoles = ["TENANT_ADMIN", "ADMIN", "SUPER_ADMIN", "HR_MANAGER", "MANAGER"];
+    const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER", "MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
       return NextResponse.json(
         { error: "لا تملك صلاحية إنشاء خطط تطوير" },

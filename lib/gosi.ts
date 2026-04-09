@@ -13,10 +13,13 @@
  *   No pension; only 2% Hazard Coverage from employer
  */
 
+import type { GOSISettings } from "@/lib/types/payroll";
+
 export type GosiInput = {
   basicSalary: number;
   housingAllowance?: number;
   isSaudi: boolean;
+  settings?: Pick<GOSISettings, "employeePercentage" | "employerPercentage" | "maxSalary" | "isEnabled">;
 };
 
 export type GosiResult = {
@@ -43,8 +46,37 @@ const GOSI_RATES = {
   employerUi: 0.0075, // 0.75%
 } as const;
 
+const DEFAULT_EMPLOYEE_TOTAL_RATE = GOSI_RATES.employeePension + GOSI_RATES.employeeUi; // 9.75%
+const DEFAULT_EMPLOYER_TOTAL_RATE =
+  GOSI_RATES.employerPension + GOSI_RATES.employerHazard + GOSI_RATES.employerUi; // 11.75%
+
+function clampGosiBase(base: number, settings?: GosiInput["settings"]) {
+  if (!settings) return base;
+  if (settings.isEnabled === false) return 0;
+  if (!Number.isFinite(settings.maxSalary) || settings.maxSalary <= 0) return base;
+  return Math.min(base, settings.maxSalary);
+}
+
 export function calculateGosi(input: GosiInput): GosiResult {
-  const base = input.basicSalary + (input.housingAllowance ?? 0);
+  const baseRaw = input.basicSalary + (input.housingAllowance ?? 0);
+  const settings = input.settings;
+
+  if (settings?.isEnabled === false) {
+    return {
+      employeeContribution: 0,
+      employerContribution: 0,
+      total: 0,
+      breakdown: {
+        employeePension: 0,
+        employeeUi: 0,
+        employerPension: 0,
+        employerHazard: 0,
+        employerUi: 0,
+      },
+    };
+  }
+
+  const base = clampGosiBase(baseRaw, settings);
 
   if (!input.isSaudi) {
     // Non-Saudi: only employer pays hazard coverage
@@ -64,14 +96,19 @@ export function calculateGosi(input: GosiInput): GosiResult {
   }
 
   // Saudi national
-  const employeePension = round(base * GOSI_RATES.employeePension);
-  const employeeUi = round(base * GOSI_RATES.employeeUi);
-  const employerPension = round(base * GOSI_RATES.employerPension);
-  const employerHazard = round(base * GOSI_RATES.employerHazard);
-  const employerUi = round(base * GOSI_RATES.employerUi);
+  const employeeTotalRate = settings ? settings.employeePercentage / 100 : DEFAULT_EMPLOYEE_TOTAL_RATE;
+  const employerTotalRate = settings ? settings.employerPercentage / 100 : DEFAULT_EMPLOYER_TOTAL_RATE;
 
-  const employeeContribution = employeePension + employeeUi;
-  const employerContribution = employerPension + employerHazard + employerUi;
+  const employeeContribution = round(base * employeeTotalRate);
+  const employerContribution = round(base * employerTotalRate);
+
+  // Provide a breakdown that always sums up to totals.
+  const employeePension = round(employeeContribution * (GOSI_RATES.employeePension / DEFAULT_EMPLOYEE_TOTAL_RATE));
+  const employeeUi = round(employeeContribution - employeePension);
+
+  const employerHazard = round(employerContribution * (GOSI_RATES.employerHazard / DEFAULT_EMPLOYER_TOTAL_RATE));
+  const employerUi = round(employerContribution * (GOSI_RATES.employerUi / DEFAULT_EMPLOYER_TOTAL_RATE));
+  const employerPension = round(employerContribution - employerHazard - employerUi);
 
   return {
     employeeContribution: round(employeeContribution),
@@ -103,6 +140,7 @@ export function calculatePayrollDeductions(params: {
   lateDays?: number;
   workingDays?: number;
   loanDeduction?: number;
+  gosiSettings?: GosiInput["settings"];
 }): {
   grossSalary: number;
   gosiEmployee: number;
@@ -125,6 +163,7 @@ export function calculatePayrollDeductions(params: {
     basicSalary: params.basicSalary,
     housingAllowance: params.housingAllowance,
     isSaudi: params.isSaudi,
+    settings: params.gosiSettings,
   });
 
   const absenceDeduction = round(dailySalary * (params.absenceDays ?? 0));

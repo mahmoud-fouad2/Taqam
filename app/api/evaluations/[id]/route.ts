@@ -243,7 +243,7 @@ export async function DELETE(
     }
 
     // Check permissions
-    const allowedRoles = ["ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
+    const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
       return NextResponse.json(
         { error: "لا تملك صلاحية حذف التقييم" },

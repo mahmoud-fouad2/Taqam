@@ -65,12 +65,25 @@ export async function GET(request: NextRequest) {
 
     where.tenantId = tenantId;
 
-    if (!canManageLeaveRequests(session.user.role)) {
-      const requesterEmployee = await prisma.employee.findFirst({
-        where: { tenantId, userId: session.user.id },
-        select: { id: true },
-      });
+    const requesterEmployee = await prisma.employee.findFirst({
+      where: { tenantId, userId: session.user.id },
+      select: { id: true },
+    });
 
+    if (session.user.role === "MANAGER") {
+      if (!requesterEmployee) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+      
+      const allowedFilters: any[] = [{ employeeId: requesterEmployee.id }, { employee: { managerId: requesterEmployee.id } }];
+      
+      if (employeeId) {
+        where.employeeId = employeeId;
+      }
+      
+      where.OR = allowedFilters;
+      
+    } else if (!canManageLeaveRequests(session.user.role)) {
       if (!requesterEmployee) {
         return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }

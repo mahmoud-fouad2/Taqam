@@ -90,7 +90,7 @@ export async function MarketingFooter() {
                 </div>
                 <div className="min-w-0 text-start">
                   <p className="text-[10px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    Android
+                    Android v2
                   </p>
                   <p className="truncate text-xs font-semibold text-foreground">
                     {isAr ? "تحميل التطبيق" : "Download app"}

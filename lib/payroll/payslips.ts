@@ -5,6 +5,7 @@ import { extractCurrentCompensation } from "@/lib/payroll/compensation";
 import { calculatePayrollDeductions } from "@/lib/gosi";
 import { sendBulkNotification, notifyPayslipReady } from "@/lib/notifications/send";
 import type { Payslip, PayslipDeduction, PayslipEarning, PayslipStatus } from "@/lib/types/payroll";
+import type { GOSISettings } from "@/lib/types/payroll";
 
 export type PayrollPeriodSnapshot = {
   id: string;
@@ -108,6 +109,51 @@ function roundInt(value: number): number {
   return Math.round(value);
 }
 
+const DEFAULT_GOSI_SETTINGS: Omit<GOSISettings, "tenantId"> = {
+  employeePercentage: 9.75,
+  employerPercentage: 11.75,
+  maxSalary: 45000,
+  isEnabled: true,
+};
+
+function normalizeGosiSettings(tenantId: string, value: unknown): GOSISettings {
+  if (!value || typeof value !== "object") {
+    return { tenantId, ...DEFAULT_GOSI_SETTINGS };
+  }
+
+  const input = value as Partial<GOSISettings>;
+  return {
+    tenantId,
+    employeePercentage:
+      typeof input.employeePercentage === "number" ? input.employeePercentage : DEFAULT_GOSI_SETTINGS.employeePercentage,
+    employerPercentage:
+      typeof input.employerPercentage === "number" ? input.employerPercentage : DEFAULT_GOSI_SETTINGS.employerPercentage,
+    maxSalary: typeof input.maxSalary === "number" ? input.maxSalary : DEFAULT_GOSI_SETTINGS.maxSalary,
+    isEnabled: typeof input.isEnabled === "boolean" ? input.isEnabled : DEFAULT_GOSI_SETTINGS.isEnabled,
+  };
+}
+
+function getStoredGosiSettings(settings: unknown) {
+  if (!settings || typeof settings !== "object") {
+    return undefined;
+  }
+
+  const settingsObject = settings as Record<string, unknown>;
+  const payroll = settingsObject.payroll;
+  if (payroll && typeof payroll === "object") {
+    const payrollObject = payroll as Record<string, unknown>;
+    if (payrollObject.gosiSettings) {
+      return payrollObject.gosiSettings;
+    }
+  }
+
+  if (settingsObject.gosiSettings) {
+    return settingsObject.gosiSettings;
+  }
+
+  return undefined;
+}
+
 export function toIsoDate(date: Date): string {
   return date.toISOString().split("T")[0] ?? "";
 }
@@ -183,6 +229,7 @@ export function isSaudiNational(nationality?: string | null): boolean {
 export function computePayslipSnapshot(input: {
   employee: PayrollEmployeeSnapshot;
   period: PayrollPeriodSnapshot;
+  gosiSettings?: GOSISettings;
 }): PayslipSnapshot {
   const compensation = extractCurrentCompensation(input.employee);
   const basicSalary = roundMoney(compensation.basicSalary);
@@ -212,6 +259,7 @@ export function computePayslipSnapshot(input: {
     otherAllowances: transportAllowance + otherConfiguredAllowances,
     isSaudi: isSaudiNational(input.employee.nationality),
     workingDays,
+    gosiSettings: input.gosiSettings,
   });
 
   const gosiEmployee = roundInt(deductionsSummary.gosiEmployee);
@@ -306,8 +354,13 @@ export function buildPayslipCreateData(input: {
   tenantId: string;
   employee: PayrollEmployeeSnapshot;
   period: PayrollPeriodSnapshot;
+  gosiSettings?: GOSISettings;
 }) {
-  const snapshot = computePayslipSnapshot({ employee: input.employee, period: input.period });
+  const snapshot = computePayslipSnapshot({
+    employee: input.employee,
+    period: input.period,
+    gosiSettings: input.gosiSettings,
+  });
 
   return {
     tenantId: input.tenantId,
@@ -335,6 +388,13 @@ export function buildPayslipCreateData(input: {
 }
 
 export async function ensurePayslipsForPeriod(tenantId: string, periodId: string) {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { settings: true },
+  });
+
+  const gosiSettings = normalizeGosiSettings(tenantId, getStoredGosiSettings(tenant?.settings));
+
   const period = await prisma.payrollPeriod.findFirst({
     where: { id: periodId, tenantId },
     select: {
@@ -406,6 +466,7 @@ export async function ensurePayslipsForPeriod(tenantId: string, periodId: string
           tenantId,
           employee: employee as PayrollEmployeeSnapshot,
           period,
+          gosiSettings,
         }),
         update: {},
       })

@@ -35,6 +35,38 @@ export default async function SettingsLayout({
       title: locale === "ar" ? "إعدادات الحضور والموقع" : "Attendance & Location",
       href: `${p}/dashboard/settings/attendance`,
     },
+    {
+      title: locale === "ar" ? "إعدادات عامة" : "General",
+      href: `${p}/dashboard/settings-advanced`,
+    },
+    {
+      title: locale === "ar" ? "الأمان" : "Security",
+      href: `${p}/dashboard/settings-advanced?section=security`,
+    },
+    {
+      title: locale === "ar" ? "الإشعارات" : "Notifications",
+      href: `${p}/dashboard/settings-advanced?section=notifications`,
+    },
+    {
+      title: locale === "ar" ? "التكاملات" : "Integrations",
+      href: `${p}/dashboard/settings-advanced?section=integrations`,
+    },
+    {
+      title: locale === "ar" ? "الأدوار والصلاحيات" : "Roles & Permissions",
+      href: `${p}/dashboard/settings-advanced?section=roles`,
+    },
+    {
+      title: locale === "ar" ? "أنواع الإجازات" : "Leave Types",
+      href: `${p}/dashboard/settings-advanced?section=leaves`,
+    },
+    {
+      title: locale === "ar" ? "سير العمل" : "Workflows",
+      href: `${p}/dashboard/settings-advanced?section=workflows`,
+    },
+    {
+      title: locale === "ar" ? "النسخ الاحتياطي" : "Backup",
+      href: `${p}/dashboard/settings-advanced?section=backup`,
+    },
   ];
 
   return (

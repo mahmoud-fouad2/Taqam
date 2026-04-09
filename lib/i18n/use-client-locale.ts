@@ -2,12 +2,16 @@
 
 import { useSyncExternalStore } from "react";
 import type { AppLocale } from "./types";
+import { useAppLocale } from "./locale-context";
 
 /**
  * Hook that safely returns the current locale after hydration.
  * Returns a default value during SSR to prevent hydration mismatches.
  */
-export function useClientLocale(defaultLocale: AppLocale = "ar"): AppLocale {
+export function useClientLocale(defaultLocale?: AppLocale): AppLocale {
+  const appLocale = useAppLocale();
+  const ssrLocale = defaultLocale ?? appLocale;
+
   return useSyncExternalStore(
     // Locale changes are applied via full reload in this app, so no subscription needed.
     () => () => {},
@@ -23,7 +27,7 @@ export function useClientLocale(defaultLocale: AppLocale = "ar"): AppLocale {
       const lang = document.documentElement.lang;
       return lang === "en" ? "en" : "ar";
     },
-    () => defaultLocale
+    () => ssrLocale
   );
 }
 

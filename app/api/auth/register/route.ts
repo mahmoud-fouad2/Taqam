@@ -10,6 +10,7 @@ const registerSchema = z.object({
   name: z.string().min(2).max(200),
   email: z.string().email().max(320),
   password: z.string().min(8).max(200),
+  companyName: z.string().min(2).max(200).optional(),
 });
 
 function splitName(name: string): { firstName: string; lastName: string } {
@@ -51,11 +52,6 @@ export async function POST(req: NextRequest) {
     const email = parsed.data.email.toLowerCase();
 
     const result = await prisma.$transaction(async (tx) => {
-      const usersCount = await tx.user.count();
-      if (usersCount > 0) {
-        return { ok: false as const, status: 403 as const, error: "Registration is disabled" };
-      }
-
       const existing = await tx.user.findUnique({ where: { email }, select: { id: true } });
       if (existing) {
         return { ok: false as const, status: 400 as const, error: "Email already in use" };
@@ -63,6 +59,16 @@ export async function POST(req: NextRequest) {
 
       const { firstName, lastName } = splitName(parsed.data.name);
       const passwordHash = await hash(parsed.data.password, 12);
+      
+      const newTenant = await tx.tenant.create({
+        data: {
+          name: parsed.data.companyName || `${firstName}'s Company`,
+          slug: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, "")}-${Date.now().toString(36)}`,
+          domain: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, "")}-${Date.now().toString(36)}`,
+          status: "ACTIVE",
+        },
+        select: { id: true },
+      });
 
       const user = await tx.user.create({
         data: {
@@ -70,16 +76,30 @@ export async function POST(req: NextRequest) {
           password: passwordHash,
           firstName,
           lastName,
-          role: "SUPER_ADMIN",
+          role: "TENANT_ADMIN",
           status: "ACTIVE",
           permissions: [],
+          tenantId: newTenant.id,
         },
         select: { id: true, email: true },
       });
 
+      // Automatically create an employee profile for the admin so they can use the app properly
+      await tx.employee.create({
+        data: {
+          tenantId: newTenant.id,
+          userId: user.id,
+          employeeNumber: "ADMIN-001",
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          hireDate: new Date(),
+        },
+      });
+
       await tx.auditLog.create({
         data: {
-          tenantId: null,
+          tenantId: newTenant.id,
           userId: user.id,
           action: "REGISTER",
           entity: "User",

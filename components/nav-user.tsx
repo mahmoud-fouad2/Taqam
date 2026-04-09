@@ -34,6 +34,8 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
+import { signOut } from "next-auth/react";
+
 export function NavUser({
   user,
 }: {
@@ -58,9 +60,8 @@ export function NavUser({
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const handleLogout = () => {
-    // No real auth yet. Redirect to login for now.
-    window.location.href = "/login";
+  const handleLogout = async () => {
+    await signOut({ callbackUrl: "/login" });
   };
 
   return (

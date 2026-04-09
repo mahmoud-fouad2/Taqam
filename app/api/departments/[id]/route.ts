@@ -16,7 +16,7 @@ function isSuperAdmin(role: string | undefined) {
 }
 
 function canManageDepartments(role: string | undefined) {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "ADMIN";
+  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER";
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {

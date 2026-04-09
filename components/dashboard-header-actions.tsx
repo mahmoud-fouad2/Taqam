@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { Bell, HelpCircle, LogOut, User, KeyRound, ChevronLeft, ChevronRight, Moon, Sun, Mail } from "lucide-react";
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { startLocaleTransition } from "@/components/locale-transition";
 
@@ -164,8 +164,8 @@ export function DashboardHeaderActions({
     setTheme(theme === "dark" ? "light" : "dark");
   };
 
-  const logout = () => {
-    window.location.href = "/login";
+  const logout = async () => {
+    await signOut({ callbackUrl: "/login" });
   };
 
   const actionIconBtnClass = "h-9 w-9 rounded-lg border border-border/70 bg-background/75 shadow-sm hover:bg-accent/80";
@@ -173,6 +173,22 @@ export function DashboardHeaderActions({
 
   return (
     <div className="flex items-center gap-2">
+      {/* Language toggle – always visible */}
+      <Button
+        type="button"
+        variant="ghost"
+        size="icon"
+        className={actionIconBtnClass}
+        aria-label={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
+        onClick={toggleLocale}
+      >
+        <span dir="ltr" className="inline-flex h-5 w-[42px] shrink-0 items-center rounded-full bg-muted ring-1 ring-border/50 px-0.5">
+          <span className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "ar" ? "text-primary" : "text-muted-foreground/40"}`}>AR</span>
+          <span className="mx-0.5 h-3 w-px bg-border/60" />
+          <span className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "en" ? "text-primary" : "text-muted-foreground/40"}`}>EN</span>
+        </span>
+      </Button>
+
       <Button
         type="button"
         variant="ghost"

@@ -56,8 +56,8 @@
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  /* Brand primary (aligned with lib/design-tokens.ts -> colors.primary[500]) */
-  --primary: #0ea5e9;
+  /* Brand primary – deep professional blue (aligned with lib/design-tokens.ts -> colors.primary[600]) */
+  --primary: #2563eb;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -68,7 +68,7 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: #0ea5e9;
+  --ring: #2563eb;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -81,7 +81,7 @@
   --sidebar-accent: hsl(240 4.8% 95.9%);
   --sidebar-accent-foreground: hsl(240 5.9% 10%);
   --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: #0ea5e9;
+  --sidebar-ring: #2563eb;
 }
 
 .dark {
@@ -91,8 +91,8 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  /* Keep the same brand primary in dark mode for consistency */
-  --primary: #0ea5e9;
+  /* Slightly brighter in dark mode for legibility */
+  --primary: #3b82f6;
   --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(0.985 0 0);
@@ -103,7 +103,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: #0ea5e9;
+  --ring: #3b82f6;
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -116,7 +116,7 @@
   --sidebar-accent: hsl(240 3.7% 15.9%);
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: #0ea5e9;
+  --sidebar-ring: #3b82f6;
 }
 
 @layer base {
@@ -149,8 +149,8 @@
     position: relative;
     isolation: isolate;
     background:
-      radial-gradient(900px 420px at 8% -10%, rgba(14, 165, 233, 0.12), transparent 60%),
-      radial-gradient(760px 360px at 92% -6%, rgba(34, 197, 94, 0.1), transparent 62%),
+      radial-gradient(900px 420px at 8% -10%, rgba(37, 99, 235, 0.10), transparent 60%),
+      radial-gradient(760px 360px at 92% -6%, rgba(34, 197, 94, 0.08), transparent 62%),
       var(--background);
   }
 
@@ -169,8 +169,8 @@
 
   .dark .dashboard-shell {
     background:
-      radial-gradient(900px 420px at 8% -10%, rgba(14, 165, 233, 0.2), transparent 62%),
-      radial-gradient(760px 360px at 92% -6%, rgba(45, 212, 191, 0.14), transparent 64%),
+      radial-gradient(900px 420px at 8% -10%, rgba(37, 99, 235, 0.16), transparent 62%),
+      radial-gradient(760px 360px at 92% -6%, rgba(45, 212, 191, 0.10), transparent 64%),
       var(--background);
   }
 
@@ -200,7 +200,7 @@
     bottom: -1px;
     height: 1px;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.3), transparent);
   }
 
   .dashboard-header-inner {
@@ -223,7 +223,7 @@
     top: -0.35rem;
     height: 1px;
     pointer-events: none;
-    background: linear-gradient(90deg, transparent, rgba(14, 165, 233, 0.45), transparent);
+    background: linear-gradient(90deg, transparent, rgba(37, 99, 235, 0.35), transparent);
   }
 
   .dark .dashboard-content-wrap {

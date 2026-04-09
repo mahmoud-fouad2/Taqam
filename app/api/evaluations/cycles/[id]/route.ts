@@ -109,7 +109,7 @@ export async function PATCH(
     }
 
     // Check permissions
-    const allowedRoles = ["ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
+    const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
       return NextResponse.json(
         { error: "لا تملك صلاحية تعديل دورة التقييم" },
@@ -191,7 +191,7 @@ export async function DELETE(
     }
 
     // Check permissions
-    const allowedRoles = ["ADMIN", "SUPER_ADMIN"];
+    const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN"];
     if (!allowedRoles.includes(session.user.role || "")) {
       return NextResponse.json(
         { error: "لا تملك صلاحية حذف دورة التقييم" },

@@ -6,7 +6,9 @@ import * as LocalAuthentication from "expo-local-authentication";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
-import { humanizeApiError, t } from "@/lib/i18n";
+import { humanizeApiError, t, tStr } from "@/lib/i18n";
+
+const BRAND = "#3b82f6";
 
 type LastResult = {
   ok: boolean;
@@ -25,6 +27,14 @@ type TodayStatus = {
   } | null;
 };
 
+type DashboardData = {
+  leaves: {
+    pendingCount: number;
+    balances: Array<{ typeName: string; color: string | null; entitled: number; remaining: number }>;
+  };
+  approvals: { pendingCount: number };
+} | null;
+
 export default function AttendanceScreen() {
   const { accessToken, user, authFetch } = useAuth();
   const { language, biometricsEnabled } = useAppSettings();
@@ -33,6 +43,7 @@ export default function AttendanceScreen() {
   const [today, setToday] = useState<TodayStatus | null>(null);
   const [loadingToday, setLoadingToday] = useState(false);
   const [locationIssue, setLocationIssue] = useState<"PERMISSION" | "SERVICES" | null>(null);
+  const [dashboard, setDashboard] = useState<DashboardData>(null);
 
   const header = useMemo(() => {
     const name = user ? `${user.firstName} ${user.lastName}` : "";
@@ -47,8 +58,12 @@ export default function AttendanceScreen() {
     setLoadingToday(true);
     setLocationIssue(null);
     try {
-      const res = await authFetch<{ data: TodayStatus }>("/api/mobile/attendance/today");
-      setToday(res.data);
+      const [todayRes, dashRes] = await Promise.all([
+        authFetch<{ data: TodayStatus }>("/api/mobile/attendance/today"),
+        authFetch<{ data: DashboardData }>("/api/mobile/dashboard").catch(() => null),
+      ]);
+      setToday(todayRes.data);
+      if (dashRes?.data) setDashboard(dashRes.data);
     } catch (e: any) {
       setLast({ ok: false, message: humanizeApiError(language, e?.message || "") });
     } finally {
@@ -152,7 +167,7 @@ export default function AttendanceScreen() {
       style={styles.container}
       contentContainerStyle={styles.scrollContent}
       refreshControl={
-        <RefreshControl refreshing={loadingToday} onRefresh={() => void loadToday()} colors={["#0ea5e9"]} tintColor="#0ea5e9" />
+        <RefreshControl refreshing={loadingToday} onRefresh={() => void loadToday()} colors={[BRAND]} tintColor={BRAND} />
       }
     >
       {/* Header */}
@@ -184,7 +199,7 @@ export default function AttendanceScreen() {
             style={[styles.refreshBtn, (loadingToday || busy) && { opacity: 0.5 }]}
           >
             {loadingToday
-              ? <ActivityIndicator color="#0ea5e9" size="small" />
+              ? <ActivityIndicator color={BRAND} size="small" />
               : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
           </Pressable>
         </View>
@@ -248,6 +263,49 @@ export default function AttendanceScreen() {
         </View>
       ) : null}
 
+      {/* Dashboard Summary */}
+      {dashboard && (
+        <View style={styles.dashSection}>
+          {/* Leave balances */}
+          {dashboard.leaves.balances.length > 0 && (
+            <View style={styles.dashCard}>
+              <Text style={styles.dashTitle}>
+                {tStr(language, "رصيد الإجازات", "Leave Balances")}
+              </Text>
+              <View style={styles.dashBalGrid}>
+                {dashboard.leaves.balances.map((b, i) => (
+                  <View key={i} style={styles.dashBalItem}>
+                    <View style={[styles.dashBalDot, b.color ? { backgroundColor: b.color } : undefined]} />
+                    <Text style={styles.dashBalLabel} numberOfLines={1}>{b.typeName}</Text>
+                    <Text style={styles.dashBalNum}>{b.remaining}<Text style={styles.dashBalTotal}>/{b.entitled}</Text></Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {/* Quick stats row */}
+          <View style={styles.dashStatsRow}>
+            {dashboard.leaves.pendingCount > 0 && (
+              <View style={[styles.dashStat, { borderLeftColor: "#f59e0b", borderLeftWidth: 3 }]}>
+                <Text style={styles.dashStatNum}>{dashboard.leaves.pendingCount}</Text>
+                <Text style={styles.dashStatLabel}>
+                  {tStr(language, "طلبات معلقة", "Pending")}
+                </Text>
+              </View>
+            )}
+            {dashboard.approvals.pendingCount > 0 && (
+              <View style={[styles.dashStat, { borderLeftColor: "#ef4444", borderLeftWidth: 3 }]}>
+                <Text style={styles.dashStatNum}>{dashboard.approvals.pendingCount}</Text>
+                <Text style={styles.dashStatLabel}>
+                  {tStr(language, "بانتظار موافقتك", "Need approval")}
+                </Text>
+              </View>
+            )}
+          </View>
+        </View>
+      )}
+
       {/* Note */}
       <View style={styles.note}>
         <Text style={styles.noteText}>
@@ -294,8 +352,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(34,197,94,0.06)",
   },
   statusCardBlue: {
-    borderColor: "rgba(14,165,233,0.35)",
-    backgroundColor: "rgba(14,165,233,0.06)",
+    borderColor: "rgba(59,130,246,0.35)",
+    backgroundColor: "rgba(59,130,246,0.06)",
   },
   statusRow: {
     flexDirection: "row",
@@ -309,7 +367,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dotGreen: { backgroundColor: "#22c55e" },
-  dotBlue:  { backgroundColor: "#0ea5e9" },
+  dotBlue:  { backgroundColor: BRAND },
   dotGray:  { backgroundColor: "#cbd5e1" },
   statusLabel: {
     color: "#64748b",
@@ -423,24 +481,59 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   smallBtnPrimary: {
-    backgroundColor: "rgba(14,165,233,0.12)",
-    borderColor: "rgba(14,165,233,0.30)",
+    backgroundColor: "rgba(59,130,246,0.12)",
+    borderColor: "rgba(59,130,246,0.30)",
   },
   smallBtnSecondary: {
     backgroundColor: "#f1f5f9",
     borderColor: "#e2e8f0",
   },
-  smallBtnText: { color: "#0ea5e9", fontWeight: "700", fontSize: 12 },
+  smallBtnText: { color: BRAND, fontWeight: "700", fontSize: 12 },
   note: {
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "rgba(14,165,233,0.06)",
+    backgroundColor: "rgba(59,130,246,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(14,165,233,0.15)",
+    borderColor: "rgba(59,130,246,0.15)",
   },
   noteText: {
     color: "#64748b",
     fontSize: 12,
     lineHeight: 18,
   },
+
+  // Dashboard summary
+  dashSection: { gap: 10, marginBottom: 14 },
+  dashCard: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  dashTitle: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#94a3b8",
+    textTransform: "uppercase",
+    letterSpacing: 0.6,
+    marginBottom: 10,
+  },
+  dashBalGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
+  dashBalItem: { alignItems: "center", minWidth: 70 },
+  dashBalDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: BRAND, marginBottom: 4 },
+  dashBalLabel: { fontSize: 11, color: "#64748b", fontWeight: "600", marginBottom: 2 },
+  dashBalNum: { fontSize: 18, fontWeight: "900", color: "#0f172a" },
+  dashBalTotal: { fontSize: 12, fontWeight: "600", color: "#94a3b8" },
+  dashStatsRow: { flexDirection: "row", gap: 10 },
+  dashStat: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#e2e8f0",
+  },
+  dashStatNum: { fontSize: 22, fontWeight: "900", color: "#0f172a", marginBottom: 2 },
+  dashStatLabel: { fontSize: 12, color: "#64748b", fontWeight: "600" },
 });

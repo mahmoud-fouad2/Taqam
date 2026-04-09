@@ -12,6 +12,19 @@ function canManageAttendanceRequests(role: string | undefined) {
   return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
 }
 
+async function canManagerAccessEmployee(params: {
+  tenantId: string;
+  managerUserId: string;
+  targetEmployeeManagerId: string | null;
+}) {
+  const requesterEmployee = await prisma.employee.findFirst({
+    where: { tenantId: params.tenantId, userId: params.managerUserId },
+    select: { id: true },
+  });
+
+  return Boolean(requesterEmployee && params.targetEmployeeManagerId === requesterEmployee.id);
+}
+
 function serializeAttendanceRequest(
   item: {
     id: string;
@@ -79,17 +92,30 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     const requestItem = await prisma.attendanceRequest.findFirst({
       where: { id, ...(tenantId ? { tenantId } : {}) },
-      include: { employee: { select: { userId: true } } },
+      include: { employee: { select: { userId: true, managerId: true } } },
     });
 
     if (!requestItem) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
     }
 
-    if (!canManageAttendanceRequests(session.user.role)) {
-      if (requestItem.employee.userId !== session.user.id) {
+    const role = session.user.role;
+    const isSelf = requestItem.employee.userId === session.user.id;
+
+    if (role === "MANAGER") {
+      const canAccess =
+        isSelf ||
+        (await canManagerAccessEmployee({
+          tenantId: requestItem.tenantId,
+          managerUserId: session.user.id,
+          targetEmployeeManagerId: requestItem.employee.managerId ?? null,
+        }));
+
+      if (!canAccess) {
         return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }
+    } else if (!canManageAttendanceRequests(role) && !isSelf) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     return NextResponse.json({ data: serializeAttendanceRequest(requestItem) });
@@ -123,11 +149,23 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     const existing = await prisma.attendanceRequest.findFirst({
       where: { id, ...(tenantId ? { tenantId } : {}) },
-      include: { employee: { select: { userId: true } } },
+      include: { employee: { select: { userId: true, managerId: true } } },
     });
 
     if (!existing) {
       return NextResponse.json({ error: "Not found" }, { status: 404 });
+    }
+
+    if (session.user.role === "MANAGER") {
+      const canAccess = await canManagerAccessEmployee({
+        tenantId: existing.tenantId,
+        managerUserId: session.user.id,
+        targetEmployeeManagerId: existing.employee.managerId ?? null,
+      });
+
+      if (!canAccess) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
     }
 
     if (existing.status !== "PENDING") {
