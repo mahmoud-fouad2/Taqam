@@ -44,7 +44,7 @@ export default async function Page({ children }: { children: React.ReactNode }) 
       <SidebarProvider
         className="[--sidebar-width:calc(var(--spacing)*74)] [--sidebar-width-icon:4.5rem] [--header-height:calc(var(--spacing)*13)]"
       >
-        <AppSidebar variant="inset" side={sidebarSide} />
+        <AppSidebar variant="inset" side={sidebarSide} dir={dir} />
         <SidebarInset className="dashboard-main-surface">
           <SiteHeader locale={locale} dir={dir} />
           <div className="flex flex-1 flex-col">

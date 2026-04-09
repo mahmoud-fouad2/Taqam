@@ -28,9 +28,22 @@ export default async function Page() {
   const user = await requireTenantAccess();
 
   const [stats, charts, activities] = await Promise.all([
-    getDashboardStats(user.tenantId),
-    getDashboardCharts({ tenantId: user.tenantId, period: "week" }),
-    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }),
+    getDashboardStats(user.tenantId).catch(() => ({
+      totalEmployees: 0,
+      activeEmployees: 0,
+      departments: 0,
+      todayAttendance: 0,
+      attendanceRate: 0,
+      pendingLeaves: 0,
+      onLeaveToday: 0,
+      newHiresThisMonth: 0,
+    })),
+    getDashboardCharts({ tenantId: user.tenantId, period: "week" }).catch(() => ({
+      attendance: [],
+      departments: [],
+      leaves: [],
+    })),
+    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }).catch(() => []),
   ]);
 
   const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User";
