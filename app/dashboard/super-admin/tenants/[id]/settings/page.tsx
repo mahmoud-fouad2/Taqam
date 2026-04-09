@@ -27,7 +27,7 @@ import { TenantSettingsForm } from "./tenant-settings-form";
 import { tenantsService } from "@/lib/api";
 import { TenantAdminCredentialsCard } from "./tenant-admin-credentials-card";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getText } from "@/lib/i18n/text";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
@@ -104,15 +104,12 @@ function DeleteTenantDialog({
   );
 }
 
-interface PageProps {
-  params: { id: string };
-}
-
-export default function TenantSettingsPage({ params }: PageProps) {
+export default function TenantSettingsPage() {
   const locale = useClientLocale();
   const t = getText(locale);
   const router = useRouter();
-  const id = params.id;
+  const params = useParams<{ id?: string | string[] }>();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [tenant, setTenant] = React.useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);

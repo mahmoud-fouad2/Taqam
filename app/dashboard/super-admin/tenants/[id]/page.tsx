@@ -7,6 +7,7 @@
 
 import Link from "next/link";
 import * as React from "react";
+import { useParams } from "next/navigation";
 import { 
   ArrowRight, 
   Building2, 
@@ -171,14 +172,11 @@ function formatCompactId(value: string | null | undefined) {
   return `${value.slice(0, 8)}...`;
 }
 
-interface PageProps {
-  params: { id: string };
-}
-
-export default function TenantDetailsPage({ params }: PageProps) {
+export default function TenantDetailsPage() {
   const locale = useClientLocale();
   const t = getText(locale);
-  const id = params.id;
+  const params = useParams<{ id?: string | string[] }>();
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const [tenant, setTenant] = React.useState<Tenant | null>(null);
   const [tenantUsers, setTenantUsers] = React.useState<TenantUser[]>([]);
   const [auditLogs, setAuditLogs] = React.useState<TenantAuditLog[]>([]);
