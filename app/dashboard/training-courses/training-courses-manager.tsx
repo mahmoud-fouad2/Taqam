@@ -84,6 +84,9 @@ import {
   courseCategoryLabels,
 } from "@/lib/types/training";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function TrainingCoursesManager() {
   const locale = useClientLocale("ar");
@@ -156,7 +159,7 @@ export function TrainingCoursesManager() {
       setStats((statsJson?.data ?? null) as any);
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل تحميل بيانات التدريب");
+      toast.error(e?.message || t.trainingCourses.loadFailed);
     }
   }, []);
 
@@ -224,13 +227,13 @@ export function TrainingCoursesManager() {
         throw new Error(err?.error || "Failed to create course");
       }
 
-      toast.success(status === "draft" ? "تم حفظ الدورة كمسودة" : "تم إنشاء الدورة");
+      toast.success(status === "draft" ? t.trainingCourses.savedAsDraft : t.trainingCourses.createdSuccess);
       setIsAddSheetOpen(false);
       resetForm();
       await refresh();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل إنشاء الدورة");
+      toast.error(e?.message || t.trainingCourses.createFailed);
     }
   };
 
@@ -254,12 +257,12 @@ export function TrainingCoursesManager() {
         throw new Error(err?.error || "Failed to delete course");
       }
 
-      toast.success("تم حذف الدورة");
+      toast.success(t.trainingCourses.deletedSuccess);
       setDeleteCourseId(null);
       await refresh();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل حذف الدورة");
+      toast.error(e?.message || t.trainingCourses.deleteFailed);
     } finally {
       setIsDeletingCourse(false);
     }
@@ -296,57 +299,57 @@ export function TrainingCoursesManager() {
 
   return (
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
+      {/* {t.trainingCourses.statsCards} */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الدورات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingCourses.totalCourses}</CardTitle>
             <IconBook className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalCourses ?? 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.activeCourses ?? 0} دورة نشطة</p>
+            <p className="text-xs text-muted-foreground">{stats?.activeCourses ?? 0} {t.trainingCourses.activeCourses}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">المسجلون</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingCourses.enrolled}</CardTitle>
             <IconUsers className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats?.totalEnrollments ?? 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.completedEnrollments ?? 0} أتموا التدريب</p>
+            <p className="text-xs text-muted-foreground">{stats?.completedEnrollments ?? 0} {t.trainingCourses.completedTraining}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">ساعات التدريب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingCourses.trainingHours}</CardTitle>
             <IconClock className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats?.totalHoursCompleted ?? 0}</div>
-            <p className="text-xs text-muted-foreground">ساعة مكتملة</p>
+            <p className="text-xs text-muted-foreground">{t.trainingCourses.hoursCompleted}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">معدل الشهادات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingCourses.certRate}</CardTitle>
             <IconCertificate className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats?.certificationRate ?? 0}%</div>
-            <p className="text-xs text-muted-foreground">حصلوا على شهادات</p>
+            <p className="text-xs text-muted-foreground">{t.trainingCourses.receivedCerts}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* ميزانية التدريب */}
+      {/* {t.trainingCourses.trainingBudget} */}
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm font-medium">ميزانية التدريب</CardTitle>
+          <CardTitle className="text-sm font-medium">{t.trainingCourses.trainingBudget}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
@@ -355,49 +358,49 @@ export function TrainingCoursesManager() {
               className="h-3 flex-1"
             />
             <span className="text-sm font-medium">
-              {(stats?.budgetUsed ?? 0).toLocaleString(numLocale)} / {(stats?.budgetTotal ?? 0).toLocaleString(numLocale)} ر.س
+              {(stats?.budgetUsed ?? 0).toLocaleString(numLocale)} / {(stats?.budgetTotal ?? 0).toLocaleString(numLocale)} {t.trainingCourses.sar}
             </span>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            تم استخدام {stats?.budgetTotal ? Math.round((stats.budgetUsed / stats.budgetTotal) * 100) : 0}% من الميزانية
+            {t.trainingCourses.pUsed} {stats?.budgetTotal ? Math.round((stats.budgetUsed / stats.budgetTotal) * 100) : 0}{t.trainingCourses.budgetPercent}
           </p>
         </CardContent>
       </Card>
 
-      {/* قائمة الدورات */}
+      {/* {t.trainingCourses.courseList} */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>الدورات التدريبية</CardTitle>
-              <CardDescription>إدارة الدورات والبرامج التدريبية</CardDescription>
+              <CardTitle>{t.trainingCourses.title}</CardTitle>
+              <CardDescription>{t.trainingCourses.subtitle}</CardDescription>
             </div>
             <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
               <SheetTrigger asChild>
                 <Button>
                   <IconPlus className="ms-2 h-4 w-4" />
-                  إضافة دورة
+                  {t.trainingCourses.addCourse}
                 </Button>
               </SheetTrigger>
               <SheetContent className="sm:max-w-xl overflow-y-auto">
                 <SheetHeader>
-                  <SheetTitle>إضافة دورة تدريبية جديدة</SheetTitle>
+                  <SheetTitle>{t.trainingCourses.addDialog}</SheetTitle>
                   <SheetDescription>
-                    أدخل تفاصيل الدورة التدريبية
+                    {t.trainingCourses.enterCourseDetails}
                   </SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="title">عنوان الدورة</Label>
+                    <Label htmlFor="title">{t.trainingCourses.courseTitle}</Label>
                     <Input
                       id="title"
-                      placeholder="مثال: مهارات التواصل الفعّال"
+                      placeholder={t.trainingCourses.courseTitleExample}
                       value={form.title}
                       onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="titleEn">العنوان بالإنجليزية</Label>
+                    <Label htmlFor="titleEn">{t.trainingCourses.titleEnglish}</Label>
                     <Input
                       id="titleEn"
                       placeholder="e.g. Effective Communication Skills"
@@ -405,9 +408,9 @@ export function TrainingCoursesManager() {
                       onChange={(e) => setForm((p) => ({ ...p, titleEn: e.target.value }))}
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="category">التصنيف</Label>
+                      <Label htmlFor="category">{t.common.category}</Label>
                       <Select
                         value={form.category}
                         onValueChange={(v) =>
@@ -415,7 +418,7 @@ export function TrainingCoursesManager() {
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر التصنيف" />
+                          <SelectValue placeholder={t.trainingCourses.chooseCat} />
                         </SelectTrigger>
                         <SelectContent>
                           {Object.entries(courseCategoryLabels).map(([value, label]) => (
@@ -427,13 +430,13 @@ export function TrainingCoursesManager() {
                       </Select>
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="type">نوع الدورة</Label>
+                      <Label htmlFor="type">{t.trainingCourses.courseType}</Label>
                       <Select
                         value={form.type}
                         onValueChange={(v) => setForm((p) => ({ ...p, type: v as CourseType }))}
                       >
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر النوع" />
+                          <SelectValue placeholder={t.common.selectType} />
                         </SelectTrigger>
                         <SelectContent>
                           {Object.entries(courseTypeLabels).map(([value, label]) => (
@@ -445,9 +448,9 @@ export function TrainingCoursesManager() {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="duration">المدة (ساعات)</Label>
+                      <Label htmlFor="duration">{t.trainingCourses.durationHours}</Label>
                       <Input
                         id="duration"
                         type="number"
@@ -462,7 +465,7 @@ export function TrainingCoursesManager() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="maxParticipants">الحد الأقصى للمشاركين</Label>
+                      <Label htmlFor="maxParticipants">{t.trainingCourses.maxParticipants}</Label>
                       <Input
                         id="maxParticipants"
                         type="number"
@@ -472,9 +475,9 @@ export function TrainingCoursesManager() {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="startDate">تاريخ البدء</Label>
+                      <Label htmlFor="startDate">{t.common.startDate}</Label>
                       <Input
                         id="startDate"
                         type="date"
@@ -483,7 +486,7 @@ export function TrainingCoursesManager() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="endDate">تاريخ الانتهاء</Label>
+                      <Label htmlFor="endDate">{t.common.endDate}</Label>
                       <Input
                         id="endDate"
                         type="date"
@@ -493,38 +496,38 @@ export function TrainingCoursesManager() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="instructor">المدرب</Label>
+                    <Label htmlFor="instructor">{t.trainingCourses.instructor}</Label>
                     <Input
                       id="instructor"
-                      placeholder="اسم المدرب"
+                      placeholder={t.trainingCourses.trainerName}
                       value={form.instructorName}
                       onChange={(e) => setForm((p) => ({ ...p, instructorName: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="location">المكان / رابط الاجتماع</Label>
+                    <Label htmlFor="location">{t.trainingCourses.venueOrLink}</Label>
                     <Input
                       id="location"
-                      placeholder="قاعة التدريب أو رابط Zoom"
+                      placeholder={t.trainingCourses.venue}
                       value={form.locationOrLink}
                       onChange={(e) => setForm((p) => ({ ...p, locationOrLink: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="description">وصف الدورة</Label>
+                    <Label htmlFor="description">{t.trainingCourses.courseDescription}</Label>
                     <Textarea
                       id="description"
-                      placeholder="وصف تفصيلي للدورة..."
+                      placeholder={t.trainingCourses.descPlaceholder}
                       rows={3}
                       value={form.description}
                       onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="objectives">أهداف الدورة</Label>
+                    <Label htmlFor="objectives">{t.trainingCourses.courseObjectives}</Label>
                     <Textarea
                       id="objectives"
-                      placeholder="اكتب كل هدف في سطر منفصل..."
+                      placeholder={t.trainingCourses.objectivesPlaceholder}
                       rows={3}
                       value={form.objectivesText}
                       onChange={(e) => setForm((p) => ({ ...p, objectivesText: e.target.value }))}
@@ -532,10 +535,10 @@ export function TrainingCoursesManager() {
                   </div>
                   <div className="flex gap-2 pt-4">
                     <Button className="flex-1" onClick={() => handleCreateCourse("draft")}>
-                      حفظ كمسودة
+                      {t.trainingCourses.saveAsDraft}
                     </Button>
                     <Button variant="secondary" className="flex-1" onClick={() => handleCreateCourse("scheduled")}>
-                      نشر الدورة
+                      {t.trainingCourses.publishCourse}
                     </Button>
                   </div>
                 </div>
@@ -544,12 +547,12 @@ export function TrainingCoursesManager() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* أدوات البحث والفلترة */}
+          {/* {t.trainingCourses.searchFilter} */}
           <div className="flex flex-col gap-4 mb-6 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث عن دورة..."
+                placeholder={t.trainingCourses.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -557,10 +560,10 @@ export function TrainingCoursesManager() {
             </div>
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="التصنيف" />
+                <SelectValue placeholder={t.common.category} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع التصنيفات</SelectItem>
+                <SelectItem value="all">{t.onboarding.allCategories}</SelectItem>
                 {Object.entries(courseCategoryLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -571,10 +574,10 @@ export function TrainingCoursesManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(courseStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -584,26 +587,26 @@ export function TrainingCoursesManager() {
             </Select>
           </div>
 
-          {/* جدول الدورات */}
+          {/* {t.trainingCourses.coursesTable} */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الدورة</TableHead>
-                  <TableHead>التصنيف</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead>المدة</TableHead>
-                  <TableHead>المشاركون</TableHead>
-                  <TableHead>التقييم</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.trainingCourses.course}</TableHead>
+                  <TableHead>{t.common.category}</TableHead>
+                  <TableHead>{t.common.type}</TableHead>
+                  <TableHead>{t.trainingCourses.durationHours}</TableHead>
+                  <TableHead>{t.trainingCourses.participants}</TableHead>
+                  <TableHead>{t.common.rating}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredCourses.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="text-center py-8">
-                      <p className="text-muted-foreground">لا توجد دورات</p>
+                      <p className="text-muted-foreground">{t.trainingCourses.noCourses}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -629,7 +632,7 @@ export function TrainingCoursesManager() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{course.duration} ساعة</span>
+                        <span className="text-sm">{course.duration} {t.trainingCourses.hourUnit}</span>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{course.currentParticipants}</span>
@@ -652,26 +655,20 @@ export function TrainingCoursesManager() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewCourse(course)}>
-                              <IconEye className="ms-2 h-4 w-4" />
-                              عرض التفاصيل
-                            </DropdownMenuItem>
-                            <DropdownMenuItem disabled onClick={() => toast.message("غير متاح حالياً")}
+                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
+                            <DropdownMenuItem disabled onClick={() => toast.message(t.common.notAvailable)}
                             >
-                              <IconEdit className="ms-2 h-4 w-4" />
-                              تعديل
-                            </DropdownMenuItem>
-                            <DropdownMenuItem disabled onClick={() => toast.message("غير متاح حالياً")}
+                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
+                            <DropdownMenuItem disabled onClick={() => toast.message(t.common.notAvailable)}
                             >
                               <IconUsers className="ms-2 h-4 w-4" />
-                              المشاركون
+                              {t.trainingCourses.participants}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => handleDeleteCourse(course.id)}
                             >
-                              <IconTrash className="ms-2 h-4 w-4" />
-                              حذف
-                            </DropdownMenuItem>
+                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -684,7 +681,7 @@ export function TrainingCoursesManager() {
         </CardContent>
       </Card>
 
-      {/* Sheet عرض تفاصيل الدورة */}
+      {/* {t.trainingCourses.courseDetailsSheet} */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
         <SheetContent className="sm:max-w-xl overflow-y-auto">
           <SheetHeader>
@@ -704,14 +701,14 @@ export function TrainingCoursesManager() {
                   {courseTypeLabels[selectedCourse.type]}
                 </Badge>
                 {selectedCourse.isMandatory && (
-                  <Badge variant="destructive">إلزامي</Badge>
+                  <Badge variant="destructive">{t.trainingCourses.mandatory}</Badge>
                 )}
               </div>
 
               <div className="grid gap-4">
                 <div className="flex items-center gap-2 text-sm">
                   <IconClock className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedCourse.duration} ساعة</span>
+                  <span>{selectedCourse.duration} {t.trainingCourses.hourUnit}</span>
                 </div>
                 {selectedCourse.startDate && (
                   <div className="flex items-center gap-2 text-sm">
@@ -732,7 +729,7 @@ export function TrainingCoursesManager() {
                   <IconUsers className="h-4 w-4 text-muted-foreground" />
                   <span>
                     {selectedCourse.currentParticipants}
-                    {selectedCourse.maxParticipants && ` / ${selectedCourse.maxParticipants}`} مشارك
+                    {selectedCourse.maxParticipants && ` / ${selectedCourse.maxParticipants}`} {t.trainingCourses.participant}
                   </span>
                 </div>
               </div>
@@ -741,7 +738,7 @@ export function TrainingCoursesManager() {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">المدرب</h4>
+                    <h4 className="font-semibold mb-3">{t.trainingCourses.instructor}</h4>
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarImage src={selectedCourse.instructor.avatar} alt="" />
@@ -763,13 +760,13 @@ export function TrainingCoursesManager() {
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-2">الوصف</h4>
+                <h4 className="font-semibold mb-2">{t.common.description}</h4>
                 <p className="text-sm text-muted-foreground">{selectedCourse.description}</p>
               </div>
 
               {selectedCourse.objectives.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">أهداف الدورة</h4>
+                  <h4 className="font-semibold mb-2">{t.trainingCourses.courseObjectives}</h4>
                   <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                     {selectedCourse.objectives.map((obj, i) => (
                       <li key={i}>{obj}</li>
@@ -780,7 +777,7 @@ export function TrainingCoursesManager() {
 
               {selectedCourse.certificate && (
                 <div>
-                  <h4 className="font-semibold mb-2">الشهادة</h4>
+                  <h4 className="font-semibold mb-2">{t.trainingCourses.certificate}</h4>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <div className="flex items-center gap-2">
                       <IconCertificate className="h-5 w-5 text-primary" />
@@ -788,7 +785,7 @@ export function TrainingCoursesManager() {
                     </div>
                     {selectedCourse.certificate.validityPeriod && (
                       <p className="text-sm text-muted-foreground mt-1">
-                        صالحة لمدة {selectedCourse.certificate.validityPeriod} شهر
+                        {t.trainingCourses.validFor} {selectedCourse.certificate.validityPeriod} {t.trainingCourses.monthUnit}
                       </p>
                     )}
                   </div>
@@ -796,13 +793,13 @@ export function TrainingCoursesManager() {
               )}
 
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1" disabled onClick={() => toast.message("غير متاح حالياً")}>
+                <Button className="flex-1" disabled onClick={() => toast.message(t.common.notAvailable)}>
                   <IconUsers className="ms-2 h-4 w-4" />
-                  إدارة المشاركين
+                  {t.trainingCourses.manageParticipants}
                 </Button>
-                <Button variant="outline" className="flex-1" disabled onClick={() => toast.message("غير متاح حالياً")}>
+                <Button variant="outline" className="flex-1" disabled onClick={() => toast.message(t.common.notAvailable)}>
                   <IconEdit className="ms-2 h-4 w-4" />
-                  تعديل الدورة
+                  {t.trainingCourses.editCourse}
                 </Button>
               </div>
             </div>
@@ -813,19 +810,19 @@ export function TrainingCoursesManager() {
       <AlertDialog open={deleteCourseId !== null} onOpenChange={(open) => !open && setDeleteCourseId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف الدورة</AlertDialogTitle>
+            <AlertDialogTitle>{t.trainingCourses.deleteCourse}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف هذه الدورة؟ لا يمكن التراجع عن هذا الإجراء.
+              {t.trainingCourses.deleteConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingCourse}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeletingCourse}>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void confirmDeleteCourse()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeletingCourse}
             >
-              {isDeletingCourse ? "جارٍ الحذف..." : "حذف"}
+              {isDeletingCourse ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

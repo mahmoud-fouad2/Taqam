@@ -3,6 +3,9 @@ import Link from "next/link";
 import { NotFoundShell } from "@/components/marketing/not-found-shell";
 import { Button } from "@/components/ui/button";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export default async function DashboardNotFound() {
   const locale = await getAppLocale();
@@ -19,7 +22,7 @@ export default async function DashboardNotFound() {
           : "The dashboard route you tried to open is missing or has moved to another module. Use these shortcuts to get back to the right operational surfaces."
       }
       eyebrow={isAr ? "خطأ مسار داخل لوحة التحكم" : "Dashboard route not found"}
-      primaryAction={{ href: `${p}/dashboard`, label: isAr ? "العودة للوحة التحكم" : "Back to dashboard", variant: "brand" }}
+      primaryAction={{ href: `${p}/dashboard`, label: isAr ? t.common.goToDashboard2 : "Back to dashboard", variant: "brand" }}
       quickLinks={[
         {
           href: `${p}/dashboard/help-center`,
@@ -28,7 +31,7 @@ export default async function DashboardNotFound() {
         },
         {
           href: `${p}/dashboard/support`,
-          title: isAr ? "الدعم والتذاكر" : "Support & tickets",
+          title: isAr ? t.helpCenter.support : "Support & tickets",
           description: isAr ? "افتح أو تابع الحالات المرتبطة بالشركة أو المستخدمين." : "Open or track cases tied to the tenant or affected users.",
         },
         {
@@ -37,7 +40,7 @@ export default async function DashboardNotFound() {
           description: isAr ? "إدارة الوظائف الشاغرة وروابط البوابة العامة للشركة." : "Manage open roles and the tenant's public careers portal links.",
         },
       ]}
-      secondaryAction={{ href: `${p}/dashboard/help-center`, label: isAr ? "مركز المساعدة" : "Help center", variant: "outline" }}
+      secondaryAction={{ href: `${p}/dashboard/help-center`, label: isAr ? t.helpCenter.title : "Help center", variant: "outline" }}
       title={isAr ? "هذه الصفحة ليست ضمن المسار الحالي" : "This page is not in the current route tree"}
     />
   );

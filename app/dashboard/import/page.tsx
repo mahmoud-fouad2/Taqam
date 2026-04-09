@@ -1,12 +1,20 @@
 import { CSVImportManager } from "./csv-import-manager";
 import { Upload } from "lucide-react";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export const metadata = {
-  title: "استيراد البيانات | طاقم",
-  description: "استيراد بيانات الموظفين من ملفات CSV",
-};
+export async function generateMetadata() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
+  return {
+    title: t.csvImport.pageTitle,
+    description: t.csvImport.pageDesc,
+  };
+}
 
-export default function ImportPage() {
+export default async function ImportPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -15,8 +23,8 @@ export default function ImportPage() {
             <Upload className="h-5 w-5 text-slate-600 dark:text-slate-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">استيراد البيانات</h1>
-            <p className="text-sm text-muted-foreground">استيراد بيانات الموظفين بشكل جماعي من ملفات CSV</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.csvImport.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.csvImport.pEmployeeDetails} CSV</p>
           </div>
         </div>
       </div>

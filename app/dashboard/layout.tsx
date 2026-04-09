@@ -37,19 +37,19 @@ export default async function Page({ children }: { children: React.ReactNode }) 
 
   return (
     <div
-      className={`min-h-screen ${dir === "rtl" ? "direction-rtl" : "direction-ltr"}`}
+      className={`dashboard-shell min-h-screen ${dir === "rtl" ? "direction-rtl" : "direction-ltr"}`}
       data-locale={locale}
       data-dir={dir}
     >
       <SidebarProvider
-        className="[--sidebar-width:calc(var(--spacing)*72)] [--header-height:calc(var(--spacing)*12)]"
+        className="[--sidebar-width:calc(var(--spacing)*74)] [--sidebar-width-icon:4.5rem] [--header-height:calc(var(--spacing)*13)]"
       >
         <AppSidebar variant="inset" side={sidebarSide} />
-        <SidebarInset>
+        <SidebarInset className="dashboard-main-surface">
           <SiteHeader locale={locale} dir={dir} />
           <div className="flex flex-1 flex-col">
-            <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4  md:gap-6 p-4 lg:p-6">
+            <div className="@container/main flex flex-1 flex-col">
+              <div className="dashboard-content-wrap flex flex-col gap-4 p-4 md:gap-6 lg:p-6">
                 <PageTransition>{children}</PageTransition>
               </div>
             </div>

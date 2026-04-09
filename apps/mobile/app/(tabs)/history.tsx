@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from "react-native";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
@@ -96,7 +96,7 @@ export default function HistoryScreen() {
       <View style={styles.headerRow}>
         <Text style={styles.title}>{t(language, "history_title")}</Text>
         <Pressable onPress={() => void load({ reset: true, nextPage: 1 })} disabled={busy} style={[styles.refresh, busy && styles.refreshDisabled]}>
-          {busy ? <ActivityIndicator color="#3b82f6" /> : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
+          {busy ? <ActivityIndicator color="#0ea5e9" /> : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
         </Pressable>
       </View>
 
@@ -117,6 +117,9 @@ export default function HistoryScreen() {
       <FlatList
         data={rows}
         keyExtractor={(item) => item.id}
+        refreshControl={
+          <RefreshControl refreshing={busy && rows.length > 0} onRefresh={() => void load({ reset: true, nextPage: 1 })} colors={["#0ea5e9"]} tintColor="#0ea5e9" />
+        }
         contentContainerStyle={rows.length === 0 ? styles.emptyContainer : undefined}
         ListEmptyComponent={!busy ? <Text style={styles.empty}>{t(language, "empty_history")}</Text> : null}
         onEndReachedThreshold={0.4}

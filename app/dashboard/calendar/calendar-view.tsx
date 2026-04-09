@@ -45,8 +45,14 @@ import {
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
 import { useAttendance } from "@/hooks/use-attendance";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function CalendarView() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { employees, getEmployeeFullName } = useEmployees();
   const [selectedDate, setSelectedDate] = React.useState(new Date());
   const [selectedEmployee, setSelectedEmployee] = React.useState<string>("");
@@ -209,42 +215,42 @@ export function CalendarView() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">حضور</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.present}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.present}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تأخير</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.late}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.late}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">غياب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.absent}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.absent}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجازات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.calendar.leaves}</CardTitle>
             <IconBeach className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.onLeave}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
       </div>
@@ -254,8 +260,8 @@ export function CalendarView() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>تقويم الحضور</CardTitle>
-              <CardDescription>عرض شهري لسجل الحضور</CardDescription>
+              <CardTitle>{t.calendar.attendanceCalendar}</CardTitle>
+              <CardDescription>{t.calendar.monthlyView}</CardDescription>
             </div>
             <div className="flex items-center gap-4">
               <Select value={selectedEmployee} onValueChange={setSelectedEmployee}>
@@ -271,13 +277,13 @@ export function CalendarView() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" aria-label="الشهر السابق" onClick={() => navigateMonth(-1)}>
+                <Button variant="outline" size="icon" aria-label={t.common.lastMonth} onClick={() => navigateMonth(-1)}>
                   <IconChevronRight className="h-4 w-4" />
                 </Button>
                 <span className="font-medium min-w-[150px] text-center">
                   {selectedDate.toLocaleString("ar-SA", { month: "long", year: "numeric" })}
                 </span>
-                <Button variant="outline" size="icon" aria-label="الشهر التالي" onClick={() => navigateMonth(1)}>
+                <Button variant="outline" size="icon" aria-label={t.common.nextMonth} onClick={() => navigateMonth(1)}>
                   <IconChevronLeft className="h-4 w-4" />
                 </Button>
               </div>
@@ -372,7 +378,7 @@ export function CalendarView() {
                           </p>
                           {attendance.checkInTime && (
                             <p className="text-xs">
-                              الحضور:{" "}
+                              {t.calendar.pCheckin}{" "}
                               {new Date(attendance.checkInTime).toLocaleTimeString("ar-SA", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -381,7 +387,7 @@ export function CalendarView() {
                           )}
                           {attendance.checkOutTime && (
                             <p className="text-xs">
-                              الانصراف:{" "}
+                              {t.calendar.pClockOut}{" "}
                               {new Date(attendance.checkOutTime).toLocaleTimeString("ar-SA", {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -390,16 +396,16 @@ export function CalendarView() {
                           )}
                           {attendance.lateMinutes && attendance.lateMinutes > 0 && (
                             <p className="text-xs text-yellow-600">
-                              تأخير: {attendance.lateMinutes} دقيقة
+                              {t.calendar.pLate} {attendance.lateMinutes} {t.calendar.minuteUnit}
                             </p>
                           )}
                         </div>
                       ) : holiday ? (
                         <p>{holidayName}</p>
                       ) : isWeekend ? (
-                        <p>عطلة أسبوعية</p>
+                        <p>{t.calendar.weeklyHoliday}</p>
                       ) : (
-                        <p>{isRecordsLoading ? "جاري التحميل..." : "لا يوجد سجل"}</p>
+                        <p>{isRecordsLoading ? t.common.loading : t.calendar.noRecord}</p>
                       )}
                     </TooltipContent>
                   </Tooltip>
@@ -410,14 +416,14 @@ export function CalendarView() {
 
           {/* Legend */}
           <div className="flex flex-wrap items-center gap-4 mt-6 pt-4 border-t">
-            <span className="text-sm text-muted-foreground">دليل الألوان:</span>
+            <span className="text-sm text-muted-foreground">{t.calendar.colorGuide}</span>
             {[
-              { status: "present", label: "حاضر" },
-              { status: "late", label: "متأخر" },
-              { status: "absent", label: "غائب" },
-              { status: "on_leave", label: "إجازة" },
-              { status: "holiday", label: "عطلة رسمية" },
-              { status: "weekend", label: "عطلة أسبوعية" },
+              { status: "present", label: t.calendar.present },
+              { status: "late", label: t.calendar.late },
+              { status: "absent", label: t.calendar.absent },
+              { status: "on_leave", label: t.calendar.onLeave },
+              { status: "holiday", label: t.calendar.officialHoliday },
+              { status: "weekend", label: t.calendar.weekendHoliday },
             ].map(({ status, label }) => (
               <div key={status} className="flex items-center gap-1.5">
                 <div className={`w-3 h-3 rounded-full ${getStatusColor(status as AttendanceStatus)}`} />

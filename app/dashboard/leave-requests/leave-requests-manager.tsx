@@ -31,8 +31,14 @@ import { mapRequestStatusToUi, toIso, toNumber, toYmd } from "./_components/leav
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { leaveRequestSchema, type LeaveRequestFormData } from "./_components/leave-request-schema";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function LeaveRequestsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -136,7 +142,7 @@ export function LeaveRequestsManager() {
     return isHalfDay ? 0.5 : diffDays;
   };
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
 
@@ -147,11 +153,11 @@ export function LeaveRequestsManager() {
       ]);
 
       if (!leavesRes.success) {
-        throw new Error(leavesRes.error || "فشل تحميل طلبات الإجازات");
+        throw new Error(leavesRes.error || t.leaveRequests.pFailedToLoadLeaveRequests);
       }
 
       if (!typesRes.success) {
-        throw new Error(typesRes.error || "فشل تحميل أنواع الإجازات");
+        throw new Error(typesRes.error || t.leaveTypes.loadFailed);
       }
 
       const mappedTypes: ApiLeaveType[] = Array.isArray(typesRes.data)
@@ -198,15 +204,15 @@ export function LeaveRequestsManager() {
         : [];
       setRequests(mappedRequests);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "فشل تحميل البيانات");
+      setLoadError(err instanceof Error ? err.message : t.common.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t.common.loadFailed, t.leaveRequests.pFailedToLoadLeaveRequests, t.leaveTypes.loadFailed]);
 
   useEffect(() => {
     void loadData();
-  }, []);
+  }, [loadData]);
 
   const handleAddRequest = leaveForm.handleSubmit(async (data: LeaveRequestFormData) => {
     try {
@@ -229,15 +235,15 @@ export function LeaveRequestsManager() {
       });
 
       if (!res.success) {
-        throw new Error(res.error || "فشل إنشاء طلب الإجازة");
+        throw new Error(res.error || t.leaveRequests.createFailed);
       }
 
-      toast.success("تم إرسال طلب الإجازة");
+      toast.success(t.leaveRequests.sentSuccess);
       setIsAddDialogOpen(false);
       resetForm();
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل إنشاء طلب الإجازة");
+      toast.error(err instanceof Error ? err.message : t.leaveRequests.createFailed);
     }
   });
 
@@ -246,15 +252,15 @@ export function LeaveRequestsManager() {
     try {
       const res = await leavesApi.requests.approve(selectedRequest.id, approvalComment || undefined);
       if (!res.success) {
-        throw new Error(res.error || "فشل الموافقة على الطلب");
+        throw new Error(res.error || t.leaveRequests.approveFailed);
       }
-      toast.success("تمت الموافقة على الطلب");
+      toast.success(t.leaveRequests.approvedSuccess);
       setIsApproveDialogOpen(false);
       setSelectedRequest(null);
       setApprovalComment("");
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل الموافقة على الطلب");
+      toast.error(err instanceof Error ? err.message : t.leaveRequests.approveFailed);
     }
   };
 
@@ -263,15 +269,15 @@ export function LeaveRequestsManager() {
     try {
       const res = await leavesApi.requests.reject(selectedRequest.id, rejectionReason);
       if (!res.success) {
-        throw new Error(res.error || "فشل رفض الطلب");
+        throw new Error(res.error || t.leaveRequests.rejectFailed);
       }
-      toast.success("تم رفض الطلب");
+      toast.success(t.leaveRequests.rejectedSuccess);
       setIsRejectDialogOpen(false);
       setSelectedRequest(null);
       setRejectionReason("");
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل رفض الطلب");
+      toast.error(err instanceof Error ? err.message : t.leaveRequests.rejectFailed);
     }
   };
 
@@ -279,32 +285,32 @@ export function LeaveRequestsManager() {
     try {
       const res = await leavesApi.requests.cancel(id);
       if (!res.success) {
-        throw new Error(res.error || "فشل إلغاء الطلب");
+        throw new Error(res.error || t.leaveRequests.cancelFailed);
       }
-      toast.success("تم إلغاء الطلب");
+      toast.success(t.leaveRequests.cancelledSuccess);
       await loadData();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل إلغاء الطلب");
+      toast.error(err instanceof Error ? err.message : t.leaveRequests.cancelFailed);
     }
   };
 
   const handleBulkApprove = async (ids: string[]) => {
     try {
       await Promise.all(ids.map((id) => leavesApi.requests.approve(id)));
-      toast.success(`تمت الموافقة على ${ids.length} طلب`);
+      toast.success(`${t.leaveRequests.pApproval} ${ids.length} ${t.leaveRequests.pRequest}`);
       await loadData();
     } catch {
-      toast.error("فشل الموافقة الجماعية");
+      toast.error(t.leaveRequests.bulkApproveFailed);
     }
   };
 
   const handleBulkReject = async (ids: string[]) => {
     try {
-      await Promise.all(ids.map((id) => leavesApi.requests.reject(id, "رفض جماعي")));
-      toast.success(`تم رفض ${ids.length} طلب`);
+      await Promise.all(ids.map((id) => leavesApi.requests.reject(id, t.leaveRequests.pBulkRejection)));
+      toast.success(`${t.leaveRequests.rejectedCount} ${ids.length} ${t.leaveRequests.pRequest}`);
       await loadData();
     } catch {
-      toast.error("فشل الرفض الجماعي");
+      toast.error(t.leaveRequests.bulkRejectFailed);
     }
   };
 
@@ -371,9 +377,7 @@ export function LeaveRequestsManager() {
           )}
           {(isLoading || isEmployeesLoading) && (
             <div className="mb-4 flex items-center gap-3 text-sm text-muted-foreground">
-              <Progress value={35} className="h-2 w-40" />
-              جاري التحميل...
-            </div>
+              <Progress value={35} className="h-2 w-40" />{t.common.loading}</div>
           )}
           <LeaveRequestsTable
             requests={filteredRequests}

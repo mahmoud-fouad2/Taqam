@@ -70,6 +70,10 @@ import {
   salaryComponentLabels,
   formatCurrency,
 } from "@/lib/types/payroll";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { cache: "no-store", ...init });
@@ -81,6 +85,8 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function SalaryStructuresManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [structures, setStructures] = React.useState<SalaryStructure[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [isFormOpen, setIsFormOpen] = React.useState(false);
@@ -96,7 +102,7 @@ export function SalaryStructuresManager() {
   const [formIsDefault, setFormIsDefault] = React.useState(false);
   const [formIsActive, setFormIsActive] = React.useState(true);
   const [formComponents, setFormComponents] = React.useState<SalaryComponentItem[]>([
-    { id: "basic", type: "basic", name: "Basic Salary", nameAr: "الراتب الأساسي", isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
+    { id: "basic", type: "basic", name: "Basic Salary", nameAr: t.common.basicSalary, isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
   ]);
 
   const filteredStructures = structures.filter(
@@ -112,7 +118,7 @@ export function SalaryStructuresManager() {
     setFormIsDefault(false);
     setFormIsActive(true);
     setFormComponents([
-      { id: "basic", type: "basic", name: "Basic Salary", nameAr: "الراتب الأساسي", isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
+      { id: "basic", type: "basic", name: "Basic Salary", nameAr: t.common.basicSalary, isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
     ]);
     setEditingStructure(null);
   };
@@ -124,11 +130,11 @@ export function SalaryStructuresManager() {
       setStructures(data);
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل تحميل هياكل الرواتب");
+      toast.error(e?.message || t.salaryStructures.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.salaryStructures.loadFailed]);
 
   React.useEffect(() => {
     loadStructures();
@@ -166,7 +172,7 @@ export function SalaryStructuresManager() {
             }),
           }
         );
-        toast.success("تم حفظ التعديلات");
+        toast.success(t.salaryStructures.savedChanges);
       } else {
         await fetchJson<{ data: SalaryStructure }>("/api/payroll/structures", {
           method: "POST",
@@ -180,7 +186,7 @@ export function SalaryStructuresManager() {
             components: formComponents,
           }),
         });
-        toast.success("تم إنشاء الهيكل");
+        toast.success(t.salaryStructures.createdSuccess);
       }
 
       setIsFormOpen(false);
@@ -188,7 +194,7 @@ export function SalaryStructuresManager() {
       await loadStructures();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل حفظ الهيكل");
+      toast.error(e?.message || t.salaryStructures.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -199,11 +205,11 @@ export function SalaryStructuresManager() {
       await fetchJson(`/api/payroll/structures/${encodeURIComponent(id)}`, {
         method: "DELETE",
       });
-      toast.success("تم حذف الهيكل");
+      toast.success(t.salaryStructures.deletedSuccess);
       await loadStructures();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل حذف الهيكل");
+      toast.error(e?.message || t.salaryStructures.deleteFailed);
     }
   };
 
@@ -214,18 +220,18 @@ export function SalaryStructuresManager() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: `${structure.name} (Copy)`,
-          nameAr: `${structure.nameAr} (نسخة)`,
+          nameAr: `${structure.nameAr} (${t.salaryStructures.copy})`,
           description: structure.description,
           isDefault: false,
           isActive: structure.isActive,
           components: structure.components,
         }),
       });
-      toast.success("تم نسخ الهيكل");
+      toast.success(t.salaryStructures.copiedSuccess);
       await loadStructures();
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل نسخ الهيكل");
+      toast.error(e?.message || t.salaryStructures.copyFailed);
     }
   };
 
@@ -234,7 +240,7 @@ export function SalaryStructuresManager() {
       id: `comp-${Date.now()}`,
       type: "housing",
       name: "Housing Allowance",
-      nameAr: "بدل السكن",
+      nameAr: t.salaryStructures.housingAllowance,
       isPercentage: true,
       value: 25,
       isTaxable: true,
@@ -260,7 +266,7 @@ export function SalaryStructuresManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الهياكل</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.totalStructures}</CardTitle>
             <IconBuildingBank className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -269,7 +275,7 @@ export function SalaryStructuresManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">نشطة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.active}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -280,7 +286,7 @@ export function SalaryStructuresManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الافتراضي</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.default}</CardTitle>
             <IconShieldCheck className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -291,7 +297,7 @@ export function SalaryStructuresManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">متوسط المكونات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.avgComponents}</CardTitle>
             <IconPercentage className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -310,7 +316,7 @@ export function SalaryStructuresManager() {
         <div className="relative flex-1 max-w-sm">
           <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث في الهياكل..."
+            placeholder={t.salaryStructures.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ps-9"
@@ -324,31 +330,31 @@ export function SalaryStructuresManager() {
           <DialogTrigger asChild>
             <Button>
               <IconPlus className="ms-2 h-4 w-4" />
-              هيكل جديد
+              {t.salaryStructures.pNewStructure}
             </Button>
           </DialogTrigger>
           <DialogContent className="w-full sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
-                {editingStructure ? "تعديل هيكل الراتب" : "إنشاء هيكل راتب جديد"}
+                {editingStructure ? t.salaryStructures.editStructure : t.salaryStructures.createStructure}
               </DialogTitle>
               <DialogDescription>
-                حدد مكونات الراتب ونسبها أو قيمها الثابتة
+                {t.salaryStructures.pDefineSalaryComponentsAndTheir}
               </DialogDescription>
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>الاسم (عربي)</Label>
+                  <Label>{t.salaryStructures.nameArabic}</Label>
                   <Input
                     value={formNameAr}
                     onChange={(e) => setFormNameAr(e.target.value)}
-                    placeholder="مثال: الحزمة القياسية"
+                    placeholder={t.salaryStructures.exampleName}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>الاسم (English)</Label>
+                  <Label>{t.salaryStructures.nameEnglish}</Label>
                   <Input
                     value={formName}
                     onChange={(e) => setFormName(e.target.value)}
@@ -358,11 +364,11 @@ export function SalaryStructuresManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>الوصف</Label>
+                <Label>{t.common.description}</Label>
                 <Textarea
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="وصف مختصر لهذا الهيكل..."
+                  placeholder={t.salaryStructures.shortDesc}
                   rows={2}
                 />
               </div>
@@ -373,24 +379,24 @@ export function SalaryStructuresManager() {
                     checked={formIsActive}
                     onCheckedChange={setFormIsActive}
                   />
-                  <Label>نشط</Label>
+                  <Label>{t.common.active}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={formIsDefault}
                     onCheckedChange={setFormIsDefault}
                   />
-                  <Label>الافتراضي</Label>
+                  <Label>{t.salaryStructures.default}</Label>
                 </div>
               </div>
 
               {/* Components */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <Label className="text-base font-semibold">مكونات الراتب</Label>
+                  <Label className="text-base font-semibold">{t.salaryStructures.components}</Label>
                   <Button type="button" variant="outline" size="sm" onClick={addComponent}>
                     <IconPlus className="h-4 w-4 ms-1" />
-                    إضافة مكون
+                    {t.salaryStructures.pAddComponent}
                   </Button>
                 </div>
 
@@ -407,7 +413,7 @@ export function SalaryStructuresManager() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            aria-label="حذف المكون"
+                            aria-label={t.salaryStructures.deleteComponent}
                             className="h-8 w-8 text-destructive"
                             onClick={() => removeComponent(index)}
                           >
@@ -418,7 +424,7 @@ export function SalaryStructuresManager() {
 
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                         <div className="space-y-1">
-                          <Label className="text-xs">النوع</Label>
+                          <Label className="text-xs">{t.common.type}</Label>
                           <Select
                             value={comp.type}
                             onValueChange={(v) => {
@@ -447,7 +453,7 @@ export function SalaryStructuresManager() {
                         {comp.type !== "basic" && (
                           <>
                             <div className="space-y-1">
-                              <Label className="text-xs">القيمة</Label>
+                              <Label className="text-xs">{t.salaryStructures.value}</Label>
                               <div className="flex items-center gap-2">
                                 <Input
                                   type="number"
@@ -458,13 +464,13 @@ export function SalaryStructuresManager() {
                                   className="flex-1"
                                 />
                                 <span className="text-sm text-muted-foreground">
-                                  {comp.isPercentage ? "%" : "ر.س"}
+                                  {comp.isPercentage ? "%" : t.salaryStructures.sar}
                                 </span>
                               </div>
                             </div>
 
                             <div className="space-y-1">
-                              <Label className="text-xs">نوع القيمة</Label>
+                              <Label className="text-xs">{t.salaryStructures.valueType}</Label>
                               <Select
                                 value={comp.isPercentage ? "percentage" : "fixed"}
                                 onValueChange={(v) =>
@@ -475,8 +481,8 @@ export function SalaryStructuresManager() {
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="percentage">نسبة من الأساسي</SelectItem>
-                                  <SelectItem value="fixed">مبلغ ثابت</SelectItem>
+                                  <SelectItem value="percentage">{t.salaryStructures.percentOfBasic}</SelectItem>
+                                  <SelectItem value="fixed">{t.salaryStructures.fixedAmount}</SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -484,7 +490,7 @@ export function SalaryStructuresManager() {
                         )}
 
                         <div className="space-y-2">
-                          <Label className="text-xs">خاضع لـ</Label>
+                          <Label className="text-xs">{t.salaryStructures.subjectTo}</Label>
                           <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-2">
                               <Checkbox
@@ -495,7 +501,7 @@ export function SalaryStructuresManager() {
                                 }
                               />
                               <label htmlFor={`gosi-${index}`} className="text-xs">
-                                التأمينات
+                                {t.salaryStructures.pInsurance}
                               </label>
                             </div>
                             <div className="flex items-center gap-2">
@@ -507,7 +513,7 @@ export function SalaryStructuresManager() {
                                 }
                               />
                               <label htmlFor={`tax-${index}`} className="text-xs">
-                                الضريبة
+                                {t.salaryStructures.pTax}
                               </label>
                             </div>
                           </div>
@@ -520,11 +526,9 @@ export function SalaryStructuresManager() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsFormOpen(false)}>
-                إلغاء
-              </Button>
+              <Button variant="outline" onClick={() => setIsFormOpen(false)}>{t.common.cancel}</Button>
               <Button onClick={handleSubmit} disabled={!formName || !formNameAr || isSaving}>
-                {editingStructure ? "حفظ التعديلات" : "إنشاء الهيكل"}
+                {editingStructure ? t.common.saveChanges : t.salaryStructures.createStructure}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -534,32 +538,32 @@ export function SalaryStructuresManager() {
       {/* Structures Table */}
       <Card>
         <CardHeader>
-          <CardTitle>هياكل الرواتب</CardTitle>
-          <CardDescription>قائمة بجميع هياكل الرواتب المتاحة</CardDescription>
+          <CardTitle>{t.salaryStructures.structuresTitle}</CardTitle>
+          <CardDescription>{t.salaryStructures.structuresDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الهيكل</TableHead>
-                <TableHead>المكونات</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>افتراضي</TableHead>
-                <TableHead className="text-start">إجراءات</TableHead>
+                <TableHead>{t.salaryStructures.structure}</TableHead>
+                <TableHead>{t.salaryStructures.components}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead>{t.common.draft}</TableHead>
+                <TableHead className="text-start">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
-                    <p className="text-muted-foreground">جاري التحميل...</p>
+                    <p className="text-muted-foreground">{t.common.loading}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredStructures.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center py-8">
                     <IconBuildingBank className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">لا توجد هياكل رواتب</p>
+                    <p className="text-muted-foreground">{t.salaryStructures.noStructures}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -592,14 +596,14 @@ export function SalaryStructuresManager() {
                     </TableCell>
                     <TableCell>
                       <Badge variant={structure.isActive ? "default" : "secondary"}>
-                        {structure.isActive ? "نشط" : "غير نشط"}
+                        {structure.isActive ? t.common.active : t.common.inactive}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       {structure.isDefault && (
                         <Badge variant="outline" className="text-blue-600">
                           <IconCheck className="h-3 w-3 ms-1" />
-                          افتراضي
+                          {t.salaryStructures.pDefault}
                         </Badge>
                       )}
                     </TableCell>
@@ -608,7 +612,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="عرض"
+                          aria-label={t.common.view}
                           onClick={() => setSelectedStructure(structure)}
                         >
                           <IconCurrencyRiyal className="h-4 w-4" />
@@ -616,7 +620,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="تعديل"
+                          aria-label={t.common.edit}
                           onClick={() => openEditForm(structure)}
                         >
                           <IconEdit className="h-4 w-4" />
@@ -624,7 +628,7 @@ export function SalaryStructuresManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="نسخ"
+                          aria-label={t.salaryStructures.copyLabel}
                           onClick={() => handleDuplicate(structure)}
                         >
                           <IconCopy className="h-4 w-4" />
@@ -634,7 +638,7 @@ export function SalaryStructuresManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="حذف"
+                              aria-label={t.common.delete}
                               className="text-destructive"
                               disabled={structure.isDefault}
                             >
@@ -643,19 +647,17 @@ export function SalaryStructuresManager() {
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>حذف الهيكل</AlertDialogTitle>
+                              <AlertDialogTitle>{t.salaryStructures.deleteStructure}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                هل أنت متأكد من حذف &quot;{structure.nameAr}&quot;؟
+                                {t.salaryStructures.pAreYouSureYouWantToDelete} &quot;{structure.nameAr}&quot;?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                              <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(structure.id)}
                                 className="bg-destructive"
-                              >
-                                حذف
-                              </AlertDialogAction>
+                              >{t.common.delete}</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -673,17 +675,17 @@ export function SalaryStructuresManager() {
       <Dialog open={!!selectedStructure} onOpenChange={() => setSelectedStructure(null)}>
         <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>معاينة الهيكل</DialogTitle>
+            <DialogTitle>{t.salaryStructures.preview}</DialogTitle>
             <DialogDescription>{selectedStructure?.nameAr}</DialogDescription>
           </DialogHeader>
           {selectedStructure && (
             <div className="space-y-4">
               <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">مثال: راتب أساسي 10,000 ر.س</p>
+                <p className="text-sm text-muted-foreground mb-2">{t.salaryStructures.exampleSalary}</p>
                 <Table>
                   <TableBody>
                     <TableRow>
-                      <TableCell className="font-medium">الراتب الأساسي</TableCell>
+                      <TableCell className="font-medium">{t.common.basicSalary}</TableCell>
                       <TableCell className="text-start">{formatCurrency(10000)}</TableCell>
                     </TableRow>
                     {selectedStructure.components
@@ -699,7 +701,7 @@ export function SalaryStructuresManager() {
                         </TableRow>
                       ))}
                     <TableRow className="font-bold border-t-2">
-                      <TableCell>الإجمالي</TableCell>
+                      <TableCell>{t.common.total}</TableCell>
                       <TableCell className="text-start">
                         {formatCurrency(
                           10000 +

@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
-export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
+export function ChangePasswordForm({ locale: _locale }: { locale: "ar" | "en" }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -18,15 +22,15 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
   const copy = useMemo(() => {
     if (locale === "ar") {
       return {
-        title: "تحديث كلمة المرور",
-        current: "كلمة المرور الحالية",
-        next: "كلمة المرور الجديدة",
-        confirm: "تأكيد كلمة المرور الجديدة",
-        save: "حفظ",
-        saving: "جارٍ الحفظ...",
-        required: "يرجى تعبئة جميع الحقول.",
-        mismatch: "كلمتا المرور غير متطابقتين.",
-        success: "تم تغيير كلمة المرور بنجاح.",
+        title: t.common.pUpdatePassword,
+        current: t.common.currentPassword,
+        next: t.common.pNewPassword,
+        confirm: t.common.pConfirmNewPassword,
+        save: t.common.save,
+        saving: t.common.saving,
+        required: t.common.fillAllFields,
+        mismatch: t.common.pPasswordsDoNotMatch,
+        success: t.common.pPasswordChangedSuccessfully,
         minLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
       };
     }
@@ -43,7 +47,18 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
       success: "Password changed successfully.",
       minLength: "Password must be at least 6 characters.",
     };
-  }, [locale]);
+  }, [
+    locale,
+    t.common.currentPassword,
+    t.common.fillAllFields,
+    t.common.pConfirmNewPassword,
+    t.common.pNewPassword,
+    t.common.pPasswordChangedSuccessfully,
+    t.common.pPasswordsDoNotMatch,
+    t.common.pUpdatePassword,
+    t.common.save,
+    t.common.saving,
+  ]);
 
   const onSave = async () => {
     if (!current || !next || !confirm) {
@@ -83,7 +98,7 @@ export function ChangePasswordForm({ locale }: { locale: "ar" | "en" }) {
       setNext("");
       setConfirm("");
     } catch (error: any) {
-      toast.error(error.message || (locale === "ar" ? "تعذر الحفظ." : "Could not save."));
+      toast.error(error.message || (locale === "ar" ? t.common.saveFailed : "Could not save."));
     } finally {
       setIsSaving(false);
     }

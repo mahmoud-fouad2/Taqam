@@ -1,3 +1,5 @@
+"use client";
+
 import type { Dispatch, SetStateAction } from 'react';
 import { Database } from 'lucide-react';
 
@@ -15,6 +17,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function BackupSection({
   settings,
@@ -23,20 +29,22 @@ export function BackupSection({
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Database className="h-5 w-5" />
-          النسخ الاحتياطي
+          {t.backup.title}
         </CardTitle>
-        <CardDescription>إعدادات النسخ الاحتياطي التلقائي</CardDescription>
+        <CardDescription>{t.backup.pSettings} {t.backup.title} {t.backup.pAutomatic}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between py-2">
           <div>
-            <Label>النسخ الاحتياطي التلقائي</Label>
-            <p className="text-sm text-muted-foreground">تفعيل النسخ الاحتياطي الدوري</p>
+            <Label>{t.backup.autoBackup}</Label>
+            <p className="text-sm text-muted-foreground">{t.backup.pEnable} {t.backup.title} {t.backup.pPeriodic}</p>
           </div>
           <Switch
             checked={settings.backup.autoBackup}
@@ -53,7 +61,7 @@ export function BackupSection({
           <>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>التكرار</Label>
+                <Label>{t.backup.pFrequency}</Label>
                 <Select
                   value={settings.backup.frequency}
                   onValueChange={(value: 'daily' | 'weekly' | 'monthly') =>
@@ -67,14 +75,14 @@ export function BackupSection({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="daily">يومياً</SelectItem>
-                    <SelectItem value="weekly">أسبوعياً</SelectItem>
-                    <SelectItem value="monthly">شهرياً</SelectItem>
+                    <SelectItem value="daily">{t.backup.daily}</SelectItem>
+                    <SelectItem value="weekly">{t.backup.weekly}</SelectItem>
+                    <SelectItem value="monthly">{t.backup.monthly}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>مدة الاحتفاظ (أيام)</Label>
+                <Label>{t.backup.retentionDays}</Label>
                 <Input
                   type="number"
                   value={settings.backup.retentionDays}
@@ -93,8 +101,8 @@ export function BackupSection({
 
             <div className="flex items-center justify-between py-2">
               <div>
-                <Label>تضمين المرفقات</Label>
-                <p className="text-sm text-muted-foreground">نسخ الملفات والمستندات</p>
+                <Label>{t.backup.includeAttachments}</Label>
+                <p className="text-sm text-muted-foreground">{t.backup.includeAttachmentsDesc}</p>
               </div>
               <Switch
                 checked={settings.backup.includeAttachments}
@@ -110,15 +118,15 @@ export function BackupSection({
             <div className="bg-muted rounded-lg p-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">آخر نسخة احتياطية</p>
+                  <p className="text-sm text-muted-foreground">{t.backup.lastBackup}</p>
                   <p className="font-medium">
                     {settings.backup.lastBackup
                       ? new Date(settings.backup.lastBackup).toLocaleString('ar-SA')
-                      : 'لم يتم بعد'}
+                      : t.backup.notYet}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">النسخة التالية</p>
+                  <p className="text-sm text-muted-foreground">{t.backup.nextBackup}</p>
                   <p className="font-medium">
                     {settings.backup.nextBackup
                       ? new Date(settings.backup.nextBackup).toLocaleString('ar-SA')
@@ -132,7 +140,7 @@ export function BackupSection({
 
         <Button variant="outline">
           <Database className="h-4 w-4 ms-2" />
-          إنشاء نسخة احتياطية الآن
+          {t.backup.backupNow}
         </Button>
       </CardContent>
     </Card>

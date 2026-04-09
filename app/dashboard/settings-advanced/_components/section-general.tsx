@@ -1,3 +1,5 @@
+"use client";
+
 import type { Dispatch, SetStateAction } from 'react';
 import { Building2 } from 'lucide-react';
 
@@ -13,6 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function GeneralSettingsSection({
   settings,
@@ -21,19 +27,21 @@ export function GeneralSettingsSection({
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Building2 className="h-5 w-5" />
-          الإعدادات العامة
+          {t.generalSettings.title}
         </CardTitle>
-        <CardDescription>معلومات الشركة والإعدادات الأساسية</CardDescription>
+        <CardDescription>{t.generalSettings.subtitle}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>اسم الشركة (عربي)</Label>
+            <Label>{t.organization.companyName}</Label>
             <Input
               value={settings.general.companyName}
               onChange={(e) =>
@@ -45,7 +53,7 @@ export function GeneralSettingsSection({
             />
           </div>
           <div className="space-y-2">
-            <Label>اسم الشركة (إنجليزي)</Label>
+            <Label>{t.organization.companyNameEn}</Label>
             <Input
               value={settings.general.companyNameEn || ''}
               onChange={(e) =>
@@ -57,7 +65,7 @@ export function GeneralSettingsSection({
             />
           </div>
           <div className="space-y-2">
-            <Label>المنطقة الزمنية</Label>
+            <Label>{t.tenant.timezone}</Label>
             <Select
               value={settings.general.timezone}
               onValueChange={(value) =>
@@ -71,14 +79,14 @@ export function GeneralSettingsSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Asia/Riyadh">الرياض (GMT+3)</SelectItem>
-                <SelectItem value="Asia/Dubai">دبي (GMT+4)</SelectItem>
-                <SelectItem value="Asia/Kuwait">الكويت (GMT+3)</SelectItem>
+                <SelectItem value="Asia/Riyadh">{t.generalSettings.riyadh}</SelectItem>
+                <SelectItem value="Asia/Dubai">{t.generalSettings.dubai}</SelectItem>
+                <SelectItem value="Asia/Kuwait">{t.generalSettings.kuwait}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>العملة</Label>
+            <Label>{t.salaryStructures.currency}</Label>
             <Select
               value={settings.general.currency}
               onValueChange={(value) =>
@@ -92,14 +100,14 @@ export function GeneralSettingsSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SAR">ريال سعودي (SAR)</SelectItem>
-                <SelectItem value="AED">درهم إماراتي (AED)</SelectItem>
-                <SelectItem value="KWD">دينار كويتي (KWD)</SelectItem>
+                <SelectItem value="SAR">{t.pricingPlans.sar}</SelectItem>
+                <SelectItem value="AED">{t.generalSettings.aed}</SelectItem>
+                <SelectItem value="KWD">{t.generalSettings.kwd}</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>تنسيق التاريخ</Label>
+            <Label>{t.generalSettings.dateFormat}</Label>
             <Select
               value={settings.general.dateFormat}
               onValueChange={(value) =>
@@ -120,7 +128,7 @@ export function GeneralSettingsSection({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>تنسيق الوقت</Label>
+            <Label>{t.generalSettings.timeFormat}</Label>
             <Select
               value={settings.general.timeFormat}
               onValueChange={(value: '12h' | '24h') =>
@@ -134,8 +142,8 @@ export function GeneralSettingsSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="12h">12 ساعة (AM/PM)</SelectItem>
-                <SelectItem value="24h">24 ساعة</SelectItem>
+                <SelectItem value="12h">{t.generalSettings.twelveHour}</SelectItem>
+                <SelectItem value="24h">{t.generalSettings.twentyFourHour}</SelectItem>
               </SelectContent>
             </Select>
           </div>

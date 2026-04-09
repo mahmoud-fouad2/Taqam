@@ -39,6 +39,10 @@ import { Progress } from "@/components/ui/progress";
 import {
   formatMinutesToHours,
 } from "@/lib/types/attendance";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 function getEmployeeFullNameSafe(emp: ApiEmployee, locale: "ar" | "en" = "ar") {
   if (locale === "ar" && emp.firstNameAr && emp.lastNameAr) {
     return `${emp.firstNameAr} ${emp.lastNameAr}`;
@@ -81,6 +85,8 @@ type ApiAttendanceRecord = {
 };
 
 export function ReportsView() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [reportType, setReportType] = React.useState<"summary" | "department" | "individual">(
     "summary"
   );
@@ -216,13 +222,13 @@ export function ReportsView() {
   // Export to CSV
   const exportToCSV = () => {
     const headers = [
-      "الموظف",
-      "أيام العمل",
-      "حضور",
-      "تأخير",
-      "غياب",
-      "إجمالي التأخير (دقيقة)",
-      "نسبة الحضور",
+      t.common.employee,
+      t.shifts.workingDays,
+      t.reports.pPresent,
+      t.reports.pLate,
+      t.reports.pAbsent,
+      t.reports.pTotalLateMinutes,
+      t.reports.pAttendanceRate,
     ];
     const rows = filteredEmployeeStats.map((s) => [
       getEmployeeFullNameSafe(s.employee, "ar"),
@@ -259,7 +265,7 @@ export function ReportsView() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">نسبة الحضور</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.attendanceRate}</CardTitle>
             <IconTrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -269,7 +275,7 @@ export function ReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">نسبة الالتزام بالمواعيد</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.reports.pScheduleComplianceRate}</CardTitle>
             <IconClock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -279,7 +285,7 @@ export function ReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي التأخير</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.reports.pTotalLate}</CardTitle>
             <IconAlertCircle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -287,20 +293,20 @@ export function ReportsView() {
               {formatMinutesToHours(totalLateMinutes)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {totalLate} يوم تأخير
+              {totalLate} {t.reports.pLateDays}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي ساعات العمل</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.reports.pTotalWorkHours}</CardTitle>
             <IconCalendar className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">
               {Math.round(totalWorkMinutes / 60)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">ساعة</p>
+            <p className="text-xs text-muted-foreground mt-1">{t.common.hour}</p>
           </CardContent>
         </Card>
       </div>
@@ -325,10 +331,10 @@ export function ReportsView() {
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-[180px]">
               <IconFilter className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="القسم" />
+              <SelectValue placeholder={t.common.department} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الأقسام</SelectItem>
+              <SelectItem value="all">{t.common.allDepartments}</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.nameAr}
@@ -347,8 +353,8 @@ export function ReportsView() {
       {/* Department Summary */}
       <Card>
         <CardHeader>
-          <CardTitle>ملخص الأقسام</CardTitle>
-          <CardDescription>نسب الحضور حسب القسم</CardDescription>
+          <CardTitle>{t.reports.pDepartmentsSummary}</CardTitle>
+          <CardDescription>{t.reports.pAttendanceRatesByDepartment}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -357,15 +363,15 @@ export function ReportsView() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{stat.department.nameAr}</span>
-                    <Badge variant="outline">{stat.employeeCount} موظف</Badge>
+                    <Badge variant="outline">{stat.employeeCount} {t.reports.pEmployee}</Badge>
                   </div>
                   <span className="font-bold">{stat.attendanceRate}%</span>
                 </div>
                 <Progress value={stat.attendanceRate} />
                 <div className="flex gap-4 text-xs text-muted-foreground">
-                  <span className="text-green-600">حضور: {stat.present}</span>
-                  <span className="text-yellow-600">تأخير: {stat.late}</span>
-                  <span className="text-red-600">غياب: {stat.absent}</span>
+                  <span className="text-green-600">{t.reports.pPresent} {stat.present}</span>
+                  <span className="text-yellow-600">{t.reports.pLate} {stat.late}</span>
+                  <span className="text-red-600">{t.reports.pAbsent} {stat.absent}</span>
                 </div>
               </div>
             ))}
@@ -376,38 +382,38 @@ export function ReportsView() {
       {/* Individual Report */}
       <Card>
         <CardHeader>
-          <CardTitle>تقرير الموظفين</CardTitle>
+          <CardTitle>{t.reports.pEmployeeReport}</CardTitle>
           <CardDescription>
-            تفاصيل الحضور لكل موظف ({filteredEmployeeStats.length} موظف)
+            {t.reports.pAttendanceDetailsPerEmployee}{filteredEmployeeStats.length} موظف)
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead>القسم</TableHead>
-                <TableHead>أيام العمل</TableHead>
-                <TableHead>حضور</TableHead>
-                <TableHead>تأخير</TableHead>
-                <TableHead>غياب</TableHead>
-                <TableHead>إجمالي التأخير</TableHead>
-                <TableHead>ساعات العمل</TableHead>
-                <TableHead>نسبة الحضور</TableHead>
+                <TableHead>{t.common.employee}</TableHead>
+                <TableHead>{t.common.department}</TableHead>
+                <TableHead>{t.shifts.workingDays}</TableHead>
+                <TableHead>{t.attendance.present}</TableHead>
+                <TableHead>{t.attendance.late}</TableHead>
+                <TableHead>{t.attendance.absent}</TableHead>
+                <TableHead>{t.reports.pTotalLate}</TableHead>
+                <TableHead>{t.shifts.workHours}</TableHead>
+                <TableHead>{t.attendance.attendanceRate}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {isLoading ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
-                    <p className="text-muted-foreground">جاري التحميل...</p>
+                    <p className="text-muted-foreground">{t.common.loading}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredEmployeeStats.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
                     <IconUsers className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">لا توجد بيانات</p>
+                    <p className="text-muted-foreground">{t.common.noData}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -436,7 +442,7 @@ export function ReportsView() {
                       </TableCell>
                       <TableCell>
                         {stat.workMinutes > 0
-                          ? `${Math.round(stat.workMinutes / 60)} ساعة`
+                          ? `${Math.round(stat.workMinutes / 60)} {t.reports.pHour}`
                           : "-"}
                       </TableCell>
                       <TableCell>

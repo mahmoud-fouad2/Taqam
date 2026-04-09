@@ -86,8 +86,14 @@ import {
 } from "@/lib/types/documents";
 import { documentsService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function DocumentsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { employees, getEmployeeFullName } = useEmployees();
   const [documents, setDocuments] = React.useState<Document[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -110,15 +116,15 @@ export function DocumentsManager() {
         setDocuments(res.data);
       } else {
         setDocuments([]);
-        setError(res.error ?? "فشل تحميل المستندات");
+        setError(res.error ?? t.documents.uploadFailed);
       }
     } catch (e) {
       setDocuments([]);
-      setError(e instanceof Error ? e.message : "فشل تحميل المستندات");
+      setError(e instanceof Error ? e.message : t.documents.uploadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.documents.uploadFailed]);
 
   React.useEffect(() => {
     fetchDocuments();
@@ -187,7 +193,7 @@ export function DocumentsManager() {
       });
 
       if (!res.success) {
-        setActionError(res.error ?? "فشل رفع المستند");
+        setActionError(res.error ?? t.documents.uploadFailed);
         return;
       }
 
@@ -195,7 +201,7 @@ export function DocumentsManager() {
       resetUploadForm();
       setIsUploadOpen(false);
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "فشل رفع المستند");
+      setActionError(e instanceof Error ? e.message : t.documents.uploadFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -222,16 +228,16 @@ export function DocumentsManager() {
       const res =
         newStatus === "approved"
           ? await documentsService.approve(docId)
-          : await documentsService.reject(docId, "مرفوض");
+          : await documentsService.reject(docId, t.common.rejected);
 
       if (!res.success) {
-        setActionError(res.error ?? "فشل تحديث حالة المستند");
+        setActionError(res.error ?? t.documents.statusUpdateFailed);
         return;
       }
 
       await fetchDocuments();
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "فشل تحديث حالة المستند");
+      setActionError(e instanceof Error ? e.message : t.documents.statusUpdateFailed);
     }
   };
 
@@ -241,12 +247,12 @@ export function DocumentsManager() {
     try {
       const res = await documentsService.delete(docId);
       if (!res.success) {
-        setActionError(res.error ?? "فشل حذف المستند");
+        setActionError(res.error ?? t.documents.deleteFailed);
         return;
       }
       await fetchDocuments();
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "فشل حذف المستند");
+      setActionError(e instanceof Error ? e.message : t.documents.deleteFailed);
     }
   };
 
@@ -289,7 +295,7 @@ export function DocumentsManager() {
 
       const res = await documentsService.download(doc.id);
       if (!res.success || !res.data) {
-        setActionError(res.error ?? "فشل تنزيل المستند");
+        setActionError(res.error ?? t.documents.downloadFailed);
         return;
       }
 
@@ -298,7 +304,7 @@ export function DocumentsManager() {
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "فشل تنزيل المستند");
+      setActionError(e instanceof Error ? e.message : t.documents.downloadFailed);
     }
   };
 
@@ -313,7 +319,7 @@ export function DocumentsManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المستندات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.totalDocuments}</CardTitle>
             <IconFile className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -322,7 +328,7 @@ export function DocumentsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -331,7 +337,7 @@ export function DocumentsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">معتمدة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.approved}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -340,7 +346,7 @@ export function DocumentsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تنتهي قريباً</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.expiringSoon}</CardTitle>
             <IconAlertCircle className="h-4 w-4 text-orange-500" />
           </CardHeader>
           <CardContent>
@@ -355,7 +361,7 @@ export function DocumentsManager() {
           <div className="relative flex-1 max-w-sm">
             <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="بحث في المستندات..."
+              placeholder={t.documents.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="ps-9"
@@ -367,10 +373,10 @@ export function DocumentsManager() {
           >
             <SelectTrigger className="w-[160px]">
               <IconFilter className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="التصنيف" />
+              <SelectValue placeholder={t.common.category} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل التصنيفات</SelectItem>
+              <SelectItem value="all">{t.documents.allCategories}</SelectItem>
               {Object.entries(documentCategoryLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label.ar}
@@ -383,10 +389,10 @@ export function DocumentsManager() {
             onValueChange={(value) => setStatusFilter(value as DocumentStatus | "all")}
           >
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
               {Object.entries(documentStatusLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label.ar}
@@ -400,28 +406,26 @@ export function DocumentsManager() {
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
             <Button>
-              <IconUpload className="ms-2 h-4 w-4" />
-              رفع مستند
-            </Button>
+              <IconUpload className="ms-2 h-4 w-4" />{t.documents.upload}</Button>
           </DialogTrigger>
           <DialogContent className="w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>رفع مستند جديد</DialogTitle>
+              <DialogTitle>{t.documents.uploadDialog}</DialogTitle>
               <DialogDescription>
-                قم برفع مستند للموظف. الأنواع المدعومة: PDF, Word, صور
+                {t.documents.uploadDesc}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {/* File Input */}
               <div className="space-y-2">
-                <Label>اختر الملف</Label>
+                <Label>{t.documents.chooseFile}</Label>
                 <input
                   ref={fileInputRef}
                   type="file"
                   className="hidden"
                   accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
                   onChange={handleFileSelect}
-                  aria-label="رفع مستند"
+                  aria-label={t.documents.uploadDocument}
                 />
                 <button
                   type="button"
@@ -440,7 +444,7 @@ export function DocumentsManager() {
                     <>
                       <IconUpload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        اضغط لاختيار ملف
+                        {t.documents.clickToChoose}
                       </p>
                     </>
                   )}
@@ -449,15 +453,15 @@ export function DocumentsManager() {
 
               {/* Employee Select */}
               <div className="space-y-2">
-                <Label>الموظف</Label>
+                <Label>{t.common.employee}</Label>
                 <Select value={uploadEmployeeId} onValueChange={setUploadEmployeeId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر الموظف" />
+                    <SelectValue placeholder={t.common.selectEmployee} />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.length === 0 ? (
                       <SelectItem value="__empty" disabled>
-                        لا يوجد موظفون
+                        {t.documents.noEmployees}
                       </SelectItem>
                     ) : (
                       employees.map((emp) => (
@@ -472,7 +476,7 @@ export function DocumentsManager() {
 
               {/* Category */}
               <div className="space-y-2">
-                <Label>التصنيف</Label>
+                <Label>{t.common.category}</Label>
                 <Select
                   value={uploadCategory}
                   onValueChange={(v) => setUploadCategory(v as DocumentCategory)}
@@ -491,17 +495,17 @@ export function DocumentsManager() {
               </div>
 
               {/* Title */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>العنوان (عربي)</Label>
+                  <Label>{t.documents.titleAr}</Label>
                   <Input
                     value={uploadTitleAr}
                     onChange={(e) => setUploadTitleAr(e.target.value)}
-                    placeholder="مثال: الهوية الوطنية"
+                    placeholder={t.documents.exampleId}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>العنوان (English)</Label>
+                  <Label>{t.documents.titleEn}</Label>
                   <Input
                     value={uploadTitle}
                     onChange={(e) => setUploadTitle(e.target.value)}
@@ -512,19 +516,19 @@ export function DocumentsManager() {
 
               {/* Description */}
               <div className="space-y-2">
-                <Label>الوصف (اختياري)</Label>
+                <Label>{t.documents.descriptionOptional}</Label>
                 <Textarea
                   value={uploadDescription}
                   onChange={(e) => setUploadDescription(e.target.value)}
-                  placeholder="وصف أو ملاحظات..."
+                  placeholder={t.documents.descriptionPlaceholder}
                   rows={2}
                 />
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>تاريخ الإصدار (اختياري)</Label>
+                  <Label>{t.documents.issueDateOptional}</Label>
                   <Input
                     type="date"
                     value={uploadIssued}
@@ -532,7 +536,7 @@ export function DocumentsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>تاريخ الانتهاء (اختياري)</Label>
+                  <Label>{t.documents.expiryDateOptional}</Label>
                   <Input
                     type="date"
                     value={uploadExpiry}
@@ -542,14 +546,12 @@ export function DocumentsManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>
-                إلغاء
-              </Button>
+              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>{t.common.cancel}</Button>
               <Button
                 onClick={handleUpload}
                 disabled={isSubmitting || !uploadFile || !uploadEmployeeId || !uploadTitle}
               >
-                {isSubmitting ? "جاري الرفع..." : "رفع المستند"}
+                {isSubmitting ? t.documents.uploading : t.documents.uploadDoc}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -559,9 +561,9 @@ export function DocumentsManager() {
       {/* Documents Table */}
       <Card>
         <CardHeader>
-          <CardTitle>المستندات</CardTitle>
+          <CardTitle>{t.documents.title}</CardTitle>
           <CardDescription>
-            قائمة بجميع مستندات الموظفين ({filteredDocuments.length} مستند)
+            {t.documents.docListDesc} ({filteredDocuments.length} {t.documents.docCount})
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -584,7 +586,7 @@ export function DocumentsManager() {
                         <Skeleton className="h-8 w-8 rounded-md" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-3 gap-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
                       <Skeleton className="h-3 w-16" />
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-3 w-16" />
@@ -601,16 +603,14 @@ export function DocumentsManager() {
                   <EmptyMedia variant="icon">
                     <IconFile className="size-5" />
                   </EmptyMedia>
-                  <EmptyTitle>لا توجد مستندات</EmptyTitle>
+                  <EmptyTitle>{t.common.noData}</EmptyTitle>
                   <EmptyDescription>
-                    ارفع مستندًا للموظفين ليظهر هنا مع الحالة والتصنيف.
+                    {t.documents.emptyState}
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button onClick={() => setIsUploadOpen(true)}>
-                    <IconUpload className="ms-2 h-4 w-4" />
-                    رفع مستند
-                  </Button>
+                    <IconUpload className="ms-2 h-4 w-4" />{t.documents.upload}</Button>
                 </EmptyContent>
               </Empty>
             ) : (
@@ -629,26 +629,26 @@ export function DocumentsManager() {
                           </div>
                         </div>
 
-                        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                          <div className="text-muted-foreground">الموظف</div>
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                          <div className="text-muted-foreground">{t.common.employee}</div>
                           <div className="text-start truncate">{getEmployeeName(doc.employeeId)}</div>
 
-                          <div className="text-muted-foreground">التصنيف</div>
+                          <div className="text-muted-foreground">{t.common.category}</div>
                           <div className="text-start">
                             <Badge variant="outline">{documentCategoryLabels[doc.category].ar}</Badge>
                           </div>
 
-                          <div className="text-muted-foreground">الحالة</div>
+                          <div className="text-muted-foreground">{t.common.status}</div>
                           <div className="text-start">
                             <Badge variant={getStatusVariant(doc.status)}>
                               {documentStatusLabels[doc.status].ar}
                             </Badge>
                           </div>
 
-                          <div className="text-muted-foreground">تاريخ الرفع</div>
+                          <div className="text-muted-foreground">{t.common.date}</div>
                           <div className="text-start text-sm">{new Date(doc.uploadedAt).toLocaleDateString("ar-SA")}</div>
 
-                          <div className="text-muted-foreground">تاريخ الانتهاء</div>
+                          <div className="text-muted-foreground">{t.common.endDate}</div>
                           <div className="text-start">
                             {doc.expiryDate ? (
                               <span className={isDocumentExpired(doc) ? "text-red-600" : "text-muted-foreground"}>
@@ -665,7 +665,7 @@ export function DocumentsManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="عرض"
+                          aria-label={t.common.view}
                           onClick={() => {
                             setSelectedDocument(doc);
                             setIsPreviewOpen(true);
@@ -674,7 +674,7 @@ export function DocumentsManager() {
                           <IconEye className="h-4 w-4" />
                         </Button>
 
-                        <Button variant="ghost" size="icon" aria-label="تحميل" onClick={() => handleDownload(doc)}>
+                        <Button variant="ghost" size="icon" aria-label={t.common.download} onClick={() => handleDownload(doc)}>
                           <IconDownload className="h-4 w-4" />
                         </Button>
 
@@ -683,7 +683,7 @@ export function DocumentsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="قبول"
+                              aria-label={t.common.accept}
                               className="text-green-600"
                               onClick={() => handleStatusChange(doc.id, "approved")}
                             >
@@ -692,7 +692,7 @@ export function DocumentsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="رفض"
+                              aria-label={t.common.reject}
                               className="text-red-600"
                               onClick={() => handleStatusChange(doc.id, "rejected")}
                             >
@@ -703,25 +703,23 @@ export function DocumentsManager() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
+                            <Button variant="ghost" size="icon" aria-label={t.common.delete} className="text-destructive">
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>حذف المستند</AlertDialogTitle>
+                              <AlertDialogTitle>{t.common.delete}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                هل أنت متأكد من حذف &quot;{doc.titleAr || doc.title}&quot;؟
+                                {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}&quot;?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                              <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(doc.id)}
                                 className="bg-destructive"
-                              >
-                                حذف
-                              </AlertDialogAction>
+                              >{t.common.delete}</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -738,13 +736,13 @@ export function DocumentsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الملف</TableHead>
-                  <TableHead>الموظف</TableHead>
-                  <TableHead>التصنيف</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ الرفع</TableHead>
-                  <TableHead>تاريخ الانتهاء</TableHead>
-                  <TableHead className="text-start">إجراءات</TableHead>
+                  <TableHead>{t.common.name}</TableHead>
+                  <TableHead>{t.common.employee}</TableHead>
+                  <TableHead>{t.common.category}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead>{t.common.date}</TableHead>
+                  <TableHead>{t.common.endDate}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -757,10 +755,10 @@ export function DocumentsManager() {
                 ) : filteredDocuments.length === 0 ? (
                   <TableEmptyRow
                     colSpan={7}
-                    title="لا توجد مستندات"
-                    description="ارفع مستندًا للموظفين ليظهر هنا مع الحالة والتصنيف."
+                    title={t.documents.noDocsTitle}
+                    description={t.documents.emptyDescription}
                     icon={<IconFile className="size-5" />}
-                    actionLabel="رفع مستند"
+                    actionLabel={t.documents.uploadDocument}
                     onAction={() => setIsUploadOpen(true)}
                   />
                 ) : (
@@ -811,7 +809,7 @@ export function DocumentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="عرض"
+                            aria-label={t.common.view}
                             onClick={() => {
                               setSelectedDocument(doc);
                               setIsPreviewOpen(true);
@@ -823,7 +821,7 @@ export function DocumentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="تحميل"
+                            aria-label={t.common.download}
                             onClick={() => handleDownload(doc)}
                           >
                             <IconDownload className="h-4 w-4" />
@@ -834,7 +832,7 @@ export function DocumentsManager() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="قبول"
+                                aria-label={t.common.accept}
                                 className="text-green-600"
                                 onClick={() => handleStatusChange(doc.id, "approved")}
                               >
@@ -843,7 +841,7 @@ export function DocumentsManager() {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                aria-label="رفض"
+                                aria-label={t.common.reject}
                                 className="text-red-600"
                                 onClick={() => handleStatusChange(doc.id, "rejected")}
                               >
@@ -854,25 +852,23 @@ export function DocumentsManager() {
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
+                              <Button variant="ghost" size="icon" aria-label={t.common.delete} className="text-destructive">
                                 <IconTrash className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
                             <AlertDialogContent>
                               <AlertDialogHeader>
-                                <AlertDialogTitle>حذف المستند</AlertDialogTitle>
+                                <AlertDialogTitle>{t.common.delete}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  هل أنت متأكد من حذف &quot;{doc.titleAr || doc.title}&quot;؟
+                                  {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}&quot;?
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
-                                <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                                <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(doc.id)}
                                   className="bg-destructive"
-                                >
-                                  حذف
-                                </AlertDialogAction>
+                                >{t.common.delete}</AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -891,44 +887,44 @@ export function DocumentsManager() {
       <Dialog open={isPreviewOpen} onOpenChange={setIsPreviewOpen}>
         <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>معاينة المستند</DialogTitle>
+            <DialogTitle>{t.documents.title}</DialogTitle>
           </DialogHeader>
           {selectedDocument && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">العنوان</p>
+                  <p className="text-muted-foreground">{t.common.title}</p>
                   <p className="font-medium">{selectedDocument.titleAr || selectedDocument.title}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">الحجم</p>
+                  <p className="text-muted-foreground">{t.documents.size}</p>
                   <p className="font-medium">{formatFileSize(selectedDocument.size)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">الموظف</p>
+                  <p className="text-muted-foreground">{t.common.employee}</p>
                   <p className="font-medium">{getEmployeeName(selectedDocument.employeeId)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">التصنيف</p>
+                  <p className="text-muted-foreground">{t.common.category}</p>
                   <p className="font-medium">
                     {documentCategoryLabels[selectedDocument.category].ar}
                   </p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">الحالة</p>
+                  <p className="text-muted-foreground">{t.common.status}</p>
                   <Badge variant={getStatusVariant(selectedDocument.status)}>
                     {documentStatusLabels[selectedDocument.status].ar}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">تاريخ الرفع</p>
+                  <p className="text-muted-foreground">{t.common.date}</p>
                   <p className="font-medium">
                     {new Date(selectedDocument.uploadedAt).toLocaleDateString("ar-SA")}
                   </p>
                 </div>
                 {selectedDocument.expiryDate && (
                   <div>
-                    <p className="text-muted-foreground">تاريخ الانتهاء</p>
+                    <p className="text-muted-foreground">{t.common.endDate}</p>
                     <p
                       className={`font-medium ${
                         isDocumentExpired(selectedDocument) ? "text-red-600" : ""
@@ -940,7 +936,7 @@ export function DocumentsManager() {
                 )}
                 {selectedDocument.description && (
                   <div className="col-span-2">
-                    <p className="text-muted-foreground">الوصف</p>
+                    <p className="text-muted-foreground">{t.common.description}</p>
                     <p className="font-medium">{selectedDocument.description}</p>
                   </div>
                 )}

@@ -26,6 +26,12 @@ type CommandItemProps = {
   };
 };
 
+function resolveLucideIcon(iconName?: string) {
+  if (!iconName) return null;
+  const key = iconName as keyof typeof icons;
+  return icons[key] ?? null;
+}
+
 export default function Search() {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -48,8 +54,7 @@ export default function Search() {
   }, []);
 
   const CommandItemComponent: React.FC<CommandItemProps> = ({ item }) => {
-    // @ts-expect-error
-    const LucideIcon = icons[item.icon];
+    const LucideIcon = resolveLucideIcon(item.icon);
 
     return (
       <CommandItem
@@ -57,7 +62,7 @@ export default function Search() {
           setOpen(false);
           router.push(item.href);
         }}>
-        {item.icon && <LucideIcon className="me-2 !h-4 !w-4" />}
+        {LucideIcon ? <LucideIcon className="me-2 !h-4 !w-4" /> : null}
         <span>{item.title}</span>
       </CommandItem>
     );

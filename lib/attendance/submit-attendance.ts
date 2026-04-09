@@ -2,6 +2,14 @@ import prisma from "@/lib/db";
 import { isWithinRadiusMeters } from "@/lib/geo";
 import type { CheckSource } from "@prisma/client";
 
+type AttendanceError = Error & { status: number };
+
+function createAttendanceError(message: string, status: number): AttendanceError {
+  const error = new Error(message) as AttendanceError;
+  error.status = status;
+  return error;
+}
+
 export type SubmitAttendanceInput = {
   tenantId: string;
   employeeId: string;
@@ -23,10 +31,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
   });
 
   if (!employee) {
-    const err = new Error("Employee not found");
-    // @ts-expect-error attach status
-    err.status = 404;
-    throw err;
+    throw createAttendanceError("Employee not found", 404);
   }
 
   const policy = await prisma.tenantAttendancePolicy.findUnique({
@@ -40,17 +45,11 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
   if (policy?.enforceGeofence) {
     if (!hasLocation) {
       if (!policy.allowCheckInWithoutLocation) {
-        const err = new Error("Location is required for attendance");
-        // @ts-expect-error attach status
-        err.status = 400;
-        throw err;
+        throw createAttendanceError("Location is required for attendance", 400);
       }
     } else {
       if (typeof input.accuracy === "number" && input.accuracy > policy.maxAccuracyMeters) {
-        const err = new Error("Location accuracy is too low");
-        // @ts-expect-error attach status
-        err.status = 400;
-        throw err;
+        throw createAttendanceError("Location accuracy is too low", 400);
       }
 
       const locations = await prisma.tenantWorkLocation.findMany({
@@ -59,10 +58,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
       });
 
       if (locations.length === 0) {
-        const err = new Error("No work locations configured");
-        // @ts-expect-error attach status
-        err.status = 400;
-        throw err;
+        throw createAttendanceError("No work locations configured", 400);
       }
 
       const point = { lat: input.latitude!, lng: input.longitude! };
@@ -76,10 +72,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
       );
 
       if (!match) {
-        const err = new Error("Outside allowed work location");
-        // @ts-expect-error attach status
-        err.status = 403;
-        throw err;
+        throw createAttendanceError("Outside allowed work location", 403);
       }
 
       matchedLocationId = match.id;
@@ -98,10 +91,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
 
   if (input.type === "check-in") {
     if (record && record.checkInTime) {
-      const err = new Error("Already checked in today");
-      // @ts-expect-error attach status
-      err.status = 400;
-      throw err;
+      throw createAttendanceError("Already checked in today", 400);
     }
 
     if (record) {
@@ -137,17 +127,11 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
     }
   } else {
     if (!record || !record.checkInTime) {
-      const err = new Error("Must check in first");
-      // @ts-expect-error attach status
-      err.status = 400;
-      throw err;
+      throw createAttendanceError("Must check in first", 400);
     }
 
     if (record.checkOutTime) {
-      const err = new Error("Already checked out today");
-      // @ts-expect-error attach status
-      err.status = 400;
-      throw err;
+      throw createAttendanceError("Already checked out today", 400);
     }
 
     const checkInTime = new Date(record.checkInTime);

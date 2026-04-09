@@ -4,7 +4,7 @@
  * Platform Settings Manager Component
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +14,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { Loader2, Save, Settings, Globe, Palette, Shield } from "lucide-react";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 interface PlatformSettings {
   id: string;
@@ -36,15 +38,13 @@ interface PlatformSettings {
 }
 
 export function PlatformSettingsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    fetchSettings();
-  }, []);
-
-  async function fetchSettings() {
+  const fetchSettings = useCallback(async () => {
     try {
       const res = await fetch("/api/super-admin/platform-settings");
       const json = await res.json();
@@ -53,11 +53,15 @@ export function PlatformSettingsManager() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("فشل في تحميل الإعدادات");
+      toast.error(t.platformSettings.loadFailed);
     } finally {
       setLoading(false);
     }
-  }
+  }, [t.platformSettings.loadFailed]);
+
+  useEffect(() => {
+    void fetchSettings();
+  }, [fetchSettings]);
 
   async function handleSave() {
     if (!settings) return;
@@ -70,13 +74,13 @@ export function PlatformSettingsManager() {
       });
 
       if (res.ok) {
-        toast.success("تم حفظ الإعدادات بنجاح");
+        toast.success(t.platformSettings.savedSuccess);
       } else {
-        toast.error("فشل في حفظ الإعدادات");
+        toast.error(t.platformSettings.saveFailed);
       }
     } catch (err) {
       console.error(err);
-      toast.error("خطأ في الاتصال");
+      toast.error(t.platformSettings.connectionError);
     } finally {
       setSaving(false);
     }
@@ -92,9 +96,7 @@ export function PlatformSettingsManager() {
 
   if (!settings) {
     return (
-      <div className="text-center py-12 text-muted-foreground">
-        لم يتم العثور على الإعدادات
-      </div>
+      <div className="text-center py-12 text-muted-foreground">{t.platformSettings.notFound}</div>
     );
   }
 
@@ -103,36 +105,28 @@ export function PlatformSettingsManager() {
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general" className="gap-2">
-            <Settings className="h-4 w-4" />
-            عام
-          </TabsTrigger>
+            <Settings className="h-4 w-4" />{t.common.general}</TabsTrigger>
           <TabsTrigger value="trial" className="gap-2">
-            <Globe className="h-4 w-4" />
-            الفترة التجريبية
-          </TabsTrigger>
+            <Globe className="h-4 w-4" />{t.platformSettings.trial}</TabsTrigger>
           <TabsTrigger value="appearance" className="gap-2">
-            <Palette className="h-4 w-4" />
-            المظهر
-          </TabsTrigger>
+            <Palette className="h-4 w-4" />{t.platformSettings.appearance}</TabsTrigger>
           <TabsTrigger value="maintenance" className="gap-2">
-            <Shield className="h-4 w-4" />
-            الصيانة
-          </TabsTrigger>
+            <Shield className="h-4 w-4" />{t.platformSettings.maintenance}</TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
         <TabsContent value="general">
           <Card>
             <CardHeader>
-              <CardTitle>الإعدادات العامة</CardTitle>
+              <CardTitle>{t.common.options}</CardTitle>
               <CardDescription>
-                معلومات المنصة الأساسية وبيانات الدعم
+                {t.platformSettings.pBasicPlatformInfoAndSupportDat}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>اسم المنصة (عربي)</Label>
+                  <Label>{t.platformSettings.platformNameAr}</Label>
                   <Input
                     value={settings.platformName}
                     onChange={(e) =>
@@ -141,7 +135,7 @@ export function PlatformSettingsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>اسم المنصة (إنجليزي)</Label>
+                  <Label>{t.platformSettings.platformNameEn}</Label>
                   <Input
                     value={settings.platformNameEn}
                     onChange={(e) =>
@@ -153,7 +147,7 @@ export function PlatformSettingsManager() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>بريد الدعم</Label>
+                  <Label>{t.platformSettings.supportEmail}</Label>
                   <Input
                     type="email"
                     value={settings.supportEmail}
@@ -163,7 +157,7 @@ export function PlatformSettingsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>هاتف الدعم</Label>
+                  <Label>{t.platformSettings.supportPhone}</Label>
                   <Input
                     value={settings.supportPhone || ""}
                     onChange={(e) =>
@@ -175,7 +169,7 @@ export function PlatformSettingsManager() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>رابط الشروط والأحكام</Label>
+                  <Label>{t.platformSettings.termsUrl}</Label>
                   <Input
                     value={settings.termsUrl || ""}
                     onChange={(e) =>
@@ -185,7 +179,7 @@ export function PlatformSettingsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>رابط سياسة الخصوصية</Label>
+                  <Label>{t.platformSettings.privacyUrl}</Label>
                   <Input
                     value={settings.privacyUrl || ""}
                     onChange={(e) =>
@@ -197,7 +191,7 @@ export function PlatformSettingsManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>روابط التواصل الاجتماعي</Label>
+                <Label>{t.platformSettings.socialLinks}</Label>
                 <div className="grid gap-4 md:grid-cols-3">
                   <Input
                     value={settings.twitterUrl || ""}
@@ -230,15 +224,13 @@ export function PlatformSettingsManager() {
         <TabsContent value="trial">
           <Card>
             <CardHeader>
-              <CardTitle>إعدادات الفترة التجريبية</CardTitle>
-              <CardDescription>
-                تكوين الفترة التجريبية للشركات الجديدة
-              </CardDescription>
+              <CardTitle>{t.platformSettings.trialSettings}</CardTitle>
+              <CardDescription>{t.platformSettings.trialDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>عدد أيام الفترة التجريبية</Label>
+                  <Label>{t.platformSettings.trialDays}</Label>
                   <Input
                     type="number"
                     min={1}
@@ -250,7 +242,7 @@ export function PlatformSettingsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>الحد الأقصى للموظفين</Label>
+                  <Label>{t.platformSettings.maxEmployees}</Label>
                   <Input
                     type="number"
                     min={1}
@@ -270,15 +262,13 @@ export function PlatformSettingsManager() {
         <TabsContent value="appearance">
           <Card>
             <CardHeader>
-              <CardTitle>المظهر والعلامة التجارية</CardTitle>
-              <CardDescription>
-                تخصيص ألوان وشعارات المنصة
-              </CardDescription>
+              <CardTitle>{t.platformSettings.branding}</CardTitle>
+              <CardDescription>{t.platformSettings.brandingDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>اللون الأساسي</Label>
+                  <Label>{t.platformSettings.primaryColor}</Label>
                   <div className="flex gap-2">
                     <Input
                       type="color"
@@ -301,7 +291,7 @@ export function PlatformSettingsManager() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>رابط الشعار</Label>
+                  <Label>{t.platformSettings.logoUrl}</Label>
                   <Input
                     value={settings.logoUrl || ""}
                     onChange={(e) =>
@@ -311,7 +301,7 @@ export function PlatformSettingsManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>رابط Favicon</Label>
+                  <Label>{t.platformSettings.faviconUrl}</Label>
                   <Input
                     value={settings.faviconUrl || ""}
                     onChange={(e) =>
@@ -329,10 +319,8 @@ export function PlatformSettingsManager() {
         <TabsContent value="maintenance">
           <Card>
             <CardHeader>
-              <CardTitle>وضع الصيانة</CardTitle>
-              <CardDescription>
-                تفعيل وضع الصيانة يمنع الوصول للمنصة مؤقتاً
-              </CardDescription>
+              <CardTitle>{t.platformSettings.maintenanceMode}</CardTitle>
+              <CardDescription>{t.platformSettings.maintenanceModeDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center gap-4">
@@ -342,18 +330,18 @@ export function PlatformSettingsManager() {
                     setSettings({ ...settings, maintenanceMode: checked })
                   }
                 />
-                <Label>تفعيل وضع الصيانة</Label>
+                <Label>{t.platformSettings.pEnableMaintenanceMode}</Label>
               </div>
 
               {settings.maintenanceMode && (
                 <div className="space-y-2">
-                  <Label>رسالة الصيانة</Label>
+                  <Label>{t.platformSettings.maintenanceMsg}</Label>
                   <Textarea
                     value={settings.maintenanceMsg || ""}
                     onChange={(e) =>
                       setSettings({ ...settings, maintenanceMsg: e.target.value || null })
                     }
-                    placeholder="المنصة تحت الصيانة حالياً، نعود قريباً..."
+                    placeholder={t.platformSettings.maintenanceMsgExample}
                     rows={3}
                   />
                 </div>
@@ -368,14 +356,10 @@ export function PlatformSettingsManager() {
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              جاري الحفظ...
-            </>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.common.saving}</>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" />
-              حفظ الإعدادات
-            </>
+              <Save className="mr-2 h-4 w-4" />{t.common.saveChanges}</>
           )}
         </Button>
       </div>

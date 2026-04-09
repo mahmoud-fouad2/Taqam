@@ -73,8 +73,14 @@ import {
   type JobPosting,
   sourceChannelLabels,
 } from "@/lib/types/recruitment";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function ApplicantsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [applicants, setApplicants] = React.useState<Applicant[]>([]);
   const [jobs, setJobs] = React.useState<JobPosting[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -95,11 +101,11 @@ export function ApplicantsManager() {
     } catch (error) {
       setApplicants([]);
       setJobs([]);
-      toast.error(error instanceof Error ? error.message : "فشل في جلب بيانات التوظيف");
+      toast.error(error instanceof Error ? error.message : t.applicants.fetchFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.applicants.fetchFailed]);
 
   React.useEffect(() => {
     void loadData();
@@ -163,9 +169,9 @@ export function ApplicantsManager() {
         setSelectedApplicant(updatedApplicant);
       }
 
-      toast.success("تم تحديث حالة المتقدم");
+      toast.success(t.applicants.statusUpdated);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "فشل في تحديث حالة المتقدم");
+      toast.error(error instanceof Error ? error.message : t.applicants.statusUpdateFailed);
     } finally {
       setUpdatingStatusId(null);
     }
@@ -183,9 +189,9 @@ export function ApplicantsManager() {
         setSelectedApplicant(updatedApplicant);
       }
 
-      toast.success("تم تحديث تقييم المتقدم");
+      toast.success(t.applicants.ratingUpdated);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "فشل في تحديث تقييم المتقدم");
+      toast.error(error instanceof Error ? error.message : t.applicants.ratingUpdateFailed);
     } finally {
       setUpdatingRatingId(null);
     }
@@ -216,60 +222,60 @@ export function ApplicantsManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المتقدمين</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.applicants.total}</CardTitle>
             <IconUser className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">متقدم</p>
+            <p className="text-xs text-muted-foreground">{t.applicants.pApplicant}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">طلبات جديدة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.applicants.new}</CardTitle>
             <IconFileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
-            <p className="text-xs text-muted-foreground">بانتظار المراجعة</p>
+            <p className="text-xs text-muted-foreground">{t.superAdmin.awaitingReview}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">في المقابلات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.applicants.pInInterviews}</CardTitle>
             <IconCalendar className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.interview}</div>
-            <p className="text-xs text-muted-foreground">قيد التقييم</p>
+            <p className="text-xs text-muted-foreground">{t.applicants.evaluating}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">تم قبولهم</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.applicants.pAccepted}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
-            <p className="text-xs text-muted-foreground">مرشحون مقبولون</p>
+            <p className="text-xs text-muted-foreground">{t.applicants.accepted}</p>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>المتقدمون للوظائف</CardTitle>
-          <CardDescription>إدارة طلبات التقديم وتحديث الحالة والتقييم بشكل فعلي</CardDescription>
+          <CardTitle>{t.applicants.title}</CardTitle>
+          <CardDescription>{t.applicants.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث عن متقدم..."
+                placeholder={t.applicants.pSearchApplicant}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
@@ -277,10 +283,10 @@ export function ApplicantsManager() {
             </div>
             <Select value={jobFilter} onValueChange={setJobFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="الوظيفة" />
+                <SelectValue placeholder={t.applicants.pJob} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الوظائف</SelectItem>
+                <SelectItem value="all">{t.common.allJobs}</SelectItem>
                 {jobs.map((job) => (
                   <SelectItem key={job.id} value={job.id}>
                     {job.title}
@@ -291,10 +297,10 @@ export function ApplicantsManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(applicationStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -308,20 +314,20 @@ export function ApplicantsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المتقدم</TableHead>
-                  <TableHead>الوظيفة</TableHead>
-                  <TableHead>المصدر</TableHead>
-                  <TableHead>التقييم</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ التقديم</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.interviews.applicant}</TableHead>
+                  <TableHead>{t.onboarding.jobCol}</TableHead>
+                  <TableHead>{t.applicants.source}</TableHead>
+                  <TableHead>{t.common.rating}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead>{t.myRequests.submissionDate}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {!isLoading && filteredApplicants.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-8 text-center">
-                      <p className="text-muted-foreground">لا يوجد متقدمون مطابقون</p>
+                      <p className="text-muted-foreground">{t.applicants.noMatches}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -347,7 +353,7 @@ export function ApplicantsManager() {
                         <div>
                           <p className="font-medium">{applicant.jobTitle}</p>
                           {applicant.currentCompany && (
-                            <p className="text-xs text-muted-foreground">حالياً: {applicant.currentCompany}</p>
+                            <p className="text-xs text-muted-foreground">{t.applicants.pCurrently} {applicant.currentCompany}</p>
                           )}
                         </div>
                       </TableCell>
@@ -386,18 +392,16 @@ export function ApplicantsManager() {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => void handleViewApplicant(applicant)}>
                               <IconEye className="ms-2 h-4 w-4" />
-                              عرض الملف
+                              {t.applicants.pViewProfile}
                             </DropdownMenuItem>
                             <DropdownMenuItem asChild>
                               <a href={`mailto:${applicant.email}`}>
                                 <IconMail className="ms-2 h-4 w-4" />
-                                إرسال بريد
+                                {t.applicants.pSendEmail}
                               </a>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => void handleStatusChange(applicant.id, "rejected")}>
-                              رفض الطلب
-                            </DropdownMenuItem>
+                            <DropdownMenuItem className="text-destructive" onClick={() => void handleStatusChange(applicant.id, "rejected")}>{t.applicants.rejectApplication}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -413,8 +417,8 @@ export function ApplicantsManager() {
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle>ملف المتقدم</SheetTitle>
-            <SheetDescription>معلومات تفصيلية عن المتقدم ومسار طلبه</SheetDescription>
+            <SheetTitle>{t.applicants.profileTitle}</SheetTitle>
+            <SheetDescription>{t.applicants.profileDesc}</SheetDescription>
           </SheetHeader>
 
           {selectedApplicant && (
@@ -446,7 +450,7 @@ export function ApplicantsManager() {
               <Separator />
 
               <div>
-                <h4 className="mb-3 font-semibold">معلومات الاتصال</h4>
+                <h4 className="mb-3 font-semibold">{t.organization.contactInfo}</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
                     <IconMail className="h-4 w-4 text-muted-foreground" />
@@ -483,9 +487,7 @@ export function ApplicantsManager() {
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
-                      >
-                        فتح السيرة الذاتية
-                      </a>
+                      >{t.applicants.openResume}</a>
                     </div>
                   )}
                 </div>
@@ -494,33 +496,33 @@ export function ApplicantsManager() {
               <Separator />
 
               <div>
-                <h4 className="mb-3 font-semibold">تفاصيل التقديم</h4>
+                <h4 className="mb-3 font-semibold">{t.applicants.pApplicationDetails}</h4>
                 <div className="rounded-lg bg-muted/50 p-3 text-sm">
                   <p className="font-medium">{selectedApplicant.jobTitle}</p>
                   <div className="mt-2 flex flex-wrap gap-2 text-muted-foreground">
-                    <span>المصدر: {sourceChannelLabels[selectedApplicant.source]}</span>
-                    <span>تاريخ التقديم: {new Date(selectedApplicant.appliedAt).toLocaleDateString("ar-SA")}</span>
+                    <span>{t.applicants.pSource} {sourceChannelLabels[selectedApplicant.source]}</span>
+                    <span>{t.applicants.applicationDate} {new Date(selectedApplicant.appliedAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</span>
                   </div>
                 </div>
               </div>
 
               {selectedApplicant.coverLetter && (
                 <div>
-                  <h4 className="mb-3 font-semibold">خطاب التقديم</h4>
+                  <h4 className="mb-3 font-semibold">{t.applicants.pCoverLetter}</h4>
                   <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.coverLetter}</p>
                 </div>
               )}
 
               {selectedApplicant.notes && (
                 <div>
-                  <h4 className="mb-3 font-semibold">ملاحظات داخلية</h4>
+                  <h4 className="mb-3 font-semibold">{t.applicants.pInternalNotes}</h4>
                   <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.notes}</p>
                 </div>
               )}
 
               {selectedApplicant.skills.length > 0 && (
                 <div>
-                  <h4 className="mb-3 font-semibold">المهارات</h4>
+                  <h4 className="mb-3 font-semibold">{t.applicants.pSkills}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedApplicant.skills.map((skill) => (
                       <Badge key={skill} variant="secondary">
@@ -534,12 +536,12 @@ export function ApplicantsManager() {
               <div className="flex gap-2 pt-4">
                 <Button className="flex-1" onClick={() => void handleStatusChange(selectedApplicant.id, "interview")}>
                   <IconCalendar className="ms-2 h-4 w-4" />
-                  نقل إلى المقابلة
+                  {t.applicants.pMoveToInterview}
                 </Button>
                 <Button variant="outline" className="flex-1" asChild>
                   <a href={`mailto:${selectedApplicant.email}`}>
                     <IconMail className="ms-2 h-4 w-4" />
-                    إرسال رسالة
+                    {t.applicants.pSendMessage}
                   </a>
                 </Button>
               </div>

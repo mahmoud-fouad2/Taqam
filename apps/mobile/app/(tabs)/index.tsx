@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, Linking, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 
 import * as Location from "expo-location";
 import * as LocalAuthentication from "expo-local-authentication";
@@ -36,8 +36,8 @@ export default function AttendanceScreen() {
 
   const header = useMemo(() => {
     const name = user ? `${user.firstName} ${user.lastName}` : "";
-    return name ? `مرحبًا ${name}` : "الحضور";
-  }, [user]);
+    return name ? `${t(language, "greeting")} ${name}` : t(language, "attendance_title");
+  }, [user, language]);
 
   const loadToday = useCallback(async () => {
     if (!accessToken) {
@@ -77,12 +77,12 @@ export default function AttendanceScreen() {
 
         if (hasHardware && isEnrolled) {
           const res = await LocalAuthentication.authenticateAsync({
-            promptMessage: type === "check-in" ? (language === "ar" ? "تأكيد البصمة لتسجيل الحضور" : "Confirm biometrics to check in") : (language === "ar" ? "تأكيد البصمة لتسجيل الانصراف" : "Confirm biometrics to check out"),
-            cancelLabel: "إلغاء",
+            promptMessage: type === "check-in" ? t(language, "biometric_prompt_checkin") : t(language, "biometric_prompt_checkout"),
+            cancelLabel: t(language, "cancel"),
             disableDeviceFallback: false,
           });
           if (!res.success) {
-            throw new Error(language === "ar" ? "لم يتم تأكيد البصمة" : "Biometric verification failed");
+            throw new Error(t(language, "biometric_failed"));
           }
         }
       }
@@ -104,7 +104,7 @@ export default function AttendanceScreen() {
       const challenge = await authFetch<{ data: { nonce: string } }>("/api/mobile/auth/challenge", { method: "POST" });
 
       const nonce = challenge?.data?.nonce;
-      if (!nonce) throw new Error(language === "ar" ? "فشل إنشاء التحدي" : "Failed to create challenge");
+      if (!nonce) throw new Error(t(language, "challenge_failed"));
 
       await authFetch("/api/mobile/attendance", {
         method: "POST",
@@ -119,7 +119,7 @@ export default function AttendanceScreen() {
         }),
       });
 
-      setLast({ ok: true, message: type === "check-in" ? (language === "ar" ? "تم تسجيل الحضور" : "Checked in") : (language === "ar" ? "تم تسجيل الانصراف" : "Checked out") });
+      setLast({ ok: true, message: type === "check-in" ? t(language, "checked_in_msg") : t(language, "checked_out_msg") });
       await loadToday();
     } catch (e: any) {
       setLast({ ok: false, message: humanizeApiError(language, e?.message || "") });
@@ -148,7 +148,13 @@ export default function AttendanceScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.scrollContent}
+      refreshControl={
+        <RefreshControl refreshing={loadingToday} onRefresh={() => void loadToday()} colors={["#0ea5e9"]} tintColor="#0ea5e9" />
+      }
+    >
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>{header}</Text>
@@ -178,7 +184,7 @@ export default function AttendanceScreen() {
             style={[styles.refreshBtn, (loadingToday || busy) && { opacity: 0.5 }]}
           >
             {loadingToday
-              ? <ActivityIndicator color="#3b82f6" size="small" />
+              ? <ActivityIndicator color="#0ea5e9" size="small" />
               : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
           </Pressable>
         </View>
@@ -245,20 +251,21 @@ export default function AttendanceScreen() {
       {/* Note */}
       <View style={styles.note}>
         <Text style={styles.noteText}>
-          {language === "ar"
-            ? "🔒 إذا كان نظام Geofence مفعلاً، التسجيل خارج مواقع العمل سيتم رفضه."
-            : "🔒 If geofence is enabled, check-ins outside allowed locations will be rejected."}
+          {t(language, "geofence_note")}
         </Text>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: "#f8fafc",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingBottom: 32,
   },
   header: {
     marginTop: 8,
@@ -287,8 +294,8 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(34,197,94,0.06)",
   },
   statusCardBlue: {
-    borderColor: "rgba(59,130,246,0.35)",
-    backgroundColor: "rgba(59,130,246,0.06)",
+    borderColor: "rgba(14,165,233,0.35)",
+    backgroundColor: "rgba(14,165,233,0.06)",
   },
   statusRow: {
     flexDirection: "row",
@@ -302,7 +309,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   dotGreen: { backgroundColor: "#22c55e" },
-  dotBlue:  { backgroundColor: "#3b82f6" },
+  dotBlue:  { backgroundColor: "#0ea5e9" },
   dotGray:  { backgroundColor: "#cbd5e1" },
   statusLabel: {
     color: "#64748b",
@@ -416,20 +423,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   smallBtnPrimary: {
-    backgroundColor: "rgba(59,130,246,0.12)",
-    borderColor: "rgba(59,130,246,0.30)",
+    backgroundColor: "rgba(14,165,233,0.12)",
+    borderColor: "rgba(14,165,233,0.30)",
   },
   smallBtnSecondary: {
     backgroundColor: "#f1f5f9",
     borderColor: "#e2e8f0",
   },
-  smallBtnText: { color: "#3b82f6", fontWeight: "700", fontSize: 12 },
+  smallBtnText: { color: "#0ea5e9", fontWeight: "700", fontSize: 12 },
   note: {
     padding: 12,
     borderRadius: 12,
-    backgroundColor: "rgba(59,130,246,0.06)",
+    backgroundColor: "rgba(14,165,233,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(59,130,246,0.15)",
+    borderColor: "rgba(14,165,233,0.15)",
   },
   noteText: {
     color: "#64748b",

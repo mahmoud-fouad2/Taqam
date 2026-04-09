@@ -97,18 +97,18 @@ export function DashboardBreadcrumb() {
   if (crumbs.length <= 1) return null; // On the root dashboard page, no breadcrumb needed
 
   return (
-    <Breadcrumb>
-      <BreadcrumbList>
+    <Breadcrumb className="hidden sm:block">
+      <BreadcrumbList className="max-w-full flex-nowrap overflow-hidden rounded-lg border border-border/70 bg-background/70 px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm">
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1;
           return (
-            <BreadcrumbItem key={crumb.href}>
+            <BreadcrumbItem key={crumb.href} className="min-w-0">
               {isLast ? (
-                <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                <BreadcrumbPage className="truncate font-medium">{crumb.label}</BreadcrumbPage>
               ) : (
                 <>
-                  <BreadcrumbLink asChild>
-                    <Link href={crumb.href}>{crumb.label}</Link>
+                  <BreadcrumbLink asChild className="truncate text-muted-foreground/90 hover:text-foreground">
+                    <Link href={crumb.href} className="truncate">{crumb.label}</Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator>
                     <SepIcon className="h-3.5 w-3.5" />

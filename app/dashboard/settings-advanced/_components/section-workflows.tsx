@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronLeft, Plus, Settings } from 'lucide-react';
 
 import type { ApprovalWorkflow } from '@/lib/types/settings';
@@ -6,8 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function WorkflowsSection({ workflows }: { workflows: ApprovalWorkflow[] }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card>
       <CardHeader>
@@ -15,20 +23,20 @@ export function WorkflowsSection({ workflows }: { workflows: ApprovalWorkflow[] 
           <div>
             <CardTitle className="flex items-center gap-2">
               <Settings className="h-5 w-5" />
-              سير العمل والموافقات
+              {t.workflows.title}
             </CardTitle>
-            <CardDescription>إدارة مسارات الموافقة والتصعيد</CardDescription>
+            <CardDescription>{t.workflows.subtitle}</CardDescription>
           </div>
-          <Button disabled onClick={() => toast.message('إدارة سير العمل قيد التطوير')}>
+          <Button disabled onClick={() => toast.message(t.common.notAvailable)}>
             <Plus className="h-4 w-4 ms-2" />
-            سير عمل جديد
+            {t.workflows.newWorkflow}
           </Button>
         </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {workflows.length === 0 ? (
-            <div className="py-10 text-center text-muted-foreground">لا يوجد سير عمل</div>
+            <div className="py-10 text-center text-muted-foreground">{t.workflows.empty}</div>
           ) : (
             workflows.map((workflow) => (
               <div key={workflow.id} className="border rounded-lg p-4">
@@ -39,11 +47,9 @@ export function WorkflowsSection({ workflows }: { workflows: ApprovalWorkflow[] 
                   </div>
                   <div className="flex items-center gap-2">
                     <Badge variant={workflow.isActive ? 'default' : 'secondary'}>
-                      {workflow.isActive ? 'نشط' : 'غير نشط'}
+                      {workflow.isActive ? t.workflows.active : t.workflows.inactive}
                     </Badge>
-                    <Button variant="outline" size="sm" disabled>
-                      تعديل
-                    </Button>
+                    <Button variant="outline" size="sm" disabled>{t.common.edit}</Button>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -55,11 +61,11 @@ export function WorkflowsSection({ workflows }: { workflows: ApprovalWorkflow[] 
                         </span>
                         <span className="text-sm">
                           {step.approverType === 'direct-manager'
-                            ? 'المدير المباشر'
+                            ? t.workflows.directManager
                             : step.approverType === 'department-head'
-                              ? 'مدير القسم'
+                              ? t.workflows.deptManager
                               : step.approverType === 'hr'
-                                ? 'الموارد البشرية'
+                                ? t.workflows.hr
                                 : step.approverType}
                         </span>
                       </div>

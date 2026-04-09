@@ -4,57 +4,30 @@
  */
 
 import { Suspense } from "react";
-import { Inbox, Search } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Inbox } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { RequestsTable } from "./requests-table";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export default function RequestsPage() {
+export default async function RequestsPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
+      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <Inbox className="h-6 w-6" />
-          طلبات الاشتراك
+          {t.superAdmin.pSubscriptionRequests}
         </h1>
-        <p className="text-muted-foreground">
-          إدارة طلبات الاشتراك الواردة من الشركات
+        <p className="mt-1 text-sm text-muted-foreground">
+          {t.superAdmin.pManageIncomingSubscriptionRequ}
         </p>
-      </div>
+      </section>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">البحث والفلترة</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="البحث باسم الشركة أو البريد الإلكتروني..."
-                className="ps-9"
-                aria-label="البحث باسم الشركة أو البريد الإلكتروني"
-              />
-            </div>
-            <select
-              className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-              aria-label="تصفية حسب الحالة"
-            >
-              <option value="">جميع الحالات</option>
-              <option value="pending">معلقة</option>
-              <option value="approved">مقبولة</option>
-              <option value="rejected">مرفوضة</option>
-            </select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Table */}
-      <Card>
+      <Card className="overflow-hidden border-border/60 bg-card/85 shadow-sm">
         <CardContent className="p-0">
-          <Suspense fallback={<div className="p-8 text-center">جاري التحميل...</div>}>
+          <Suspense fallback={<div className="p-8 text-center">{t.common.loading}</div>}>
             <RequestsTable />
           </Suspense>
         </CardContent>

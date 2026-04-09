@@ -1,6 +1,5 @@
 /**
  * Documents Data Hook - Centralized document management
- * TODO: Replace with actual API calls + R2 storage when backend is ready
  */
 
 "use client";
@@ -62,7 +61,6 @@ export function useDocuments(options: UseDocumentsOptions = {}): UseDocumentsRet
 
   const uploadDocument = useCallback(async (file: File, metadata: Partial<Document>) => {
     try {
-      // TODO: Upload to R2 storage first, then save metadata
       const response = await documentsService.upload({
         file,
         employeeId: metadata.employeeId || "",
@@ -85,7 +83,6 @@ export function useDocuments(options: UseDocumentsOptions = {}): UseDocumentsRet
 
   const deleteDocument = useCallback(async (id: string) => {
     try {
-      // TODO: Delete from R2 storage too
       const response = await documentsService.delete(id);
       if (response.success) {
         await fetchData();
@@ -99,15 +96,13 @@ export function useDocuments(options: UseDocumentsOptions = {}): UseDocumentsRet
 
   const downloadDocument = useCallback(async (id: string) => {
     try {
-      // TODO: Get signed URL from R2 storage
       const response = await documentsService.download(id);
       if (response.success && response.data) {
-        // Trigger download
         const blob = response.data;
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
-        a.download = "document"; // TODO: Get filename from response
+        a.download = "document";
         a.click();
         window.URL.revokeObjectURL(url);
       } else {

@@ -23,6 +23,10 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import type { EmployeeDocument, EmployeeProfile } from '@/lib/types/self-service';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type ProfileApiResponse = {
   data?: {
@@ -185,6 +189,8 @@ function mapProfileApiToEmployeeProfile(api: NonNullable<ProfileApiResponse['dat
 }
 
 export default function MyProfileManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { update: updateSession } = useSession();
   const [profile, setProfile] = useState<EmployeeProfile | null>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -309,7 +315,7 @@ export default function MyProfileManager() {
         }
       }
 
-      toast.success('تم حفظ التغييرات');
+      toast.success(t.common.savedSuccess);
       setIsEditing(false);
       await loadProfile();
     } catch (e) {
@@ -336,11 +342,11 @@ export default function MyProfileManager() {
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('الملف المختار ليس صورة');
+      toast.error(t.myProfile.notImage);
       return;
     }
     if (file.size > 3 * 1024 * 1024) {
-      toast.error('حجم الصورة كبير (الحد 3MB)');
+      toast.error(t.myProfile.imageTooLarge);
       return;
     }
 
@@ -356,16 +362,16 @@ export default function MyProfileManager() {
       const json = await res.json();
 
       if (!res.ok) {
-        throw new Error(json.error || 'فشل رفع الصورة');
+        throw new Error(json.error || t.myProfile.uploadImageFailed);
       }
 
       const url = json?.data?.url as string | undefined;
-      if (!url) throw new Error('فشل رفع الصورة');
+      if (!url) throw new Error(t.myProfile.uploadImageFailed);
 
       setEditedProfile((p) => (p ? { ...p, avatar: url } : p));
-      toast.success('تم تحديث الصورة');
+      toast.success(t.myProfile.imageUpdated);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'فشل رفع الصورة';
+      const message = err instanceof Error ? err.message : t.myProfile.uploadImageFailed;
       toast.error(message);
     } finally {
       setIsUploadingAvatar(false);
@@ -375,7 +381,7 @@ export default function MyProfileManager() {
 
   const openDocumentPicker = () => {
     if (!employeeIdForDocs) {
-      toast.error('لا يوجد ملف موظف مرتبط بهذا الحساب');
+      toast.error(t.myProfile.noEmployeeLinked);
       return;
     }
     documentInputRef.current?.click();
@@ -385,7 +391,7 @@ export default function MyProfileManager() {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!employeeIdForDocs) {
-      toast.error('لا يوجد ملف موظف مرتبط بهذا الحساب');
+      toast.error(t.myProfile.noEmployeeLinked);
       return;
     }
 
@@ -404,13 +410,13 @@ export default function MyProfileManager() {
       const json = await res.json();
 
       if (!res.ok) {
-        throw new Error(json.error || 'فشل رفع المستند');
+        throw new Error(json.error || t.myProfile.uploadDocFailed);
       }
 
-      toast.success('تم رفع المستند');
+      toast.success(t.myProfile.docUploaded);
       await loadProfile();
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'فشل رفع المستند';
+      const message = err instanceof Error ? err.message : t.myProfile.uploadDocFailed;
       toast.error(message);
     } finally {
       setIsUploadingDoc(false);
@@ -422,8 +428,8 @@ export default function MyProfileManager() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">ملفي الشخصي</h1>
-          <p className="text-muted-foreground">جاري تحميل البيانات...</p>
+          <h1 className="text-2xl font-bold">{t.myProfile.title}</h1>
+          <p className="text-muted-foreground">{t.common.loading}</p>
         </div>
         <Card>
           <CardContent className="pt-6">
@@ -438,10 +444,10 @@ export default function MyProfileManager() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold">ملفي الشخصي</h1>
-          <p className="text-muted-foreground">تعذر تحميل الملف الشخصي</p>
+          <h1 className="text-2xl font-bold">{t.myProfile.title}</h1>
+          <p className="text-muted-foreground">{t.myProfile.loadFailed}</p>
         </div>
-        <Button variant="outline" onClick={() => void loadProfile()}>إعادة المحاولة</Button>
+        <Button variant="outline" onClick={() => void loadProfile()}>{t.common.retry}</Button>
       </div>
     );
   }
@@ -451,26 +457,22 @@ export default function MyProfileManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">ملفي الشخصي</h1>
-          <p className="text-muted-foreground">عرض وتعديل معلوماتك الشخصية</p>
+          <h1 className="text-2xl font-bold">{t.myProfile.title}</h1>
+          <p className="text-muted-foreground">{t.myProfile.description}</p>
         </div>
         <div className="flex gap-2">
           {isEditing ? (
             <>
               <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 me-2" />
-                إلغاء
-              </Button>
+                <X className="h-4 w-4 me-2" />{t.common.cancel}</Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 <Save className="h-4 w-4 me-2" />
-                {isSaving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
+                {isSaving ? '${t.myProfile.saving}' : '${t.common.saveChanges}'}
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
-              <Edit className="h-4 w-4 me-2" />
-              تعديل البيانات
-            </Button>
+              <Edit className="h-4 w-4 me-2" />{t.myProfile.editData}</Button>
           )}
         </div>
       </div>
@@ -494,7 +496,7 @@ export default function MyProfileManager() {
                   size="icon" 
                   variant="secondary" 
                   className="absolute bottom-0 start-0 h-8 w-8 rounded-full"
-                  aria-label="تغيير الصورة"
+                  aria-label={t.myProfile.changeImage}
                   onClick={openAvatarPicker}
                   disabled={isUploadingAvatar}
                 >
@@ -506,7 +508,7 @@ export default function MyProfileManager() {
                 type="file"
                 accept="image/*"
                 className="hidden"
-                aria-label="اختيار صورة الملف الشخصي"
+                aria-label={t.myProfile.chooseProfileImage}
                 onChange={onAvatarSelected}
               />
             </div>
@@ -519,9 +521,9 @@ export default function MyProfileManager() {
               </div>
             </div>
             <div className="text-center sm:text-start">
-              <p className="text-sm text-muted-foreground">تاريخ الانضمام</p>
+              <p className="text-sm text-muted-foreground">{t.myProfile.joinDate}</p>
               <p className="font-medium">{new Date(profile.hireDate).toLocaleDateString('ar-SA')}</p>
-              <p className="text-sm text-muted-foreground mt-2">المدير المباشر</p>
+              <p className="text-sm text-muted-foreground mt-2">{t.onboarding.directManager}</p>
               <p className="font-medium">{profile.managerName || '-'}</p>
             </div>
           </div>
@@ -531,10 +533,10 @@ export default function MyProfileManager() {
       {/* Tabs */}
       <Tabs defaultValue="personal" className="w-full">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">البيانات الشخصية</TabsTrigger>
-          <TabsTrigger value="contact">معلومات الاتصال</TabsTrigger>
-          <TabsTrigger value="bank">البيانات البنكية</TabsTrigger>
-          <TabsTrigger value="documents">المستندات</TabsTrigger>
+          <TabsTrigger value="personal">{t.employees.personalInfo}</TabsTrigger>
+          <TabsTrigger value="contact">{t.organization.contactInfo}</TabsTrigger>
+          <TabsTrigger value="bank">{t.common.bankData}</TabsTrigger>
+          <TabsTrigger value="documents">{t.onboarding.documents}</TabsTrigger>
         </TabsList>
 
         {/* Personal Info Tab */}
@@ -542,14 +544,12 @@ export default function MyProfileManager() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
-                المعلومات الشخصية
-              </CardTitle>
-              <CardDescription>البيانات الأساسية والشخصية</CardDescription>
+                <User className="h-5 w-5" />{t.myProfile.personalInfo}</CardTitle>
+              <CardDescription>{t.myProfile.personalInfoDesc}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>الاسم الأول (عربي)</Label>
+                <Label>{t.myProfile.firstNameAr}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.firstName}
@@ -560,7 +560,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الاسم الأخير (عربي)</Label>
+                <Label>{t.myProfile.lastNameAr}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.lastName}
@@ -571,7 +571,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الاسم الأول (إنجليزي)</Label>
+                <Label>{t.myProfile.firstNameEn}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.firstNameEn || ''}
@@ -582,7 +582,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الاسم الأخير (إنجليزي)</Label>
+                <Label>{t.myProfile.lastNameEn}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.lastNameEn || ''}
@@ -593,7 +593,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>تاريخ الميلاد</Label>
+                <Label>{t.myProfile.birthDate}</Label>
                 {isEditing ? (
                   <Input 
                     type="date"
@@ -607,7 +607,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الجنس</Label>
+                <Label>{t.myProfile.gender}</Label>
                 {isEditing ? (
                   <Select 
                     value={editedProfile.gender}
@@ -617,18 +617,18 @@ export default function MyProfileManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="male">ذكر</SelectItem>
-                      <SelectItem value="female">أنثى</SelectItem>
+                      <SelectItem value="male">{t.myProfile.male}</SelectItem>
+                      <SelectItem value="female">{t.myProfile.female}</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
                   <p className="text-sm font-medium p-2 bg-muted rounded">
-                    {profile.gender === 'male' ? 'ذكر' : 'أنثى'}
+                    {profile.gender === 'male' ? t.myProfile.male : t.myProfile.female}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الحالة الاجتماعية</Label>
+                <Label>{t.myProfile.maritalStatus}</Label>
                 {isEditing ? (
                   <Select 
                     value={editedProfile.maritalStatus || ''}
@@ -639,22 +639,22 @@ export default function MyProfileManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="single">أعزب</SelectItem>
-                      <SelectItem value="married">متزوج</SelectItem>
-                      <SelectItem value="divorced">مطلق</SelectItem>
-                      <SelectItem value="widowed">أرمل</SelectItem>
+                      <SelectItem value="single">{t.myProfile.single}</SelectItem>
+                      <SelectItem value="married">{t.myProfile.married}</SelectItem>
+                      <SelectItem value="divorced">{t.myProfile.divorced}</SelectItem>
+                      <SelectItem value="widowed">{t.myProfile.widowed}</SelectItem>
                     </SelectContent>
                   </Select>
                 ) : (
                   <p className="text-sm font-medium p-2 bg-muted rounded">
-                    {profile.maritalStatus === 'single' ? 'أعزب' : 
-                     profile.maritalStatus === 'married' ? 'متزوج' : 
-                     profile.maritalStatus === 'divorced' ? 'مطلق' : 'أرمل'}
+                    {profile.maritalStatus === 'single' ? t.myProfile.single : 
+                     profile.maritalStatus === 'married' ? t.myProfile.married : 
+                     profile.maritalStatus === 'divorced' ? t.myProfile.divorced : t.myProfile.widowed}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الجنسية</Label>
+                <Label>{t.myProfile.nationality}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.nationality || ''}
@@ -665,7 +665,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>رقم الهوية</Label>
+                <Label>{t.employees.nationalId}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded flex items-center gap-2">
                   <Shield className="h-4 w-4 text-muted-foreground" />
                   {profile.nationalId || '-'}
@@ -681,20 +681,20 @@ export default function MyProfileManager() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Phone className="h-5 w-5" />
-                معلومات الاتصال
+                {t.myProfile.pContactInformation}
               </CardTitle>
-              <CardDescription>بيانات التواصل والعنوان</CardDescription>
+              <CardDescription>{t.myProfile.contactInfoDesc}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>البريد الإلكتروني</Label>
+                <Label>{t.common.email}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded flex items-center gap-2">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   {profile.email}
                 </p>
               </div>
               <div className="space-y-2">
-                <Label>رقم الجوال</Label>
+                <Label>{t.myProfile.mobile}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.phone}
@@ -710,12 +710,10 @@ export default function MyProfileManager() {
               <div className="md:col-span-2">
                 <Separator className="my-4" />
                 <h4 className="font-semibold mb-4 flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  العنوان
-                </h4>
+                  <MapPin className="h-4 w-4" />{t.myProfile.address}</h4>
               </div>
               <div className="space-y-2">
-                <Label>الشارع</Label>
+                <Label>{t.myProfile.street}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.address?.street || ''}
@@ -729,7 +727,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>المدينة</Label>
+                <Label>{t.common.city}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.address?.city || ''}
@@ -743,7 +741,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الدولة</Label>
+                <Label>{t.common.country}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.address?.country || ''}
@@ -757,7 +755,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>الرمز البريدي</Label>
+                <Label>{t.myProfile.postalCode}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.address?.postalCode || ''}
@@ -774,11 +772,11 @@ export default function MyProfileManager() {
                 <Separator className="my-4" />
                 <h4 className="font-semibold mb-4 flex items-center gap-2">
                   <AlertCircle className="h-4 w-4" />
-                  جهة اتصال الطوارئ
+                  {t.myProfile.pEmergencyContact}
                 </h4>
               </div>
               <div className="space-y-2">
-                <Label>الاسم</Label>
+                <Label>{t.common.name}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.emergencyContact?.name || ''}
@@ -792,7 +790,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>صلة القرابة</Label>
+                <Label>{t.myProfile.relationship}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.emergencyContact?.relationship || ''}
@@ -806,7 +804,7 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="space-y-2">
-                <Label>رقم الهاتف</Label>
+                <Label>{t.common.phone}</Label>
                 {isEditing ? (
                   <Input 
                     value={editedProfile.emergencyContact?.phone || ''}
@@ -828,33 +826,31 @@ export default function MyProfileManager() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />
-                البيانات البنكية
-              </CardTitle>
-              <CardDescription>معلومات الحساب البنكي لتحويل الراتب</CardDescription>
+                <CreditCard className="h-5 w-5" />{t.common.bankData}</CardTitle>
+              <CardDescription>{t.myProfile.bankAccountDesc}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>اسم البنك</Label>
+                <Label>{t.myProfile.bankName}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.bankName || '-'}</p>
               </div>
               <div className="space-y-2">
-                <Label>رقم الحساب</Label>
+                <Label>{t.myProfile.accountNumber}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.accountNumber || '-'}</p>
               </div>
               <div className="space-y-2">
-                <Label>رقم الآيبان</Label>
+                <Label>{t.myProfile.ibanNumber}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.iban || '-'}</p>
               </div>
               <div className="space-y-2">
-                <Label>رمز SWIFT</Label>
+                <Label>{t.myProfile.swiftCode}</Label>
                 <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.swiftCode || '-'}</p>
               </div>
               <div className="md:col-span-2">
                 <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                   <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
                     <AlertCircle className="h-4 w-4" />
-                    لتحديث البيانات البنكية، يرجى التواصل مع قسم الموارد البشرية
+                    {t.myProfile.pToUpdateBankDetailsPleaseConta}
                   </p>
                 </div>
               </div>
@@ -868,15 +864,15 @@ export default function MyProfileManager() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5" />
-                المستندات
+                {t.myProfile.pDocuments}
               </CardTitle>
-              <CardDescription>الوثائق والمستندات الشخصية</CardDescription>
+              <CardDescription>{t.myProfile.documentsDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {(profile.documents || []).length === 0 ? (
                   <div className="md:col-span-2 lg:col-span-3 text-sm text-muted-foreground">
-                    لا توجد مستندات بعد.
+                    {t.myProfile.pNoDocumentsYet}
                   </div>
                 ) : (
                   (profile.documents || []).map((doc) => (
@@ -887,7 +883,7 @@ export default function MyProfileManager() {
                       <div className="flex-1">
                         <p className="font-medium text-sm">{doc.name}</p>
                         <p className="text-xs text-muted-foreground mt-1">
-                          {doc.expiryDate ? `ينتهي: ${new Date(doc.expiryDate).toLocaleDateString('ar-SA')}` : '—'}
+                          {doc.expiryDate ? `${t.myProfile.expires} ${new Date(doc.expiryDate).toLocaleDateString('ar-SA')}` : '—'}
                         </p>
                       </div>
                       <Button
@@ -895,7 +891,7 @@ export default function MyProfileManager() {
                         size="sm"
                         onClick={() => window.open(doc.fileUrl, '_blank', 'noopener,noreferrer')}
                       >
-                        عرض
+                        {t.myProfile.pView}
                       </Button>
                     </div>
                   ))
@@ -904,13 +900,13 @@ export default function MyProfileManager() {
               <div className="mt-4">
                 <Button variant="outline" className="w-full" onClick={openDocumentPicker} disabled={isUploadingDoc}>
                   <Camera className="h-4 w-4 me-2" />
-                  {isUploadingDoc ? 'جاري الرفع...' : 'رفع مستند جديد'}
+                  {isUploadingDoc ? t.myProfile.uploading : t.myProfile.uploadNewDoc}
                 </Button>
                 <input
                   ref={documentInputRef}
                   type="file"
                   className="hidden"
-                  aria-label="رفع مستند جديد"
+                  aria-label={t.myProfile.uploadNewDoc}
                   onChange={(e) => void onDocumentSelected(e)}
                 />
               </div>

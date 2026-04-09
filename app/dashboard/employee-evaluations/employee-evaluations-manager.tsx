@@ -59,6 +59,10 @@ import {
   getRatingByScore,
   defaultPerformanceRatings,
 } from "@/lib/types/performance";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type RawEvaluation = {
   id: string;
@@ -239,6 +243,8 @@ function mapEvaluation(item: RawEvaluation): EmployeeEvaluation {
 }
 
 export function EmployeeEvaluationsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [evaluations, setEvaluations] = useState<EmployeeEvaluation[]>([]);
   const [cycles, setCycles] = useState<Array<{ id: string; name: string }>>([]);
   const [selectedEvaluation, setSelectedEvaluation] = useState<EmployeeEvaluation | null>(null);
@@ -270,13 +276,13 @@ export function EmployeeEvaluationsManager() {
       const cyclesJson = (await cyclesRes.json()) as CyclesResponse;
 
       if (!profileRes.ok) {
-        throw new Error("فشل تحميل بيانات المستخدم");
+        throw new Error(t.evaluations.loadUserFailed);
       }
       if (!evaluationsRes.ok) {
-        throw new Error("فشل تحميل التقييمات");
+        throw new Error(t.evaluations.loadFailed);
       }
       if (!cyclesRes.ok) {
-        throw new Error("فشل تحميل دورات التقييم");
+        throw new Error(t.evaluations.loadCyclesFailed);
       }
 
       setCurrentUserId(
@@ -293,11 +299,11 @@ export function EmployeeEvaluationsManager() {
     } catch (error) {
       setEvaluations([]);
       setCycles([]);
-      toast.error(error instanceof Error ? error.message : "تعذر تحميل التقييمات");
+      toast.error(error instanceof Error ? error.message : t.evaluations.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.evaluations.loadCyclesFailed, t.evaluations.loadFailed, t.evaluations.loadUserFailed]);
 
   useEffect(() => {
     void loadData();
@@ -401,16 +407,16 @@ export function EmployeeEvaluationsManager() {
 
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json?.error || "فشل حفظ التقييم");
+        throw new Error(json?.error || t.evaluations.saveFailed);
       }
 
-      toast.success("تم حفظ التقييم بنجاح");
+      toast.success(t.evaluations.savedSuccess);
       setIsReviewDialogOpen(false);
       setSelectedEvaluation(null);
       setReviewForm(INITIAL_REVIEW_FORM);
       await loadData();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "تعذر حفظ التقييم");
+      toast.error(error instanceof Error ? error.message : t.evaluations.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -426,13 +432,13 @@ export function EmployeeEvaluationsManager() {
       });
       const json = await response.json();
       if (!response.ok) {
-        throw new Error(json?.error || "فشل تأكيد التقييم");
+        throw new Error(json?.error || t.evaluations.acknowledgeFailed);
       }
 
-      toast.success("تم تأكيد الاطلاع على التقييم");
+      toast.success(t.evaluations.acknowledgedSuccess);
       await loadData();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "تعذر تأكيد التقييم");
+      toast.error(error instanceof Error ? error.message : t.evaluations.acknowledgeFailed);
     } finally {
       setIsSaving(false);
     }
@@ -440,7 +446,7 @@ export function EmployeeEvaluationsManager() {
 
   const getRatingLabel = (score: number) => {
     const rating = getRatingByScore(score, defaultPerformanceRatings);
-    return rating?.label || "غير محدد";
+    return rating?.label || t.common.unspecified;
   };
 
   const getRatingColor = (score: number) => {
@@ -452,42 +458,40 @@ export function EmployeeEvaluationsManager() {
     <div className="space-y-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">تقييمات الموظفين</h2>
-          <p className="text-muted-foreground">إدارة التقييمات الفعلية ومتابعة الاعتماد والتأكيد</p>
+          <h2 className="text-2xl font-bold">{t.evaluations.title}</h2>
+          <p className="text-muted-foreground">{t.evaluations.subtitle}</p>
         </div>
-        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading || isSaving}>
-          تحديث البيانات
-        </Button>
+        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading || isSaving}>{t.common.refresh}</Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي التقييمات</CardDescription>
+            <CardDescription>{t.evaluations.total}</CardDescription>
             <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>قيد المراجعة</CardDescription>
+            <CardDescription>{t.evaluations.underReview}</CardDescription>
             <CardTitle className="text-3xl text-orange-600">{stats.inReview}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>بانتظار التأكيد</CardDescription>
+            <CardDescription>{t.evaluations.pendingAcknowledgement}</CardDescription>
             <CardTitle className="text-3xl text-teal-600">{stats.pendingAcknowledgment}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>مكتملة</CardDescription>
+            <CardDescription>{t.common.completed}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.completed}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>متوسط التقييم</CardDescription>
+            <CardDescription>{t.evaluations.avgRating}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{formatScore(stats.avgScore)}</CardTitle>
           </CardHeader>
         </Card>
@@ -497,7 +501,7 @@ export function EmployeeEvaluationsManager() {
         <div className="relative max-w-sm flex-1">
           <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث بالاسم أو المسمى الوظيفي"
+            placeholder={t.evaluations.searchPlaceholder}
             className="ps-9"
             value={searchQuery}
             onChange={(event) => setSearchQuery(event.target.value)}
@@ -506,10 +510,10 @@ export function EmployeeEvaluationsManager() {
 
         <Select value={filterCycle} onValueChange={setFilterCycle}>
           <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="دورة التقييم" />
+            <SelectValue placeholder={t.evaluations.evaluationCycle} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الدورات</SelectItem>
+            <SelectItem value="all">{t.trainingCourses.allCourses}</SelectItem>
             {cycles.map((cycle) => (
               <SelectItem key={cycle.id} value={cycle.id}>
                 {cycle.name}
@@ -520,10 +524,10 @@ export function EmployeeEvaluationsManager() {
 
         <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as EmployeeEvaluationStatus | "all")}>
           <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="الحالة" />
+            <SelectValue placeholder={t.common.status} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الحالات</SelectItem>
+            <SelectItem value="all">{t.common.allStatuses}</SelectItem>
             {Object.entries(employeeEvaluationStatusLabels).map(([key, label]) => (
               <SelectItem key={key} value={key}>
                 {label}
@@ -535,9 +539,9 @@ export function EmployeeEvaluationsManager() {
 
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "all" | "mine" | "assigned")}>
         <TabsList>
-          <TabsTrigger value="all">الكل</TabsTrigger>
-          <TabsTrigger value="mine">تقييماتي</TabsTrigger>
-          <TabsTrigger value="assigned">المكلّف بها</TabsTrigger>
+          <TabsTrigger value="all">{t.common.all}</TabsTrigger>
+          <TabsTrigger value="mine">{t.evaluations.myEvaluations}</TabsTrigger>
+          <TabsTrigger value="assigned">{t.evaluations.assignedToMe}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all">
@@ -586,9 +590,9 @@ export function EmployeeEvaluationsManager() {
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent className="w-full max-h-[90vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>تفاصيل التقييم</DialogTitle>
+            <DialogTitle>{t.evaluations.evalDetails}</DialogTitle>
             <DialogDescription>
-              {selectedEvaluation ? `عرض تقييم ${selectedEvaluation.employeeName}` : ""}
+              {selectedEvaluation ? `${t.evaluations.pViewEvaluation} ${selectedEvaluation.employeeName}` : ""}
             </DialogDescription>
           </DialogHeader>
 
@@ -614,22 +618,22 @@ export function EmployeeEvaluationsManager() {
 
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-base">معلومات الدورة</CardTitle>
+                  <CardTitle className="text-base">{t.evaluations.cycleInfo}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
-                      <p className="text-sm text-muted-foreground">الدورة</p>
+                      <p className="text-sm text-muted-foreground">{t.trainingCourses.course}</p>
                       <p className="font-medium">{selectedEvaluation.cycleName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">الفترة</p>
+                      <p className="text-sm text-muted-foreground">{t.leaveRequests.period}</p>
                       <p className="font-medium">
                         {formatDate(selectedEvaluation.periodStart)} - {formatDate(selectedEvaluation.periodEnd)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">المراجع</p>
+                      <p className="text-sm text-muted-foreground">{t.evaluations.reviewer}</p>
                       <p className="font-medium">{selectedEvaluation.managerName || "-"}</p>
                     </div>
                   </div>
@@ -641,7 +645,7 @@ export function EmployeeEvaluationsManager() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <IconClipboardCheck className="h-4 w-4" />
-                      مراجعة الأداء
+                      {t.evaluations.pPerformanceReview}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -657,13 +661,13 @@ export function EmployeeEvaluationsManager() {
                         </div>
                         {selectedEvaluation.managerReview.comments && (
                           <div>
-                            <p className="mb-1 text-sm text-muted-foreground">الملاحظات</p>
+                            <p className="mb-1 text-sm text-muted-foreground">{t.evaluations.notes}</p>
                             <p className="text-sm">{selectedEvaluation.managerReview.comments}</p>
                           </div>
                         )}
                         {selectedEvaluation.managerReview.strengths && selectedEvaluation.managerReview.strengths.length > 0 && (
                           <div>
-                            <p className="mb-1 text-sm text-muted-foreground">نقاط القوة</p>
+                            <p className="mb-1 text-sm text-muted-foreground">{t.common.notes}</p>
                             <ul className="list-inside list-disc text-sm">
                               {selectedEvaluation.managerReview.strengths.map((item, index) => (
                                 <li key={`${item}-${index}`}>{item}</li>
@@ -673,7 +677,7 @@ export function EmployeeEvaluationsManager() {
                         )}
                         {selectedEvaluation.managerReview.improvements && selectedEvaluation.managerReview.improvements.length > 0 && (
                           <div>
-                            <p className="mb-1 text-sm text-muted-foreground">مجالات التحسين</p>
+                            <p className="mb-1 text-sm text-muted-foreground">{t.evaluations.improvementAreas}</p>
                             <ul className="list-inside list-disc text-sm">
                               {selectedEvaluation.managerReview.improvements.map((item, index) => (
                                 <li key={`${item}-${index}`}>{item}</li>
@@ -683,7 +687,7 @@ export function EmployeeEvaluationsManager() {
                         )}
                       </div>
                     ) : (
-                      <p className="py-4 text-center text-muted-foreground">لم يتم إدخال مراجعة بعد</p>
+                      <p className="py-4 text-center text-muted-foreground">{t.evaluations.noReviewEntered}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -692,14 +696,14 @@ export function EmployeeEvaluationsManager() {
                   <CardHeader className="pb-2">
                     <CardTitle className="text-base flex items-center gap-2">
                       <IconUser className="h-4 w-4" />
-                      تعليقات الموظف
+                      {t.evaluations.pEmployeeComments}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     {selectedEvaluation.employeeComments ? (
                       <p className="text-sm leading-6">{selectedEvaluation.employeeComments}</p>
                     ) : (
-                      <p className="py-4 text-center text-muted-foreground">لا توجد تعليقات من الموظف</p>
+                      <p className="py-4 text-center text-muted-foreground">{t.evaluations.noEmployeeComments}</p>
                     )}
                   </CardContent>
                 </Card>
@@ -709,7 +713,7 @@ export function EmployeeEvaluationsManager() {
                 <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <p className="mb-2 text-sm text-muted-foreground">النتيجة النهائية</p>
+                      <p className="mb-2 text-sm text-muted-foreground">{t.evaluations.finalScore}</p>
                       <p className="mb-2 text-5xl font-bold">{formatScore(selectedEvaluation.finalScore)}</p>
                       <Badge
                         className="px-4 py-1 text-lg"
@@ -728,9 +732,7 @@ export function EmployeeEvaluationsManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
-              إغلاق
-            </Button>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>{t.common.close}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -738,15 +740,15 @@ export function EmployeeEvaluationsManager() {
       <Dialog open={isReviewDialogOpen} onOpenChange={setIsReviewDialogOpen}>
         <DialogContent className="w-full max-w-2xl">
           <DialogHeader>
-            <DialogTitle>مراجعة التقييم</DialogTitle>
+            <DialogTitle>{t.evaluations.reviewRating}</DialogTitle>
             <DialogDescription>
-              {selectedEvaluation ? `إدخال مراجعة ${selectedEvaluation.employeeName} ضمن ${selectedEvaluation.cycleName}` : ""}
+              {selectedEvaluation ? `${t.evaluations.pEnterReview} ${selectedEvaluation.employeeName} - ${selectedEvaluation.cycleName}` : ""}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="space-y-4">
-              <Label>الدرجة النهائية</Label>
+              <Label>{t.evaluations.finalGrade}</Label>
               <div className="rounded-lg bg-muted p-6 text-center">
                 <p className="mb-2 text-5xl font-bold text-blue-600">{formatScore(reviewForm.score)}</p>
                 <p className="text-muted-foreground">{getRatingLabel(reviewForm.score)}</p>
@@ -762,32 +764,32 @@ export function EmployeeEvaluationsManager() {
             </div>
 
             <div className="space-y-2">
-              <Label>ملاحظات المراجع</Label>
+              <Label>{t.evaluations.reviewerNotes}</Label>
               <Textarea
                 rows={3}
                 value={reviewForm.comments}
                 onChange={(event) => setReviewForm((current) => ({ ...current, comments: event.target.value }))}
-                placeholder="أضف ملخص المراجعة"
+                placeholder={t.evaluations.reviewSummary}
               />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="space-y-2">
-                <Label>نقاط القوة</Label>
+                <Label>{t.common.notes}</Label>
                 <Textarea
                   rows={4}
                   value={reviewForm.strengths}
                   onChange={(event) => setReviewForm((current) => ({ ...current, strengths: event.target.value }))}
-                  placeholder="سطر لكل نقطة"
+                  placeholder={t.common.linePerPoint}
                 />
               </div>
               <div className="space-y-2">
-                <Label>مجالات التحسين</Label>
+                <Label>{t.evaluations.improvementAreas}</Label>
                 <Textarea
                   rows={4}
                   value={reviewForm.improvements}
                   onChange={(event) => setReviewForm((current) => ({ ...current, improvements: event.target.value }))}
-                  placeholder="سطر لكل نقطة"
+                  placeholder={t.common.linePerPoint}
                 />
               </div>
             </div>
@@ -801,11 +803,9 @@ export function EmployeeEvaluationsManager() {
                 setSelectedEvaluation(null);
                 setReviewForm(INITIAL_REVIEW_FORM);
               }}
-            >
-              إلغاء
-            </Button>
+            >{t.common.cancel}</Button>
             <Button onClick={handleSubmitReview} disabled={isSaving}>
-              حفظ المراجعة
+              {t.evaluations.pSaveReview}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -843,26 +843,26 @@ function EvaluationsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>الموظف</TableHead>
-            <TableHead>القسم</TableHead>
-            <TableHead>دورة التقييم</TableHead>
-            <TableHead>الحالة</TableHead>
-            <TableHead>النتيجة</TableHead>
-            <TableHead>آخر تحديث</TableHead>
-            <TableHead className="w-[100px]">الإجراءات</TableHead>
+            <TableHead>{t.common.employee}</TableHead>
+            <TableHead>{t.common.department}</TableHead>
+            <TableHead>{t.evaluations.evaluationCycle}</TableHead>
+            <TableHead>{t.common.status}</TableHead>
+            <TableHead>{t.evaluations.result}</TableHead>
+            <TableHead>{t.myRequests.lastUpdated}</TableHead>
+            <TableHead className="w-[100px]">{t.common.actions}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {isLoading ? (
             <TableRow>
               <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                جاري تحميل التقييمات...
+                {t.evaluations.pLoadingEvaluations}
               </TableCell>
             </TableRow>
           ) : evaluations.length === 0 ? (
             <TableRow>
               <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                لا توجد تقييمات مطابقة للمرشحات الحالية
+                {t.evaluations.pNoEvaluationsMatchTheCurrentFi}
               </TableCell>
             </TableRow>
           ) : (
@@ -910,25 +910,23 @@ function EvaluationsTable({
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="خيارات">
+                      <Button variant="ghost" size="icon" aria-label={t.common.options}>
                         <IconDots className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => onView(evaluation)}>
-                        <IconEye className="ms-2 h-4 w-4" />
-                        عرض التفاصيل
-                      </DropdownMenuItem>
+                        <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
                       {canReviewEvaluation(evaluation) && (
                         <DropdownMenuItem onClick={() => onReview(evaluation)}>
                           <IconClipboardCheck className="ms-2 h-4 w-4" />
-                          مراجعة التقييم
+                          {t.evaluations.pReviewEvaluation}
                         </DropdownMenuItem>
                       )}
                       {canAcknowledgeEvaluation(evaluation) && (
                         <DropdownMenuItem onClick={() => onAcknowledge(evaluation.id)}>
                           <IconCheck className="ms-2 h-4 w-4" />
-                          تأكيد الاطلاع
+                          {t.evaluations.pConfirmAcknowledgment}
                         </DropdownMenuItem>
                       )}
                     </DropdownMenuContent>

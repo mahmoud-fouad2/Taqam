@@ -3,6 +3,7 @@ import { getText } from "@/lib/i18n/text";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
+
 const releaseHighlights = [
   {
     key: "operations",

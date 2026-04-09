@@ -1,6 +1,5 @@
 /**
  * Leaves Data Hook - Centralized leave management
- * TODO: Replace with actual API calls when backend is ready
  */
 
 "use client";

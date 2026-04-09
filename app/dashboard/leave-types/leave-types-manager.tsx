@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   IconPlus,
   IconEdit,
@@ -67,6 +67,10 @@ import { toast } from "sonner";
 import { leavesApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getLeaveTheme } from "@/lib/ui/leave-color";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 function mapApplicableGendersToRestriction(value: unknown): LeaveType["genderRestriction"] {
   if (!Array.isArray(value) || value.length === 0) return "all";
@@ -157,6 +161,8 @@ const categoryIcons: Record<LeaveCategory, React.ReactNode> = {
 };
 
 export function LeaveTypesManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [leaveTypes, setLeaveTypes] = useState<LeaveType[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -169,10 +175,10 @@ export function LeaveTypesManager() {
 
   const validateForm = (): boolean => {
     const errors: typeof formErrors = {};
-    if (!formData.name?.trim()) errors.name = "الاسم بالعربية مطلوب";
-    if (!formData.nameEn?.trim()) errors.nameEn = "الاسم بالإنجليزية مطلوب";
+    if (!formData.name?.trim()) errors.name = t.leaveTypes.nameArRequired;
+    if (!formData.nameEn?.trim()) errors.nameEn = t.leaveTypes.nameEnRequired;
     if (!formData.maxDaysPerYear || Number(formData.maxDaysPerYear) < 1)
-      errors.maxDaysPerYear = "يجب أن يكون الحد الأقصى يوماً واحداً على الأقل";
+      errors.maxDaysPerYear = t.leaveTypes.minOneDay;
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -227,28 +233,28 @@ export function LeaveTypesManager() {
     });
   };
 
-  const loadLeaveTypes = async () => {
+  const loadLeaveTypes = useCallback(async () => {
     setIsLoading(true);
     setLoadError(null);
 
     try {
       const res = await leavesApi.types.getAll();
       if (!res.success) {
-        throw new Error(res.error || "فشل تحميل أنواع الإجازات");
+        throw new Error(res.error || t.leaveTypes.loadFailed);
       }
 
       const mapped = Array.isArray(res.data) ? (res.data as any[]).map(mapLeaveTypeFromApi) : [];
       setLeaveTypes(mapped);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "فشل تحميل أنواع الإجازات");
+      setLoadError(err instanceof Error ? err.message : t.leaveTypes.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t.leaveTypes.loadFailed]);
 
   useEffect(() => {
     void loadLeaveTypes();
-  }, []);
+  }, [loadLeaveTypes]);
 
   const handleAdd = async () => {
     if (!validateForm()) return;
@@ -277,15 +283,15 @@ export function LeaveTypesManager() {
       });
 
       if (!res.success) {
-        throw new Error(res.error || "فشل إنشاء نوع الإجازة");
+        throw new Error(res.error || t.leaveTypes.createFailed);
       }
 
-      toast.success("تم إنشاء نوع الإجازة");
+      toast.success(t.leaveTypes.createdSuccess);
       setIsAddDialogOpen(false);
       resetForm();
       await loadLeaveTypes();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل إنشاء نوع الإجازة");
+      toast.error(err instanceof Error ? err.message : t.leaveTypes.createFailed);
     } finally {
       setIsSaving(false);
     }
@@ -319,16 +325,16 @@ export function LeaveTypesManager() {
       });
 
       if (!res.success) {
-        throw new Error(res.error || "فشل تعديل نوع الإجازة");
+        throw new Error(res.error || t.leaveTypes.updateFailed);
       }
 
-      toast.success("تم تعديل نوع الإجازة");
+      toast.success(t.leaveTypes.updatedSuccess);
       setIsEditDialogOpen(false);
       setSelectedType(null);
       resetForm();
       await loadLeaveTypes();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل تعديل نوع الإجازة");
+      toast.error(err instanceof Error ? err.message : t.leaveTypes.updateFailed);
     } finally {
       setIsSaving(false);
     }
@@ -339,12 +345,12 @@ export function LeaveTypesManager() {
     try {
       const res = await leavesApi.types.delete(id);
       if (!res.success) {
-        throw new Error(res.error || "فشل حذف نوع الإجازة");
+        throw new Error(res.error || t.leaveTypes.deleteFailed);
       }
-      toast.success("تم حذف نوع الإجازة");
+      toast.success(t.leaveTypes.deletedSuccess);
       await loadLeaveTypes();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل حذف نوع الإجازة");
+      toast.error(err instanceof Error ? err.message : t.leaveTypes.deleteFailed);
     } finally {
       setIsSaving(false);
     }
@@ -373,11 +379,11 @@ export function LeaveTypesManager() {
         isActive: !type.isActive,
       });
       if (!res.success) {
-        throw new Error(res.error || "فشل تحديث الحالة");
+        throw new Error(res.error || t.leaveTypes.statusUpdateFailed);
       }
       await loadLeaveTypes();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل تحديث الحالة");
+      toast.error(err instanceof Error ? err.message : t.leaveTypes.statusUpdateFailed);
     } finally {
       setIsSaving(false);
     }
@@ -408,12 +414,12 @@ export function LeaveTypesManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">أنواع الإجازات</h2>
-          <p className="text-muted-foreground">إدارة وتكوين أنواع الإجازات المتاحة</p>
+          <h2 className="text-2xl font-bold">{t.leaveTypes.title}</h2>
+          <p className="text-muted-foreground">{t.leaveTypes.subtitle}</p>
         </div>
         <Button onClick={() => setIsAddDialogOpen(true)}>
           <IconPlus className="ms-2 h-4 w-4" />
-          إضافة نوع إجازة
+          {t.leaveTypes.pAddLeaveType}
         </Button>
       </div>
 
@@ -421,25 +427,25 @@ export function LeaveTypesManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الأنواع</CardDescription>
+            <CardDescription>{t.leaveTypes.totalTypes}</CardDescription>
             <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>أنواع نشطة</CardDescription>
+            <CardDescription>{t.leaveTypes.activeTypes}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.active}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجازات مدفوعة</CardDescription>
+            <CardDescription>{t.leaveTypes.paidLeaves}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{stats.paid}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>باستحقاق دوري</CardDescription>
+            <CardDescription>{t.leaveTypes.periodicAccrual}</CardDescription>
             <CardTitle className="text-3xl text-purple-600">{stats.withAccrual}</CardTitle>
           </CardHeader>
         </Card>
@@ -450,12 +456,12 @@ export function LeaveTypesManager() {
         <CardHeader>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
-              <TabsTrigger value="all">الكل ({leaveTypes.length})</TabsTrigger>
+              <TabsTrigger value="all">{t.leaveTypes.all} ({leaveTypes.length})</TabsTrigger>
               <TabsTrigger value="active">
-                نشط ({leaveTypes.filter((t) => t.isActive).length})
+                {t.leaveTypes.activeTab} ({leaveTypes.filter((lt) => lt.isActive).length})
               </TabsTrigger>
               <TabsTrigger value="inactive">
-                معطل ({leaveTypes.filter((t) => !t.isActive).length})
+                {t.leaveTypes.inactiveTab} ({leaveTypes.filter((lt) => !lt.isActive).length})
               </TabsTrigger>
             </TabsList>
           </Tabs>
@@ -468,25 +474,25 @@ export function LeaveTypesManager() {
           )}
 
           {isLoading ? (
-            <div className="py-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+            <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
           ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>النوع</TableHead>
-                <TableHead>التصنيف</TableHead>
-                <TableHead>الأيام المسموحة</TableHead>
-                <TableHead>الاستحقاق</TableHead>
-                <TableHead>الراتب</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="w-[100px]">إجراءات</TableHead>
+                <TableHead>{t.common.type}</TableHead>
+                <TableHead>{t.common.category}</TableHead>
+                <TableHead>{t.leaveTypes.allowedDays}</TableHead>
+                <TableHead>{t.leaveTypes.accrual}</TableHead>
+                <TableHead>{t.leaveTypes.salary}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead className="w-[100px]">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredTypes.length === 0 && (
                 <TableRow>
                   <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                    لا توجد أنواع إجازات مطابقة
+                    {t.leaveTypes.pNoMatchingLeaveTypesFound}
                   </TableCell>
                 </TableRow>
               )}
@@ -513,22 +519,22 @@ export function LeaveTypesManager() {
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
-                      <div>{type.maxDaysPerYear} يوم/سنة</div>
+                      <div>{type.maxDaysPerYear} {t.leaveTypes.daysPerYear}</div>
                       <div className="text-muted-foreground">
-                        {type.minDaysPerRequest}-{type.maxDaysPerRequest} يوم/طلب
+                        {type.minDaysPerRequest}-{type.maxDaysPerRequest} {t.leaveTypes.daysPerRequest}
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
                       {type.accrualType === "none" ? (
-                        <span className="text-muted-foreground">بدون استحقاق</span>
+                        <span className="text-muted-foreground">{t.leaveTypes.noAccrual}</span>
                       ) : (
                         <>
-                          <div>{type.accrualRate} يوم/{accrualTypeLabels[type.accrualType]}</div>
+                          <div>{type.accrualRate} {t.leaveTypes.pDay}/{accrualTypeLabels[type.accrualType]}</div>
                           {type.carryOverAllowed && (
                             <div className="text-muted-foreground">
-                              ترحيل: {type.maxCarryOverDays} يوم
+                              {t.leaveTypes.pCarryOver} {type.maxCarryOverDays} {t.leaveTypes.pDay}
                             </div>
                           )}
                         </>
@@ -541,7 +547,7 @@ export function LeaveTypesManager() {
                         {type.salaryPercentage}%
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">بدون راتب</Badge>
+                      <Badge variant="secondary">{t.leaveTypes.unpaid}</Badge>
                     )}
                   </TableCell>
                   <TableCell>
@@ -553,23 +559,19 @@ export function LeaveTypesManager() {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label="خيارات">
+                        <Button variant="ghost" size="icon" aria-label={t.common.options}>
                           <IconDots className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
                         <DropdownMenuItem onClick={() => openEditDialog(type)}>
-                          <IconEdit className="ms-2 h-4 w-4" />
-                          تعديل
-                        </DropdownMenuItem>
+                          <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => handleDelete(type.id)}
                           disabled={type.isDefault}
                         >
-                          <IconTrash className="ms-2 h-4 w-4" />
-                          حذف
-                        </DropdownMenuItem>
+                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -596,29 +598,29 @@ export function LeaveTypesManager() {
         <DialogContent className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {isEditDialogOpen ? "تعديل نوع الإجازة" : "إضافة نوع إجازة جديد"}
+              {isEditDialogOpen ? t.leaveTypes.editType : t.leaveTypes.addNewType}
             </DialogTitle>
             <DialogDescription>
               {isEditDialogOpen
-                ? "تعديل إعدادات نوع الإجازة"
-                : "إنشاء نوع إجازة جديد مع تحديد الإعدادات"}
+                ? t.leaveTypes.editSettings
+                : t.leaveTypes.createNewType}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             {/* Basic Info */}
             <div className="space-y-4">
-              <h4 className="font-medium">المعلومات الأساسية</h4>
+              <h4 className="font-medium">{t.leaveTypes.basicInfo}</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>الاسم بالعربية *</Label>
+                  <Label>{t.leaveTypes.nameArRequired}</Label>
                   <Input
                     value={formData.name}
                     onChange={(e) => {
                       setFormData({ ...formData, name: e.target.value });
                       if (formErrors.name) setFormErrors((p) => ({ ...p, name: undefined }));
                     }}
-                    placeholder="إجازة سنوية"
+                    placeholder={t.leaveTypes.annualLeaveExample}
                     className={formErrors.name ? "border-destructive" : ""}
                   />
                   {formErrors.name && (
@@ -626,7 +628,7 @@ export function LeaveTypesManager() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>الاسم بالإنجليزية *</Label>
+                  <Label>{t.leaveTypes.nameEnRequired}</Label>
                   <Input
                     value={formData.nameEn}
                     onChange={(e) => {
@@ -645,7 +647,7 @@ export function LeaveTypesManager() {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>التصنيف *</Label>
+                  <Label>{t.leaveTypes.categoryRequired}</Label>
                   <Select
                     value={formData.category}
                     onValueChange={(value: LeaveCategory) => {
@@ -677,7 +679,7 @@ export function LeaveTypesManager() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>لون التمييز</Label>
+                  <Label>{t.leaveTypes.highlightColor}</Label>
                   <div className="flex items-center gap-2">
                     <Input
                       type="color"
@@ -696,11 +698,11 @@ export function LeaveTypesManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>الوصف</Label>
+                <Label>{t.common.description}</Label>
                 <Textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="وصف نوع الإجازة..."
+                  placeholder={t.leaveTypes.leaveTypeDesc}
                   rows={2}
                 />
               </div>
@@ -708,10 +710,10 @@ export function LeaveTypesManager() {
 
             {/* Days Settings */}
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">إعدادات الأيام</h4>
+              <h4 className="font-medium">{t.leaveTypes.daysSettings}</h4>
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>الحد الأقصى سنوياً *</Label>
+                  <Label>{t.leaveTypes.maxPerYear}</Label>
                   <Input
                     type="number"
                     value={formData.maxDaysPerYear}
@@ -727,7 +729,7 @@ export function LeaveTypesManager() {
                   )}
                 </div>
                 <div className="space-y-2">
-                  <Label>الحد الأدنى للطلب</Label>
+                  <Label>{t.leaveTypes.minPerRequest}</Label>
                   <Input
                     type="number"
                     value={formData.minDaysPerRequest}
@@ -738,7 +740,7 @@ export function LeaveTypesManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>الحد الأقصى للطلب</Label>
+                  <Label>{t.leaveTypes.maxPerRequest}</Label>
                   <Input
                     type="number"
                     value={formData.maxDaysPerRequest}
@@ -753,10 +755,10 @@ export function LeaveTypesManager() {
 
             {/* Accrual Settings */}
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">إعدادات الاستحقاق</h4>
+              <h4 className="font-medium">{t.leaveTypes.accrualSettings}</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>نوع الاستحقاق</Label>
+                  <Label>{t.leaveTypes.accrualType}</Label>
                   <Select
                     value={formData.accrualType}
                     onValueChange={(value: AccrualType) =>
@@ -777,7 +779,7 @@ export function LeaveTypesManager() {
                 </div>
                 {formData.accrualType !== "none" && (
                   <div className="space-y-2">
-                    <Label>معدل الاستحقاق (يوم)</Label>
+                    <Label>{t.leaveTypes.accrualRate}</Label>
                     <Input
                       type="number"
                       value={formData.accrualRate}
@@ -799,11 +801,11 @@ export function LeaveTypesManager() {
                       setFormData({ ...formData, carryOverAllowed: checked })
                     }
                   />
-                  <Label>السماح بترحيل الرصيد</Label>
+                  <Label>{t.leaveTypes.allowCarryOver}</Label>
                 </div>
                 {formData.carryOverAllowed && (
                   <div className="flex items-center gap-2">
-                    <Label>الحد الأقصى للترحيل:</Label>
+                    <Label>{t.leaveTypes.maxCarryOver}</Label>
                     <Input
                       type="number"
                       value={formData.maxCarryOverDays}
@@ -813,7 +815,7 @@ export function LeaveTypesManager() {
                       className="w-20"
                       min={0}
                     />
-                    <span className="text-sm text-muted-foreground">يوم</span>
+                    <span className="text-sm text-muted-foreground">{t.attendance.day}</span>
                   </div>
                 )}
               </div>
@@ -821,7 +823,7 @@ export function LeaveTypesManager() {
 
             {/* Salary Settings */}
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">إعدادات الراتب</h4>
+              <h4 className="font-medium">{t.leaveTypes.salarySettings}</h4>
               <div className="flex flex-wrap items-center gap-6">
                 <div className="flex items-center gap-2">
                   <Switch
@@ -834,11 +836,11 @@ export function LeaveTypesManager() {
                       })
                     }
                   />
-                  <Label>إجازة مدفوعة</Label>
+                  <Label>{t.leaveTypes.paidLeave}</Label>
                 </div>
                 {formData.isPaid && (
                   <div className="flex items-center gap-2">
-                    <Label>نسبة الراتب:</Label>
+                    <Label>{t.leaveTypes.salaryPercentage}</Label>
                     <Input
                       type="number"
                       value={formData.salaryPercentage}
@@ -857,10 +859,10 @@ export function LeaveTypesManager() {
 
             {/* Other Settings */}
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">إعدادات أخرى</h4>
+              <h4 className="font-medium">{t.leaveTypes.otherSettings}</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>الحد الأدنى لأشهر الخدمة</Label>
+                  <Label>{t.leaveTypes.minServiceMonths}</Label>
                   <Input
                     type="number"
                     value={formData.minServiceMonths}
@@ -871,7 +873,7 @@ export function LeaveTypesManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>قيود الجنس</Label>
+                  <Label>{t.leaveTypes.genderRestrictions}</Label>
                   <Select
                     value={formData.genderRestriction}
                     onValueChange={(value: "all" | "male" | "female") =>
@@ -882,9 +884,9 @@ export function LeaveTypesManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">الجميع</SelectItem>
-                      <SelectItem value="male">ذكور فقط</SelectItem>
-                      <SelectItem value="female">إناث فقط</SelectItem>
+                      <SelectItem value="all">{t.leaveTypes.everyone}</SelectItem>
+                      <SelectItem value="male">{t.leaveTypes.malesOnly}</SelectItem>
+                      <SelectItem value="female">{t.leaveTypes.femalesOnly}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -898,7 +900,7 @@ export function LeaveTypesManager() {
                       setFormData({ ...formData, requiresAttachment: checked })
                     }
                   />
-                  <Label>يتطلب مرفقات</Label>
+                  <Label>{t.leaveTypes.requiresAttachments}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -907,7 +909,7 @@ export function LeaveTypesManager() {
                       setFormData({ ...formData, allowHalfDay: checked })
                     }
                   />
-                  <Label>السماح بنصف يوم</Label>
+                  <Label>{t.leaveTypes.allowHalfDay}</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <Switch
@@ -916,7 +918,7 @@ export function LeaveTypesManager() {
                       setFormData({ ...formData, isActive: checked })
                     }
                   />
-                  <Label>نوع نشط</Label>
+                  <Label>{t.leaveTypes.activeType}</Label>
                 </div>
               </div>
             </div>
@@ -932,12 +934,10 @@ export function LeaveTypesManager() {
                 resetForm();
               }}
             >
-              <IconX className="ms-2 h-4 w-4" />
-              إلغاء
-            </Button>
+              <IconX className="ms-2 h-4 w-4" />{t.common.cancel}</Button>
             <Button onClick={isEditDialogOpen ? handleEdit : handleAdd} disabled={isSaving}>
               <IconCheck className="ms-2 h-4 w-4" />
-              {isEditDialogOpen ? "حفظ التعديلات" : "إضافة"}
+              {isEditDialogOpen ? t.common.saveChanges : t.common.add}
             </Button>
           </DialogFooter>
         </DialogContent>

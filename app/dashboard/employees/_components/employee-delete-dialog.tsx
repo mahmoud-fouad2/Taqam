@@ -1,3 +1,5 @@
+"use client";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +12,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import type { Employee } from "@/lib/types/core-hr";
 import { getEmployeeFullName } from "@/lib/types/core-hr";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function EmployeeDeleteDialog({
   open,
@@ -22,35 +28,37 @@ export function EmployeeDeleteDialog({
   employee: Employee | null;
   onConfirm: () => void;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const isTerminated = employee?.status === "terminated";
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+          <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
           <AlertDialogDescription>
             {isTerminated ? (
               <>
-                سيتم حذف الموظف &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot; نهائياً.
-                لا يمكن التراجع عن هذا الإجراء.
+                {t.employees.pTheEmployeeWillBeDeleted} &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot; {t.employees.pPermanently}
+                {t.employees.pThisActionCannotBeUndone}
               </>
             ) : (
               <>
-                سيتم إنهاء خدمة الموظف &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot;.
-                يمكنك الضغط على حذف مرة أخرى لاحقاً للحذف النهائي.
+                {t.employees.pTheEmployeeServiceWillBeTermin} &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot;.
+                {t.employees.pYouCanPressDeleteAgainLaterFor}
               </>
             )}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
+          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground"
             disabled={!employee}
           >
-            {isTerminated ? "حذف نهائي" : "إنهاء الخدمة"}
+            {isTerminated ? t.employees.permanentDelete : t.employees.terminateService}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

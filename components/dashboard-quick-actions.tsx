@@ -25,52 +25,77 @@ export function DashboardQuickActions({ locale, pendingLeaves, role, t }: Props)
   const isHrOrAdmin = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"].includes(role);
   const prefix = locale === "en" ? "/en" : "";
 
+  const actions = [
+    ...(isHrOrAdmin
+      ? [
+          {
+            href: `${prefix}/dashboard/employees/new`,
+            label: t.addEmployee,
+            icon: UserPlus,
+          },
+        ]
+      : []),
+    {
+      href: `${prefix}/dashboard/my-requests`,
+      label: t.requestLeave,
+      icon: CalendarOff,
+    },
+    {
+      href: `${prefix}/dashboard/attendance`,
+      label: t.recordAttendance,
+      icon: Clock,
+    },
+    ...(isHrOrAdmin
+      ? [
+          {
+            href: `${prefix}/dashboard/payroll`,
+            label: t.runPayroll,
+            icon: DollarSign,
+          },
+        ]
+      : []),
+  ];
+
   return (
-    <div className="flex flex-col gap-3">
+    <div className="space-y-3 rounded-2xl border bg-card p-3 sm:p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          {t.quickActions}
+        </p>
+        {isManager && pendingLeaves > 0 ? (
+          <Button asChild size="sm" variant="outline" className="h-8 rounded-lg">
+            <Link href={`${prefix}/dashboard/requests`}>{t.reviewRequests}</Link>
+          </Button>
+        ) : null}
+      </div>
+
       {isManager && pendingLeaves > 0 && (
-        <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+        <Alert className="border-amber-200/70 bg-amber-50/70 dark:border-amber-800 dark:bg-amber-950/30">
           <AlertCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-          <AlertDescription className="flex items-center justify-between gap-4">
-            <span className="text-amber-800 dark:text-amber-300 text-sm font-medium">
-              {t.pendingApprovalsBanner(pendingLeaves)}
-            </span>
-            <Button asChild size="sm" variant="outline" className="shrink-0 border-amber-300 text-amber-800 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50">
-              <Link href={`${prefix}/dashboard/requests`}>{t.reviewRequests}</Link>
-            </Button>
+          <AlertDescription className="text-sm font-medium text-amber-900 dark:text-amber-200">
+            {t.pendingApprovalsBanner(pendingLeaves)}
           </AlertDescription>
         </Alert>
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground me-1">{t.quickActions}</span>
-        {isHrOrAdmin && (
-          <Button asChild size="sm" variant="outline" className="h-8 gap-1.5 rounded-full border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 hover:border-blue-300 dark:border-blue-800 dark:bg-blue-950/30 dark:text-blue-400 dark:hover:bg-blue-900/50">
-            <Link href={`${prefix}/dashboard/employees/new`}>
-              <UserPlus className="h-3.5 w-3.5" />
-              {t.addEmployee}
-            </Link>
-          </Button>
-        )}
-        <Button asChild size="sm" variant="outline" className="h-8 gap-1.5 rounded-full border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100 hover:border-amber-300 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400 dark:hover:bg-amber-900/50">
-          <Link href={`${prefix}/dashboard/my-requests`}>
-            <CalendarOff className="h-3.5 w-3.5" />
-            {t.requestLeave}
-          </Link>
-        </Button>
-        <Button asChild size="sm" variant="outline" className="h-8 gap-1.5 rounded-full border-green-200 bg-green-50 text-green-700 hover:bg-green-100 hover:border-green-300 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400 dark:hover:bg-green-900/50">
-          <Link href={`${prefix}/dashboard/attendance`}>
-            <Clock className="h-3.5 w-3.5" />
-            {t.recordAttendance}
-          </Link>
-        </Button>
-        {isHrOrAdmin && (
-          <Button asChild size="sm" variant="outline" className="h-8 gap-1.5 rounded-full border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 hover:border-purple-300 dark:border-purple-800 dark:bg-purple-950/30 dark:text-purple-400 dark:hover:bg-purple-900/50">
-            <Link href={`${prefix}/dashboard/payroll`}>
-              <DollarSign className="h-3.5 w-3.5" />
-              {t.runPayroll}
-            </Link>
-          </Button>
-        )}
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {actions.map((action) => {
+          const Icon = action.icon;
+
+          return (
+            <Button
+              key={action.href}
+              asChild
+              variant="outline"
+              className="h-10 justify-between rounded-xl border-border/70 bg-background px-3 hover:bg-muted/60"
+            >
+              <Link href={action.href}>
+                <span className="truncate text-sm font-medium">{action.label}</span>
+                <Icon className="h-4 w-4 shrink-0 opacity-80" />
+              </Link>
+            </Button>
+          );
+        })}
       </div>
     </div>
   );

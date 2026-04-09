@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   IconSearch,
   IconFilter,
@@ -51,6 +51,10 @@ import { useEmployees } from "@/hooks/use-employees";
 import { leavesApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { getLeaveTheme } from "@/lib/ui/leave-color";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type UiLeaveBalance = {
   id: string;
@@ -86,6 +90,8 @@ function toNumber(value: any): number {
 }
 
 export function LeaveBalancesManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { departments, isLoading: isEmployeesLoading, error: employeesError } = useEmployees();
 
   const [balances, setBalances] = useState<UiLeaveBalance[]>([]);
@@ -104,7 +110,7 @@ export function LeaveBalancesManager() {
     reason: "",
   });
 
-  const loadData = async (year: number) => {
+  const loadData = useCallback(async (year: number) => {
     setIsLoading(true);
     setLoadError(null);
 
@@ -115,10 +121,10 @@ export function LeaveBalancesManager() {
       ]);
 
       if (!balancesRes.success) {
-        throw new Error(balancesRes.error || "فشل تحميل أرصدة الإجازات");
+        throw new Error(balancesRes.error || t.leaveBalances.loadBalancesFailed);
       }
       if (!typesRes.success) {
-        throw new Error(typesRes.error || "فشل تحميل أنواع الإجازات");
+        throw new Error(typesRes.error || t.leaveTypes.loadFailed);
       }
 
       const mappedTypes: ApiLeaveType[] = Array.isArray(typesRes.data)
@@ -169,15 +175,15 @@ export function LeaveBalancesManager() {
         : [];
       setBalances(mappedBalances);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "فشل تحميل البيانات");
+      setLoadError(err instanceof Error ? err.message : t.common.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [t.common.loadFailed, t.leaveBalances.loadBalancesFailed, t.leaveTypes.loadFailed]);
 
   useEffect(() => {
     void loadData(selectedYear);
-  }, [selectedYear]);
+  }, [selectedYear, loadData]);
 
   // Group balances by employee
   const employeeBalances = balances.reduce((acc, balance) => {
@@ -235,16 +241,16 @@ export function LeaveBalancesManager() {
       });
 
       if (!res.success) {
-        throw new Error(res.error || "فشل تعديل الرصيد");
+        throw new Error(res.error || t.leaveBalances.updateFailed);
       }
 
-      toast.success("تم تعديل رصيد الإجازة");
+      toast.success(t.leaveBalances.updatedSuccess);
       setIsAdjustDialogOpen(false);
       setSelectedBalance(null);
       setAdjustmentData({ type: "add", days: 0, reason: "" });
       await loadData(selectedYear);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل تعديل الرصيد");
+      toast.error(err instanceof Error ? err.message : t.leaveBalances.updateFailed);
     }
   };
 
@@ -274,8 +280,8 @@ export function LeaveBalancesManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">أرصدة الإجازات</h2>
-          <p className="text-muted-foreground">متابعة أرصدة إجازات الموظفين</p>
+          <h2 className="text-2xl font-bold">{t.leaveBalances.title}</h2>
+          <p className="text-muted-foreground">{t.leaveBalances.description}</p>
         </div>
         <div className="flex gap-2">
           <Select
@@ -292,9 +298,7 @@ export function LeaveBalancesManager() {
             </SelectContent>
           </Select>
           <Button variant="outline">
-            <IconDownload className="ms-2 h-4 w-4" />
-            تصدير
-          </Button>
+            <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
         </div>
       </div>
 
@@ -302,16 +306,16 @@ export function LeaveBalancesManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي المستحق</CardDescription>
+            <CardDescription>{t.leaveBalances.entitled}</CardDescription>
             <CardTitle className="text-3xl">{totals.totalEntitled}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">يوم لجميع الموظفين</p>
+            <p className="text-sm text-muted-foreground">{t.leaveBalances.allEmployees}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي المأخوذ</CardDescription>
+            <CardDescription>{t.leaveBalances.taken}</CardDescription>
             <CardTitle className="text-3xl text-orange-600">{totals.totalTaken}</CardTitle>
           </CardHeader>
           <CardContent>
@@ -323,20 +327,20 @@ export function LeaveBalancesManager() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>قيد الانتظار</CardDescription>
+            <CardDescription>{t.common.pending}</CardDescription>
             <CardTitle className="text-3xl text-yellow-600">{totals.totalPending}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">يوم في طلبات معلقة</p>
+            <p className="text-sm text-muted-foreground">{t.leaveBalances.pendingDays}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي المتبقي</CardDescription>
+            <CardDescription>{t.leaveBalances.remaining}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{totals.totalRemaining}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">يوم متاح للاستخدام</p>
+            <p className="text-sm text-muted-foreground">{t.leaveBalances.available}</p>
           </CardContent>
         </Card>
       </div>
@@ -344,8 +348,8 @@ export function LeaveBalancesManager() {
       {/* Leave Type Usage Overview */}
       <Card>
         <CardHeader>
-          <CardTitle>معدل استخدام أنواع الإجازات</CardTitle>
-          <CardDescription>نظرة عامة على استخدام كل نوع إجازة</CardDescription>
+          <CardTitle>{t.leaveBalances.usageRate}</CardTitle>
+          <CardDescription>{t.leaveBalances.usageDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-4">
@@ -362,9 +366,9 @@ export function LeaveBalancesManager() {
                   </div>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">المستخدم</span>
+                      <span className="text-muted-foreground">{t.common.user}</span>
                       <span>
-                        {type.totalTaken} من {type.totalEntitled}
+                        {type.totalTaken} {t.leaveBalances.ofTotal} {type.totalEntitled}
                       </span>
                     </div>
                     <Progress value={type.usageRate} className={cn("h-2", theme.progress)} />
@@ -383,12 +387,12 @@ export function LeaveBalancesManager() {
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <CardTitle>أرصدة الموظفين</CardTitle>
+            <CardTitle>{t.leaveBalances.employeeBalances}</CardTitle>
             <div className="flex gap-2">
               <div className="relative">
                 <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="بحث بالاسم أو الرقم..."
+                  placeholder={t.employees.searchPlaceholder}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-[200px] ps-9"
@@ -396,10 +400,10 @@ export function LeaveBalancesManager() {
               </div>
               <Select value={filterDepartment} onValueChange={setFilterDepartment}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="جميع الأقسام" />
+                  <SelectValue placeholder={t.common.allDepartments} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الأقسام</SelectItem>
+                  <SelectItem value="all">{t.common.allDepartments}</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -423,29 +427,27 @@ export function LeaveBalancesManager() {
           )}
           {(isLoading || isEmployeesLoading) && (
             <div className="mb-4 flex items-center gap-3 text-sm text-muted-foreground">
-              <Progress value={35} className="h-2 w-40" />
-              جاري التحميل...
-            </div>
+              <Progress value={35} className="h-2 w-40" />{t.common.loading}</div>
           )}
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead>نوع الإجازة</TableHead>
-                <TableHead className="text-center">المستحق</TableHead>
-                <TableHead className="text-center">المرحل</TableHead>
-                <TableHead className="text-center">المأخوذ</TableHead>
-                <TableHead className="text-center">معلق</TableHead>
-                <TableHead className="text-center">المتبقي</TableHead>
-                <TableHead className="text-center">الاستخدام</TableHead>
-                <TableHead className="w-[100px]">إجراءات</TableHead>
+                <TableHead>{t.common.employee}</TableHead>
+                <TableHead>{t.common.type}</TableHead>
+                <TableHead className="text-center">{t.common.due}</TableHead>
+                <TableHead className="text-center">{t.leaveBalances.carryOver}</TableHead>
+                <TableHead className="text-center">{t.common.taken}</TableHead>
+                <TableHead className="text-center">{t.common.pending}</TableHead>
+                <TableHead className="text-center">{t.leaveBalances.remaining}</TableHead>
+                <TableHead className="text-center">{t.leaveBalances.usage}</TableHead>
+                <TableHead className="w-[100px]">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredEmployees.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={9} className="text-center py-8">
-                    <p className="text-muted-foreground">لا توجد بيانات</p>
+                    <p className="text-muted-foreground">{t.common.noData}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -542,9 +544,9 @@ export function LeaveBalancesManager() {
       <Dialog open={isAdjustDialogOpen} onOpenChange={setIsAdjustDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تعديل رصيد الإجازة</DialogTitle>
+            <DialogTitle>{t.leaveBalances.editBalance}</DialogTitle>
             <DialogDescription>
-              تعديل رصيد {selectedBalance?.leaveTypeName} للموظف{" "}
+              {t.leaveBalances.pAdjustBalance} {selectedBalance?.leaveTypeName} {t.leaveBalances.pForEmployee}{" "}
               {selectedBalance?.employeeName}
             </DialogDescription>
           </DialogHeader>
@@ -553,19 +555,19 @@ export function LeaveBalancesManager() {
             <div className="space-y-4 py-4">
               {/* Current Balance Info */}
               <div className="rounded-lg bg-muted p-4">
-                <div className="grid grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
                   <div>
-                    <p className="text-sm text-muted-foreground">المستحق</p>
+                    <p className="text-sm text-muted-foreground">{t.common.due}</p>
                     <p className="text-xl font-bold">{selectedBalance.entitled}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">المأخوذ</p>
+                    <p className="text-sm text-muted-foreground">{t.common.taken}</p>
                     <p className="text-xl font-bold text-orange-600">
                       {selectedBalance.taken}
                     </p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">المتبقي</p>
+                    <p className="text-sm text-muted-foreground">{t.leaveBalances.remaining}</p>
                     <p className="text-xl font-bold text-green-600">
                       {selectedBalance.remaining}
                     </p>
@@ -574,7 +576,7 @@ export function LeaveBalancesManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>نوع التعديل</Label>
+                <Label>{t.leaveBalances.adjustType}</Label>
                 <div className="flex gap-2">
                   <Button
                     variant={adjustmentData.type === "add" ? "default" : "outline"}
@@ -584,7 +586,7 @@ export function LeaveBalancesManager() {
                     }
                   >
                     <IconPlus className="ms-2 h-4 w-4" />
-                    إضافة أيام
+                    {t.leaveBalances.pAddDays}
                   </Button>
                   <Button
                     variant={adjustmentData.type === "subtract" ? "default" : "outline"}
@@ -594,13 +596,13 @@ export function LeaveBalancesManager() {
                     }
                   >
                     <IconMinus className="ms-2 h-4 w-4" />
-                    خصم أيام
+                    {t.leaveBalances.pDeductDays}
                   </Button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <Label>عدد الأيام *</Label>
+                <Label>{t.leaveBalances.daysCount}</Label>
                 <Input
                   type="number"
                   value={adjustmentData.days}
@@ -616,13 +618,13 @@ export function LeaveBalancesManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>سبب التعديل *</Label>
+                <Label>{t.leaveBalances.adjustReason}</Label>
                 <Textarea
                   value={adjustmentData.reason}
                   onChange={(e) =>
                     setAdjustmentData({ ...adjustmentData, reason: e.target.value })
                   }
-                  placeholder="أدخل سبب تعديل الرصيد..."
+                  placeholder={t.leaveBalances.adjustReasonPlaceholder}
                   rows={3}
                 />
               </div>
@@ -630,9 +632,9 @@ export function LeaveBalancesManager() {
               {/* Preview */}
               {adjustmentData.days > 0 && (
                 <div className="rounded-lg border border-dashed p-4">
-                  <p className="text-sm text-muted-foreground mb-2">معاينة التعديل:</p>
+                  <p className="text-sm text-muted-foreground mb-2">{t.leaveBalances.adjustPreview}</p>
                   <div className="flex items-center justify-between">
-                    <span>الرصيد الجديد:</span>
+                    <span>{t.leaveBalances.newBalance}</span>
                     <Badge
                       variant="outline"
                       className={
@@ -644,7 +646,7 @@ export function LeaveBalancesManager() {
                       {adjustmentData.type === "add"
                         ? selectedBalance.remaining + adjustmentData.days
                         : selectedBalance.remaining - adjustmentData.days}{" "}
-                      يوم
+                      {t.leaveBalances.pDay}
                     </Badge>
                   </div>
                 </div>
@@ -653,14 +655,12 @@ export function LeaveBalancesManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>{t.common.cancel}</Button>
             <Button
               onClick={handleAdjust}
               disabled={adjustmentData.days <= 0 || !adjustmentData.reason}
             >
-              حفظ التعديل
+              {t.leaveBalances.pSaveAdjustment}
             </Button>
           </DialogFooter>
         </DialogContent>

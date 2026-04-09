@@ -27,7 +27,6 @@ function getCookie(name: string): string | undefined {
 export function LocaleToggle({
   className,
   // variant kept for backward compat but ignored — pill style is always used
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   variant: _variant,
 }: {
   className?: string;

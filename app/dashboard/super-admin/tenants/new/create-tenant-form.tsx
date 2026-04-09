@@ -25,18 +25,20 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 // Validation Schema
 const createTenantSchema = z.object({
   // Company Info
-  name: z.string().min(2, "اسم الشركة بالإنجليزية مطلوب"),
-  nameAr: z.string().min(2, "اسم الشركة بالعربية مطلوب"),
+  name: z.string().min(2, "English name is required"),
+  nameAr: z.string().min(2, "Arabic name is required"),
   slug: z
     .string()
-    .min(3, "الـ slug يجب أن يكون 3 أحرف على الأقل")
-    .max(30, "الـ slug يجب أن يكون أقل من 30 حرف")
-    .regex(/^[a-z0-9-]+$/, "الـ slug يجب أن يحتوي على أحرف صغيرة وأرقام وشرطات فقط"),
-  email: z.string().email("البريد الإلكتروني غير صحيح"),
+    .min(3, "Slug must be at least 3 characters")
+    .max(30, "Slug must be less than 30 characters")
+    .regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase letters, numbers, and hyphens"),
+  email: z.string().email("Invalid email"),
   phone: z.string().optional(),
   commercialRegister: z.string().optional(),
   
@@ -46,14 +48,16 @@ const createTenantSchema = z.object({
   defaultTheme: z.enum(["shadcn", "mantine"]),
   
   // Company Admin
-  adminName: z.string().min(2, "اسم المدير مطلوب"),
-  adminEmail: z.string().email("البريد الإلكتروني للمدير غير صحيح"),
+  adminName: z.string().min(2, "Admin name is required"),
+  adminEmail: z.string().email("Invalid admin email"),
   sendInvite: z.boolean().default(true),
 });
 
 type CreateTenantInput = z.infer<typeof createTenantSchema>;
 
 export function CreateTenantForm() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -121,15 +125,15 @@ export function CreateTenantForm() {
       const json = await res.json().catch(() => ({} as any));
 
       if (!res.ok || json?.success === false) {
-        const msg = json?.error || json?.message || "فشل إنشاء الشركة";
+        const msg = json?.error || json?.message || t.tenant.createFailed;
         toast.error(msg);
         return;
       }
 
-      toast.success("تم إنشاء الشركة بنجاح");
+      toast.success(t.tenants.createdSuccess);
       router.push("/dashboard/super-admin/tenants?created=true");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "فشل الاتصال بالخادم");
+      toast.error(e instanceof Error ? e.message : t.tenants.connectionFailed);
     } finally {
       setIsLoading(false);
     }
@@ -140,16 +144,14 @@ export function CreateTenantForm() {
       {/* Section 1: Company Info */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <Building2 className="h-5 w-5" />
-          معلومات الشركة
-        </div>
+          <Building2 className="h-5 w-5" />{t.organization.companySection}</div>
         
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="nameAr">اسم الشركة بالعربية *</Label>
+            <Label htmlFor="nameAr">{t.tenant.nameArLabel}</Label>
             <Input
               id="nameAr"
-              placeholder="شركة النخبة للتقنية"
+              placeholder={t.tenant.companyNameExample}
               {...register("nameAr")}
             />
             {errors.nameAr && (
@@ -158,7 +160,7 @@ export function CreateTenantForm() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="name">اسم الشركة بالإنجليزية *</Label>
+            <Label htmlFor="name">{t.tenant.nameEnLabel}</Label>
             <Input
               id="name"
               placeholder="Elite Technology Co."
@@ -173,24 +175,24 @@ export function CreateTenantForm() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="slug">مسار الشركة (slug) *</Label>
+            <Label htmlFor="slug">{t.tenant.slugLabel}</Label>
             <div className="flex items-center gap-2">
               <Input
                 id="slug"
-                placeholder="elite-tech"
+                placeholder={t.tenant.slugExample}
                 className="flex-1"
                 {...register("slug")}
               />
               <span className="text-sm text-muted-foreground">/t/</span>
             </div>
-            <p className="text-xs text-muted-foreground">سيكون رابط الشركة: /t/{slugPreview || "company"}</p>
+            <p className="text-xs text-muted-foreground">{t.tenant.pCompanyUrlWillBe} /t/{slugPreview || "company"}</p>
             {errors.slug && (
               <p className="text-sm text-destructive">{errors.slug.message}</p>
             )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="commercialRegister">السجل التجاري</Label>
+            <Label htmlFor="commercialRegister">{t.organization.commercialReg}</Label>
             <Input
               id="commercialRegister"
               placeholder="1010123456"
@@ -201,7 +203,7 @@ export function CreateTenantForm() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني للشركة *</Label>
+            <Label htmlFor="email">{t.tenant.emailLabel}</Label>
             <Input
               id="email"
               type="email"
@@ -214,7 +216,7 @@ export function CreateTenantForm() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="phone">رقم الهاتف</Label>
+            <Label htmlFor="phone">{t.common.phone}</Label>
             <Input
               id="phone"
               placeholder="+966501234567"
@@ -229,19 +231,17 @@ export function CreateTenantForm() {
       {/* Section 2: Settings */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <Settings className="h-5 w-5" />
-          الإعدادات الافتراضية
-        </div>
+          <Settings className="h-5 w-5" />{t.tenant.defaultSettings}</div>
         
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
-            <Label>الباقة *</Label>
+            <Label>{t.tenant.planLabel}</Label>
             <Select
               defaultValue="business"
               onValueChange={(value) => setValue("plan", value as any)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر الباقة" />
+                <SelectValue placeholder={t.tenant.planPlaceholder} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="starter">Starter</SelectItem>
@@ -252,29 +252,29 @@ export function CreateTenantForm() {
           </div>
           
           <div className="space-y-2">
-            <Label>اللغة الافتراضية *</Label>
+            <Label>{t.tenant.languageLabel}</Label>
             <Select
               defaultValue="ar"
               onValueChange={(value) => setValue("defaultLocale", value as any)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر اللغة" />
+                <SelectValue placeholder={t.tenant.languagePlaceholder} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ar">العربية</SelectItem>
+                <SelectItem value="ar">{t.common.arabic}</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="space-y-2">
-            <Label>الثيم الافتراضي *</Label>
+            <Label>{t.tenant.themeLabel}</Label>
             <Select
               defaultValue="shadcn"
               onValueChange={(value) => setValue("defaultTheme", value as any)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر الثيم" />
+                <SelectValue placeholder={t.tenant.themePlaceholder} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="shadcn">Modern (shadcn)</SelectItem>
@@ -290,19 +290,15 @@ export function CreateTenantForm() {
       {/* Section 3: Company Admin */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <User className="h-5 w-5" />
-          مدير الشركة (Company Admin)
-        </div>
-        <p className="text-sm text-muted-foreground">
-          سيتم إرسال دعوة لهذا المستخدم ليكون المدير الرئيسي للشركة
-        </p>
+          <User className="h-5 w-5" />{t.tenant.adminLabel}</div>
+        <p className="text-sm text-muted-foreground">{t.tenant.adminDescription}</p>
         
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="adminName">اسم المدير *</Label>
+            <Label htmlFor="adminName">{t.tenant.adminNameLabel}</Label>
             <Input
               id="adminName"
-              placeholder="أحمد محمد"
+              placeholder={t.tenant.adminNameExample}
               {...register("adminName")}
             />
             {errors.adminName && (
@@ -311,7 +307,7 @@ export function CreateTenantForm() {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="adminEmail">البريد الإلكتروني للمدير *</Label>
+            <Label htmlFor="adminEmail">{t.tenant.adminEmailLabel}</Label>
             <Input
               id="adminEmail"
               type="email"
@@ -330,9 +326,7 @@ export function CreateTenantForm() {
             defaultChecked
             onCheckedChange={(checked) => setValue("sendInvite", !!checked)}
           />
-          <Label htmlFor="sendInvite" className="text-sm font-normal">
-            إرسال دعوة بالبريد الإلكتروني للمدير
-          </Label>
+          <Label htmlFor="sendInvite" className="text-sm font-normal">{t.tenant.sendInviteCheckbox}</Label>
         </div>
       </div>
 
@@ -344,12 +338,10 @@ export function CreateTenantForm() {
           type="button"
           variant="outline"
           onClick={() => router.back()}
-        >
-          إلغاء
-        </Button>
+        >{t.common.cancel}</Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-          إنشاء الشركة
+          {t.tenant.pCreateCompany}
         </Button>
       </div>
     </form>

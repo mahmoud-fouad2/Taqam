@@ -27,16 +27,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 import { buildTenantUrl } from "@/lib/tenant";
 import { tenantsService } from "@/lib/api";
+import { getText } from "@/lib/i18n/text";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
-const statusConfig: Record<TenantStatus, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
-  active: { label: "نشط", variant: "default" },
-  pending: { label: "معلق", variant: "secondary" },
-  suspended: { label: "موقوف", variant: "destructive" },
-  cancelled: { label: "ملغاة", variant: "outline" },
-  deleted: { label: "محذوف", variant: "outline" },
-};
+type LocaleText = ReturnType<typeof getText>;
 
-function getStatusMeta(status: string) {
+function getStatusMeta(status: string, t: LocaleText) {
+  const statusConfig: Record<
+    TenantStatus,
+    { label: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  > = {
+    active: { label: t.common.active, variant: "default" },
+    pending: { label: t.common.pending, variant: "secondary" },
+    suspended: { label: t.common.suspended, variant: "destructive" },
+    cancelled: { label: t.common.cancelled, variant: "outline" },
+    deleted: { label: t.common.deleted, variant: "outline" },
+  };
+
   return (
     statusConfig[status as TenantStatus] ?? {
       label: status,
@@ -75,21 +82,6 @@ type TenantAuditLog = {
   } | null;
 };
 
-const userStatusConfig: Record<string, { label: string; variant: BadgeVariant }> = {
-  ACTIVE: { label: "نشط", variant: "default" },
-  INACTIVE: { label: "غير نشط", variant: "secondary" },
-  SUSPENDED: { label: "موقوف", variant: "destructive" },
-  PENDING_VERIFICATION: { label: "بانتظار التفعيل", variant: "outline" },
-};
-
-const roleLabels: Record<string, string> = {
-  SUPER_ADMIN: "مدير المنصة",
-  TENANT_ADMIN: "مدير الشركة",
-  HR_MANAGER: "مدير الموارد البشرية",
-  MANAGER: "مدير",
-  EMPLOYEE: "موظف",
-};
-
 const rolePriority: Record<string, number> = {
   TENANT_ADMIN: 0,
   HR_MANAGER: 1,
@@ -98,41 +90,14 @@ const rolePriority: Record<string, number> = {
   SUPER_ADMIN: 4,
 };
 
-const auditActionLabels: Record<string, string> = {
-  LOGIN: "تسجيل دخول",
-  LOGOUT: "تسجيل خروج",
-  LOGIN_FAILED: "محاولة دخول فاشلة",
-  PASSWORD_CHANGED: "تغيير كلمة المرور",
-  PASSWORD_RESET: "إعادة تعيين كلمة المرور",
-  TOKEN_REFRESH: "تجديد الجلسة",
-  USER_CREATE: "إنشاء مستخدم",
-  USER_UPDATE: "تحديث مستخدم",
-  USER_DELETE: "حذف مستخدم",
-  USER_SUSPEND: "إيقاف مستخدم",
-  USER_ACTIVATE: "تفعيل مستخدم",
-  EMPLOYEE_CREATE: "إنشاء موظف",
-  EMPLOYEE_UPDATE: "تحديث موظف",
-  EMPLOYEE_DELETE: "حذف موظف",
-  EMPLOYEE_BULK_IMPORT: "استيراد جماعي للموظفين",
-  EMPLOYEE_STATUS_CHANGE: "تغيير حالة موظف",
-  DATA_IMPORT: "استيراد بيانات",
-  DATA_EXPORT: "تصدير بيانات",
-  SETTINGS_UPDATE: "تحديث الإعدادات",
-  PAYROLL_PROCESS: "معالجة الرواتب",
-};
+function getUserStatusMeta(status: string, t: LocaleText) {
+  const userStatusConfig: Record<string, { label: string; variant: BadgeVariant }> = {
+    ACTIVE: { label: t.common.active, variant: "default" },
+    INACTIVE: { label: t.common.inactive, variant: "secondary" },
+    SUSPENDED: { label: t.common.suspended, variant: "destructive" },
+    PENDING_VERIFICATION: { label: t.common.pendingActivation, variant: "outline" },
+  };
 
-const auditEntityLabels: Record<string, string> = {
-  User: "المستخدم",
-  Employee: "الموظف",
-  Tenant: "الشركة",
-  DevelopmentPlan: "خطة التطوير",
-  PayrollPeriod: "فترة الرواتب",
-  MobileSession: "جلسة الجوال",
-  MobileRefreshToken: "جلسة الجوال",
-  Settings: "الإعدادات",
-};
-
-function getUserStatusMeta(status: string) {
   return userStatusConfig[status] ?? { label: status, variant: "outline" as const };
 }
 
@@ -141,21 +106,63 @@ function getUserDisplayName(user: Pick<TenantUser, "firstName" | "lastName" | "e
   return fullName || user.email;
 }
 
-function getRoleLabel(role: string) {
+function getRoleLabel(role: string, t: LocaleText) {
+  const roleLabels: Record<string, string> = {
+    SUPER_ADMIN: t.common.superAdmin,
+    TENANT_ADMIN: t.common.companyAdmin,
+    HR_MANAGER: t.common.hrManager,
+    MANAGER: t.common.manager,
+    EMPLOYEE: t.common.employee,
+  };
+
   return roleLabels[role] ?? role;
 }
 
-function formatAuditAction(action: string) {
+function formatAuditAction(action: string, t: LocaleText) {
+  const auditActionLabels: Record<string, string> = {
+    LOGIN: t.audit.login,
+    LOGOUT: t.audit.logout,
+    LOGIN_FAILED: t.audit.loginFailed,
+    PASSWORD_CHANGED: t.audit.passwordChanged,
+    PASSWORD_RESET: t.audit.passwordReset,
+    TOKEN_REFRESH: t.audit.tokenRefresh,
+    USER_CREATE: t.common.add,
+    USER_UPDATE: t.common.update,
+    USER_DELETE: t.common.delete,
+    USER_SUSPEND: t.audit.userSuspend,
+    USER_ACTIVATE: t.audit.userActivate,
+    EMPLOYEE_CREATE: t.employees.addEmployee,
+    EMPLOYEE_UPDATE: t.employees.updatedSuccess,
+    EMPLOYEE_DELETE: t.audit.employeeDelete,
+    EMPLOYEE_BULK_IMPORT: t.audit.employeeBulkImport,
+    EMPLOYEE_STATUS_CHANGE: t.audit.employeeStatusChange,
+    DATA_IMPORT: t.audit.dataImport,
+    DATA_EXPORT: t.common.exportData,
+    SETTINGS_UPDATE: t.audit.settingsUpdate,
+    PAYROLL_PROCESS: t.audit.payrollProcess,
+  };
+
   return auditActionLabels[action] ?? action.replaceAll("_", " ");
 }
 
-function formatAuditEntity(entity: string) {
+function formatAuditEntity(entity: string, t: LocaleText) {
+  const auditEntityLabels: Record<string, string> = {
+    User: t.audit.entityUser,
+    Employee: t.common.employee,
+    Tenant: t.common.company,
+    DevelopmentPlan: t.audit.entityDevPlan,
+    PayrollPeriod: t.audit.entityPayrollPeriod,
+    MobileSession: t.audit.entityMobileSession,
+    MobileRefreshToken: t.audit.entityMobileSession,
+    Settings: t.common.options,
+  };
+
   return auditEntityLabels[entity] ?? entity;
 }
 
-function formatDateTime(value: string | null | undefined) {
+function formatDateTime(value: string | null | undefined, locale: "ar" | "en") {
   if (!value) return "—";
-  return new Date(value).toLocaleString("ar-SA");
+  return new Date(value).toLocaleString(locale === "ar" ? "ar-SA" : "en-US");
 }
 
 function formatCompactId(value: string | null | undefined) {
@@ -165,11 +172,13 @@ function formatCompactId(value: string | null | undefined) {
 }
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export default function TenantDetailsPage({ params }: PageProps) {
-  const [id, setId] = React.useState<string | null>(null);
+  const locale = useClientLocale();
+  const t = getText(locale);
+  const id = params.id;
   const [tenant, setTenant] = React.useState<Tenant | null>(null);
   const [tenantUsers, setTenantUsers] = React.useState<TenantUser[]>([]);
   const [auditLogs, setAuditLogs] = React.useState<TenantAuditLog[]>([]);
@@ -177,11 +186,6 @@ export default function TenantDetailsPage({ params }: PageProps) {
   const [error, setError] = React.useState<string | null>(null);
   const [usersError, setUsersError] = React.useState<string | null>(null);
   const [auditError, setAuditError] = React.useState<string | null>(null);
-
-  // Resolve params Promise
-  React.useEffect(() => {
-    params.then((p) => setId(p.id));
-  }, [params]);
 
   React.useEffect(() => {
     if (!id) return;
@@ -206,7 +210,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
           setTenant(tenantRes.data);
         } else {
           setTenant(null);
-          setError(tenantRes.error || "تعذر تحميل بيانات الشركة");
+          setError(tenantRes.error || t.organization.fetchCompanyError);
         }
 
         if (usersRes.success && Array.isArray(usersRes.data)) {
@@ -219,21 +223,21 @@ export default function TenantDetailsPage({ params }: PageProps) {
           );
         } else {
           setTenantUsers([]);
-          setUsersError(usersRes.error || "تعذر تحميل المستخدمين");
+          setUsersError(usersRes.error || t.tenant.pFailedToLoadUsers);
         }
 
         if (auditRes.success && Array.isArray(auditRes.data)) {
           setAuditLogs(auditRes.data);
         } else {
           setAuditLogs([]);
-          setAuditError(auditRes.error || "تعذر تحميل سجل التغييرات");
+          setAuditError(auditRes.error || t.tenant.pFailedToLoadChangeLog);
         }
       } catch (e) {
         if (!mounted) return;
         setTenant(null);
         setTenantUsers([]);
         setAuditLogs([]);
-        setError(e instanceof Error ? e.message : "تعذر تحميل بيانات الشركة");
+        setError(e instanceof Error ? e.message : t.organization.fetchCompanyError);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -241,13 +245,16 @@ export default function TenantDetailsPage({ params }: PageProps) {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [
+    id,
+    t.organization.fetchCompanyError,
+    t.tenant.pFailedToLoadChangeLog,
+    t.tenant.pFailedToLoadUsers,
+  ]);
 
   if (!id || isLoading) {
     return (
-      <div className="flex items-center justify-center py-10 text-muted-foreground">
-        جاري تحميل بيانات الشركة...
-      </div>
+      <div className="flex items-center justify-center rounded-2xl border border-border/60 bg-card/80 py-10 text-muted-foreground shadow-sm">{t.tenant.loading}</div>
     );
   }
 
@@ -257,9 +264,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
           {error}
         </div>
-        <Link href="/dashboard/super-admin/tenants" className="text-sm text-primary hover:underline">
-          العودة إلى قائمة الشركات
-        </Link>
+        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
       </div>
     );
   }
@@ -267,10 +272,8 @@ export default function TenantDetailsPage({ params }: PageProps) {
   if (!tenant) {
     return (
       <div className="space-y-4">
-        <p className="text-muted-foreground">الشركة غير موجودة.</p>
-        <Link href="/dashboard/super-admin/tenants" className="text-sm text-primary hover:underline">
-          العودة إلى قائمة الشركات
-        </Link>
+        <p className="text-muted-foreground">{t.tenant.notFound}</p>
+        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
       </div>
     );
   }
@@ -280,21 +283,19 @@ export default function TenantDetailsPage({ params }: PageProps) {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb & Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
+      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div className="space-y-1">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/dashboard/super-admin/tenants" className="hover:text-primary">
-              الشركات
-            </Link>
+            <Link href="/dashboard/super-admin/tenants" className="font-medium hover:text-primary">{t.common.companies}</Link>
             <ArrowRight className="h-4 w-4 rotate-180" />
             <span>{tenant.nameAr}</span>
           </div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
             <Building2 className="h-6 w-6" />
             {tenant.nameAr}
             {(() => {
-              const meta = getStatusMeta(String((tenant as any)?.status ?? "unknown"));
+              const meta = getStatusMeta(String((tenant as any)?.status ?? "unknown"), t);
               return (
                 <Badge variant={meta?.variant ?? "outline"} className="ms-2">
                   {meta?.label ?? "—"}
@@ -302,14 +303,12 @@ export default function TenantDetailsPage({ params }: PageProps) {
               );
             })()}
           </h1>
-          <p className="text-muted-foreground">{tenant.name}</p>
-        </div>
-        <div className="flex gap-2">
+          <p className="text-sm text-muted-foreground">{tenant.name}</p>
+          </div>
+          <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link href={`/dashboard/super-admin/tenants/${id}/settings`}>
-              <Settings className="me-2 h-4 w-4" />
-              الإعدادات
-            </Link>
+              <Settings className="me-2 h-4 w-4" />{t.common.settings}</Link>
           </Button>
           <Button variant="outline" asChild>
             <a
@@ -317,9 +316,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
               target="_blank"
               rel="noreferrer"
             >
-              <ExternalLink className="me-2 h-4 w-4" />
-              فتح لوحة الشركة
-            </a>
+              <ExternalLink className="me-2 h-4 w-4" />{t.common.open}</a>
           </Button>
           <Button variant="outline" asChild>
             <a
@@ -327,75 +324,72 @@ export default function TenantDetailsPage({ params }: PageProps) {
               target="_blank"
               rel="noreferrer"
             >
-              <ExternalLink className="me-2 h-4 w-4" />
-              بوابة التوظيف العامة
-            </a>
+              <ExternalLink className="me-2 h-4 w-4" />{t.tenant.careersPortal}</a>
           </Button>
         </div>
-      </div>
+        </div>
+      </section>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-4">
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المستخدمين</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.users}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tenant.usersCount}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الموظفين</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.employees}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tenant.employeesCount}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الباقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.type}</CardTitle>
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">{tenant.plan}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تاريخ الإنشاء</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.createdAt}</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {new Date(tenant.createdAt).toLocaleDateString("ar-SA")}
+              {new Date(tenant.createdAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Tabs */}
       <Tabs defaultValue="info" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="info">المعلومات</TabsTrigger>
-          <TabsTrigger value="users">المستخدمين</TabsTrigger>
-          <TabsTrigger value="audit">سجل التغييرات</TabsTrigger>
+        <TabsList className="bg-card/80">
+          <TabsTrigger value="info">{t.common.info}</TabsTrigger>
+          <TabsTrigger value="users">{t.common.users}</TabsTrigger>
+          <TabsTrigger value="audit">{t.audit.auditLog}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="info" className="space-y-4">
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Company Info */}
-            <Card>
+            <Card className="border-border/60 bg-card/85 shadow-sm">
               <CardHeader>
-                <CardTitle>معلومات الشركة</CardTitle>
+                <CardTitle>{t.organization.companySection}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">رابط لوحة الشركة</p>
+                    <p className="text-sm text-muted-foreground">{t.tenant.dashboardLink}</p>
                     <p className="font-medium">
                       <code className="rounded bg-muted px-2 py-1">
                         {buildTenantUrl(tenant.slug, "/dashboard")}
@@ -406,7 +400,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <Globe className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">رابط بوابة التوظيف</p>
+                    <p className="text-sm text-muted-foreground">{t.tenant.careersLink}</p>
                     <p className="font-medium">
                       <code className="rounded bg-muted px-2 py-1">
                         {buildTenantUrl(tenant.slug, "/careers")}
@@ -417,7 +411,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
                 <div className="flex items-center gap-3">
                   <Mail className="h-4 w-4 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">البريد الإلكتروني</p>
+                    <p className="text-sm text-muted-foreground">{t.common.email}</p>
                     <p className="font-medium" dir="ltr">{tenant.email || "-"}</p>
                   </div>
                 </div>
@@ -425,7 +419,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
                   <div className="flex items-center gap-3">
                     <Phone className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm text-muted-foreground">رقم الهاتف</p>
+                      <p className="text-sm text-muted-foreground">{t.common.phone}</p>
                       <p className="font-medium">{tenant.phone}</p>
                     </div>
                   </div>
@@ -434,7 +428,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
                   <div className="flex items-center gap-3">
                     <Building2 className="h-4 w-4 text-muted-foreground" />
                     <div>
-                      <p className="text-sm text-muted-foreground">السجل التجاري</p>
+                      <p className="text-sm text-muted-foreground">{t.organization.commercialReg}</p>
                       <p className="font-medium">{tenant.commercialRegister}</p>
                     </div>
                   </div>
@@ -443,32 +437,32 @@ export default function TenantDetailsPage({ params }: PageProps) {
             </Card>
 
             {/* Settings */}
-            <Card>
+            <Card className="border-border/60 bg-card/85 shadow-sm">
               <CardHeader>
-                <CardTitle>الإعدادات</CardTitle>
+                <CardTitle>{t.common.options}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">اللغة الافتراضية</span>
+                  <span className="text-muted-foreground">{t.common.options}</span>
                   <Badge variant="outline">
-                    {tenant.defaultLocale === "ar" ? "العربية" : "English"}
+                    {tenant.defaultLocale === "ar" ? t.tenant.pArabic : "English"}
                   </Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">الثيم الافتراضي</span>
+                  <span className="text-muted-foreground">{t.tenant.defaultTheme}</span>
                   <Badge variant="outline">{tenant.defaultTheme}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">المنطقة الزمنية</span>
+                  <span className="text-muted-foreground">{t.tenant.timezone}</span>
                   <Badge variant="outline">{tenant.timezone}</Badge>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-muted-foreground">الدولة</span>
+                  <span className="text-muted-foreground">{t.common.country}</span>
                   <Badge variant="outline">{tenant.country}</Badge>
                 </div>
                 {tenant.city && (
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">المدينة</span>
+                    <span className="text-muted-foreground">{t.common.city}</span>
                     <Badge variant="outline">{tenant.city}</Badge>
                   </div>
                 )}
@@ -480,39 +474,37 @@ export default function TenantDetailsPage({ params }: PageProps) {
           {tenant.status === "suspended" && tenant.suspendedReason && (
             <Card className="border-destructive">
               <CardHeader>
-                <CardTitle className="text-destructive">الشركة موقوفة</CardTitle>
+                <CardTitle className="text-destructive">{t.tenant.suspended}</CardTitle>
                 <CardDescription>
-                  تم إيقاف هذه الشركة بتاريخ{" "}
-                  {new Date(tenant.suspendedAt!).toLocaleDateString("ar-SA")}
+                  {t.tenant.pThisCompanyWasSuspendedOn}{" "}
+                  {new Date(tenant.suspendedAt!).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p><strong>السبب:</strong> {tenant.suspendedReason}</p>
+                <p><strong>{t.common.reason}</strong> {tenant.suspendedReason}</p>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
         <TabsContent value="users">
-          <Card>
+          <Card className="border-border/60 bg-card/85 shadow-sm">
             <CardHeader>
-              <CardTitle>مستخدمي الشركة</CardTitle>
-              <CardDescription>
-                الحسابات المرتبطة بهذه الشركة مع الحالة وآخر تسجيل دخول
-              </CardDescription>
+              <CardTitle>{t.tenant.users}</CardTitle>
+              <CardDescription>{t.tenant.usersDescription}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">إجمالي المستخدمين</p>
+                  <p className="text-sm text-muted-foreground">{t.superAdmin.totalUsers}</p>
                   <p className="mt-2 text-2xl font-bold">{tenant.usersCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">الحسابات النشطة</p>
+                  <p className="text-sm text-muted-foreground">{t.tenant.activeAccounts}</p>
                   <p className="mt-2 text-2xl font-bold">{activeUsersCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">مدراء الشركة</p>
+                  <p className="text-sm text-muted-foreground">{t.tenant.admins}</p>
                   <p className="mt-2 text-2xl font-bold">{adminUsersCount}</p>
                 </div>
               </div>
@@ -524,37 +516,35 @@ export default function TenantDetailsPage({ params }: PageProps) {
               )}
 
               {!usersError && tenantUsers.length === 0 && (
-                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                  لا توجد حسابات مستخدمين مرتبطة بهذه الشركة حتى الآن.
-                </div>
+                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">{t.tenant.noUsers}</div>
               )}
 
               {tenantUsers.length > 0 && (
                 <div className="space-y-3">
                   {tenantUsers.map((user) => {
-                    const meta = getUserStatusMeta(user.status);
+                    const meta = getUserStatusMeta(user.status, t);
                     return (
                       <div key={user.id} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-medium">{getUserDisplayName(user)}</p>
-                            <Badge variant="outline">{getRoleLabel(user.role)}</Badge>
+                            <Badge variant="outline">{getRoleLabel(user.role, t)}</Badge>
                             <Badge variant={meta.variant}>{meta.label}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground" dir="ltr">{user.email}</p>
                           {user.employee?.employeeNumber && (
                             <p className="text-xs text-muted-foreground">
-                              الرقم الوظيفي: {user.employee.employeeNumber}
+                              {t.tenant.pEmployeeNumber} {user.employee.employeeNumber}
                             </p>
                           )}
                         </div>
 
                         <div className="space-y-1 text-sm text-muted-foreground md:text-end">
-                          <p>أضيف الحساب: {formatDateTime(user.createdAt)}</p>
+                          <p>{t.tenant.pAccountAdded} {formatDateTime(user.createdAt, locale)}</p>
                           <p>
                             {user.lastLoginAt
-                              ? `آخر دخول: ${formatDateTime(user.lastLoginAt)}`
-                              : "لا يوجد تسجيل دخول بعد"}
+                              ? `${t.tenant.pLastLogin} ${formatDateTime(user.lastLoginAt, locale)}`
+                              : t.tenant.pNoLoginRecordedYet}
                           </p>
                         </div>
                       </div>
@@ -567,15 +557,13 @@ export default function TenantDetailsPage({ params }: PageProps) {
         </TabsContent>
 
         <TabsContent value="audit">
-          <Card>
+          <Card className="border-border/60 bg-card/85 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <History className="h-5 w-5" />
-                سجل التغييرات (Audit Log)
+                {t.audit.auditLog}
               </CardTitle>
-              <CardDescription>
-                جميع التغييرات التي تمت على هذه الشركة
-              </CardDescription>
+              <CardDescription>{t.audit.description}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               {auditError && (
@@ -585,9 +573,7 @@ export default function TenantDetailsPage({ params }: PageProps) {
               )}
 
               {!auditError && auditLogs.length === 0 && (
-                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">
-                  لا توجد أحداث مسجلة لهذه الشركة حتى الآن.
-                </div>
+                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">{t.audit.noEvents}</div>
               )}
 
               {auditLogs.length > 0 && (
@@ -600,20 +586,20 @@ export default function TenantDetailsPage({ params }: PageProps) {
                         </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium">{formatAuditAction(entry.action)}</p>
-                            <Badge variant="outline">{formatAuditEntity(entry.entity)}</Badge>
+                            <p className="font-medium">{formatAuditAction(entry.action, t)}</p>
+                            <Badge variant="outline">{formatAuditEntity(entry.entity, t)}</Badge>
                           </div>
                           <p className="text-sm text-muted-foreground">
                             {entry.user?.name || entry.user?.email
-                              ? `بواسطة ${entry.user?.name || entry.user?.email}`
-                              : "بدون مستخدم مرتبط"}
-                            {entry.entityId ? ` • المعرف: ${formatCompactId(entry.entityId)}` : ""}
+                              ? `${t.tenant.pBy} ${entry.user?.name || entry.user?.email}`
+                              : t.tenant.pNoLinkedUser}
+                            {entry.entityId ? ` • ${t.tenant.pId} ${formatCompactId(entry.entityId)}` : ""}
                           </p>
                         </div>
                       </div>
 
                       <span className="text-sm text-muted-foreground md:text-end">
-                        {formatDateTime(entry.createdAt)}
+                        {formatDateTime(entry.createdAt, locale)}
                       </span>
                     </div>
                   ))}

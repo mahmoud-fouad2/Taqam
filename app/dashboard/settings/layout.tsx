@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import { SidebarNav } from "./sidebar-nav";
 import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
@@ -9,7 +12,7 @@ export async function generateMetadata(): Promise<Metadata> {
     title: locale === "ar" ? "إعدادات النظام" : "Settings",
     description:
       locale === "ar"
-        ? "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
+        ? t.common.pManageYourAccountSettingsAndEm
         : "Manage your account settings and email preferences.",
   });
 }
@@ -42,7 +45,7 @@ export default async function SettingsLayout({
         </h2>
         <p className="text-muted-foreground">
           {locale === "ar"
-            ? "إدارة إعدادات حسابك وتفضيلات البريد الإلكتروني."
+            ? t.common.pManageYourAccountSettingsAndEm
             : "Manage your account settings and email preferences."}
         </p>
       </div>

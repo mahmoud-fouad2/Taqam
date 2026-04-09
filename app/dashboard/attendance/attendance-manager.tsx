@@ -52,8 +52,14 @@ import {
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function AttendanceManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -130,7 +136,7 @@ export function AttendanceManager() {
         setRecords(recordsRes.data);
       } else {
         setRecords([]);
-        setError(recordsRes.error || "فشل تحميل سجلات الحضور");
+        setError(recordsRes.error || t.attendance.loadRecordsFailed);
       }
 
       if (shiftsRes.success && shiftsRes.data) {
@@ -141,11 +147,11 @@ export function AttendanceManager() {
     } catch (e) {
       setRecords([]);
       setShifts([]);
-      setError(e instanceof Error ? e.message : "فشل تحميل بيانات الحضور");
+      setError(e instanceof Error ? e.message : t.attendance.loadDataFailed);
     } finally {
       setIsLoading(false);
     }
-  }, [startDate, endDate]);
+  }, [startDate, endDate, t.attendance.loadDataFailed, t.attendance.loadRecordsFailed]);
 
   React.useEffect(() => {
     fetchMonthData();
@@ -208,7 +214,7 @@ export function AttendanceManager() {
   // Get shift name
   const getShiftName = (shiftId: string) => {
     const shift = shifts.find((s) => s.id === shiftId);
-    return shift?.nameAr || shift?.name || "غير محدد";
+    return shift?.nameAr || shift?.name || t.common.unspecified;
   };
 
   // Format datetime to time
@@ -245,7 +251,7 @@ export function AttendanceManager() {
     }
 
     if (!currentEmployeeId) {
-      setError("حسابك غير مرتبط بموظف لتسجيل البصمة");
+      setError(t.attendance.notLinked);
       return;
     }
 
@@ -273,7 +279,7 @@ export function AttendanceManager() {
       }
       await fetchMonthData();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل التسجيل السريع");
+      setError(e instanceof Error ? e.message : t.attendance.quickRegisterFailed);
     }
   };
 
@@ -310,10 +316,10 @@ export function AttendanceManager() {
                 </h3>
                 <p className="text-muted-foreground">
                   {todayRecord?.checkInTime
-                    ? `تسجيل الحضور: ${formatDateTime(todayRecord.checkInTime)}`
-                    : "لم تسجل حضورك بعد"}
+                    ? `${t.attendance.pClockIn} ${formatDateTime(todayRecord.checkInTime)}`
+                    : t.attendance.notCheckedIn}
                   {todayRecord?.checkOutTime &&
-                    ` | الانصراف: ${formatDateTime(todayRecord.checkOutTime)}`}
+                    ` | ${t.attendance.pClockOut} ${formatDateTime(todayRecord.checkOutTime)}`}
                 </p>
               </div>
             </div>
@@ -326,17 +332,17 @@ export function AttendanceManager() {
               {!todayRecord?.checkInTime ? (
                 <>
                   <IconLogin className="ms-2 h-5 w-5" />
-                  تسجيل الحضور
+                  {t.attendance.pClockIn}
                 </>
               ) : !todayRecord?.checkOutTime ? (
                 <>
                   <IconLogout className="ms-2 h-5 w-5" />
-                  تسجيل الانصراف
+                  {t.attendance.pClockOut}
                 </>
               ) : (
                 <>
                   <IconCheck className="ms-2 h-5 w-5" />
-                  تم التسجيل
+                  {t.attendance.pRecorded}
                 </>
               )}
             </Button>
@@ -348,52 +354,52 @@ export function AttendanceManager() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">أيام العمل</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.shifts.workingDays}</CardTitle>
             <IconCalendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalWorkDays}</div>
-            <p className="text-xs text-muted-foreground">هذا الشهر</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.thisMonthLabel}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">حضور</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.present}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.present}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">تأخير</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.late}</CardTitle>
             <IconAlertCircle className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.late}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">غياب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.absent}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.absent}</div>
-            <p className="text-xs text-muted-foreground">يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">متوسط العمل</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.attendance.avgWork}</CardTitle>
             <IconClock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.avgWorkHours}</div>
-            <p className="text-xs text-muted-foreground">ساعة/يوم</p>
+            <p className="text-xs text-muted-foreground">{t.attendance.hourPerDay}</p>
           </CardContent>
         </Card>
       </div>
@@ -401,11 +407,11 @@ export function AttendanceManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" aria-label="الشهر السابق" onClick={() => navigateMonth(-1)}>
+          <Button variant="outline" size="icon" aria-label={t.common.lastMonth} onClick={() => navigateMonth(-1)}>
             <IconChevronRight className="h-4 w-4" />
           </Button>
           <span className="font-medium min-w-[150px] text-center">{currentMonth}</span>
-          <Button variant="outline" size="icon" aria-label="الشهر التالي" onClick={() => navigateMonth(1)}>
+          <Button variant="outline" size="icon" aria-label={t.common.nextMonth} onClick={() => navigateMonth(1)}>
             <IconChevronLeft className="h-4 w-4" />
           </Button>
         </div>
@@ -416,10 +422,10 @@ export function AttendanceManager() {
             onValueChange={(value) => setEmployeeFilter(value)}
           >
             <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="الموظف" />
+              <SelectValue placeholder={t.common.employee} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الموظفين</SelectItem>
+              <SelectItem value="all">{t.attendance.allEmployees}</SelectItem>
                 {employees.map((emp) => (
                   <SelectItem key={emp.id} value={emp.id}>
                     {getEmployeeFullName(emp.id)}
@@ -434,10 +440,10 @@ export function AttendanceManager() {
           >
             <SelectTrigger className="w-[150px]">
               <IconFilter className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
               {Object.entries(attendanceStatusLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label.ar}
@@ -451,23 +457,23 @@ export function AttendanceManager() {
       {/* Attendance Table */}
       <Card>
         <CardHeader>
-          <CardTitle>سجل الحضور</CardTitle>
+          <CardTitle>{t.attendance.title}</CardTitle>
           <CardDescription>
-            سجل الحضور والانصراف للشهر الحالي ({filteredRecords.length} سجل)
+            {t.attendance.pAttendanceRecordForTheCurrentM}{filteredRecords.length} {t.attendance.record})
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>التاريخ</TableHead>
-                <TableHead>الموظف</TableHead>
-                <TableHead>الوردية</TableHead>
-                <TableHead>الحضور</TableHead>
-                <TableHead>الانصراف</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead>التأخير</TableHead>
-                <TableHead>ساعات العمل</TableHead>
+                <TableHead>{t.common.date}</TableHead>
+                <TableHead>{t.common.employee}</TableHead>
+                <TableHead>{t.shifts.title}</TableHead>
+                <TableHead>{t.attendance.title}</TableHead>
+                <TableHead>{t.attendance.departureCol}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead>{t.attendance.delay}</TableHead>
+                <TableHead>{t.shifts.workHours}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -480,8 +486,8 @@ export function AttendanceManager() {
               ) : filteredRecords.length === 0 ? (
                 <TableEmptyRow
                   colSpan={8}
-                  title="لا توجد سجلات"
-                  description="عند تسجيل الحضور والانصراف سيظهر السجل هنا."
+                  title={t.attendance.noRecordsTitle}
+                  description={t.attendance.noRecordsDesc}
                   icon={<IconCalendar className="size-5" />}
                 />
               ) : (
@@ -514,7 +520,7 @@ export function AttendanceManager() {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        المتوقع: {formatTime(record.expectedCheckIn)}
+                        {t.attendance.pExpected} {formatTime(record.expectedCheckIn)}
                       </p>
                     </TableCell>
                     <TableCell>
@@ -525,7 +531,7 @@ export function AttendanceManager() {
                         </span>
                       </div>
                       <p className="text-xs text-muted-foreground">
-                        المتوقع: {formatTime(record.expectedCheckOut)}
+                        {t.attendance.pExpected} {formatTime(record.expectedCheckOut)}
                       </p>
                     </TableCell>
                     <TableCell>

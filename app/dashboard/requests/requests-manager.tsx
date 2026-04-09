@@ -4,6 +4,7 @@ import * as React from "react";
 import {
   IconPlus,
   IconFilter,
+  IconSearch,
   IconClock,
   IconCheck,
   IconX,
@@ -59,6 +60,8 @@ import {
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 type ProfileResponse = {
   data?: {
@@ -68,6 +71,8 @@ type ProfileResponse = {
 };
 
 type RequestsTableProps = {
+  locale: "ar" | "en";
+  t: ReturnType<typeof getText>;
   requests: AttendanceRequest[];
   isLoading: boolean;
   isApprovalMode: boolean;
@@ -82,12 +87,16 @@ type RequestsTableProps = {
 
 const APPROVER_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"];
 
-function formatDate(value: string) {
-  return new Date(value).toLocaleDateString("ar-SA");
+function localeTag(locale: "ar" | "en") {
+  return locale === "ar" ? "ar-SA" : "en-US";
 }
 
-function formatDateTime(value: string) {
-  return new Date(value).toLocaleString("ar-SA", {
+function formatDate(value: string, locale: "ar" | "en") {
+  return new Date(value).toLocaleDateString(localeTag(locale));
+}
+
+function formatDateTime(value: string, locale: "ar" | "en") {
+  return new Date(value).toLocaleString(localeTag(locale), {
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -96,12 +105,12 @@ function formatDateTime(value: string) {
   });
 }
 
-function formatTime(value?: string) {
+function formatTime(value: string | undefined, locale: "ar" | "en") {
   if (!value) {
     return "-";
   }
 
-  return new Date(value).toLocaleTimeString("ar-SA", {
+  return new Date(value).toLocaleTimeString(localeTag(locale), {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -129,6 +138,8 @@ function toLocalIso(date: string, time?: string) {
 }
 
 function RequestsTable({
+  locale,
+  t,
   requests,
   isLoading,
   isApprovalMode,
@@ -141,35 +152,33 @@ function RequestsTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isApprovalMode ? "طلبات تحتاج موافقتك" : "طلباتي"}</CardTitle>
-        <CardDescription>{requests.length} طلب</CardDescription>
+        <CardTitle>{isApprovalMode ? t.requests.needsApproval : t.requests.myRequestsLabel}</CardTitle>
+        <CardDescription>{requests.length} {t.requests.requestCount}</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              {isApprovalMode && <TableHead>الموظف</TableHead>}
-              <TableHead>نوع الطلب</TableHead>
-              <TableHead>التاريخ</TableHead>
-              <TableHead>التفاصيل</TableHead>
-              <TableHead>السبب</TableHead>
-              <TableHead>الحالة</TableHead>
-              <TableHead>تاريخ التقديم</TableHead>
-              {isApprovalMode && <TableHead className="text-start">إجراءات</TableHead>}
+              {isApprovalMode && <TableHead>{t.common.employee}</TableHead>}
+              <TableHead>{t.myRequests.requestType}</TableHead>
+              <TableHead>{t.common.date}</TableHead>
+              <TableHead>{t.common.details}</TableHead>
+              <TableHead>{t.common.reason}</TableHead>
+              <TableHead>{t.common.status}</TableHead>
+              <TableHead>{t.myRequests.submissionDate}</TableHead>
+              {isApprovalMode && <TableHead className="text-start">{t.common.actions}</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center text-muted-foreground">
-                  جاري تحميل الطلبات...
-                </TableCell>
+                <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center text-muted-foreground">{t.requests.loadingRequests}</TableCell>
               </TableRow>
             ) : requests.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center">
                   <IconFileDescription className="mx-auto mb-2 h-12 w-12 text-muted-foreground" />
-                  <p className="text-muted-foreground">لا توجد طلبات</p>
+                  <p className="text-muted-foreground">{t.requests.noRequests}</p>
                 </TableCell>
               </TableRow>
             ) : (
@@ -179,42 +188,38 @@ function RequestsTable({
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {getTypeIcon(request.type)}
-                      <span>{requestTypeLabels[request.type].ar}</span>
+                      <span>{requestTypeLabels[request.type][locale]}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{formatDate(request.date)}</TableCell>
+                  <TableCell>{formatDate(request.date, locale)}</TableCell>
                   <TableCell className="text-sm">
                     {request.type === "check_correction" && request.requestedCheckIn && (
                       <span>
-                        {formatTime(request.requestedCheckIn)} - {formatTime(request.requestedCheckOut)}
+                        {formatTime(request.requestedCheckIn, locale)} - {formatTime(request.requestedCheckOut, locale)}
                       </span>
                     )}
-                    {request.type === "overtime" && <span>{request.overtimeHours} ساعات</span>}
+                    {request.type === "overtime" && <span>{request.overtimeHours} {t.requests.hoursUnit}</span>}
                     {request.type === "permission" && (
                       <span>
-                        {formatTime(request.permissionStartTime)} - {formatTime(request.permissionEndTime)}
+                        {formatTime(request.permissionStartTime, locale)} - {formatTime(request.permissionEndTime, locale)}
                       </span>
                     )}
-                    {request.type === "work_from_home" && <span>يوم كامل</span>}
+                    {request.type === "work_from_home" && <span>{t.requests.fullDay}</span>}
                   </TableCell>
                   <TableCell className="max-w-[220px] truncate">{request.reason}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusVariant(request.status)}>
-                      {requestStatusLabels[request.status].ar}
+                      {requestStatusLabels[request.status][locale]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDateTime(request.createdAt)}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{formatDateTime(request.createdAt, locale)}</TableCell>
                   {isApprovalMode && (
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button size="sm" onClick={() => onApprove?.(request.id)}>
-                          <IconCheck className="ms-2 h-4 w-4" />
-                          اعتماد
-                        </Button>
+                          <IconCheck className="ms-2 h-4 w-4" />{t.common.accept}</Button>
                         <Button size="sm" variant="destructive" onClick={() => onReject?.(request.id)}>
-                          <IconX className="ms-2 h-4 w-4" />
-                          رفض
-                        </Button>
+                          <IconX className="ms-2 h-4 w-4" />{t.common.reject}</Button>
                       </div>
                     </TableCell>
                   )}
@@ -229,6 +234,8 @@ function RequestsTable({
 }
 
 export function RequestsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { getEmployeeFullName } = useEmployees();
   const [requests, setRequests] = React.useState<AttendanceRequest[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
@@ -237,6 +244,7 @@ export function RequestsManager() {
   const [isRejecting, setIsRejecting] = React.useState(false);
   const [currentUserId, setCurrentUserId] = React.useState<string | null>(null);
   const [currentUserRole, setCurrentUserRole] = React.useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<AttendanceRequestStatus | "all">("all");
   const [typeFilter, setTypeFilter] = React.useState<AttendanceRequestType | "all">("all");
   const [activeTab, setActiveTab] = React.useState<"my" | "pending">("my");
@@ -294,18 +302,18 @@ export function RequestsManager() {
       const response = await attendanceService.getRequests();
       if (!response.success || !response.data) {
         setRequests([]);
-        setError(response.error || "فشل تحميل الطلبات");
+        setError(response.error || t.requests.loadingRequests);
         return;
       }
 
       setRequests(response.data);
     } catch (loadError) {
       setRequests([]);
-      setError(loadError instanceof Error ? loadError.message : "فشل تحميل الطلبات");
+      setError(loadError instanceof Error ? loadError.message : t.requests.loadingRequests);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.requests.loadingRequests]);
 
   React.useEffect(() => {
     void loadRequests();
@@ -323,11 +331,34 @@ export function RequestsManager() {
   );
 
   const displayedRequests = activeTab === "my" ? myRequests : pendingApprovalRequests;
+  const normalizedSearch = searchTerm.trim().toLowerCase();
   const filteredRequests = displayedRequests.filter((item) => {
     const matchesType = typeFilter === "all" || item.type === typeFilter;
     const matchesStatus = statusFilter === "all" || item.status === statusFilter;
-    return matchesType && matchesStatus;
+
+    if (!normalizedSearch) {
+      return matchesType && matchesStatus;
+    }
+
+    const employeeName = getEmployeeFullName(item.employeeId).toLowerCase();
+    const requestType = requestTypeLabels[item.type][locale].toLowerCase();
+    const requestStatus = requestStatusLabels[item.status][locale].toLowerCase();
+    const reason = item.reason.toLowerCase();
+
+    const matchesSearch =
+      employeeName.includes(normalizedSearch) ||
+      requestType.includes(normalizedSearch) ||
+      requestStatus.includes(normalizedSearch) ||
+      reason.includes(normalizedSearch);
+
+    return matchesType && matchesStatus && matchesSearch;
   });
+
+  const searchPlaceholder =
+    locale === "ar"
+      ? "ابحث بالموظف أو النوع أو الحالة أو السبب"
+      : "Search by employee, type, status, or reason";
+  const pendingCountLabel = locale === "ar" ? "طلبات معلقة" : "Pending requests";
 
   const stats = {
     total: myRequests.length,
@@ -352,12 +383,12 @@ export function RequestsManager() {
 
   const handleSubmit = async () => {
     if (!currentUserId) {
-      setError("لا يوجد موظف مرتبط بالحساب الحالي");
+      setError(t.requests.noEmployeeLinked);
       return;
     }
 
     if (!formData.date || !formData.reason.trim()) {
-      setError("الرجاء إدخال التاريخ والسبب");
+      setError(t.requests.enterDateReason);
       return;
     }
 
@@ -388,16 +419,16 @@ export function RequestsManager() {
 
       const response = await attendanceService.createRequest(payload);
       if (!response.success) {
-        setError(response.error || "فشل تقديم الطلب");
+        setError(response.error || t.requests.submitFailed);
         return;
       }
 
-      toast.success("تم تقديم الطلب بنجاح");
+      toast.success(t.requests.submittedSuccess);
       setIsAddOpen(false);
       resetForm();
       await loadRequests();
     } catch (submitError) {
-      setError(submitError instanceof Error ? submitError.message : "فشل تقديم الطلب");
+      setError(submitError instanceof Error ? submitError.message : t.requests.submitFailed);
     } finally {
       setIsSubmitting(false);
     }
@@ -413,14 +444,14 @@ export function RequestsManager() {
     try {
       const response = await attendanceService.approveRequest(requestId);
       if (!response.success) {
-        setError(response.error || "فشل اعتماد الطلب");
+        setError(response.error || t.requests.approveFailed);
         return;
       }
 
-      toast.success("تم اعتماد الطلب");
+      toast.success(t.requests.approvedSuccess);
       await loadRequests();
     } catch (approveError) {
-      setError(approveError instanceof Error ? approveError.message : "فشل اعتماد الطلب");
+      setError(approveError instanceof Error ? approveError.message : t.requests.approveFailed);
     }
   };
 
@@ -430,7 +461,7 @@ export function RequestsManager() {
     }
 
     if (!rejectReason.trim()) {
-      setError("الرجاء كتابة سبب الرفض");
+      setError(t.requests.enterRejectReason);
       return;
     }
 
@@ -440,16 +471,16 @@ export function RequestsManager() {
     try {
       const response = await attendanceService.rejectRequest(rejectRequestId, rejectReason.trim());
       if (!response.success) {
-        setError(response.error || "فشل رفض الطلب");
+        setError(response.error || t.leaveRequests.rejectFailed);
         return;
       }
 
-      toast.success("تم رفض الطلب");
+      toast.success(t.leaveRequests.rejectedSuccess);
       setRejectRequestId(null);
       setRejectReason("");
       await loadRequests();
     } catch (rejectError) {
-      setError(rejectError instanceof Error ? rejectError.message : "فشل رفض الطلب");
+      setError(rejectError instanceof Error ? rejectError.message : t.leaveRequests.rejectFailed);
     } finally {
       setIsRejecting(false);
     }
@@ -494,7 +525,7 @@ export function RequestsManager() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي طلباتي</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.requests.totalMyRequests}</CardTitle>
             <IconFileDescription className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -503,7 +534,7 @@ export function RequestsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -512,7 +543,7 @@ export function RequestsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">معتمدة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.approved}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -521,7 +552,7 @@ export function RequestsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">مرفوضة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.rejected}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
@@ -531,7 +562,7 @@ export function RequestsManager() {
         {canApprove && (
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">تحتاج موافقتك</CardTitle>
+              <CardTitle className="text-sm font-medium">{t.requests.needsYourApproval}</CardTitle>
               <IconClock className="h-4 w-4 text-primary" />
             </CardHeader>
             <CardContent>
@@ -544,10 +575,10 @@ export function RequestsManager() {
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "my" | "pending")}>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <TabsList>
-            <TabsTrigger value="my">طلباتي</TabsTrigger>
+            <TabsTrigger value="my">{t.myRequests.title}</TabsTrigger>
             {canApprove && (
               <TabsTrigger value="pending">
-                بانتظار الموافقة
+                {t.requests.pPendingApproval}
                 {stats.pendingApproval > 0 && (
                   <Badge variant="destructive" className="me-2 h-5 w-5 justify-center p-0">
                     {stats.pendingApproval}
@@ -557,17 +588,31 @@ export function RequestsManager() {
             )}
           </TabsList>
 
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
+            <div className="relative w-full sm:w-72">
+              <IconSearch className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder={searchPlaceholder}
+                className="h-9 pe-9"
+              />
+            </div>
+
+            <Badge variant="outline" className="h-9 px-3 text-xs text-muted-foreground">
+              {pendingCountLabel}: {activeTab === "my" ? stats.pending : stats.pendingApproval}
+            </Badge>
+
             <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as AttendanceRequestType | "all")}>
               <SelectTrigger className="w-[150px]">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="النوع" />
+                <SelectValue placeholder={t.common.type} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الأنواع</SelectItem>
+                <SelectItem value="all">{t.requests.allTypes}</SelectItem>
                 {Object.entries(requestTypeLabels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
-                    {label.ar}
+                    {label[locale]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -575,13 +620,13 @@ export function RequestsManager() {
 
             <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AttendanceRequestStatus | "all")}>
               <SelectTrigger className="w-[150px]">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الحالات</SelectItem>
+                <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
                 {Object.entries(requestStatusLabels).map(([key, label]) => (
                   <SelectItem key={key} value={key}>
-                    {label.ar}
+                    {label[locale]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -590,19 +635,17 @@ export function RequestsManager() {
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
-                  <IconPlus className="ms-2 h-4 w-4" />
-                  طلب جديد
-                </Button>
+                  <IconPlus className="ms-2 h-4 w-4" />{t.myRequests.newRequest}</Button>
               </DialogTrigger>
               <DialogContent className="w-full sm:max-w-[520px]">
                 <DialogHeader>
-                  <DialogTitle>طلب جديد</DialogTitle>
-                  <DialogDescription>اختر نوع الطلب وأدخل البيانات المطلوبة.</DialogDescription>
+                  <DialogTitle>{t.myRequests.newRequest}</DialogTitle>
+                  <DialogDescription>{t.requests.chooseTypeAndData}</DialogDescription>
                 </DialogHeader>
 
                 <div className="grid gap-4 py-4">
                   <div className="space-y-2">
-                    <Label>نوع الطلب</Label>
+                    <Label>{t.myRequests.requestType}</Label>
                     <Select
                       value={formData.type}
                       onValueChange={(value) =>
@@ -617,7 +660,7 @@ export function RequestsManager() {
                           <SelectItem key={key} value={key}>
                             <div className="flex items-center gap-2">
                               {getTypeIcon(key as AttendanceRequestType)}
-                              {label.ar}
+                              {label[locale]}
                             </div>
                           </SelectItem>
                         ))}
@@ -626,7 +669,7 @@ export function RequestsManager() {
                   </div>
 
                   <div className="space-y-2">
-                    <Label>التاريخ</Label>
+                    <Label>{t.common.date}</Label>
                     <Input
                       type="date"
                       value={formData.date}
@@ -635,9 +678,9 @@ export function RequestsManager() {
                   </div>
 
                   {formData.type === "check_correction" && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>وقت الحضور الصحيح</Label>
+                        <Label>{t.requests.correctAttendance}</Label>
                         <Input
                           type="time"
                           value={formData.requestedCheckIn}
@@ -647,7 +690,7 @@ export function RequestsManager() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>وقت الانصراف الصحيح</Label>
+                        <Label>{t.requests.correctDeparture}</Label>
                         <Input
                           type="time"
                           value={formData.requestedCheckOut}
@@ -661,7 +704,7 @@ export function RequestsManager() {
 
                   {formData.type === "overtime" && (
                     <div className="space-y-2">
-                      <Label>عدد ساعات العمل الإضافي</Label>
+                      <Label>{t.requests.overtimeHours}</Label>
                       <Input
                         type="number"
                         min={1}
@@ -675,9 +718,9 @@ export function RequestsManager() {
                   )}
 
                   {formData.type === "permission" && (
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label>من الساعة</Label>
+                        <Label>{t.requests.fromTime}</Label>
                         <Input
                           type="time"
                           value={formData.permissionStartTime}
@@ -687,7 +730,7 @@ export function RequestsManager() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label>إلى الساعة</Label>
+                        <Label>{t.requests.toTime}</Label>
                         <Input
                           type="time"
                           value={formData.permissionEndTime}
@@ -700,23 +743,19 @@ export function RequestsManager() {
                   )}
 
                   <div className="space-y-2">
-                    <Label>السبب</Label>
+                    <Label>{t.common.reason}</Label>
                     <Textarea
                       rows={3}
                       value={formData.reason}
                       onChange={(event) => setFormData((current) => ({ ...current, reason: event.target.value }))}
-                      placeholder="اكتب سبب الطلب"
+                      placeholder={t.requests.writeReason}
                     />
                   </div>
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                    إلغاء
-                  </Button>
-                  <Button onClick={handleSubmit} disabled={isSubmitting}>
-                    تقديم الطلب
-                  </Button>
+                  <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t.common.cancel}</Button>
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>{t.common.submitRequest}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -725,6 +764,8 @@ export function RequestsManager() {
 
         <TabsContent value="my">
           <RequestsTable
+            locale={locale}
+            t={t}
             requests={filteredRequests}
             isLoading={isLoading}
             isApprovalMode={false}
@@ -736,6 +777,8 @@ export function RequestsManager() {
 
         <TabsContent value="pending">
           <RequestsTable
+            locale={locale}
+            t={t}
             requests={filteredRequests}
             isLoading={isLoading}
             isApprovalMode={true}
@@ -754,25 +797,23 @@ export function RequestsManager() {
       <Dialog open={Boolean(rejectRequestId)} onOpenChange={(open) => !open && setRejectRequestId(null)}>
         <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>رفض الطلب</DialogTitle>
-            <DialogDescription>أدخل سبب الرفض ليظهر للموظف عند مراجعة الطلب.</DialogDescription>
+            <DialogTitle>{t.common.reject}</DialogTitle>
+            <DialogDescription>{t.requests.rejectDialogDesc}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2 py-2">
-            <Label htmlFor="rejection-reason">سبب الرفض</Label>
+            <Label htmlFor="rejection-reason">{t.common.reason}</Label>
             <Textarea
               id="rejection-reason"
               rows={4}
               value={rejectReason}
               onChange={(event) => setRejectReason(event.target.value)}
-              placeholder="اكتب سبب الرفض"
+              placeholder={t.requests.writeRejectReason}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectRequestId(null)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setRejectRequestId(null)}>{t.common.cancel}</Button>
             <Button variant="destructive" onClick={handleReject} disabled={isRejecting}>
-              تأكيد الرفض
+              {t.requests.pConfirmRejection}
             </Button>
           </DialogFooter>
         </DialogContent>

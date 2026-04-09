@@ -1,7 +1,10 @@
 import { PayrollProcessingManager } from "./payroll-manager";
-import { DollarSign } from "lucide-react";
+import { DollarSign } from "lucide-react";import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export default function PayrollPage() {
+export default async function PayrollPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -10,8 +13,8 @@ export default function PayrollPage() {
             <DollarSign className="h-5 w-5 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">مسير الرواتب</h1>
-            <p className="text-sm text-muted-foreground">معالجة وإدارة الرواتب الشهرية</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.payroll.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.payroll.pageSubtitle}</p>
           </div>
         </div>
       </div>

@@ -64,6 +64,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 interface Employee {
   id: string;
@@ -104,21 +108,21 @@ interface Stats {
 }
 
 const typeLabels: Record<string, { ar: string; en: string }> = {
-  SALARY_ADVANCE: { ar: "سلفة راتب", en: "Salary Advance" },
-  PERSONAL_LOAN: { ar: "قرض شخصي", en: "Personal Loan" },
-  EMERGENCY_LOAN: { ar: "قرض طوارئ", en: "Emergency Loan" },
-  HOUSING_LOAN: { ar: "قرض سكني", en: "Housing Loan" },
-  CAR_LOAN: { ar: "قرض سيارة", en: "Car Loan" },
-  OTHER: { ar: "أخرى", en: "Other" },
+  SALARY_ADVANCE: { ar: t.loans.salaryAdvance, en: "Salary Advance" },
+  PERSONAL_LOAN: { ar: t.loans.personalLoan, en: "Personal Loan" },
+  EMERGENCY_LOAN: { ar: t.loans.emergencyLoan, en: "Emergency Loan" },
+  HOUSING_LOAN: { ar: t.loans.housingLoan, en: "Housing Loan" },
+  CAR_LOAN: { ar: t.loans.carLoan, en: "Car Loan" },
+  OTHER: { ar: t.common.other, en: "Other" },
 };
 
 const statusLabels: Record<string, { ar: string; en: string }> = {
-  PENDING: { ar: "بانتظار الموافقة", en: "Pending" },
-  APPROVED: { ar: "تمت الموافقة", en: "Approved" },
-  ACTIVE: { ar: "نشط", en: "Active" },
-  COMPLETED: { ar: "مكتمل", en: "Completed" },
-  REJECTED: { ar: "مرفوض", en: "Rejected" },
-  CANCELLED: { ar: "ملغي", en: "Cancelled" },
+  PENDING: { ar: t.documents.pendingApproval, en: "Pending" },
+  APPROVED: { ar: t.loans.pApproval, en: "Approved" },
+  ACTIVE: { ar: t.common.active, en: "Active" },
+  COMPLETED: { ar: t.common.completed, en: "Completed" },
+  REJECTED: { ar: t.common.rejected, en: "Rejected" },
+  CANCELLED: { ar: t.common.cancelled, en: "Cancelled" },
 };
 
 const formatCurrency = (amount: number) => {
@@ -130,6 +134,8 @@ const formatCurrency = (amount: number) => {
 };
 
 export function LoansManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [loans, setLoans] = React.useState<Loan[]>([]);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [stats, setStats] = React.useState<Stats>({
@@ -169,11 +175,11 @@ export function LoansManager() {
         setStats(json.data.stats);
       }
     } catch (error) {
-      toast.error("فشل في تحميل القروض");
+      toast.error(t.loans.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, t.loans.loadFailed]);
 
   // Fetch employees
   const fetchEmployees = React.useCallback(async () => {
@@ -216,7 +222,7 @@ export function LoansManager() {
 
   const handleSubmit = async () => {
     if (!formEmployeeId || !formAmount || !formInstallments) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error(t.common.fillRequired);
       return;
     }
 
@@ -243,10 +249,10 @@ export function LoansManager() {
       const json = await res.json();
 
       if (!res.ok) {
-        throw new Error(json.error || "فشل في حفظ القرض");
+        throw new Error(json.error || t.loans.saveFailed);
       }
 
-      toast.success(editingLoan ? "تم تحديث القرض" : "تم إنشاء طلب القرض");
+      toast.success(editingLoan ? t.loans.updatedSuccess : t.loans.createdSuccess);
       setIsFormOpen(false);
       resetForm();
       fetchLoans();
@@ -266,10 +272,10 @@ export function LoansManager() {
       });
 
       if (!res.ok) {
-        throw new Error("فشل في تحديث الحالة");
+        throw new Error(t.loans.statusUpdateFailed);
       }
 
-      toast.success("تم تحديث حالة القرض");
+      toast.success(t.loans.statusUpdated);
       fetchLoans();
     } catch (error: any) {
       toast.error(error.message);
@@ -286,10 +292,10 @@ export function LoansManager() {
 
       if (!res.ok) {
         const json = await res.json();
-        throw new Error(json.error || "فشل في حذف القرض");
+        throw new Error(json.error || t.loans.deleteFailed);
       }
 
-      toast.success("تم حذف القرض");
+      toast.success(t.loans.deletedSuccess);
       setDeleteDialogOpen(false);
       setLoanToDelete(null);
       fetchLoans();
@@ -356,7 +362,7 @@ export function LoansManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي القروض</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.loans.totalLoans}</CardTitle>
             <IconReceipt className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -365,7 +371,7 @@ export function LoansManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">قروض نشطة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.loans.activeLoans}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -374,7 +380,7 @@ export function LoansManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -383,7 +389,7 @@ export function LoansManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">المبالغ المتبقية</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.loans.remainingAmounts}</CardTitle>
             <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -398,10 +404,10 @@ export function LoansManager() {
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
               <IconFilter className="h-4 w-4 me-2" />
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
               {Object.entries(statusLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label.ar}
@@ -413,7 +419,7 @@ export function LoansManager() {
             type="loans" 
             filters={{ status: statusFilter !== "all" ? statusFilter : "" }} 
           />
-          <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchLoans()}>
+          <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchLoans()}>
             <IconRefresh className="h-4 w-4" />
           </Button>
         </div>
@@ -427,21 +433,19 @@ export function LoansManager() {
         >
           <DialogTrigger asChild>
             <Button>
-              <IconPlus className="h-4 w-4 me-2" />
-              طلب قرض جديد
-            </Button>
+              <IconPlus className="h-4 w-4 me-2" />{t.loans.newLoanRequest}</Button>
           </DialogTrigger>
           <DialogContent className="w-full sm:max-w-[500px]">
             <DialogHeader>
-              <DialogTitle>{editingLoan ? "تعديل القرض" : "طلب قرض جديد"}</DialogTitle>
-              <DialogDescription>أدخل تفاصيل القرض أو السلفة</DialogDescription>
+              <DialogTitle>{editingLoan ? t.loans.editLoan : t.loans.newLoanRequest}</DialogTitle>
+              <DialogDescription>{t.loans.loanDetailsDesc}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="space-y-2">
-                <Label>الموظف *</Label>
+                <Label>{t.common.selectEmployee}</Label>
                 <Select value={formEmployeeId} onValueChange={setFormEmployeeId}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر الموظف" />
+                    <SelectValue placeholder={t.common.selectEmployee} />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((emp) => (
@@ -454,7 +458,7 @@ export function LoansManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>نوع القرض *</Label>
+                <Label>{t.loans.loanType}</Label>
                 <Select value={formType} onValueChange={setFormType}>
                   <SelectTrigger>
                     <SelectValue />
@@ -469,9 +473,9 @@ export function LoansManager() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>المبلغ (ر.س) *</Label>
+                  <Label>{t.loans.amountSar}</Label>
                   <Input
                     type="number"
                     value={formAmount}
@@ -480,7 +484,7 @@ export function LoansManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>عدد الأقساط *</Label>
+                  <Label>{t.loans.installments}</Label>
                   <Input
                     type="number"
                     value={formInstallments}
@@ -492,7 +496,7 @@ export function LoansManager() {
 
               {formAmount && formInstallments && parseInt(formInstallments) > 0 && (
                 <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">قيمة القسط الشهري</p>
+                  <p className="text-sm text-muted-foreground">{t.loans.monthlyInstallment}</p>
                   <p className="text-lg font-bold">
                     {formatCurrency(parseFloat(formAmount) / parseInt(formInstallments))}
                   </p>
@@ -500,7 +504,7 @@ export function LoansManager() {
               )}
 
               <div className="space-y-2">
-                <Label>تاريخ البدء</Label>
+                <Label>{t.common.startDate}</Label>
                 <Input
                   type="date"
                   value={formStartDate}
@@ -509,21 +513,19 @@ export function LoansManager() {
               </div>
 
               <div className="space-y-2">
-                <Label>السبب</Label>
+                <Label>{t.common.reason}</Label>
                 <Textarea
                   value={formReason}
                   onChange={(e) => setFormReason(e.target.value)}
-                  placeholder="سبب طلب القرض..."
+                  placeholder={t.loans.loanReasonPlaceholder}
                   rows={3}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsFormOpen(false)}>
-                إلغاء
-              </Button>
+              <Button variant="outline" onClick={() => setIsFormOpen(false)}>{t.common.cancel}</Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? "جاري الحفظ..." : editingLoan ? "حفظ التعديلات" : "إرسال الطلب"}
+                {isSubmitting ? t.common.saving : editingLoan ? t.common.saveChanges : t.loans.submitRequest}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -536,20 +538,20 @@ export function LoansManager() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الموظف</TableHead>
-                <TableHead>النوع</TableHead>
-                <TableHead>المبلغ</TableHead>
-                <TableHead>الأقساط</TableHead>
-                <TableHead>المتبقي</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="w-[120px]">إجراءات</TableHead>
+                <TableHead>{t.common.employee}</TableHead>
+                <TableHead>{t.common.type}</TableHead>
+                <TableHead>{t.common.amount}</TableHead>
+                <TableHead>{t.loans.installments}</TableHead>
+                <TableHead>{t.leaveBalances.remaining}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead className="w-[120px]">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loans.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
-                    لا توجد قروض
+                    {t.loans.pNoLoansFound}
                   </TableCell>
                 </TableRow>
               ) : (
@@ -586,20 +588,20 @@ export function LoansManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="موافقة"
+                              aria-label={t.common.approve}
                               className="h-8 w-8 text-green-600"
                               onClick={() => handleStatusChange(loan.id, "ACTIVE")}
-                              title="موافقة"
+                              title={t.common.approve}
                             >
                               <IconCheck className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="رفض"
+                              aria-label={t.common.reject}
                               className="h-8 w-8 text-red-600"
                               onClick={() => handleStatusChange(loan.id, "REJECTED")}
-                              title="رفض"
+                              title={t.common.reject}
                             >
                               <IconX className="h-4 w-4" />
                             </Button>
@@ -608,7 +610,7 @@ export function LoansManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="تعديل"
+                          aria-label={t.common.edit}
                           className="h-8 w-8"
                           onClick={() => openEditForm(loan)}
                           disabled={loan.status === "COMPLETED"}
@@ -618,7 +620,7 @@ export function LoansManager() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="حذف"
+                          aria-label={t.common.delete}
                           className="h-8 w-8 text-destructive"
                           onClick={() => {
                             setLoanToDelete(loan);
@@ -642,19 +644,17 @@ export function LoansManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+            <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف هذا القرض نهائياً. لا يمكن التراجع عن هذا الإجراء.
+              {t.loans.pThisLoanWillBePermanentlyDelet}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              حذف
-            </AlertDialogAction>
+            >{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

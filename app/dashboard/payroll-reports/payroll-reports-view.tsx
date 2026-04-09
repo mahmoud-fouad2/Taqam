@@ -39,6 +39,10 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, getMonthName } from "@/lib/types/payroll";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type DepartmentOption = { id: string; name: string; nameAr?: string | null };
 
@@ -72,6 +76,8 @@ async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export function PayrollReportsView() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [yearFilter, setYearFilter] = React.useState(String(new Date().getFullYear()));
   const [monthFilter, setMonthFilter] = React.useState("all");
   const [departmentFilter, setDepartmentFilter] = React.useState("all");
@@ -89,9 +95,9 @@ export function PayrollReportsView() {
       })
       .catch((e) => {
         console.error(e);
-        toast.error(e?.message || "فشل تحميل الأقسام");
+        toast.error(e?.message || t.jobPostings.fetchDeptsFailed);
       });
-  }, []);
+  }, [t.jobPostings.fetchDeptsFailed]);
 
   React.useEffect(() => {
     setIsLoading(true);
@@ -106,10 +112,10 @@ export function PayrollReportsView() {
       })
       .catch((e) => {
         console.error(e);
-        toast.error(e?.message || "فشل تحميل تقرير الرواتب");
+        toast.error(e?.message || t.perfReports.loadReportFailed);
       })
       .finally(() => setIsLoading(false));
-  }, [yearFilter, monthFilter, departmentFilter]);
+  }, [yearFilter, monthFilter, departmentFilter, t.perfReports.loadReportFailed]);
 
   // Calculate totals
   const totalStats = {
@@ -127,7 +133,7 @@ export function PayrollReportsView() {
 
   const handleExportCSV = () => {
     // Generate CSV content
-    const headers = ["القسم", "عدد الموظفين", "إجمالي الرواتب", "الخصومات", "الصافي", "متوسط الراتب"];
+    const headers = [t.common.department, t.common.employees, t.payrollReports.totalSalaries, t.payroll.deductions, t.payroll.net, t.payrollReports.avgSalary];
     const rows = departmentStats.map((d) => [
       d.name,
       d.employeeCount,
@@ -156,7 +162,7 @@ export function PayrollReportsView() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الرواتب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.totalSalaries}</CardTitle>
             <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -165,7 +171,7 @@ export function PayrollReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الخصومات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.payroll.deductionsCol}</CardTitle>
             <IconTrendingUp className="h-4 w-4 text-red-500" />
           </CardHeader>
           <CardContent>
@@ -176,7 +182,7 @@ export function PayrollReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">صافي الرواتب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.netSalaries}</CardTitle>
             <IconCurrencyRiyal className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -187,7 +193,7 @@ export function PayrollReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">عدد الموظفين</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.employees}</CardTitle>
             <IconUsers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -196,7 +202,7 @@ export function PayrollReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">متوسط الراتب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.salaryStructures.avgSalary}</CardTitle>
             <IconChartBar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -211,7 +217,7 @@ export function PayrollReportsView() {
           <Select value={yearFilter} onValueChange={setYearFilter}>
             <SelectTrigger className="w-[120px]">
               <IconCalendar className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="السنة" />
+              <SelectValue placeholder={t.common.year} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="2024">2024</SelectItem>
@@ -220,10 +226,10 @@ export function PayrollReportsView() {
           </Select>
           <Select value={monthFilter} onValueChange={setMonthFilter}>
             <SelectTrigger className="w-[140px]">
-              <SelectValue placeholder="الشهر" />
+              <SelectValue placeholder={t.payrollReports.month} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الشهور</SelectItem>
+              <SelectItem value="all">{t.payrollReports.allMonths}</SelectItem>
               {Array.from({ length: 12 }, (_, i) => (
                 <SelectItem key={i + 1} value={(i + 1).toString()}>
                   {getMonthName(i + 1)}
@@ -234,10 +240,10 @@ export function PayrollReportsView() {
           <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
             <SelectTrigger className="w-[160px]">
               <IconFilter className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="القسم" />
+              <SelectValue placeholder={t.common.department} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الأقسام</SelectItem>
+              <SelectItem value="all">{t.common.allDepartments}</SelectItem>
               {departments.map((dept) => (
                 <SelectItem key={dept.id} value={dept.id}>
                   {dept.nameAr || dept.name}
@@ -248,24 +254,22 @@ export function PayrollReportsView() {
         </div>
 
         <Button variant="outline" onClick={handleExportCSV}>
-          <IconDownload className="ms-2 h-4 w-4" />
-          تصدير التقرير
-        </Button>
+          <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
       </div>
 
       <Tabs defaultValue="departments" className="space-y-4">
         <TabsList>
           <TabsTrigger value="departments">
             <IconBuilding className="h-4 w-4 ms-2" />
-            حسب الأقسام
+            {t.payrollReports.pByDepartment}
           </TabsTrigger>
           <TabsTrigger value="trend">
             <IconTrendingUp className="h-4 w-4 ms-2" />
-            الاتجاه الشهري
+            {t.payrollReports.pMonthlyTrend}
           </TabsTrigger>
           <TabsTrigger value="gosi">
             <IconFileSpreadsheet className="h-4 w-4 ms-2" />
-            تقرير التأمينات
+            {t.payrollReports.pInsuranceReport}
           </TabsTrigger>
         </TabsList>
 
@@ -273,28 +277,26 @@ export function PayrollReportsView() {
         <TabsContent value="departments">
           <Card>
             <CardHeader>
-              <CardTitle>تقرير الرواتب حسب الأقسام</CardTitle>
-              <CardDescription>تفصيل الرواتب والخصومات لكل قسم</CardDescription>
+              <CardTitle>{t.payrollReports.payrollByDept}</CardTitle>
+              <CardDescription>{t.payrollReports.payrollByDeptDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>القسم</TableHead>
-                    <TableHead>عدد الموظفين</TableHead>
-                    <TableHead>إجمالي الرواتب</TableHead>
-                    <TableHead>الخصومات</TableHead>
-                    <TableHead>الصافي</TableHead>
-                    <TableHead>متوسط الراتب</TableHead>
-                    <TableHead>النسبة</TableHead>
+                    <TableHead>{t.common.department}</TableHead>
+                    <TableHead>{t.common.employees}</TableHead>
+                    <TableHead>{t.salaryStructures.totalSalaries}</TableHead>
+                    <TableHead>{t.payroll.deductionsCol}</TableHead>
+                    <TableHead>{t.payroll.netCol}</TableHead>
+                    <TableHead>{t.salaryStructures.avgSalary}</TableHead>
+                    <TableHead>{t.payrollReports.percentage}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
-                        جاري التحميل...
-                      </TableCell>
+                      <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">{t.common.loading}</TableCell>
                     </TableRow>
                   )}
                   {departmentStats.map((dept) => (
@@ -323,7 +325,7 @@ export function PayrollReportsView() {
                     </TableRow>
                   ))}
                   <TableRow className="font-bold bg-muted">
-                    <TableCell>الإجمالي</TableCell>
+                    <TableCell>{t.common.total}</TableCell>
                     <TableCell>{totalStats.totalEmployees}</TableCell>
                     <TableCell>{formatCurrency(totalStats.totalGross)}</TableCell>
                     <TableCell className="text-red-600">
@@ -336,9 +338,7 @@ export function PayrollReportsView() {
                 </TableBody>
                   {isLoading && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
-                        جاري التحميل...
-                      </TableCell>
+                      <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">{t.common.loading}</TableCell>
                     </TableRow>
                   )}
               </Table>
@@ -350,18 +350,18 @@ export function PayrollReportsView() {
         <TabsContent value="trend">
           <Card>
             <CardHeader>
-              <CardTitle>الاتجاه الشهري للرواتب</CardTitle>
-              <CardDescription>مقارنة الرواتب على مدار الأشهر</CardDescription>
+              <CardTitle>{t.payrollReports.monthlyTrend} {t.payrollReports.pForPayroll}</CardTitle>
+              <CardDescription>{t.payrollReports.monthlyTrendDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>الشهر</TableHead>
-                    <TableHead>عدد الموظفين</TableHead>
-                    <TableHead>إجمالي الرواتب</TableHead>
-                    <TableHead>صافي الرواتب</TableHead>
-                    <TableHead>التغيير</TableHead>
+                    <TableHead>{t.common.month}</TableHead>
+                    <TableHead>{t.common.employees}</TableHead>
+                    <TableHead>{t.salaryStructures.totalSalaries}</TableHead>
+                    <TableHead>{t.salaryStructures.netSalaries}</TableHead>
+                    <TableHead>{t.payrollReports.change}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -405,16 +405,16 @@ export function PayrollReportsView() {
         <TabsContent value="gosi">
           <Card>
             <CardHeader>
-              <CardTitle>تقرير التأمينات الاجتماعية (GOSI)</CardTitle>
+              <CardTitle>{t.payrollReports.gosiReport}  (GOSI)</CardTitle>
               <CardDescription>
-                ملخص اشتراكات التأمينات الاجتماعية للموظفين وصاحب العمل
+                {t.payrollReports.pSummaryOfSocialInsuranceSubscr}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-3">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">حصة الموظفين (9.75%)</CardTitle>
+                    <CardTitle className="text-sm">{t.payrollReports.employeeShare}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-blue-600">
@@ -424,7 +424,7 @@ export function PayrollReportsView() {
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">حصة صاحب العمل (11.75%)</CardTitle>
+                    <CardTitle className="text-sm">{t.payrollReports.employerShare}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold text-orange-600">
@@ -434,7 +434,7 @@ export function PayrollReportsView() {
                 </Card>
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-sm">إجمالي الاشتراكات</CardTitle>
+                    <CardTitle className="text-sm">{t.payrollReports.totalSubscriptions}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
@@ -447,11 +447,11 @@ export function PayrollReportsView() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>القسم</TableHead>
-                    <TableHead>الراتب الخاضع</TableHead>
-                    <TableHead>حصة الموظف</TableHead>
-                    <TableHead>حصة صاحب العمل</TableHead>
-                    <TableHead>الإجمالي</TableHead>
+                    <TableHead>{t.common.department}</TableHead>
+                    <TableHead>{t.payrollReports.subjectSalary}</TableHead>
+                    <TableHead>{t.payrollReports.employeeShareCol}</TableHead>
+                    <TableHead>{t.payrollReports.employerShareCol}</TableHead>
+                    <TableHead>{t.common.total}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -478,7 +478,7 @@ export function PayrollReportsView() {
               <div className="flex justify-end">
                 <Button variant="outline">
                   <IconDownload className="ms-2 h-4 w-4" />
-                  تصدير تقرير التأمينات
+                  {t.payrollReports.pExportInsuranceReport}
                 </Button>
               </div>
             </CardContent>

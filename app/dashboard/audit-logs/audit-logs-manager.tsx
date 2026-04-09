@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 import { FileText, Filter, Download, Eye, Calendar, User, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -53,6 +54,7 @@ interface AuditStats {
 
 export default function AuditLogsManager() {
   const locale = useClientLocale("ar");
+  const t = getText(locale);
   const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [stats, setStats] = useState<AuditStats | null>(null);
@@ -96,7 +98,7 @@ export default function AuditLogsManager() {
       ]);
 
       if (!logsRes.ok) {
-        throw new Error("فشل تحميل سجلات التدقيق");
+        throw new Error(t.auditLogs.loadFailed);
       }
 
       const logsData = await logsRes.json();
@@ -108,11 +110,20 @@ export default function AuditLogsManager() {
         setStats(statsData.data);
       }
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "حدث خطأ");
+      setLoadError(err instanceof Error ? err.message : t.organization.genericError);
     } finally {
       setIsLoading(false);
     }
-  }, [actionFilter, dateFrom, dateTo, entityFilter, page, userFilter]);
+  }, [
+    actionFilter,
+    dateFrom,
+    dateTo,
+    entityFilter,
+    page,
+    userFilter,
+    t.auditLogs.loadFailed,
+    t.organization.genericError,
+  ]);
 
   useEffect(() => {
     loadData();
@@ -130,23 +141,23 @@ export default function AuditLogsManager() {
 
   const getActionLabel = (action: string) => {
     const labels: Record<string, string> = {
-      LOGIN: "تسجيل دخول",
-      LOGOUT: "تسجيل خروج",
-      USER_CREATE: "إنشاء مستخدم",
-      USER_UPDATE: "تحديث مستخدم",
-      USER_DELETE: "حذف مستخدم",
-      EMPLOYEE_CREATE: "إنشاء موظف",
-      EMPLOYEE_UPDATE: "تحديث موظف",
-      EMPLOYEE_DELETE: "حذف موظف",
-      PAYROLL_PROCESS: "معالجة رواتب",
-      PAYROLL_APPROVE: "موافقة رواتب",
-      LEAVE_REQUEST_CREATE: "طلب إجازة",
-      LEAVE_REQUEST_APPROVE: "موافقة إجازة",
-      LEAVE_REQUEST_REJECT: "رفض إجازة",
-      ATTENDANCE_CHECK_IN: "تسجيل حضور",
-      ATTENDANCE_CHECK_OUT: "تسجيل انصراف",
-      DATA_EXPORT: "تصدير بيانات",
-      BULK_DELETE: "حذف جماعي",
+      LOGIN: t.audit.login,
+      LOGOUT: t.audit.logout,
+      USER_CREATE: t.common.add,
+      USER_UPDATE: t.common.update,
+      USER_DELETE: t.common.delete,
+      EMPLOYEE_CREATE: t.employees.addEmployee,
+      EMPLOYEE_UPDATE: t.employees.updatedSuccess,
+      EMPLOYEE_DELETE: t.audit.employeeDelete,
+      PAYROLL_PROCESS: t.auditLogs.payrollProcess,
+      PAYROLL_APPROVE: t.auditLogs.payrollApprove,
+      LEAVE_REQUEST_CREATE: t.auditLogs.leaveRequest,
+      LEAVE_REQUEST_APPROVE: t.auditLogs.leaveApprove,
+      LEAVE_REQUEST_REJECT: t.auditLogs.leaveReject,
+      ATTENDANCE_CHECK_IN: t.auditLogs.checkIn,
+      ATTENDANCE_CHECK_OUT: t.auditLogs.checkOut,
+      DATA_EXPORT: t.common.exportData,
+      BULK_DELETE: t.auditLogs.bulkDelete,
     };
     return labels[action] || action;
   };
@@ -171,15 +182,11 @@ export default function AuditLogsManager() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">سجل التدقيق</h1>
-          <p className="text-muted-foreground">
-            جميع العمليات والتغييرات في النظام
-          </p>
+          <h1 className="text-3xl font-bold">{t.auditLogs.title}</h1>
+          <p className="text-muted-foreground">{t.auditLogs.description}</p>
         </div>
         <Button variant="outline">
-          <Download className="h-4 w-4 ms-2" />
-          تصدير السجل
-        </Button>
+          <Download className="h-4 w-4 ms-2" />{t.auditLogs.export}</Button>
       </div>
 
       {/* Statistics Cards */}
@@ -187,9 +194,7 @@ export default function AuditLogsManager() {
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                إجمالي العمليات
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{t.auditLogs.totalOperations}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.total.toLocaleString(numLocale)}</div>
@@ -198,25 +203,21 @@ export default function AuditLogsManager() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                أكثر عملية
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{t.auditLogs.topOperation}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">
                 {stats.byAction[0] ? getActionLabel(stats.byAction[0].action) : "-"}
               </div>
               <p className="text-xs text-muted-foreground">
-                {stats.byAction[0] ? `${stats.byAction[0].count} مرة` : ""}
+                {stats.byAction[0] ? `${stats.byAction[0].count} ${t.auditLogs.timesUnit}` : ""}
               </p>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                المستخدمون النشطون
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{t.auditLogs.activeUsers}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stats.byUser.length}</div>
@@ -225,9 +226,7 @@ export default function AuditLogsManager() {
 
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium">
-                آخر نشاط
-              </CardTitle>
+              <CardTitle className="text-sm font-medium">{t.auditLogs.lastActivity}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="text-sm font-medium">
@@ -244,49 +243,47 @@ export default function AuditLogsManager() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            تصفية السجلات
-          </CardTitle>
+            <Filter className="h-5 w-5" />{t.auditLogs.filter}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-5">
             <div>
-              <Label>نوع العملية</Label>
+              <Label>{t.auditLogs.actionType}</Label>
               <Select value={actionFilter} onValueChange={setActionFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
-                  <SelectItem value="LOGIN">تسجيل دخول</SelectItem>
-                  <SelectItem value="EMPLOYEE_CREATE">إنشاء موظف</SelectItem>
-                  <SelectItem value="EMPLOYEE_UPDATE">تحديث موظف</SelectItem>
-                  <SelectItem value="PAYROLL_PROCESS">معالجة رواتب</SelectItem>
-                  <SelectItem value="LEAVE_REQUEST_CREATE">طلب إجازة</SelectItem>
-                  <SelectItem value="DATA_EXPORT">تصدير بيانات</SelectItem>
+                  <SelectItem value="all">{t.common.all}</SelectItem>
+                  <SelectItem value="LOGIN">{t.auditLogs.loginFilter}</SelectItem>
+                  <SelectItem value="EMPLOYEE_CREATE">{t.auditLogs.employeeCreate}</SelectItem>
+                  <SelectItem value="EMPLOYEE_UPDATE">{t.auditLogs.employeeUpdate}</SelectItem>
+                  <SelectItem value="PAYROLL_PROCESS">{t.auditLogs.payrollProcess}</SelectItem>
+                  <SelectItem value="LEAVE_REQUEST_CREATE">{t.auditLogs.leaveRequest}</SelectItem>
+                  <SelectItem value="DATA_EXPORT">{t.common.exportData}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>الكيان</Label>
+              <Label>{t.common.company}</Label>
               <Select value={entityFilter} onValueChange={setEntityFilter}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">الكل</SelectItem>
-                  <SelectItem value="User">مستخدم</SelectItem>
-                  <SelectItem value="Employee">موظف</SelectItem>
-                  <SelectItem value="LeaveRequest">إجازة</SelectItem>
-                  <SelectItem value="AttendanceRecord">حضور</SelectItem>
-                  <SelectItem value="PayrollPeriod">رواتب</SelectItem>
+                  <SelectItem value="all">{t.common.all}</SelectItem>
+                  <SelectItem value="User">{t.auditLogs.userEntity}</SelectItem>
+                  <SelectItem value="Employee">{t.auditLogs.employeeEntity}</SelectItem>
+                  <SelectItem value="LeaveRequest">{t.auditLogs.leaveEntity}</SelectItem>
+                  <SelectItem value="AttendanceRecord">{t.attendance.present}</SelectItem>
+                  <SelectItem value="PayrollPeriod">{t.auditLogs.payrollEntity}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div>
-              <Label>من تاريخ</Label>
+              <Label>{t.auditLogs.fromDate}</Label>
               <Input
                 type="date"
                 value={dateFrom}
@@ -295,7 +292,7 @@ export default function AuditLogsManager() {
             </div>
 
             <div>
-              <Label>إلى تاريخ</Label>
+              <Label>{t.auditLogs.toDate}</Label>
               <Input
                 type="date"
                 value={dateTo}
@@ -314,9 +311,7 @@ export default function AuditLogsManager() {
                   setDateTo("");
                   setPage(1);
                 }}
-              >
-                إعادة تعيين
-              </Button>
+              >{t.common.reset}</Button>
             </div>
           </div>
         </CardContent>
@@ -327,10 +322,10 @@ export default function AuditLogsManager() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Activity className="h-5 w-5" />
-            السجلات ({logs.length})
+            {t.auditLogs.logCount} ({logs.length})
           </CardTitle>
           <CardDescription>
-            {isLoading ? "جارٍ التحميل..." : loadError || `صفحة ${page} من ${totalPages}`}
+            {isLoading ? t.common.loading : loadError || `${t.auditLogs.pageOf} ${page} ${t.auditLogs.ofPages} ${totalPages}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -338,20 +333,18 @@ export default function AuditLogsManager() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الوقت</TableHead>
-                <TableHead>العملية</TableHead>
-                <TableHead>الكيان</TableHead>
-                <TableHead>المستخدم</TableHead>
+                <TableHead>{t.interviews.time}</TableHead>
+                <TableHead>{t.auditLogs.operation}</TableHead>
+                <TableHead>{t.common.company}</TableHead>
+                <TableHead>{t.common.user}</TableHead>
                 <TableHead>IP Address</TableHead>
-                <TableHead>الإجراءات</TableHead>
+                <TableHead>{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {logs.length === 0 && !isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">
-                    لا توجد سجلات تطابق التصفية الحالية
-                  </TableCell>
+                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">{t.auditLogs.noRecords}</TableCell>
                 </TableRow>
               ) : (
               logs.map((log) => (
@@ -387,7 +380,7 @@ export default function AuditLogsManager() {
                         </div>
                       </div>
                     ) : (
-                      <span className="text-muted-foreground">النظام</span>
+                      <span className="text-muted-foreground">{t.auditLogs.pSystem}</span>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-xs">
@@ -416,20 +409,16 @@ export default function AuditLogsManager() {
                 size="sm"
                 disabled={page === 1}
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                السابق
-              </Button>
+              >{t.common.previous}</Button>
               <span className="text-sm text-muted-foreground">
-                صفحة {page} من {totalPages}
+                {t.auditLogs.pPage} {page} {t.auditLogs.pOf} {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === totalPages}
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >
-                التالي
-              </Button>
+              >{t.common.next}</Button>
             </div>
           )}
         </CardContent>
@@ -439,7 +428,7 @@ export default function AuditLogsManager() {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="w-full max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>تفاصيل العملية</DialogTitle>
+            <DialogTitle>{t.auditLogs.details}</DialogTitle>
             <DialogDescription>
               {selectedLog && formatDate(selectedLog.createdAt)}
             </DialogDescription>
@@ -449,7 +438,7 @@ export default function AuditLogsManager() {
             <div className="space-y-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <Label>العملية</Label>
+                  <Label>{t.auditLogs.operation}</Label>
                   <div className="mt-1">
                     <Badge className={getActionColor(selectedLog.action)}>
                       {getActionLabel(selectedLog.action)}
@@ -458,14 +447,14 @@ export default function AuditLogsManager() {
                 </div>
 
                 <div>
-                  <Label>الكيان</Label>
+                  <Label>{t.common.company}</Label>
                   <div className="mt-1 font-medium">{selectedLog.entity}</div>
                 </div>
 
                 <div>
-                  <Label>المستخدم</Label>
+                  <Label>{t.common.user}</Label>
                   <div className="mt-1 font-medium">
-                    {selectedLog.user?.name || selectedLog.user?.email || "النظام"}
+                    {selectedLog.user?.name || selectedLog.user?.email || t.auditLogs.system}
                   </div>
                 </div>
 
@@ -479,7 +468,7 @@ export default function AuditLogsManager() {
 
               {selectedLog.oldData && (
                 <div>
-                  <Label>البيانات القديمة</Label>
+                  <Label>{t.auditLogs.oldData}</Label>
                   <pre className="mt-1 rounded-md bg-muted p-4 text-xs overflow-x-auto">
                     {JSON.stringify(selectedLog.oldData, null, 2)}
                   </pre>
@@ -488,7 +477,7 @@ export default function AuditLogsManager() {
 
               {selectedLog.newData && (
                 <div>
-                  <Label>البيانات الجديدة</Label>
+                  <Label>{t.auditLogs.newData}</Label>
                   <pre className="mt-1 rounded-md bg-muted p-4 text-xs overflow-x-auto">
                     {JSON.stringify(selectedLog.newData, null, 2)}
                   </pre>

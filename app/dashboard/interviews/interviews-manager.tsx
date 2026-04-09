@@ -85,6 +85,10 @@ import {
   submitInterviewFeedback,
   updateInterviewStatus,
 } from "@/lib/api/recruitment";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type ScheduleFormState = {
   applicantId: string;
@@ -137,6 +141,8 @@ function formatDate(date: string) {
 }
 
 export function InterviewsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { employees } = useEmployees();
   const [interviews, setInterviews] = React.useState<Interview[]>([]);
   const [applicants, setApplicants] = React.useState<Applicant[]>([]);
@@ -161,11 +167,11 @@ export function InterviewsManager() {
     } catch (error) {
       setInterviews([]);
       setApplicants([]);
-      toast.error("فشل تحميل بيانات المقابلات");
+      toast.error(t.interviews.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.interviews.loadFailed]);
 
   React.useEffect(() => {
     void refreshData();
@@ -205,7 +211,7 @@ export function InterviewsManager() {
 
   const handleScheduleSubmit = async () => {
     if (!selectedApplicant || !scheduleForm.scheduledDate || !scheduleForm.scheduledTime) {
-      toast.error("الرجاء استكمال بيانات المقابلة المطلوبة");
+      toast.error(t.interviews.fillRequired);
       return;
     }
 
@@ -236,9 +242,9 @@ export function InterviewsManager() {
       setInterviews((current) => [created, ...current]);
       setScheduleForm(INITIAL_SCHEDULE_FORM);
       setIsAddSheetOpen(false);
-      toast.success("تمت جدولة المقابلة بنجاح");
+      toast.success(t.interviews.scheduledSuccess);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "تعذر جدولة المقابلة");
+      toast.error(error instanceof Error ? error.message : t.interviews.scheduleFailed);
     } finally {
       setIsSubmittingSchedule(false);
     }
@@ -249,9 +255,9 @@ export function InterviewsManager() {
     try {
       const updated = await updateInterviewStatus(interviewId, newStatus);
       setInterviews((current) => current.map((item) => (item.id === interviewId ? updated : item)));
-      toast.success("تم تحديث حالة المقابلة");
+      toast.success(t.interviews.statusUpdated);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "تعذر تحديث حالة المقابلة");
+      toast.error(error instanceof Error ? error.message : t.interviews.statusUpdateFailed);
     } finally {
       setStatusUpdatingId(null);
     }
@@ -272,7 +278,7 @@ export function InterviewsManager() {
   const handleFeedbackSubmit = async () => {
     if (!feedbackInterview) return;
     if (feedbackForm.rating < 1 || feedbackForm.rating > 5) {
-      toast.error("درجة التقييم يجب أن تكون بين 1 و 5");
+      toast.error(t.interviews.ratingRange);
       return;
     }
 
@@ -282,7 +288,7 @@ export function InterviewsManager() {
       const updated = await submitInterviewFeedback(feedbackInterview.id, [
         {
           interviewerId: primaryInterviewer?.id || "unknown",
-          interviewerName: primaryInterviewer?.name || "غير محدد",
+          interviewerName: primaryInterviewer?.name || t.common.unspecified,
           overallRating: feedbackForm.rating,
           strengths: splitLines(feedbackForm.strengths),
           weaknesses: splitLines(feedbackForm.weaknesses),
@@ -295,9 +301,9 @@ export function InterviewsManager() {
       setInterviews((current) => current.map((item) => (item.id === updated.id ? updated : item)));
       setFeedbackInterview(null);
       setFeedbackForm(INITIAL_FEEDBACK_FORM);
-      toast.success("تم حفظ تقييم المقابلة");
+      toast.success(t.interviews.ratingSaved);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "تعذر حفظ تقييم المقابلة");
+      toast.error(error instanceof Error ? error.message : t.interviews.ratingFailed);
     } finally {
       setIsSubmittingFeedback(false);
     }
@@ -322,84 +328,84 @@ export function InterviewsManager() {
 
   return (
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
+      {/* {t.interviews.statsCards} */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المقابلات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.interviews.totalInterviews}</CardTitle>
             <IconCalendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">مقابلة</p>
+            <p className="text-xs text-muted-foreground">{t.interviews.interview}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مقابلات اليوم</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.interviews.todayInterviews}</CardTitle>
             <IconClock className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.today}</div>
-            <p className="text-xs text-muted-foreground">مقابلة مجدولة اليوم</p>
+            <p className="text-xs text-muted-foreground">{t.interviews.scheduledToday}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مقابلات قادمة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.interviews.upcomingInterviews}</CardTitle>
             <IconCalendar className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
-            <p className="text-xs text-muted-foreground">بانتظار الموعد</p>
+            <p className="text-xs text-muted-foreground">{t.interviews.awaitingSchedule}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مكتملة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.completed}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">مقابلة مكتملة</p>
+            <p className="text-xs text-muted-foreground">{t.interviews.completedInterview}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* جدول المقابلات */}
+      {/* {t.interviews.interviewsTable} */}
       <Card>
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>المقابلات</CardTitle>
-              <CardDescription>جدولة وإدارة المقابلات مع المرشحين</CardDescription>
+              <CardTitle>{t.interviews.title}</CardTitle>
+              <CardDescription>{t.interviews.subtitle}</CardDescription>
             </div>
             <Sheet open={isAddSheetOpen} onOpenChange={setIsAddSheetOpen}>
               <SheetTrigger asChild>
                 <Button>
                   <IconPlus className="ms-2 h-4 w-4" />
-                  جدولة مقابلة
+                  {t.interviews.scheduleInterview}
                 </Button>
               </SheetTrigger>
               <SheetContent className="sm:max-w-lg overflow-y-auto">
                 <SheetHeader>
-                  <SheetTitle>جدولة مقابلة جديدة</SheetTitle>
+                  <SheetTitle>{t.interviews.newInterview}</SheetTitle>
                   <SheetDescription>
-                    أدخل تفاصيل المقابلة مع المرشح
+                    {t.interviews.enterInterviewDetails}
                   </SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="applicant">المتقدم</Label>
+                    <Label htmlFor="applicant">{t.interviews.applicant}</Label>
                     <Select
                       value={scheduleForm.applicantId}
                       onValueChange={(value) => setScheduleForm((current) => ({ ...current, applicantId: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر المتقدم" />
+                        <SelectValue placeholder={t.interviews.chooseApplicant} />
                       </SelectTrigger>
                       <SelectContent>
                         {applicants.map((applicant) => (
@@ -411,13 +417,13 @@ export function InterviewsManager() {
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="type">نوع المقابلة</Label>
+                    <Label htmlFor="type">{t.interviews.interviewType}</Label>
                     <Select
                       value={scheduleForm.type}
                       onValueChange={(value: InterviewType) => setScheduleForm((current) => ({ ...current, type: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر النوع" />
+                        <SelectValue placeholder={t.common.selectType} />
                       </SelectTrigger>
                       <SelectContent>
                         {Object.entries(interviewTypeLabels).map(([value, label]) => (
@@ -428,9 +434,9 @@ export function InterviewsManager() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="grid gap-2">
-                      <Label htmlFor="date">التاريخ</Label>
+                      <Label htmlFor="date">{t.common.date}</Label>
                       <Input
                         id="date"
                         type="date"
@@ -441,7 +447,7 @@ export function InterviewsManager() {
                       />
                     </div>
                     <div className="grid gap-2">
-                      <Label htmlFor="time">الوقت</Label>
+                      <Label htmlFor="time">{t.interviews.time}</Label>
                       <Input
                         id="time"
                         type="time"
@@ -453,7 +459,7 @@ export function InterviewsManager() {
                     </div>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="duration">المدة (بالدقائق)</Label>
+                    <Label htmlFor="duration">{t.interviews.duration}</Label>
                     <Select
                       value={scheduleForm.duration}
                       onValueChange={(value) => setScheduleForm((current) => ({ ...current, duration: value }))}
@@ -462,19 +468,19 @@ export function InterviewsManager() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="30">30 دقيقة</SelectItem>
-                        <SelectItem value="45">45 دقيقة</SelectItem>
-                        <SelectItem value="60">ساعة</SelectItem>
-                        <SelectItem value="90">ساعة ونصف</SelectItem>
-                        <SelectItem value="120">ساعتان</SelectItem>
+                        <SelectItem value="30">30 {t.interviews.minutes}</SelectItem>
+                        <SelectItem value="45">45 {t.interviews.minutes}</SelectItem>
+                        <SelectItem value="60">{t.common.hour}</SelectItem>
+                        <SelectItem value="90">{t.interviews.hourAndHalf}</SelectItem>
+                        <SelectItem value="120">{t.interviews.twoHours}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="location">المكان / رابط الاجتماع</Label>
+                    <Label htmlFor="location">{t.trainingCourses.venueOrLink}</Label>
                     <Input
                       id="location"
-                      placeholder="غرفة الاجتماعات"
+                      placeholder={t.interviews.meetingRoom}
                       value={scheduleForm.location}
                       onChange={(event) =>
                         setScheduleForm((current) => ({ ...current, location: event.target.value }))
@@ -482,7 +488,7 @@ export function InterviewsManager() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="meeting-link">رابط الاجتماع</Label>
+                    <Label htmlFor="meeting-link">{t.interviews.meetingLink}</Label>
                     <Input
                       id="meeting-link"
                       placeholder="https://meet.google.com/..."
@@ -494,13 +500,13 @@ export function InterviewsManager() {
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="interviewers">المُقابِلون</Label>
+                    <Label htmlFor="interviewers">{t.interviews.interviewers}</Label>
                     <Select
                       value={scheduleForm.interviewerId}
                       onValueChange={(value) => setScheduleForm((current) => ({ ...current, interviewerId: value }))}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="اختر المُقابِلين" />
+                        <SelectValue placeholder={t.interviews.chooseInterviewers} />
                       </SelectTrigger>
                       <SelectContent>
                         {employees.map((employee) => (
@@ -513,11 +519,11 @@ export function InterviewsManager() {
                   </div>
                   {selectedApplicant && (
                     <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
-                      سيتم ربط المقابلة بوظيفة: <span className="font-medium text-foreground">{selectedApplicant.jobTitle}</span>
+                      {t.interviews.linkedToJob} <span className="font-medium text-foreground">{selectedApplicant.jobTitle}</span>
                     </div>
                   )}
                   <Button className="mt-4" onClick={handleScheduleSubmit} disabled={isSubmittingSchedule}>
-                    جدولة المقابلة
+                    {t.interviews.scheduleBtn}
                   </Button>
                 </div>
               </SheetContent>
@@ -525,12 +531,12 @@ export function InterviewsManager() {
           </div>
         </CardHeader>
         <CardContent>
-          {/* أدوات البحث والفلترة */}
+          {/* {t.interviews.searchFilter} */}
           <div className="flex flex-col gap-4 mb-6 sm:flex-row">
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث..."
+                placeholder={t.common.searchDots}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -538,10 +544,10 @@ export function InterviewsManager() {
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-full sm:w-40">
-                <SelectValue placeholder="النوع" />
+                <SelectValue placeholder={t.common.type} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الأنواع</SelectItem>
+                <SelectItem value="all">{t.common.allTypes}</SelectItem>
                 {Object.entries(interviewTypeLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -552,10 +558,10 @@ export function InterviewsManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(interviewStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -565,31 +571,31 @@ export function InterviewsManager() {
             </Select>
           </div>
 
-          {/* جدول المقابلات */}
+          {/* {t.interviews.interviewsTable} */}
           <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المرشح</TableHead>
-                  <TableHead>الوظيفة</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead>التاريخ والوقت</TableHead>
-                  <TableHead>المُقابِلون</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.jobOffers.candidate}</TableHead>
+                  <TableHead>{t.onboarding.jobCol}</TableHead>
+                  <TableHead>{t.common.type}</TableHead>
+                  <TableHead>{t.interviews.dateAndTime}</TableHead>
+                  <TableHead>{t.interviews.interviewers}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                      جاري تحميل المقابلات...
+                      {t.interviews.loading}
                     </TableCell>
                   </TableRow>
                 ) : filteredInterviews.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
-                      <p className="text-muted-foreground">لا توجد مقابلات</p>
+                      <p className="text-muted-foreground">{t.interviews.noInterviews}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -616,7 +622,7 @@ export function InterviewsManager() {
                         <div>
                           <p>{new Date(interview.scheduledDate).toLocaleDateString("ar-SA")}</p>
                           <p className="text-xs text-muted-foreground">
-                            {interview.scheduledTime} ({interview.duration} دقيقة)
+                            {interview.scheduledTime} ({interview.duration} {t.interviews.minuteUnit})
                           </p>
                         </div>
                       </TableCell>
@@ -636,7 +642,7 @@ export function InterviewsManager() {
                             ))}
                           </div>
                         ) : (
-                          <span className="text-muted-foreground">غير محدد</span>
+                          <span className="text-muted-foreground">{t.common.unspecified}</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -656,22 +662,22 @@ export function InterviewsManager() {
                               <>
                                 <DropdownMenuItem onClick={() => openFeedbackDialog(interview)}>
                                   <IconCheck className="ms-2 h-4 w-4" />
-                                  تسجيل تقييم المقابلة
+                                  {t.interviews.recordEvaluation}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleStatusChange(interview.id, "completed")}>
                                   <IconClock className="ms-2 h-4 w-4" />
-                                  إنهاء بدون تقييم
+                                  {t.interviews.endWithoutEval}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem onClick={() => handleStatusChange(interview.id, "no-show")}>
                                   <IconX className="ms-2 h-4 w-4" />
-                                  لم يحضر
+                                  {t.interviews.noShow}
                                 </DropdownMenuItem>
                               </>
                             )}
                             {interview.status === "completed" && (
                               <DropdownMenuItem onClick={() => openFeedbackDialog(interview)}>
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                {interview.feedback?.length ? "تعديل التقييم" : "إضافة تقييم"}
+                                {interview.feedback?.length ? t.interviews.editEval : t.interviews.addEval}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
@@ -681,7 +687,7 @@ export function InterviewsManager() {
                               disabled={interview.status === "cancelled"}
                             >
                               <IconX className="ms-2 h-4 w-4" />
-                              إلغاء المقابلة
+                              {t.interviews.cancelInterview}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -698,17 +704,17 @@ export function InterviewsManager() {
       <Dialog open={Boolean(feedbackInterview)} onOpenChange={(open) => !open && setFeedbackInterview(null)}>
         <DialogContent className="w-full sm:max-w-2xl">
           <DialogHeader>
-            <DialogTitle>تقييم المقابلة</DialogTitle>
+            <DialogTitle>{t.interviews.evaluationTitle}</DialogTitle>
             <DialogDescription>
               {feedbackInterview
-                ? `تسجيل تقييم ${feedbackInterview.applicantName} لوظيفة ${feedbackInterview.jobTitle}`
+                ? `${t.interviews.recordEvalTitle} ${feedbackInterview.applicantName} ${t.interviews.forPosition} ${feedbackInterview.jobTitle}`
                 : ""}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4 py-2">
             <div className="grid gap-2">
-              <Label htmlFor="rating">التقييم العام</Label>
+              <Label htmlFor="rating">{t.interviews.overallRating}</Label>
               <Input
                 id="rating"
                 type="number"
@@ -726,7 +732,7 @@ export function InterviewsManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="recommendation">التوصية</Label>
+              <Label htmlFor="recommendation">{t.interviews.recommendation}</Label>
               <Select
                 value={feedbackForm.recommendation}
                 onValueChange={(value: InterviewFeedback["recommendation"]) =>
@@ -748,11 +754,11 @@ export function InterviewsManager() {
 
             <div className="grid gap-2 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="strengths">نقاط القوة</Label>
+                <Label htmlFor="strengths">{t.common.notes}</Label>
                 <Textarea
                   id="strengths"
                   rows={4}
-                  placeholder="سطر لكل نقطة"
+                  placeholder={t.common.linePerPoint}
                   value={feedbackForm.strengths}
                   onChange={(event) =>
                     setFeedbackForm((current) => ({ ...current, strengths: event.target.value }))
@@ -760,11 +766,11 @@ export function InterviewsManager() {
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="weaknesses">نقاط التحسين</Label>
+                <Label htmlFor="weaknesses">{t.interviews.improvementPoints}</Label>
                 <Textarea
                   id="weaknesses"
                   rows={4}
-                  placeholder="سطر لكل نقطة"
+                  placeholder={t.common.linePerPoint}
                   value={feedbackForm.weaknesses}
                   onChange={(event) =>
                     setFeedbackForm((current) => ({ ...current, weaknesses: event.target.value }))
@@ -774,7 +780,7 @@ export function InterviewsManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="comments">ملاحظات إضافية</Label>
+              <Label htmlFor="comments">{t.interviews.additionalNotes}</Label>
               <Textarea
                 id="comments"
                 rows={3}
@@ -787,11 +793,9 @@ export function InterviewsManager() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFeedbackInterview(null)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setFeedbackInterview(null)}>{t.common.cancel}</Button>
             <Button onClick={handleFeedbackSubmit} disabled={isSubmittingFeedback}>
-              حفظ التقييم
+              {t.interviews.saveEvaluation}
             </Button>
           </DialogFooter>
         </DialogContent>

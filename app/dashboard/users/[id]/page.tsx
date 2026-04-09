@@ -5,6 +5,7 @@ import { getAppLocale } from "@/lib/i18n/locale";
 import prisma from "@/lib/db";
 import { requireTenantRole } from "@/lib/auth";
 import UserDetailsClient from "./user-details-client";
+import { getText } from "@/lib/i18n/text";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -13,6 +14,7 @@ interface PageProps {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
   const locale = await getAppLocale();
+  const t = getText(locale);
   const user = await prisma.user.findUnique({
     where: { id },
     select: { firstName: true, lastName: true },
@@ -21,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : "";
   
   return generateMeta({
-    title: locale === "ar" ? `${name || "المستخدم"} - تفاصيل` : `${name || "User"} - Details`,
+    title: locale === "ar" ? `${name || t.audit.entityUser} - تفاصيل` : `${name || "User"} - Details`,
     description: locale === "ar" ? "عرض تفاصيل المستخدم" : "View user details",
   });
 }

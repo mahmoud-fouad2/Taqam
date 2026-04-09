@@ -65,6 +65,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { ar } from "date-fns/locale";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 // Types
 interface Employee {
@@ -102,18 +106,18 @@ interface PerformanceGoal {
 
 // Labels
 const statusLabels: Record<string, string> = {
-  DRAFT: "مسودة",
-  PENDING: "قيد الانتظار",
-  IN_PROGRESS: "قيد التنفيذ",
-  COMPLETED: "مكتمل",
-  CANCELLED: "ملغى",
+  DRAFT: t.common.draft,
+  PENDING: t.common.pending,
+  IN_PROGRESS: t.common.inProgress,
+  COMPLETED: t.common.completed,
+  CANCELLED: t.performanceGoals.cancelled,
 };
 
 const priorityLabels: Record<string, string> = {
-  LOW: "منخفض",
-  MEDIUM: "متوسط",
-  HIGH: "عالي",
-  CRITICAL: "حرج",
+  LOW: t.common.low,
+  MEDIUM: t.common.medium,
+  HIGH: t.common.high,
+  CRITICAL: t.common.critical,
 };
 
 const statusColors: Record<string, string> = {
@@ -132,6 +136,8 @@ const priorityColors: Record<string, string> = {
 };
 
 export function PerformanceGoalsManagerNew() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   // State
   const [goals, setGoals] = useState<PerformanceGoal[]>([]);
   const [employees, setEmployees] = useState<Employee[]>([]);
@@ -198,9 +204,9 @@ export function PerformanceGoalsManagerNew() {
       if (data.stats) setStats(data.stats);
     } catch (error) {
       console.error("Error fetching goals:", error);
-      toast.error("حدث خطأ في جلب الأهداف");
+      toast.error(t.performanceGoals.fetchFailed);
     }
-  }, [filterStatus, filterPriority]);
+  }, [filterStatus, filterPriority, t.performanceGoals.fetchFailed]);
 
   // Fetch employees
   const fetchEmployees = useCallback(async () => {
@@ -277,7 +283,7 @@ export function PerformanceGoalsManagerNew() {
   // Submit form
   const handleSubmit = async (isEdit: boolean) => {
     if (!formData.employeeId || !formData.title || !formData.description || !formData.dueDate) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+      toast.error(t.common.fillRequired);
       return;
     }
 
@@ -298,17 +304,17 @@ export function PerformanceGoalsManagerNew() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "حدث خطأ");
+        throw new Error(error.error || t.organization.genericError);
       }
 
       await fetchGoals();
       setIsAddDialogOpen(false);
       setIsEditDialogOpen(false);
       resetForm();
-      toast.success(isEdit ? "تم تحديث الهدف بنجاح" : "تم إضافة الهدف بنجاح");
+      toast.success(isEdit ? t.performanceGoals.updatedSuccess : t.performanceGoals.addedSuccess);
     } catch (error) {
       console.error("Error saving goal:", error);
-      toast.error(error instanceof Error ? error.message : "حدث خطأ");
+      toast.error(error instanceof Error ? error.message : t.organization.genericError);
     } finally {
       setIsSaving(false);
     }
@@ -326,16 +332,16 @@ export function PerformanceGoalsManagerNew() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "حدث خطأ");
+        throw new Error(error.error || t.organization.genericError);
       }
 
       await fetchGoals();
       setIsDeleteDialogOpen(false);
       setSelectedGoal(null);
-      toast.success("تم حذف الهدف بنجاح");
+      toast.success(t.performanceGoals.deletedSuccess);
     } catch (error) {
       console.error("Error deleting goal:", error);
-      toast.error(error instanceof Error ? error.message : "حدث خطأ في الحذف");
+      toast.error(error instanceof Error ? error.message : t.onboarding.deleteFailed);
     } finally {
       setIsSaving(false);
     }
@@ -353,10 +359,10 @@ export function PerformanceGoalsManagerNew() {
       if (!res.ok) throw new Error("Failed to update status");
       
       await fetchGoals();
-      toast.success("تم تحديث الحالة بنجاح");
+      toast.success(t.performanceGoals.statusUpdatedSuccess);
     } catch (error) {
       console.error("Error updating status:", error);
-      toast.error("حدث خطأ في تحديث الحالة");
+      toast.error(t.performanceGoals.statusUpdateFailed);
     }
   };
 
@@ -372,10 +378,10 @@ export function PerformanceGoalsManagerNew() {
       if (!res.ok) throw new Error("Failed to update progress");
       
       await fetchGoals();
-      toast.success("تم تحديث التقدم بنجاح");
+      toast.success(t.performanceGoals.progressUpdatedSuccess);
     } catch (error) {
       console.error("Error updating progress:", error);
-      toast.error("حدث خطأ في تحديث التقدم");
+      toast.error(t.performanceGoals.progressUpdateFailed);
     }
   };
 
@@ -417,17 +423,15 @@ export function PerformanceGoalsManagerNew() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">أهداف الأداء</h1>
-          <p className="text-muted-foreground">إدارة ومتابعة أهداف الموظفين</p>
+          <h1 className="text-2xl font-bold">{t.performanceGoals.title}</h1>
+          <p className="text-muted-foreground">{t.performanceGoals.subtitle}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchGoals()}>
+          <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchGoals()}>
             <IconRefresh className="size-4" />
           </Button>
           <Button onClick={handleAdd}>
-            <IconPlus className="size-4 ms-2" />
-            إضافة هدف
-          </Button>
+            <IconPlus className="size-4 ms-2" />{t.performanceGoals.addGoal}</Button>
         </div>
       </div>
 
@@ -435,31 +439,31 @@ export function PerformanceGoalsManagerNew() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>مسودة</CardDescription>
+            <CardDescription>{t.common.draft}</CardDescription>
             <CardTitle className="text-3xl">{stats.draft}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>قيد الانتظار</CardDescription>
+            <CardDescription>{t.common.pending}</CardDescription>
             <CardTitle className="text-3xl text-yellow-600">{stats.pending}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>قيد التنفيذ</CardDescription>
+            <CardDescription>{t.common.inProgress}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{stats.inProgress}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>مكتمل</CardDescription>
+            <CardDescription>{t.common.completed}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.completed}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>ملغى</CardDescription>
+            <CardDescription>{t.common.cancelled}</CardDescription>
             <CardTitle className="text-3xl text-red-600">{stats.cancelled}</CardTitle>
           </CardHeader>
         </Card>
@@ -471,32 +475,32 @@ export function PerformanceGoalsManagerNew() {
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
               <IconTarget className="size-5" />
-              قائمة الأهداف
+              {t.performanceGoals.pGoalsList}
             </CardTitle>
             <div className="flex gap-2">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="الحالة" />
+                  <SelectValue placeholder={t.common.status} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الحالات</SelectItem>
-                  <SelectItem value="DRAFT">مسودة</SelectItem>
-                  <SelectItem value="PENDING">قيد الانتظار</SelectItem>
-                  <SelectItem value="IN_PROGRESS">قيد التنفيذ</SelectItem>
-                  <SelectItem value="COMPLETED">مكتمل</SelectItem>
-                  <SelectItem value="CANCELLED">ملغى</SelectItem>
+                  <SelectItem value="all">{t.common.allStatuses}</SelectItem>
+                  <SelectItem value="DRAFT">{t.common.draft}</SelectItem>
+                  <SelectItem value="PENDING">{t.common.pending}</SelectItem>
+                  <SelectItem value="IN_PROGRESS">{t.common.inProgress}</SelectItem>
+                  <SelectItem value="COMPLETED">{t.common.completed}</SelectItem>
+                  <SelectItem value="CANCELLED">{t.common.cancelled}</SelectItem>
                 </SelectContent>
               </Select>
               <Select value={filterPriority} onValueChange={setFilterPriority}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="الأولوية" />
+                  <SelectValue placeholder={t.common.priority} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الأولويات</SelectItem>
-                  <SelectItem value="LOW">منخفض</SelectItem>
-                  <SelectItem value="MEDIUM">متوسط</SelectItem>
-                  <SelectItem value="HIGH">عالي</SelectItem>
-                  <SelectItem value="CRITICAL">حرج</SelectItem>
+                  <SelectItem value="all">{t.performanceGoals.allPriorities}</SelectItem>
+                  <SelectItem value="LOW">{t.common.low}</SelectItem>
+                  <SelectItem value="MEDIUM">{t.common.medium}</SelectItem>
+                  <SelectItem value="HIGH">{t.common.high}</SelectItem>
+                  <SelectItem value="CRITICAL">{t.common.critical}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -506,22 +510,22 @@ export function PerformanceGoalsManagerNew() {
           {goals.length === 0 ? (
             <div className="text-center py-12">
               <IconTarget className="size-12 mx-auto text-muted-foreground/50 mb-4" />
-              <p className="text-muted-foreground">لا توجد أهداف</p>
+              <p className="text-muted-foreground">{t.developmentPlans.noGoals}</p>
               <Button variant="outline" className="mt-4" onClick={handleAdd}>
-                إضافة هدف جديد
+                {t.performanceGoals.pAddNewGoal}
               </Button>
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الموظف</TableHead>
-                  <TableHead>الهدف</TableHead>
-                  <TableHead>التقدم</TableHead>
-                  <TableHead>الأولوية</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ الاستحقاق</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.common.employee}</TableHead>
+                  <TableHead>{t.performanceGoals.goal}</TableHead>
+                  <TableHead>{t.common.inProgress}</TableHead>
+                  <TableHead>{t.common.priority}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead>{t.performanceGoals.dueDate}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -578,46 +582,38 @@ export function PerformanceGoalsManagerNew() {
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" aria-label="خيارات">
+                          <Button variant="ghost" size="icon" aria-label={t.common.options}>
                             <IconDots className="size-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleEdit(goal)}>
-                            <IconEdit className="size-4 ms-2" />
-                            تعديل
-                          </DropdownMenuItem>
+                            <IconEdit className="size-4 ms-2" />{t.common.edit}</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             onClick={() => handleStatusChange(goal.id, "IN_PROGRESS")}
                             disabled={goal.status === "IN_PROGRESS"}
                           >
-                            <IconProgress className="size-4 ms-2" />
-                            بدء التنفيذ
-                          </DropdownMenuItem>
+                            <IconProgress className="size-4 ms-2" />{t.common.startExecution}</DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleStatusChange(goal.id, "COMPLETED")}
                             disabled={goal.status === "COMPLETED"}
                           >
                             <IconCheck className="size-4 ms-2" />
-                            إكمال
+                            {t.performanceGoals.pComplete}
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={() => handleStatusChange(goal.id, "CANCELLED")}
                             disabled={goal.status === "CANCELLED" || goal.status === "COMPLETED"}
                           >
-                            <IconX className="size-4 ms-2" />
-                            إلغاء
-                          </DropdownMenuItem>
+                            <IconX className="size-4 ms-2" />{t.common.cancel}</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             onClick={() => handleDelete(goal)}
                             className="text-destructive"
                             disabled={goal.status === "COMPLETED"}
                           >
-                            <IconTrash className="size-4 ms-2" />
-                            حذف
-                          </DropdownMenuItem>
+                            <IconTrash className="size-4 ms-2" />{t.common.delete}</DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -643,24 +639,24 @@ export function PerformanceGoalsManagerNew() {
         <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
-              {isEditDialogOpen ? "تعديل الهدف" : "إضافة هدف جديد"}
+              {isEditDialogOpen ? t.performanceGoals.editGoal : t.performanceGoals.addNewGoal}
             </DialogTitle>
             <DialogDescription>
-              {isEditDialogOpen ? "تعديل بيانات الهدف" : "إضافة هدف أداء جديد للموظف"}
+              {isEditDialogOpen ? t.performanceGoals.editGoalData : t.performanceGoals.addGoalDesc}
             </DialogDescription>
           </DialogHeader>
           
           <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>الموظف *</Label>
+                <Label>{t.common.selectEmployee}</Label>
                 <Select 
                   value={formData.employeeId} 
                   onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
                   disabled={isEditDialogOpen}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر الموظف" />
+                    <SelectValue placeholder={t.common.selectEmployee} />
                   </SelectTrigger>
                   <SelectContent>
                     {employees.map((emp) => (
@@ -672,16 +668,16 @@ export function PerformanceGoalsManagerNew() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>المدير المسؤول</Label>
+                <Label>{t.performanceGoals.responsibleManager}</Label>
                 <Select 
                   value={formData.managerId} 
                   onValueChange={(value) => setFormData({ ...formData, managerId: value })}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر المدير" />
+                    <SelectValue placeholder={t.performanceGoals.chooseManager} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">بدون</SelectItem>
+                    <SelectItem value="">{t.performanceGoals.none}</SelectItem>
                     {employees.map((emp) => (
                       <SelectItem key={emp.id} value={emp.id}>
                         {getEmployeeName(emp)}
@@ -692,9 +688,9 @@ export function PerformanceGoalsManagerNew() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>عنوان الهدف (إنجليزي) *</Label>
+                <Label>{t.performanceGoals.goalTitleEn}</Label>
                 <Input
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -702,28 +698,28 @@ export function PerformanceGoalsManagerNew() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>عنوان الهدف (عربي)</Label>
+                <Label>{t.performanceGoals.goalTitleAr}</Label>
                 <Input
                   value={formData.titleAr}
                   onChange={(e) => setFormData({ ...formData, titleAr: e.target.value })}
-                  placeholder="عنوان الهدف"
+                  placeholder={t.performanceGoals.goalTitlePlaceholder}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>وصف الهدف *</Label>
+              <Label>{t.performanceGoals.goalDesc}</Label>
               <Textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="وصف تفصيلي للهدف..."
+                placeholder={t.performanceGoals.detailedDesc}
                 rows={3}
               />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>الفئة</Label>
+                <Label>{t.performanceGoals.category}</Label>
                 <Select 
                   value={formData.category} 
                   onValueChange={(value) => setFormData({ ...formData, category: value })}
@@ -732,15 +728,15 @@ export function PerformanceGoalsManagerNew() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="performance">الأداء</SelectItem>
-                    <SelectItem value="development">التطوير</SelectItem>
-                    <SelectItem value="learning">التعلم</SelectItem>
-                    <SelectItem value="project">المشاريع</SelectItem>
+                    <SelectItem value="performance">{t.performanceGoals.performance}</SelectItem>
+                    <SelectItem value="development">{t.performanceGoals.development}</SelectItem>
+                    <SelectItem value="learning">{t.performanceGoals.learning}</SelectItem>
+                    <SelectItem value="project">{t.performanceGoals.projects}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>الأولوية</Label>
+                <Label>{t.common.priority}</Label>
                 <Select 
                   value={formData.priority} 
                   onValueChange={(value: any) => setFormData({ ...formData, priority: value })}
@@ -749,15 +745,15 @@ export function PerformanceGoalsManagerNew() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LOW">منخفض</SelectItem>
-                    <SelectItem value="MEDIUM">متوسط</SelectItem>
-                    <SelectItem value="HIGH">عالي</SelectItem>
-                    <SelectItem value="CRITICAL">حرج</SelectItem>
+                    <SelectItem value="LOW">{t.common.low}</SelectItem>
+                    <SelectItem value="MEDIUM">{t.common.medium}</SelectItem>
+                    <SelectItem value="HIGH">{t.common.high}</SelectItem>
+                    <SelectItem value="CRITICAL">{t.common.critical}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>الوحدة</Label>
+                <Label>{t.performanceGoals.unit}</Label>
                 <Select 
                   value={formData.unit} 
                   onValueChange={(value) => setFormData({ ...formData, unit: value })}
@@ -766,19 +762,19 @@ export function PerformanceGoalsManagerNew() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="%">نسبة مئوية (%)</SelectItem>
-                    <SelectItem value="عدد">عدد</SelectItem>
-                    <SelectItem value="ريال">ريال</SelectItem>
-                    <SelectItem value="ساعة">ساعة</SelectItem>
-                    <SelectItem value="مشروع">مشروع</SelectItem>
+                    <SelectItem value="%">{t.performanceGoals.percentUnit}</SelectItem>
+                    <SelectItem value={t.performanceGoals.number}>{t.performanceGoals.countUnit}</SelectItem>
+                    <SelectItem value={t.performanceGoals.riyal}>{t.performanceGoals.pSar}</SelectItem>
+                    <SelectItem value={t.common.hour}>{t.common.hour}</SelectItem>
+                    <SelectItem value={t.performanceGoals.project}>{t.performanceGoals.pProject}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>القيمة المستهدفة</Label>
+                <Label>{t.performanceGoals.targetValue}</Label>
                 <Input
                   value={formData.targetValue}
                   onChange={(e) => setFormData({ ...formData, targetValue: e.target.value })}
@@ -786,7 +782,7 @@ export function PerformanceGoalsManagerNew() {
                 />
               </div>
               <div className="space-y-2">
-                <Label>تاريخ الاستحقاق *</Label>
+                <Label>{t.performanceGoals.dueDateRequired}</Label>
                 <Input
                   type="date"
                   value={formData.dueDate}
@@ -795,9 +791,9 @@ export function PerformanceGoalsManagerNew() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>تاريخ البداية</Label>
+                <Label>{t.common.startDate}</Label>
                 <Input
                   type="date"
                   value={formData.startDate}
@@ -807,11 +803,11 @@ export function PerformanceGoalsManagerNew() {
             </div>
 
             <div className="space-y-2">
-              <Label>ملاحظات</Label>
+              <Label>{t.common.notes}</Label>
               <Textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="ملاحظات إضافية..."
+                placeholder={t.common.additionalNotes}
                 rows={2}
               />
             </div>
@@ -825,11 +821,9 @@ export function PerformanceGoalsManagerNew() {
                 setIsEditDialogOpen(false);
                 resetForm();
               }}
-            >
-              إلغاء
-            </Button>
+            >{t.common.cancel}</Button>
             <Button onClick={() => handleSubmit(isEditDialogOpen)} disabled={isSaving}>
-              {isSaving ? "جارٍ الحفظ..." : isEditDialogOpen ? "تحديث" : "إضافة"}
+              {isSaving ? t.common.saving : isEditDialogOpen ? t.common.update : t.common.add}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -839,20 +833,18 @@ export function PerformanceGoalsManagerNew() {
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف الهدف</AlertDialogTitle>
+            <AlertDialogTitle>{t.performanceGoals.deleteGoal}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الهدف &quot;{selectedGoal?.titleAr || selectedGoal?.title}&quot;؟
-              <br />
-              لا يمكن التراجع عن هذا الإجراء.
-            </AlertDialogDescription>
+              {t.performanceGoals.pAreYouSureYouWantToDeleteTheGo} &quot;{selectedGoal?.titleAr || selectedGoal?.title}&quot;?
+              <br />{t.common.cannotUndo}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isSaving ? "جارٍ الحذف..." : "حذف"}
+              {isSaving ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

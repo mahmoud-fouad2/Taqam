@@ -35,15 +35,19 @@ import {
 import { useEmployees } from "@/hooks/use-employees";
 import { leavesApi } from "@/lib/api";
 import { getLeaveTheme } from "@/lib/ui/leave-color";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type UiLeaveStatus = Exclude<LeaveRequestStatus, "taken">;
 
 const statusLabels: Record<UiLeaveStatus | "all", string> = {
-  all: "جميع الحالات",
-  pending: "قيد الانتظار",
-  approved: "موافق عليها",
-  rejected: "مرفوض",
-  cancelled: "ملغي",
+  all: t.common.allStatuses,
+  pending: t.common.pending,
+  approved: t.leaveCalendar.approved,
+  rejected: t.common.rejected,
+  cancelled: t.common.cancelled,
 };
 
 function pickLeaveBgClass(color?: string | null): string {
@@ -91,24 +95,26 @@ function mapStatusFromApi(value: any): UiLeaveStatus {
 
 // أسماء الأشهر بالعربية
 const monthNames = [
-  "يناير",
-  "فبراير",
-  "مارس",
-  "أبريل",
-  "مايو",
-  "يونيو",
-  "يوليو",
-  "أغسطس",
-  "سبتمبر",
-  "أكتوبر",
-  "نوفمبر",
-  "ديسمبر",
+  t.leaveCalendar.january,
+  t.leaveCalendar.february,
+  t.leaveCalendar.march,
+  t.leaveCalendar.april,
+  t.leaveCalendar.may,
+  t.leaveCalendar.june,
+  t.leaveCalendar.july,
+  t.leaveCalendar.august,
+  t.leaveCalendar.september,
+  t.leaveCalendar.october,
+  t.leaveCalendar.november,
+  t.leaveCalendar.december,
 ];
 
 // أسماء الأيام بالعربية
-const dayNames = ["الأحد", "الاثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
+const dayNames = [t.leaveCalendar.sunday, t.leaveCalendar.monday, t.leaveCalendar.tuesday, t.leaveCalendar.wednesday, t.leaveCalendar.thursday, t.leaveCalendar.friday, t.leaveCalendar.saturday];
 
 export function LeaveCalendarView() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [filterDepartment, setFilterDepartment] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<UiLeaveStatus | "all">("all");
@@ -127,7 +133,7 @@ export function LeaveCalendarView() {
     try {
       const res = await leavesApi.requests.getAll({ limit: 1000, year });
       if (!res.success) {
-        throw new Error(res.error || "فشل تحميل الإجازات");
+        throw new Error(res.error || t.leaveBalances.loadFailed);
       }
 
       const mapped: CalendarEvent[] = Array.isArray(res.data)
@@ -156,7 +162,7 @@ export function LeaveCalendarView() {
       // Keep same behavior: hide rejected/cancelled by default in the calendar grid
       setCalendarEvents(mapped.filter((e) => e.status !== "rejected" && e.status !== "cancelled"));
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "فشل تحميل الإجازات");
+      setLoadError(err instanceof Error ? err.message : t.leaveBalances.loadFailed);
     } finally {
       setIsLoading(false);
     }
@@ -261,25 +267,23 @@ export function LeaveCalendarView() {
     for (const e of filteredEvents) {
       if (!e.leaveTypeId) continue;
       if (!map.has(e.leaveTypeId)) {
-        map.set(e.leaveTypeId, { name: e.leaveTypeName || "نوع إجازة", color: e.color });
+        map.set(e.leaveTypeId, { name: e.leaveTypeName || t.leaveCalendar.leaveType, color: e.color });
       }
     }
     return Array.from(map.values()).slice(0, 12);
-  }, [filteredEvents]);
+  }, [filteredEvents, t.leaveCalendar.leaveType]);
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">تقويم الإجازات</h2>
-          <p className="text-muted-foreground">عرض جميع الإجازات في التقويم</p>
+          <h2 className="text-2xl font-bold">{t.common.calendar}</h2>
+          <p className="text-muted-foreground">{t.leaveCalendar.viewAllLeaves}</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <IconDownload className="ms-2 h-4 w-4" />
-            تصدير
-          </Button>
+            <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
         </div>
       </div>
 
@@ -287,7 +291,7 @@ export function LeaveCalendarView() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card className="border-blue-200 bg-blue-50">
           <CardHeader className="pb-2">
-            <CardDescription>في إجازة اليوم</CardDescription>
+            <CardDescription>{t.leaveBalances.onLeaveToday}</CardDescription>
             <CardTitle className="flex items-center gap-2 text-3xl text-blue-600">
               <IconBeach className="h-8 w-8" />
               {stats.onLeaveToday}
@@ -296,7 +300,7 @@ export function LeaveCalendarView() {
         </Card>
         <Card className="border-green-200 bg-green-50">
           <CardHeader className="pb-2">
-            <CardDescription>إجازات قادمة</CardDescription>
+            <CardDescription>{t.leaveCalendar.upcomingLeaves}</CardDescription>
             <CardTitle className="flex items-center gap-2 text-3xl text-green-600">
               <IconCalendar className="h-8 w-8" />
               {stats.upcomingLeaves}
@@ -305,7 +309,7 @@ export function LeaveCalendarView() {
         </Card>
         <Card className="border-yellow-200 bg-yellow-50">
           <CardHeader className="pb-2">
-            <CardDescription>بانتظار الموافقة</CardDescription>
+            <CardDescription>{t.documents.pendingApproval}</CardDescription>
             <CardTitle className="flex items-center gap-2 text-3xl text-yellow-600">
               <IconUsers className="h-8 w-8" />
               {stats.pendingApprovals}
@@ -320,28 +324,26 @@ export function LeaveCalendarView() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Month Navigation */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" aria-label="الشهر السابق" onClick={goToPreviousMonth}>
+              <Button variant="ghost" size="icon" aria-label={t.common.lastMonth} onClick={goToPreviousMonth}>
                 <IconChevronRight className="h-5 w-5" />
               </Button>
               <h3 className="text-xl font-semibold">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <Button variant="ghost" size="icon" aria-label="الشهر التالي" onClick={goToNextMonth}>
+              <Button variant="ghost" size="icon" aria-label={t.common.nextMonth} onClick={goToNextMonth}>
                 <IconChevronLeft className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="sm" onClick={goToToday}>
-                اليوم
-              </Button>
+              <Button variant="outline" size="sm" onClick={goToToday}>{t.common.today}</Button>
             </div>
 
             {/* Filters */}
             <div className="flex gap-2">
               <Select value={filterDepartment} onValueChange={setFilterDepartment}>
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="جميع الأقسام" />
+                  <SelectValue placeholder={t.common.allDepartments} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">جميع الأقسام</SelectItem>
+                  <SelectItem value="all">{t.common.allDepartments}</SelectItem>
                   {departments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id}>
                       {dept.name}
@@ -351,7 +353,7 @@ export function LeaveCalendarView() {
               </Select>
               <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as UiLeaveStatus | "all")}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="جميع الحالات" />
+                  <SelectValue placeholder={t.common.allStatuses} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">{statusLabels.all}</SelectItem>
@@ -377,7 +379,7 @@ export function LeaveCalendarView() {
           )}
 
           {isLoading || isEmployeesLoading ? (
-            <div className="py-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+            <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
           ) : (
             <>
               {/* Day Headers */}
@@ -473,7 +475,7 @@ export function LeaveCalendarView() {
                           ))}
                           {events.length > 3 && (
                             <div className="text-xs text-muted-foreground text-center">
-                              +{events.length - 3} المزيد
+                              +{events.length - 3} {t.leaveCalendar.more}
                             </div>
                           )}
                         </TooltipProvider>
@@ -490,12 +492,12 @@ export function LeaveCalendarView() {
       {/* Legend */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">دليل الألوان</CardTitle>
+          <CardTitle className="text-base">{t.leaveCalendar.colorGuide}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4">
             {legendItems.length === 0 ? (
-              <span className="text-sm text-muted-foreground">لا توجد بيانات لعرضها</span>
+              <span className="text-sm text-muted-foreground">{t.leaveCalendar.noDataToShow}</span>
             ) : (
               legendItems.map((item) => (
                 <div key={`${item.name}-${item.color}`} className="flex items-center gap-2">
@@ -511,13 +513,13 @@ export function LeaveCalendarView() {
       {/* Today's Leaves */}
       <Card>
         <CardHeader>
-          <CardTitle>في إجازة اليوم</CardTitle>
-          <CardDescription>الموظفون الذين في إجازة حالياً</CardDescription>
+          <CardTitle>{t.leaveBalances.onLeaveToday}</CardTitle>
+          <CardDescription>{t.leaveCalendar.employeesOnLeave}</CardDescription>
         </CardHeader>
         <CardContent>
           {stats.onLeaveToday === 0 ? (
             <p className="text-center text-muted-foreground py-8">
-              لا يوجد موظفون في إجازة اليوم
+              {t.leaveCalendar.pNoEmployeesOnLeaveToday}
             </p>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">

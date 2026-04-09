@@ -15,6 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { tenantsService } from "@/lib/api";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 export function RequestActions({
   requestId,
@@ -23,6 +25,8 @@ export function RequestActions({
   requestId: string;
   status: "PENDING" | "APPROVED" | "REJECTED" | string;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [isActing, setIsActing] = React.useState(false);
   const [showRejectDialog, setShowRejectDialog] = React.useState(false);
   const [rejectReason, setRejectReason] = React.useState("");
@@ -34,13 +38,13 @@ export function RequestActions({
     try {
       const res = await tenantsService.approveRequest(requestId, {});
       if (!res.success) {
-        toast.error(res.error || "تعذر قبول الطلب");
+        toast.error(res.error || t.requests.acceptFailed);
         return;
       }
-      toast.success("تم قبول الطلب وإنشاء الشركة");
+      toast.success(t.superAdmin.pRequestAcceptedAndCompanyCreat);
       window.location.reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر قبول الطلب");
+      toast.error(e instanceof Error ? e.message : t.requests.acceptFailed);
     } finally {
       setIsActing(false);
     }
@@ -57,13 +61,13 @@ export function RequestActions({
     try {
       const res = await tenantsService.rejectRequest(requestId, rejectReason);
       if (!res.success) {
-        toast.error(res.error || "تعذر رفض الطلب");
+        toast.error(res.error || t.requests.rejectFailed);
         return;
       }
-      toast.success("تم رفض الطلب");
+      toast.success(t.leaveRequests.rejectedSuccess);
       window.location.reload();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "تعذر رفض الطلب");
+      toast.error(e instanceof Error ? e.message : t.requests.rejectFailed);
     } finally {
       setIsActing(false);
     }
@@ -73,31 +77,29 @@ export function RequestActions({
     <>
       <div className="flex flex-wrap gap-2">
         <Button onClick={() => void approve()} disabled={!canAct || isActing}>
-          قبول وإنشاء شركة
+          {t.superAdmin.pAcceptAndCreateCompany}
         </Button>
-        <Button variant="outline" onClick={reject} disabled={!canAct || isActing}>
-          رفض
-        </Button>
+        <Button variant="outline" onClick={reject} disabled={!canAct || isActing}>{t.common.reject}</Button>
       </div>
 
       <Dialog open={showRejectDialog} onOpenChange={(open) => { if (!open) setShowRejectDialog(false); }}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>رفض الطلب</DialogTitle>
-            <DialogDescription>يمكنك إدخال سبب الرفض أدناه (اختياري).</DialogDescription>
+            <DialogTitle>{t.common.reject}</DialogTitle>
+            <DialogDescription>{t.common.rejectReasonOptional}</DialogDescription>
           </DialogHeader>
           <div className="space-y-2">
-            <Label htmlFor="request-reject-reason">سبب الرفض</Label>
+            <Label htmlFor="request-reject-reason">{t.common.reason}</Label>
             <Input
               id="request-reject-reason"
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="سبب الرفض..."
+              placeholder={t.common.rejectReason}
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>إلغاء</Button>
-            <Button variant="destructive" onClick={() => void confirmReject()}>رفض</Button>
+            <Button variant="outline" onClick={() => setShowRejectDialog(false)}>{t.common.cancel}</Button>
+            <Button variant="destructive" onClick={() => void confirmReject()}>{t.common.reject}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

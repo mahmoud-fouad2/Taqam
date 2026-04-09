@@ -1,6 +1,5 @@
 /**
  * Training Service - API calls for training and development management
- * TODO: Connect to actual API endpoints when backend is ready
  */
 
 import { apiClient, ApiResponse } from "./client";

@@ -2,15 +2,21 @@ import type { Metadata } from "next";
 import { generateMeta } from "@/lib/utils";
 import { DepartmentsManager } from "./departments-manager";
 import { Layers } from "lucide-react";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return generateMeta({
-    title: "الأقسام - Departments",
-    description: "إدارة أقسام الشركة - Core HR Phase 3",
+    title: t.departments.pageTitle,
+    description: t.departments.pageDesc,
   });
 }
 
-export default function DepartmentsPage() {
+export default async function DepartmentsPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -19,8 +25,8 @@ export default function DepartmentsPage() {
             <Layers className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">الأقسام</h1>
-            <p className="text-sm text-muted-foreground">إدارة الهيكل التنظيمي وأقسام الشركة</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.common.departments}</h1>
+            <p className="text-sm text-muted-foreground">{t.departments.pManageOrganizationalStructureA}</p>
           </div>
         </div>
       </div>

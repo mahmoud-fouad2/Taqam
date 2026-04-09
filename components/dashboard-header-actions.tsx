@@ -168,12 +168,16 @@ export function DashboardHeaderActions({
     window.location.href = "/login";
   };
 
+  const actionIconBtnClass = "h-9 w-9 rounded-lg border border-border/70 bg-background/75 shadow-sm hover:bg-accent/80";
+  const dropdownSurfaceClass = "rounded-xl border border-border/70 bg-popover/95 shadow-xl backdrop-blur-xl";
+
   return (
     <div className="flex items-center gap-2">
       <Button
         type="button"
         variant="ghost"
         size="icon"
+        className={actionIconBtnClass}
         aria-label={locale === "ar" ? "تبديل المظهر" : "Toggle theme"}
         onClick={toggleTheme}
       >
@@ -182,12 +186,12 @@ export function DashboardHeaderActions({
       {/* Help */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-9 w-9">
+          <Button variant="ghost" size="icon" className={actionIconBtnClass}>
             <HelpCircle className="h-5 w-5" />
             <span className="sr-only">{t.common.helpCenter}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-72">
+        <DropdownMenuContent align="end" className={`w-72 ${dropdownSurfaceClass}`}>
           <DropdownMenuLabel>{t.common.helpCenter}</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
@@ -316,7 +320,7 @@ export function DashboardHeaderActions({
       {/* Notifications */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="relative h-9 w-9">
+          <Button variant="ghost" size="icon" className={`relative ${actionIconBtnClass}`}>
             <Bell className="h-5 w-5" />
             {unreadCount > 0 && (
               <span className="absolute -end-0.5 -top-0.5">
@@ -328,7 +332,7 @@ export function DashboardHeaderActions({
             <span className="sr-only">{t.common.notifications}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-96">
+        <DropdownMenuContent align="end" className={`w-96 ${dropdownSurfaceClass}`}>
           <DropdownMenuLabel className="flex items-center justify-between">
             <span>{t.common.notifications}</span>
             <div className="flex items-center gap-3">
@@ -377,7 +381,7 @@ export function DashboardHeaderActions({
       {/* User */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-9 gap-2 px-2">
+          <Button variant="ghost" className="h-9 gap-2 rounded-lg border border-border/70 bg-background/75 px-2 shadow-sm hover:bg-accent/80">
             <Avatar className="h-7 w-7">
               <AvatarImage src={avatarSrc} alt="User" />
               <AvatarFallback>U</AvatarFallback>
@@ -387,7 +391,7 @@ export function DashboardHeaderActions({
             </span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-72">
+        <DropdownMenuContent align="end" className={`w-72 ${dropdownSurfaceClass}`}>
           <DropdownMenuLabel className="p-0">
             <div className="flex items-center gap-2 px-2 py-2">
               <Avatar className="h-9 w-9 rounded-lg">

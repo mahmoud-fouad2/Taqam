@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -70,21 +70,30 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPlus, IconPencil, IconTrash, IconSearch, IconRefresh } from "@tabler/icons-react";
 import { useQuery } from "@tanstack/react-query";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 import type { Department, DepartmentCreateInput } from "@/lib/types/core-hr";
 
-// Validation schema
-const departmentSchema = z.object({
-  name: z.string().min(2, "الاسم مطلوب (حرفين على الأقل)"),
-  nameAr: z.string().optional(),
-  code: z.string().optional(),
-  description: z.string().optional(),
-  parentId: z.string().optional(),
-});
+function createDepartmentSchema(nameRequiredMessage: string) {
+  return z.object({
+    name: z.string().min(2, nameRequiredMessage),
+    nameAr: z.string().optional(),
+    code: z.string().optional(),
+    description: z.string().optional(),
+    parentId: z.string().optional(),
+  });
+}
 
-type DepartmentFormData = z.infer<typeof departmentSchema>;
+type DepartmentFormData = z.infer<ReturnType<typeof createDepartmentSchema>>;
 
 export function DepartmentsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
+  const departmentSchema = useMemo(
+    () => createDepartmentSchema(t.common.nameRequired),
+    [t.common.nameRequired]
+  );
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -168,7 +177,7 @@ export function DepartmentsManager() {
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Failed to update department");
-        toast.success("تم تحديث القسم بنجاح");
+        toast.success(t.departments.updatedSuccess);
         await fetchDepartments();
       } else {
         // Create new
@@ -178,14 +187,14 @@ export function DepartmentsManager() {
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("Failed to create department");
-        toast.success("تم إضافة القسم بنجاح");
+        toast.success(t.departments.addedSuccess);
         await fetchDepartments();
       }
       setIsDialogOpen(false);
       form.reset();
     } catch (error) {
       console.error("Error saving department:", error);
-      toast.error(editingDepartment ? "فشل في تحديث القسم" : "فشل في إضافة القسم");
+      toast.error(editingDepartment ? t.departments.updateFailed : t.departments.addFailed);
     } finally {
       setSaving(false);
     }
@@ -204,11 +213,11 @@ export function DepartmentsManager() {
           method: "DELETE",
         });
         if (!res.ok) throw new Error("Failed to delete department");
-        toast.success("تم حذف القسم بنجاح");
+        toast.success(t.departments.deletedSuccess);
         await fetchDepartments();
       } catch (error) {
         console.error("Error deleting department:", error);
-        toast.error("فشل في حذف القسم");
+        toast.error(t.departments.deleteFailed);
       } finally {
         setDeleteDialogOpen(false);
         setDepartmentToDelete(null);
@@ -256,19 +265,19 @@ export function DepartmentsManager() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الأقسام</CardDescription>
+            <CardDescription>{t.departments.totalDepartments}</CardDescription>
             <CardTitle className="text-3xl">{departments.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الموظفين</CardDescription>
+            <CardDescription>{t.departments.totalEmployees}</CardDescription>
             <CardTitle className="text-3xl">{totalEmployees}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>متوسط الموظفين لكل قسم</CardDescription>
+            <CardDescription>{t.departments.avgEmployees}</CardDescription>
             <CardTitle className="text-3xl">
               {departments.length > 0 ? Math.round(totalEmployees / departments.length) : 0}
             </CardTitle>
@@ -281,16 +290,16 @@ export function DepartmentsManager() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>الأقسام</CardTitle>
-              <CardDescription>إدارة أقسام الشركة والهيكل التنظيمي</CardDescription>
+              <CardTitle>{t.departments.title}</CardTitle>
+              <CardDescription>{t.departments.subtitle}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchDepartments()} title="تحديث">
+              <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchDepartments()} title={t.common.refresh}>
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>
                 <IconPlus className="ms-2 h-4 w-4" />
-                إضافة قسم
+                {t.departments.addDepartment}
               </Button>
             </div>
           </div>
@@ -301,7 +310,7 @@ export function DepartmentsManager() {
             <div className="relative flex-1 max-w-sm">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث..."
+                placeholder={t.common.searchDots}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -317,15 +326,15 @@ export function DepartmentsManager() {
                   <EmptyMedia variant="icon">
                     <IconPlus className="size-5" />
                   </EmptyMedia>
-                  <EmptyTitle>لا توجد أقسام</EmptyTitle>
+                  <EmptyTitle>{t.departments.noDepartments}</EmptyTitle>
                   <EmptyDescription>
-                    أضف قسمًا لبدء تنظيم الموظفين وهيكلة المنشأة.
+                    {t.departments.noDepartmentsDesc}
                   </EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button onClick={handleAdd}>
                     <IconPlus className="ms-2 h-4 w-4" />
-                    إضافة قسم
+                    {t.departments.addDepartment}
                   </Button>
                 </EmptyContent>
               </Empty>
@@ -340,30 +349,30 @@ export function DepartmentsManager() {
                           <div className="text-sm text-muted-foreground truncate">{dept.name}</div>
                         ) : null}
 
-                        <div className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
-                          <div className="text-muted-foreground">الرمز</div>
+                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                          <div className="text-muted-foreground">{t.common.code}</div>
                           <div className="text-start">
                             {dept.code ? <Badge variant="outline">{dept.code}</Badge> : <span className="text-muted-foreground">-</span>}
                           </div>
 
-                          <div className="text-muted-foreground">الموظفين</div>
+                          <div className="text-muted-foreground">{t.common.employees}</div>
                           <div className="text-start">
                             <Badge variant="secondary">{dept.employeesCount}</Badge>
                           </div>
 
-                          <div className="text-muted-foreground">الوصف</div>
+                          <div className="text-muted-foreground">{t.common.description}</div>
                           <div className="text-start line-clamp-2">{dept.description || "-"}</div>
                         </div>
                       </div>
 
                       <div className="flex flex-col items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" aria-label="تعديل" onClick={() => handleEdit(dept)}>
+                        <Button variant="ghost" size="icon" aria-label={t.common.edit} onClick={() => handleEdit(dept)}>
                           <IconPencil className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
-                          aria-label="حذف"
+                          aria-label={t.common.delete}
                           onClick={() => handleDeleteClick(dept)}
                           disabled={dept.employeesCount > 0}
                         >
@@ -382,21 +391,21 @@ export function DepartmentsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-start">الاسم</TableHead>
-                  <TableHead className="text-start">الرمز</TableHead>
-                  <TableHead className="text-start">الوصف</TableHead>
-                  <TableHead className="text-start">الموظفين</TableHead>
-                  <TableHead className="text-start w-[100px]">إجراءات</TableHead>
+                  <TableHead className="text-start">{t.common.name}</TableHead>
+                  <TableHead className="text-start">{t.common.code}</TableHead>
+                  <TableHead className="text-start">{t.common.description}</TableHead>
+                  <TableHead className="text-start">{t.common.employees}</TableHead>
+                  <TableHead className="text-start w-[100px]">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredDepartments.length === 0 ? (
                   <TableEmptyRow
                     colSpan={5}
-                    title="لا توجد أقسام"
-                    description="أضف قسمًا لبدء تنظيم الموظفين وهيكلة المنشأة."
+                    title={t.departments.noDepartments}
+                    description={t.departments.noDepartmentsDesc}
                     icon={<IconPlus className="size-5" />}
-                    actionLabel="إضافة قسم"
+                    actionLabel={t.departments.addDepartment}
                     onAction={handleAdd}
                   />
                 ) : (
@@ -424,7 +433,7 @@ export function DepartmentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="تعديل"
+                            aria-label={t.common.edit}
                             onClick={() => handleEdit(dept)}
                           >
                             <IconPencil className="h-4 w-4" />
@@ -432,7 +441,7 @@ export function DepartmentsManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="حذف"
+                            aria-label={t.common.delete}
                             onClick={() => handleDeleteClick(dept)}
                             disabled={dept.employeesCount > 0}
                           >
@@ -454,12 +463,12 @@ export function DepartmentsManager() {
         <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingDepartment ? "تعديل القسم" : "إضافة قسم جديد"}
+              {editingDepartment ? t.departments.editDepartment : t.departments.addNewDepartment}
             </DialogTitle>
             <DialogDescription>
               {editingDepartment
-                ? "قم بتعديل بيانات القسم"
-                : "أدخل بيانات القسم الجديد"}
+                ? t.departments.editDesc
+                : t.departments.addDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -469,7 +478,7 @@ export function DepartmentsManager() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم (بالإنجليزية) *</FormLabel>
+                    <FormLabel>{t.common.nameEn} *</FormLabel>
                     <FormControl>
                       <Input placeholder="Human Resources" {...field} />
                     </FormControl>
@@ -482,9 +491,9 @@ export function DepartmentsManager() {
                 name="nameAr"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم (بالعربية)</FormLabel>
+                    <FormLabel>{t.common.nameAr}</FormLabel>
                     <FormControl>
-                      <Input placeholder="الموارد البشرية" {...field} />
+                      <Input placeholder={t.departments.pHumanResources} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -495,7 +504,7 @@ export function DepartmentsManager() {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>رمز القسم</FormLabel>
+                    <FormLabel>{t.departments.departmentCode}</FormLabel>
                     <FormControl>
                       <Input placeholder="HR" {...field} />
                     </FormControl>
@@ -508,18 +517,18 @@ export function DepartmentsManager() {
                 name="parentId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>القسم الأب</FormLabel>
+                    <FormLabel>{t.common.parentDepartment}</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="اختر القسم الأب (اختياري)" />
+                          <SelectValue placeholder={t.common.selectParentOptional} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="none">بدون (قسم رئيسي)</SelectItem>
+                        <SelectItem value="none">{t.common.noParentDepartment}</SelectItem>
                         {departments
                           .filter((d) => d.id !== editingDepartment?.id)
                           .map((d) => (
@@ -538,10 +547,10 @@ export function DepartmentsManager() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الوصف</FormLabel>
+                    <FormLabel>{t.common.description}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="وصف مختصر للقسم..."
+                        placeholder={t.common.shortDesc}
                         className="resize-none"
                         {...field}
                       />
@@ -557,10 +566,10 @@ export function DepartmentsManager() {
                   onClick={() => setIsDialogOpen(false)}
                   disabled={saving}
                 >
-                  إلغاء
+                  {t.common.cancel}
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? "جاري الحفظ..." : editingDepartment ? "حفظ التعديلات" : "إضافة"}
+                  {saving ? t.common.saving : editingDepartment ? t.common.saveChanges : t.common.add}
                 </Button>
               </DialogFooter>
             </form>
@@ -572,16 +581,16 @@ export function DepartmentsManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+            <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف القسم &quot;{departmentToDelete?.nameAr || departmentToDelete?.name}&quot; نهائياً.
-              هذا الإجراء لا يمكن التراجع عنه.
+              {t.departments.deleteConfirmPrefix} &quot;{departmentToDelete?.nameAr || departmentToDelete?.name}&quot; {t.departments.deleteConfirmSuffix}{" "}
+              {t.common.cannotUndo}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              حذف
+              {t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

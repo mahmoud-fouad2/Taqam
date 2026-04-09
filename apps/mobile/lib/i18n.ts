@@ -78,6 +78,63 @@ const dict: Dict = {
   language: { ar: "اللغة", en: "Language" },
   arabic: { ar: "العربية", en: "Arabic" },
   english: { ar: "English", en: "English" },
+
+  // Settings screen: Biometrics
+  security_verification: { ar: "الأمان والتحقق", en: "Security and verification" },
+  biometric_confirm: { ar: "تأكيد الحضور بالبصمة", en: "Biometric attendance confirmation" },
+  biometric_loading: { ar: "جارٍ فحص البصمة على هذا الجهاز...", en: "Checking biometric support on this device..." },
+  biometric_enabled: { ar: "البصمة مفعلة لتأكيد الحضور والانصراف.", en: "Biometrics are enabled for attendance confirmation." },
+  biometric_available: { ar: "البصمة متاحة لكن معطلة من إعدادات التطبيق.", en: "Biometrics are available but disabled in app settings." },
+  biometric_not_enrolled: { ar: "الجهاز يدعم البصمة لكن لا توجد بصمة أو وجه مسجلان عليه.", en: "This device supports biometrics, but none are enrolled." },
+  biometric_unsupported: { ar: "هذا الجهاز لا يدعم المصادقة الحيوية.", en: "This device does not support biometric authentication." },
+
+  // Settings screen: Session
+  session_section: { ar: "الجلسة", en: "Session" },
+  not_signed_in: { ar: "غير مسجل الدخول", en: "Not signed in" },
+
+  // Settings screen: Diagnostics
+  runtime_diagnostics: { ar: "تشخيص التشغيل", en: "Runtime diagnostics" },
+  app_version_label: { ar: "إصدار التطبيق", en: "App version" },
+  package_id_label: { ar: "معرّف الحزمة", en: "Package ID" },
+  api_url_label: { ar: "عنوان الخادم", en: "API base URL" },
+  config_source_label: { ar: "مصدر الإعداد", en: "Config source" },
+  config_source_env: { ar: "ملف البيئة EXPO_PUBLIC_API_BASE_URL", en: "EXPO_PUBLIC_API_BASE_URL" },
+  config_source_default: { ar: "الافتراضي الإنتاجي المدمج (taqam.net)", en: "Built-in production default (taqam.net)" },
+  config_source_fallback: { ar: "Fallback محلي مؤقت", en: "Temporary localhost fallback" },
+  config_warning_localhost: { ar: "هذا البناء ما زال يعتمد على localhost كاحتياط. اضبط EXPO_PUBLIC_API_BASE_URL قبل مشاركة التطبيق خارج جهاز التطوير.", en: "This build is still using localhost as a fallback. Set EXPO_PUBLIC_API_BASE_URL before sharing the app outside the dev machine." },
+  config_ok_explicit: { ar: "التطبيق مربوط حاليًا بعنوان خادم صريح ويمكن مراجعته من هذه الشاشة.", en: "The app is currently wired to an explicit backend URL visible on this screen." },
+
+  // Attendance screen
+  greeting: { ar: "مرحبًا", en: "Welcome" },
+  geofence_note: { ar: "🔒 إذا كان نظام Geofence مفعلاً، التسجيل خارج مواقع العمل سيتم رفضه.", en: "🔒 If geofence is enabled, check-ins outside allowed locations will be rejected." },
+  biometric_prompt_checkin: { ar: "تأكيد البصمة لتسجيل الحضور", en: "Confirm biometrics to check in" },
+  biometric_prompt_checkout: { ar: "تأكيد البصمة لتسجيل الانصراف", en: "Confirm biometrics to check out" },
+  biometric_failed: { ar: "لم يتم تأكيد البصمة", en: "Biometric verification failed" },
+  challenge_failed: { ar: "فشل إنشاء التحدي", en: "Failed to create challenge" },
+  checked_in_msg: { ar: "تم تسجيل الحضور", en: "Checked in" },
+  checked_out_msg: { ar: "تم تسجيل الانصراف", en: "Checked out" },
+
+  // Leaves screen
+  new_request: { ar: "طلب جديد", en: "New request" },
+  leave_request: { ar: "طلب إجازة", en: "Leave request" },
+  leave_type_label: { ar: "نوع الإجازة", en: "Leave type" },
+  no_leave_types: { ar: "لا توجد أنواع إجازات", en: "No leave types available" },
+  leave_annual: { ar: "سنوية، مرضية، بدون راتب...", en: "Annual, sick, unpaid..." },
+  support_ticket: { ar: "تذكرة دعم", en: "Support ticket" },
+  support_ticket_sub: { ar: "استفسار أو مشكلة", en: "Question or issue" },
+  fill_all_fields: { ar: "الرجاء ملء جميع الحقول", en: "Please fill all fields" },
+  select_leave_type: { ar: "يرجى اختيار نوع الإجازة", en: "Please select a leave type" },
+  end_after_start: { ar: "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء", en: "End date must be after start date" },
+  start_date_label: { ar: "تاريخ البدء", en: "Start date" },
+  end_date_label: { ar: "تاريخ الانتهاء", en: "End date" },
+  reason_label: { ar: "السبب (اختياري)", en: "Reason (optional)" },
+  reason_placeholder: { ar: "سبب الإجازة...", en: "Reason for leave..." },
+  back: { ar: "رجوع", en: "Back" },
+
+  // Profile screen
+  account_info: { ar: "معلومات الحساب", en: "Account info" },
+  signout_all_confirm_msg: { ar: "سيتم تسجيل خروجك من جميع الأجهزة. هل أنت متأكد؟", en: "You will be signed out from all devices. Are you sure?" },
+  copyright: { ar: "© 2025 طاقم. جميع الحقوق محفوظة.", en: "© 2025 Taqam. All rights reserved." },
 };
 
 export function t(lang: AppLanguage, key: keyof typeof dict): string {

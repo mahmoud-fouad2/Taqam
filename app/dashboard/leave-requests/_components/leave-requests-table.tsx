@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { IconCheck, IconCheckbox, IconEye, IconTrash, IconX } from "@tabler/icons-react";
 
@@ -24,6 +26,10 @@ import type { LeaveRequestStatus } from "@/lib/types/leave";
 import { formatDateRange } from "@/lib/types/leave";
 
 import type { UiLeaveRequest } from "./leave-requests-types";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function LeaveRequestsTable({
   requests,
@@ -46,6 +52,8 @@ export function LeaveRequestsTable({
   onBulkApprove?: (ids: string[]) => void;
   onBulkReject?: (ids: string[]) => void;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const pendingRequests = requests.filter((r) => r.status === "pending");
@@ -88,23 +96,23 @@ export function LeaveRequestsTable({
       {selectedIds.size > 0 && (onBulkApprove || onBulkReject) && (
         <div className="flex items-center gap-2 rounded-lg border bg-muted/50 px-4 py-2">
           <span className="text-sm font-medium">
-            تم تحديد {selectedIds.size} طلب
+            {t.leaveRequests.pSelected} {selectedIds.size} {t.leaveRequests.pRequest}
           </span>
           <div className="ms-auto flex gap-2">
             {onBulkApprove && (
               <Button size="sm" variant="default" className="gap-1.5" onClick={handleBulkApprove}>
                 <IconCheck className="h-3.5 w-3.5" />
-                موافقة جماعية
+                {t.leaveRequests.pBulkApprove}
               </Button>
             )}
             {onBulkReject && (
               <Button size="sm" variant="destructive" className="gap-1.5" onClick={handleBulkReject}>
                 <IconX className="h-3.5 w-3.5" />
-                رفض جماعي
+                {t.leaveRequests.pBulkRejection}
               </Button>
             )}
             <Button size="sm" variant="ghost" onClick={() => setSelectedIds(new Set())}>
-              إلغاء التحديد
+              {t.leaveRequests.pCancelSelection}
             </Button>
           </div>
         </div>
@@ -118,23 +126,23 @@ export function LeaveRequestsTable({
               <Checkbox
                 checked={allPendingSelected}
                 onCheckedChange={toggleAll}
-                aria-label="تحديد كل الطلبات المعلقة"
+                aria-label={t.leaveRequests.selectAllPending}
               />
             </TableHead>
           )}
-          <TableHead>الموظف</TableHead>
-          <TableHead>نوع الإجازة</TableHead>
-          <TableHead>الفترة</TableHead>
-          <TableHead>المدة</TableHead>
-          <TableHead>الحالة</TableHead>
-          <TableHead className="w-[120px]">إجراءات</TableHead>
+          <TableHead>{t.common.employee}</TableHead>
+          <TableHead>{t.common.type}</TableHead>
+          <TableHead>{t.leaveRequests.period}</TableHead>
+          <TableHead>{t.trainingCourses.durationHours}</TableHead>
+          <TableHead>{t.common.status}</TableHead>
+          <TableHead className="w-[120px]">{t.common.actions}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {requests.length === 0 ? (
           <TableRow>
             <TableCell colSpan={7} className="text-center py-8">
-              <p className="text-muted-foreground">لا توجد طلبات</p>
+              <p className="text-muted-foreground">{t.requests.noRequests}</p>
             </TableCell>
           </TableRow>
         ) : (
@@ -145,7 +153,7 @@ export function LeaveRequestsTable({
                   <Checkbox
                     checked={selectedIds.has(request.id)}
                     onCheckedChange={() => toggleOne(request.id)}
-                    aria-label={`تحديد طلب ${request.employeeName}`}
+                    aria-label={`${t.leaveRequests.selectRequest} ${request.employeeName}`}
                   />
                 ) : (
                   <span />
@@ -167,7 +175,7 @@ export function LeaveRequestsTable({
                   <div className="font-medium">{request.leaveTypeName}</div>
                   <div className="text-sm text-muted-foreground">
                     {getLeaveTypeCode(request.leaveTypeId)
-                      ? `الرمز: ${getLeaveTypeCode(request.leaveTypeId)}`
+                      ? `${t.leaveRequests.pCode} ${getLeaveTypeCode(request.leaveTypeId)}`
                       : ""}
                   </div>
                 </div>
@@ -177,8 +185,8 @@ export function LeaveRequestsTable({
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
-                  {request.totalDays} {request.totalDays === 1 ? "يوم" : "أيام"}
-                  {request.isHalfDay && " (نصف يوم)"}
+                  {request.totalDays} {request.totalDays === 1 ? t.common.day : t.common.days}
+                  {request.isHalfDay && ` ${t.leaveRequests.pHalfDay}`}
                 </Badge>
               </TableCell>
               <TableCell>{getStatusBadge(request.status)}</TableCell>
@@ -186,30 +194,22 @@ export function LeaveRequestsTable({
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm">
-                      إجراءات
+                      {t.leaveRequests.pActions}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => onView(request)}>
-                      <IconEye className="ms-2 h-4 w-4" />
-                      عرض التفاصيل
-                    </DropdownMenuItem>
+                      <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
                     {request.status === "pending" && (
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className="text-green-600" onClick={() => onApprove(request)}>
-                          <IconCheck className="ms-2 h-4 w-4" />
-                          موافقة
-                        </DropdownMenuItem>
+                          <IconCheck className="ms-2 h-4 w-4" />{t.common.accept}</DropdownMenuItem>
                         <DropdownMenuItem className="text-red-600" onClick={() => onReject(request)}>
-                          <IconX className="ms-2 h-4 w-4" />
-                          رفض
-                        </DropdownMenuItem>
+                          <IconX className="ms-2 h-4 w-4" />{t.common.reject}</DropdownMenuItem>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onCancel(request.id)}>
-                          <IconTrash className="ms-2 h-4 w-4" />
-                          إلغاء الطلب
-                        </DropdownMenuItem>
+                          <IconTrash className="ms-2 h-4 w-4" />{t.myRequests.cancelRequest}</DropdownMenuItem>
                       </>
                     )}
                   </DropdownMenuContent>

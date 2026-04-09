@@ -22,12 +22,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 import type { Tenant } from "@/lib/types/tenant";
 import { tenantsService } from "@/lib/api";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 interface TenantSettingsFormProps {
   tenant: Tenant;
 }
 
 export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -45,7 +49,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
     setIsLoading(true);
 
     if (!formData.nameAr?.trim() && !formData.name?.trim()) {
-      toast.error("اسم الشركة مطلوب");
+      toast.error(t.organization.companyNameRequired);
       setIsLoading(false);
       return;
     }
@@ -62,14 +66,14 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
       });
 
       if (!res.success) {
-        toast.error(res.error || "تعذر حفظ إعدادات الشركة");
+        toast.error(res.error || t.organization.updateFailed);
         return;
       }
 
-      toast.success("تم حفظ إعدادات الشركة");
+      toast.success(t.tenant.pCompanySettingsSaved);
       router.refresh();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "تعذر حفظ إعدادات الشركة");
+      toast.error(err instanceof Error ? err.message : t.organization.updateFailed);
     }
 
     setIsLoading(false);
@@ -79,11 +83,11 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Company Info */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">معلومات الشركة</h3>
+        <h3 className="text-lg font-medium">{t.organization.companySection}</h3>
         
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="nameAr">اسم الشركة بالعربية</Label>
+            <Label htmlFor="nameAr">{t.tenant.pCompanyNameArabic}</Label>
             <Input
               id="nameAr"
               value={formData.nameAr}
@@ -92,7 +96,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="name">اسم الشركة بالإنجليزية</Label>
+            <Label htmlFor="name">{t.tenant.pCompanyNameEnglish}</Label>
             <Input
               id="name"
               value={formData.name}
@@ -103,7 +107,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
-            <Label htmlFor="email">البريد الإلكتروني</Label>
+            <Label htmlFor="email">{t.common.email}</Label>
             <Input
               id="email"
               type="email"
@@ -113,7 +117,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="phone">رقم الهاتف</Label>
+            <Label htmlFor="phone">{t.common.phone}</Label>
             <Input
               id="phone"
               value={formData.phone}
@@ -127,11 +131,11 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
 
       {/* Settings */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">الإعدادات</h3>
+        <h3 className="text-lg font-medium">{t.common.options}</h3>
         
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
-            <Label>الباقة</Label>
+            <Label>{t.common.type}</Label>
             <Select
               value={formData.plan}
               onValueChange={(value) => setFormData({ ...formData, plan: value as any })}
@@ -148,7 +152,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
           </div>
           
           <div className="space-y-2">
-            <Label>اللغة الافتراضية</Label>
+            <Label>{t.common.options}</Label>
             <Select
               value={formData.defaultLocale}
               onValueChange={(value) => setFormData({ ...formData, defaultLocale: value as any })}
@@ -157,14 +161,14 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ar">العربية</SelectItem>
+                <SelectItem value="ar">{t.common.arabic}</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
           </div>
           
           <div className="space-y-2">
-            <Label>الثيم الافتراضي</Label>
+            <Label>{t.tenant.defaultTheme}</Label>
             <Select
               value={formData.defaultTheme}
               onValueChange={(value) => setFormData({ ...formData, defaultTheme: value as any })}
@@ -185,12 +189,10 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
 
       {/* Actions */}
       <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          إلغاء
-        </Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>{t.common.cancel}</Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
-          حفظ التغييرات
+          {t.tenant.pSaveChanges}
         </Button>
       </div>
     </form>

@@ -62,10 +62,13 @@ import { IconPlus, IconPencil, IconTrash, IconSearch } from "@tabler/icons-react
 import type { JobTitle } from "@/lib/types/core-hr";
 import { getLevelLabelAr } from "@/lib/types/core-hr";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 // Validation schema
 const jobTitleSchema = z.object({
-  name: z.string().min(2, "الاسم مطلوب (حرفين على الأقل)"),
+  name: z.string().min(2, t.common.nameRequired),
   nameAr: z.string().optional(),
   code: z.string().optional(),
   description: z.string().optional(),
@@ -81,7 +84,7 @@ const initialJobTitles: JobTitle[] = [
   {
     id: "job-1",
     name: "Software Engineer",
-    nameAr: "مهندس برمجيات",
+    nameAr: t.common.jobTitleExample,
     code: "SE",
     level: 2,
     minSalary: 12000,
@@ -159,12 +162,12 @@ const initialJobTitles: JobTitle[] = [
 ];
 
 const levels = [
-  { value: "1", label: "مبتدئ (Entry Level)" },
-  { value: "2", label: "متوسط (Mid Level)" },
-  { value: "3", label: "أول (Senior)" },
-  { value: "4", label: "مدير (Manager)" },
-  { value: "5", label: "مدير تنفيذي (Director)" },
-  { value: "6", label: "قيادي (Executive)" },
+  { value: "1", label: t.jobTitles.entryLevel },
+  { value: "2", label: t.jobTitles.midLevel },
+  { value: "3", label: t.jobTitles.senior },
+  { value: "4", label: t.jobTitles.managerLevel },
+  { value: "5", label: t.jobTitles.director },
+  { value: "6", label: t.jobTitles.executive },
 ];
 
 export function JobTitlesManager() {
@@ -303,19 +306,19 @@ export function JobTitlesManager() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي المسميات</CardDescription>
+            <CardDescription>{t.jobTitles.totalTitles}</CardDescription>
             <CardTitle className="text-3xl">{jobTitles.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الموظفين</CardDescription>
+            <CardDescription>{t.departments.totalEmployees}</CardDescription>
             <CardTitle className="text-3xl">{totalEmployees}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>المسميات الإدارية</CardDescription>
+            <CardDescription>{t.jobTitles.adminTitles}</CardDescription>
             <CardTitle className="text-3xl">
               {jobTitles.filter((j) => j.level && j.level >= 4).length}
             </CardTitle>
@@ -328,12 +331,12 @@ export function JobTitlesManager() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>المسميات الوظيفية</CardTitle>
-              <CardDescription>إدارة المسميات الوظيفية ومستوياتها</CardDescription>
+              <CardTitle>{t.jobTitles.title}</CardTitle>
+              <CardDescription>{t.jobTitles.subtitle}</CardDescription>
             </div>
             <Button onClick={handleAdd}>
               <IconPlus className="ms-2 h-4 w-4" />
-              إضافة مسمى
+              {t.jobTitles.pAddTitle}
             </Button>
           </div>
         </CardHeader>
@@ -343,7 +346,7 @@ export function JobTitlesManager() {
             <div className="relative flex-1 max-w-sm">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث..."
+                placeholder={t.common.searchDots}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -356,19 +359,19 @@ export function JobTitlesManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-start">المسمى</TableHead>
-                  <TableHead className="text-start">الرمز</TableHead>
-                  <TableHead className="text-start">المستوى</TableHead>
-                  <TableHead className="text-start">نطاق الراتب</TableHead>
-                  <TableHead className="text-start">الموظفين</TableHead>
-                  <TableHead className="text-start w-[100px]">إجراءات</TableHead>
+                  <TableHead className="text-start">{t.common.jobTitle}</TableHead>
+                  <TableHead className="text-start">{t.common.code}</TableHead>
+                  <TableHead className="text-start">{t.jobTitles.level}</TableHead>
+                  <TableHead className="text-start">{t.jobTitles.salaryRange}</TableHead>
+                  <TableHead className="text-start">{t.common.employees}</TableHead>
+                  <TableHead className="text-start w-[100px]">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredJobTitles.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      لا توجد مسميات وظيفية
+                      {t.jobTitles.pNoJobTitlesFound}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -391,7 +394,7 @@ export function JobTitlesManager() {
                       <TableCell>
                         {job.minSalary || job.maxSalary ? (
                           <span className="text-sm">
-                            {job.minSalary?.toLocaleString(numLocale)} - {job.maxSalary?.toLocaleString(numLocale)} ر.س
+                            {job.minSalary?.toLocaleString(numLocale)} - {job.maxSalary?.toLocaleString(numLocale)} {t.jobTitles.sar}
                           </span>
                         ) : (
                           "-"
@@ -405,7 +408,7 @@ export function JobTitlesManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="تعديل"
+                            aria-label={t.common.edit}
                             onClick={() => handleEdit(job)}
                           >
                             <IconPencil className="h-4 w-4" />
@@ -413,7 +416,7 @@ export function JobTitlesManager() {
                           <Button
                             variant="ghost"
                             size="icon"
-                            aria-label="حذف"
+                            aria-label={t.common.delete}
                             onClick={() => handleDeleteClick(job)}
                             disabled={job.employeesCount > 0}
                           >
@@ -435,12 +438,12 @@ export function JobTitlesManager() {
         <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingJobTitle ? "تعديل المسمى الوظيفي" : "إضافة مسمى وظيفي جديد"}
+              {editingJobTitle ? t.jobTitles.editJobTitle : t.jobTitles.addJobTitle}
             </DialogTitle>
             <DialogDescription>
               {editingJobTitle
-                ? "قم بتعديل بيانات المسمى الوظيفي"
-                : "أدخل بيانات المسمى الوظيفي الجديد"}
+                ? t.jobTitles.editDesc
+                : t.jobTitles.addDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -450,7 +453,7 @@ export function JobTitlesManager() {
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم (بالإنجليزية) *</FormLabel>
+                    <FormLabel>{t.common.nameEn} *</FormLabel>
                     <FormControl>
                       <Input placeholder="Software Engineer" {...field} />
                     </FormControl>
@@ -463,21 +466,21 @@ export function JobTitlesManager() {
                 name="nameAr"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الاسم (بالعربية)</FormLabel>
+                    <FormLabel>{t.common.nameAr}</FormLabel>
                     <FormControl>
-                      <Input placeholder="مهندس برمجيات" {...field} />
+                      <Input placeholder={t.common.jobTitleExample} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الرمز</FormLabel>
+                      <FormLabel>{t.common.code}</FormLabel>
                       <FormControl>
                         <Input placeholder="SE" {...field} />
                       </FormControl>
@@ -490,11 +493,11 @@ export function JobTitlesManager() {
                   name="level"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المستوى</FormLabel>
+                      <FormLabel>{t.jobTitles.level}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="اختر المستوى" />
+                            <SelectValue placeholder={t.common.selectLevel} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
@@ -510,13 +513,13 @@ export function JobTitlesManager() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="minSalary"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الحد الأدنى للراتب</FormLabel>
+                      <FormLabel>{t.jobPostings.minSalary}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="8000" {...field} />
                       </FormControl>
@@ -529,7 +532,7 @@ export function JobTitlesManager() {
                   name="maxSalary"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الحد الأقصى للراتب</FormLabel>
+                      <FormLabel>{t.jobPostings.maxSalary}</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="15000" {...field} />
                       </FormControl>
@@ -543,10 +546,10 @@ export function JobTitlesManager() {
                 name="description"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>الوصف</FormLabel>
+                    <FormLabel>{t.common.description}</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="وصف المهام والمسؤوليات..."
+                        placeholder={t.jobTitles.responsibilitiesPlaceholder}
                         className="resize-none"
                         {...field}
                       />
@@ -560,11 +563,9 @@ export function JobTitlesManager() {
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                >
-                  إلغاء
-                </Button>
+                >{t.common.cancel}</Button>
                 <Button type="submit">
-                  {editingJobTitle ? "حفظ التعديلات" : "إضافة"}
+                  {editingJobTitle ? t.common.saveChanges : t.common.add}
                 </Button>
               </DialogFooter>
             </form>
@@ -576,16 +577,14 @@ export function JobTitlesManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد؟</AlertDialogTitle>
+            <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف المسمى الوظيفي &quot;{jobTitleToDelete?.nameAr || jobTitleToDelete?.name}&quot; نهائياً.
+              {t.jobTitles.pTheJobTitleWillBePermanentlyDe} &quot;{jobTitleToDelete?.nameAr || jobTitleToDelete?.name}&quot; {t.jobTitles.pPermanently}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
-              حذف
-            </AlertDialogAction>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -35,8 +35,14 @@ import {
   requestStatusLabels,
   requestStatusColors,
 } from '@/lib/types/self-service';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export default function MyRequestsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [requests, setRequests] = useState<SelfServiceRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -123,7 +129,7 @@ export default function MyRequestsManager() {
     const source = meta.source as string | undefined;
     const sourceId = meta.sourceId as string | undefined;
     if (!source || !sourceId) {
-      setError('لا يمكن إلغاء هذا الطلب');
+      setError(t.myRequests.cannotCancel);
       return;
     }
 
@@ -131,26 +137,26 @@ export default function MyRequestsManager() {
       setError(null);
       if (source === 'leave') {
         const res = await fetch(`/api/leaves/${sourceId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('فشل إلغاء طلب الإجازة');
+        if (!res.ok) throw new Error(t.myRequests.cancelLeaveFailed);
       } else if (source === 'attendance') {
         const res = await fetch(`/api/attendance-requests/${sourceId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('فشل إلغاء طلب الحضور');
+        if (!res.ok) throw new Error(t.myRequests.cancelAttendanceFailed);
       } else if (source === 'ticket') {
         const res = await fetch(`/api/tickets/${sourceId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'CLOSED' }),
         });
-        if (!res.ok) throw new Error('فشل إغلاق التذكرة');
+        if (!res.ok) throw new Error(t.myRequests.closeTicketFailed);
       } else if (source === 'training') {
         const res = await fetch(`/api/training/enrollments/${sourceId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'withdrawn' }),
         });
-        if (!res.ok) throw new Error('فشل سحب طلب التدريب');
+        if (!res.ok) throw new Error(t.myRequests.withdrawTrainingFailed);
       } else {
-        throw new Error('لا يمكن إلغاء هذا النوع من الطلبات');
+        throw new Error(t.myRequests.cannotCancelType);
       }
 
       await refresh();
@@ -174,24 +180,22 @@ export default function MyRequestsManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">طلباتي</h1>
-          <p className="text-muted-foreground">إدارة ومتابعة جميع طلباتك</p>
+          <h1 className="text-2xl font-bold">{t.myRequests.title}</h1>
+          <p className="text-muted-foreground">{t.myRequests.subtitle}</p>
         </div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogTrigger asChild>
             <Button>
-              <Plus className="h-4 w-4 ms-2" />
-              طلب جديد
-            </Button>
+              <Plus className="h-4 w-4 ms-2" />{t.myRequests.newRequest}</Button>
           </DialogTrigger>
           <DialogContent className="w-full max-w-md">
             <DialogHeader>
-              <DialogTitle>تقديم طلب جديد</DialogTitle>
-              <DialogDescription>اختر نوع الطلب وأدخل التفاصيل</DialogDescription>
+              <DialogTitle>{t.myRequests.submitNewRequest}</DialogTitle>
+              <DialogDescription>{t.myRequests.chooseTypeAndDetails}</DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label>نوع الطلب</Label>
+                <Label>{t.myRequests.requestType}</Label>
                 <Select 
                   value={newRequest.type}
                   onValueChange={(value: SelfServiceRequestType) => 
@@ -199,7 +203,7 @@ export default function MyRequestsManager() {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر نوع الطلب" />
+                    <SelectValue placeholder={t.myRequests.selectRequestType} />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="ticket">{selfServiceRequestTypeLabels.ticket}</SelectItem>
@@ -207,28 +211,26 @@ export default function MyRequestsManager() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>عنوان الطلب</Label>
+                <Label>{t.myRequests.requestTitle}</Label>
                 <Input 
                   value={newRequest.title}
                   onChange={(e) => setNewRequest({...newRequest, title: e.target.value})}
-                  placeholder="أدخل عنوان واضح للطلب"
+                  placeholder={t.myRequests.enterClearTitle}
                 />
               </div>
               <div className="space-y-2">
-                <Label>التفاصيل</Label>
+                <Label>{t.common.details}</Label>
                 <Textarea 
                   value={newRequest.description}
                   onChange={(e) => setNewRequest({...newRequest, description: e.target.value})}
-                  placeholder="أضف تفاصيل إضافية للطلب"
+                  placeholder={t.myRequests.addDetails}
                   rows={4}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>إلغاء</Button>
-              <Button onClick={handleSubmitRequest} disabled={!newRequest.type || !newRequest.title}>
-                تقديم الطلب
-              </Button>
+              <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t.common.cancel}</Button>
+              <Button onClick={handleSubmitRequest} disabled={!newRequest.type || !newRequest.title}>{t.common.submitRequest}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -240,7 +242,7 @@ export default function MyRequestsManager() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">إجمالي الطلبات</p>
+                <p className="text-sm text-muted-foreground">{t.myRequests.totalRequests}</p>
                 <p className="text-2xl font-bold">{requests.length}</p>
               </div>
               <FileText className="h-8 w-8 text-muted-foreground" />
@@ -251,7 +253,7 @@ export default function MyRequestsManager() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">قيد المراجعة</p>
+                <p className="text-sm text-muted-foreground">{t.evaluations.underReview}</p>
                 <p className="text-2xl font-bold text-yellow-600">{pendingCount}</p>
               </div>
               <Clock className="h-8 w-8 text-yellow-600" />
@@ -262,7 +264,7 @@ export default function MyRequestsManager() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">موافق عليها</p>
+                <p className="text-sm text-muted-foreground">{t.common.accepted}</p>
                 <p className="text-2xl font-bold text-green-600">{approvedCount}</p>
               </div>
               <CheckCircle2 className="h-8 w-8 text-green-600" />
@@ -273,7 +275,7 @@ export default function MyRequestsManager() {
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">مرفوضة</p>
+                <p className="text-sm text-muted-foreground">{t.common.rejected}</p>
                 <p className="text-2xl font-bold text-red-600">{rejectedCount}</p>
               </div>
               <XCircle className="h-8 w-8 text-red-600" />
@@ -289,7 +291,7 @@ export default function MyRequestsManager() {
             <div className="relative flex-1">
               <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث في الطلبات..."
+                placeholder={t.myRequests.searchRequests}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="ps-9"
@@ -297,10 +299,10 @@ export default function MyRequestsManager() {
             </div>
             <Select value={typeFilter} onValueChange={setTypeFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="نوع الطلب" />
+                <SelectValue placeholder={t.myRequests.requestType} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الأنواع</SelectItem>
+                <SelectItem value="all">{t.common.allTypes}</SelectItem>
                 {Object.entries(selfServiceRequestTypeLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>{label}</SelectItem>
                 ))}
@@ -308,10 +310,10 @@ export default function MyRequestsManager() {
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(requestStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>{label}</SelectItem>
                 ))}
@@ -324,8 +326,8 @@ export default function MyRequestsManager() {
       {/* Requests List */}
       <Card>
         <CardHeader>
-          <CardTitle>قائمة الطلبات</CardTitle>
-          <CardDescription>{filteredRequests.length} طلب</CardDescription>
+          <CardTitle>{t.myRequests.requestList}</CardTitle>
+          <CardDescription>{filteredRequests.length} {t.myRequests.requestCount}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
@@ -337,7 +339,7 @@ export default function MyRequestsManager() {
             {filteredRequests.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">{isLoading ? 'جاري التحميل...' : 'لا توجد طلبات'}</p>
+                <p className="text-muted-foreground">{isLoading ? t.common.loading : t.myRequests.pNoRequestsFound}</p>
               </div>
             ) : (
               filteredRequests.map((request) => (
@@ -348,7 +350,7 @@ export default function MyRequestsManager() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      {getStatusIcon(request.status)}
+                      <p className="text-sm text-muted-foreground mb-2">{t.myRequests.approvalPath}</p>
                       <div>
                         <h4 className="font-semibold">{request.title}</h4>
                         <p className="text-sm text-muted-foreground">{request.description}</p>
@@ -369,7 +371,7 @@ export default function MyRequestsManager() {
                   </div>
                   {request.approvers.length > 0 && (
                     <div className="mt-3 pt-3 border-t">
-                      <p className="text-sm text-muted-foreground mb-2">مسار الموافقة:</p>
+                      <p className="text-sm text-muted-foreground mb-2">{t.myRequests.approvalPath}</p>
                       <div className="flex items-center gap-2">
                         {request.approvers.map((approver, index) => (
                           <div key={approver.id} className="flex items-center gap-1">
@@ -398,42 +400,42 @@ export default function MyRequestsManager() {
       <Dialog open={!!selectedRequest} onOpenChange={() => setSelectedRequest(null)}>
         <DialogContent className="w-full max-w-2xl">
           <DialogHeader>
-            <DialogTitle>تفاصيل الطلب</DialogTitle>
+            <DialogTitle>{t.myRequests.requestDetails}</DialogTitle>
           </DialogHeader>
           {selectedRequest && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">نوع الطلب</p>
+                  <p className="text-sm text-muted-foreground">{t.myRequests.requestType}</p>
                   <p className="font-medium">{selfServiceRequestTypeLabels[selectedRequest.type]}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">الحالة</p>
+                  <p className="text-sm text-muted-foreground">{t.common.status}</p>
                   <Badge className={requestStatusColors[selectedRequest.status]}>
                     {requestStatusLabels[selectedRequest.status]}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">تاريخ التقديم</p>
+                  <p className="text-sm text-muted-foreground">{t.myRequests.submissionDate}</p>
                   <p className="font-medium">{new Date(selectedRequest.createdAt).toLocaleDateString('ar-SA')}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">آخر تحديث</p>
+                  <p className="text-sm text-muted-foreground">{t.myRequests.lastUpdated}</p>
                   <p className="font-medium">{new Date(selectedRequest.updatedAt).toLocaleDateString('ar-SA')}</p>
                 </div>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground">العنوان</p>
+                <p className="text-sm text-muted-foreground">{t.common.title}</p>
                 <p className="font-medium">{selectedRequest.title}</p>
               </div>
               {selectedRequest.description && (
                 <div>
-                  <p className="text-sm text-muted-foreground">التفاصيل</p>
+                  <p className="text-sm text-muted-foreground">{t.common.details}</p>
                   <p className="text-sm">{selectedRequest.description}</p>
                 </div>
               )}
               <div>
-                <p className="text-sm text-muted-foreground mb-2">مسار الموافقة</p>
+                <p className="text-sm text-muted-foreground mb-2">{t.myRequests.approvalPath}</p>
                 <div className="space-y-2">
                   {selectedRequest.approvers.map((approver) => (
                     <div key={approver.id} className="flex items-center justify-between border rounded p-2">
@@ -461,11 +463,9 @@ export default function MyRequestsManager() {
           )}
           <DialogFooter>
             {selectedRequest?.status === 'pending' && (
-              <Button variant="destructive" onClick={cancelSelectedRequest}>
-                إلغاء الطلب
-              </Button>
+              <Button variant="destructive" onClick={cancelSelectedRequest}>{t.myRequests.cancelRequest}</Button>
             )}
-            <Button variant="outline" onClick={() => setSelectedRequest(null)}>إغلاق</Button>
+            <Button variant="outline" onClick={() => setSelectedRequest(null)}>{t.common.close}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

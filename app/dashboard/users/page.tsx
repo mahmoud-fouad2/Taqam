@@ -11,6 +11,7 @@ import { PlusCircledIcon } from "@radix-ui/react-icons";
 import UsersDataTable from "./data-table";
 import { Card, CardContent } from "@/components/ui/card";
 
+
 export async function generateMetadata(): Promise<Metadata>{
   const locale = await getAppLocale();
   return generateMeta({

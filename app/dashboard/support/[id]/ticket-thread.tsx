@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 type Message = {
   id: string;
@@ -22,7 +24,7 @@ type Message = {
 };
 
 export function TicketThread({
-  locale,
+  locale: _locale,
   ticketId,
   initialMessages,
   canAddInternalNote,
@@ -32,6 +34,8 @@ export function TicketThread({
   initialMessages: Message[];
   canAddInternalNote: boolean;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [body, setBody] = useState("");
   const [isInternal, setIsInternal] = useState(false);
@@ -122,7 +126,7 @@ export function TicketThread({
 
                 <div className="mt-3 flex justify-end">
           <Button onClick={() => void submit()} disabled={submitting || body.trim().length === 0}>
-            {submitting ? (locale === "ar" ? "جاري الإرسال..." : "Sending...") : locale === "ar" ? "إرسال" : "Send"}
+            {submitting ? (locale === "ar" ? t.common.sending : "Sending...") : locale === "ar" ? t.common.send : "Send"}
           </Button>
         </div>
       </div>

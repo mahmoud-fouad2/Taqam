@@ -81,8 +81,14 @@ import {
 } from "@/lib/types/payroll";
 import { downloadBlob, fetchBlobOrThrow } from "@/lib/browser/download";
 import { toast } from "sonner";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function PayrollProcessingManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [periods, setPeriods] = React.useState<PayrollPeriod[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<PayrollPeriodStatus | "all">("all");
@@ -111,7 +117,7 @@ export function PayrollProcessingManager() {
       const res = await fetch(`/api/payroll/periods?${params.toString()}`, { cache: "no-store" });
       const json = (await res.json()) as { data?: any[]; error?: string };
       if (!res.ok) {
-        throw new Error(json.error || "فشل تحميل فترات الرواتب");
+        throw new Error(json.error || t.payroll.loadFailed);
       }
 
       const mapped: PayrollPeriod[] = Array.isArray(json.data)
@@ -138,11 +144,11 @@ export function PayrollProcessingManager() {
 
       setPeriods(mapped);
     } catch (err) {
-      setLoadError(err instanceof Error ? err.message : "فشل تحميل فترات الرواتب");
+      setLoadError(err instanceof Error ? err.message : t.payroll.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, [statusFilter, yearFilter]);
+  }, [statusFilter, yearFilter, t.payroll.loadFailed]);
 
   React.useEffect(() => {
     void loadPeriods();
@@ -187,15 +193,15 @@ export function PayrollProcessingManager() {
 
       const json = (await res.json()) as { data?: any; error?: string };
       if (!res.ok) {
-        throw new Error(json.error || "فشل إنشاء فترة الرواتب");
+        throw new Error(json.error || t.payroll.createFailed);
       }
 
-      toast.success("تم إنشاء فترة الرواتب");
+      toast.success(t.payroll.createdSuccess);
       setIsCreateOpen(false);
       setFormPaymentDate("");
       await loadPeriods();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل إنشاء فترة الرواتب");
+      toast.error(err instanceof Error ? err.message : t.payroll.createFailed);
     }
   };
 
@@ -209,14 +215,14 @@ export function PayrollProcessingManager() {
       });
       const json = (await res.json()) as { data?: any; error?: string };
       if (!res.ok) {
-        throw new Error(json.error || "فشل معالجة فترة الرواتب");
+        throw new Error(json.error || t.payroll.processFailed);
       }
 
       setProcessProgress(100);
-      toast.success("تمت معالجة فترة الرواتب وإرسالها للموافقة");
+      toast.success(t.payroll.processedSuccess);
       await loadPeriods();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل معالجة فترة الرواتب");
+      toast.error(err instanceof Error ? err.message : t.payroll.processFailed);
     } finally {
       setIsProcessing(false);
       setProcessProgress(0);
@@ -232,11 +238,11 @@ export function PayrollProcessingManager() {
       });
       const json = (await res.json()) as { data?: any; error?: string };
       if (!res.ok) {
-        throw new Error(json.error || "فشل تحديث حالة الفترة");
+        throw new Error(json.error || t.payroll.statusUpdateFailed);
       }
       await loadPeriods();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل تحديث حالة الفترة");
+      toast.error(err instanceof Error ? err.message : t.payroll.statusUpdateFailed);
     }
   };
 
@@ -247,13 +253,13 @@ export function PayrollProcessingManager() {
       });
       const json = (await res.json()) as { data?: { sent?: number }; error?: string };
       if (!res.ok) {
-        throw new Error(json.error || "فشل إرسال قسائم الرواتب");
+        throw new Error(json.error || t.payroll.payslipsSendFailed);
       }
 
-      toast.success(`تم إرسال ${json.data?.sent ?? 0} قسيمة راتب`);
+      toast.success(`${t.payroll.sentPayslips} ${json.data?.sent ?? 0} ${t.payroll.payslipUnit}`);
       await loadPeriods();
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل إرسال قسائم الرواتب");
+      toast.error(err instanceof Error ? err.message : t.payroll.payslipsSendFailed);
     }
   };
 
@@ -265,7 +271,7 @@ export function PayrollProcessingManager() {
       );
       downloadBlob(blob, filename || `bank-file-${period.id}.csv`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "فشل تحميل ملف البنك");
+      toast.error(err instanceof Error ? err.message : t.payroll.bankFileFailed);
     }
   };
 
@@ -298,7 +304,7 @@ export function PayrollProcessingManager() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الفترات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.payroll.totalPeriods}</CardTitle>
             <IconCalendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -307,7 +313,7 @@ export function PayrollProcessingManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">مسودات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobOffers.drafts}</CardTitle>
             <IconFileInvoice className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
@@ -316,7 +322,7 @@ export function PayrollProcessingManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
@@ -325,7 +331,7 @@ export function PayrollProcessingManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">مدفوعة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.payroll.paid}</CardTitle>
             <IconCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
@@ -334,7 +340,7 @@ export function PayrollProcessingManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المدفوع</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.payroll.totalPaid}</CardTitle>
             <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -349,7 +355,7 @@ export function PayrollProcessingManager() {
           <div className="relative flex-1 max-w-sm">
             <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="بحث..."
+              placeholder={t.common.searchDots}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="ps-9"
@@ -357,7 +363,7 @@ export function PayrollProcessingManager() {
           </div>
           <Select value={yearFilter} onValueChange={setYearFilter}>
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="السنة" />
+              <SelectValue placeholder={t.common.year} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="2024">2024</SelectItem>
@@ -370,10 +376,10 @@ export function PayrollProcessingManager() {
           >
             <SelectTrigger className="w-[160px]">
               <IconFilter className="h-4 w-4 ms-2" />
-              <SelectValue placeholder="الحالة" />
+              <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">كل الحالات</SelectItem>
+              <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
               {Object.entries(payrollPeriodStatusLabels).map(([key, label]) => (
                 <SelectItem key={key} value={key}>
                   {label.ar}
@@ -387,20 +393,20 @@ export function PayrollProcessingManager() {
           <DialogTrigger asChild>
             <Button>
               <IconPlus className="ms-2 h-4 w-4" />
-              فترة جديدة
+              {t.payroll.pNewPeriod}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>إنشاء فترة رواتب جديدة</DialogTitle>
+              <DialogTitle>{t.payroll.createNewPeriod}</DialogTitle>
               <DialogDescription>
-                حدد الشهر والسنة لإنشاء مسير رواتب جديد
+                {t.payroll.pSelectMonthAndYearToCreateANew}
               </DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>السنة</Label>
+                  <Label>{t.common.year}</Label>
                   <Select value={formYear} onValueChange={setFormYear}>
                     <SelectTrigger>
                       <SelectValue />
@@ -412,7 +418,7 @@ export function PayrollProcessingManager() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>الشهر</Label>
+                  <Label>{t.common.month}</Label>
                   <Select value={formMonth} onValueChange={setFormMonth}>
                     <SelectTrigger>
                       <SelectValue />
@@ -428,7 +434,7 @@ export function PayrollProcessingManager() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>تاريخ الصرف</Label>
+                <Label>{t.payroll.paymentDate}</Label>
                 <Input
                   type="date"
                   value={formPaymentDate}
@@ -437,10 +443,8 @@ export function PayrollProcessingManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleCreatePeriod}>إنشاء</Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>{t.common.cancel}</Button>
+              <Button onClick={handleCreatePeriod}>{t.common.add}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -453,7 +457,7 @@ export function PayrollProcessingManager() {
             <div className="flex items-center gap-4">
               <IconClock className="h-5 w-5 animate-spin text-blue-500" />
               <div className="flex-1">
-                <p className="text-sm font-medium">جاري معالجة مسير الرواتب...</p>
+                <p className="text-sm font-medium">{t.payroll.processingPayroll}</p>
                 <Progress value={processProgress} className="mt-2" />
               </div>
               <span className="text-sm text-muted-foreground">{processProgress}%</span>
@@ -465,23 +469,23 @@ export function PayrollProcessingManager() {
       {/* Periods Table */}
       <Card>
         <CardHeader>
-          <CardTitle>فترات الرواتب</CardTitle>
+          <CardTitle>{t.payroll.title}</CardTitle>
           <CardDescription>
-            إدارة ومعالجة مسيرات الرواتب الشهرية
+            {t.payroll.pManageAndProcessMonthlyPayroll}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الفترة</TableHead>
-                <TableHead>تاريخ الصرف</TableHead>
-                <TableHead>الموظفين</TableHead>
-                <TableHead>الإجمالي</TableHead>
-                <TableHead>الخصومات</TableHead>
-                <TableHead>الصافي</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-start">إجراءات</TableHead>
+                <TableHead>{t.leaveRequests.period}</TableHead>
+                <TableHead>{t.payroll.paymentDate}</TableHead>
+                <TableHead>{t.common.employees}</TableHead>
+                <TableHead>{t.common.total}</TableHead>
+                <TableHead>{t.payroll.deductionsCol}</TableHead>
+                <TableHead>{t.payroll.netCol}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead className="text-start">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -489,7 +493,7 @@ export function PayrollProcessingManager() {
                 <TableRow>
                   <TableCell colSpan={8} className="text-center py-8">
                     <IconFileInvoice className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">لا توجد فترات رواتب</p>
+                    <p className="text-muted-foreground">{t.payroll.noPayrollPeriods}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -522,7 +526,7 @@ export function PayrollProcessingManager() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
-                            إجراءات
+                            {t.payroll.pActions}
                             <IconChevronDown className="h-4 w-4 me-1" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -533,7 +537,7 @@ export function PayrollProcessingManager() {
                               disabled={isProcessing}
                             >
                               <IconPlayerPlay className="h-4 w-4 ms-2" />
-                              معالجة المسير
+                              {t.payroll.pProcessPayroll}
                             </DropdownMenuItem>
                           )}
                           {period.status === "pending_approval" && (
@@ -541,14 +545,12 @@ export function PayrollProcessingManager() {
                               <DropdownMenuItem
                                 onClick={() => handleStatusChange(period.id, "approved")}
                               >
-                                <IconCheck className="h-4 w-4 ms-2 text-green-500" />
-                                موافقة
-                              </DropdownMenuItem>
+                                <IconCheck className="h-4 w-4 ms-2 text-green-500" />{t.common.accept}</DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleStatusChange(period.id, "draft")}
                               >
                                 <IconX className="h-4 w-4 ms-2 text-red-500" />
-                                إرجاع للتعديل
+                                {t.payroll.pReturnForEditing}
                               </DropdownMenuItem>
                             </>
                           )}
@@ -557,25 +559,23 @@ export function PayrollProcessingManager() {
                               onClick={() => handleStatusChange(period.id, "paid")}
                             >
                               <IconCurrencyRiyal className="h-4 w-4 ms-2" />
-                              تأكيد الصرف
+                              {t.payroll.pConfirmPayment}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={() => setSelectedPeriod(period)}
                           >
-                            <IconFileInvoice className="h-4 w-4 ms-2" />
-                            عرض التفاصيل
-                          </DropdownMenuItem>
+                            <IconFileInvoice className="h-4 w-4 ms-2" />{t.common.viewDetails}</DropdownMenuItem>
                           {period.status === "paid" && (
                             <>
                               <DropdownMenuItem onClick={() => handleSendPayslips(period.id)}>
                                 <IconSend className="h-4 w-4 ms-2" />
-                                إرسال قسائم الرواتب
+                                {t.payroll.pSendPayslips}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDownloadBankFile(period)}>
                                 <IconDownload className="h-4 w-4 ms-2" />
-                                تحميل ملف البنك
+                                {t.payroll.pDownloadBankFile}
                               </DropdownMenuItem>
                             </>
                           )}
@@ -586,9 +586,7 @@ export function PayrollProcessingManager() {
                                 className="text-destructive"
                                 onClick={() => handleStatusChange(period.id, "cancelled")}
                               >
-                                <IconX className="h-4 w-4 ms-2" />
-                                إلغاء
-                              </DropdownMenuItem>
+                                <IconX className="h-4 w-4 ms-2" />{t.common.cancel}</DropdownMenuItem>
                             </>
                           )}
                         </DropdownMenuContent>
@@ -606,46 +604,46 @@ export function PayrollProcessingManager() {
       <Dialog open={!!selectedPeriod} onOpenChange={() => setSelectedPeriod(null)}>
         <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>تفاصيل مسير الرواتب</DialogTitle>
+            <DialogTitle>{t.payroll.payrollDetails}</DialogTitle>
             <DialogDescription>{selectedPeriod?.nameAr}</DialogDescription>
           </DialogHeader>
           {selectedPeriod && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">فترة المسير</p>
+                  <p className="text-sm text-muted-foreground">{t.payroll.payrollPeriod}</p>
                   <p className="font-medium">
                     {selectedPeriod.startDate} - {selectedPeriod.endDate}
                   </p>
                 </div>
                 <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">تاريخ الصرف</p>
+                  <p className="text-sm text-muted-foreground">{t.payroll.paymentDate}</p>
                   <p className="font-medium">{selectedPeriod.paymentDate}</p>
                 </div>
               </div>
 
               <div className="space-y-2">
-                <h4 className="font-semibold">ملخص المسير</h4>
+                <h4 className="font-semibold">{t.payroll.payrollSummary}</h4>
                 <Table>
                   <TableBody>
                     <TableRow>
-                      <TableCell>عدد الموظفين</TableCell>
+                      <TableCell>{t.common.employees}</TableCell>
                       <TableCell className="text-start">{selectedPeriod.employeeCount}</TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>إجمالي الرواتب</TableCell>
+                      <TableCell>{t.salaryStructures.totalSalaries}</TableCell>
                       <TableCell className="text-start">
                         {formatCurrency(selectedPeriod.totalGross)}
                       </TableCell>
                     </TableRow>
                     <TableRow>
-                      <TableCell>إجمالي الخصومات</TableCell>
+                      <TableCell>{t.payroll.totalDeductions}</TableCell>
                       <TableCell className="text-start text-red-600">
                         -{formatCurrency(selectedPeriod.totalDeductions)}
                       </TableCell>
                     </TableRow>
                     <TableRow className="font-bold">
-                      <TableCell>صافي الرواتب</TableCell>
+                      <TableCell>{t.salaryStructures.netSalaries}</TableCell>
                       <TableCell className="text-start text-green-600">
                         {formatCurrency(selectedPeriod.totalNet)}
                       </TableCell>
@@ -656,12 +654,12 @@ export function PayrollProcessingManager() {
 
               {selectedPeriod.processedAt && (
                 <div className="text-sm text-muted-foreground">
-                  <p>تمت المعالجة: {new Date(selectedPeriod.processedAt).toLocaleDateString("ar-SA")}</p>
+                  <p>{t.payroll.processedAt} {new Date(selectedPeriod.processedAt).toLocaleDateString("ar-SA")}</p>
                   {selectedPeriod.approvedAt && (
-                    <p>تمت الموافقة: {new Date(selectedPeriod.approvedAt).toLocaleDateString("ar-SA")}</p>
+                    <p>{t.payroll.approvedAt} {new Date(selectedPeriod.approvedAt).toLocaleDateString("ar-SA")}</p>
                   )}
                   {selectedPeriod.paidAt && (
-                    <p>تم الصرف: {new Date(selectedPeriod.paidAt).toLocaleDateString("ar-SA")}</p>
+                    <p>{t.payroll.paidAt} {new Date(selectedPeriod.paidAt).toLocaleDateString("ar-SA")}</p>
                   )}
                 </div>
               )}

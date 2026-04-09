@@ -11,15 +11,20 @@ export function SiteHeader({
   dir: "rtl" | "ltr";
 }) {
   return (
-    <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
-      <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
-        <SidebarTrigger className="-ms-1" />
+    <header
+      data-dir={dir}
+      className="dashboard-header sticky top-0 z-30 flex h-(--header-height) shrink-0 items-center gap-2 border-b border-border/70 bg-background/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
+    >
+      <div className="dashboard-header-inner flex w-full items-center gap-2 px-3 lg:px-5">
+        <SidebarTrigger className="-ms-1 rounded-lg" />
         <Separator
           orientation="vertical"
-          className="mx-2 data-[orientation=vertical]:h-4"
+          className="mx-1 hidden data-[orientation=vertical]:h-5 sm:block"
         />
-        <DashboardBreadcrumb />
-        <div className="ms-auto flex items-center gap-2">
+        <div className="min-w-0 flex-1 overflow-hidden">
+          <DashboardBreadcrumb />
+        </div>
+        <div className="ms-auto flex shrink-0 items-center gap-2">
           <DashboardHeaderActions locale={locale} />
         </div>
       </div>

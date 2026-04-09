@@ -12,6 +12,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type Ticket = {
   id: string;
@@ -55,11 +59,11 @@ const categoryMeta: Record<CategoryKey, { icon: typeof Lightbulb; ar: string; en
 
 function statusLabel(locale: "ar" | "en", status: Ticket["status"]) {
   const mapAr: Record<Ticket["status"], string> = {
-    OPEN: "مفتوحة",
-    IN_PROGRESS: "قيد العمل",
-    WAITING_CUSTOMER: "بانتظار العميل",
-    RESOLVED: "تم الحل",
-    CLOSED: "مغلقة",
+    OPEN: t.common.open,
+    IN_PROGRESS: t.ideas.inProgress,
+    WAITING_CUSTOMER: t.ideas.waitingCustomer,
+    RESOLVED: t.common.resolved,
+    CLOSED: t.common.closed,
   };
 
   const mapEn: Record<Ticket["status"], string> = {
@@ -75,10 +79,10 @@ function statusLabel(locale: "ar" | "en", status: Ticket["status"]) {
 
 function priorityLabel(locale: "ar" | "en", priority: Ticket["priority"]) {
   const mapAr: Record<Ticket["priority"], string> = {
-    LOW: "منخفضة",
-    NORMAL: "عادية",
-    HIGH: "عالية",
-    URGENT: "عاجلة",
+    LOW: t.common.low,
+    NORMAL: t.common.normal,
+    HIGH: t.common.high,
+    URGENT: t.common.urgent,
   };
 
   const mapEn: Record<Ticket["priority"], string> = {
@@ -99,7 +103,9 @@ function badgeVariantForStatus(status: Ticket["status"]): "default" | "secondary
   return "outline";
 }
 
-export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; isSuperAdmin: boolean }) {
+export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar" | "en"; isSuperAdmin: boolean }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const prefix = locale === "en" ? "/en" : "";
   const [items, setItems] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,17 +126,17 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
       const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(json?.error || (locale === "ar" ? "فشل تحميل المقترحات" : "Failed to load ideas"));
+        throw new Error(json?.error || (locale === "ar" ? t.ideas.loadFailed : "Failed to load ideas"));
       }
 
       setItems(Array.isArray(json?.data?.items) ? json.data.items : []);
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : locale === "ar" ? "فشل تحميل المقترحات" : "Failed to load ideas");
+      setLoadError(error instanceof Error ? error.message : locale === "ar" ? t.ideas.loadFailed : "Failed to load ideas");
       setItems([]);
     } finally {
       setLoading(false);
     }
-  }, [locale]);
+  }, [locale, t.ideas.loadFailed]);
 
   useEffect(() => {
     void load();
@@ -153,7 +159,7 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
 
   const handleSubmit = async () => {
     if (!subject.trim() || !message.trim()) {
-      toast.error(locale === "ar" ? "الموضوع والرسالة مطلوبان" : "Subject and message are required");
+      toast.error(locale === "ar" ? t.ideas.requiredFields : "Subject and message are required");
       return;
     }
 
@@ -173,17 +179,17 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
 
       const json = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error(json?.error || (locale === "ar" ? "فشل إرسال المقترح" : "Failed to submit idea"));
+        throw new Error(json?.error || (locale === "ar" ? t.ideas.submitFailed : "Failed to submit idea"));
       }
 
-      toast.success(locale === "ar" ? "تم إرسال المقترح بنجاح" : "Idea submitted successfully");
+      toast.success(locale === "ar" ? t.ideas.submitSuccess : "Idea submitted successfully");
       setCategory("FEATURE_REQUEST");
       setPriority("NORMAL");
       setSubject("");
       setMessage("");
       await load();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : locale === "ar" ? "فشل إرسال المقترح" : "Failed to submit idea");
+      toast.error(error instanceof Error ? error.message : locale === "ar" ? t.ideas.submitFailed : "Failed to submit idea");
     } finally {
       setSubmitting(false);
     }
@@ -200,13 +206,13 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "مفتوحة" : "Open"}</CardDescription>
+            <CardDescription>{locale === "ar" ? t.common.open : "Open"}</CardDescription>
             <CardTitle className="text-3xl">{stats.open}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "قيد العمل" : "In progress"}</CardDescription>
+            <CardDescription>{locale === "ar" ? t.ideas.inProgress : "In progress"}</CardDescription>
             <CardTitle className="text-3xl">{stats.inProgress}</CardTitle>
           </CardHeader>
         </Card>
@@ -272,22 +278,22 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idea-subject">{locale === "ar" ? "الموضوع" : "Subject"}</Label>
+              <Label htmlFor="idea-subject">{locale === "ar" ? t.common.subject : "Subject"}</Label>
               <Input
                 id="idea-subject"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
-                placeholder={locale === "ar" ? "مثال: نحتاج اعتماد متعدد المراحل" : "Example: multi-step approval for expenses"}
+                placeholder={locale === "ar" ? t.ideas.subjectExample : "Example: multi-step approval for expenses"}
                 disabled={!canSubmit || submitting}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idea-priority">{locale === "ar" ? "الأولوية" : "Priority"}</Label>
+              <Label htmlFor="idea-priority">{locale === "ar" ? t.common.priority : "Priority"}</Label>
               <select
                 id="idea-priority"
-                aria-label={locale === "ar" ? "أولوية المقترح" : "Idea priority"}
-                title={locale === "ar" ? "أولوية المقترح" : "Idea priority"}
+                aria-label={locale === "ar" ? t.ideas.priority : "Idea priority"}
+                title={locale === "ar" ? t.ideas.priority : "Idea priority"}
                 className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
                 value={priority}
                 onChange={(event) => setPriority(event.target.value as Ticket["priority"])}
@@ -301,7 +307,7 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idea-message">{locale === "ar" ? "الوصف" : "Description"}</Label>
+              <Label htmlFor="idea-message">{locale === "ar" ? t.common.description : "Description"}</Label>
               <Textarea
                 id="idea-message"
                 rows={8}
@@ -319,7 +325,7 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={() => void handleSubmit()} disabled={!canSubmit || submitting}>
                 <Send className="me-2 h-4 w-4" />
-                {submitting ? (locale === "ar" ? "جاري الإرسال..." : "Submitting...") : locale === "ar" ? "إرسال" : "Submit"}
+                {submitting ? (locale === "ar" ? t.common.sending : "Submitting...") : locale === "ar" ? t.common.send : "Submit"}
               </Button>
               <Button variant="outline" asChild>
                 <Link href={`${prefix}/dashboard/support`}>
@@ -343,7 +349,7 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
             </div>
             <Button variant="outline" onClick={() => void load()} disabled={loading}>
               <RefreshCw className="me-2 h-4 w-4" />
-              {locale === "ar" ? "تحديث" : "Refresh"}
+              {locale === "ar" ? t.common.update : "Refresh"}
             </Button>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -389,12 +395,12 @@ export function IdeasWorkspace({ locale, isSuperAdmin }: { locale: "ar" | "en"; 
                             </span>
                             {item._count?.messages ? (
                               <span>
-                                {locale === "ar" ? "الرسائل:" : "Messages:"} {item._count.messages}
+                                {locale === "ar" ? t.ideas.messages : "Messages:"} {item._count.messages}
                               </span>
                             ) : null}
                             {isSuperAdmin && item.tenant ? (
                               <span>
-                                {locale === "ar" ? "الشركة:" : "Tenant:"} {item.tenant.nameAr || item.tenant.name}
+                                {locale === "ar" ? t.common.company : "Tenant:"} {item.tenant.nameAr || item.tenant.name}
                               </span>
                             ) : null}
                           </div>

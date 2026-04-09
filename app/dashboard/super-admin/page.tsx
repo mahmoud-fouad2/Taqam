@@ -5,21 +5,28 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Building2, Users, Clock, AlertCircle, TrendingUp, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getAppLocale } from "@/lib/i18n/locale";
+import { getText } from "@/lib/i18n/text";
 
 export default async function SuperAdminPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   const session = await getServerSession(authOptions);
   if (!session?.user || session.user.role !== "SUPER_ADMIN") {
     // Keep the page non-disclosing and consistent with admin APIs.
     return (
-      <div className="space-y-6">
-        <h1 className="text-2xl font-bold">غير مصرح</h1>
-        <p className="text-muted-foreground">هذه الصفحة مخصصة للسوبر أدمن فقط.</p>
+      <div className="space-y-4">
+        <div className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
+          <h1 className="text-2xl font-semibold tracking-tight">{t.superAdmin.pUnauthorized}</h1>
+          <p className="mt-1 text-muted-foreground">{t.superAdmin.onlyForAdmin}</p>
+        </div>
       </div>
     );
   }
@@ -57,93 +64,92 @@ export default async function SuperAdminPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">لوحة تحكم Super Admin</h1>
-          <p className="text-muted-foreground">إدارة الشركات والمستأجرين</p>
+      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-semibold tracking-tight">{t.superAdmin.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.superAdmin.subtitle}</p>
+          </div>
+          <Button asChild className="min-w-36">
+            <Link href="/dashboard/super-admin/tenants/new">
+              <Building2 className="h-4 w-4" />
+              {t.common.add}
+            </Link>
+          </Button>
         </div>
-        <Link
-          href="/dashboard/super-admin/tenants/new"
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Building2 className="h-4 w-4" />
-          إنشاء شركة جديدة
-        </Link>
-      </div>
+      </section>
 
-      {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الشركات</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t.superAdmin.totalTenants}</CardTitle>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Building2 className="h-4 w-4" />
+            </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalTenants}</div>
             <p className="text-xs text-muted-foreground">
-              {stats.activeTenants} نشطة
+              {stats.activeTenants} {t.superAdmin.pActive}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي المستخدمين</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t.superAdmin.totalUsers}</CardTitle>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Users className="h-4 w-4" />
+            </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">
-              عبر جميع الشركات
-            </p>
+            <p className="text-xs text-muted-foreground">{t.superAdmin.acrossAllTenants}</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">طلبات معلقة</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t.superAdmin.pendingRequests}</CardTitle>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-amber-500/15 text-amber-700 dark:text-amber-300">
+              <Clock className="h-4 w-4" />
+            </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingRequests}</div>
-            <p className="text-xs text-muted-foreground">
-              بانتظار المراجعة
-            </p>
+            <p className="text-xs text-muted-foreground">{t.superAdmin.awaitingReview}</p>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">النمو الشهري</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">{t.superAdmin.monthlyGrowth}</CardTitle>
+            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <TrendingUp className="h-4 w-4" />
+            </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+15%</div>
-            <p className="text-xs text-muted-foreground">
-              مقارنة بالشهر السابق
-            </p>
+            <p className="text-xs text-muted-foreground">{t.superAdmin.vsLastMonth}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Main Content Grid */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Recent Tenants */}
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Building2 className="h-5 w-5" />
-              أحدث الشركات
+              {t.superAdmin.recentTenants}
             </CardTitle>
-            <CardDescription>آخر الشركات المضافة للمنصة</CardDescription>
+            <CardDescription>{t.superAdmin.recentTenantsDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {recentTenants.map((tenant) => (
                 <div
                   key={tenant.id}
-                  className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                  className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/25 p-3 transition-colors hover:bg-muted/40"
                 >
                   <div className="space-y-1">
                     <Link
@@ -153,16 +159,23 @@ export default async function SuperAdminPage() {
                       {tenant.nameAr ?? tenant.name}
                     </Link>
                     <p className="text-sm text-muted-foreground">
-                      /t/{tenant.slug} • {tenant._count.users} مستخدم
+                      /t/{tenant.slug} • {tenant._count.users} {t.superAdmin.pUser}
                     </p>
                   </div>
                   <Badge
                     variant={tenant.status === "ACTIVE" ? "default" : "secondary"}
+                    className="gap-1"
                   >
                     {tenant.status === "ACTIVE" ? (
-                      <><CheckCircle2 className="h-3 w-3 me-1" /> نشط</>
+                      <>
+                        <CheckCircle2 className="h-3 w-3" />
+                        {t.common.active}
+                      </>
                     ) : (
-                      <><Clock className="h-3 w-3 me-1" /> معلق</>
+                      <>
+                        <Clock className="h-3 w-3" />
+                        {t.common.pending}
+                      </>
                     )}
                   </Badge>
                 </div>
@@ -170,21 +183,20 @@ export default async function SuperAdminPage() {
             </div>
             <Link
               href="/dashboard/super-admin/tenants"
-              className="mt-4 block text-center text-sm text-primary hover:underline"
+              className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
             >
-              عرض جميع الشركات →
+              {t.superAdmin.viewAllTenants}
             </Link>
           </CardContent>
         </Card>
 
-        {/* Pending Requests */}
-        <Card>
+        <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5" />
-              طلبات الاشتراك المعلقة
+              {t.superAdmin.pendingSubscriptions}
             </CardTitle>
-            <CardDescription>طلبات بانتظار الموافقة</CardDescription>
+            <CardDescription>{t.superAdmin.pendingApproval}</CardDescription>
           </CardHeader>
           <CardContent>
             {pendingRequests.length > 0 ? (
@@ -192,7 +204,7 @@ export default async function SuperAdminPage() {
                 {pendingRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
+                    className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/25 p-3 transition-colors hover:bg-muted/40"
                   >
                     <div className="space-y-1">
                       <p className="font-medium">{request.companyNameAr ?? request.companyName}</p>
@@ -200,62 +212,59 @@ export default async function SuperAdminPage() {
                         {request.contactEmail}
                       </p>
                     </div>
-                    <div className="flex gap-2">
-                      <Link
-                        href={`/dashboard/super-admin/requests/${request.id}`}
-                        className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90"
-                      >
-                        مراجعة
+                    <Button asChild size="sm" className="h-8">
+                      <Link href={`/dashboard/super-admin/requests/${request.id}`}>
+                        {t.common.review}
                       </Link>
-                    </div>
+                    </Button>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
                 <CheckCircle2 className="mb-2 h-8 w-8" />
-                <p>لا توجد طلبات معلقة</p>
+                <p>{t.superAdmin.noPendingRequests}</p>
               </div>
             )}
             <Link
               href="/dashboard/super-admin/requests"
-              className="mt-4 block text-center text-sm text-primary hover:underline"
+              className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
             >
-              عرض جميع الطلبات →
+              {t.superAdmin.viewAllRequests}
             </Link>
           </CardContent>
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-border/60 bg-card/85 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5" />
-            الربط بين الواجهة والمنصة
+            {t.superAdmin.linkage}
           </CardTitle>
-          <CardDescription>روابط مباشرة بين الواجهة العامة ولوحات التشغيل الداخلية</CardDescription>
+          <CardDescription>{t.superAdmin.linkageDesc}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <Link href="/help-center" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-              <p className="font-medium">مركز المساعدة العام</p>
-              <p className="mt-1 text-sm text-muted-foreground">راجع المحتوى العام وقنوات التواصل كما يراها العميل.</p>
+            <Link href="/help-center" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+              <p className="font-medium">{t.superAdmin.helpCenter}</p>
+              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.helpCenterDesc}</p>
             </Link>
-            <Link href="/careers" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-              <p className="font-medium">بوابة الوظائف العامة</p>
-              <p className="mt-1 text-sm text-muted-foreground">راجع الوظائف المجمعة وصفحات الشركات العامة كما يراها المرشحون.</p>
+            <Link href="/careers" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+              <p className="font-medium">{t.superAdmin.careersPortal}</p>
+              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.careersPortalDesc}</p>
             </Link>
-            <Link href="/pricing" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-              <p className="font-medium">الأسعار والباقات</p>
-              <p className="mt-1 text-sm text-muted-foreground">تحقق من توافق الباقات العامة مع إعدادات المنصة الداخلية.</p>
+            <Link href="/pricing" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+              <p className="font-medium">{t.superAdmin.pricing}</p>
+              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.pricingDesc}</p>
             </Link>
-            <Link href="/dashboard/support" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-              <p className="font-medium">تذاكر الدعم</p>
-              <p className="mt-1 text-sm text-muted-foreground">متابعة الحالات المفتوحة من الشركات داخل الداشبورد.</p>
+            <Link href="/dashboard/support" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+              <p className="font-medium">{t.superAdmin.supportTickets}</p>
+              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.supportTicketsDesc}</p>
             </Link>
-            <Link href="/dashboard/help-center" className="rounded-xl border p-4 transition-colors hover:bg-muted/40">
-              <p className="font-medium">مساعدة داخلية</p>
-              <p className="mt-1 text-sm text-muted-foreground">اختصارات التشغيل والتمييز بين صلاحيات الشركة والسوبر أدمن.</p>
+            <Link href="/dashboard/help-center" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+              <p className="font-medium">{t.superAdmin.internalHelp}</p>
+              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.internalHelpDesc}</p>
             </Link>
           </div>
         </CardContent>

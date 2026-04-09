@@ -59,8 +59,14 @@ import {
   dayNames,
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function ShiftsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [shifts, setShifts] = React.useState<Shift[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
@@ -80,12 +86,12 @@ export function ShiftsManager() {
           setShifts(res.data);
         } else {
           setShifts([]);
-          setError(res.error || "فشل تحميل الورديات");
+          setError(res.error || t.shifts.loadFailed);
         }
       } catch (e) {
         if (!mounted) return;
         setShifts([]);
-        setError(e instanceof Error ? e.message : "فشل تحميل الورديات");
+        setError(e instanceof Error ? e.message : t.shifts.loadFailed);
       } finally {
         if (mounted) setIsLoading(false);
       }
@@ -93,7 +99,7 @@ export function ShiftsManager() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [t.shifts.loadFailed]);
 
   // Form state
   const [formData, setFormData] = React.useState({
@@ -238,17 +244,17 @@ export function ShiftsManager() {
   // Form component (shared between add and edit)
   const ShiftForm = () => (
     <div className="grid gap-4 py-4">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>الاسم (عربي)</Label>
+          <Label>{t.salaryStructures.nameArabic}</Label>
           <Input
             value={formData.nameAr}
             onChange={(e) => setFormData((p) => ({ ...p, nameAr: e.target.value }))}
-            placeholder="الوردية الصباحية"
+            placeholder={t.shifts.morningShift}
           />
         </div>
         <div className="space-y-2">
-          <Label>الاسم (إنجليزي)</Label>
+          <Label>{t.shifts.nameEn}</Label>
           <Input
             value={formData.name}
             onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
@@ -257,9 +263,9 @@ export function ShiftsManager() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>الكود</Label>
+          <Label>{t.common.code}</Label>
           <Input
             value={formData.code}
             onChange={(e) => setFormData((p) => ({ ...p, code: e.target.value.toUpperCase() }))}
@@ -267,7 +273,7 @@ export function ShiftsManager() {
           />
         </div>
         <div className="space-y-2">
-          <Label>اللون</Label>
+          <Label>{t.common.color}</Label>
           <div className="flex gap-2">
             <Input
               type="color"
@@ -284,9 +290,9 @@ export function ShiftsManager() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>وقت البداية</Label>
+          <Label>{t.shifts.startTime}</Label>
           <Input
             type="time"
             value={formData.startTime}
@@ -294,7 +300,7 @@ export function ShiftsManager() {
           />
         </div>
         <div className="space-y-2">
-          <Label>وقت النهاية</Label>
+          <Label>{t.shifts.endTime}</Label>
           <Input
             type="time"
             value={formData.endTime}
@@ -303,9 +309,9 @@ export function ShiftsManager() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>بداية الاستراحة (اختياري)</Label>
+          <Label>{t.shifts.breakStartOptional}</Label>
           <Input
             type="time"
             value={formData.breakStartTime}
@@ -313,7 +319,7 @@ export function ShiftsManager() {
           />
         </div>
         <div className="space-y-2">
-          <Label>نهاية الاستراحة (اختياري)</Label>
+          <Label>{t.shifts.breakEndOptional}</Label>
           <Input
             type="time"
             value={formData.breakEndTime}
@@ -322,9 +328,9 @@ export function ShiftsManager() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>مرونة الحضور (دقائق)</Label>
+          <Label>{t.shifts.flexStart}</Label>
           <Input
             type="number"
             value={formData.flexibleStartMinutes}
@@ -334,7 +340,7 @@ export function ShiftsManager() {
           />
         </div>
         <div className="space-y-2">
-          <Label>مرونة الانصراف (دقائق)</Label>
+          <Label>{t.shifts.flexEnd}</Label>
           <Input
             type="number"
             value={formData.flexibleEndMinutes}
@@ -346,7 +352,7 @@ export function ShiftsManager() {
       </div>
 
       <div className="space-y-2">
-        <Label>أيام العمل</Label>
+        <Label>{t.shifts.workingDays}</Label>
         <div className="flex flex-wrap gap-2">
           {dayNames.ar.map((day, index) => (
             <label
@@ -374,11 +380,11 @@ export function ShiftsManager() {
             checked={formData.overtimeEnabled}
             onCheckedChange={(checked) => setFormData((p) => ({ ...p, overtimeEnabled: checked }))}
           />
-          <Label>تفعيل العمل الإضافي</Label>
+          <Label>{t.shifts.enableOvertime}</Label>
         </div>
         {formData.overtimeEnabled && (
           <div className="flex items-center gap-2">
-            <Label>معامل الأجر:</Label>
+            <Label>{t.shifts.multiplier}</Label>
             <Input
               type="number"
               value={formData.overtimeMultiplier}
@@ -398,7 +404,7 @@ export function ShiftsManager() {
           checked={formData.isDefault}
           onCheckedChange={(checked) => setFormData((p) => ({ ...p, isDefault: checked }))}
         />
-        <Label>وردية افتراضية</Label>
+        <Label>{t.shifts.isDefault}</Label>
       </div>
     </div>
   );
@@ -407,7 +413,7 @@ export function ShiftsManager() {
     <>
       {isLoading ? (
         <div className="flex items-center justify-center py-10 text-muted-foreground">
-          جاري تحميل الورديات...
+          {t.shifts.pLoadingShifts}
         </div>
       ) : error ? (
         <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
@@ -420,7 +426,7 @@ export function ShiftsManager() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الورديات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.shifts.total}</CardTitle>
             <IconClock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -429,7 +435,7 @@ export function ShiftsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">ورديات نشطة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.shifts.active}</CardTitle>
             <IconCalendar className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
@@ -440,12 +446,12 @@ export function ShiftsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">الوردية الافتراضية</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.shifts.default}</CardTitle>
             <IconSun className="h-4 w-4 text-yellow-500" />
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold">
-              {shifts.find((s) => s.isDefault)?.nameAr || "غير محددة"}
+              {shifts.find((s) => s.isDefault)?.nameAr || t.shifts.notSet}
             </div>
           </CardContent>
         </Card>
@@ -456,7 +462,7 @@ export function ShiftsManager() {
         <div className="relative flex-1 max-w-sm">
           <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="بحث في الورديات..."
+            placeholder={t.shifts.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="ps-9"
@@ -466,25 +472,17 @@ export function ShiftsManager() {
         <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
-              <IconPlus className="ms-2 h-4 w-4" />
-              إضافة وردية
-            </Button>
+              <IconPlus className="ms-2 h-4 w-4" />{t.shifts.add}</Button>
           </DialogTrigger>
           <DialogContent className="w-full sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>إضافة وردية جديدة</DialogTitle>
-              <DialogDescription>
-                أدخل بيانات الوردية الجديدة
-              </DialogDescription>
+              <DialogTitle>{t.shifts.addNew}</DialogTitle>
+              <DialogDescription>{t.shifts.description}</DialogDescription>
             </DialogHeader>
             <ShiftForm />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-                إلغاء
-              </Button>
-              <Button onClick={handleSave} disabled={!formData.nameAr || !formData.code}>
-                إضافة
-              </Button>
+              <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t.common.cancel}</Button>
+              <Button onClick={handleSave} disabled={!formData.nameAr || !formData.code}>{t.common.add}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -493,22 +491,22 @@ export function ShiftsManager() {
       {/* Shifts Table */}
       <Card>
         <CardHeader>
-          <CardTitle>الورديات</CardTitle>
+          <CardTitle>{t.shifts.title}</CardTitle>
           <CardDescription>
-            قائمة بجميع ورديات العمل ({filteredShifts.length} وردية)
+            {t.shifts.pListOfAllWorkShifts}{filteredShifts.length} {t.shifts.shiftCount})
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>الوردية</TableHead>
-                <TableHead>الكود</TableHead>
-                <TableHead>وقت العمل</TableHead>
-                <TableHead>الاستراحة</TableHead>
-                <TableHead>أيام العمل</TableHead>
-                <TableHead>الحالة</TableHead>
-                <TableHead className="text-start">إجراءات</TableHead>
+                <TableHead>{t.shifts.title}</TableHead>
+                <TableHead>{t.common.code}</TableHead>
+                <TableHead>{t.shifts.workTime}</TableHead>
+                <TableHead>{t.shifts.breakCol}</TableHead>
+                <TableHead>{t.shifts.workingDays}</TableHead>
+                <TableHead>{t.common.status}</TableHead>
+                <TableHead className="text-start">{t.common.actions}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -516,7 +514,7 @@ export function ShiftsManager() {
                 <TableRow>
                   <TableCell colSpan={7} className="text-center py-8">
                     <IconClock className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
-                    <p className="text-muted-foreground">لا توجد ورديات</p>
+                    <p className="text-muted-foreground">{t.shifts.noShifts}</p>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -546,7 +544,7 @@ export function ShiftsManager() {
                     <TableCell>
                       {shift.breakDurationMinutes ? (
                         <span className="text-sm text-muted-foreground">
-                          {shift.breakDurationMinutes} دقيقة
+                          {shift.breakDurationMinutes} {t.shifts.minuteUnit}
                         </span>
                       ) : (
                         <span className="text-muted-foreground">-</span>
@@ -567,15 +565,15 @@ export function ShiftsManager() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {shift.isDefault && (
-                          <Badge variant="default">افتراضية</Badge>
+                          <Badge variant="default">{t.shifts.defaultShift}</Badge>
                         )}
                         {shift.isActive ? (
                           <Badge variant="outline" className="text-green-600 border-green-600">
-                            نشطة
+                            {t.shifts.pActive}
                           </Badge>
                         ) : (
                           <Badge variant="outline" className="text-gray-500">
-                            غير نشطة
+                            {t.shifts.pInactive}
                           </Badge>
                         )}
                       </div>
@@ -595,7 +593,7 @@ export function ShiftsManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="تعديل"
+                              aria-label={t.common.edit}
                               onClick={() => openEditDialog(shift)}
                             >
                               <IconEdit className="h-4 w-4" />
@@ -603,9 +601,9 @@ export function ShiftsManager() {
                           </DialogTrigger>
                           <DialogContent className="w-full sm:max-w-[550px] max-h-[80vh] overflow-y-auto">
                             <DialogHeader>
-                              <DialogTitle>تعديل الوردية</DialogTitle>
+                              <DialogTitle>{t.shifts.editShift}</DialogTitle>
                               <DialogDescription>
-                                تعديل بيانات الوردية &quot;{shift.nameAr}&quot;
+                                {t.shifts.pEditShiftDetails} &quot;{shift.nameAr}&quot;
                               </DialogDescription>
                             </DialogHeader>
                             <ShiftForm />
@@ -616,35 +614,31 @@ export function ShiftsManager() {
                                   setEditingShift(null);
                                   resetForm();
                                 }}
-                              >
-                                إلغاء
-                              </Button>
-                              <Button onClick={handleSave}>حفظ التغييرات</Button>
+                              >{t.common.cancel}</Button>
+                              <Button onClick={handleSave}>{t.common.saveChanges}</Button>
                             </DialogFooter>
                           </DialogContent>
                         </Dialog>
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label="حذف" className="text-destructive">
+                            <Button variant="ghost" size="icon" aria-label={t.common.delete} className="text-destructive">
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>حذف الوردية</AlertDialogTitle>
+                              <AlertDialogTitle>{t.shifts.deleteShift}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                هل أنت متأكد من حذف &quot;{shift.nameAr}&quot;؟ هذا الإجراء لا يمكن التراجع عنه.
+                                {t.shifts.pAreYouSureYouWantToDelete} &quot;{shift.nameAr}&quot;{t.shifts.pThisActionCannotBeUndone}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+                              <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(shift.id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                حذف
-                              </AlertDialogAction>
+                              >{t.common.delete}</AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>

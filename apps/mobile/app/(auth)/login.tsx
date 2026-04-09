@@ -53,7 +53,7 @@ export default function LoginScreen() {
       >
         {/* Logo */}
         <View style={styles.logoWrap}>
-          <BrandLogo style={styles.logo} />
+          <BrandLogo style={styles.logo} variant="light" />
         </View>
 
         {/* Title */}
@@ -72,7 +72,7 @@ export default function LoginScreen() {
               textContentType="emailAddress"
               autoComplete="email"
               placeholder="name@company.com"
-              placeholderTextColor="rgba(255,255,255,0.28)"
+              placeholderTextColor="#94a3b8"
               value={email}
               onChangeText={setEmail}
               style={[styles.input, isRtl && styles.rtlInput]}
@@ -88,7 +88,7 @@ export default function LoginScreen() {
                 textContentType="password"
                 autoComplete="password"
                 placeholder="••••••••"
-                placeholderTextColor="rgba(255,255,255,0.28)"
+                placeholderTextColor="#94a3b8"
                 value={password}
                 onChangeText={setPassword}
                 style={[styles.input, isRtl ? styles.inputWithToggleRtl : styles.inputWithToggleLtr, isRtl && styles.rtlInput]}
@@ -135,7 +135,7 @@ export default function LoginScreen() {
 
         {/* Copyright */}
         <Text style={[styles.copyright, isRtl && styles.rtlText]}>
-          {language === "ar" ? "© 2025 طاقم. جميع الحقوق محفوظة." : "© 2025 Taqam. All rights reserved."}
+          {t(language, "copyright")}
         </Text>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -145,7 +145,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: "#0a0f1e",
+    backgroundColor: "#f8fafc",
   },
   scroll: {
     flexGrow: 1,
@@ -161,13 +161,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 26,
     fontWeight: "800",
     marginBottom: 6,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.50)",
+    color: "#64748b",
     fontSize: 15,
     marginBottom: 32,
     lineHeight: 22,
@@ -183,18 +183,18 @@ const styles = StyleSheet.create({
     gap: 7,
   },
   label: {
-    color: "rgba(255,255,255,0.70)",
+    color: "#334155",
     fontSize: 14,
     fontWeight: "600",
   },
   input: {
-    backgroundColor: "#1e293b",
+    backgroundColor: "#ffffff",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.10)",
+    borderColor: "#e2e8f0",
     borderRadius: 14,
     paddingHorizontal: 16,
     paddingVertical: Platform.OS === "ios" ? 15 : 13,
-    color: "#f1f5f9",
+    color: "#0f172a",
     fontSize: 15,
   },
   rtlInput: {
@@ -222,31 +222,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   errorBox: {
-    backgroundColor: "rgba(239,68,68,0.10)",
+    backgroundColor: "#fef2f2",
     borderWidth: 1,
-    borderColor: "rgba(239,68,68,0.28)",
+    borderColor: "#fecaca",
     borderRadius: 12,
     padding: 12,
   },
   errorText: {
-    color: "#f87171",
+    color: "#dc2626",
     fontSize: 14,
     lineHeight: 20,
   },
   btn: {
-    backgroundColor: "#3b82f6",
+    backgroundColor: "#0ea5e9",
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 4,
-    shadowColor: "#3b82f6",
+    shadowColor: "#0ea5e9",
     shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.40,
+    shadowOpacity: 0.30,
     shadowRadius: 14,
     elevation: 8,
   },
   btnDisabled: {
-    backgroundColor: "#1e293b",
+    backgroundColor: "#cbd5e1",
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -261,13 +261,13 @@ const styles = StyleSheet.create({
     letterSpacing: 0.3,
   },
   hint: {
-    color: "rgba(255,255,255,0.25)",
+    color: "#94a3b8",
     fontSize: 11,
     textAlign: "center",
     lineHeight: 18,
   },
   copyright: {
-    color: "rgba(255,255,255,0.22)",
+    color: "#94a3b8",
     fontSize: 11,
     textAlign: "center",
     marginTop: 6,

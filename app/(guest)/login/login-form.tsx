@@ -60,7 +60,15 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
 
       const session = await getSession();
       const role = (session?.user as any)?.role as string | undefined;
-      router.replace(role === "SUPER_ADMIN" ? "/dashboard/super-admin" : "/dashboard");
+      const tenantSlug = (session?.user as any)?.tenant?.slug as string | undefined;
+
+      if (role === "SUPER_ADMIN") {
+        router.replace("/dashboard/super-admin");
+      } else if (tenantSlug) {
+        router.replace(`/t/${tenantSlug}/dashboard`);
+      } else {
+        router.replace("/dashboard");
+      }
     } finally {
       setIsLoading(false);
     }

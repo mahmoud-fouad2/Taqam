@@ -52,8 +52,14 @@ import {
   enrollmentStatusLabels,
   enrollmentStatusColors,
 } from "@/lib/types/training";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function TrainingEnrollmentsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [enrollments, setEnrollments] = React.useState<CourseEnrollment[]>([]);
   const [courses, setCourses] = React.useState<Array<{ id: string; title: string }>>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -88,9 +94,9 @@ export function TrainingEnrollmentsManager() {
       );
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل تحميل تسجيلات التدريب");
+      toast.error(e?.message || t.trainingEnrollments.loadFailed);
     }
-  }, []);
+  }, [t.trainingEnrollments.loadFailed]);
 
   React.useEffect(() => {
     refresh();
@@ -137,10 +143,10 @@ export function TrainingEnrollmentsManager() {
       setEnrollments((prev) =>
         prev.map((e) => (e.id === enrollmentId ? { ...e, status: newStatus } : e))
       );
-      toast.success("تم تحديث الحالة");
+      toast.success(t.onboarding.statusUpdated);
     } catch (e: any) {
       console.error(e);
-      toast.error(e?.message || "فشل تحديث الحالة");
+      toast.error(e?.message || t.leaveTypes.statusUpdateFailed);
     }
   };
 
@@ -150,45 +156,45 @@ export function TrainingEnrollmentsManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي التسجيلات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.academy.totalEnrollments}</CardTitle>
             <IconUser className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">تسجيل</p>
+            <p className="text-xs text-muted-foreground">{t.trainingEnrollments.enrollment}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconProgress className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
-            <p className="text-xs text-muted-foreground">طلب تسجيل</p>
+            <p className="text-xs text-muted-foreground">{t.trainingEnrollments.enrollmentRequest}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">قيد التدريب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingEnrollments.inTraining}</CardTitle>
             <IconBook className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">يتدربون حالياً</p>
+            <p className="text-xs text-muted-foreground">{t.trainingEnrollments.currentlyTraining}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">أتموا التدريب</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.trainingCourses.completedTraining}</CardTitle>
             <IconCertificate className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">متدرب</p>
+            <p className="text-xs text-muted-foreground">{t.trainingEnrollments.trainee}</p>
           </CardContent>
         </Card>
       </div>
@@ -196,8 +202,8 @@ export function TrainingEnrollmentsManager() {
       {/* جدول التسجيلات */}
       <Card>
         <CardHeader>
-          <CardTitle>تسجيلات التدريب</CardTitle>
-          <CardDescription>متابعة تسجيلات الموظفين في الدورات التدريبية</CardDescription>
+          <CardTitle>{t.academy.enrollments}</CardTitle>
+          <CardDescription>{t.trainingEnrollments.trackEnrollments}</CardDescription>
         </CardHeader>
         <CardContent>
           {/* أدوات البحث والفلترة */}
@@ -205,7 +211,7 @@ export function TrainingEnrollmentsManager() {
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث..."
+                placeholder={t.common.searchDots}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="ps-9"
@@ -213,10 +219,10 @@ export function TrainingEnrollmentsManager() {
             </div>
             <Select value={courseFilter} onValueChange={setCourseFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="الدورة" />
+                <SelectValue placeholder={t.trainingEnrollments.courseFilter} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الدورات</SelectItem>
+                <SelectItem value="all">{t.trainingCourses.allCourses}</SelectItem>
                 {courses.map((course) => (
                   <SelectItem key={course.id} value={course.id}>
                     {course.title}
@@ -227,10 +233,10 @@ export function TrainingEnrollmentsManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-40">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(enrollmentStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -245,20 +251,20 @@ export function TrainingEnrollmentsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الموظف</TableHead>
-                  <TableHead>الدورة</TableHead>
-                  <TableHead>القسم</TableHead>
-                  <TableHead>التقدم</TableHead>
-                  <TableHead>الدرجة</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.common.employee}</TableHead>
+                  <TableHead>{t.trainingCourses.course}</TableHead>
+                  <TableHead>{t.common.department}</TableHead>
+                  <TableHead>{t.common.inProgress}</TableHead>
+                  <TableHead>{t.trainingEnrollments.grade}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredEnrollments.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={7} className="text-center py-8">
-                      <p className="text-muted-foreground">لا توجد تسجيلات</p>
+                      <p className="text-muted-foreground">{t.trainingEnrollments.noEnrollments}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -318,21 +324,19 @@ export function TrainingEnrollmentsManager() {
                                   onClick={() => handleStatusChange(enrollment.id, "approved")}
                                 >
                                   <IconCheck className="ms-2 h-4 w-4" />
-                                  الموافقة
+                                  {t.trainingEnrollments.pApproval}
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   className="text-destructive"
                                   onClick={() => handleStatusChange(enrollment.id, "rejected")}
                                 >
-                                  <IconX className="ms-2 h-4 w-4" />
-                                  رفض
-                                </DropdownMenuItem>
+                                  <IconX className="ms-2 h-4 w-4" />{t.common.reject}</DropdownMenuItem>
                               </>
                             )}
                             {enrollment.certificate && (
                               <DropdownMenuItem>
                                 <IconDownload className="ms-2 h-4 w-4" />
-                                تحميل الشهادة
+                                {t.trainingEnrollments.pUploadCertificate}
                               </DropdownMenuItem>
                             )}
                             {enrollment.status === "in-progress" && (
@@ -340,7 +344,7 @@ export function TrainingEnrollmentsManager() {
                                 onClick={() => handleStatusChange(enrollment.id, "completed")}
                               >
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                إكمال التدريب
+                                {t.trainingEnrollments.pCompleteTraining}
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

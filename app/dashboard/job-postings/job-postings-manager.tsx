@@ -84,6 +84,9 @@ import {
   jobTypeLabels,
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type JobFormState = {
   title: string;
@@ -175,12 +178,12 @@ export function JobPostingsManager() {
       setDepartments(departmentsRes.data ?? []);
 
       if (!departmentsRes.success) {
-        toast.error(departmentsRes.error || "فشل في جلب الأقسام");
+        toast.error(departmentsRes.error || t.jobPostings.fetchDeptsFailed);
       }
     } catch (error) {
       setJobs([]);
       setDepartments([]);
-      toast.error(error instanceof Error ? error.message : "فشل في جلب بيانات التوظيف");
+      toast.error(error instanceof Error ? error.message : t.applicants.fetchFailed);
     } finally {
       setIsLoading(false);
     }
@@ -241,17 +244,17 @@ export function JobPostingsManager() {
     const salaryMax = jobForm.salaryMax ? Number(jobForm.salaryMax) : undefined;
 
     if (title.length < 2) {
-      toast.error("يرجى إدخال مسمى وظيفي صالح");
+      toast.error(t.jobPostings.enterValidTitle);
       return;
     }
 
     if (description.length < 5) {
-      toast.error("يرجى إدخال وصف وظيفة أوضح");
+      toast.error(t.jobPostings.enterClearerDesc);
       return;
     }
 
     if (salaryMin !== undefined && salaryMax !== undefined && salaryMin > salaryMax) {
-      toast.error("الحد الأدنى للراتب يجب أن يكون أقل من أو يساوي الحد الأقصى");
+      toast.error(t.jobPostings.minSalaryError);
       return;
     }
 
@@ -262,7 +265,7 @@ export function JobPostingsManager() {
         titleEn: jobForm.titleAr.trim() || undefined,
         description,
         departmentId: jobForm.departmentId || undefined,
-        location: jobForm.location.trim() || "غير محدد",
+        location: jobForm.location.trim() || t.common.unspecified,
         jobType: jobForm.jobType,
         experienceLevel: jobForm.experienceLevel,
         salaryMin,
@@ -294,12 +297,12 @@ export function JobPostingsManager() {
         setSelectedJob(savedJob);
       }
 
-      toast.success(editingJob ? "تم تحديث الوظيفة" : "تم إنشاء الوظيفة");
+      toast.success(editingJob ? t.jobPostings.jobUpdated : t.jobPostings.jobCreated);
       setIsFormSheetOpen(false);
       setEditingJob(null);
       setJobForm(emptyJobForm);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "فشل في حفظ الوظيفة");
+      toast.error(error instanceof Error ? error.message : t.jobPostings.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -320,10 +323,10 @@ export function JobPostingsManager() {
         setIsViewSheetOpen(false);
       }
 
-      toast.success("تم حذف الوظيفة");
+      toast.success(t.jobPostings.deletedSuccess);
       setDeleteJobId(null);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "فشل في حذف الوظيفة");
+      toast.error(error instanceof Error ? error.message : t.jobPostings.deleteFailed);
     } finally {
       setIsDeleting(false);
     }
@@ -334,45 +337,45 @@ export function JobPostingsManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الوظائف</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobPostings.totalJobs}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">وظيفة مُعلنة</p>
+            <p className="text-xs text-muted-foreground">{t.jobPostings.announcedJobs}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">الوظائف المفتوحة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobPostings.openPositions}</CardTitle>
             <IconUsers className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">تقبل طلبات التقديم</p>
+            <p className="text-xs text-muted-foreground">{t.jobPostings.acceptingApplications}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">تم شغلها</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobPostings.filled}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.filled}</div>
-            <p className="text-xs text-muted-foreground">وظائف مكتملة التوظيف</p>
+            <p className="text-xs text-muted-foreground">{t.jobPostings.completedRecruitment}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">المناصب الشاغرة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobPostings.vacantPositions}</CardTitle>
             <IconUsers className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.totalPositions}</div>
-            <p className="text-xs text-muted-foreground">منصب مطلوب</p>
+            <p className="text-xs text-muted-foreground">{t.jobPostings.positionRequired}</p>
           </CardContent>
         </Card>
       </div>
@@ -381,16 +384,16 @@ export function JobPostingsManager() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>الوظائف الشاغرة</CardTitle>
-              <CardDescription>إدارة إعلانات الوظائف وربطها ببيانات فعلية</CardDescription>
+              <CardTitle>{t.jobPostings.pageTitle}</CardTitle>
+              <CardDescription>{t.jobPostings.pageSubtitle}</CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button variant="outline" onClick={() => void loadData()} disabled={isLoading}>
-                إعادة تحميل
+                {t.jobPostings.pReload}
               </Button>
               <Button onClick={openCreateSheet}>
                 <IconPlus className="ms-2 h-4 w-4" />
-                إضافة وظيفة
+                {t.jobPostings.pAddJob}
               </Button>
             </div>
           </div>
@@ -400,7 +403,7 @@ export function JobPostingsManager() {
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث عن وظيفة..."
+                placeholder={t.jobPostings.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
@@ -409,10 +412,10 @@ export function JobPostingsManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(jobStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -426,21 +429,21 @@ export function JobPostingsManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الوظيفة</TableHead>
-                  <TableHead>القسم</TableHead>
-                  <TableHead>الموقع</TableHead>
-                  <TableHead>النوع</TableHead>
-                  <TableHead>المناصب</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead>تاريخ النشر</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.onboarding.jobCol}</TableHead>
+                  <TableHead>{t.common.department}</TableHead>
+                  <TableHead>{t.jobPostings.locationCol}</TableHead>
+                  <TableHead>{t.common.type}</TableHead>
+                  <TableHead>{t.jobPostings.positions}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead>{t.jobPostings.publishDate}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {!isLoading && filteredJobs.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={8} className="py-8 text-center">
-                      <p className="text-muted-foreground">لا توجد وظائف مطابقة</p>
+                      <p className="text-muted-foreground">{t.jobPostings.noMatchingJobs}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -482,17 +485,11 @@ export function JobPostingsManager() {
                                 setIsViewSheetOpen(true);
                               }}
                             >
-                              <IconEye className="ms-2 h-4 w-4" />
-                              عرض التفاصيل
-                            </DropdownMenuItem>
+                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditSheet(job)}>
-                              <IconEdit className="ms-2 h-4 w-4" />
-                              تعديل
-                            </DropdownMenuItem>
+                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
                             <DropdownMenuItem className="text-destructive" onClick={() => setDeleteJobId(job.id)}>
-                              <IconTrash className="ms-2 h-4 w-4" />
-                              حذف
-                            </DropdownMenuItem>
+                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -508,43 +505,43 @@ export function JobPostingsManager() {
       <Sheet open={isFormSheetOpen} onOpenChange={setIsFormSheetOpen}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle>{editingJob ? "تعديل الوظيفة" : "إضافة وظيفة جديدة"}</SheetTitle>
-            <SheetDescription>اربط الإعلان الوظيفي ببيانات التوظيف الفعلية في النظام.</SheetDescription>
+            <SheetTitle>{editingJob ? t.jobPostings.editJob : t.jobPostings.addNewJob}</SheetTitle>
+            <SheetDescription>{t.jobPostings.formDesc}</SheetDescription>
           </SheetHeader>
 
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="job-title">المسمى الوظيفي</Label>
+              <Label htmlFor="job-title">{t.common.jobTitle}</Label>
               <Input
                 id="job-title"
                 value={jobForm.title}
                 onChange={(event) => updateFormValue("title", event.target.value)}
-                placeholder="مثال: Senior Backend Engineer"
+                placeholder={t.jobPostings.titlePlaceholder}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="job-title-ar">المسمى بالعربية</Label>
+              <Label htmlFor="job-title-ar">{t.jobPostings.titleAr}</Label>
               <Input
                 id="job-title-ar"
                 value={jobForm.titleAr}
                 onChange={(event) => updateFormValue("titleAr", event.target.value)}
-                placeholder="مثال: مهندس برمجيات أول"
+                placeholder={t.jobPostings.titleArExample}
               />
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label>القسم</Label>
+                <Label>{t.common.department}</Label>
                 <Select
                   value={jobForm.departmentId || "none"}
                   onValueChange={(value) => updateFormValue("departmentId", value === "none" ? "" : value)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر القسم" />
+                    <SelectValue placeholder={t.jobPostings.chooseDept} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">بدون قسم محدد</SelectItem>
+                    <SelectItem value="none">{t.jobPostings.noDept}</SelectItem>
                     {departments.map((department) => (
                       <SelectItem key={department.id} value={department.id}>
                         {department.nameAr || department.name}
@@ -555,22 +552,22 @@ export function JobPostingsManager() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="job-location">الموقع</Label>
+                <Label htmlFor="job-location">{t.jobPostings.locationCol}</Label>
                 <Input
                   id="job-location"
                   value={jobForm.location}
                   onChange={(event) => updateFormValue("location", event.target.value)}
-                  placeholder="الرياض"
+                  placeholder={t.jobPostings.riyadh}
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label>نوع الوظيفة</Label>
+                <Label>{t.jobPostings.jobType}</Label>
                 <Select value={jobForm.jobType} onValueChange={(value) => updateFormValue("jobType", value as JobType)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر النوع" />
+                    <SelectValue placeholder={t.common.selectType} />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(jobTypeLabels).map(([value, label]) => (
@@ -583,13 +580,13 @@ export function JobPostingsManager() {
               </div>
 
               <div className="grid gap-2">
-                <Label>مستوى الخبرة</Label>
+                <Label>{t.jobPostings.experienceLevel}</Label>
                 <Select
                   value={jobForm.experienceLevel}
                   onValueChange={(value) => updateFormValue("experienceLevel", value as ExperienceLevel)}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر المستوى" />
+                    <SelectValue placeholder={t.common.selectLevel} />
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(experienceLevelLabels).map(([value, label]) => (
@@ -604,7 +601,7 @@ export function JobPostingsManager() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="salary-min">الحد الأدنى للراتب</Label>
+                <Label htmlFor="salary-min">{t.jobPostings.minSalary}</Label>
                 <Input
                   id="salary-min"
                   type="number"
@@ -615,7 +612,7 @@ export function JobPostingsManager() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="salary-max">الحد الأقصى للراتب</Label>
+                <Label htmlFor="salary-max">{t.jobPostings.maxSalary}</Label>
                 <Input
                   id="salary-max"
                   type="number"
@@ -628,7 +625,7 @@ export function JobPostingsManager() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="open-positions">عدد المناصب المطلوبة</Label>
+                <Label htmlFor="open-positions">{t.jobPostings.positionsCount}</Label>
                 <Input
                   id="open-positions"
                   type="number"
@@ -639,7 +636,7 @@ export function JobPostingsManager() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="deadline">تاريخ إغلاق التقديم</Label>
+                <Label htmlFor="deadline">{t.jobPostings.closingDate}</Label>
                 <Input
                   id="deadline"
                   type="date"
@@ -650,44 +647,44 @@ export function JobPostingsManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="job-description">وصف الوظيفة</Label>
+              <Label htmlFor="job-description">{t.jobPostings.jobDescription}</Label>
               <Textarea
                 id="job-description"
                 value={jobForm.description}
                 onChange={(event) => updateFormValue("description", event.target.value)}
-                placeholder="وصف تفصيلي للوظيفة..."
+                placeholder={t.jobPostings.jobDescPlaceholder}
                 rows={4}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="job-requirements">المتطلبات</Label>
+              <Label htmlFor="job-requirements">{t.jobPostings.requirements}</Label>
               <Textarea
                 id="job-requirements"
                 value={jobForm.requirements}
                 onChange={(event) => updateFormValue("requirements", event.target.value)}
-                placeholder="اكتب كل متطلب في سطر منفصل..."
+                placeholder={t.jobPostings.requirementsPlaceholder}
                 rows={4}
               />
             </div>
 
             <div className="grid gap-2">
-              <Label htmlFor="job-benefits">المزايا</Label>
+              <Label htmlFor="job-benefits">{t.jobPostings.benefits}</Label>
               <Textarea
                 id="job-benefits"
                 value={jobForm.benefits}
                 onChange={(event) => updateFormValue("benefits", event.target.value)}
-                placeholder="اكتب كل ميزة في سطر منفصل..."
+                placeholder={t.jobPostings.benefitsPlaceholder}
                 rows={3}
               />
             </div>
 
             <div className="flex gap-2 pt-4">
               <Button variant="outline" className="flex-1" onClick={() => void saveJob("draft")} disabled={isSaving}>
-                {isSaving ? "جارٍ الحفظ..." : "حفظ كمسودة"}
+                {isSaving ? t.common.saving : t.jobPostings.saveAsDraft}
               </Button>
               <Button className="flex-1" onClick={() => void saveJob("active")} disabled={isSaving}>
-                {isSaving ? "جارٍ النشر..." : editingJob ? "تحديث ونشر" : "نشر الوظيفة"}
+                {isSaving ? t.jobPostings.publishing : editingJob ? t.jobPostings.updateAndPublish : t.jobPostings.publishJob}
               </Button>
             </div>
           </div>
@@ -698,7 +695,7 @@ export function JobPostingsManager() {
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedJob?.title}</SheetTitle>
-            <SheetDescription>{selectedJob?.titleEn || "تفاصيل الوظيفة"}</SheetDescription>
+            <SheetDescription>{selectedJob?.titleEn || t.jobPostings.jobDetails}</SheetDescription>
           </SheetHeader>
 
           {selectedJob && (
@@ -728,18 +725,18 @@ export function JobPostingsManager() {
                 )}
                 <div className="flex items-center gap-2 text-sm">
                   <IconUsers className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedJob.openPositions} مناصب مطلوبة</span>
+                  <span>{selectedJob.openPositions} {t.jobPostings.requiredPositions}</span>
                 </div>
               </div>
 
               <div>
-                <h4 className="mb-2 font-semibold">الوصف</h4>
+                <h4 className="mb-2 font-semibold">{t.common.description}</h4>
                 <p className="text-sm text-muted-foreground">{selectedJob.description}</p>
               </div>
 
               {selectedJob.requirements.length > 0 && (
                 <div>
-                  <h4 className="mb-2 font-semibold">المتطلبات</h4>
+                  <h4 className="mb-2 font-semibold">{t.jobPostings.requirements}</h4>
                   <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
                     {selectedJob.requirements.map((requirement) => (
                       <li key={requirement}>{requirement}</li>
@@ -750,7 +747,7 @@ export function JobPostingsManager() {
 
               {selectedJob.benefits.length > 0 && (
                 <div>
-                  <h4 className="mb-2 font-semibold">المزايا</h4>
+                  <h4 className="mb-2 font-semibold">{t.jobPostings.benefits}</h4>
                   <div className="flex flex-wrap gap-2">
                     {selectedJob.benefits.map((benefit) => (
                       <Badge key={benefit} variant="outline">
@@ -763,7 +760,7 @@ export function JobPostingsManager() {
 
               {selectedJob.applicationDeadline && (
                 <div>
-                  <h4 className="mb-2 font-semibold">موعد إغلاق التقديم</h4>
+                  <h4 className="mb-2 font-semibold">{t.jobPostings.applicationDeadline}</h4>
                   <p className="text-sm text-muted-foreground">
                     {new Date(selectedJob.applicationDeadline).toLocaleDateString("ar-SA")}
                   </p>
@@ -777,19 +774,19 @@ export function JobPostingsManager() {
       <AlertDialog open={deleteJobId !== null} onOpenChange={(open) => !open && setDeleteJobId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف الوظيفة</AlertDialogTitle>
+            <AlertDialogTitle>{t.jobPostings.deleteJob}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف هذه الوظيفة؟ إذا كان عليها متقدمون فسيرفض النظام الحذف لحماية البيانات.
+              {t.jobPostings.pAreYouSureYouWantToDelete}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel disabled={isDeleting}>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void confirmDeleteJob()}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isDeleting ? "جارٍ الحذف..." : "حذف"}
+              {isDeleting ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

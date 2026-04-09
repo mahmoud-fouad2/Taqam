@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
@@ -90,6 +90,10 @@ import {
   developmentPlanPriorityColors,
   activityTypeLabels,
 } from "@/lib/types/training";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type EditablePlanGoal = {
   id: string;
@@ -237,24 +241,24 @@ function normalizeEditableActivity(activity: EditablePlanActivity): EditablePlan
 function getGoalStatusLabel(status: DevelopmentGoal["status"]) {
   switch (status) {
     case "completed":
-      return "مكتمل";
+      return t.common.completed;
     case "in-progress":
-      return "قيد التنفيذ";
+      return t.common.inProgress;
     default:
-      return "لم يبدأ";
+      return t.common.notStarted;
   }
 }
 
 function getActivityStatusLabel(status: DevelopmentActivity["status"]) {
   switch (status) {
     case "completed":
-      return "مكتمل";
+      return t.common.completed;
     case "in-progress":
-      return "قيد التنفيذ";
+      return t.common.inProgress;
     case "skipped":
-      return "تم تخطيه";
+      return t.common.skipped;
     default:
-      return "معلّق";
+      return t.common.pending;
   }
 }
 
@@ -395,6 +399,8 @@ function getGoalStatusColor(status: string) {
 }
 
 export function DevelopmentPlansManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const { employees, isLoading: isEmployeesLoading } = useEmployees();
   const [plans, setPlans] = React.useState<DevelopmentPlan[]>([]);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -418,18 +424,18 @@ export function DevelopmentPlansManager() {
       const response = await developmentPlansApi.getAll({ pageSize: 200 });
       if (!response.success || !response.data) {
         setPlans([]);
-        setError(response.error || "فشل تحميل خطط التطوير");
+        setError(response.error || t.developmentPlans.loadFailed);
         return;
       }
 
       setPlans(response.data.plans);
     } catch (loadError) {
       setPlans([]);
-      setError(loadError instanceof Error ? loadError.message : "فشل تحميل خطط التطوير");
+      setError(loadError instanceof Error ? loadError.message : t.developmentPlans.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.developmentPlans.loadFailed]);
 
   React.useEffect(() => {
     void loadPlans();
@@ -543,7 +549,7 @@ export function DevelopmentPlansManager() {
 
   async function handleSave() {
     if (!form.employeeId || form.title.trim().length < 2 || !form.startDate || !form.targetDate) {
-      toast.error("يرجى استكمال بيانات الخطة الأساسية");
+      toast.error(t.developmentPlans.fillRequired);
       return;
     }
 
@@ -556,17 +562,17 @@ export function DevelopmentPlansManager() {
         : await developmentPlansApi.create(payload);
 
       if (!response.success || !response.data) {
-        toast.error(response.error || "تعذر حفظ خطة التطوير");
+        toast.error(response.error || t.developmentPlans.saveFailed);
         return;
       }
 
-      toast.success(editingPlan ? "تم تحديث الخطة" : "تم إنشاء الخطة");
+      toast.success(editingPlan ? t.developmentPlans.planUpdated : t.developmentPlans.planCreated);
       setIsFormSheetOpen(false);
       setEditingPlan(null);
       setForm(EMPTY_FORM);
       await loadPlans();
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : "تعذر حفظ خطة التطوير");
+      toast.error(saveError instanceof Error ? saveError.message : t.developmentPlans.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -577,17 +583,17 @@ export function DevelopmentPlansManager() {
     try {
       const response = await developmentPlansApi.update(plan.id, { status });
       if (!response.success || !response.data) {
-        toast.error(response.error || "تعذر تحديث حالة الخطة");
+        toast.error(response.error || t.developmentPlans.statusUpdateFailed);
         return;
       }
 
-      toast.success("تم تحديث حالة الخطة");
+      toast.success(t.developmentPlans.statusUpdated);
       setPlans((current) => current.map((item) => (item.id === plan.id ? response.data! : item)));
       if (selectedPlan?.id === plan.id) {
         setSelectedPlan(response.data);
       }
     } catch (statusError) {
-      toast.error(statusError instanceof Error ? statusError.message : "تعذر تحديث حالة الخطة");
+      toast.error(statusError instanceof Error ? statusError.message : t.developmentPlans.statusUpdateFailed);
     } finally {
       setUpdatingId(null);
     }
@@ -605,18 +611,18 @@ export function DevelopmentPlansManager() {
     try {
       const response = await developmentPlansApi.delete(plan.id);
       if (!response.success) {
-        toast.error(response.error || "تعذر حذف الخطة");
+        toast.error(response.error || t.developmentPlans.deleteFailed);
         return;
       }
 
-      toast.success("تم حذف الخطة بنجاح");
+      toast.success(t.developmentPlans.deletedSuccess);
       setPlans((current) => current.filter((item) => item.id !== plan.id));
       if (selectedPlan?.id === plan.id) {
         setIsViewSheetOpen(false);
         setSelectedPlan(null);
       }
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : "تعذر حذف الخطة");
+      toast.error(deleteError instanceof Error ? deleteError.message : t.developmentPlans.deleteFailed);
     } finally {
       setDeletingId(null);
     }
@@ -634,56 +640,56 @@ export function DevelopmentPlansManager() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي الخطط</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.developmentPlans.totalPlans}</CardTitle>
             <IconTarget className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">خطة تطوير</p>
+            <p className="text-xs text-muted-foreground">{t.developmentPlans.devPlan}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">خطط نشطة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.developmentPlans.activePlans}</CardTitle>
             <IconProgress className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">قيد التنفيذ</p>
+            <p className="text-xs text-muted-foreground">{t.common.inProgress}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">بانتظار الموافقة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.pendingApproval}</div>
-            <p className="text-xs text-muted-foreground">بانتظار الموافقة</p>
+            <p className="text-xs text-muted-foreground">{t.documents.pendingApproval}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مكتملة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.completed}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">خطة مكتملة</p>
+            <p className="text-xs text-muted-foreground">{t.developmentPlans.completedPlan}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">متوسط التقدم</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.developmentPlans.avgProgress}</CardTitle>
             <IconTarget className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.avgProgress}%</div>
-            <p className="text-xs text-muted-foreground">لكل الخطط</p>
+            <p className="text-xs text-muted-foreground">{t.developmentPlans.forAllPlans}</p>
           </CardContent>
         </Card>
       </div>
@@ -692,12 +698,12 @@ export function DevelopmentPlansManager() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>خطط التطوير الوظيفي</CardTitle>
-              <CardDescription>إدارة خطط تطوير الموظفين وربطها بالبيانات الحقيقية</CardDescription>
+              <CardTitle>{t.developmentPlans.pageTitle}</CardTitle>
+              <CardDescription>{t.developmentPlans.pageSubtitle}</CardDescription>
             </div>
             <Button onClick={openCreateSheet}>
               <IconPlus className="ms-2 h-4 w-4" />
-              خطة جديدة
+              {t.developmentPlans.newPlan}
             </Button>
           </div>
         </CardHeader>
@@ -706,7 +712,7 @@ export function DevelopmentPlansManager() {
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="بحث باسم الموظف أو عنوان الخطة"
+                placeholder={t.developmentPlans.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
@@ -714,10 +720,10 @@ export function DevelopmentPlansManager() {
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">جميع الحالات</SelectItem>
+                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                 {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -731,25 +737,25 @@ export function DevelopmentPlansManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>الموظف</TableHead>
-                  <TableHead>عنوان الخطة</TableHead>
-                  <TableHead>التاريخ المستهدف</TableHead>
-                  <TableHead>التقدم</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.common.employee}</TableHead>
+                  <TableHead>{t.developmentPlans.planTitle}</TableHead>
+                  <TableHead>{t.performanceGoals.dueDate}</TableHead>
+                  <TableHead>{t.common.inProgress}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      جاري تحميل خطط التطوير...
+                      {t.developmentPlans.loadingPlans}
                     </TableCell>
                   </TableRow>
                 ) : filteredPlans.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center">
-                      <p className="text-muted-foreground">لا توجد خطط تطوير مطابقة</p>
+                      <p className="text-muted-foreground">{t.developmentPlans.noMatchingPlans}</p>
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -804,13 +810,9 @@ export function DevelopmentPlansManager() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => openViewSheet(plan)}>
-                              <IconEye className="ms-2 h-4 w-4" />
-                              عرض التفاصيل
-                            </DropdownMenuItem>
+                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditSheet(plan)}>
-                              <IconEdit className="ms-2 h-4 w-4" />
-                              تعديل
-                            </DropdownMenuItem>
+                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {plan.status === "draft" && (
                               <DropdownMenuItem
@@ -818,7 +820,7 @@ export function DevelopmentPlansManager() {
                                 onClick={() => void handleStatusChange(plan, "pending-approval")}
                               >
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                إرسال للموافقة
+                                {t.developmentPlans.submitForApproval}
                               </DropdownMenuItem>
                             )}
                             {plan.status !== "active" && plan.status !== "completed" && plan.status !== "cancelled" && (
@@ -826,9 +828,7 @@ export function DevelopmentPlansManager() {
                                 disabled={updatingId === plan.id}
                                 onClick={() => void handleStatusChange(plan, "active")}
                               >
-                                <IconPlayerPlay className="ms-2 h-4 w-4" />
-                                بدء التنفيذ
-                              </DropdownMenuItem>
+                                <IconPlayerPlay className="ms-2 h-4 w-4" />{t.common.startExecution}</DropdownMenuItem>
                             )}
                             {plan.status !== "completed" && (
                               <DropdownMenuItem
@@ -836,7 +836,7 @@ export function DevelopmentPlansManager() {
                                 onClick={() => void handleStatusChange(plan, "completed")}
                               >
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                تعيين كمكتملة
+                                {t.developmentPlans.markAsComplete}
                               </DropdownMenuItem>
                             )}
                             {plan.status !== "cancelled" && plan.status !== "completed" && (
@@ -845,7 +845,7 @@ export function DevelopmentPlansManager() {
                                 onClick={() => void handleStatusChange(plan, "cancelled")}
                               >
                                 <IconX className="ms-2 h-4 w-4" />
-                                إلغاء الخطة
+                                {t.developmentPlans.cancelPlan}
                               </DropdownMenuItem>
                             )}
                             {plan.status === "cancelled" && (
@@ -854,7 +854,7 @@ export function DevelopmentPlansManager() {
                                 onClick={() => void handleStatusChange(plan, "draft")}
                               >
                                 <IconEdit className="ms-2 h-4 w-4" />
-                                إعادة فتح كمسودة
+                                {t.developmentPlans.reopenAsDraft}
                               </DropdownMenuItem>
                             )}
                             {plan.status !== "completed" && (
@@ -866,7 +866,7 @@ export function DevelopmentPlansManager() {
                                   onClick={() => void handleDelete(plan)}
                                 >
                                   <IconTrash className="ms-2 h-4 w-4" />
-                                  {deletingId === plan.id ? "جاري الحذف..." : "حذف الخطة"}
+                                  {deletingId === plan.id ? t.common.deleting : t.developmentPlans.deletePlan}
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -885,15 +885,15 @@ export function DevelopmentPlansManager() {
       <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
-            <SheetTitle>{editingPlan ? "تعديل خطة التطوير" : "إنشاء خطة تطوير جديدة"}</SheetTitle>
-            <SheetDescription>أدخل بيانات الخطة وربطها بموظف ومرشد عند الحاجة.</SheetDescription>
+            <SheetTitle>{editingPlan ? t.developmentPlans.editPlan : t.developmentPlans.createPlan}</SheetTitle>
+            <SheetDescription>{t.developmentPlans.formDesc}</SheetDescription>
           </SheetHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>الموظف</Label>
+              <Label>{t.common.employee}</Label>
               <Select value={form.employeeId} onValueChange={(value) => updateFormValue("employeeId", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder={isEmployeesLoading ? "جاري تحميل الموظفين..." : "اختر الموظف"} />
+                  <SelectValue placeholder={isEmployeesLoading ? t.developmentPlans.loadingEmployees : t.common.selectEmployee} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((employee) => (
@@ -906,12 +906,12 @@ export function DevelopmentPlansManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label>عنوان الخطة</Label>
+              <Label>{t.developmentPlans.planTitle}</Label>
               <Input value={form.title} onChange={(event) => updateFormValue("title", event.target.value)} />
             </div>
 
             <div className="grid gap-2">
-              <Label>الوصف</Label>
+              <Label>{t.common.description}</Label>
               <Textarea
                 rows={3}
                 value={form.description}
@@ -921,18 +921,18 @@ export function DevelopmentPlansManager() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>تاريخ البدء</Label>
+                <Label>{t.common.startDate}</Label>
                 <Input type="date" value={form.startDate} onChange={(event) => updateFormValue("startDate", event.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>التاريخ المستهدف</Label>
+                <Label>{t.performanceGoals.dueDate}</Label>
                 <Input type="date" value={form.targetDate} onChange={(event) => updateFormValue("targetDate", event.target.value)} />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>الحالة</Label>
+                <Label>{t.common.status}</Label>
                 <Select value={form.status} onValueChange={(value) => updateFormValue("status", value as DevelopmentPlanStatus)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -947,13 +947,13 @@ export function DevelopmentPlansManager() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>المرشد</Label>
+                <Label>{t.developmentPlans.mentor}</Label>
                 <Select value={form.mentorId || "none"} onValueChange={(value) => updateFormValue("mentorId", value === "none" ? "" : value)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="اختر المرشد" />
+                    <SelectValue placeholder={t.developmentPlans.chooseMentor} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">بدون مرشد</SelectItem>
+                    <SelectItem value="none">{t.developmentPlans.noMentor}</SelectItem>
                     {employees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id}>
                         {employee.firstName} {employee.lastName}
@@ -966,7 +966,7 @@ export function DevelopmentPlansManager() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>نوع الخطة</Label>
+                <Label>{t.developmentPlans.planType}</Label>
                 <Select value={form.type} onValueChange={(value) => updateFormValue("type", value as DevelopmentPlanType)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -981,7 +981,7 @@ export function DevelopmentPlansManager() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>الأولوية</Label>
+                <Label>{t.common.priority}</Label>
                 <Select value={form.priority} onValueChange={(value) => updateFormValue("priority", value as DevelopmentPlanPriority)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -1000,38 +1000,34 @@ export function DevelopmentPlansManager() {
             <div className="space-y-3 rounded-lg border p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <Label>الأهداف</Label>
-                  <p className="text-sm text-muted-foreground">أضف كل هدف وعدّل حالته وتاريخه بشكل مستقل.</p>
+                  <Label>{t.developmentPlans.goalsSection}</Label>
+                  <p className="text-sm text-muted-foreground">{t.developmentPlans.goalsDescription}</p>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={addGoal}>
-                  <IconPlus className="ms-2 h-4 w-4" />
-                  إضافة هدف
-                </Button>
+                  <IconPlus className="ms-2 h-4 w-4" />{t.performanceGoals.addGoal}</Button>
               </div>
 
               {form.goals.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  لا توجد أهداف مضافة بعد.
+                  {t.developmentPlans.noGoalsYet}
                 </div>
               ) : (
                 <div className="space-y-3">
                   {form.goals.map((goal, index) => (
                     <div key={goal.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium">الهدف {index + 1}</p>
+                        <p className="text-sm font-medium">{t.developmentPlans.goalN} {index + 1}</p>
                         <Button type="button" variant="ghost" size="sm" onClick={() => removeGoal(goal.id)}>
-                          <IconTrash className="ms-2 h-4 w-4" />
-                          حذف
-                        </Button>
+                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</Button>
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>العنوان</Label>
+                        <Label>{t.common.title}</Label>
                         <Input value={goal.title} onChange={(event) => updateGoal(goal.id, { title: event.target.value })} />
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>الوصف</Label>
+                        <Label>{t.common.description}</Label>
                         <Textarea
                           rows={2}
                           value={goal.description}
@@ -1041,7 +1037,7 @@ export function DevelopmentPlansManager() {
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
-                          <Label>التاريخ المستهدف</Label>
+                          <Label>{t.performanceGoals.dueDate}</Label>
                           <Input
                             type="date"
                             value={goal.targetDate}
@@ -1049,15 +1045,15 @@ export function DevelopmentPlansManager() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label>الحالة</Label>
+                          <Label>{t.common.status}</Label>
                           <Select value={goal.status} onValueChange={(value) => updateGoal(goal.id, { status: value as DevelopmentGoal["status"] })}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="not-started">لم يبدأ</SelectItem>
-                              <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
-                              <SelectItem value="completed">مكتمل</SelectItem>
+                              <SelectItem value="not-started">{t.common.notStarted}</SelectItem>
+                              <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
+                              <SelectItem value="completed">{t.common.completed}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -1065,7 +1061,7 @@ export function DevelopmentPlansManager() {
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
-                          <Label>نسبة الإنجاز</Label>
+                          <Label>{t.developmentPlans.completionPercentage}</Label>
                           <Input
                             type="number"
                             min={0}
@@ -1075,7 +1071,7 @@ export function DevelopmentPlansManager() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label>تاريخ الإنجاز</Label>
+                          <Label>{t.developmentPlans.completionDate}</Label>
                           <Input
                             type="date"
                             value={goal.completedDate}
@@ -1086,12 +1082,12 @@ export function DevelopmentPlansManager() {
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>مؤشرات القياس</Label>
+                        <Label>{t.developmentPlans.measurementIndicators}</Label>
                         <Textarea
                           rows={2}
                           value={goal.metrics}
                           onChange={(event) => updateGoal(goal.id, { metrics: event.target.value })}
-                          placeholder="مثال: إنهاء دورة، اجتياز اختبار، تسليم مشروع"
+                          placeholder={t.developmentPlans.indicatorsExample}
                         />
                       </div>
                     </div>
@@ -1103,39 +1099,37 @@ export function DevelopmentPlansManager() {
             <div className="space-y-3 rounded-lg border p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <Label>الأنشطة</Label>
-                  <p className="text-sm text-muted-foreground">أدر كل نشاط داخل الخطة مع نوعه ووصفه ومرجعه.</p>
+                  <Label>{t.developmentPlans.activitiesSection}</Label>
+                  <p className="text-sm text-muted-foreground">{t.developmentPlans.activitiesDescription}</p>
                 </div>
                 <Button type="button" variant="outline" size="sm" onClick={addActivity}>
                   <IconPlus className="ms-2 h-4 w-4" />
-                  إضافة نشاط
+                  {t.developmentPlans.addActivity}
                 </Button>
               </div>
 
               {form.activities.length === 0 ? (
                 <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  لا توجد أنشطة مضافة بعد.
+                  {t.developmentPlans.noActivitiesYet}
                 </div>
               ) : (
                 <div className="space-y-3">
                   {form.activities.map((activity, index) => (
                     <div key={activity.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium">النشاط {index + 1}</p>
+                        <p className="text-sm font-medium">{t.developmentPlans.activityN} {index + 1}</p>
                         <Button type="button" variant="ghost" size="sm" onClick={() => removeActivity(activity.id)}>
-                          <IconTrash className="ms-2 h-4 w-4" />
-                          حذف
-                        </Button>
+                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</Button>
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>العنوان</Label>
+                        <Label>{t.common.title}</Label>
                         <Input value={activity.title} onChange={(event) => updateActivity(activity.id, { title: event.target.value })} />
                       </div>
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
-                          <Label>النوع</Label>
+                          <Label>{t.common.type}</Label>
                           <Select value={activity.type} onValueChange={(value) => updateActivity(activity.id, { type: value as DevelopmentActivity["type"] })}>
                             <SelectTrigger>
                               <SelectValue />
@@ -1150,17 +1144,17 @@ export function DevelopmentPlansManager() {
                           </Select>
                         </div>
                         <div className="grid gap-2">
-                          <Label>الرابط أو المرجع</Label>
+                          <Label>{t.developmentPlans.linkOrReference}</Label>
                           <Input
                             value={activity.courseId}
                             onChange={(event) => updateActivity(activity.id, { courseId: event.target.value })}
-                            placeholder="رابط أو معرف الدورة/المورد"
+                            placeholder={t.developmentPlans.linkPlaceholder}
                           />
                         </div>
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>الوصف</Label>
+                        <Label>{t.common.description}</Label>
                         <Textarea
                           rows={2}
                           value={activity.description}
@@ -1170,7 +1164,7 @@ export function DevelopmentPlansManager() {
 
                       <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
-                          <Label>الموعد المستهدف</Label>
+                          <Label>{t.developmentPlans.targetDate}</Label>
                           <Input
                             type="date"
                             value={activity.dueDate}
@@ -1178,7 +1172,7 @@ export function DevelopmentPlansManager() {
                           />
                         </div>
                         <div className="grid gap-2">
-                          <Label>الحالة</Label>
+                          <Label>{t.common.status}</Label>
                           <Select
                             value={activity.status}
                             onValueChange={(value) => updateActivity(activity.id, { status: value as DevelopmentActivity["status"] })}
@@ -1187,17 +1181,17 @@ export function DevelopmentPlansManager() {
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="pending">معلّق</SelectItem>
-                              <SelectItem value="in-progress">قيد التنفيذ</SelectItem>
-                              <SelectItem value="completed">مكتمل</SelectItem>
-                              <SelectItem value="skipped">تم تخطيه</SelectItem>
+                              <SelectItem value="pending">{t.common.pending}</SelectItem>
+                              <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
+                              <SelectItem value="completed">{t.common.completed}</SelectItem>
+                              <SelectItem value="skipped">{t.common.skipped}</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>تاريخ الإكمال</Label>
+                        <Label>{t.developmentPlans.completionDate}</Label>
                         <Input
                           type="date"
                           value={activity.completedDate}
@@ -1207,7 +1201,7 @@ export function DevelopmentPlansManager() {
                       </div>
 
                       <div className="grid gap-2">
-                        <Label>ملاحظات</Label>
+                        <Label>{t.common.notes}</Label>
                         <Textarea
                           rows={2}
                           value={activity.notes}
@@ -1221,7 +1215,7 @@ export function DevelopmentPlansManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label>ملاحظات</Label>
+              <Label>{t.common.notes}</Label>
               <Textarea
                 rows={3}
                 value={form.notes}
@@ -1230,11 +1224,9 @@ export function DevelopmentPlansManager() {
             </div>
 
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => handleFormSheetOpenChange(false)}>
-                إلغاء
-              </Button>
+              <Button variant="outline" onClick={() => handleFormSheetOpenChange(false)}>{t.common.cancel}</Button>
               <Button onClick={() => void handleSave()} disabled={isSaving}>
-                {editingPlan ? "حفظ التعديلات" : "إنشاء الخطة"}
+                {editingPlan ? t.common.saveChanges : t.developmentPlans.createPlan}
               </Button>
             </div>
           </div>
@@ -1245,7 +1237,7 @@ export function DevelopmentPlansManager() {
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedPlan?.title}</SheetTitle>
-            <SheetDescription>تفاصيل خطة التطوير</SheetDescription>
+            <SheetDescription>{t.developmentPlans.planDetails}</SheetDescription>
           </SheetHeader>
           {selectedPlan && (
             <div className="space-y-6 py-4">
@@ -1270,27 +1262,27 @@ export function DevelopmentPlansManager() {
 
               <div>
                 <div className="mb-2 flex justify-between text-sm">
-                  <span>التقدم الكلي</span>
+                  <span>{t.onboarding.totalProgress}</span>
                   <span>{selectedPlan.progress}%</span>
                 </div>
                 <Progress value={selectedPlan.progress} className="h-3" />
               </div>
 
-              <div className="grid grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-muted-foreground">تاريخ البدء</p>
+                  <p className="text-muted-foreground">{t.common.startDate}</p>
                   <p className="font-medium">{formatDate(selectedPlan.startDate)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">التاريخ المستهدف</p>
+                  <p className="text-muted-foreground">{t.performanceGoals.dueDate}</p>
                   <p className="font-medium">{formatDate(selectedPlan.targetDate)}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">نوع الخطة</p>
+                  <p className="text-muted-foreground">{t.developmentPlans.planType}</p>
                   <p className="font-medium">{developmentPlanTypeLabels[selectedPlan.type]}</p>
                 </div>
                 <div>
-                  <p className="text-muted-foreground">الأولوية</p>
+                  <p className="text-muted-foreground">{t.common.priority}</p>
                   <Badge className={developmentPlanPriorityColors[selectedPlan.priority]}>
                     {developmentPlanPriorityLabels[selectedPlan.priority]}
                   </Badge>
@@ -1303,13 +1295,13 @@ export function DevelopmentPlansManager() {
                   <div className="space-y-4">
                     {selectedPlan.description && (
                       <div>
-                        <h4 className="mb-2 font-semibold">وصف الخطة</h4>
+                        <h4 className="mb-2 font-semibold">{t.developmentPlans.planDescription}</h4>
                         <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.description}</p>
                       </div>
                     )}
                     {selectedPlan.notes && (
                       <div>
-                        <h4 className="mb-2 font-semibold">ملاحظات عامة</h4>
+                        <h4 className="mb-2 font-semibold">{t.developmentPlans.generalNotes}</h4>
                         <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.notes}</p>
                       </div>
                     )}
@@ -1321,7 +1313,7 @@ export function DevelopmentPlansManager() {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="mb-3 font-semibold">المرشد</h4>
+                    <h4 className="mb-3 font-semibold">{t.developmentPlans.mentor}</h4>
                     <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
                       <Avatar className="h-10 w-10">
                         <AvatarImage src={selectedPlan.mentor.avatar} alt="" />
@@ -1345,10 +1337,10 @@ export function DevelopmentPlansManager() {
               <Separator />
 
               <div>
-                <h4 className="mb-3 font-semibold">الأهداف</h4>
+                <h4 className="mb-3 font-semibold">{t.developmentPlans.goalsSection}</h4>
                 <div className="space-y-3">
                   {selectedPlan.goals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">لا توجد أهداف مضافة لهذه الخطة</p>
+                    <p className="text-sm text-muted-foreground">{t.developmentPlans.noGoalsForThisPlan}</p>
                   ) : (
                     selectedPlan.goals.map((goal) => (
                       <div key={goal.id} className="rounded-lg border p-3">
@@ -1359,9 +1351,9 @@ export function DevelopmentPlansManager() {
                         {goal.description && <p className="mb-2 text-sm text-muted-foreground">{goal.description}</p>}
                         <Progress value={goal.progress} className="h-2" />
                         <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span>الموعد: {formatDate(goal.targetDate)}</span>
-                          {goal.completedDate && <span>الإنجاز: {formatDate(goal.completedDate)}</span>}
-                          {goal.metrics && <span>القياس: {goal.metrics}</span>}
+                          <span>{t.developmentPlans.dueDate} {formatDate(goal.targetDate)}</span>
+                          {goal.completedDate && <span>{t.developmentPlans.completedDate} {formatDate(goal.completedDate)}</span>}
+                          {goal.metrics && <span>{t.developmentPlans.metrics} {goal.metrics}</span>}
                         </div>
                       </div>
                     ))
@@ -1372,10 +1364,10 @@ export function DevelopmentPlansManager() {
               <Separator />
 
               <div>
-                <h4 className="mb-3 font-semibold">الأنشطة</h4>
+                <h4 className="mb-3 font-semibold">{t.developmentPlans.activitiesSection}</h4>
                 <div className="space-y-2">
                   {selectedPlan.activities.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">لا توجد أنشطة مرتبطة بالخطة</p>
+                    <p className="text-sm text-muted-foreground">{t.developmentPlans.noRelatedActivities}</p>
                   ) : (
                     selectedPlan.activities.map((activity) => (
                       <div key={activity.id} className="flex items-center gap-3 rounded-lg border p-2">
@@ -1391,7 +1383,7 @@ export function DevelopmentPlansManager() {
                             </Badge>
                             <Badge className={getActivityStatusColor(activity.status)}>{getActivityStatusLabel(activity.status)}</Badge>
                             <span className="text-xs text-muted-foreground">{formatDate(activity.dueDate)}</span>
-                            {activity.completedDate && <span className="text-xs text-muted-foreground">اكتمل: {formatDate(activity.completedDate)}</span>}
+                            {activity.completedDate && <span className="text-xs text-muted-foreground">{t.developmentPlans.completedOn} {formatDate(activity.completedDate)}</span>}
                           </div>
                           {activity.notes && <p className="mt-1 text-xs text-muted-foreground">{activity.notes}</p>}
                         </div>
@@ -1409,16 +1401,14 @@ export function DevelopmentPlansManager() {
     <AlertDialog open={!!planToDelete} onOpenChange={(open) => { if (!open) setPlanToDelete(null); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>تأكيد الحذف</AlertDialogTitle>
+          <AlertDialogTitle>{t.common.confirmDeleteTitle}</AlertDialogTitle>
           <AlertDialogDescription>
-            هل أنت متأكد من حذف خطة &ldquo;{planToDelete?.title}&rdquo;؟ لا يمكن التراجع عن هذا الإجراء.
+            {t.developmentPlans.pAreYouSureYouWantToDelete} &ldquo;{planToDelete?.title}&rdquo;? {t.developmentPlans.deleteConfirm}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>إلغاء</AlertDialogCancel>
-          <AlertDialogAction onClick={() => void confirmDelete()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            حذف
-          </AlertDialogAction>
+          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+          <AlertDialogAction onClick={() => void confirmDelete()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t.common.delete}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

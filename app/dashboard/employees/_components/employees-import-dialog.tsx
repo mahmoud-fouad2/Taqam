@@ -26,6 +26,10 @@ import {
 
 import { employeesService } from "@/lib/api";
 import { csvRowsToObjects, parseCsv } from "@/lib/csv/parse";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type PreviewRow = Record<string, string>;
 
@@ -114,6 +118,8 @@ function validateRow(row: PreviewRow, rowIndex: number): string[] {
 }
 
 export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [file, setFile] = React.useState<File | null>(null);
   const [parsing, setParsing] = React.useState(false);
   const [importing, setImporting] = React.useState(false);
@@ -152,7 +158,7 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
       setErrors(rowErrors.slice(0, 200));
     } catch (e) {
       console.error(e);
-      toast.error("فشل في قراءة ملف CSV");
+      toast.error(t.employeesImport.csvReadFailed);
     } finally {
       setParsing(false);
     }
@@ -172,9 +178,9 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
       const apiErrors = res.data?.errors ?? [];
 
       if (apiErrors.length > 0) {
-        toast.warning(`تم الاستيراد جزئياً: ${imported} صف (مع أخطاء)`);
+        toast.warning(`${t.employeesImport.pPartiallyImported} ${imported} ${t.employeesImport.pRowsWithErrors}`);
       } else {
-        toast.success(`تم استيراد ${imported} موظف بنجاح`);
+        toast.success(`${t.employeesImport.pImported} ${imported} ${t.employeesImport.pEmployeesSuccessfully}`);
       }
 
       setErrors(apiErrors);
@@ -182,7 +188,7 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
       await onImported?.();
     } catch (e) {
       console.error(e);
-      toast.error("فشل في استيراد الموظفين");
+      toast.error(t.employeesImport.importFailed);
     } finally {
       setImporting(false);
     }
@@ -192,9 +198,9 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full sm:max-w-3xl">
         <DialogHeader>
-          <DialogTitle>استيراد الموظفين (CSV)</DialogTitle>
+          <DialogTitle>{t.employeesImport.importTitle}</DialogTitle>
           <DialogDescription>
-            ارفع ملف CSV مطابقاً للقالب. سيتم استيراد الصفوف الصحيحة وتسجيل الأخطاء للصفوف غير الصالحة.
+            {t.employeesImport.uploadCsvFile} {t.employeesImport.pImport}
           </DialogDescription>
         </DialogHeader>
 
@@ -210,23 +216,23 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
             </div>
             <Button type="button" variant="outline" onClick={downloadTemplate} disabled={parsing || importing}>
               <IconDownload className="ms-2 h-4 w-4" />
-              تنزيل قالب CSV
+              {t.employeesImport.downloadCsvTemplate}
             </Button>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border p-3">
-              <div className="text-sm font-medium mb-2">معاينة (أول 20 صف)</div>
+              <div className="text-sm font-medium mb-2">{t.employeesImport.previewFirst20}</div>
               {preview.length === 0 ? (
-                <div className="text-sm text-muted-foreground">اختر ملف CSV لعرض المعاينة</div>
+                <div className="text-sm text-muted-foreground">{t.employeesImport.selectCsvFile}</div>
               ) : (
                 <ScrollArea className="h-64">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>الاسم</TableHead>
-                        <TableHead>البريد</TableHead>
-                        <TableHead>تاريخ التعيين</TableHead>
+                        <TableHead>{t.common.name}</TableHead>
+                        <TableHead>{t.common.email}</TableHead>
+                        <TableHead>{t.common.hireDate}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -248,9 +254,9 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
             </div>
 
             <div className="rounded-lg border p-3">
-              <div className="text-sm font-medium mb-2">الأخطاء</div>
+              <div className="text-sm font-medium mb-2">{t.employeesImport.errorsTitle}</div>
               {errors.length === 0 ? (
-                <div className="text-sm text-muted-foreground">لا توجد أخطاء حالياً</div>
+                <div className="text-sm text-muted-foreground">{t.employeesImport.noErrors}</div>
               ) : (
                 <ScrollArea className="h-64">
                   <ul className="text-sm space-y-1">
@@ -267,12 +273,10 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
         </div>
 
         <DialogFooter className="gap-2">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={importing}>
-            إغلاق
-          </Button>
+          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={importing}>{t.common.close}</Button>
           <Button type="button" onClick={startImport} disabled={!canImport || importing}>
             <IconUpload className="ms-2 h-4 w-4" />
-            {importing ? "جاري الاستيراد..." : "بدء الاستيراد"}
+            {importing ? t.employeesImport.importing : t.employeesImport.startImport}
           </Button>
         </DialogFooter>
       </DialogContent>

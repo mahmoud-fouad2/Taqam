@@ -1,3 +1,5 @@
+"use client";
+
 import { IconSearch } from "@tabler/icons-react";
 
 import { Input } from "@/components/ui/input";
@@ -11,6 +13,10 @@ import {
 import type { Department } from "@/lib/types/core-hr";
 
 import { statusOptions } from "./employee-constants";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function EmployeesFilters({
   searchQuery,
@@ -29,12 +35,14 @@ export function EmployeesFilters({
   onFilterStatusChange: (value: string) => void;
   departments: Department[];
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <div className="mb-4 flex flex-wrap items-center gap-3">
       <div className="relative flex-1 min-w-[200px] max-w-sm">
         <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="بحث بالاسم أو الرقم..."
+          placeholder={t.employees.searchPlaceholder}
           value={searchQuery}
           onChange={(e) => onSearchQueryChange(e.target.value)}
           className="ps-9"
@@ -43,10 +51,10 @@ export function EmployeesFilters({
 
       <Select value={filterDept} onValueChange={onFilterDeptChange}>
         <SelectTrigger className="w-[180px]">
-          <SelectValue placeholder="القسم" />
+          <SelectValue placeholder={t.common.department} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">كل الأقسام</SelectItem>
+          <SelectItem value="all">{t.common.allDepartments}</SelectItem>
           {departments.map((d) => (
             <SelectItem key={d.id} value={d.id}>
               {d.nameAr || d.name}
@@ -57,10 +65,10 @@ export function EmployeesFilters({
 
       <Select value={filterStatus} onValueChange={onFilterStatusChange}>
         <SelectTrigger className="w-[150px]">
-          <SelectValue placeholder="الحالة" />
+          <SelectValue placeholder={t.common.status} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">كل الحالات</SelectItem>
+          <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
           {statusOptions.map((s) => (
             <SelectItem key={s.value} value={s.value}>
               {s.label}

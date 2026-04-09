@@ -1,6 +1,5 @@
 /**
  * Attendance Data Hook - Centralized attendance management
- * TODO: Replace with actual API calls when backend is ready
  */
 
 "use client";
@@ -63,7 +62,6 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
 
   const checkIn = useCallback(async (employeeId: string, notes?: string) => {
     try {
-      // TODO: Replace with actual API call
       const response = await attendanceService.checkIn({ employeeId, notes });
       if (response.success) {
         await fetchAttendance();
@@ -75,7 +73,6 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
 
   const checkOut = useCallback(async (employeeId: string, notes?: string) => {
     try {
-      // TODO: Replace with actual API call
       const response = await attendanceService.checkOut({ employeeId, notes });
       if (response.success) {
         await fetchAttendance();

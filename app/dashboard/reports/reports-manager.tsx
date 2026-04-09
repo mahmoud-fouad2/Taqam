@@ -34,8 +34,14 @@ import {
   reportCategoryLabels,
   scheduleFrequencyLabels,
 } from '@/lib/types/reports';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export default function ReportsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [reports, setReports] = useState<ReportDefinition[]>([]);
   const [scheduledReports, setScheduledReports] = useState<ScheduledReport[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -134,20 +140,20 @@ export default function ReportsManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">التقارير</h1>
-          <p className="text-muted-foreground">إنشاء وتشغيل التقارير المختلفة</p>
+          <h1 className="text-2xl font-bold">{t.common.reports}</h1>
+          <p className="text-muted-foreground">{t.reports.createAndRun}</p>
         </div>
         <Button>
           <Plus className="h-4 w-4 ms-2" />
-          تقرير مخصص جديد
+          {t.reports.pNewCustomReport}
         </Button>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList>
-          <TabsTrigger value="all">جميع التقارير</TabsTrigger>
-          <TabsTrigger value="favorites">المفضلة ({favoriteReports.length})</TabsTrigger>
-          <TabsTrigger value="scheduled">المجدولة ({scheduledReports.length})</TabsTrigger>
+          <TabsTrigger value="all">{t.reports.allReports}</TabsTrigger>
+          <TabsTrigger value="favorites">{t.reports.favorites} ({favoriteReports.length})</TabsTrigger>
+          <TabsTrigger value="scheduled">{t.reports.scheduled} ({scheduledReports.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -166,7 +172,7 @@ export default function ReportsManager() {
                 <div className="relative flex-1">
                   <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="بحث في التقارير..."
+                    placeholder={t.reports.searchReports}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="ps-9"
@@ -174,10 +180,10 @@ export default function ReportsManager() {
                 </div>
                 <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="التصنيف" />
+                    <SelectValue placeholder={t.common.category} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع التصنيفات</SelectItem>
+                    <SelectItem value="all">{t.onboarding.allCategories}</SelectItem>
                     {Object.entries(reportCategoryLabels).map(([value, label]) => (
                       <SelectItem key={value} value={value}>{label}</SelectItem>
                     ))}
@@ -207,13 +213,13 @@ export default function ReportsManager() {
           {isLoading ? (
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">جاري تحميل التقارير...</p>
+                <p className="text-sm text-muted-foreground">{t.reports.loadingReports}</p>
               </CardContent>
             </Card>
           ) : filteredReports.length === 0 ? (
             <Card>
               <CardContent className="pt-6">
-                <p className="text-sm text-muted-foreground">لا توجد تقارير</p>
+                <p className="text-sm text-muted-foreground">{t.reports.noReports}</p>
               </CardContent>
             </Card>
           ) : viewMode === 'grid' ? (
@@ -228,7 +234,7 @@ export default function ReportsManager() {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        aria-label="تفضيل"
+                        aria-label={t.ideas.preference}
                         onClick={(e) => {
                           e.stopPropagation();
                           void toggleFavorite(report.id);
@@ -261,9 +267,7 @@ export default function ReportsManager() {
                           setIsRunDialogOpen(true);
                         }}
                       >
-                        <Play className="h-4 w-4 ms-1" />
-                        تشغيل
-                      </Button>
+                        <Play className="h-4 w-4 ms-1" />{t.common.submit}</Button>
                       <Button variant="outline" size="sm">
                         <Download className="h-4 w-4" />
                       </Button>
@@ -297,7 +301,7 @@ export default function ReportsManager() {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          aria-label="تفضيل"
+                          aria-label={t.ideas.preference}
                           onClick={() => void toggleFavorite(report.id)}
                         >
                           <Star className={`h-4 w-4 ${report.isFavorite ? 'fill-yellow-400 text-yellow-400' : ''}`} />
@@ -309,9 +313,7 @@ export default function ReportsManager() {
                             setIsRunDialogOpen(true);
                           }}
                         >
-                          <Play className="h-4 w-4 ms-1" />
-                          تشغيل
-                        </Button>
+                          <Play className="h-4 w-4 ms-1" />{t.common.submit}</Button>
                       </div>
                     </div>
                   ))}
@@ -343,9 +345,7 @@ export default function ReportsManager() {
                       setIsRunDialogOpen(true);
                     }}
                   >
-                    <Play className="h-4 w-4 ms-1" />
-                    تشغيل التقرير
-                  </Button>
+                    <Play className="h-4 w-4 ms-1" />{t.reports.run}</Button>
                 </CardContent>
               </Card>
             ))}
@@ -355,13 +355,13 @@ export default function ReportsManager() {
         <TabsContent value="scheduled" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>التقارير المجدولة</CardTitle>
-              <CardDescription>التقارير التي يتم تشغيلها تلقائياً</CardDescription>
+              <CardTitle>{t.reports.scheduledReports}</CardTitle>
+              <CardDescription>{t.reports.scheduledDesc}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {scheduledReports.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">لا توجد تقارير مجدولة</p>
+                  <p className="text-sm text-muted-foreground">{t.reports.noScheduled}</p>
                 ) : scheduledReports.map((scheduled) => (
                   <div 
                     key={scheduled.id} 
@@ -388,15 +388,15 @@ export default function ReportsManager() {
                     </div>
                     <div className="flex items-center gap-4">
                       <div className="text-start">
-                        <p className="text-xs text-muted-foreground">التشغيل القادم</p>
+                        <p className="text-xs text-muted-foreground">{t.reports.nextRun}</p>
                         <p className="text-sm font-medium">
                           {new Date(scheduled.nextRun).toLocaleDateString('ar-SA')}
                         </p>
                       </div>
                       <Badge variant={scheduled.isActive ? 'default' : 'secondary'}>
-                        {scheduled.isActive ? 'نشط' : 'متوقف'}
+                        {scheduled.isActive ? t.reports.activeStatus : t.reports.stoppedStatus}
                       </Badge>
-                      <Button variant="outline" size="sm">تعديل</Button>
+                      <Button variant="outline" size="sm">{t.common.edit}</Button>
                     </div>
                   </div>
                 ))}
@@ -410,34 +410,34 @@ export default function ReportsManager() {
       <Dialog open={isRunDialogOpen} onOpenChange={setIsRunDialogOpen}>
         <DialogContent className="w-full max-w-md">
           <DialogHeader>
-            <DialogTitle>تشغيل التقرير</DialogTitle>
+            <DialogTitle>{t.reports.run}</DialogTitle>
             <DialogDescription>{selectedReport?.name}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>الفترة</Label>
+              <Label>{t.leaveRequests.period}</Label>
               <Select defaultValue="current-month">
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="today">اليوم</SelectItem>
-                  <SelectItem value="this-week">هذا الأسبوع</SelectItem>
-                  <SelectItem value="current-month">الشهر الحالي</SelectItem>
-                  <SelectItem value="last-month">الشهر السابق</SelectItem>
-                  <SelectItem value="this-year">هذه السنة</SelectItem>
-                  <SelectItem value="custom">فترة مخصصة</SelectItem>
+                  <SelectItem value="today">{t.common.today}</SelectItem>
+                  <SelectItem value="this-week">{t.common.thisWeek}</SelectItem>
+                  <SelectItem value="current-month">{t.common.thisMonth}</SelectItem>
+                  <SelectItem value="last-month">{t.common.lastMonth}</SelectItem>
+                  <SelectItem value="this-year">{t.common.thisYear}</SelectItem>
+                  <SelectItem value="custom">{t.reports.customPeriod}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label>صيغة التصدير</Label>
+              <Label>{t.reports.exportFormat}</Label>
               <Select defaultValue="view">
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="view">عرض فقط</SelectItem>
+                  <SelectItem value="view">{t.reports.viewOnly}</SelectItem>
                   <SelectItem value="pdf">PDF</SelectItem>
                   <SelectItem value="excel">Excel</SelectItem>
                   <SelectItem value="csv">CSV</SelectItem>
@@ -446,13 +446,9 @@ export default function ReportsManager() {
             </div>
           </div>
           <DialogFooter className="flex gap-2">
-            <Button variant="outline" onClick={() => setIsRunDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setIsRunDialogOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={() => setIsRunDialogOpen(false)}>
-              <Play className="h-4 w-4 ms-2" />
-              تشغيل
-            </Button>
+              <Play className="h-4 w-4 ms-2" />{t.common.submit}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

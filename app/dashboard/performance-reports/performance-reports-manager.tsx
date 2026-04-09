@@ -41,6 +41,10 @@ import {
   formatScore,
   getRatingByScore,
 } from "@/lib/types/performance";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type EvaluationCycle = {
   id: string;
@@ -182,6 +186,8 @@ function getRatingSwatchClass(color: string) {
 }
 
 export function PerformanceReportsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [selectedCycle, setSelectedCycle] = React.useState<string>("all");
   const [selectedDepartment, setSelectedDepartment] = React.useState<string>("all");
   const [selectedPeriod, setSelectedPeriod] = React.useState<string>("current_year");
@@ -191,11 +197,7 @@ export function PerformanceReportsManager() {
   const [evaluations, setEvaluations] = React.useState<EmployeeEvaluation[]>([]);
   const [goals, setGoals] = React.useState<PerformanceGoal[]>([]);
 
-  React.useEffect(() => {
-    void loadData();
-  }, []);
-
-  async function loadData() {
+  const loadData = React.useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -214,7 +216,7 @@ export function PerformanceReportsManager() {
 
       if (!cyclesRes.ok || !evaluationsRes.ok || !goalsRes.ok) {
         throw new Error(
-          cyclesData.error || evaluationsData.error || goalsData.error || "فشل تحميل بيانات الأداء"
+          cyclesData.error || evaluationsData.error || goalsData.error || t.perfReports.loadFailed
         );
       }
 
@@ -225,11 +227,15 @@ export function PerformanceReportsManager() {
       setCycles([]);
       setEvaluations([]);
       setGoals([]);
-      setError(loadError instanceof Error ? loadError.message : "فشل تحميل بيانات الأداء");
+      setError(loadError instanceof Error ? loadError.message : t.perfReports.loadFailed);
     } finally {
       setLoading(false);
     }
-  }
+  }, [t.perfReports.loadFailed]);
+
+  React.useEffect(() => {
+    void loadData();
+  }, [loadData]);
 
   const departmentOptions = React.useMemo(() => {
     return Array.from(
@@ -375,7 +381,7 @@ export function PerformanceReportsManager() {
 
   const getRatingLabel = (score: number) => {
     const rating = getRatingByScore(score, defaultPerformanceRatings);
-    return rating?.label || "غير محدد";
+    return rating?.label || t.common.unspecified;
   };
 
   const getRatingColor = (score: number) => {
@@ -397,7 +403,7 @@ export function PerformanceReportsManager() {
     );
 
     if (!csv) {
-      toast.error("لا توجد بيانات قابلة للتصدير");
+      toast.error(t.perfReports.noExportData);
       return;
     }
 
@@ -408,7 +414,7 @@ export function PerformanceReportsManager() {
     link.download = "performance-report.csv";
     link.click();
     URL.revokeObjectURL(url);
-    toast.success("تم تصدير التقرير");
+    toast.success(t.perfReports.reportExported);
   }
 
   return (
@@ -421,22 +427,20 @@ export function PerformanceReportsManager() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">تقارير الأداء</h2>
-          <p className="text-muted-foreground">تحليلات وإحصائيات أداء الموظفين</p>
+          <h2 className="text-2xl font-bold">{t.perfReports.title}</h2>
+          <p className="text-muted-foreground">{t.perfReports.subtitle}</p>
         </div>
         <Button variant="outline" onClick={handleExport}>
-          <IconDownload className="ms-2 h-4 w-4" />
-          تصدير التقرير
-        </Button>
+          <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
       </div>
 
       <div className="flex flex-wrap gap-4">
         <Select value={selectedCycle} onValueChange={setSelectedCycle}>
           <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="دورة التقييم" />
+            <SelectValue placeholder={t.evaluations.evaluationCycle} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الدورات</SelectItem>
+            <SelectItem value="all">{t.trainingCourses.allCourses}</SelectItem>
             {cycles.map((cycle) => (
               <SelectItem key={cycle.id} value={cycle.id}>
                 {cycle.name}
@@ -446,10 +450,10 @@ export function PerformanceReportsManager() {
         </Select>
         <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
           <SelectTrigger className="w-[220px]">
-            <SelectValue placeholder="القسم" />
+            <SelectValue placeholder={t.common.department} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">جميع الأقسام</SelectItem>
+            <SelectItem value="all">{t.common.allDepartments}</SelectItem>
             {departmentOptions.map((department) => (
               <SelectItem key={department} value={department}>
                 {department}
@@ -459,13 +463,13 @@ export function PerformanceReportsManager() {
         </Select>
         <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
           <SelectTrigger className="w-[200px]">
-            <SelectValue placeholder="الفترة" />
+            <SelectValue placeholder={t.common.period} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="current_year">السنة الحالية</SelectItem>
-            <SelectItem value="last_year">السنة الماضية</SelectItem>
-            <SelectItem value="last_quarter">الربع الأخير</SelectItem>
-            <SelectItem value="last_6_months">آخر 6 أشهر</SelectItem>
+            <SelectItem value="current_year">{t.perfReports.currentYear}</SelectItem>
+            <SelectItem value="last_year">{t.perfReports.lastYear}</SelectItem>
+            <SelectItem value="last_quarter">{t.perfReports.lastQuarter}</SelectItem>
+            <SelectItem value="last_6_months">{t.perfReports.last6Months}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -480,21 +484,17 @@ export function PerformanceReportsManager() {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconUsers className="h-4 w-4" />
-                  إجمالي التقييمات المكتملة
-                </CardDescription>
+                  <IconUsers className="h-4 w-4" />{t.perfReports.completedEvaluations}</CardDescription>
                 <CardTitle className="text-3xl">{completedEvaluations.length}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">من أصل {filteredEvaluations.length} تقييم</p>
+                <p className="text-sm text-muted-foreground">{t.perfReports.outOf} {filteredEvaluations.length} {t.perfReports.evaluation}</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconStarFilled className="h-4 w-4" />
-                  متوسط التقييم
-                </CardDescription>
+                  <IconStarFilled className="h-4 w-4" />{t.perfReports.avgScore}</CardDescription>
                 <CardTitle className="text-3xl">{formatScore(avgScore)}</CardTitle>
               </CardHeader>
               <CardContent>
@@ -506,9 +506,7 @@ export function PerformanceReportsManager() {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconTarget className="h-4 w-4" />
-                  نسبة تحقيق الأهداف
-                </CardDescription>
+                  <IconTarget className="h-4 w-4" />{t.performanceGoals.completedGoals}</CardDescription>
                 <CardTitle className="text-3xl">{Math.round(goalsCompletionRate)}%</CardTitle>
               </CardHeader>
               <CardContent>
@@ -519,7 +517,7 @@ export function PerformanceReportsManager() {
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
                   <IconBuilding className="h-4 w-4" />
-                  أفضل قسم
+                  {t.perfReports.pTopDepartment}
                 </CardDescription>
                 <CardTitle className="text-xl">{bestDepartment?.department || "-"}</CardTitle>
               </CardHeader>
@@ -530,7 +528,7 @@ export function PerformanceReportsManager() {
                     {getTrendIcon(bestDepartment.trend)}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">لا توجد بيانات كافية</p>
+                  <p className="text-sm text-muted-foreground">{t.perfReports.insufficientData}</p>
                 )}
               </CardContent>
             </Card>
@@ -538,10 +536,10 @@ export function PerformanceReportsManager() {
 
           <Tabs defaultValue="overview" className="space-y-4">
             <TabsList>
-              <TabsTrigger value="overview">نظرة عامة</TabsTrigger>
-              <TabsTrigger value="departments">الأقسام</TabsTrigger>
-              <TabsTrigger value="top-performers">المتميزون</TabsTrigger>
-              <TabsTrigger value="distribution">توزيع التقييمات</TabsTrigger>
+              <TabsTrigger value="overview">{t.perfReports.overview}</TabsTrigger>
+              <TabsTrigger value="departments">{t.common.departments}</TabsTrigger>
+              <TabsTrigger value="top-performers">{t.perfReports.topPerformers}</TabsTrigger>
+              <TabsTrigger value="distribution">{t.evaluations.ratingDistribution}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="overview" className="space-y-4">
@@ -550,7 +548,7 @@ export function PerformanceReportsManager() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <IconChartPie className="h-4 w-4" />
-                      توزيع التقييمات
+                      {t.perfReports.pEvaluationDistribution}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -572,15 +570,15 @@ export function PerformanceReportsManager() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <IconTarget className="h-4 w-4" />
-                      تقدم الأهداف
+                      {t.perfReports.pGoalsProgress}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       {[
-                        { label: "أهداف مكتملة", value: completedGoals.length, total: filteredGoals.length, color: "bg-green-500" },
-                        { label: "قيد التنفيذ", value: filteredGoals.filter((goal) => goal.status === "in-progress").length, total: filteredGoals.length, color: "bg-blue-500" },
-                        { label: "متأخرة", value: filteredGoals.filter((goal) => goal.status === "overdue").length, total: filteredGoals.length, color: "bg-red-500" },
+                        { label: t.perfReports.completedGoals, value: completedGoals.length, total: filteredGoals.length, color: "bg-green-500" },
+                        { label: t.common.inProgress, value: filteredGoals.filter((goal) => goal.status === "in-progress").length, total: filteredGoals.length, color: "bg-blue-500" },
+                        { label: t.perfReports.overdue, value: filteredGoals.filter((goal) => goal.status === "overdue").length, total: filteredGoals.length, color: "bg-red-500" },
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -603,18 +601,18 @@ export function PerformanceReportsManager() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-base">
                       <IconCalendar className="h-4 w-4" />
-                      آخر التقييمات المكتملة
+                      {t.perfReports.pLatestCompletedEvaluations}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>الموظف</TableHead>
-                          <TableHead>القسم</TableHead>
-                          <TableHead>الدورة</TableHead>
-                          <TableHead>التقييم النهائي</TableHead>
-                          <TableHead>المستوى</TableHead>
+                          <TableHead>{t.common.employee}</TableHead>
+                          <TableHead>{t.common.department}</TableHead>
+                          <TableHead>{t.trainingCourses.course}</TableHead>
+                          <TableHead>{t.perfReports.finalEval}</TableHead>
+                          <TableHead>{t.jobTitles.level}</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -651,18 +649,18 @@ export function PerformanceReportsManager() {
             <TabsContent value="departments">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">أداء الأقسام</CardTitle>
-                  <CardDescription>مقارنة أداء الأقسام المختلفة</CardDescription>
+                  <CardTitle className="text-base">{t.perfReports.deptPerformance}</CardTitle>
+                  <CardDescription>{t.perfReports.deptPerformanceDesc}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>القسم</TableHead>
-                        <TableHead>عدد الموظفين</TableHead>
-                        <TableHead>متوسط التقييم</TableHead>
-                        <TableHead>نسبة تحقيق الأهداف</TableHead>
-                        <TableHead>الاتجاه</TableHead>
+                        <TableHead>{t.common.department}</TableHead>
+                        <TableHead>{t.common.employees}</TableHead>
+                        <TableHead>{t.evaluations.avgRating}</TableHead>
+                        <TableHead>{t.performanceGoals.completedGoals}</TableHead>
+                        <TableHead>{t.perfReports.trend}</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -696,8 +694,8 @@ export function PerformanceReportsManager() {
             <TabsContent value="top-performers">
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-base">الموظفون المتميزون</CardTitle>
-                  <CardDescription>أعلى 10 موظفين أداءً</CardDescription>
+                  <CardTitle className="text-base">{t.perfReports.topEmployees}</CardTitle>
+                  <CardDescription>{t.perfReports.topEmployeesDesc}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -740,8 +738,8 @@ export function PerformanceReportsManager() {
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">توزيع التقييمات</CardTitle>
-                    <CardDescription>توزيع الموظفين حسب مستوى التقييم</CardDescription>
+                    <CardTitle className="text-base">{t.evaluations.ratingDistribution}</CardTitle>
+                    <CardDescription>{t.perfReports.evalLevelDist}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-6">
@@ -762,12 +760,12 @@ export function PerformanceReportsManager() {
                                 <span className="font-medium">{rating.label}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">{count} موظف</span>
+                                <span className="text-muted-foreground">{count} {t.perfReports.employeeCount}</span>
                                 <Badge variant="outline">{Math.round(percentage)}%</Badge>
                               </div>
                             </div>
                             <Progress value={percentage} className="h-3" />
-                            <p className="text-xs text-muted-foreground">النطاق: {rating.minScore} - {rating.maxScore}</p>
+                            <p className="text-xs text-muted-foreground">{t.perfReports.range} {rating.minScore} - {rating.maxScore}</p>
                           </div>
                         );
                       })}
@@ -777,38 +775,38 @@ export function PerformanceReportsManager() {
 
                 <Card>
                   <CardHeader>
-                    <CardTitle className="text-base">إحصائيات سريعة</CardTitle>
+                    <CardTitle className="text-base">{t.perfReports.quickStats}</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>أعلى تقييم</span>
+                        <span>{t.perfReports.highestEval}</span>
                         <Badge className="bg-green-100 text-green-700">
                           {formatScore(Math.max(...completedEvaluations.map((evaluation) => evaluation.overallScore || 0), 0))}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>أقل تقييم</span>
+                        <span>{t.perfReports.lowestEval}</span>
                         <Badge className="bg-red-100 text-red-700">
                           {formatScore(Math.min(...completedEvaluations.map((evaluation) => evaluation.overallScore || 0), completedEvaluations.length > 0 ? completedEvaluations[0].overallScore || 0 : 0))}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>المتوسط</span>
+                        <span>{t.perfReports.average}</span>
                         <Badge className="bg-blue-100 text-blue-700">{formatScore(avgScore)}</Badge>
                       </div>
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>الانحراف المعياري</span>
+                        <span>{t.perfReports.stdDeviation}</span>
                         <Badge variant="outline">{formatScore(scoreDeviation)}</Badge>
                       </div>
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>موظفون فوق المتوسط</span>
+                        <span>{t.perfReports.aboveAverage}</span>
                         <Badge className="bg-green-100 text-green-700">
                           {completedEvaluations.filter((evaluation) => (evaluation.overallScore || 0) >= avgScore).length}
                         </Badge>
                       </div>
                       <div className="flex items-center justify-between rounded-lg bg-muted p-3">
-                        <span>موظفون دون المتوسط</span>
+                        <span>{t.perfReports.belowAverage}</span>
                         <Badge className="bg-orange-100 text-orange-700">
                           {completedEvaluations.filter((evaluation) => (evaluation.overallScore || 0) < avgScore).length}
                         </Badge>

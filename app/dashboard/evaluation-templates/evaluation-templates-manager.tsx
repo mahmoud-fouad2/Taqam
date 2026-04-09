@@ -65,6 +65,10 @@ import {
   type RatingScale,
   ratingScaleLabels,
 } from "@/lib/types/performance";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type TemplateFormState = Partial<EvaluationTemplate>;
 
@@ -117,6 +121,8 @@ function getScaleIcon(scale: RatingScale) {
 }
 
 export function EvaluationTemplatesManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [templates, setTemplates] = React.useState<EvaluationTemplate[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [isSaving, setIsSaving] = React.useState(false);
@@ -137,18 +143,18 @@ export function EvaluationTemplatesManager() {
       const response = await evaluationTemplatesApi.getAll();
       if (!response.success || !response.data) {
         setTemplates([]);
-        setError(response.error || "فشل تحميل نماذج التقييم");
+        setError(response.error || t.evalTemplates.saveFailed);
         return;
       }
 
       setTemplates(response.data);
     } catch (loadError) {
       setTemplates([]);
-      setError(loadError instanceof Error ? loadError.message : "فشل تحميل نماذج التقييم");
+      setError(loadError instanceof Error ? loadError.message : t.evalTemplates.saveFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.evalTemplates.saveFailed]);
 
   React.useEffect(() => {
     void loadTemplates();
@@ -260,17 +266,17 @@ export function EvaluationTemplatesManager() {
 
   async function handleSave() {
     if (!formData.name?.trim() || !formData.nameEn?.trim()) {
-      toast.error("يرجى إدخال اسم النموذج بالعربية والإنجليزية");
+      toast.error(t.evalTemplates.enterNames);
       return;
     }
 
     if ((formData.sections?.length || 0) === 0) {
-      toast.error("أضف قسمًا واحدًا على الأقل قبل الحفظ");
+      toast.error(t.evalTemplates.addSectionFirst);
       return;
     }
 
     if (totalWeight !== 100) {
-      toast.error("يجب أن يساوي الوزن الإجمالي 100%");
+      toast.error(t.evalTemplates.weightMust100);
       return;
     }
 
@@ -297,16 +303,16 @@ export function EvaluationTemplatesManager() {
         : await evaluationTemplatesApi.create(payload);
 
       if (!response.success || !response.data) {
-        toast.error(response.error || "تعذر حفظ النموذج");
+        toast.error(response.error || t.evalTemplates.saveFailed);
         return;
       }
 
-      toast.success(isEditing ? "تم تحديث النموذج" : "تم إنشاء النموذج");
+      toast.success(isEditing ? t.evalTemplates.templateUpdated : t.evalTemplates.templateCreated);
       setIsDialogOpen(false);
       resetDialogState();
       await loadTemplates();
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : "تعذر حفظ النموذج");
+      toast.error(saveError instanceof Error ? saveError.message : t.evalTemplates.saveFailed);
     } finally {
       setIsSaving(false);
     }
@@ -315,16 +321,16 @@ export function EvaluationTemplatesManager() {
   async function handleDuplicate(template: EvaluationTemplate) {
     setBusyTemplateId(template.id);
     try {
-      const response = await evaluationTemplatesApi.duplicate(template.id, `${template.name} (نسخة)`);
+      const response = await evaluationTemplatesApi.duplicate(template.id, `${template.name} (${t.evalTemplates.copy})`);
       if (!response.success) {
-        toast.error(response.error || "تعذر نسخ النموذج");
+        toast.error(response.error || t.evalTemplates.duplicateFailed);
         return;
       }
 
-      toast.success("تم إنشاء نسخة من النموذج");
+      toast.success(t.evalTemplates.duplicatedSuccess);
       await loadTemplates();
     } catch (duplicateError) {
-      toast.error(duplicateError instanceof Error ? duplicateError.message : "تعذر نسخ النموذج");
+      toast.error(duplicateError instanceof Error ? duplicateError.message : t.evalTemplates.duplicateFailed);
     } finally {
       setBusyTemplateId(null);
     }
@@ -335,14 +341,14 @@ export function EvaluationTemplatesManager() {
     try {
       const response = await evaluationTemplatesApi.setDefault(template.id);
       if (!response.success) {
-        toast.error(response.error || "تعذر تعيين النموذج كافتراضي");
+        toast.error(response.error || t.evalTemplates.setDefaultFailed);
         return;
       }
 
-      toast.success("تم تعيين النموذج كافتراضي");
+      toast.success(t.evalTemplates.setDefaultSuccess);
       await loadTemplates();
     } catch (defaultError) {
-      toast.error(defaultError instanceof Error ? defaultError.message : "تعذر تعيين النموذج كافتراضي");
+      toast.error(defaultError instanceof Error ? defaultError.message : t.evalTemplates.setDefaultFailed);
     } finally {
       setBusyTemplateId(null);
     }
@@ -353,14 +359,14 @@ export function EvaluationTemplatesManager() {
     try {
       const response = await evaluationTemplatesApi.delete(id);
       if (!response.success) {
-        toast.error(response.error || "تعذر حذف النموذج");
+        toast.error(response.error || t.evalTemplates.deleteFailed);
         return;
       }
 
-      toast.success("تم حذف النموذج");
+      toast.success(t.evalTemplates.deletedSuccess);
       await loadTemplates();
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : "تعذر حذف النموذج");
+      toast.error(deleteError instanceof Error ? deleteError.message : t.evalTemplates.deleteFailed);
     } finally {
       setBusyTemplateId(null);
     }
@@ -386,37 +392,37 @@ export function EvaluationTemplatesManager() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">نماذج التقييم</h2>
-          <p className="text-muted-foreground">إدارة نماذج ومعايير تقييم الأداء</p>
+          <h2 className="text-2xl font-bold">{t.common.templates}</h2>
+          <p className="text-muted-foreground">{t.evalTemplates.manageDesc}</p>
         </div>
         <Button onClick={openCreateDialog}>
           <IconPlus className="ms-2 h-4 w-4" />
-          إضافة نموذج
+          {t.evalTemplates.pAddTemplate}
         </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي النماذج</CardDescription>
+            <CardDescription>{t.evalTemplates.totalTemplates}</CardDescription>
             <CardTitle className="text-3xl">{stats.total}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>نماذج نشطة</CardDescription>
+            <CardDescription>{t.evalTemplates.activeTemplates}</CardDescription>
             <CardTitle className="text-3xl text-green-600">{stats.active}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>نماذج افتراضية</CardDescription>
+            <CardDescription>{t.evalTemplates.defaultTemplates}</CardDescription>
             <CardTitle className="text-3xl text-blue-600">{stats.defaults}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي المعايير</CardDescription>
+            <CardDescription>{t.evalTemplates.totalCriteria}</CardDescription>
             <CardTitle className="text-3xl text-purple-600">{stats.criteria}</CardTitle>
           </CardHeader>
         </Card>
@@ -435,36 +441,32 @@ export function EvaluationTemplatesManager() {
                   <div className="space-y-1">
                     <CardTitle className="flex items-center gap-2">
                       {template.name}
-                      {template.isDefault && <Badge variant="secondary">افتراضي</Badge>}
+                      {template.isDefault && <Badge variant="secondary">{t.common.draft}</Badge>}
                     </CardTitle>
                     <CardDescription>{template.nameEn}</CardDescription>
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label="خيارات" disabled={busyTemplateId === template.id}>
+                      <Button variant="ghost" size="icon" aria-label={t.common.options} disabled={busyTemplateId === template.id}>
                         <IconDots className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEditDialog(template)}>
-                        <IconEdit className="ms-2 h-4 w-4" />
-                        تعديل
-                      </DropdownMenuItem>
+                        <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
                       <DropdownMenuItem onClick={() => void handleDuplicate(template)}>
                         <IconCopy className="ms-2 h-4 w-4" />
-                        نسخ
+                        {t.evalTemplates.pCopy}
                       </DropdownMenuItem>
                       {!template.isDefault && (
                         <DropdownMenuItem onClick={() => void handleSetDefault(template)}>
                           <IconCheck className="ms-2 h-4 w-4" />
-                          تعيين كافتراضي
+                          {t.evalTemplates.pSetAsDefault}
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
                       <DropdownMenuItem className="text-red-600" onClick={() => void handleDelete(template.id)} disabled={template.isDefault}>
-                        <IconTrash className="ms-2 h-4 w-4" />
-                        حذف
-                      </DropdownMenuItem>
+                        <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -477,14 +479,14 @@ export function EvaluationTemplatesManager() {
                     {getScaleIcon(template.ratingScale)}
                     {ratingScaleLabels[template.ratingScale]}
                   </Badge>
-                  <Badge variant="outline">{template.sections.length} أقسام</Badge>
+                  <Badge variant="outline">{template.sections.length} {t.evalTemplates.sectionsCount}</Badge>
                   <Badge variant="outline">
-                    {template.sections.reduce((sum, section) => sum + section.criteria.length, 0)} معيار
+                    {template.sections.reduce((sum, section) => sum + section.criteria.length, 0)} {t.evalTemplates.criterionCount}
                   </Badge>
                 </div>
 
                 <div className="border-t pt-3">
-                  <p className="mb-2 text-sm font-medium">الأقسام:</p>
+                  <p className="mb-2 text-sm font-medium">{t.evalTemplates.sectionsLabel}</p>
                   <div className="space-y-1">
                     {template.sections.map((section) => (
                       <div key={section.id} className="flex items-center justify-between text-sm">
@@ -511,34 +513,34 @@ export function EvaluationTemplatesManager() {
       >
         <DialogContent className="w-full max-h-[90vh] max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditing ? "تعديل نموذج التقييم" : "إضافة نموذج تقييم جديد"}</DialogTitle>
-            <DialogDescription>تحديد معلومات النموذج، الأقسام، والمعايير.</DialogDescription>
+            <DialogTitle>{isEditing ? t.evalTemplates.editTitle : t.evalTemplates.addTitle}</DialogTitle>
+            <DialogDescription>{t.evalTemplates.addDesc}</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="space-y-4">
-              <h4 className="font-medium">المعلومات الأساسية</h4>
+              <h4 className="font-medium">{t.leaveTypes.basicInfo}</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>الاسم بالعربية *</Label>
+                  <Label>{t.leaveTypes.nameArRequired}</Label>
                   <Input value={formData.name || ""} onChange={(event) => updateForm("name", event.target.value)} />
                 </div>
                 <div className="space-y-2">
-                  <Label>الاسم بالإنجليزية *</Label>
+                  <Label>{t.leaveTypes.nameEnRequired}</Label>
                   <Input value={formData.nameEn || ""} onChange={(event) => updateForm("nameEn", event.target.value)} dir="ltr" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>الوصف</Label>
+                <Label>{t.common.description}</Label>
                 <Textarea value={formData.description || ""} onChange={(event) => updateForm("description", event.target.value)} rows={2} />
               </div>
             </div>
 
             <div className="space-y-4 border-t pt-4">
-              <h4 className="font-medium">إعدادات مدعومة</h4>
+              <h4 className="font-medium">{t.evalTemplates.supportedSettings}</h4>
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
-                  <Label>مقياس التقييم</Label>
+                  <Label>{t.evalTemplates.ratingScale}</Label>
                   <Select value={formData.ratingScale} onValueChange={(value: RatingScale) => updateForm("ratingScale", value)}>
                     <SelectTrigger>
                       <SelectValue />
@@ -554,27 +556,25 @@ export function EvaluationTemplatesManager() {
                 </div>
                 <div className="flex items-center gap-2 pt-8">
                   <Switch checked={formData.isActive ?? true} onCheckedChange={(checked) => updateForm("isActive", checked)} />
-                  <Label>نموذج نشط</Label>
+                  <Label>{t.evalTemplates.activeTemplate}</Label>
                 </div>
               </div>
             </div>
 
             <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium">أقسام التقييم</h4>
-                <Badge variant={totalWeight === 100 ? "default" : "destructive"}>الوزن الإجمالي: {totalWeight}%</Badge>
+                <h4 className="font-medium">{t.evalTemplates.evalSections}</h4>
+                <Badge variant={totalWeight === 100 ? "default" : "destructive"}>{t.evalTemplates.totalWeight} {totalWeight}%</Badge>
               </div>
 
               <div className="space-y-3 rounded-lg border p-4">
-                <p className="text-sm font-medium">إضافة قسم جديد</p>
+                <p className="text-sm font-medium">{t.evalTemplates.addSection}</p>
                 <div className="grid gap-3 md:grid-cols-4">
-                  <Input placeholder="اسم القسم" value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} />
-                  <Input placeholder="الوصف" value={sectionForm.description} onChange={(event) => setSectionForm((current) => ({ ...current, description: event.target.value }))} />
-                  <Input type="number" placeholder="الوزن %" value={sectionForm.weight || ""} onChange={(event) => setSectionForm((current) => ({ ...current, weight: Number(event.target.value) }))} min={1} max={100} />
+                  <Input placeholder={t.evalTemplates.sectionName} value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} />
+                  <Input placeholder={t.common.description} value={sectionForm.description} onChange={(event) => setSectionForm((current) => ({ ...current, description: event.target.value }))} />
+                  <Input type="number" placeholder={t.evalTemplates.weightPercent} value={sectionForm.weight || ""} onChange={(event) => setSectionForm((current) => ({ ...current, weight: Number(event.target.value) }))} min={1} max={100} />
                   <Button onClick={handleAddSection} disabled={!sectionForm.name.trim() || sectionForm.weight <= 0}>
-                    <IconPlus className="ms-2 h-4 w-4" />
-                    إضافة
-                  </Button>
+                    <IconPlus className="ms-2 h-4 w-4" />{t.common.add}</Button>
                 </div>
               </div>
 
@@ -586,8 +586,8 @@ export function EvaluationTemplatesManager() {
                         <span className="font-medium">{section.name}</span>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{section.weight}%</Badge>
-                          <Badge variant="secondary">{section.criteria.length} معيار</Badge>
-                          <Button variant="ghost" size="icon" aria-label="حذف القسم" className="h-6 w-6" onClick={(event) => {
+                          <Badge variant="secondary">{section.criteria.length} {t.evalTemplates.criterionCount}</Badge>
+                          <Button variant="ghost" size="icon" aria-label={t.evalTemplates.deleteSection} className="h-6 w-6" onClick={(event) => {
                             event.stopPropagation();
                             handleRemoveSection(section.id);
                           }}>
@@ -599,10 +599,10 @@ export function EvaluationTemplatesManager() {
                     <AccordionContent className="px-4 pb-4">
                       <div className="space-y-3">
                         <div className="space-y-2 rounded-lg bg-muted p-3">
-                          <p className="text-sm">إضافة معيار</p>
+                          <p className="text-sm">{t.evalTemplates.pAdd} {t.evalTemplates.criterionCount}</p>
                           <div className="grid gap-2 md:grid-cols-5">
                             <Input
-                              placeholder="اسم المعيار"
+                              placeholder={t.evalTemplates.criterionName}
                               value={criterionTargetSectionId === section.id ? criterionForm.name : ""}
                               onFocus={() => setCriterionTargetSectionId(section.id)}
                               onChange={(event) => {
@@ -611,14 +611,14 @@ export function EvaluationTemplatesManager() {
                               }}
                             />
                             <Input
-                              placeholder="الوصف"
+                              placeholder={t.common.description}
                               value={criterionTargetSectionId === section.id ? criterionForm.description : ""}
                               onFocus={() => setCriterionTargetSectionId(section.id)}
                               onChange={(event) => setCriterionForm((current) => ({ ...current, description: event.target.value }))}
                             />
                             <Input
                               type="number"
-                              placeholder="الوزن %"
+                              placeholder={t.evalTemplates.weightPercent}
                               value={criterionTargetSectionId === section.id ? criterionForm.weight || "" : ""}
                               onFocus={() => setCriterionTargetSectionId(section.id)}
                               onChange={(event) => setCriterionForm((current) => ({ ...current, weight: Number(event.target.value) }))}
@@ -626,11 +626,9 @@ export function EvaluationTemplatesManager() {
                             />
                             <div className="flex items-center gap-2">
                               <Switch checked={criterionForm.isRequired} onCheckedChange={(checked) => setCriterionForm((current) => ({ ...current, isRequired: checked }))} />
-                              <span className="text-sm">مطلوب</span>
+                              <span className="text-sm">{t.common.required}</span>
                             </div>
-                            <Button size="sm" onClick={() => handleAddCriterion(section.id)} disabled={criterionTargetSectionId !== section.id || !criterionForm.name.trim() || criterionForm.weight <= 0}>
-                              إضافة
-                            </Button>
+                            <Button size="sm" onClick={() => handleAddCriterion(section.id)} disabled={criterionTargetSectionId !== section.id || !criterionForm.name.trim() || criterionForm.weight <= 0}>{t.common.add}</Button>
                           </div>
                         </div>
 
@@ -638,10 +636,10 @@ export function EvaluationTemplatesManager() {
                           <Table>
                             <TableHeader>
                               <TableRow>
-                                <TableHead>المعيار</TableHead>
-                                <TableHead>الوصف</TableHead>
-                                <TableHead className="w-[80px]">الوزن</TableHead>
-                                <TableHead className="w-[80px]">مطلوب</TableHead>
+                                <TableHead>{t.evalTemplates.criterionCol}</TableHead>
+                                <TableHead>{t.common.description}</TableHead>
+                                <TableHead className="w-[80px]">{t.evalTemplates.weightCol}</TableHead>
+                                <TableHead className="w-[80px]">{t.common.required}</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                               </TableRow>
                             </TableHeader>
@@ -655,7 +653,7 @@ export function EvaluationTemplatesManager() {
                                   </TableCell>
                                   <TableCell>{criterion.isRequired ? <IconCheck className="h-4 w-4 text-green-600" /> : "-"}</TableCell>
                                   <TableCell>
-                                    <Button variant="ghost" size="icon" aria-label="حذف المعيار" className="h-6 w-6" onClick={() => handleRemoveCriterion(section.id, criterion.id)}>
+                                    <Button variant="ghost" size="icon" aria-label={t.evalTemplates.deleteCriterion} className="h-6 w-6" onClick={() => handleRemoveCriterion(section.id, criterion.id)}>
                                       <IconTrash className="h-4 w-4 text-red-500" />
                                     </Button>
                                   </TableCell>
@@ -673,12 +671,10 @@ export function EvaluationTemplatesManager() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
               <IconCheck className="ms-2 h-4 w-4" />
-              {isEditing ? "حفظ التعديلات" : "إضافة النموذج"}
+              {isEditing ? t.common.saveChanges : t.evalTemplates.addTemplateBtn}
             </Button>
           </DialogFooter>
         </DialogContent>

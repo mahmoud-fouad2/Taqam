@@ -3,9 +3,11 @@ import Link from "next/link";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { Button } from "@/components/ui/button";
 import { ChangeEmailForm } from "./change-email-form";
+import { getText } from "@/lib/i18n/text";
 
 export default async function ChangeEmailPage() {
   const locale = await getAppLocale();
+  const t = getText(locale);
 
   return (
     <div className="mx-auto w-full max-w-lg space-y-6">
@@ -22,7 +24,7 @@ export default async function ChangeEmailPage() {
 
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" asChild>
-          <Link href="/dashboard/my-profile">{locale === "ar" ? "رجوع" : "Back"}</Link>
+          <Link href="/dashboard/my-profile">{locale === "ar" ? t.common.back : "Back"}</Link>
         </Button>
       </div>
     </div>

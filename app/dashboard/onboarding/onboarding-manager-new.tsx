@@ -82,6 +82,10 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 // Types
 interface OnboardingTask {
@@ -186,10 +190,10 @@ interface APIResponse {
 
 // Status helpers
 const statusLabels: Record<string, string> = {
-  NOT_STARTED: "لم يبدأ",
-  IN_PROGRESS: "قيد التنفيذ",
-  COMPLETED: "مكتمل",
-  CANCELLED: "ملغي",
+  NOT_STARTED: t.common.notStarted,
+  IN_PROGRESS: t.common.inProgress,
+  COMPLETED: t.common.completed,
+  CANCELLED: t.common.cancelled,
 };
 
 const statusColors: Record<string, string> = {
@@ -200,15 +204,17 @@ const statusColors: Record<string, string> = {
 };
 
 const taskCategoryLabels: Record<string, string> = {
-  documentation: "المستندات",
-  "system-access": "صلاحيات النظام",
-  training: "التدريب",
-  introduction: "التعريف",
-  equipment: "المعدات",
-  other: "أخرى",
+  documentation: t.onboarding.documentation,
+  "system-access": t.onboarding.systemAccess,
+  training: t.onboarding.training,
+  introduction: t.onboarding.introduction,
+  equipment: t.onboarding.equipment,
+  other: t.common.other,
 };
 
 export function OnboardingManagerNew() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [processes, setProcesses] = React.useState<OnboardingProcess[]>([]);
   const [templates, setTemplates] = React.useState<OnboardingTemplate[]>([]);
   const [employees, setEmployees] = React.useState<Employee[]>([]);
@@ -278,11 +284,11 @@ export function OnboardingManagerNew() {
       }
     } catch (error) {
       console.error("Error fetching data:", error);
-      toast.error("حدث خطأ في جلب البيانات");
+      toast.error(t.onboarding.fetchError);
     } finally {
       setLoading(false);
     }
-  }, [statusFilter]);
+  }, [statusFilter, t.onboarding.fetchError]);
 
   React.useEffect(() => {
     fetchData();
@@ -304,7 +310,7 @@ export function OnboardingManagerNew() {
   // Create process
   const handleCreateProcess = async () => {
     if (!newProcess.employeeId) {
-      toast.error("يرجى اختيار الموظف");
+      toast.error(t.onboarding.selectEmployee);
       return;
     }
 
@@ -317,7 +323,7 @@ export function OnboardingManagerNew() {
       });
 
       if (res.ok) {
-        toast.success("تم بدء عملية الإلحاق بنجاح");
+        toast.success(t.onboarding.onboardingStarted);
         setIsAddDialogOpen(false);
         setNewProcess({
           employeeId: "",
@@ -328,10 +334,10 @@ export function OnboardingManagerNew() {
         fetchData();
       } else {
         const error = await res.json();
-        toast.error(error.error || "حدث خطأ في بدء عملية الإلحاق");
+        toast.error(error.error || t.onboarding.startFailed);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الاتصال");
+      toast.error(t.onboarding.connectionError);
     } finally {
       setSubmitting(false);
     }
@@ -362,12 +368,12 @@ export function OnboardingManagerNew() {
         if (selectedProcess?.id === processId) {
           setSelectedProcess({ ...selectedProcess, ...data.process });
         }
-        toast.success("تم تحديث المهمة");
+        toast.success(t.onboarding.taskUpdated);
       } else {
-        toast.error("حدث خطأ في تحديث المهمة");
+        toast.error(t.onboarding.taskUpdateError);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الاتصال");
+      toast.error(t.onboarding.connectionError);
     }
   };
 
@@ -381,13 +387,13 @@ export function OnboardingManagerNew() {
       });
 
       if (res.ok) {
-        toast.success("تم تحديث الحالة");
+        toast.success(t.onboarding.statusUpdated);
         fetchData();
       } else {
-        toast.error("حدث خطأ في تحديث الحالة");
+        toast.error(t.performanceGoals.statusUpdateFailed);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الاتصال");
+      toast.error(t.onboarding.connectionError);
     }
   };
 
@@ -401,22 +407,22 @@ export function OnboardingManagerNew() {
       });
 
       if (res.ok) {
-        toast.success("تم حذف عملية الإلحاق");
+        toast.success(t.onboarding.onboardingDeleted);
         setDeleteProcessId(null);
         fetchData();
       } else {
         const error = await res.json();
-        toast.error(error.error || "حدث خطأ في الحذف");
+        toast.error(error.error || t.onboarding.deleteFailed);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الاتصال");
+      toast.error(t.onboarding.connectionError);
     }
   };
 
   // Create template
   const handleCreateTemplate = async () => {
     if (!newTemplate.name) {
-      toast.error("يرجى إدخال اسم القالب");
+      toast.error(t.onboarding.enterTemplateName);
       return;
     }
 
@@ -429,7 +435,7 @@ export function OnboardingManagerNew() {
       });
 
       if (res.ok) {
-        toast.success("تم إنشاء القالب بنجاح");
+        toast.success(t.onboarding.templateCreated);
         setIsTemplateDialogOpen(false);
         setNewTemplate({
           name: "",
@@ -442,10 +448,10 @@ export function OnboardingManagerNew() {
         fetchData();
       } else {
         const error = await res.json();
-        toast.error(error.error || "حدث خطأ في إنشاء القالب");
+        toast.error(error.error || t.onboarding.createTemplateFailed);
       }
     } catch (error) {
-      toast.error("حدث خطأ في الاتصال");
+      toast.error(t.onboarding.connectionError);
     } finally {
       setSubmitting(false);
     }
@@ -464,7 +470,7 @@ export function OnboardingManagerNew() {
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="flex flex-col items-center gap-2">
           <IconLoader className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-muted-foreground">جاري تحميل بيانات الإلحاق...</p>
+          <p className="text-muted-foreground">{t.onboarding.loadingData}</p>
         </div>
       </div>
     );
@@ -472,74 +478,74 @@ export function OnboardingManagerNew() {
 
   return (
     <div className="space-y-6">
-      {/* بطاقات الإحصائيات */}
+      {/* {t.onboarding.statsCards} */}
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي العمليات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.onboarding.totalProcesses}</CardTitle>
             <IconUsers className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">في عملية الإلحاق</p>
+            <p className="text-xs text-muted-foreground">{t.onboarding.inProcess}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">قيد التنفيذ</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.inProgress}</CardTitle>
             <IconProgress className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">يمرون بالإجراءات</p>
+            <p className="text-xs text-muted-foreground">{t.onboarding.undergoing}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مكتملة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.completed}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">أتموا الإلحاق</p>
+            <p className="text-xs text-muted-foreground">{t.onboarding.completedOnboarding}</p>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">لم تبدأ</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.onboarding.notStartedYet}</CardTitle>
             <IconAlertCircle className="h-4 w-4 text-gray-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">{stats.notStarted}</div>
-            <p className="text-xs text-muted-foreground">بانتظار البدء</p>
+            <p className="text-xs text-muted-foreground">{t.onboarding.awaitingStart}</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* التبويبات */}
+      {/* {t.onboarding.tabs} */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="processes">
             <IconClipboardList className="h-4 w-4 ms-2" />
-            عمليات الإلحاق
+            {t.onboarding.operations}
           </TabsTrigger>
           <TabsTrigger value="templates">
             <IconTemplate className="h-4 w-4 ms-2" />
-            القوالب
+            {t.onboarding.templates}
           </TabsTrigger>
         </TabsList>
 
         <TabsContent value="processes" className="mt-4">
-          {/* جدول الإلحاق */}
+          {/* {t.onboarding.operationsTable} */}
           <Card>
             <CardHeader>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>عمليات الإلحاق</CardTitle>
-                  <CardDescription>متابعة إجراءات الموظفين الجدد</CardDescription>
+                  <CardTitle>{t.onboarding.processesTab}</CardTitle>
+                  <CardDescription>{t.onboarding.pageSubtitle}</CardDescription>
                 </div>
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={fetchData}>
@@ -547,18 +553,18 @@ export function OnboardingManagerNew() {
                   </Button>
                   <Button onClick={() => setIsAddDialogOpen(true)}>
                     <IconPlus className="ms-2 h-4 w-4" />
-                    بدء إلحاق جديد
+                    {t.onboarding.startNew}
                   </Button>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              {/* أدوات البحث والفلترة */}
+              {/* {t.onboarding.searchFilter} */}
               <div className="flex flex-col gap-4 mb-6 sm:flex-row">
                 <div className="relative flex-1">
                   <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
-                    placeholder="بحث عن موظف..."
+                    placeholder={t.onboarding.searchEmployee}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="ps-9"
@@ -567,10 +573,10 @@ export function OnboardingManagerNew() {
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
                   <SelectTrigger className="w-full sm:w-48">
                     <IconFilter className="ms-2 h-4 w-4" />
-                    <SelectValue placeholder="الحالة" />
+                    <SelectValue placeholder={t.common.status} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع الحالات</SelectItem>
+                    <SelectItem value="all">{t.common.allStatuses}</SelectItem>
                     {Object.entries(statusLabels).map(([value, label]) => (
                       <SelectItem key={value} value={value}>
                         {label}
@@ -580,25 +586,25 @@ export function OnboardingManagerNew() {
                 </Select>
               </div>
 
-              {/* جدول العمليات */}
+              {/* {t.onboarding.operationsTable} */}
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>الموظف</TableHead>
-                      <TableHead>الوظيفة</TableHead>
-                      <TableHead>القسم</TableHead>
-                      <TableHead>تاريخ البدء</TableHead>
-                      <TableHead>التقدم</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead className="text-start">الإجراءات</TableHead>
+                      <TableHead>{t.common.employee}</TableHead>
+                      <TableHead>{t.onboarding.jobCol}</TableHead>
+                      <TableHead>{t.common.department}</TableHead>
+                      <TableHead>{t.common.startDate}</TableHead>
+                      <TableHead>{t.common.inProgress}</TableHead>
+                      <TableHead>{t.common.status}</TableHead>
+                      <TableHead className="text-start">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredProcesses.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={7} className="text-center py-8">
-                          <p className="text-muted-foreground">لا توجد عمليات إلحاق</p>
+                          <p className="text-muted-foreground">{t.onboarding.noProcesses}</p>
                         </TableCell>
                       </TableRow>
                     ) : (
@@ -674,12 +680,12 @@ export function OnboardingManagerNew() {
             <CardHeader>
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <CardTitle>قوالب الإلحاق</CardTitle>
-                  <CardDescription>إدارة قوالب عملية الإلحاق</CardDescription>
+                  <CardTitle>{t.onboarding.templatesTitle}</CardTitle>
+                  <CardDescription>{t.onboarding.templatesSubtitle}</CardDescription>
                 </div>
                 <Button onClick={() => setIsTemplateDialogOpen(true)}>
                   <IconPlus className="ms-2 h-4 w-4" />
-                  قالب جديد
+                  {t.onboarding.newTemplate}
                 </Button>
               </div>
             </CardHeader>
@@ -687,13 +693,13 @@ export function OnboardingManagerNew() {
               {templates.length === 0 ? (
                 <div className="text-center py-8">
                   <IconTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">لا توجد قوالب</p>
+                  <p className="text-muted-foreground">{t.onboarding.noTemplates}</p>
                   <Button
                     variant="link"
                     className="mt-2"
                     onClick={() => setIsTemplateDialogOpen(true)}
                   >
-                    إنشاء قالب جديد
+                    {t.onboarding.pCreate} {t.onboarding.newTemplate}
                   </Button>
                 </div>
               ) : (
@@ -704,7 +710,7 @@ export function OnboardingManagerNew() {
                         <div className="flex items-start justify-between">
                           <CardTitle className="text-base">{template.name}</CardTitle>
                           <Badge variant={template.isActive ? "default" : "secondary"}>
-                            {template.isActive ? "نشط" : "غير نشط"}
+                            {template.isActive ? t.common.active : t.common.inactive}
                           </Badge>
                         </div>
                         {template.description && (
@@ -715,16 +721,16 @@ export function OnboardingManagerNew() {
                       </CardHeader>
                       <CardContent>
                         <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span>{template.durationDays} يوم</span>
-                          <span>{template._count?.processes || 0} استخدام</span>
+                          <span>{template.durationDays} {t.onboarding.dayUnit}</span>
+                          <span>{template._count?.processes || 0} {t.onboarding.usageCount}</span>
                         </div>
                         <div className="flex gap-2 mt-3">
                           <span className="text-xs text-muted-foreground">
-                            {template.tasks?.length || 0} مهمة
+                            {template.tasks?.length || 0} {t.onboarding.taskCount}
                           </span>
                           <span className="text-xs text-muted-foreground">•</span>
                           <span className="text-xs text-muted-foreground">
-                            {template.documents?.length || 0} مستند
+                            {template.documents?.length || 0} {t.onboarding.docCount}
                           </span>
                         </div>
                       </CardContent>
@@ -737,22 +743,22 @@ export function OnboardingManagerNew() {
         </TabsContent>
       </Tabs>
 
-      {/* Dialog بدء إلحاق جديد */}
+      {/* Dialog {t.onboarding.startNew} */}
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>بدء عملية إلحاق جديدة</DialogTitle>
-            <DialogDescription>اختر الموظف الجديد وقالب الإلحاق</DialogDescription>
+            <DialogTitle>{t.onboarding.startDialog}</DialogTitle>
+            <DialogDescription>{t.onboarding.startDialogDesc}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>الموظف الجديد *</Label>
+              <Label>{t.onboarding.newEmployee}</Label>
               <Select
                 value={newProcess.employeeId}
                 onValueChange={(value) => setNewProcess({ ...newProcess, employeeId: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر الموظف" />
+                  <SelectValue placeholder={t.common.selectEmployee} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((emp) => (
@@ -765,25 +771,25 @@ export function OnboardingManagerNew() {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>قالب الإلحاق</Label>
+              <Label>{t.onboarding.templateSelect}</Label>
               <Select
                 value={newProcess.templateId}
                 onValueChange={(value) => setNewProcess({ ...newProcess, templateId: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر القالب (اختياري)" />
+                  <SelectValue placeholder={t.onboarding.chooseTemplate} />
                 </SelectTrigger>
                 <SelectContent>
                   {templates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
-                      {template.name} ({template.durationDays} يوم)
+                      {template.name} ({template.durationDays} {t.onboarding.dayUnit})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label>تاريخ البدء</Label>
+              <Label>{t.common.startDate}</Label>
               <Input
                 type="date"
                 value={newProcess.startDate}
@@ -791,58 +797,54 @@ export function OnboardingManagerNew() {
               />
             </div>
             <div className="grid gap-2">
-              <Label>ملاحظات</Label>
+              <Label>{t.common.notes}</Label>
               <Textarea
                 value={newProcess.notes}
                 onChange={(e) => setNewProcess({ ...newProcess, notes: e.target.value })}
-                placeholder="ملاحظات إضافية..."
+                placeholder={t.common.additionalNotes}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={handleCreateProcess} disabled={submitting}>
               {submitting ? (
                 <>
-                  <IconLoader className="h-4 w-4 animate-spin ms-2" />
-                  جاري الإنشاء...
-                </>
+                  <IconLoader className="h-4 w-4 animate-spin ms-2" />{t.common.creating}</>
               ) : (
-                "بدء الإلحاق"
+                t.onboarding.startOnboarding
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Dialog إنشاء قالب */}
+      {/* {t.onboarding.createTemplateDialog} */}
       <Dialog open={isTemplateDialogOpen} onOpenChange={setIsTemplateDialogOpen}>
         <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>إنشاء قالب إلحاق جديد</DialogTitle>
-            <DialogDescription>أنشئ قالب يمكن استخدامه لعمليات الإلحاق</DialogDescription>
+            <DialogTitle>{t.onboarding.createTemplateDialog}</DialogTitle>
+            <DialogDescription>{t.onboarding.createTemplateDialogDesc}</DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>اسم القالب *</Label>
+              <Label>{t.onboarding.templateNameLabel}</Label>
               <Input
                 value={newTemplate.name}
                 onChange={(e) => setNewTemplate({ ...newTemplate, name: e.target.value })}
-                placeholder="مثال: قالب تقنية المعلومات"
+                placeholder={t.onboarding.templateNameExample}
               />
             </div>
             <div className="grid gap-2">
-              <Label>الوصف</Label>
+              <Label>{t.common.description}</Label>
               <Textarea
                 value={newTemplate.description}
                 onChange={(e) => setNewTemplate({ ...newTemplate, description: e.target.value })}
-                placeholder="وصف القالب..."
+                placeholder={t.onboarding.templateDescPlaceholder}
               />
             </div>
             <div className="grid gap-2">
-              <Label>مدة الإلحاق (بالأيام)</Label>
+              <Label>{t.onboarding.durationDays}</Label>
               <Input
                 type="number"
                 value={newTemplate.durationDays}
@@ -852,35 +854,31 @@ export function OnboardingManagerNew() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={handleCreateTemplate} disabled={submitting}>
               {submitting ? (
                 <>
-                  <IconLoader className="h-4 w-4 animate-spin ms-2" />
-                  جاري الإنشاء...
-                </>
+                  <IconLoader className="h-4 w-4 animate-spin ms-2" />{t.common.creating}</>
               ) : (
-                "إنشاء القالب"
+                t.onboarding.createTemplate
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Sheet عرض المهام */}
+      {/* {t.onboarding.taskSheet} */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
         <SheetContent className="sm:max-w-xl overflow-y-auto">
           <SheetHeader>
-            <SheetTitle>مهام الإلحاق</SheetTitle>
+            <SheetTitle>{t.onboarding.tasks}</SheetTitle>
             <SheetDescription>
-              متابعة مهام {selectedProcess ? getEmployeeName(selectedProcess.employee) : ""}
+              {t.onboarding.taskSheet} {selectedProcess ? getEmployeeName(selectedProcess.employee) : ""}
             </SheetDescription>
           </SheetHeader>
           {selectedProcess && (
             <div className="space-y-6 py-4">
-              {/* معلومات الموظف */}
+              {/* {t.onboarding.employeeInfo} */}
               <div className="flex items-center gap-4">
                 <Avatar className="h-12 w-12">
                   <AvatarImage src={selectedProcess.employee.avatar} alt="" />
@@ -899,18 +897,18 @@ export function OnboardingManagerNew() {
                 </div>
               </div>
 
-              {/* التقدم */}
+              {/* {t.onboarding.progress} */}
               <div>
                 <div className="flex justify-between text-sm mb-2">
-                  <span>التقدم الكلي</span>
+                  <span>{t.onboarding.totalProgress}</span>
                   <span>{selectedProcess.progress}%</span>
                 </div>
                 <Progress value={selectedProcess.progress} className="h-3" />
               </div>
 
-              {/* تغيير الحالة */}
+              {/* {t.onboarding.changeStatus} */}
               <div className="grid gap-2">
-                <Label>الحالة</Label>
+                <Label>{t.common.status}</Label>
                 <Select
                   value={selectedProcess.status}
                   onValueChange={(value) => handleStatusChange(selectedProcess.id, value)}
@@ -928,10 +926,10 @@ export function OnboardingManagerNew() {
                 </Select>
               </div>
 
-              {/* المدير */}
+              {/* {t.onboarding.manager} */}
               {selectedProcess.employee.manager && (
                 <div className="bg-muted/50 rounded-lg p-3">
-                  <p className="text-sm font-medium mb-1">المدير المباشر</p>
+                  <p className="text-sm font-medium mb-1">{t.onboarding.directManager}</p>
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>
@@ -953,11 +951,11 @@ export function OnboardingManagerNew() {
 
               <Separator />
 
-              {/* قائمة المهام */}
+              {/* {t.onboarding.taskList} */}
               <div>
-                <h4 className="font-semibold mb-3">قائمة المهام</h4>
+                <h4 className="font-semibold mb-3">{t.onboarding.taskList}</h4>
                 {selectedProcess.tasks.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">لا توجد مهام</p>
+                  <p className="text-center text-muted-foreground py-4">{t.onboarding.noTasks}</p>
                 ) : (
                   <div className="space-y-3">
                     {selectedProcess.tasks.map((task) => (
@@ -985,12 +983,12 @@ export function OnboardingManagerNew() {
                               </Badge>
                             )}
                             <Badge className={`text-xs ${task.isCompleted ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
-                              {task.isCompleted ? "مكتملة" : "قيد الانتظار"}
+                              {task.isCompleted ? t.common.completed : t.common.pending}
                             </Badge>
                           </div>
                           {task.dueDate && (
                             <p className="text-xs text-muted-foreground mt-1">
-                              الموعد: {new Date(task.dueDate).toLocaleDateString("ar-SA")}
+                              {t.onboarding.dueDate} {new Date(task.dueDate).toLocaleDateString("ar-SA")}
                             </p>
                           )}
                         </div>
@@ -1000,12 +998,12 @@ export function OnboardingManagerNew() {
                 )}
               </div>
 
-              {/* المستندات */}
+              {/* {t.onboarding.docsSection} */}
               {selectedProcess.documents.length > 0 && (
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">المستندات المطلوبة</h4>
+                    <h4 className="font-semibold mb-3">{t.onboarding.requiredDocuments}</h4>
                     <div className="space-y-2">
                       {selectedProcess.documents.map((doc) => (
                         <div
@@ -1017,12 +1015,12 @@ export function OnboardingManagerNew() {
                             <span>{doc.name}</span>
                             {doc.isRequired && (
                               <Badge variant="destructive" className="text-xs">
-                                مطلوب
+                                {t.onboarding.required}
                               </Badge>
                             )}
                           </div>
                           <Badge className={doc.isSubmitted ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
-                            {doc.isSubmitted ? "مرفق" : "بانتظار"}
+                            {doc.isSubmitted ? t.onboarding.attached : t.onboarding.awaitingAttach}
                           </Badge>
                         </div>
                       ))}
@@ -1035,20 +1033,18 @@ export function OnboardingManagerNew() {
         </SheetContent>
       </Sheet>
 
-      {/* Alert Dialog للحذف */}
+      {/* Delete Alert */}
       <AlertDialog open={!!deleteProcessId} onOpenChange={() => setDeleteProcessId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>هل أنت متأكد من الحذف؟</AlertDialogTitle>
+            <AlertDialogTitle>{t.common.confirmDeleteTitle}</AlertDialogTitle>
             <AlertDialogDescription>
-              سيتم حذف عملية الإلحاق بشكل نهائي. هذا الإجراء لا يمكن التراجع عنه.
+              {t.onboarding.deleteConfirm}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProcess} className="bg-destructive hover:bg-destructive/90">
-              حذف
-            </AlertDialogAction>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteProcess} className="bg-destructive hover:bg-destructive/90">{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

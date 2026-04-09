@@ -1,3 +1,5 @@
+"use client";
+
 import { IconUser } from "@tabler/icons-react";
 import { formatCurrency } from "@/lib/types/payroll";
 
@@ -13,6 +15,10 @@ import type { Employee } from "@/lib/types/core-hr";
 import { getEmployeeFullName } from "@/lib/types/core-hr";
 
 import { EmployeeStatusBadge } from "./employee-status-badge";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function EmployeeViewDialog({
   employee,
@@ -27,11 +33,13 @@ export function EmployeeViewDialog({
   getDeptName: (departmentId: string) => string;
   getJobName: (jobTitleId: string) => string;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Dialog open={!!employee} onOpenChange={() => onClose()}>
       <DialogContent className="w-full sm:max-w-[500px]">
         <DialogHeader>
-          <DialogTitle>بيانات الموظف</DialogTitle>
+          <DialogTitle>{t.employees.pEmployeeDetails}</DialogTitle>
         </DialogHeader>
 
         {employee && (
@@ -48,34 +56,34 @@ export function EmployeeViewDialog({
 
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-muted-foreground">الرقم الوظيفي:</span>
+                <span className="text-muted-foreground">{t.employees.pEmployeeNumber}</span>
                 <p className="font-medium">{employee.employeeNumber}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">الحالة:</span>
+                <span className="text-muted-foreground">{t.employees.pStatus}</span>
                 <p>
                   <EmployeeStatusBadge status={employee.status} />
                 </p>
               </div>
               <div>
-                <span className="text-muted-foreground">القسم:</span>
+                <span className="text-muted-foreground">{t.employees.pDepartment}</span>
                 <p className="font-medium">{getDeptName(employee.departmentId)}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">المسمى:</span>
+                <span className="text-muted-foreground">{t.employees.pJobTitle}</span>
                 <p className="font-medium">{getJobName(employee.jobTitleId)}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">تاريخ التعيين:</span>
+                <span className="text-muted-foreground">{t.employees.pHireDate}</span>
                 <p className="font-medium">{employee.hireDate}</p>
               </div>
               <div>
-                <span className="text-muted-foreground">الهاتف:</span>
+                <span className="text-muted-foreground">{t.employees.pPhone}</span>
                 <p className="font-medium">{employee.phone || "-"}</p>
               </div>
               {employee.basicSalary && (
                 <div>
-                  <span className="text-muted-foreground">الراتب:</span>
+                  <span className="text-muted-foreground">{t.employees.pSalary}</span>
                   <p className="font-medium">{formatCurrency(employee.basicSalary)}</p>
                 </div>
               )}
@@ -84,9 +92,7 @@ export function EmployeeViewDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>
-            إغلاق
-          </Button>
+          <Button variant="outline" onClick={onClose}>{t.common.close}</Button>
           <Button
             onClick={() => {
               if (!employee) return;
@@ -94,9 +100,7 @@ export function EmployeeViewDialog({
               onClose();
             }}
             disabled={!employee}
-          >
-            تعديل
-          </Button>
+          >{t.common.edit}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

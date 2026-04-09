@@ -1,12 +1,15 @@
-import { OnboardingManagerNew } from "./onboarding-manager-new";
+import { OnboardingManagerNew } from "./onboarding-manager-new";import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export default function OnboardingPage() {
+export default async function OnboardingPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <div className="flex flex-1 flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">إلحاق الموظفين</h1>
-          <p className="text-muted-foreground">متابعة إجراءات الموظفين الجدد</p>
+          <h1 className="text-2xl font-bold">{t.onboarding.pEmployeeOnboarding}</h1>
+          <p className="text-muted-foreground">{t.onboarding.pageSubtitle}</p>
         </div>
       </div>
       <OnboardingManagerNew />

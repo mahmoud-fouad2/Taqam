@@ -33,11 +33,15 @@ import {
 } from "@/components/ui/card";
 import { IconArrowRight, IconArrowLeft, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 const userSchema = z.object({
   firstName: z.string().min(2, "الاسم الأول مطلوب"),
   lastName: z.string().min(2, "اسم العائلة مطلوب"),
-  email: z.string().email("البريد الإلكتروني غير صالح"),
+  email: z.string().email(t.common.emailInvalid),
   role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_VERIFICATION"]),
   phone: z.string().optional(),
@@ -60,7 +64,9 @@ interface Props {
   locale: "ar" | "en";
 }
 
-export default function EditUserClient({ user, locale }: Props) {
+export default function EditUserClient({ user, locale: _locale }: Props) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isRtl = locale === "ar";
@@ -104,24 +110,24 @@ export default function EditUserClient({ user, locale }: Props) {
   };
 
   const roleOptions = [
-    { value: "EMPLOYEE", label: isRtl ? "موظف" : "Employee" },
-    { value: "HR_MANAGER", label: isRtl ? "مدير الموارد البشرية" : "HR Manager" },
-    { value: "MANAGER", label: isRtl ? "مدير" : "Manager" },
-    { value: "TENANT_ADMIN", label: isRtl ? "مدير الشركة" : "Tenant Admin" },
+    { value: "EMPLOYEE", label: isRtl ? t.common.employee : "Employee" },
+    { value: "HR_MANAGER", label: isRtl ? t.common.hrManager : "HR Manager" },
+    { value: "MANAGER", label: isRtl ? t.common.manager : "Manager" },
+    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" },
   ];
 
   const statusOptions = [
-    { value: "ACTIVE", label: isRtl ? "نشط" : "Active" },
-    { value: "INACTIVE", label: isRtl ? "غير نشط" : "Inactive" },
-    { value: "SUSPENDED", label: isRtl ? "موقوف" : "Suspended" },
-    { value: "PENDING_VERIFICATION", label: isRtl ? "بانتظار التفعيل" : "Pending Verification" },
+    { value: "ACTIVE", label: isRtl ? t.common.active : "Active" },
+    { value: "INACTIVE", label: isRtl ? t.common.inactive : "Inactive" },
+    { value: "SUSPENDED", label: isRtl ? t.common.suspended : "Suspended" },
+    { value: "PENDING_VERIFICATION", label: isRtl ? t.common.pendingActivation : "Pending Verification" },
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" aria-label="رجوع" asChild>
+        <Button variant="ghost" size="icon" aria-label={t.common.back} asChild>
           <Link href={`/dashboard/users/${user.id}`}>
             <ArrowIcon className="h-5 w-5" />
           </Link>
@@ -143,7 +149,7 @@ export default function EditUserClient({ user, locale }: Props) {
               <IconUser className="size-5 text-primary" />
             </div>
             <div>
-              <CardTitle>{isRtl ? "بيانات المستخدم" : "User Details"}</CardTitle>
+              <CardTitle>{isRtl ? t.common.details : "User Details"}</CardTitle>
               <CardDescription>
                 {isRtl ? "تعديل معلومات المستخدم" : "Edit user information"}
               </CardDescription>
@@ -159,7 +165,7 @@ export default function EditUserClient({ user, locale }: Props) {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "الاسم الأول *" : "First Name *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.firstName : "First Name *"}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -172,7 +178,7 @@ export default function EditUserClient({ user, locale }: Props) {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "اسم العائلة *" : "Last Name *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.lastName : "Last Name *"}</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -188,7 +194,7 @@ export default function EditUserClient({ user, locale }: Props) {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "البريد الإلكتروني *" : "Email *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.emailRequired : "Email *"}</FormLabel>
                       <FormControl>
                         <Input type="email" {...field} />
                       </FormControl>
@@ -201,7 +207,7 @@ export default function EditUserClient({ user, locale }: Props) {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "رقم الهاتف" : "Phone"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.phone : "Phone"}</FormLabel>
                       <FormControl>
                         <Input placeholder="+966500000000" {...field} />
                       </FormControl>
@@ -217,7 +223,7 @@ export default function EditUserClient({ user, locale }: Props) {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "الدور *" : "Role *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.roleRequired : "Role *"}</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -266,14 +272,14 @@ export default function EditUserClient({ user, locale }: Props) {
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting
                     ? isRtl
-                      ? "جاري الحفظ..."
+                      ? t.common.saving
                       : "Saving..."
                     : isRtl
-                    ? "حفظ التعديلات"
+                    ? t.common.saveChanges
                     : "Save Changes"}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href={`/dashboard/users/${user.id}`}>{isRtl ? "إلغاء" : "Cancel"}</Link>
+                  <Link href={`/dashboard/users/${user.id}`}>{isRtl ? t.common.cancel : "Cancel"}</Link>
                 </Button>
               </div>
             </form>

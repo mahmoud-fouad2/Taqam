@@ -6,6 +6,7 @@ import { getText } from "@/lib/i18n/text";
 import { Button } from "@/components/ui/button";
 import { ChangePasswordForm } from "./change-password-form";
 
+
 export default async function ChangePasswordPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
@@ -25,7 +26,7 @@ export default async function ChangePasswordPage() {
 
       <div className="flex items-center justify-between gap-2">
         <Button variant="outline" asChild>
-          <Link href="/dashboard/my-profile">{locale === "ar" ? "رجوع" : "Back"}</Link>
+          <Link href="/dashboard/my-profile">{locale === "ar" ? t.common.back : "Back"}</Link>
         </Button>
       </div>
     </div>

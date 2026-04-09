@@ -8,8 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
-export function ChangeEmailForm({ locale }: { locale: "ar" | "en" }) {
+export function ChangeEmailForm({ locale: _locale }: { locale: "ar" | "en" }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -17,13 +21,13 @@ export function ChangeEmailForm({ locale }: { locale: "ar" | "en" }) {
   const copy = useMemo(() => {
     if (locale === "ar") {
       return {
-        title: "تحديث البريد الإلكتروني",
-        currentPassword: "كلمة المرور الحالية",
-        newEmail: "البريد الإلكتروني الجديد",
-        save: "حفظ",
-        saving: "جارٍ الحفظ...",
-        required: "يرجى تعبئة جميع الحقول.",
-        success: "تم تغيير البريد الإلكتروني بنجاح.",
+        title: t.common.pUpdateEmail,
+        currentPassword: t.common.currentPassword,
+        newEmail: t.common.pNewEmail,
+        save: t.common.save,
+        saving: t.common.saving,
+        required: t.common.fillAllFields,
+        success: t.common.pEmailChangedSuccessfully,
       };
     }
 
@@ -36,7 +40,16 @@ export function ChangeEmailForm({ locale }: { locale: "ar" | "en" }) {
       required: "Please fill in all fields.",
       success: "Email changed successfully.",
     };
-  }, [locale]);
+  }, [
+    locale,
+    t.common.currentPassword,
+    t.common.fillAllFields,
+    t.common.pEmailChangedSuccessfully,
+    t.common.pNewEmail,
+    t.common.pUpdateEmail,
+    t.common.save,
+    t.common.saving,
+  ]);
 
   const onSave = async () => {
     if (!currentPassword || !newEmail) {
@@ -67,7 +80,7 @@ export function ChangeEmailForm({ locale }: { locale: "ar" | "en" }) {
       // NextAuth session might keep old email until refresh.
       window.location.reload();
     } catch (error: any) {
-      toast.error(error?.message || (locale === "ar" ? "تعذر الحفظ." : "Could not save."));
+      toast.error(error?.message || (locale === "ar" ? t.common.saveFailed : "Could not save."));
     } finally {
       setIsSaving(false);
     }

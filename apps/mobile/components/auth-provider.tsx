@@ -46,28 +46,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!refreshInFlight.current) {
       refreshInFlight.current = (async () => {
-        try {
-          const refreshed = await apiFetch("/api/mobile/auth/refresh", {
-            init: { method: "POST", body: JSON.stringify({ refreshToken: currentRefresh }) },
-          });
+        const MAX_ATTEMPTS = 2;
+        for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+          try {
+            const refreshed = await apiFetch("/api/mobile/auth/refresh", {
+              init: { method: "POST", body: JSON.stringify({ refreshToken: currentRefresh }) },
+              retries: 0,
+            });
 
-          const nextAccess = refreshed?.data?.accessToken as string | undefined;
-          const nextRefresh = refreshed?.data?.refreshToken as string | undefined;
-          if (!nextAccess || !nextRefresh) return null;
+            const nextAccess = refreshed?.data?.accessToken as string | undefined;
+            const nextRefresh = refreshed?.data?.refreshToken as string | undefined;
+            if (!nextAccess || !nextRefresh) return null;
 
-          await setStoredAccessToken(nextAccess);
-          await setStoredRefreshToken(nextRefresh);
+            await setStoredAccessToken(nextAccess);
+            await setStoredRefreshToken(nextRefresh);
 
-          setAccessToken(nextAccess);
-          setRefreshToken(nextRefresh);
+            setAccessToken(nextAccess);
+            setRefreshToken(nextRefresh);
 
-          return { accessToken: nextAccess, refreshToken: nextRefresh };
-        } catch {
-          return null;
-        } finally {
-          refreshInFlight.current = null;
+            return { accessToken: nextAccess, refreshToken: nextRefresh };
+          } catch (e) {
+            const status = e instanceof ApiError ? e.status : 0;
+            const isTransient = status === 0 || status >= 500 || status === 429;
+            if (isTransient && attempt < MAX_ATTEMPTS - 1) {
+              await new Promise((r) => setTimeout(r, 1000));
+              continue;
+            }
+            return null;
+          }
         }
+        return null;
       })();
+
+      refreshInFlight.current.finally(() => {
+        refreshInFlight.current = null;
+      });
     }
 
     return await refreshInFlight.current;

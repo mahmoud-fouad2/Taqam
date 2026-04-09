@@ -196,7 +196,7 @@ export default async function AcademyPage() {
                   <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
                     <span>{dateFormatter.format(course.startDate as Date)}</span>
                     <span>
-                      {isAr ? "المدة:" : "Duration:"} {course.durationHours} {isAr ? "ساعة" : "hours"}
+                      {isAr ? t.common.duration : "Duration:"} {course.durationHours} {isAr ? t.common.hour : "hours"}
                     </span>
                     <span>
                       {isAr ? "المسجلون:" : "Enrollments:"} {course._count.enrollments}
@@ -237,7 +237,7 @@ export default async function AcademyPage() {
                       {isAr ? "المُنشأة:" : "Created:"} {dateFormatter.format(course.createdAt)}
                     </span>
                     <span>
-                      {isAr ? "المدة:" : "Duration:"} {course.durationHours} {isAr ? "ساعة" : "hours"}
+                      {isAr ? t.common.duration : "Duration:"} {course.durationHours} {isAr ? t.common.hour : "hours"}
                     </span>
                   </div>
                 </div>
@@ -270,7 +270,7 @@ export default async function AcademyPage() {
             },
             {
               href: `${prefix}/dashboard/help-center`,
-              title: isAr ? "مركز المساعدة" : "Help center",
+              title: isAr ? t.helpCenter.title : "Help center",
               desc: isAr ? "الرجوع إلى الأدلة ومسارات الاستخدام الأساسية." : "Open the help center and operational guides.",
             },
           ].map((item) => (

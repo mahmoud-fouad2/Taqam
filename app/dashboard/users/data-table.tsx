@@ -48,6 +48,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export type User = {
   id: string;
@@ -60,17 +64,19 @@ export type User = {
 };
 
 export default function UsersDataTable({ data }: { data: User[] }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
-  const [locale, setLocale] = React.useState<"ar" | "en">("ar");
+  const [uiLocale, setUiLocale] = React.useState<"ar" | "en">("ar");
   const [mounted, setMounted] = React.useState(false);
   
   React.useEffect(() => {
     setMounted(true);
     const lang = typeof document !== "undefined" ? document.documentElement.lang : "ar";
-    setLocale(lang === "en" ? "en" : "ar");
+    setUiLocale(lang === "en" ? "en" : "ar");
   }, []);
   
-  const isRtl = locale === "ar";
+  const isRtl = uiLocale === "ar";
 
   const [tableData, setTableData] = React.useState<User[]>(data);
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -109,7 +115,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       router.refresh();
     } catch (error) {
       setActionError(
-        error instanceof Error ? error.message : isRtl ? "حدث خطأ غير متوقع" : "Unexpected error"
+        error instanceof Error ? error.message : isRtl ? t.common.unexpectedError : "Unexpected error"
       );
     } finally {
       setDeletingUserId(null);
@@ -118,10 +124,10 @@ export default function UsersDataTable({ data }: { data: User[] }) {
 
   const statusLabel = (value: string) => {
     if (!isRtl) return value;
-    if (value === "ACTIVE") return "نشط";
-    if (value === "PENDING_VERIFICATION") return "بانتظار التفعيل";
-    if (value === "INACTIVE") return "غير نشط";
-    if (value === "SUSPENDED") return "موقوف";
+    if (value === "ACTIVE") return t.common.active;
+    if (value === "PENDING_VERIFICATION") return t.common.pendingActivation;
+    if (value === "INACTIVE") return t.common.inactive;
+    if (value === "SUSPENDED") return t.common.suspended;
     return value;
   };
 
@@ -146,7 +152,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       },
       {
         accessorKey: "name",
-        header: isRtl ? "الاسم" : "Name",
+        header: isRtl ? t.common.name : "Name",
         cell: ({ row }) => (
           <div className="flex items-center gap-4">
             <Avatar>
@@ -166,7 +172,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-              {isRtl ? "الدور" : "Role"}
+              {isRtl ? t.common.role : "Role"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
           );
@@ -198,7 +204,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
               variant="ghost"
               onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             >
-              {isRtl ? "الحالة" : "Status"}
+              {isRtl ? t.common.status : "Status"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
           );
@@ -274,7 +280,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{isRtl ? "إجراءات" : "Actions"}</DropdownMenuLabel>
+                <DropdownMenuLabel>{isRtl ? t.common.actions : "Actions"}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
                   <a href={`/dashboard/users/${row.original.id}`}>
@@ -283,7 +289,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <a href={`/dashboard/users/${row.original.id}/edit`}>
-                    {isRtl ? "تعديل" : "Edit"}
+                    {isRtl ? t.common.edit : "Edit"}
                   </a>
                 </DropdownMenuItem>
                 <DropdownMenuItem
@@ -295,10 +301,10 @@ export default function UsersDataTable({ data }: { data: User[] }) {
                 >
                   {deletingUserId === row.original.id
                     ? isRtl
-                      ? "جارٍ الحذف..."
+                      ? t.common.deleting
                       : "Deleting..."
                     : isRtl
-                      ? "حذف"
+                      ? t.common.delete
                       : "Delete"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -332,11 +338,11 @@ export default function UsersDataTable({ data }: { data: User[] }) {
   const statuses = [
     {
       value: "active",
-      label: isRtl ? "نشط" : "Active"
+      label: isRtl ? t.common.active : "Active"
     },
     {
       value: "inactive",
-      label: isRtl ? "غير نشط" : "Inactive"
+      label: isRtl ? t.common.inactive : "Inactive"
     },
     {
       value: "pending",
@@ -347,7 +353,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
   const plans = [
     {
       value: "basic",
-      label: isRtl ? "أساسي" : "Basic"
+      label: isRtl ? t.common.basic : "Basic"
     },
     {
       value: "team",
@@ -355,7 +361,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
     },
     {
       value: "enterprise",
-      label: isRtl ? "مؤسسات" : "Enterprise"
+      label: isRtl ? t.common.institutions : "Enterprise"
     }
   ];
 
@@ -404,12 +410,12 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <PopoverTrigger asChild>
               <Button variant="outline">
                 <PlusCircle className="me-2 h-4 w-4" />
-                {isRtl ? "الحالة" : "Status"}
+                {isRtl ? t.common.status : "Status"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-52 p-0">
               <Command>
-                <CommandInput placeholder={isRtl ? "الحالة" : "Status"} className="h-9" />
+                <CommandInput placeholder={isRtl ? t.common.status : "Status"} className="h-9" />
                 <CommandList>
                   <CommandEmpty>{isRtl ? "لا توجد حالة." : "No status found."}</CommandEmpty>
                   <CommandGroup>
@@ -476,12 +482,12 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <PopoverTrigger asChild>
               <Button variant="outline">
                 <PlusCircle className="me-2 h-4 w-4" />
-                {isRtl ? "الدور" : "Role"}
+                {isRtl ? t.common.role : "Role"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-52 p-0">
               <Command>
-                <CommandInput placeholder={isRtl ? "الدور" : "Role"} className="h-9" />
+                <CommandInput placeholder={isRtl ? t.common.role : "Role"} className="h-9" />
                 <CommandList>
                   <CommandEmpty>{isRtl ? "لا يوجد دور." : "No role found."}</CommandEmpty>
                   <CommandGroup>

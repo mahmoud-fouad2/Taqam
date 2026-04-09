@@ -18,6 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type KPIMetric = {
   id: string;
@@ -59,6 +63,8 @@ type AnalyticsOverview = {
 };
 
 export default function AnalyticsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [period, setPeriod] = useState('current-month');
   const [data, setData] = useState<AnalyticsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -76,11 +82,11 @@ export default function AnalyticsManager() {
 
   const getEmploymentTypeLabel = (type: string) => {
     switch (type) {
-      case 'FULL_TIME': return 'دوام كامل';
-      case 'PART_TIME': return 'دوام جزئي';
-      case 'CONTRACT': return 'عقد';
-      case 'INTERN': return 'تدريب';
-      case 'TEMPORARY': return 'مؤقت';
+      case 'FULL_TIME': return t.analytics.fullTime;
+      case 'PART_TIME': return t.analytics.partTime;
+      case 'CONTRACT': return t.analytics.contract;
+      case 'INTERN': return t.analytics.internship;
+      case 'TEMPORARY': return t.analytics.temporary;
       default: return type;
     }
   };
@@ -145,8 +151,8 @@ export default function AnalyticsManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">التحليلات</h1>
-          <p className="text-muted-foreground">لوحة تحكم تحليلية شاملة</p>
+          <h1 className="text-2xl font-bold">{t.analytics.title}</h1>
+          <p className="text-muted-foreground">{t.analytics.dashboardSubtitle}</p>
         </div>
         <div className="flex gap-2">
           <Select value={period} onValueChange={setPeriod}>
@@ -155,21 +161,19 @@ export default function AnalyticsManager() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="this-week">هذا الأسبوع</SelectItem>
-              <SelectItem value="current-month">الشهر الحالي</SelectItem>
-              <SelectItem value="last-month">الشهر السابق</SelectItem>
-              <SelectItem value="this-quarter">هذا الربع</SelectItem>
-              <SelectItem value="this-year">هذه السنة</SelectItem>
+              <SelectItem value="this-week">{t.common.thisWeek}</SelectItem>
+              <SelectItem value="current-month">{t.common.thisMonth}</SelectItem>
+              <SelectItem value="last-month">{t.common.lastMonth}</SelectItem>
+              <SelectItem value="this-quarter">{t.analytics.thisQuarter}</SelectItem>
+              <SelectItem value="this-year">{t.common.thisYear}</SelectItem>
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => void fetchOverview(period)} disabled={isLoading}>
             <RefreshCw className="h-4 w-4 ms-2" />
-            تحديث
+            {t.analytics.pRefresh}
           </Button>
           <Button variant="outline">
-            <Download className="h-4 w-4 ms-2" />
-            تصدير
-          </Button>
+            <Download className="h-4 w-4 ms-2" />{t.common.exportData}</Button>
         </div>
       </div>
 
@@ -184,7 +188,7 @@ export default function AnalyticsManager() {
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold">
-                  {kpi.unit && kpi.unit !== '%' && kpi.unit !== 'س'
+                  {kpi.unit && kpi.unit !== '%' && kpi.unit !== 'h'
                     ? formatCurrency(kpi.value)
                     : kpi.unit
                       ? `${kpi.value}${kpi.unit}`
@@ -193,14 +197,14 @@ export default function AnalyticsManager() {
               </div>
               {kpi.trendPercentage !== undefined && (
                 <p className={`text-xs mt-1 ${getTrendColor(kpi.trend, kpi.id !== 'kpi-2')}`}>
-                  {kpi.trendPercentage > 0 ? '+' : ''}{kpi.trendPercentage}% عن الفترة السابقة
+                  {kpi.trendPercentage > 0 ? '+' : ''}{kpi.trendPercentage}% {t.analytics.vsLastPeriod}
                 </p>
               )}
               {kpi.target && (
                 <div className="mt-2">
                   <Progress value={(kpi.value / kpi.target) * 100} className="h-1" />
                   <p className="text-xs text-muted-foreground mt-1">
-                    الهدف: {kpi.target}{kpi.unit}
+                    {t.analytics.pTarget} {kpi.target}{kpi.unit}
                   </p>
                 </div>
               )}
@@ -219,9 +223,9 @@ export default function AnalyticsManager() {
 
       <Tabs defaultValue="hr" className="w-full">
         <TabsList>
-          <TabsTrigger value="hr">الموارد البشرية</TabsTrigger>
-          <TabsTrigger value="attendance">الحضور</TabsTrigger>
-          <TabsTrigger value="payroll">الرواتب</TabsTrigger>
+          <TabsTrigger value="hr">{t.analytics.hr}</TabsTrigger>
+          <TabsTrigger value="attendance">{t.attendance.title}</TabsTrigger>
+          <TabsTrigger value="payroll">{t.helpCenter.payroll}</TabsTrigger>
         </TabsList>
 
         {/* HR Analytics Tab */}
@@ -234,7 +238,7 @@ export default function AnalyticsManager() {
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">إجمالي الموظفين</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.totalEmployees}</p>
                     <p className="text-2xl font-bold">{formatNumber(hr?.totalEmployees || 0)}</p>
                   </div>
                 </div>
@@ -247,7 +251,7 @@ export default function AnalyticsManager() {
                     <TrendingUp className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">تعيينات جديدة</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.newHires}</p>
                     <p className="text-2xl font-bold">{hr?.newHires || 0}</p>
                   </div>
                 </div>
@@ -260,7 +264,7 @@ export default function AnalyticsManager() {
                     <TrendingDown className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">مغادرون</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.leavers}</p>
                     <p className="text-2xl font-bold">{hr?.terminations || 0}</p>
                   </div>
                 </div>
@@ -273,7 +277,7 @@ export default function AnalyticsManager() {
                     <Target className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">معدل الدوران</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.turnoverRate}</p>
                     <p className="text-2xl font-bold">{hr?.turnoverRate || 0}%</p>
                   </div>
                 </div>
@@ -286,7 +290,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  توزيع الموظفين حسب القسم
+                  {t.analytics.pEmployeeDistributionByDepartme}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -310,7 +314,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <PieChart className="h-5 w-5" />
-                  توزيع الجنسيات
+                  {t.analytics.pNationalityDistribution}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -339,7 +343,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Users className="h-5 w-5" />
-                  التوزيع العمري
+                  {t.analytics.pAgeDistribution}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -361,7 +365,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Briefcase className="h-5 w-5" />
-                  نوع التوظيف
+                  {t.analytics.pEmploymentType}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -388,7 +392,7 @@ export default function AnalyticsManager() {
                     <Target className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">معدل الحضور</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.attendanceRateLabel}</p>
                     <p className="text-2xl font-bold">{attendance?.averageAttendanceRate || 0}%</p>
                   </div>
                 </div>
@@ -401,7 +405,7 @@ export default function AnalyticsManager() {
                     <Clock className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">تأخيرات</p>
+                    <p className="text-sm text-muted-foreground">{t.analytics.delays}</p>
                     <p className="text-2xl font-bold">{attendance?.lateArrivals || 0}</p>
                   </div>
                 </div>
@@ -414,7 +418,7 @@ export default function AnalyticsManager() {
                     <Users className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">غياب</p>
+                    <p className="text-sm text-muted-foreground">{t.attendance.absent}</p>
                     <p className="text-2xl font-bold">{attendance?.absences || 0}</p>
                   </div>
                 </div>
@@ -427,7 +431,7 @@ export default function AnalyticsManager() {
                     <Clock className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">ساعات إضافية</p>
+                    <p className="text-sm text-muted-foreground">{t.common.overtime}</p>
                     <p className="text-2xl font-bold">{attendance?.overtimeHours || 0}</p>
                   </div>
                 </div>
@@ -439,7 +443,7 @@ export default function AnalyticsManager() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                معدل الحضور حسب القسم
+                {t.analytics.pAttendanceRateByDepartment}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -473,7 +477,7 @@ export default function AnalyticsManager() {
                     <Wallet className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">إجمالي الرواتب</p>
+                    <p className="text-sm text-muted-foreground">{t.salaryStructures.totalSalaries}</p>
                     <p className="text-2xl font-bold">{formatCurrency(payroll?.totalPayroll || 0)}</p>
                   </div>
                 </div>
@@ -486,7 +490,7 @@ export default function AnalyticsManager() {
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">متوسط الراتب</p>
+                    <p className="text-sm text-muted-foreground">{t.salaryStructures.avgSalary}</p>
                     <p className="text-2xl font-bold">{formatCurrency(payroll?.averageSalary || 0)}</p>
                   </div>
                 </div>
@@ -499,7 +503,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  الرواتب حسب القسم
+                  {t.analytics.pSalariesByDepartment}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -509,7 +513,7 @@ export default function AnalyticsManager() {
                       <div>
                         <span className="font-medium">{item.department}</span>
                         <p className="text-xs text-muted-foreground">
-                          متوسط: {formatCurrency(item.average)}
+                          {t.analytics.pAverage} {formatCurrency(item.average)}
                         </p>
                       </div>
                       <span className="font-bold">{formatCurrency(item.total)}</span>
@@ -523,7 +527,7 @@ export default function AnalyticsManager() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <PieChart className="h-5 w-5" />
-                  توزيع البدلات
+                  {t.analytics.pAllowanceDistribution}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -535,7 +539,7 @@ export default function AnalyticsManager() {
                     </div>
                   ))}
                   <div className="border-t pt-3 flex items-center justify-between font-bold">
-                    <span>الإجمالي</span>
+                    <span>{t.common.total}</span>
                     <span>{formatCurrency(
                       (payroll?.allowancesBreakdown || []).reduce((sum, item) => sum + item.amount, 0)
                     )}</span>

@@ -1,3 +1,5 @@
+"use client";
+
 import { Calendar, Edit, Plus } from 'lucide-react';
 
 import type { Dispatch, SetStateAction } from 'react';
@@ -9,6 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function LeaveTypesSection({
   leaveTypes,
@@ -21,6 +27,8 @@ export function LeaveTypesSection({
   isLoading: boolean;
   error: string | null;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card>
       <CardHeader>
@@ -28,13 +36,13 @@ export function LeaveTypesSection({
           <div>
             <CardTitle className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
-              أنواع الإجازات
+              {t.leaveSettings.title}
             </CardTitle>
-            <CardDescription>إدارة أنواع الإجازات وسياساتها</CardDescription>
+            <CardDescription>{t.leaveSettings.pageDesc}</CardDescription>
           </div>
           <Button disabled>
             <Plus className="h-4 w-4 ms-2" />
-            نوع إجازة جديد
+            {t.leaveSettings.newType}
           </Button>
         </div>
       </CardHeader>
@@ -46,7 +54,7 @@ export function LeaveTypesSection({
         )}
 
         {isLoading ? (
-          <div className="py-10 text-center text-muted-foreground">جارٍ التحميل...</div>
+          <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
         ) : (
           <div className="space-y-4">
             {leaveTypes.map((leaveType) => (
@@ -69,15 +77,15 @@ export function LeaveTypesSection({
                   <div>
                     <h4 className="font-semibold">{leaveType.name}</h4>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>{leaveType.annualEntitlement} يوم سنوياً</span>
+                      <span>{leaveType.annualEntitlement} {t.leaveSettings.daysPerYear}</span>
                       <span>•</span>
-                      <span>{leaveType.isPaid ? 'مدفوعة' : 'غير مدفوعة'}</span>
+                      <span>{leaveType.isPaid ? t.leaveSettings.paid : t.leaveSettings.unpaid}</span>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <Badge variant={leaveType.isActive ? 'default' : 'secondary'}>
-                    {leaveType.isActive ? 'نشط' : 'غير نشط'}
+                    {leaveType.isActive ? t.leaveSettings.active : t.leaveSettings.inactive}
                   </Badge>
                   <Switch
                     checked={leaveType.isActive}
@@ -100,11 +108,11 @@ export function LeaveTypesSection({
                         );
                         const json = (await res.json()) as { data?: any; error?: string };
                         if (!res.ok) {
-                          throw new Error(json.error || 'فشل تحديث الحالة');
+                          throw new Error(json.error || t.leaveTypes.statusUpdateFailed);
                         }
                       } catch (err) {
                         setLeaveTypes(previous);
-                        toast.error(err instanceof Error ? err.message : 'فشل تحديث الحالة');
+                        toast.error(err instanceof Error ? err.message : t.leaveTypes.statusUpdateFailed);
                       }
                     }}
                   />

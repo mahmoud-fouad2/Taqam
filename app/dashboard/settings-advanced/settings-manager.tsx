@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 import {
   type SystemSettings,
@@ -25,6 +25,10 @@ import { NotificationsSection } from './_components/section-notifications';
 import { RolesSection } from './_components/section-roles';
 import { SecuritySettingsSection } from './_components/section-security';
 import { WorkflowsSection } from './_components/section-workflows';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type LeaveTypesApiResponse = { data?: any[]; error?: string };
 
@@ -53,6 +57,8 @@ function mapLeaveTypeConfigFromApi(t: any): LeaveTypeConfig {
 }
 
 export default function SettingsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [settings, setSettings] = useState<SystemSettings>({
     general: {
       companyName: '',
@@ -119,7 +125,7 @@ export default function SettingsManager() {
   const [isLeaveTypesLoading, setIsLeaveTypesLoading] = useState(true);
   const [leaveTypesError, setLeaveTypesError] = useState<string | null>(null);
 
-  const loadLeaveTypes = async () => {
+  const loadLeaveTypes = useCallback(async () => {
     setIsLeaveTypesLoading(true);
     setLeaveTypesError(null);
 
@@ -127,50 +133,54 @@ export default function SettingsManager() {
       const res = await fetch('/api/leave-types', { cache: 'no-store' });
       const json = (await res.json()) as LeaveTypesApiResponse;
       if (!res.ok) {
-        throw new Error(json.error || 'فشل تحميل أنواع الإجازات');
+        throw new Error(json.error || t.generalSettings.pFailedToLoadLeaveTypes);
       }
 
       const mapped = Array.isArray(json.data) ? json.data.map(mapLeaveTypeConfigFromApi) : [];
       setLeaveTypes(mapped);
     } catch (err) {
-      setLeaveTypesError(err instanceof Error ? err.message : 'فشل تحميل أنواع الإجازات');
+      setLeaveTypesError(err instanceof Error ? err.message : t.generalSettings.pFailedToLoadLeaveTypes);
     } finally {
       setIsLeaveTypesLoading(false);
     }
-  };
+  }, [t.generalSettings.pFailedToLoadLeaveTypes]);
+
+  const loadSettingsBundle = useCallback(async () => {
+    setIsBootLoading(true);
+
+    try {
+      const [settingsRes, rolesRes, workflowsRes] = await Promise.all([
+        fetch('/api/settings/system', { cache: 'no-store' }),
+        fetch('/api/settings/roles', { cache: 'no-store' }),
+        fetch('/api/settings/workflows', { cache: 'no-store' }),
+      ]);
+
+      const settingsJson = (await settingsRes.json()) as { data?: SystemSettings; error?: string };
+      if (!settingsRes.ok) throw new Error(settingsJson.error || t.platformSettings.loadFailed);
+      if (settingsJson.data) setSettings(settingsJson.data);
+
+      const rolesJson = (await rolesRes.json()) as { data?: Role[]; error?: string };
+      if (!rolesRes.ok) throw new Error(rolesJson.error || t.generalSettings.pFailedToLoadRoles);
+      setRoles(Array.isArray(rolesJson.data) ? rolesJson.data : []);
+
+      const workflowsJson = (await workflowsRes.json()) as { data?: ApprovalWorkflow[]; error?: string };
+      if (!workflowsRes.ok) throw new Error(workflowsJson.error || t.generalSettings.pFailedToLoadWorkflows);
+      setWorkflows(Array.isArray(workflowsJson.data) ? workflowsJson.data : []);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t.platformSettings.loadFailed);
+    } finally {
+      setIsBootLoading(false);
+    }
+  }, [
+    t.generalSettings.pFailedToLoadRoles,
+    t.generalSettings.pFailedToLoadWorkflows,
+    t.platformSettings.loadFailed,
+  ]);
 
   useEffect(() => {
-    const loadSettingsBundle = async () => {
-      setIsBootLoading(true);
-
-      try {
-        const [settingsRes, rolesRes, workflowsRes] = await Promise.all([
-          fetch('/api/settings/system', { cache: 'no-store' }),
-          fetch('/api/settings/roles', { cache: 'no-store' }),
-          fetch('/api/settings/workflows', { cache: 'no-store' }),
-        ]);
-
-        const settingsJson = (await settingsRes.json()) as { data?: SystemSettings; error?: string };
-        if (!settingsRes.ok) throw new Error(settingsJson.error || 'فشل تحميل الإعدادات');
-        if (settingsJson.data) setSettings(settingsJson.data);
-
-        const rolesJson = (await rolesRes.json()) as { data?: Role[]; error?: string };
-        if (!rolesRes.ok) throw new Error(rolesJson.error || 'فشل تحميل الأدوار');
-        setRoles(Array.isArray(rolesJson.data) ? rolesJson.data : []);
-
-        const workflowsJson = (await workflowsRes.json()) as { data?: ApprovalWorkflow[]; error?: string };
-        if (!workflowsRes.ok) throw new Error(workflowsJson.error || 'فشل تحميل سير العمل');
-        setWorkflows(Array.isArray(workflowsJson.data) ? workflowsJson.data : []);
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : 'فشل تحميل الإعدادات');
-      } finally {
-        setIsBootLoading(false);
-      }
-    };
-
     void loadSettingsBundle();
     void loadLeaveTypes();
-  }, []);
+  }, [loadLeaveTypes, loadSettingsBundle]);
 
   const saveAllChanges = async () => {
     setIsSavingAll(true);
@@ -182,11 +192,11 @@ export default function SettingsManager() {
         body: JSON.stringify({ settings }),
       });
       const json = (await res.json()) as { data?: SystemSettings; error?: string };
-      if (!res.ok) throw new Error(json.error || 'فشل حفظ الإعدادات');
+      if (!res.ok) throw new Error(json.error || t.platformSettings.saveFailed);
       if (json.data) setSettings(json.data);
-      toast.success('تم حفظ الإعدادات');
+      toast.success(t.platformSettings.savedSuccess);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'فشل حفظ الإعدادات');
+      toast.error(err instanceof Error ? err.message : t.platformSettings.saveFailed);
     } finally {
       setIsSavingAll(false);
     }

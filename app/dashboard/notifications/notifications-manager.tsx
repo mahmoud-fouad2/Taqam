@@ -25,8 +25,14 @@ import {
   notificationTypeLabels,
 } from '@/lib/types/self-service';
 import { notificationsService } from '@/lib/api';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export default function NotificationsManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [notificationsRaw, setNotificationsRaw] = useState<Notification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -45,11 +51,11 @@ export default function NotificationsManager() {
         const res = await notificationsService.getAll({ page: 1, pageSize: 100 });
         if (!isMounted) return;
         setNotificationsRaw(res.success && res.data ? res.data.notifications : []);
-        if (!res.success) setLoadError(res.error || 'فشل تحميل الإشعارات');
+        if (!res.success) setLoadError(res.error || t.notifications.loadFailed);
       } catch (e) {
         if (!isMounted) return;
         setNotificationsRaw([]);
-        setLoadError(e instanceof Error ? e.message : 'فشل تحميل الإشعارات');
+        setLoadError(e instanceof Error ? e.message : t.notifications.loadFailed);
       } finally {
         if (!isMounted) return;
         setIsLoading(false);
@@ -60,7 +66,7 @@ export default function NotificationsManager() {
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [t.notifications.loadFailed]);
 
   const markAsRead = (id: string) => {
     setReadIds((prev) => new Set([...prev, id]));
@@ -126,10 +132,10 @@ export default function NotificationsManager() {
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor(diff / (1000 * 60));
 
-    if (days > 0) return `منذ ${days} يوم`;
-    if (hours > 0) return `منذ ${hours} ساعة`;
-    if (minutes > 0) return `منذ ${minutes} دقيقة`;
-    return 'الآن';
+    if (days > 0) return `${days} ${t.notifications.dayUnit} ${t.notifications.daysAgo}`;
+    if (hours > 0) return `${hours} ${t.notifications.hourUnit} ${t.notifications.hoursAgo}`;
+    if (minutes > 0) return `${minutes} ${t.notifications.minuteUnit} ${t.notifications.minutesAgo}`;
+    return t.notifications.now;
   };
 
   return (
@@ -137,31 +143,29 @@ export default function NotificationsManager() {
       {/* Header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold">الإشعارات</h1>
+          <h1 className="text-2xl font-bold">{t.common.notifications}</h1>
           <p className="text-muted-foreground">
             {isLoading
-              ? 'جارٍ التحميل...'
+              ? t.notifications.loading
               : loadError
                 ? loadError
                 : unreadCount > 0
-                  ? `لديك ${unreadCount} إشعارات غير مقروءة`
-                  : 'لا توجد إشعارات جديدة'}
+                  ? `${unreadCount} ${t.notifications.unreadNotifications}`
+                  : t.notifications.noNewNotifications}
           </p>
         </div>
         <div className="flex gap-2">
           {unreadCount > 0 && (
             <Button variant="outline" onClick={markAllAsRead}>
-              <CheckCheck className="h-4 w-4 ms-2" />
-              تعليم الكل كمقروء
-            </Button>
+              <CheckCheck className="h-4 w-4 ms-2" />{t.notifications.markAllRead}</Button>
           )}
         </div>
       </div>
 
       <Tabs defaultValue="notifications" className="w-full">
         <TabsList>
-          <TabsTrigger value="notifications">الإشعارات</TabsTrigger>
-          <TabsTrigger value="settings">إعدادات الإشعارات</TabsTrigger>
+          <TabsTrigger value="notifications">{t.common.notifications}</TabsTrigger>
+          <TabsTrigger value="settings">{t.notifications.settings}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="notifications" className="space-y-4">
@@ -172,11 +176,11 @@ export default function NotificationsManager() {
                 <Filter className="h-4 w-4 text-muted-foreground" />
                 <Select value={filter} onValueChange={setFilter}>
                   <SelectTrigger className="w-[200px]">
-                    <SelectValue placeholder="تصفية الإشعارات" />
+                    <SelectValue placeholder={t.notifications.filterNotifications} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">جميع الإشعارات</SelectItem>
-                    <SelectItem value="unread">غير المقروءة</SelectItem>
+                    <SelectItem value="all">{t.notifications.all}</SelectItem>
+                    <SelectItem value="unread">{t.notifications.unread}</SelectItem>
                     {Object.entries(notificationTypeLabels).map(([value, label]) => (
                       <SelectItem key={value} value={value}>{label}</SelectItem>
                     ))}
@@ -194,7 +198,7 @@ export default function NotificationsManager() {
                 {filteredNotifications.length === 0 ? (
                   <div className="text-center py-12">
                     <BellOff className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">لا توجد إشعارات</p>
+                    <p className="text-muted-foreground">{t.common.noNotifications}</p>
                   </div>
                 ) : (
                   filteredNotifications.map((notification) => (
@@ -260,19 +264,17 @@ export default function NotificationsManager() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                تفضيلات الإشعارات
-              </CardTitle>
-              <CardDescription>تحكم في أنواع الإشعارات التي تريد استلامها</CardDescription>
+                <Settings className="h-5 w-5" />{t.notifications.preferences}</CardTitle>
+              <CardDescription>{t.notifications.preferencesDesc}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="space-y-4">
-                <h4 className="font-semibold">إشعارات البريد الإلكتروني</h4>
+                <h4 className="font-semibold">{t.notifications.emailNotifications}</h4>
                 {[
-                  { id: 'email-requests', label: 'تحديثات الطلبات', description: 'إشعار عند تغيير حالة طلباتك' },
-                  { id: 'email-approvals', label: 'طلبات الموافقة', description: 'إشعار عند وجود طلبات بانتظار موافقتك' },
-                  { id: 'email-payslip', label: 'قسائم الراتب', description: 'إشعار عند توفر قسيمة راتب جديدة' },
-                  { id: 'email-documents', label: 'انتهاء المستندات', description: 'تنبيه قبل انتهاء صلاحية المستندات' },
+                  { id: 'email-requests', label: t.notifications.requestUpdates, description: t.notifications.requestUpdatesDesc },
+                  { id: 'email-approvals', label: t.notifications.approvalRequests, description: t.notifications.approvalRequestsDesc },
+                  { id: 'email-payslip', label: t.notifications.payslipNotif, description: t.notifications.payslipNotifDesc },
+                  { id: 'email-documents', label: t.notifications.documentExpiry, description: t.notifications.documentExpiryDesc },
                 ].map((item) => (
                   <div key={item.id} className="flex items-center justify-between py-2">
                     <div>
@@ -285,11 +287,11 @@ export default function NotificationsManager() {
               </div>
 
               <div className="border-t pt-6 space-y-4">
-                <h4 className="font-semibold">إشعارات التطبيق</h4>
+                <h4 className="font-semibold">{t.notifications.appNotifications}</h4>
                 {[
-                  { id: 'app-all', label: 'جميع الإشعارات', description: 'استلام جميع إشعارات التطبيق' },
-                  { id: 'app-announcements', label: 'الإعلانات', description: 'إشعارات الإعلانات والأخبار المهمة' },
-                  { id: 'app-reminders', label: 'التذكيرات', description: 'تذكيرات المواعيد والمهام' },
+                  { id: 'app-all', label: t.notifications.allNotifications, description: t.notifications.allNotificationsDesc },
+                  { id: 'app-announcements', label: t.notifications.announcements, description: t.notifications.announcementsDesc },
+                  { id: 'app-reminders', label: t.notifications.reminders, description: t.notifications.remindersDesc },
                 ].map((item) => (
                   <div key={item.id} className="flex items-center justify-between py-2">
                     <div>
@@ -302,7 +304,7 @@ export default function NotificationsManager() {
               </div>
 
               <div className="border-t pt-6">
-                <Button>حفظ الإعدادات</Button>
+                <Button>{t.common.saveChanges}</Button>
               </div>
             </CardContent>
           </Card>

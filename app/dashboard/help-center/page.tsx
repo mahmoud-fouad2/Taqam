@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
+
 export default async function HelpCenterPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
@@ -59,7 +60,7 @@ export default async function HelpCenterPage() {
         </Card>
         <Card>
           <CardHeader>
-            <CardTitle>{locale === "ar" ? "الدعم والتذاكر" : "Support and tickets"}</CardTitle>
+            <CardTitle>{locale === "ar" ? t.helpCenter.support : "Support and tickets"}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm text-muted-foreground">
             <p>

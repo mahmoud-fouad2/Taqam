@@ -1,12 +1,20 @@
 import { ReportsView } from "./reports-view";
 import { BarChart3 } from "lucide-react";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export const metadata = {
-  title: "التقارير | طاقم",
-  description: "تقارير الحضور والانصراف",
-};
+export async function generateMetadata() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
+  return {
+    title: t.reports.pageTitle,
+    description: t.reports.pageDesc,
+  };
+}
 
-export default function ReportsPage() {
+export default async function ReportsPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -15,8 +23,8 @@ export default function ReportsPage() {
             <BarChart3 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">التقارير</h1>
-            <p className="text-sm text-muted-foreground">تقارير وإحصائيات الحضور والانصراف</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.common.reports}</h1>
+            <p className="text-sm text-muted-foreground">{t.reports.pAttendanceReportsAndStatistics}</p>
           </div>
         </div>
       </div>

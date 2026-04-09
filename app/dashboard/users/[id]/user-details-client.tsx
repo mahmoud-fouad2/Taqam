@@ -39,6 +39,10 @@ import {
   IconId,
   IconClock,
 } from "@tabler/icons-react";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 interface UserData {
   id: string;
@@ -65,7 +69,9 @@ interface Props {
   locale: "ar" | "en";
 }
 
-export default function UserDetailsClient({ user, locale }: Props) {
+export default function UserDetailsClient({ user, locale: _locale }: Props) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
   const isRtl = locale === "ar";
@@ -73,20 +79,20 @@ export default function UserDetailsClient({ user, locale }: Props) {
 
   const statusLabel = (status: string) => {
     if (!isRtl) return status;
-    if (status === "ACTIVE") return "نشط";
-    if (status === "PENDING_VERIFICATION") return "بانتظار التفعيل";
-    if (status === "INACTIVE") return "غير نشط";
-    if (status === "SUSPENDED") return "موقوف";
+    if (status === "ACTIVE") return t.common.active;
+    if (status === "PENDING_VERIFICATION") return t.common.pendingActivation;
+    if (status === "INACTIVE") return t.common.inactive;
+    if (status === "SUSPENDED") return t.common.suspended;
     return status;
   };
 
   const roleLabel = (role: string) => {
     if (!isRtl) return role;
     if (role === "SUPER_ADMIN") return "مدير النظام";
-    if (role === "TENANT_ADMIN") return "مدير الشركة";
-    if (role === "HR_MANAGER") return "مدير الموارد البشرية";
-    if (role === "MANAGER") return "مدير";
-    if (role === "EMPLOYEE") return "موظف";
+    if (role === "TENANT_ADMIN") return t.common.companyAdmin;
+    if (role === "HR_MANAGER") return t.common.hrManager;
+    if (role === "MANAGER") return t.common.manager;
+    if (role === "EMPLOYEE") return t.common.employee;
     return role;
   };
 
@@ -152,7 +158,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" aria-label="رجوع" asChild>
+          <Button variant="ghost" size="icon" aria-label={t.common.back} asChild>
             <Link href="/dashboard/users">
               <ArrowIcon className="h-5 w-5" />
             </Link>
@@ -168,20 +174,20 @@ export default function UserDetailsClient({ user, locale }: Props) {
           <Button variant="outline" asChild>
             <Link href={`/dashboard/users/${user.id}/edit`}>
               <IconPencil className="h-4 w-4 me-2" />
-              {isRtl ? "تعديل" : "Edit"}
+              {isRtl ? t.common.edit : "Edit"}
             </Link>
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
                 <IconTrash className="h-4 w-4 me-2" />
-                {isRtl ? "حذف" : "Delete"}
+                {isRtl ? t.common.delete : "Delete"}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle>
-                  {isRtl ? "هل أنت متأكد؟" : "Are you sure?"}
+                  {isRtl ? t.common.areYouSure : "Are you sure?"}
                 </AlertDialogTitle>
                 <AlertDialogDescription>
                   {isRtl
@@ -190,7 +196,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{isRtl ? "إلغاء" : "Cancel"}</AlertDialogCancel>
+                <AlertDialogCancel>{isRtl ? t.common.cancel : "Cancel"}</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
                   disabled={isDeleting}
@@ -198,10 +204,10 @@ export default function UserDetailsClient({ user, locale }: Props) {
                 >
                   {isDeleting
                     ? isRtl
-                      ? "جاري الحذف..."
+                      ? t.common.deleting
                       : "Deleting..."
                     : isRtl
-                    ? "حذف"
+                    ? t.common.delete
                     : "Delete"}
                 </AlertDialogAction>
               </AlertDialogFooter>
@@ -245,7 +251,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    {isRtl ? "البريد الإلكتروني" : "Email"}
+                    {isRtl ? t.common.email : "Email"}
                   </p>
                   <p className="font-medium">{user.email}</p>
                 </div>
@@ -257,7 +263,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">
-                    {isRtl ? "رقم الهاتف" : "Phone"}
+                    {isRtl ? t.common.phone : "Phone"}
                   </p>
                   <p className="font-medium">{user.phone || "-"}</p>
                 </div>
@@ -307,7 +313,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {isRtl ? "الرقم الوظيفي" : "Employee Number"}
+                      {isRtl ? t.employees.employeeNumber : "Employee Number"}
                     </p>
                     <p className="font-medium">{user.employee.employeeNumber || "-"}</p>
                   </div>
@@ -319,7 +325,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {isRtl ? "القسم" : "Department"}
+                      {isRtl ? t.common.department : "Department"}
                     </p>
                     <p className="font-medium">
                       {isRtl
@@ -335,7 +341,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {isRtl ? "المسمى الوظيفي" : "Job Title"}
+                      {isRtl ? t.common.jobTitle : "Job Title"}
                     </p>
                     <p className="font-medium">
                       {isRtl
@@ -351,7 +357,7 @@ export default function UserDetailsClient({ user, locale }: Props) {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {isRtl ? "تاريخ التعيين" : "Hire Date"}
+                      {isRtl ? t.common.hireDate : "Hire Date"}
                     </p>
                     <p className="font-medium">{formatDate(user.employee.hireDate)}</p>
                   </div>

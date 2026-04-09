@@ -39,24 +39,28 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 // CSV Template columns
 const employeeCSVColumns = [
-  { key: "employeeNumber", label: "رقم الموظف", labelEn: "Employee Number", required: true, example: "EMP001" },
-  { key: "firstNameAr", label: "الاسم الأول (عربي)", labelEn: "First Name (AR)", required: true, example: "أحمد" },
-  { key: "lastNameAr", label: "اسم العائلة (عربي)", labelEn: "Last Name (AR)", required: true, example: "محمد" },
-  { key: "firstNameEn", label: "الاسم الأول (إنجليزي)", labelEn: "First Name (EN)", required: false, example: "Ahmed" },
-  { key: "lastNameEn", label: "اسم العائلة (إنجليزي)", labelEn: "Last Name (EN)", required: false, example: "Mohammed" },
-  { key: "email", label: "البريد الإلكتروني", labelEn: "Email", required: true, example: "ahmed@company.com" },
-  { key: "phone", label: "رقم الهاتف", labelEn: "Phone", required: false, example: "+966501234567" },
-  { key: "nationalId", label: "رقم الهوية", labelEn: "National ID", required: true, example: "1234567890" },
-  { key: "dateOfBirth", label: "تاريخ الميلاد", labelEn: "Date of Birth", required: false, example: "1990-01-15" },
-  { key: "gender", label: "الجنس", labelEn: "Gender", required: true, example: "male / female" },
-  { key: "hireDate", label: "تاريخ التعيين", labelEn: "Hire Date", required: true, example: "2024-01-01" },
-  { key: "departmentCode", label: "كود القسم", labelEn: "Department Code", required: true, example: "IT" },
-  { key: "jobTitleCode", label: "كود المسمى الوظيفي", labelEn: "Job Title Code", required: true, example: "DEV" },
-  { key: "branchCode", label: "كود الفرع", labelEn: "Branch Code", required: false, example: "RYD" },
-  { key: "basicSalary", label: "الراتب الأساسي", labelEn: "Basic Salary", required: true, example: "10000" },
+  { key: "employeeNumber", label: t.csvImport.employeeNumber, labelEn: "Employee Number", required: true, example: "EMP001" },
+  { key: "firstNameAr", label: t.csvImport.firstNameAr, labelEn: "First Name (AR)", required: true, example: "أحمد" },
+  { key: "lastNameAr", label: t.csvImport.lastNameAr, labelEn: "Last Name (AR)", required: true, example: t.common.namePlaceholder },
+  { key: "firstNameEn", label: t.csvImport.firstNameEn, labelEn: "First Name (EN)", required: false, example: "Ahmed" },
+  { key: "lastNameEn", label: t.csvImport.lastNameEn, labelEn: "Last Name (EN)", required: false, example: "Mohammed" },
+  { key: "email", label: t.common.email, labelEn: "Email", required: true, example: "ahmed@company.com" },
+  { key: "phone", label: t.common.phone, labelEn: "Phone", required: false, example: "+966501234567" },
+  { key: "nationalId", label: t.csvImport.nationalId, labelEn: "National ID", required: true, example: "1234567890" },
+  { key: "dateOfBirth", label: t.csvImport.dateOfBirth, labelEn: "Date of Birth", required: false, example: "1990-01-15" },
+  { key: "gender", label: t.csvImport.gender, labelEn: "Gender", required: true, example: "male / female" },
+  { key: "hireDate", label: t.common.hireDate, labelEn: "Hire Date", required: true, example: "2024-01-01" },
+  { key: "departmentCode", label: t.csvImport.departmentCode, labelEn: "Department Code", required: true, example: "IT" },
+  { key: "jobTitleCode", label: t.csvImport.jobTitleCode, labelEn: "Job Title Code", required: true, example: "DEV" },
+  { key: "branchCode", label: t.csvImport.branchCode, labelEn: "Branch Code", required: false, example: "RYD" },
+  { key: "basicSalary", label: t.common.basicSalary, labelEn: "Basic Salary", required: true, example: "10000" },
 ];
 
 interface ImportRow {
@@ -104,6 +108,8 @@ function buildEmployeeImportPayload(row: ImportRow) {
 }
 
 export function CSVImportManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const [isImportOpen, setIsImportOpen] = React.useState(false);
   const [importFile, setImportFile] = React.useState<File | null>(null);
@@ -170,30 +176,30 @@ export function CSVImportManager() {
       // Validate required fields
       employeeCSVColumns.forEach((col) => {
         if (col.required && !data[col.key]) {
-          errors.push(`الحقل "${col.label}" مطلوب`);
+          errors.push(`${col.label} ${t.csvImport.fieldRequired}`);
         }
       });
 
       // Validate email format
       if (data.email && !data.email.includes("@")) {
-        errors.push("صيغة البريد الإلكتروني غير صحيحة");
+        errors.push(t.csvImport.invalidEmail);
       }
 
       // Validate dates
       ["dateOfBirth", "hireDate"].forEach((dateField) => {
         if (data[dateField] && isNaN(Date.parse(data[dateField]))) {
-          errors.push(`صيغة تاريخ ${dateField === "dateOfBirth" ? "الميلاد" : "التعيين"} غير صحيحة`);
+          errors.push(dateField === "dateOfBirth" ? t.csvImport.invalidBirthDate : t.csvImport.invalidHireDate);
         }
       });
 
       // Validate gender
       if (data.gender && !["male", "female"].includes(data.gender.toLowerCase())) {
-        errors.push("قيمة الجنس يجب أن تكون male أو female");
+        errors.push(t.csvImport.invalidGender);
       }
 
       // Validate salary
       if (data.basicSalary && isNaN(parseFloat(data.basicSalary))) {
-        errors.push("الراتب الأساسي يجب أن يكون رقماً");
+        errors.push(t.csvImport.invalidSalary);
       }
 
       rows.push({
@@ -245,17 +251,17 @@ export function CSVImportManager() {
 
         const payload = await response.json().catch(() => null);
         if (!response.ok) {
-          throw new Error(payload?.error ?? "فشل استيراد هذا الصف");
+          throw new Error(payload?.error ?? t.csvImport.rowImportFailed);
         }
 
         nextRows[rowIndex] = {
           ...nextRows[rowIndex],
           importState: "success",
-          importMessage: "تم الاستيراد بنجاح",
+          importMessage: t.csvImport.success,
         };
         succeeded += 1;
       } catch (error) {
-        const message = error instanceof Error ? error.message : "حدث خطأ أثناء الاستيراد";
+        const message = error instanceof Error ? error.message : t.csvImport.importError;
         nextRows[rowIndex] = {
           ...nextRows[rowIndex],
           importState: "error",
@@ -305,30 +311,20 @@ export function CSVImportManager() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <IconDownload className="h-5 w-5" />
-              تحميل القالب
-            </CardTitle>
-            <CardDescription>
-              قم بتحميل قالب CSV لملء بيانات الموظفين
-            </CardDescription>
+              <IconDownload className="h-5 w-5" />{t.csvImport.downloadTemplate}</CardTitle>
+            <CardDescription>{t.csvImport.templateDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={downloadTemplate} variant="outline" className="w-full">
-              <IconFileSpreadsheet className="ms-2 h-4 w-4" />
-              تحميل قالب CSV
-            </Button>
+              <IconFileSpreadsheet className="ms-2 h-4 w-4" />{t.csvImport.downloadBtn}</Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <IconUpload className="h-5 w-5" />
-              استيراد البيانات
-            </CardTitle>
-            <CardDescription>
-              قم برفع ملف CSV يحتوي على بيانات الموظفين
-            </CardDescription>
+              <IconUpload className="h-5 w-5" />{t.csvImport.title}</CardTitle>
+            <CardDescription>{t.csvImport.uploadDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <Dialog open={isImportOpen} onOpenChange={(open) => {
@@ -337,23 +333,19 @@ export function CSVImportManager() {
             }}>
               <DialogTrigger asChild>
                 <Button className="w-full">
-                  <IconUpload className="ms-2 h-4 w-4" />
-                  استيراد من CSV
-                </Button>
+                  <IconUpload className="ms-2 h-4 w-4" />{t.csvImport.importBtn}</Button>
               </DialogTrigger>
               <DialogContent className="w-full sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>استيراد الموظفين من CSV</DialogTitle>
-                  <DialogDescription>
-                    قم برفع ملف CSV يحتوي على بيانات الموظفين للاستيراد الجماعي
-                  </DialogDescription>
+                  <DialogTitle>{t.csvImport.importTitle}</DialogTitle>
+                  <DialogDescription>{t.csvImport.importDescription}</DialogDescription>
                 </DialogHeader>
 
                 <Tabs defaultValue="upload" className="w-full">
                   <TabsList className="grid w-full grid-cols-2">
-                    <TabsTrigger value="upload">رفع الملف</TabsTrigger>
+                    <TabsTrigger value="upload">{t.csvImport.uploadTab}</TabsTrigger>
                     <TabsTrigger value="preview" disabled={parsedRows.length === 0}>
-                      معاينة ({stats.total})
+                      {t.csvImport.pPreview}{stats.total})
                     </TabsTrigger>
                   </TabsList>
 
@@ -365,7 +357,7 @@ export function CSVImportManager() {
                       className="hidden"
                       accept=".csv"
                       onChange={handleFileSelect}
-                      aria-label="رفع ملف CSV"
+                      aria-label={t.csvImport.uploadCsvFile}
                     />
                     <button
                       type="button"
@@ -385,10 +377,8 @@ export function CSVImportManager() {
                       ) : (
                         <>
                           <IconUpload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-                          <p className="text-lg font-medium">اسحب ملف CSV هنا</p>
-                          <p className="text-sm text-muted-foreground">
-                            أو اضغط لاختيار ملف
-                          </p>
+                          <p className="text-lg font-medium">{t.csvImport.dragDropText}</p>
+                          <p className="text-sm text-muted-foreground">{t.csvImport.clickToSelect}</p>
                         </>
                       )}
                     </button>
@@ -396,14 +386,14 @@ export function CSVImportManager() {
                     {/* Progress */}
                     {importStatus === "validating" && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">جاري التحقق من البيانات...</p>
+                        <p className="text-sm font-medium">{t.csvImport.validatingData}</p>
                         <Progress value={importProgress} />
                       </div>
                     )}
 
                     {importStatus === "importing" && (
                       <div className="space-y-2">
-                        <p className="text-sm font-medium">جاري استيراد الموظفين...</p>
+                        <p className="text-sm font-medium">{t.csvImport.importingEmployees}</p>
                         <Progress value={importProgress} />
                       </div>
                     )}
@@ -411,31 +401,31 @@ export function CSVImportManager() {
                     {/* Validation Results */}
                     {importStatus === "complete" && parsedRows.length > 0 && (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-4 gap-2 text-center">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-center">
                           <div className="p-2 bg-muted rounded">
                             <p className="text-2xl font-bold">{stats.total}</p>
-                            <p className="text-xs text-muted-foreground">إجمالي</p>
+                            <p className="text-xs text-muted-foreground">{t.csvImport.total}</p>
                           </div>
                           <div className="p-2 bg-green-50 rounded">
                             <p className="text-2xl font-bold text-green-600">{stats.valid}</p>
-                            <p className="text-xs text-green-600">صحيح</p>
+                            <p className="text-xs text-green-600">{t.common.correct}</p>
                           </div>
                           <div className="p-2 bg-yellow-50 rounded">
                             <p className="text-2xl font-bold text-yellow-600">{stats.warnings}</p>
-                            <p className="text-xs text-yellow-600">تحذيرات</p>
+                            <p className="text-xs text-yellow-600">{t.csvImport.warnings}</p>
                           </div>
                           <div className="p-2 bg-red-50 rounded">
                             <p className="text-2xl font-bold text-red-600">{stats.errors}</p>
-                            <p className="text-xs text-red-600">أخطاء</p>
+                            <p className="text-xs text-red-600">{t.csvImport.errors}</p>
                           </div>
                         </div>
 
                         {stats.errors > 0 && (
                           <Alert variant="destructive">
                             <IconAlertTriangle className="h-4 w-4" />
-                            <AlertTitle>يوجد أخطاء في البيانات</AlertTitle>
+                            <AlertTitle>{t.csvImport.dataHasErrors}</AlertTitle>
                             <AlertDescription>
-                              {stats.errors} صف يحتوي على أخطاء ولن يتم استيراده. راجع تبويب المعاينة للتفاصيل.
+                              {stats.errors} {t.csvImport.rowsWithErrors}
                             </AlertDescription>
                           </Alert>
                         )}
@@ -450,10 +440,10 @@ export function CSVImportManager() {
                           <IconCheck className="h-4 w-4" />
                         )}
                         <AlertTitle>
-                          {importSummary.failed > 0 ? "اكتمل الاستيراد مع بعض الإخفاقات" : "تم استيراد الموظفين بنجاح"}
+                          {importSummary.failed > 0 ? t.csvImport.completedWithErrors : t.csvImport.success}
                         </AlertTitle>
                         <AlertDescription>
-                          تم استيراد {importSummary.succeeded} صف بنجاح، وفشل {importSummary.failed} صف.
+                          {t.csvImport.importSuccess} {importSummary.succeeded} {t.csvImport.rowSucceeded} {importSummary.failed} {t.csvImport.rowFailed}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -464,12 +454,12 @@ export function CSVImportManager() {
                       <Table>
                         <TableHeader>
                           <TableRow>
-                            <TableHead className="w-[60px]">الصف</TableHead>
-                            <TableHead>الحالة</TableHead>
-                            <TableHead>رقم الموظف</TableHead>
-                            <TableHead>الاسم</TableHead>
-                            <TableHead>البريد</TableHead>
-                            <TableHead>الأخطاء/التحذيرات</TableHead>
+                            <TableHead className="w-[60px]">{t.csvImport.row}</TableHead>
+                            <TableHead>{t.common.status}</TableHead>
+                            <TableHead>{t.csvImport.employeeNum}</TableHead>
+                            <TableHead>{t.common.name}</TableHead>
+                            <TableHead>{t.common.email}</TableHead>
+                            <TableHead>{t.csvImport.errorsWarnings}</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -480,29 +470,27 @@ export function CSVImportManager() {
                                 {row.importState === "success" ? (
                                   <Badge variant="default" className="bg-emerald-600">
                                     <IconCheck className="h-3 w-3 ms-1" />
-                                    تم الاستيراد
+                                    {t.csvImport.pImportSuccessful}
                                   </Badge>
                                 ) : row.importState === "error" && importStatus === "imported" ? (
                                   <Badge variant="destructive">
                                     <IconX className="h-3 w-3 ms-1" />
-                                    فشل الاستيراد
+                                    {t.csvImport.pImportFailed}
                                   </Badge>
                                 ) : row.status === "valid" ? (
                                   <Badge variant="default" className="bg-green-500">
-                                    <IconCheck className="h-3 w-3 ms-1" />
-                                    صحيح
-                                  </Badge>
+                                    <IconCheck className="h-3 w-3 ms-1" />{t.common.correct}</Badge>
                                 ) : null}
                                 {row.importState !== "success" && row.status === "warning" && (
                                   <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
                                     <IconAlertTriangle className="h-3 w-3 ms-1" />
-                                    تحذير
+                                    {t.csvImport.pWarning}
                                   </Badge>
                                 )}
                                 {row.importState !== "success" && row.status === "error" && (
                                   <Badge variant="destructive">
                                     <IconX className="h-3 w-3 ms-1" />
-                                    خطأ
+                                    {t.csvImport.pError}
                                   </Badge>
                                 )}
                               </TableCell>
@@ -535,17 +523,15 @@ export function CSVImportManager() {
                 </Tabs>
 
                 <DialogFooter className="gap-2">
-                  <Button variant="outline" onClick={() => setIsImportOpen(false)}>
-                    إلغاء
-                  </Button>
+                  <Button variant="outline" onClick={() => setIsImportOpen(false)}>{t.common.cancel}</Button>
                   {importStatus === "idle" && importFile && (
                     <Button onClick={validateCSV}>
-                      التحقق من البيانات
+                      {t.csvImport.pDataValidation}
                     </Button>
                   )}
                   {importStatus === "complete" && stats.ready > 0 && (
                     <Button onClick={performImport}>
-                      استيراد {stats.ready} موظف
+                      {t.csvImport.pImport} {stats.ready} {t.csvImport.pEmployee}
                     </Button>
                   )}
                 </DialogFooter>
@@ -558,7 +544,7 @@ export function CSVImportManager() {
       {/* CSV Columns Reference */}
       <Card>
         <CardHeader>
-          <CardTitle>دليل حقول CSV</CardTitle>
+          <CardTitle>{t.csvImport.csvFieldGuide}</CardTitle>
           <CardDescription>
             قائمة بجميع الحقول المطلوبة والاختيارية لملف CSV
           </CardDescription>
@@ -567,11 +553,11 @@ export function CSVImportManager() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>اسم الحقل</TableHead>
-                <TableHead>الوصف (عربي)</TableHead>
-                <TableHead>الوصف (إنجليزي)</TableHead>
-                <TableHead>مطلوب</TableHead>
-                <TableHead>مثال</TableHead>
+                <TableHead>{t.csvImport.fieldName}</TableHead>
+                <TableHead>{t.csvImport.descAr}</TableHead>
+                <TableHead>{t.csvImport.descEn}</TableHead>
+                <TableHead>{t.common.required}</TableHead>
+                <TableHead>{t.csvImport.example}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -582,9 +568,9 @@ export function CSVImportManager() {
                   <TableCell className="text-muted-foreground">{col.labelEn}</TableCell>
                   <TableCell>
                     {col.required ? (
-                      <Badge variant="default">مطلوب</Badge>
+                      <Badge variant="default">{t.common.required}</Badge>
                     ) : (
-                      <Badge variant="outline">اختياري</Badge>
+                      <Badge variant="outline">{t.common.optional}</Badge>
                     )}
                   </TableCell>
                   <TableCell className="font-mono text-sm text-muted-foreground">

@@ -1,3 +1,5 @@
+"use client";
+
 import { IconSend } from "@tabler/icons-react";
 
 import { Button } from "@/components/ui/button";
@@ -27,6 +29,10 @@ import { cn } from "@/lib/utils";
 import { getLeaveTheme } from "@/lib/ui/leave-color";
 
 import type { ApiLeaveType } from "./leave-requests-types";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function LeaveRequestsAddDialog({
   open,
@@ -69,24 +75,26 @@ export function LeaveRequestsAddDialog({
   calculateDays: (start: string, end: string, isHalfDay: boolean) => number;
   onSubmit: () => void;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-full max-w-2xl">
         <DialogHeader>
-          <DialogTitle>طلب إجازة جديد</DialogTitle>
-          <DialogDescription>إنشاء طلب إجازة للموظف</DialogDescription>
+          <DialogTitle>{t.leaveRequests.newRequest}</DialogTitle>
+          <DialogDescription>{t.leaveRequests.createForEmployee}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>الموظف *</Label>
+              <Label>{t.common.selectEmployee}</Label>
               <Select
                 value={formData.employeeId}
                 onValueChange={(value) => onFormDataChange({ ...formData, employeeId: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر الموظف" />
+                  <SelectValue placeholder={t.common.selectEmployee} />
                 </SelectTrigger>
                 <SelectContent>
                   {employees.map((emp) => (
@@ -99,13 +107,13 @@ export function LeaveRequestsAddDialog({
             </div>
 
             <div className="space-y-2">
-              <Label>نوع الإجازة *</Label>
+              <Label>{t.leaveRequests.leaveTypeRequired}</Label>
               <Select
                 value={formData.leaveTypeId}
                 onValueChange={(value) => onFormDataChange({ ...formData, leaveTypeId: value })}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر نوع الإجازة" />
+                  <SelectValue placeholder={t.leaveRequests.selectLeaveType} />
                 </SelectTrigger>
                 <SelectContent>
                   {leaveTypes
@@ -125,7 +133,7 @@ export function LeaveRequestsAddDialog({
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label>تاريخ البداية *</Label>
+              <Label>{t.leaveRequests.startDateRequired}</Label>
               <Input
                 type="date"
                 value={formData.startDate}
@@ -133,7 +141,7 @@ export function LeaveRequestsAddDialog({
               />
             </div>
             <div className="space-y-2">
-              <Label>تاريخ النهاية *</Label>
+              <Label>{t.leaveRequests.endDateRequired}</Label>
               <Input
                 type="date"
                 value={formData.endDate}
@@ -146,10 +154,10 @@ export function LeaveRequestsAddDialog({
           {formData.startDate && formData.endDate && (
             <div className="rounded-lg bg-muted p-3">
               <div className="flex items-center justify-between">
-                <span className="text-sm">عدد الأيام:</span>
+                <span className="text-sm">{t.leaveRequests.daysCount}</span>
                 <Badge variant="secondary">
                   {calculateDays(formData.startDate, formData.endDate, formData.isHalfDay)}{" "}
-                  {formData.isHalfDay ? "نصف يوم" : "يوم"}
+                  {formData.isHalfDay ? t.leaveRequests.halfDay : t.common.day}
                 </Badge>
               </div>
             </div>
@@ -160,7 +168,7 @@ export function LeaveRequestsAddDialog({
               checked={formData.isHalfDay}
               onCheckedChange={(checked) => onFormDataChange({ ...formData, isHalfDay: checked })}
             />
-            <Label>نصف يوم فقط</Label>
+            <Label>{t.leaveRequests.halfDayOnly}</Label>
 
             {formData.isHalfDay && (
               <Select
@@ -173,19 +181,19 @@ export function LeaveRequestsAddDialog({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="morning">الفترة الصباحية</SelectItem>
-                  <SelectItem value="afternoon">الفترة المسائية</SelectItem>
+                  <SelectItem value="morning">{t.leaveRequests.morningPeriod}</SelectItem>
+                  <SelectItem value="afternoon">{t.leaveRequests.afternoonPeriod}</SelectItem>
                 </SelectContent>
               </Select>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label>سبب الإجازة *</Label>
+            <Label>{t.leaveRequests.leaveReasonRequired}</Label>
             <Textarea
               value={formData.reason}
               onChange={(e) => onFormDataChange({ ...formData, reason: e.target.value })}
-              placeholder="أدخل سبب الإجازة..."
+              placeholder={t.leaveRequests.reasonPlaceholder}
               rows={3}
             />
           </div>
@@ -193,16 +201,16 @@ export function LeaveRequestsAddDialog({
           <Separator />
 
           <div className="space-y-2">
-            <Label>الموظف البديل (اختياري)</Label>
+            <Label>{t.leaveRequests.delegateEmployee}</Label>
             <Select
               value={formData.delegateEmployeeId}
               onValueChange={(value) => onFormDataChange({ ...formData, delegateEmployeeId: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="اختر الموظف البديل" />
+                <SelectValue placeholder={t.leaveRequests.selectDelegate} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">بدون بديل</SelectItem>
+                <SelectItem value="none">{t.leaveRequests.noDelegate}</SelectItem>
                 {employees
                   .filter((e) => e.id !== formData.employeeId)
                   .map((emp) => (
@@ -216,9 +224,7 @@ export function LeaveRequestsAddDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            إلغاء
-          </Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common.cancel}</Button>
           <Button
             onClick={onSubmit}
             disabled={
@@ -230,7 +236,7 @@ export function LeaveRequestsAddDialog({
             }
           >
             <IconSend className="ms-2 h-4 w-4" />
-            إرسال الطلب
+            {t.leaveRequests.pSubmitRequest}
           </Button>
         </DialogFooter>
       </DialogContent>

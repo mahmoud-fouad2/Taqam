@@ -6,27 +6,29 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2 } from "lucide-react";
 import { CreateTenantForm } from "./create-tenant-form";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export default function CreateTenantPage() {
+export default async function CreateTenantPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Building2 className="h-6 w-6" />
-          إنشاء شركة جديدة
-        </h1>
+          <Building2 className="h-6 w-6" />{t.common.add}</h1>
         <p className="text-muted-foreground">
-          أدخل بيانات الشركة لإنشاء حساب جديد على المنصة
+          {t.tenant.pEnterCompanyDataToCreateANewAc}
         </p>
       </div>
 
       {/* Form Card */}
       <Card>
         <CardHeader>
-          <CardTitle>بيانات الشركة</CardTitle>
+          <CardTitle>{t.organization.companySection}</CardTitle>
           <CardDescription>
-            جميع الحقول المطلوبة معلمة بـ *
+            {t.tenant.requiredFieldsNote}
           </CardDescription>
         </CardHeader>
         <CardContent>

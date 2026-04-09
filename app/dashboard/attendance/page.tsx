@@ -1,12 +1,20 @@
 import { AttendanceManager } from "./attendance-manager";
 import { Clock } from "lucide-react";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export const metadata = {
-  title: "الحضور والانصراف | طاقم",
-  description: "تسجيل ومتابعة الحضور والانصراف",
-};
+export async function generateMetadata() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
+  return {
+    title: t.attendance.pageTitle,
+    description: t.attendance.pageDesc,
+  };
+}
 
-export default function AttendancePage() {
+export default async function AttendancePage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -15,8 +23,8 @@ export default function AttendancePage() {
             <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">الحضور والانصراف</h1>
-            <p className="text-sm text-muted-foreground">تسجيل ومتابعة الحضور والانصراف اليومي</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.attendance.title}</h1>
+            <p className="text-sm text-muted-foreground">{t.attendance.pTrackAndManageDailyAttendance}</p>
           </div>
         </div>
       </div>

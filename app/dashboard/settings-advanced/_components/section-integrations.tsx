@@ -1,4 +1,6 @@
-import { useEffect, useState, type Dispatch, type SetStateAction } from 'react';
+"use client";
+
+import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
 import { AlertCircle, CheckCircle2, Link, RefreshCw, ShieldAlert } from 'lucide-react';
 
 import type { SystemSettings } from '@/lib/types/settings';
@@ -11,6 +13,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function IntegrationsSection({
   settings,
@@ -19,11 +25,13 @@ export function IntegrationsSection({
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [runtimeReport, setRuntimeReport] = useState<RuntimeIntegrationReport | null>(null);
   const [runtimeLoading, setRuntimeLoading] = useState(true);
   const [runtimeError, setRuntimeError] = useState<string | null>(null);
 
-  const loadRuntimeStatus = async () => {
+  const loadRuntimeStatus = useCallback(async () => {
     setRuntimeLoading(true);
     setRuntimeError(null);
 
@@ -32,21 +40,21 @@ export function IntegrationsSection({
       const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(json?.error || 'فشل تحميل حالة التكاملات');
+        throw new Error(json?.error || t.integrations.loadFailed);
       }
 
       setRuntimeReport(json?.data ?? null);
     } catch (error) {
-      setRuntimeError(error instanceof Error ? error.message : 'فشل تحميل حالة التكاملات');
+      setRuntimeError(error instanceof Error ? error.message : t.integrations.loadFailed);
       setRuntimeReport(null);
     } finally {
       setRuntimeLoading(false);
     }
-  };
+  }, [t.integrations.loadFailed]);
 
   useEffect(() => {
     void loadRuntimeStatus();
-  }, []);
+  }, [loadRuntimeStatus]);
 
   const runtimeItems = runtimeReport?.items ?? [];
 
@@ -56,35 +64,27 @@ export function IntegrationsSection({
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5" />
-              جاهزية التشغيل
-            </CardTitle>
-            <CardDescription>
-              تُقرأ هذه الحالة مباشرة من بيئة السيرفر الحالية لتوضيح ما إذا كانت التكاملات التشغيلية مربوطة فعليًا أم لا.
-            </CardDescription>
+              <ShieldAlert className="h-5 w-5" />{t.integrations.runtime}</CardTitle>
+            <CardDescription>{t.integrations.runtimeDesc}</CardDescription>
           </div>
           <Button variant="outline" onClick={() => void loadRuntimeStatus()} disabled={runtimeLoading}>
-            <RefreshCw className="h-4 w-4 ms-2" />
-            تحديث الحالة
-          </Button>
+            <RefreshCw className="h-4 w-4 ms-2" />{t.common.update}</Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
-            <AlertTitle>قراءة فقط من بيئة التشغيل</AlertTitle>
-            <AlertDescription>
-              هذه القيم لا تُحفَظ من داخل الصفحة. أي نقص هنا يعني أن متغيرات البيئة غير مضبوطة بالكامل على السيرفر.
-            </AlertDescription>
+            <AlertTitle>{t.integrations.readOnly}</AlertTitle>
+            <AlertDescription>{t.integrations.readOnlyDesc}</AlertDescription>
           </Alert>
 
           {runtimeError ? (
             <Alert variant="destructive">
-              <AlertTitle>تعذر قراءة حالة التكاملات</AlertTitle>
+              <AlertTitle>{t.integrations.loadError}</AlertTitle>
               <AlertDescription>{runtimeError}</AlertDescription>
             </Alert>
           ) : null}
 
           {runtimeLoading ? (
-            <div className="text-sm text-muted-foreground">جاري التحقق من تكاملات التشغيل...</div>
+            <div className="text-sm text-muted-foreground">{t.integrations.checking}</div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {runtimeItems.map((item) => {
@@ -106,18 +106,18 @@ export function IntegrationsSection({
                         <div>
                           <div className="font-medium">{item.name}</div>
                           <div className="text-sm text-muted-foreground">
-                            {item.features.join('، ')}
+                            {item.features.join(t.integrations.featureSeparator)}
                           </div>
                         </div>
                       </div>
                       <Badge variant={isConfigured ? 'default' : isPartial ? 'secondary' : 'destructive'}>
-                        {isConfigured ? 'مكتمل' : isPartial ? 'ناقص جزئيًا' : 'غير مضبوط'}
+                        {isConfigured ? t.integrations.complete : isPartial ? t.integrations.partial : t.integrations.notConfigured}
                       </Badge>
                     </div>
 
                     {item.missing.length > 0 ? (
                       <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-                        <div className="mb-2 font-medium text-foreground">المتغيرات الناقصة</div>
+                        <div className="mb-2 font-medium text-foreground">{t.integrations.missingVariables}</div>
                         <div className="flex flex-wrap gap-2">
                           {item.missing.map((entry) => (
                             <span key={entry} className="rounded-md bg-background px-2 py-1 font-mono text-[11px]">
@@ -138,31 +138,29 @@ export function IntegrationsSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Link className="h-5 w-5" />
-            التكاملات
-          </CardTitle>
-          <CardDescription>ربط النظام مع الخدمات الحكومية والأنظمة الأخرى</CardDescription>
+            <Link className="h-5 w-5" />{t.integrations.title}</CardTitle>
+          <CardDescription>{t.integrations.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {[
             {
               key: 'gosi',
-              name: 'التأمينات الاجتماعية (GOSI)',
+              name: t.integrations.gosi,
               field: 'subscriberNumber',
-              fieldLabel: 'رقم المشترك',
+              fieldLabel: t.integrations.subscriberNo,
             },
             {
               key: 'mol',
-              name: 'وزارة العمل',
+              name: t.integrations.mol,
               field: 'establishmentNumber',
-              fieldLabel: 'رقم المنشأة',
+              fieldLabel: t.integrations.establishmentNo,
             },
-            { key: 'muqeem', name: 'مقيم', field: 'username', fieldLabel: 'اسم المستخدم' },
+            { key: 'muqeem', name: t.integrations.muqeem, field: 'username', fieldLabel: t.integrations.username },
             {
               key: 'mudad',
-              name: 'مدد',
+              name: t.integrations.mudad,
               field: 'organizationId',
-              fieldLabel: 'رقم المنظمة',
+              fieldLabel: t.integrations.orgNo,
             },
           ].map((integration) => (
             <div key={integration.key} className="border rounded-lg p-4">
@@ -213,8 +211,8 @@ export function IntegrationsSection({
                           integration.key as keyof typeof settings.integrations
                         ] as { enabled: boolean }
                       ).enabled
-                        ? 'مفعل'
-                        : 'غير مفعل'}
+                        ? t.integrations.enabled
+                        : t.integrations.disabled}
                     </Badge>
                   </div>
                 </div>
@@ -251,13 +249,11 @@ export function IntegrationsSection({
                   <div className="grid gap-4 md:grid-cols-2 pt-4 border-t">
                     <div className="space-y-2">
                       <Label>{integration.fieldLabel}</Label>
-                      <Input placeholder={`أدخل ${integration.fieldLabel}`} />
+                      <Input placeholder={`${t.common.enterField} ${integration.fieldLabel}`} />
                     </div>
                     <div className="flex items-end gap-2">
                       <Button variant="outline">
-                        <RefreshCw className="h-4 w-4 ms-2" />
-                        مزامنة الآن
-                      </Button>
+                        <RefreshCw className="h-4 w-4 ms-2" />{t.common.syncNow}</Button>
                     </div>
                   </div>
                 )}

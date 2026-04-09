@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,31 +34,30 @@ import {
 } from "@/components/ui/card";
 import { IconArrowRight, IconArrowLeft, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
+import { getText } from "@/lib/i18n/text";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
-const userSchema = z.object({
-  firstName: z.string().min(2, "الاسم الأول مطلوب (حرفين على الأقل)"),
-  lastName: z.string().min(2, "اسم العائلة مطلوب (حرفين على الأقل)"),
-  email: z.string().email("البريد الإلكتروني غير صالح"),
-  password: z.string().min(6, "كلمة المرور يجب أن تكون 6 أحرف على الأقل"),
-  role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"], {
-    required_error: "الدور مطلوب",
-  }),
-  phone: z.string().optional(),
-});
+function createUserSchema(t: ReturnType<typeof getText>) {
+  return z.object({
+    firstName: z.string().min(2, "الاسم الأول مطلوب (حرفين على الأقل)"),
+    lastName: z.string().min(2, "اسم العائلة مطلوب (حرفين على الأقل)"),
+    email: z.string().email(t.common.emailInvalid),
+    password: z.string().min(6, t.common.passwordMinLength),
+    role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"], {
+      required_error: "الدور مطلوب",
+    }),
+    phone: z.string().optional(),
+  });
+}
 
-type UserFormData = z.infer<typeof userSchema>;
+type UserFormData = z.infer<ReturnType<typeof createUserSchema>>;
 
 export default function AddUserPage() {
+  const locale = useClientLocale();
+  const t = getText(locale);
+  const userSchema = useMemo(() => createUserSchema(t), [t]);
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [locale, setLocale] = useState<"ar" | "en">("ar");
-
-  useState(() => {
-    if (typeof document !== "undefined") {
-      const lang = document.documentElement.lang;
-      setLocale(lang === "en" ? "en" : "ar");
-    }
-  });
 
   const isRtl = locale === "ar";
   const ArrowIcon = isRtl ? IconArrowRight : IconArrowLeft;
@@ -101,17 +100,17 @@ export default function AddUserPage() {
   };
 
   const roleOptions = [
-    { value: "EMPLOYEE", label: isRtl ? "موظف" : "Employee" },
-    { value: "HR_MANAGER", label: isRtl ? "مدير الموارد البشرية" : "HR Manager" },
-    { value: "MANAGER", label: isRtl ? "مدير" : "Manager" },
-    { value: "TENANT_ADMIN", label: isRtl ? "مدير الشركة" : "Tenant Admin" },
+    { value: "EMPLOYEE", label: isRtl ? t.common.employee : "Employee" },
+    { value: "HR_MANAGER", label: isRtl ? t.common.hrManager : "HR Manager" },
+    { value: "MANAGER", label: isRtl ? t.common.manager : "Manager" },
+    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" },
   ];
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" aria-label="رجوع" asChild>
+        <Button variant="ghost" size="icon" aria-label={t.common.back} asChild>
           <Link href="/dashboard/users">
             <ArrowIcon className="h-5 w-5" />
           </Link>
@@ -133,7 +132,7 @@ export default function AddUserPage() {
               <IconUser className="size-5 text-primary" />
             </div>
             <div>
-              <CardTitle>{isRtl ? "بيانات المستخدم" : "User Details"}</CardTitle>
+              <CardTitle>{isRtl ? t.common.details : "User Details"}</CardTitle>
               <CardDescription>
                 {isRtl ? "المعلومات الأساسية للمستخدم" : "Basic user information"}
               </CardDescription>
@@ -149,7 +148,7 @@ export default function AddUserPage() {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "الاسم الأول *" : "First Name *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.firstName : "First Name *"}</FormLabel>
                       <FormControl>
                         <Input placeholder={isRtl ? "أحمد" : "Ahmed"} {...field} />
                       </FormControl>
@@ -162,9 +161,9 @@ export default function AddUserPage() {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "اسم العائلة *" : "Last Name *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.lastName : "Last Name *"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={isRtl ? "محمد" : "Mohammed"} {...field} />
+                        <Input placeholder={isRtl ? t.common.namePlaceholder : "Mohammed"} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -178,7 +177,7 @@ export default function AddUserPage() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "البريد الإلكتروني *" : "Email *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.emailRequired : "Email *"}</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="user@company.com" {...field} />
                       </FormControl>
@@ -191,7 +190,7 @@ export default function AddUserPage() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "رقم الهاتف" : "Phone"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.phone : "Phone"}</FormLabel>
                       <FormControl>
                         <Input placeholder="+966500000000" {...field} />
                       </FormControl>
@@ -223,7 +222,7 @@ export default function AddUserPage() {
                   name="role"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isRtl ? "الدور *" : "Role *"}</FormLabel>
+                      <FormLabel>{isRtl ? t.common.roleRequired : "Role *"}</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -248,14 +247,14 @@ export default function AddUserPage() {
                 <Button type="submit" disabled={isSubmitting}>
                   {isSubmitting
                     ? isRtl
-                      ? "جاري الحفظ..."
+                      ? t.common.saving
                       : "Saving..."
                     : isRtl
                     ? "إضافة المستخدم"
                     : "Add User"}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href="/dashboard/users">{isRtl ? "إلغاء" : "Cancel"}</Link>
+                  <Link href="/dashboard/users">{isRtl ? t.common.cancel : "Cancel"}</Link>
                 </Button>
               </div>
             </form>

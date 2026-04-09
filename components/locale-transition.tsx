@@ -45,7 +45,6 @@ export function LocaleTransitionOverlay() {
       window.removeEventListener(EVENT_NAME, handler);
       clearTimer();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // When pathname changes while panel is covering → slide out
@@ -57,10 +56,11 @@ export function LocaleTransitionOverlay() {
     if (pathname !== prevPath.current) {
       prevPath.current = pathname;
       clearTimer();
-      setPhase("out");
-      timerRef.current = setTimeout(() => setPhase("idle"), 300);
+      timerRef.current = setTimeout(() => {
+        setPhase("out");
+        timerRef.current = setTimeout(() => setPhase("idle"), 300);
+      }, 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname, phase]);
 
   return (

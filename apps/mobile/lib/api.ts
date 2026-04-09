@@ -3,6 +3,10 @@ import { Platform } from "react-native";
 import Constants from "expo-constants";
 import { getOrCreateDeviceId } from "@/lib/auth-storage";
 
+const DEFAULT_TIMEOUT_MS = 15_000;
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 1_000;
+
 export class ApiError extends Error {
   status: number;
   body: any;
@@ -15,7 +19,21 @@ export class ApiError extends Error {
   }
 }
 
-export async function apiFetch<T = any>(pathname: string, opts?: { token?: string; init?: RequestInit }): Promise<T> {
+function isTransient(e: unknown): boolean {
+  if (e instanceof ApiError) return e.status >= 500 || e.status === 429;
+  if (e instanceof TypeError) return true; // network failure
+  if (e instanceof DOMException && e.name === "AbortError") return false;
+  return false;
+}
+
+function wait(ms: number) {
+  return new Promise<void>((r) => setTimeout(r, ms));
+}
+
+export async function apiFetch<T = any>(
+  pathname: string,
+  opts?: { token?: string; init?: RequestInit; retries?: number; timeoutMs?: number },
+): Promise<T> {
   const base = getApiBaseUrl();
   const url = pathname.startsWith("http") ? pathname : `${base}${pathname.startsWith("/") ? "" : "/"}${pathname}`;
 
@@ -44,23 +62,54 @@ export async function apiFetch<T = any>(pathname: string, opts?: { token?: strin
     headers.Authorization = `Bearer ${opts.token}`;
   }
 
-  const res = await fetch(url, {
-    ...opts?.init,
-    headers,
-  });
+  const maxRetries = opts?.retries ?? MAX_RETRIES;
+  const timeoutMs = opts?.timeoutMs ?? DEFAULT_TIMEOUT_MS;
 
-  const text = await res.text();
-  let json: any = null;
-  try {
-    json = text ? JSON.parse(text) : null;
-  } catch {
-    json = null;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const controller = new AbortController();
+    const timer = timeoutMs > 0 ? setTimeout(() => controller.abort(), timeoutMs) : null;
+
+    try {
+      const res = await fetch(url, {
+        ...opts?.init,
+        headers,
+        signal: controller.signal,
+      });
+
+      if (timer) clearTimeout(timer);
+
+      const text = await res.text();
+      let json: any = null;
+      try {
+        json = text ? JSON.parse(text) : null;
+      } catch {
+        json = null;
+      }
+
+      if (!res.ok) {
+        const message = json?.error || `Request failed (${res.status})`;
+        throw new ApiError(message, res.status, json);
+      }
+
+      return json as T;
+    } catch (e) {
+      if (timer) clearTimeout(timer);
+      lastError = e;
+
+      if (e instanceof DOMException && e.name === "AbortError") {
+        lastError = new ApiError("Request timed out", 0, null);
+      }
+
+      if (attempt < maxRetries && isTransient(e)) {
+        await wait(RETRY_DELAY_MS * (attempt + 1));
+        continue;
+      }
+
+      throw lastError;
+    }
   }
 
-  if (!res.ok) {
-    const message = json?.error || `Request failed (${res.status})`;
-    throw new ApiError(message, res.status, json);
-  }
-
-  return json as T;
+  throw lastError;
 }

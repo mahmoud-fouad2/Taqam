@@ -9,6 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 type AdminUser = {
   id: string;
@@ -19,6 +21,8 @@ type AdminUser = {
 };
 
 export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [admins, setAdmins] = React.useState<AdminUser[]>([]);
   const [selectedUserId, setSelectedUserId] = React.useState<string>("");
   const [loading, setLoading] = React.useState(true);
@@ -43,7 +47,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
       const res = await fetch(`/api/admin/tenants/${tenantId}/admins`, { credentials: "include" });
       const json = (await res.json()) as any;
       if (!res.ok || !json?.success) {
-        throw new Error(json?.error || "تعذر تحميل مدير الشركة");
+        throw new Error(json?.error || t.organization.fetchCompanyError);
       }
       const list = (json.data ?? []) as AdminUser[];
       setAdmins(list);
@@ -54,7 +58,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
       setAdmins([]);
       setSelectedUserId("");
       setNewEmail("");
-      setError(e instanceof Error ? e.message : "تعذر تحميل مدير الشركة");
+      setError(e instanceof Error ? e.message : t.organization.fetchCompanyError);
     } finally {
       setLoading(false);
     }
@@ -80,10 +84,10 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
     const json = (await res.json()) as any;
 
     if (!res.ok || !json?.success) {
-      throw new Error(json?.error || "فشل تنفيذ العملية");
+      throw new Error(json?.error || t.tenantAdmin.pOperationFailed);
     }
 
-    setSuccess(json?.message || "تم الحفظ");
+    setSuccess(json?.message || t.tenantAdmin.pSavedSuccessfully);
   }
 
   async function onChangeEmail(e: React.FormEvent) {
@@ -91,7 +95,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
     setError(null);
     setSuccess(null);
     if (!selectedUserId) {
-      setError("اختر مدير الشركة أولًا");
+      setError(t.tenant.selectAdminFirst);
       return;
     }
 
@@ -100,7 +104,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
       await updateAdmin({ newEmail });
       await loadAdmins();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل تغيير البريد");
+      setError(e instanceof Error ? e.message : t.tenantAdmin.pFailedToChangeEmail);
     } finally {
       setSavingEmail(false);
     }
@@ -111,17 +115,17 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
     setError(null);
     setSuccess(null);
     if (!selectedUserId) {
-      setError("اختر مدير الشركة أولًا");
+      setError(t.tenant.selectAdminFirst);
       return;
     }
 
     if (!newPassword || newPassword.length < 6) {
-      setError("كلمة المرور يجب أن تكون 6 أحرف على الأقل");
+      setError(t.common.passwordMinLength);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("تأكيد كلمة المرور غير مطابق");
+      setError(t.tenantAdmin.passwordMismatch);
       return;
     }
 
@@ -131,7 +135,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
       setNewPassword("");
       setConfirmPassword("");
     } catch (e) {
-      setError(e instanceof Error ? e.message : "فشل تعيين كلمة المرور");
+      setError(e instanceof Error ? e.message : t.tenantAdmin.pFailedToSetPassword);
     } finally {
       setSavingPassword(false);
     }
@@ -141,30 +145,22 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserCog className="h-5 w-5" />
-          إدارة حساب مدير الشركة
-        </CardTitle>
-        <CardDescription>
-          تعديل بيانات دخول مدير الشركة (TENANT_ADMIN) لهذه الشركة.
-        </CardDescription>
+          <UserCog className="h-5 w-5" />{t.tenantAdmin.title}</CardTitle>
+        <CardDescription>{t.tenantAdmin.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {loading ? (
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            جاري تحميل البيانات...
-          </div>
+            <Loader2 className="h-4 w-4 animate-spin" />{t.common.loading}</div>
         ) : admins.length === 0 ? (
-          <div className="rounded-lg border p-4 text-sm text-muted-foreground">
-            لا يوجد مستخدم بصلاحية TENANT_ADMIN لهذه الشركة.
-          </div>
+          <div className="rounded-lg border p-4 text-sm text-muted-foreground">{t.tenantAdmin.noAdmins}</div>
         ) : (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label>مدير الشركة</Label>
+              <Label>{t.tenantAdmin.pCompanyAdmin}</Label>
               <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر مدير الشركة" />
+                  <SelectValue placeholder={t.tenantAdmin.selectPlaceholder} />
                 </SelectTrigger>
                 <SelectContent>
                   {admins.map((admin) => (
@@ -175,7 +171,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                 </SelectContent>
               </Select>
               <p className="text-xs text-muted-foreground">
-                الدور: TENANT_ADMIN — الحالة: {selectedAdmin?.status ?? "—"}
+                {t.tenantAdmin.pRole} TENANT_ADMIN — {t.tenantAdmin.pStatus} {selectedAdmin?.status ?? "—"}
               </p>
             </div>
 
@@ -196,11 +192,11 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
             <form onSubmit={onChangeEmail} className="space-y-3">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">تغيير البريد الإلكتروني</p>
+                <p className="font-medium">{t.tenantAdmin.changeEmail}</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="new-email">البريد الإلكتروني الجديد</Label>
+                  <Label htmlFor="new-email">{t.tenantAdmin.newEmail}</Label>
                   <Input
                     id="new-email"
                     type="email"
@@ -213,7 +209,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                 <div className="flex items-end">
                   <Button type="submit" disabled={savingEmail} className="w-full sm:w-auto">
                     {savingEmail ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
-                    حفظ البريد
+                    {t.tenantAdmin.pSaveEmail}
                   </Button>
                 </div>
               </div>
@@ -224,11 +220,11 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
             <form onSubmit={onResetPassword} className="space-y-3">
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-muted-foreground" />
-                <p className="font-medium">تعيين كلمة مرور جديدة</p>
+                <p className="font-medium">{t.tenantAdmin.resetPassword}</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
+                  <Label htmlFor="new-password">{t.tenantAdmin.newPassword}</Label>
                   <Input
                     id="new-password"
                     type="password"
@@ -240,7 +236,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>
+                  <Label htmlFor="confirm-password">{t.tenantAdmin.confirmPassword}</Label>
                   <Input
                     id="confirm-password"
                     type="password"
@@ -254,11 +250,9 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
               </div>
               <Button type="submit" variant="destructive" disabled={savingPassword}>
                 {savingPassword ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
-                تعيين كلمة المرور
+                {t.tenantAdmin.pSetPassword}
               </Button>
-              <p className="text-xs text-muted-foreground">
-                سيتم تسجيل خروج المستخدم من بعض الأجهزة عند تغيير كلمة المرور.
-              </p>
+              <p className="text-xs text-muted-foreground">{t.tenantAdmin.logoutWarning}</p>
             </form>
           </div>
         )}

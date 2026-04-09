@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { TicketThread } from "./ticket-thread";
+import { getText } from "@/lib/i18n/text";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -31,6 +32,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
   const { id } = await params;
   const user = await getCurrentUser();
   const locale = await getAppLocale();
+  const t = getText(locale);
   const p = locale === "en" ? "/en" : "";
 
   if (!user) {
@@ -61,7 +63,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">{locale === "ar" ? "غير موجود" : "Not found"}</h1>
           <Button asChild variant="secondary">
-            <Link href={`${p}/dashboard/support`}>{locale === "ar" ? "رجوع" : "Back"}</Link>
+            <Link href={`${p}/dashboard/support`}>{locale === "ar" ? t.common.back : "Back"}</Link>
           </Button>
         </div>
         <p className="text-muted-foreground">{locale === "ar" ? "لم يتم العثور على التذكرة." : "Ticket was not found."}</p>
@@ -80,7 +82,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
             <Badge variant="secondary">{ticket.status}</Badge>
             {isSuperAdmin(user.role) ? (
               <span>
-                {locale === "ar" ? "الشركة:" : "Tenant:"} {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
+                {locale === "ar" ? t.common.company : "Tenant:"} {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
               </span>
             ) : null}
           </div>
@@ -88,7 +90,7 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
 
         <div className="flex gap-2">
           <Button asChild variant="secondary">
-            <Link href={`${p}/dashboard/support`}>{locale === "ar" ? "رجوع" : "Back"}</Link>
+            <Link href={`${p}/dashboard/support`}>{locale === "ar" ? t.common.back : "Back"}</Link>
           </Button>
         </div>
       </div>

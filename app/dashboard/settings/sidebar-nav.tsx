@@ -5,6 +5,9 @@ import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 interface SidebarNavProps extends React.HTMLAttributes<HTMLElement> {
   items: {

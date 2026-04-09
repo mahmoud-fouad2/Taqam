@@ -4,7 +4,7 @@
  * Pricing Plans Manager Component
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 interface PricingPlan {
   id: string;
@@ -60,13 +62,6 @@ interface PricingPlan {
   sortOrder: number;
 }
 
-const PLAN_TYPES = [
-  { value: "TRIAL", label: "تجريبي" },
-  { value: "BASIC", label: "أساسي" },
-  { value: "PROFESSIONAL", label: "احترافي" },
-  { value: "ENTERPRISE", label: "مؤسسات" },
-];
-
 const DEFAULT_PLAN: Partial<PricingPlan> = {
   name: "",
   nameAr: "",
@@ -86,6 +81,17 @@ const DEFAULT_PLAN: Partial<PricingPlan> = {
 };
 
 export function PricingPlansManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
+  const planTypes = useMemo(
+    () => [
+      { value: "TRIAL", label: t.pricingPlans.trial },
+      { value: "BASIC", label: t.common.basic },
+      { value: "PROFESSIONAL", label: t.pricingPlans.professional },
+      { value: "ENTERPRISE", label: t.common.institutions },
+    ],
+    [t.common.basic, t.common.institutions, t.pricingPlans.professional, t.pricingPlans.trial]
+  );
   const [plans, setPlans] = useState<PricingPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -95,11 +101,7 @@ export function PricingPlansManager() {
   const [newFeatureEn, setNewFeatureEn] = useState("");
   const [planToDelete, setPlanToDelete] = useState<PricingPlan | null>(null);
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  async function fetchPlans() {
+  const fetchPlans = useCallback(async () => {
     try {
       const res = await fetch("/api/super-admin/pricing-plans");
       const json = await res.json();
@@ -112,17 +114,21 @@ export function PricingPlansManager() {
       }
     } catch (err) {
       console.error(err);
-      toast.error("فشل في تحميل الباقات");
+      toast.error(t.pricingPlans.loadFailed);
     } finally {
       setLoading(false);
     }
-  }
+  }, [t.pricingPlans.loadFailed]);
+
+  useEffect(() => {
+    void fetchPlans();
+  }, [fetchPlans]);
 
   async function handleSave() {
     if (!editingPlan) return;
     
     if (!editingPlan.name || !editingPlan.nameAr || !editingPlan.slug) {
-      toast.error("يرجى ملء الحقول المطلوبة");
+      toast.error(t.common.fillRequired);
       return;
     }
 
@@ -140,17 +146,17 @@ export function PricingPlansManager() {
       });
 
       if (res.ok) {
-        toast.success(isUpdate ? "تم تحديث الباقة" : "تم إنشاء الباقة");
+        toast.success(isUpdate ? t.pricingPlans.planUpdated : t.pricingPlans.planCreated);
         setDialogOpen(false);
         setEditingPlan(null);
         fetchPlans();
       } else {
         const json = await res.json();
-        toast.error(json.error || "فشل في حفظ الباقة");
+        toast.error(json.error || t.pricingPlans.saveFailed);
       }
     } catch (err) {
       console.error(err);
-      toast.error("خطأ في الاتصال");
+      toast.error(t.platformSettings.connectionError);
     } finally {
       setSaving(false);
     }
@@ -166,14 +172,14 @@ export function PricingPlansManager() {
       });
 
       if (res.ok) {
-        toast.success("تم حذف الباقة");
+        toast.success(t.pricingPlans.deletedSuccess);
         fetchPlans();
       } else {
-        toast.error("فشل في حذف الباقة");
+        toast.error(t.pricingPlans.deleteFailed);
       }
     } catch (err) {
       console.error(err);
-      toast.error("خطأ في الاتصال");
+      toast.error(t.platformSettings.connectionError);
     }
   }
 
@@ -217,12 +223,10 @@ export function PricingPlansManager() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-muted-foreground">
-          {plans.length} باقات
+          {plans.length} {t.pricingPlans.packagesCount}
         </p>
         <Button onClick={() => openEditDialog()}>
-          <Plus className="mr-2 h-4 w-4" />
-          باقة جديدة
-        </Button>
+          <Plus className="mr-2 h-4 w-4" />{t.pricingPlans.newPlan}</Button>
       </div>
 
       {/* Plans Grid */}
@@ -242,7 +246,7 @@ export function PricingPlansManager() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="تعديل"
+                    aria-label={t.common.edit}
                     onClick={() => openEditDialog(plan)}
                   >
                     <Pencil className="h-4 w-4" />
@@ -250,7 +254,7 @@ export function PricingPlansManager() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    aria-label="حذف"
+                    aria-label={t.common.delete}
                     onClick={() => setPlanToDelete(plan)}
                   >
                     <Trash2 className="h-4 w-4 text-destructive" />
@@ -261,11 +265,11 @@ export function PricingPlansManager() {
             <CardContent className="space-y-4">
               <div className="flex items-baseline gap-1">
                 <span className="text-3xl font-bold">
-                  {plan.priceMonthly != null ? plan.priceMonthly : "تواصل معنا"}
+                  {plan.priceMonthly != null ? plan.priceMonthly : t.pricingPlans.contactUs}
                 </span>
                 {plan.priceMonthly != null && (
                   <span className="text-muted-foreground">
-                    {plan.currency}/شهر
+                    {plan.currency}{t.pricingPlans.perMonth}
                   </span>
                 )}
               </div>
@@ -276,10 +280,10 @@ export function PricingPlansManager() {
 
               <div className="flex flex-wrap gap-2">
                 <Badge variant={plan.isActive ? "default" : "secondary"}>
-                  {plan.isActive ? "نشط" : "معطل"}
+                  {plan.isActive ? t.common.active : t.common.disabled}
                 </Badge>
                 <Badge variant="outline">
-                  {PLAN_TYPES.find((t) => t.value === plan.planType)?.label}
+                  {planTypes.find((item) => item.value === plan.planType)?.label}
                 </Badge>
               </div>
 
@@ -287,7 +291,7 @@ export function PricingPlansManager() {
 
               <div className="space-y-1">
                 <p className="text-xs font-medium text-muted-foreground">
-                  المميزات ({plan.featuresAr?.length || 0})
+                  {t.pricingPlans.features} ({plan.featuresAr?.length || 0})
                 </p>
                 <ul className="text-sm space-y-1">
                   {(plan.featuresAr || []).slice(0, 3).map((f, i) => (
@@ -295,7 +299,7 @@ export function PricingPlansManager() {
                   ))}
                   {(plan.featuresAr?.length || 0) > 3 && (
                     <li className="text-muted-foreground">
-                      +{plan.featuresAr.length - 3} أخرى
+                      +{plan.featuresAr.length - 3} {t.pricingPlans.moreFeatures}
                     </li>
                   )}
                 </ul>
@@ -307,8 +311,8 @@ export function PricingPlansManager() {
         {plans.length === 0 && (
           <div className="col-span-full text-center py-12 text-muted-foreground">
             <DollarSign className="mx-auto h-12 w-12 mb-4 opacity-50" />
-            <p>لا توجد باقات حتى الآن</p>
-            <p className="text-sm">أنشئ أول باقة لتظهر في صفحة التسعير</p>
+            <p>{t.pricingPlans.noPlans}</p>
+            <p className="text-sm">{t.pricingPlans.createFirstPlan}</p>
           </div>
         )}
       </div>
@@ -318,11 +322,9 @@ export function PricingPlansManager() {
         <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {editingPlan?.id ? "تعديل الباقة" : "باقة جديدة"}
+              {editingPlan?.id ? t.pricingPlans.editPlan : t.pricingPlans.newPlan}
             </DialogTitle>
-            <DialogDescription>
-              أدخل تفاصيل الباقة التي ستظهر في صفحة التسعير
-            </DialogDescription>
+            <DialogDescription>{t.pricingPlans.description}</DialogDescription>
           </DialogHeader>
 
           {editingPlan && (
@@ -330,7 +332,7 @@ export function PricingPlansManager() {
               {/* Basic Info */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>الاسم (إنجليزي) *</Label>
+                  <Label>{t.pricingPlans.nameEnLabel}</Label>
                   <Input
                     value={editingPlan.name || ""}
                     onChange={(e) =>
@@ -340,13 +342,13 @@ export function PricingPlansManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>الاسم (عربي) *</Label>
+                  <Label>{t.pricingPlans.nameAr}</Label>
                   <Input
                     value={editingPlan.nameAr || ""}
                     onChange={(e) =>
                       setEditingPlan({ ...editingPlan, nameAr: e.target.value })
                     }
-                    placeholder="الأساسية"
+                    placeholder={t.pricingPlans.nameArPlaceholder}
                   />
                 </div>
                 <div className="space-y-2">
@@ -364,7 +366,7 @@ export function PricingPlansManager() {
               {/* Pricing */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>السعر الشهري</Label>
+                  <Label>{t.pricingPlans.monthlyPrice}</Label>
                   <Input
                     type="number"
                     value={editingPlan.priceMonthly ?? ""}
@@ -374,11 +376,11 @@ export function PricingPlansManager() {
                         priceMonthly: e.target.value ? parseFloat(e.target.value) : null,
                       })
                     }
-                    placeholder="اتركه فارغاً لـ 'تواصل معنا'"
+                    placeholder={t.pricingPlans.leaveEmptyForContact}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>السعر السنوي</Label>
+                  <Label>{t.pricingPlans.yearlyPrice}</Label>
                   <Input
                     type="number"
                     value={editingPlan.priceYearly ?? ""}
@@ -391,7 +393,7 @@ export function PricingPlansManager() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>العملة</Label>
+                  <Label>{t.salaryStructures.currency}</Label>
                   <Select
                     value={editingPlan.currency || "SAR"}
                     onValueChange={(value) =>
@@ -402,9 +404,9 @@ export function PricingPlansManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="SAR">ريال سعودي (SAR)</SelectItem>
-                      <SelectItem value="USD">دولار (USD)</SelectItem>
-                      <SelectItem value="EUR">يورو (EUR)</SelectItem>
+                      <SelectItem value="SAR">{t.pricingPlans.sar}</SelectItem>
+                      <SelectItem value="USD">{t.pricingPlans.usd}</SelectItem>
+                      <SelectItem value="EUR">{t.pricingPlans.eur}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -413,7 +415,7 @@ export function PricingPlansManager() {
               {/* Employees */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>الحد الأقصى للموظفين</Label>
+                  <Label>{t.platformSettings.maxEmployees}</Label>
                   <Input
                     type="number"
                     value={editingPlan.maxEmployees ?? ""}
@@ -423,21 +425,21 @@ export function PricingPlansManager() {
                         maxEmployees: e.target.value ? parseInt(e.target.value) : null,
                       })
                     }
-                    placeholder="اتركه فارغاً لغير محدود"
+                    placeholder={t.pricingPlans.unlimitedHint}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>نص الموظفين (عربي)</Label>
+                  <Label>{t.pricingPlans.employeesLabelAr}</Label>
                   <Input
                     value={editingPlan.employeesLabel || ""}
                     onChange={(e) =>
                       setEditingPlan({ ...editingPlan, employeesLabel: e.target.value })
                     }
-                    placeholder="حتى 25 موظف"
+                    placeholder={t.pricingPlans.employeesExample}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>نص الموظفين (إنجليزي)</Label>
+                  <Label>{t.pricingPlans.employeesLabelEn}</Label>
                   <Input
                     value={editingPlan.employeesLabelEn || ""}
                     onChange={(e) =>
@@ -451,7 +453,7 @@ export function PricingPlansManager() {
               {/* Plan Type & Options */}
               <div className="grid gap-4 md:grid-cols-3">
                 <div className="space-y-2">
-                  <Label>نوع الباقة</Label>
+                  <Label>{t.pricingPlans.planType}</Label>
                   <Select
                     value={editingPlan.planType || "BASIC"}
                     onValueChange={(value) =>
@@ -462,16 +464,16 @@ export function PricingPlansManager() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {PLAN_TYPES.map((t) => (
-                        <SelectItem key={t.value} value={t.value}>
-                          {t.label}
+                      {planTypes.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>ترتيب العرض</Label>
+                  <Label>{t.pricingPlans.sortOrder}</Label>
                   <Input
                     type="number"
                     value={editingPlan.sortOrder ?? 0}
@@ -491,7 +493,7 @@ export function PricingPlansManager() {
                         setEditingPlan({ ...editingPlan, isPopular: checked })
                       }
                     />
-                    <Label>الأكثر طلباً</Label>
+                    <Label>{t.pricingPlans.mostPopular}</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
@@ -500,7 +502,7 @@ export function PricingPlansManager() {
                         setEditingPlan({ ...editingPlan, isActive: checked })
                       }
                     />
-                    <Label>نشط</Label>
+                    <Label>{t.common.active}</Label>
                   </div>
                 </div>
               </div>
@@ -509,14 +511,14 @@ export function PricingPlansManager() {
 
               {/* Features */}
               <div className="space-y-4">
-                <Label>المميزات</Label>
+                <Label>{t.pricingPlans.pFeatures}</Label>
 
                 {/* Add Feature */}
                 <div className="flex gap-2">
                   <Input
                     value={newFeatureAr}
                     onChange={(e) => setNewFeatureAr(e.target.value)}
-                    placeholder="ميزة بالعربي"
+                    placeholder={t.pricingPlans.featureArPlaceholder}
                     className="flex-1"
                   />
                   <Input
@@ -548,7 +550,7 @@ export function PricingPlansManager() {
                         type="button"
                         variant="ghost"
                         size="icon"
-                        aria-label="حذف"
+                        aria-label={t.common.delete}
                         className="h-6 w-6"
                         onClick={() => removeFeature(i)}
                       >
@@ -562,17 +564,13 @@ export function PricingPlansManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t.common.cancel}</Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  جاري الحفظ...
-                </>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.common.saving}</>
               ) : (
-                "حفظ"
+                t.common.save
               )}
             </Button>
           </DialogFooter>
@@ -583,19 +581,17 @@ export function PricingPlansManager() {
       <AlertDialog open={planToDelete !== null} onOpenChange={(open) => !open && setPlanToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف الباقة</AlertDialogTitle>
+            <AlertDialogTitle>{t.pricingPlans.deletePlan}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف باقة &quot;{planToDelete?.nameAr}&quot;؟ لا يمكن التراجع عن هذا الإجراء.
+              {t.pricingPlans.pAreYouSureYouWantToDelete} &quot;{planToDelete?.nameAr}&quot;? {t.pricingPlans.deleteConfirmMsg}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void confirmDelete()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              حذف
-            </AlertDialogAction>
+            >{t.common.delete}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

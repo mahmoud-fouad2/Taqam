@@ -1,12 +1,20 @@
 import { RequestsManager } from "./requests-manager";
 import { InboxIcon } from "lucide-react";
+import { getText } from "@/lib/i18n/text";
+import { getAppLocale } from "@/lib/i18n/locale";
 
-export const metadata = {
-  title: "الطلبات | طاقم",
-  description: "إدارة طلبات الحضور والانصراف",
-};
+export async function generateMetadata() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
+  return {
+    title: t.requests.pageTitle,
+    description: t.requests.pageDesc,
+  };
+}
 
-export default function RequestsPage() {
+export default async function RequestsPage() {
+  const locale = await getAppLocale();
+  const t = getText(locale);
   return (
     <>
       <div className="flex items-start justify-between gap-4 mb-6">
@@ -15,8 +23,8 @@ export default function RequestsPage() {
             <InboxIcon className="h-5 w-5 text-sky-600 dark:text-sky-400" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">الطلبات</h1>
-            <p className="text-sm text-muted-foreground">تقديم ومتابعة طلبات الحضور والانصراف</p>
+            <h1 className="text-2xl font-bold tracking-tight">{t.requests.pageTitle}</h1>
+            <p className="text-sm text-muted-foreground">{t.requests.pSubmitAndTrackAttendanceReques}</p>
           </div>
         </div>
       </div>

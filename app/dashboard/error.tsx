@@ -4,6 +4,10 @@ import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export default function DashboardError({
   error,
@@ -12,6 +16,8 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const pathname = usePathname();
   const isEn = pathname === "/en/dashboard" || pathname.startsWith("/en/");
 
@@ -26,7 +32,7 @@ export default function DashboardError({
       </div>
       <div className="space-y-2">
         <h2 className="text-2xl font-bold tracking-tight">
-          {isEn ? "An unexpected error occurred" : "حدث خطأ غير متوقع"}
+          {isEn ? "An unexpected error occurred" : t.common.unexpectedError}
         </h2>
         <p className="max-w-md text-muted-foreground">
           {error.message
@@ -44,7 +50,7 @@ export default function DashboardError({
       <div className="flex gap-3">
         <Button onClick={reset}>{isEn ? "Try again" : "إعادة المحاولة"}</Button>
         <Button variant="outline" onClick={() => (window.location.href = isEn ? "/en/dashboard" : "/dashboard")}>
-          {isEn ? "Back to dashboard" : "العودة للوحة التحكم"}
+          {isEn ? "Back to dashboard" : t.common.goToDashboard2}
         </Button>
       </div>
     </div>

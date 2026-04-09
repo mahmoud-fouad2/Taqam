@@ -281,30 +281,33 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       : "Tenant Workspace";
 
   return (
-    <Sidebar collapsible="icon" {...props}>
-      <SidebarHeader>
+    <Sidebar collapsible="icon" className="dashboard-app-sidebar" {...props}>
+      <SidebarHeader className="px-2 pt-3">
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
               size="lg"
               asChild
-              className="data-[slot=sidebar-menu-button]:!p-1.5"
+              className="rounded-xl border border-sidebar-border/70 bg-sidebar-accent/40 !p-2 shadow-sm transition-all hover:bg-sidebar-accent"
             >
               <Link href={homeUrl}>
-                <LogoMark frameClassName="size-8 rounded-md p-0" imageClassName="h-[18px]" />
+                <LogoMark
+                  frameClassName="size-9 rounded-lg border border-sidebar-border/60 bg-sidebar p-1 shadow-sm"
+                  imageClassName="h-[18px]"
+                />
                 <div className="grid flex-1 text-start text-sm leading-tight group-data-[collapsible=icon]:hidden">
-                  <span className="truncate font-bold">طاقم</span>
-                  <span className="truncate text-xs text-sidebar-foreground/60">{workspaceLabel}</span>
+                  <span className="truncate font-bold tracking-tight">طاقم</span>
+                  <span className="truncate text-xs text-sidebar-foreground/65">{workspaceLabel}</span>
                 </div>
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="px-1">
         <NavMain items={navItems} />
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className="border-t border-sidebar-border/70 px-2 pb-2 pt-2">
         {user ? <NavUser user={user} /> : null}
       </SidebarFooter>
     </Sidebar>

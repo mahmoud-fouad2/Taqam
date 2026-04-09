@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Bell,
   Building2,
@@ -12,6 +14,10 @@ import {
 } from 'lucide-react';
 
 import { Card, CardContent } from '@/components/ui/card';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export type SettingsSectionId =
   | 'general'
@@ -25,15 +31,15 @@ export type SettingsSectionId =
   | 'workflows';
 
 const SECTIONS: Array<{ id: SettingsSectionId; label: string; icon: LucideIcon }> = [
-  { id: 'general', label: 'الإعدادات العامة', icon: Building2 },
-  { id: 'localization', label: 'اللغة والتنسيق', icon: Globe },
-  { id: 'security', label: 'الأمان', icon: Shield },
-  { id: 'notifications', label: 'الإشعارات', icon: Bell },
-  { id: 'integrations', label: 'التكاملات', icon: Link },
-  { id: 'backup', label: 'النسخ الاحتياطي', icon: Database },
-  { id: 'roles', label: 'الأدوار والصلاحيات', icon: Users },
-  { id: 'leaves', label: 'أنواع الإجازات', icon: Calendar },
-  { id: 'workflows', label: 'سير العمل', icon: Settings },
+  { id: 'general', label: t.generalSettings.pGeneralSettings, icon: Building2 },
+  { id: 'localization', label: t.generalSettings.pLanguageFormatting, icon: Globe },
+  { id: 'security', label: t.generalSettings.pSecurity, icon: Shield },
+  { id: 'notifications', label: t.generalSettings.pNotifications, icon: Bell },
+  { id: 'integrations', label: t.generalSettings.pIntegrations, icon: Link },
+  { id: 'backup', label: t.generalSettings.pBackup, icon: Database },
+  { id: 'roles', label: t.generalSettings.pRolesPermissions, icon: Users },
+  { id: 'leaves', label: t.generalSettings.pLeaveTypes, icon: Calendar },
+  { id: 'workflows', label: t.generalSettings.pWorkflows, icon: Settings },
 ];
 
 export function SettingsSidebar({
@@ -43,6 +49,8 @@ export function SettingsSidebar({
   activeSection: SettingsSectionId;
   onChange: (section: SettingsSectionId) => void;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card className="lg:col-span-1">
       <CardContent className="p-2">

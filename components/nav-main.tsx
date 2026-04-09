@@ -23,9 +23,9 @@ export function NavMain({
   const pathname = usePathname();
 
   return (
-    <SidebarGroup>
+    <SidebarGroup className="px-1 py-2">
       <SidebarGroupContent className="flex flex-col gap-2">
-        <SidebarMenu>
+        <SidebarMenu className="gap-1.5">
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
@@ -35,10 +35,10 @@ export function NavMain({
               >
                 <Link
                   href={item.url}
-                  className="flex items-center gap-2 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
+                  className="flex w-full items-center gap-2 group-data-[collapsible=icon]/sidebar-wrapper:justify-center"
                 >
-                  {item.icon && <item.icon />}
-                  <span className="group-data-[collapsible=icon]/sidebar-wrapper:hidden">
+                  {item.icon && <item.icon className="opacity-90" />}
+                  <span className="truncate group-data-[collapsible=icon]/sidebar-wrapper:hidden">
                     {item.title}
                   </span>
                 </Link>

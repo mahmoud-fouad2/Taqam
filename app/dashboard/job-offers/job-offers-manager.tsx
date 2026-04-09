@@ -83,6 +83,10 @@ import {
   jobTypeLabels,
   type JobType,
 } from "@/lib/types/recruitment";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 type OfferFormState = {
   applicantId: string;
@@ -149,6 +153,8 @@ function formatDate(value: string) {
 }
 
 export function JobOffersManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [offers, setOffers] = React.useState<JobOffer[]>([]);
   const [applicants, setApplicants] = React.useState<Applicant[]>([]);
   const [jobs, setJobs] = React.useState<JobPosting[]>([]);
@@ -181,11 +187,11 @@ export function JobOffersManager() {
       setOffers([]);
       setApplicants([]);
       setJobs([]);
-      setError(loadError instanceof Error ? loadError.message : "فشل تحميل بيانات العروض الوظيفية");
+      setError(loadError instanceof Error ? loadError.message : t.jobOffers.loadFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.jobOffers.loadFailed]);
 
   React.useEffect(() => {
     void loadData();
@@ -240,7 +246,7 @@ export function JobOffersManager() {
 
   async function handleSave() {
     if (!form.applicantId || !form.jobPostingId || !form.offeredSalary || !form.startDate || !form.validUntil) {
-      toast.error("يرجى استكمال بيانات العرض الأساسية");
+      toast.error(t.jobOffers.fillRequired);
       return;
     }
 
@@ -279,9 +285,9 @@ export function JobOffersManager() {
         setSelectedOffer(saved);
       }
       handleFormOpenChange(false);
-      toast.success(editingOffer ? "تم تحديث العرض الوظيفي" : "تم إنشاء العرض الوظيفي");
+      toast.success(editingOffer ? t.jobOffers.offerUpdated : t.jobOffers.offerCreated);
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : editingOffer ? "تعذر تحديث العرض الوظيفي" : "تعذر إنشاء العرض الوظيفي");
+      toast.error(saveError instanceof Error ? saveError.message : editingOffer ? t.jobOffers.updateFailed : t.jobOffers.createFailed);
     } finally {
       setIsSaving(false);
     }
@@ -295,9 +301,9 @@ export function JobOffersManager() {
       if (selectedOffer?.id === offerId) {
         setSelectedOffer(updated);
       }
-      toast.success("تم تحديث حالة العرض");
+      toast.success(t.jobOffers.statusUpdated);
     } catch (statusError) {
-      toast.error(statusError instanceof Error ? statusError.message : "تعذر تحديث حالة العرض");
+      toast.error(statusError instanceof Error ? statusError.message : t.jobOffers.statusUpdateFailed);
     } finally {
       setBusyOfferId(null);
     }
@@ -317,9 +323,9 @@ export function JobOffersManager() {
         setIsViewSheetOpen(false);
       }
       setDeleteOfferId(null);
-      toast.success("تم حذف العرض الوظيفي");
+      toast.success(t.jobOffers.deletedSuccess);
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : "تعذر حذف العرض الوظيفي");
+      toast.error(deleteError instanceof Error ? deleteError.message : t.jobOffers.deleteFailed);
     } finally {
       setBusyOfferId(null);
     }
@@ -336,7 +342,7 @@ export function JobOffersManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">إجمالي العروض</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobOffers.totalOffers}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -345,7 +351,7 @@ export function JobOffersManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مسودات</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobOffers.drafts}</CardTitle>
             <IconEdit className="h-4 w-4 text-gray-500" />
           </CardHeader>
           <CardContent>
@@ -354,7 +360,7 @@ export function JobOffersManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مرسلة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.jobOffers.sent}</CardTitle>
             <IconMail className="h-4 w-4 text-blue-600" />
           </CardHeader>
           <CardContent>
@@ -363,7 +369,7 @@ export function JobOffersManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">مقبولة</CardTitle>
+            <CardTitle className="text-sm font-medium">{t.common.accepted}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
@@ -376,12 +382,12 @@ export function JobOffersManager() {
         <CardHeader>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>العروض الوظيفية</CardTitle>
-              <CardDescription>إرسال ومتابعة عروض العمل للمرشحين</CardDescription>
+              <CardTitle>{t.jobOffers.title}</CardTitle>
+              <CardDescription>{t.jobOffers.subtitle}</CardDescription>
             </div>
             <Button onClick={openCreateDialog}>
               <IconPlus className="ms-2 h-4 w-4" />
-              عرض جديد
+              {t.jobOffers.pNewOffer}
             </Button>
           </div>
         </CardHeader>
@@ -390,7 +396,7 @@ export function JobOffersManager() {
             <div className="relative flex-1">
               <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
-                placeholder="ابحث باسم المرشح أو الوظيفة أو البريد"
+                placeholder={t.jobOffers.searchPlaceholder}
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 className="ps-9"
@@ -399,10 +405,10 @@ export function JobOffersManager() {
             <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-full sm:w-48">
                 <IconFilter className="ms-2 h-4 w-4" />
-                <SelectValue placeholder="الحالة" />
+                <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">كل الحالات</SelectItem>
+                <SelectItem value="all">{t.attendance.allStatuses}</SelectItem>
                 {Object.entries(offerStatusLabels).map(([value, label]) => (
                   <SelectItem key={value} value={value}>
                     {label}
@@ -416,25 +422,25 @@ export function JobOffersManager() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>المرشح</TableHead>
-                  <TableHead>الوظيفة</TableHead>
-                  <TableHead>الراتب المعروض</TableHead>
-                  <TableHead>تاريخ البداية</TableHead>
-                  <TableHead>الحالة</TableHead>
-                  <TableHead className="text-start">الإجراءات</TableHead>
+                  <TableHead>{t.jobOffers.candidate}</TableHead>
+                  <TableHead>{t.onboarding.jobCol}</TableHead>
+                  <TableHead>{t.jobOffers.offeredSalary}</TableHead>
+                  <TableHead>{t.common.startDate}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      جاري تحميل العروض الوظيفية...
+                      {t.jobOffers.pLoadingJobOffers}
                     </TableCell>
                   </TableRow>
                 ) : filteredOffers.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      لا توجد عروض مطابقة
+                      {t.jobOffers.pNoMatchingOffersFound}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -466,31 +472,27 @@ export function JobOffersManager() {
                               setSelectedOffer(offer);
                               setIsViewSheetOpen(true);
                             }}>
-                              <IconEye className="ms-2 h-4 w-4" />
-                              عرض التفاصيل
-                            </DropdownMenuItem>
+                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditDialog(offer)}>
                               <IconEdit className="ms-2 h-4 w-4" />
-                              تعديل العرض
+                              {t.jobOffers.pEditOffer}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {offer.status !== "sent" && (
                               <DropdownMenuItem disabled={busyOfferId === offer.id} onClick={() => void handleStatusChange(offer.id, "sent")}>
                                 <IconMail className="ms-2 h-4 w-4" />
-                                تعيين كمرسل
+                                {t.jobOffers.pMarkAsSent}
                               </DropdownMenuItem>
                             )}
                             {offer.status !== "accepted" && (
                               <DropdownMenuItem disabled={busyOfferId === offer.id} onClick={() => void handleStatusChange(offer.id, "accepted")}>
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                تعيين كمقبول
+                                {t.jobOffers.pMarkAsAccepted}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-red-600" onClick={() => setDeleteOfferId(offer.id)}>
-                              <IconTrash className="ms-2 h-4 w-4" />
-                              حذف
-                            </DropdownMenuItem>
+                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -506,19 +508,19 @@ export function JobOffersManager() {
       <Dialog open={isFormOpen} onOpenChange={handleFormOpenChange}>
         <DialogContent className="w-full sm:max-w-[560px]">
           <DialogHeader>
-            <DialogTitle>{editingOffer ? "تعديل العرض الوظيفي" : "إنشاء عرض وظيفي"}</DialogTitle>
+            <DialogTitle>{editingOffer ? t.jobOffers.editOffer : t.jobOffers.createOffer}</DialogTitle>
             <DialogDescription>
               {editingOffer
-                ? "حدّث بيانات العرض الحالية واحفظ التغييرات مباشرة."
-                : "اختر المرشح وأكمل تفاصيل العرض لإرساله أو حفظه كمسودة."}
+                ? t.jobOffers.editDesc
+                : t.jobOffers.createDesc}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>المرشح</Label>
+              <Label>{t.jobOffers.candidate}</Label>
               <Select value={form.applicantId} onValueChange={(value) => updateForm("applicantId", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر المرشح" />
+                  <SelectValue placeholder={t.jobOffers.chooseCandidate} />
                 </SelectTrigger>
                 <SelectContent>
                   {applicants.map((applicant) => (
@@ -531,10 +533,10 @@ export function JobOffersManager() {
             </div>
 
             <div className="grid gap-2">
-              <Label>الوظيفة</Label>
+              <Label>{t.onboarding.jobCol}</Label>
               <Select value={form.jobPostingId} onValueChange={(value) => updateForm("jobPostingId", value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="اختر الوظيفة" />
+                  <SelectValue placeholder={t.jobOffers.chooseJob} />
                 </SelectTrigger>
                 <SelectContent>
                   {jobs.map((job) => (
@@ -548,18 +550,18 @@ export function JobOffersManager() {
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>الراتب</Label>
+                <Label>{t.leaveTypes.salary}</Label>
                 <Input type="number" value={form.offeredSalary} onChange={(event) => updateForm("offeredSalary", event.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>العملة</Label>
+                <Label>{t.salaryStructures.currency}</Label>
                 <Input value={form.currency} onChange={(event) => updateForm("currency", event.target.value)} />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>نوع العمل</Label>
+                <Label>{t.jobOffers.workType}</Label>
                 <Select value={form.jobType} onValueChange={(value) => updateForm("jobType", value as JobType)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -574,7 +576,7 @@ export function JobOffersManager() {
                 </Select>
               </div>
               <div className="grid gap-2">
-                <Label>الحالة</Label>
+                <Label>{t.common.status}</Label>
                 <Select value={form.status} onValueChange={(value) => updateForm("status", value as OfferStatus)}>
                   <SelectTrigger>
                     <SelectValue />
@@ -592,35 +594,33 @@ export function JobOffersManager() {
 
             <div className="grid gap-4 md:grid-cols-3">
               <div className="grid gap-2">
-                <Label>تاريخ البداية</Label>
+                <Label>{t.common.startDate}</Label>
                 <Input type="date" value={form.startDate} onChange={(event) => updateForm("startDate", event.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>فترة التجربة</Label>
+                <Label>{t.jobOffers.probationPeriod}</Label>
                 <Input type="number" value={form.probationPeriod} onChange={(event) => updateForm("probationPeriod", event.target.value)} />
               </div>
               <div className="grid gap-2">
-                <Label>صالح حتى</Label>
+                <Label>{t.jobOffers.validUntil}</Label>
                 <Input type="date" value={form.validUntil} onChange={(event) => updateForm("validUntil", event.target.value)} />
               </div>
             </div>
 
             <div className="grid gap-2">
-              <Label>المزايا</Label>
-              <Textarea rows={4} value={form.benefits} onChange={(event) => updateForm("benefits", event.target.value)} placeholder="اكتب ميزة في كل سطر" />
+              <Label>{t.jobPostings.benefits}</Label>
+              <Textarea rows={4} value={form.benefits} onChange={(event) => updateForm("benefits", event.target.value)} placeholder={t.jobOffers.benefitsPlaceholder} />
             </div>
 
             <div className="grid gap-2">
-              <Label>الشروط والأحكام</Label>
+              <Label>{t.jobOffers.termsAndConditions}</Label>
               <Textarea rows={4} value={form.termsAndConditions} onChange={(event) => updateForm("termsAndConditions", event.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => handleFormOpenChange(false)}>
-              إلغاء
-            </Button>
+            <Button variant="outline" onClick={() => handleFormOpenChange(false)}>{t.common.cancel}</Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
-              {editingOffer ? "حفظ التعديلات" : "حفظ العرض"}
+              {editingOffer ? t.common.saveChanges : t.jobOffers.saveOffer}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -630,12 +630,12 @@ export function JobOffersManager() {
         <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedOffer?.jobTitle}</SheetTitle>
-            <SheetDescription>تفاصيل العرض الوظيفي</SheetDescription>
+            <SheetDescription>{t.jobOffers.offerDetails}</SheetDescription>
           </SheetHeader>
           {selectedOffer && (
             <div className="space-y-6 py-4">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">المرشح</p>
+                <p className="text-sm text-muted-foreground">{t.jobOffers.candidate}</p>
                 <p className="text-lg font-semibold">{selectedOffer.applicantName}</p>
                 <p className="text-sm text-muted-foreground">{selectedOffer.applicantEmail}</p>
               </div>
@@ -645,7 +645,7 @@ export function JobOffersManager() {
                   <CardHeader className="pb-2">
                     <CardDescription className="flex items-center gap-2">
                       <IconCurrencyDollar className="h-4 w-4" />
-                      الراتب المعروض
+                      {t.jobOffers.pOfferedSalary}
                     </CardDescription>
                     <CardTitle>
                       {selectedOffer.offeredSalary.toLocaleString("ar-SA")} {selectedOffer.currency}
@@ -656,7 +656,7 @@ export function JobOffersManager() {
                   <CardHeader className="pb-2">
                     <CardDescription className="flex items-center gap-2">
                       <IconCalendar className="h-4 w-4" />
-                      تاريخ البداية
+                      {t.jobOffers.pStartDate}
                     </CardDescription>
                     <CardTitle>{formatDate(selectedOffer.startDate)}</CardTitle>
                   </CardHeader>
@@ -664,15 +664,15 @@ export function JobOffersManager() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">الحالة</p>
+                <p className="text-sm text-muted-foreground">{t.common.status}</p>
                 <Badge className={offerStatusColors[selectedOffer.status]}>{offerStatusLabels[selectedOffer.status]}</Badge>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">المزايا</p>
+                <p className="text-sm text-muted-foreground">{t.jobPostings.benefits}</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedOffer.benefits.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">لا توجد مزايا مضافة</p>
+                    <p className="text-sm text-muted-foreground">{t.jobOffers.noBenefits}</p>
                   ) : (
                     selectedOffer.benefits.map((benefit) => (
                       <Badge key={`${selectedOffer.id}-${benefit.name}`} variant="outline">
@@ -684,13 +684,13 @@ export function JobOffersManager() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">الشروط والأحكام</p>
-                <p className="rounded-lg bg-muted p-3 text-sm">{selectedOffer.termsAndConditions || "لا توجد شروط إضافية"}</p>
+                <p className="text-sm text-muted-foreground">{t.jobOffers.termsAndConditions}</p>
+                <p className="rounded-lg bg-muted p-3 text-sm">{selectedOffer.termsAndConditions || t.jobOffers.noExtraTerms}</p>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">الصلاحية</p>
-                <p className="font-medium">حتى {formatDate(selectedOffer.validUntil)}</p>
+                <p className="text-sm text-muted-foreground">{t.jobOffers.validity}</p>
+                <p className="font-medium">{t.jobOffers.validUntilPrefix} {formatDate(selectedOffer.validUntil)}</p>
               </div>
             </div>
           )}
@@ -700,16 +700,12 @@ export function JobOffersManager() {
       <Dialog open={Boolean(deleteOfferId)} onOpenChange={(open) => !open && setDeleteOfferId(null)}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>حذف العرض الوظيفي</DialogTitle>
-            <DialogDescription>سيتم حذف العرض بشكل نهائي. هل تريد المتابعة؟</DialogDescription>
+            <DialogTitle>{t.jobOffers.deleteTitle}</DialogTitle>
+            <DialogDescription>{t.jobOffers.pTheOfferWillBePermanentlyDelet}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteOfferId(null)}>
-              إلغاء
-            </Button>
-            <Button variant="destructive" onClick={() => void handleDelete()} disabled={busyOfferId === deleteOfferId}>
-              حذف
-            </Button>
+            <Button variant="outline" onClick={() => setDeleteOfferId(null)}>{t.common.cancel}</Button>
+            <Button variant="destructive" onClick={() => void handleDelete()} disabled={busyOfferId === deleteOfferId}>{t.common.delete}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

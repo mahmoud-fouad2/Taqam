@@ -1,3 +1,5 @@
+"use client";
+
 import type { Dispatch, SetStateAction } from 'react';
 import { Globe } from 'lucide-react';
 
@@ -12,6 +14,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function LocalizationSection({
   settings,
@@ -20,19 +26,21 @@ export function LocalizationSection({
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
 }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Globe className="h-5 w-5" />
-          اللغة والتنسيق
+          {t.generalSettings.pLanguageFormatting}
         </CardTitle>
-        <CardDescription>إعدادات اللغة والتقويم</CardDescription>
+        <CardDescription>{t.generalSettings.pLanguageAndCalendarSettings}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="grid gap-4 md:grid-cols-2">
           <div className="space-y-2">
-            <Label>اللغة الافتراضية</Label>
+            <Label>{t.common.options}</Label>
             <Select
               value={settings.localization.defaultLanguage}
               onValueChange={(value: 'ar' | 'en') =>
@@ -46,13 +54,13 @@ export function LocalizationSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ar">العربية</SelectItem>
+                <SelectItem value="ar">{t.common.arabic}</SelectItem>
                 <SelectItem value="en">English</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="space-y-2">
-            <Label>نوع التقويم</Label>
+            <Label>{t.generalSettings.pCalendarType}</Label>
             <Select
               value={settings.localization.calendarType}
               onValueChange={(value: 'gregorian' | 'hijri' | 'both') =>
@@ -66,9 +74,9 @@ export function LocalizationSection({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="gregorian">ميلادي</SelectItem>
-                <SelectItem value="hijri">هجري</SelectItem>
-                <SelectItem value="both">كلاهما</SelectItem>
+                <SelectItem value="gregorian">{t.generalSettings.pGregorian}</SelectItem>
+                <SelectItem value="hijri">{t.generalSettings.pHijri}</SelectItem>
+                <SelectItem value="both">{t.generalSettings.pBoth}</SelectItem>
               </SelectContent>
             </Select>
           </div>

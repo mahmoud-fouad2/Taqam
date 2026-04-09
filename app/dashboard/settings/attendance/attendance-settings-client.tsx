@@ -22,6 +22,8 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
 
 const LocationPickerMap = dynamic(() => import("@/components/maps/location-picker-map"), {
   ssr: false,
@@ -51,7 +53,7 @@ type WorkLocation = {
   createdAt: string;
 };
 
-function t(locale: Locale, ar: string, en: string) {
+function pickText(locale: Locale, ar: string, en: string) {
   return locale === "ar" ? ar : en;
 }
 
@@ -62,7 +64,9 @@ function toNullableNumber(value: string): number | null {
   return Number.isFinite(num) ? num : null;
 }
 
-export default function AttendanceSettingsClient({ locale }: { locale: Locale }) {
+export default function AttendanceSettingsClient({ locale: _locale }: { locale: Locale }) {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const [loading, setLoading] = React.useState(true);
   const [savingPolicy, setSavingPolicy] = React.useState(false);
   const [policy, setPolicy] = React.useState<Policy | null>(null);
@@ -96,18 +100,18 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
       if (pRes.ok) {
         setPolicy(pJson?.data ?? null);
       } else {
-        toast.error(pJson?.error ?? t(locale, "تعذر تحميل سياسة الحضور.", "Failed to load policy."));
+        toast.error(pJson?.error ?? pickText(locale, t.attendance.loadPolicyFailed, "Failed to load policy."));
       }
 
       if (lRes.ok) {
         setLocations(lJson?.data?.items ?? []);
       } else {
-        toast.error(lJson?.error ?? t(locale, "تعذر تحميل مواقع العمل.", "Failed to load locations."));
+        toast.error(lJson?.error ?? pickText(locale, t.attendance.loadLocationsFailed, "Failed to load locations."));
       }
     } finally {
       setLoading(false);
     }
-  }, [locale]);
+  }, [locale, t.attendance.loadLocationsFailed, t.attendance.loadPolicyFailed]);
 
   React.useEffect(() => {
     void loadAll();
@@ -131,13 +135,13 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
         const json = await res.json().catch(() => null);
         toast.error(
           json?.error ??
-            t(locale, "تعذر حفظ السياسة.", "Failed to save policy.")
+            pickText(locale, t.attendance.savePolicyFailed, "Failed to save policy.")
         );
         return;
       }
 
       await loadAll();
-      toast.success(t(locale, "تم حفظ السياسة بنجاح.", "Policy saved."));
+      toast.success(pickText(locale, "تم حفظ السياسة بنجاح.", "Policy saved."));
     } finally {
       setSavingPolicy(false);
     }
@@ -164,7 +168,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
       if (!res.ok) {
         toast.error(
           json?.error ??
-            t(locale, "تعذر إنشاء الموقع.", "Failed to create location.")
+            pickText(locale, "تعذر إنشاء الموقع.", "Failed to create location.")
         );
         return;
       }
@@ -180,7 +184,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
         isActive: true,
       });
       await loadAll();
-      toast.success(t(locale, "تمت إضافة الموقع.", "Location created."));
+      toast.success(pickText(locale, t.attendance.locationCreated, "Location created."));
     } finally {
       setCreating(false);
     }
@@ -195,15 +199,15 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
     if (!res.ok) {
       const json = await res.json().catch(() => null);
       toast.error(
-        json?.error ?? t(locale, "تعذر تحديث الموقع.", "Failed to update.")
+        json?.error ?? pickText(locale, t.attendance.updateFailed, "Failed to update.")
       );
       return;
     }
     await loadAll();
     toast.success(
       current
-        ? t(locale, "تم تعطيل الموقع.", "Location disabled.")
-        : t(locale, "تم تفعيل الموقع.", "Location enabled.")
+        ? pickText(locale, t.attendance.locationDisabled, "Location disabled.")
+        : pickText(locale, t.attendance.locationEnabled, "Location enabled.")
     );
   }
 
@@ -218,11 +222,11 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
     const res = await fetch(`/api/attendance/locations/${id}`, { method: "DELETE" });
     if (!res.ok) {
       const json = await res.json().catch(() => null);
-      toast.error(json?.error ?? t(locale, "تعذر حذف الموقع.", "Failed to delete."));
+      toast.error(json?.error ?? pickText(locale, t.attendance.deleteFailed, "Failed to delete."));
       return;
     }
     await loadAll();
-    toast.success(t(locale, "تم حذف الموقع.", "Location deleted."));
+    toast.success(pickText(locale, t.attendance.locationDeleted, "Location deleted."));
   }
 
   const isRtl = locale === "ar";
@@ -232,10 +236,10 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
     <div className="space-y-6">
       <div>
         <h3 className="text-lg font-medium text-start">
-          {t(locale, "الحضور والموقع", "Attendance & Location")}
+          {pickText(locale, "الحضور والموقع", "Attendance & Location")}
         </h3>
         <p className="text-sm text-muted-foreground text-start">
-          {t(
+          {pickText(
             locale,
             "حدد أماكن العمل المسموح بها للبصمة (Geofence) وسياسات دقة الموقع.",
             "Configure allowed work locations (geofence) and location accuracy policies."
@@ -246,23 +250,23 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
       <Card>
         <CardHeader>
           <CardTitle className="text-start">
-            {t(locale, "سياسة الحضور", "Attendance Policy")}
+            {pickText(locale, "سياسة الحضور", "Attendance Policy")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {loading || !policy ? (
             <div className="text-sm text-muted-foreground">
-              {t(locale, "جاري التحميل...", "Loading...")}
+              {pickText(locale, t.common.loading, "Loading...")}
             </div>
           ) : (
             <>
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rtl:lg:flex-row-reverse">
                 <div className="space-y-1">
                   <div className="font-medium text-start">
-                    {t(locale, "تفعيل التحقق من المكان", "Enforce Geofence")}
+                    {pickText(locale, "تفعيل التحقق من المكان", "Enforce Geofence")}
                   </div>
                   <div className="text-sm text-muted-foreground text-start">
-                    {t(
+                    {pickText(
                       locale,
                       "لن يسمح بتسجيل الحضور إلا من داخل المواقع المحددة.",
                       "Attendance will be allowed only inside configured locations."
@@ -280,10 +284,10 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rtl:lg:flex-row-reverse">
                 <div className="space-y-1">
                   <div className="font-medium text-start">
-                    {t(locale, "السماح بدون موقع", "Allow Without Location")}
+                    {pickText(locale, "السماح بدون موقع", "Allow Without Location")}
                   </div>
                   <div className="text-sm text-muted-foreground text-start">
-                    {t(
+                    {pickText(
                       locale,
                       "يسمح بتسجيل الحضور حتى لو لم يرسل الجهاز GPS (مفيد للويب).",
                       "Allow attendance even if no GPS is provided (useful for web)."
@@ -302,7 +306,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
 
               <div className="grid gap-2">
                 <Label className="text-start">
-                  {t(locale, "الحد الأقصى لدقة الموقع (متر)", "Max Location Accuracy (meters)")}
+                  {pickText(locale, "الحد الأقصى لدقة الموقع (متر)", "Max Location Accuracy (meters)")}
                 </Label>
                 <Input
                   inputMode="numeric"
@@ -323,8 +327,8 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
               <div className="flex justify-end rtl:justify-start">
                 <Button onClick={savePolicy} disabled={savingPolicy}>
                   {savingPolicy
-                    ? t(locale, "جاري الحفظ...", "Saving...")
-                    : t(locale, "حفظ السياسة", "Save Policy")}
+                    ? pickText(locale, t.common.saving, "Saving...")
+                    : pickText(locale, "حفظ السياسة", "Save Policy")}
                 </Button>
               </div>
             </>
@@ -335,71 +339,71 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
       <Card>
         <CardHeader className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between rtl:lg:flex-row-reverse">
           <CardTitle className="text-start">
-            {t(locale, "مواقع العمل المسموح بها", "Allowed Work Locations")}
+            {pickText(locale, "مواقع العمل المسموح بها", "Allowed Work Locations")}
           </CardTitle>
 
           <Dialog open={openCreate} onOpenChange={setOpenCreate}>
             <DialogTrigger asChild>
               <Button variant="default">
-                {t(locale, "إضافة موقع", "Add Location")}
+                {pickText(locale, "إضافة موقع", "Add Location")}
               </Button>
             </DialogTrigger>
             <DialogContent className="w-full sm:max-w-[560px]">
               <DialogHeader>
                 <DialogTitle>
-                  {t(locale, "إضافة موقع عمل", "Add Work Location")}
+                  {pickText(locale, "إضافة موقع عمل", "Add Work Location")}
                 </DialogTitle>
               </DialogHeader>
 
               <div className="grid gap-4">
                 <div className="grid gap-2">
-                  <Label className="text-start">{t(locale, "الاسم", "Name")}</Label>
+                  <Label className="text-start">{pickText(locale, t.common.name, "Name")}</Label>
                   <Input
                     value={form.name}
                     onChange={(e) => setForm((s) => ({ ...s, name: e.target.value }))}
-                    placeholder={t(locale, "مثال: المقر الرئيسي", "e.g. HQ")}
+                    placeholder={pickText(locale, t.attendance.hqExample, "e.g. HQ")}
                     dir={isRtl ? "rtl" : "ltr"}
                   />
                 </div>
 
                 <div className="grid gap-2">
                   <Label className="text-start">
-                    {t(locale, "الاسم بالعربية (اختياري)", "Arabic Name (optional)")}
+                    {pickText(locale, "الاسم بالعربية (اختياري)", "Arabic Name (optional)")}
                   </Label>
                   <Input
                     value={form.nameAr}
                     onChange={(e) =>
                       setForm((s) => ({ ...s, nameAr: e.target.value }))
                     }
-                    placeholder={t(locale, "المقر الرئيسي", "")}
+                    placeholder={pickText(locale, "المقر الرئيسي", "")}
                     dir="rtl"
                   />
                 </div>
 
                 <div className="grid gap-2">
                   <Label className="text-start">
-                    {t(locale, "العنوان (اختياري)", "Address (optional)")}
+                    {pickText(locale, "العنوان (اختياري)", "Address (optional)")}
                   </Label>
                   <Input
                     value={form.address}
                     onChange={(e) =>
                       setForm((s) => ({ ...s, address: e.target.value }))
                     }
-                    placeholder={t(locale, "الرياض - شارع ...", "Riyadh - ...")}
+                    placeholder={pickText(locale, t.attendance.addressExample, "Riyadh - ...")}
                     dir={isRtl ? "rtl" : "ltr"}
                   />
                 </div>
 
                 <div className="grid gap-2">
                   <div className="flex items-center justify-between gap-2 rtl:flex-row-reverse">
-                    <Label className="text-start">{t(locale, "حدد الموقع من الخريطة", "Pick on map")}</Label>
+                    <Label className="text-start">{pickText(locale, "حدد الموقع من الخريطة", "Pick on map")}</Label>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => {
                         if (!("geolocation" in navigator)) {
-                          toast.error(t(locale, "المتصفح لا يدعم تحديد الموقع.", "Geolocation is not supported."));
+                          toast.error(pickText(locale, t.attendance.geolocationNotSupported, "Geolocation is not supported."));
                           return;
                         }
                         navigator.geolocation.getCurrentPosition(
@@ -413,13 +417,13 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                             }));
                           },
                           () => {
-                            toast.error(t(locale, "تعذر الحصول على موقعك.", "Failed to get your location."));
+                            toast.error(pickText(locale, t.attendance.failedGetLocation, "Failed to get your location."));
                           },
                           { enableHighAccuracy: true, timeout: 10000 }
                         );
                       }}
                     >
-                      {t(locale, "استخدم موقعي", "Use my location")}
+                      {pickText(locale, "استخدم موقعي", "Use my location")}
                     </Button>
                   </div>
 
@@ -440,7 +444,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
 
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <div className="grid gap-2">
-                    <Label className="text-start">{t(locale, "خط العرض (lat)", "Latitude")}</Label>
+                    <Label className="text-start">{pickText(locale, "خط العرض (lat)", "Latitude")}</Label>
                     <Input
                       inputMode="decimal"
                       value={form.lat}
@@ -450,7 +454,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                     />
                   </div>
                   <div className="grid gap-2">
-                    <Label className="text-start">{t(locale, "خط الطول (lng)", "Longitude")}</Label>
+                    <Label className="text-start">{pickText(locale, "خط الطول (lng)", "Longitude")}</Label>
                     <Input
                       inputMode="decimal"
                       value={form.lng}
@@ -464,7 +468,7 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                 <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                   <div className="grid gap-2">
                     <Label className="text-start">
-                      {t(locale, "نصف القطر (متر)", "Radius (meters)")}
+                      {pickText(locale, "نصف القطر (متر)", "Radius (meters)")}
                     </Label>
                     <Input
                       inputMode="numeric"
@@ -479,10 +483,10 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                   <div className="flex items-center justify-between rounded-md border p-3 rtl:flex-row-reverse">
                     <div className="space-y-1">
                       <div className="font-medium text-start">
-                        {t(locale, "مفعل", "Active")}
+                        {pickText(locale, t.common.enabled, "Active")}
                       </div>
                       <div className="text-xs text-muted-foreground text-start">
-                        {t(locale, "يمكن استخدامه للتحقق", "Used for validation")}
+                        {pickText(locale, "يمكن استخدامه للتحقق", "Used for validation")}
                       </div>
                     </div>
                     <Switch
@@ -499,12 +503,12 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                   onClick={() => setOpenCreate(false)}
                   disabled={creating}
                 >
-                  {t(locale, "إلغاء", "Cancel")}
+                  {pickText(locale, t.common.cancel, "Cancel")}
                 </Button>
                 <Button onClick={createLocation} disabled={creating}>
                   {creating
-                    ? t(locale, "جاري الإضافة...", "Creating...")
-                    : t(locale, "إضافة", "Create")}
+                    ? pickText(locale, "جاري الإضافة...", "Creating...")
+                    : pickText(locale, t.common.add, "Create")}
                 </Button>
               </DialogFooter>
             </DialogContent>
@@ -514,11 +518,11 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
         <CardContent>
           {loading ? (
             <div className="text-sm text-muted-foreground">
-              {t(locale, "جاري التحميل...", "Loading...")}
+              {pickText(locale, t.common.loading, "Loading...")}
             </div>
           ) : locations.length === 0 ? (
             <div className="text-sm text-muted-foreground text-start">
-              {t(
+              {pickText(
                 locale,
                 "لا توجد مواقع بعد. أضف موقعًا ثم فعّل التحقق من المكان.",
                 "No locations yet. Add a location then enable geofence enforcement."
@@ -530,12 +534,12 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                 <TableHeader>
                   <TableRow>
                     <TableHead className="text-start">
-                      {t(locale, "الموقع", "Location")}
+                      {pickText(locale, "الموقع", "Location")}
                     </TableHead>
-                    <TableHead className="text-start">{t(locale, "الإحداثيات", "Coordinates")}</TableHead>
-                    <TableHead className="text-start">{t(locale, "نصف القطر", "Radius")}</TableHead>
-                    <TableHead className="text-start">{t(locale, "الحالة", "Status")}</TableHead>
-                    <TableHead className="text-start">{t(locale, "إجراءات", "Actions")}</TableHead>
+                    <TableHead className="text-start">{pickText(locale, "الإحداثيات", "Coordinates")}</TableHead>
+                    <TableHead className="text-start">{pickText(locale, "نصف القطر", "Radius")}</TableHead>
+                    <TableHead className="text-start">{pickText(locale, t.common.status, "Status")}</TableHead>
+                    <TableHead className="text-start">{pickText(locale, t.common.actions, "Actions")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -557,9 +561,9 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                       <TableCell className="text-start">{loc.radiusMeters}m</TableCell>
                       <TableCell className="text-start">
                         {loc.isActive ? (
-                          <Badge variant="default">{t(locale, "مفعل", "Active")}</Badge>
+                          <Badge variant="default">{pickText(locale, t.common.enabled, "Active")}</Badge>
                         ) : (
-                          <Badge variant="secondary">{t(locale, "غير مفعل", "Inactive")}</Badge>
+                          <Badge variant="secondary">{pickText(locale, "غير مفعل", "Inactive")}</Badge>
                         )}
                       </TableCell>
                       <TableCell className="text-start">
@@ -570,15 +574,15 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
                             onClick={() => toggleActive(loc.id, loc.isActive)}
                           >
                             {loc.isActive
-                              ? t(locale, "تعطيل", "Disable")
-                              : t(locale, "تفعيل", "Enable")}
+                              ? pickText(locale, "تعطيل", "Disable")
+                              : pickText(locale, "تفعيل", "Enable")}
                           </Button>
                           <Button
                             size="sm"
                             variant="destructive"
                             onClick={() => deleteLocation(loc.id)}
                           >
-                            {t(locale, "حذف", "Delete")}
+                            {pickText(locale, t.common.delete, "Delete")}
                           </Button>
                         </div>
                       </TableCell>
@@ -595,15 +599,15 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
     <AlertDialog open={!!locationToDelete} onOpenChange={(open) => { if (!open) setLocationToDelete(null); }}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{t(locale, "تأكيد الحذف", "Confirm Deletion")}</AlertDialogTitle>
+          <AlertDialogTitle>{pickText(locale, t.common.confirmDeleteTitle, "Confirm Deletion")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {t(locale, `هل أنت متأكد من حذف موقع «${locationToDelete?.nameAr ?? locationToDelete?.name}»؟`, `Are you sure you want to delete «${locationToDelete?.name}»?`)}
+            {pickText(locale, `هل أنت متأكد من حذف موقع «${locationToDelete?.nameAr ?? locationToDelete?.name}»؟`, `Are you sure you want to delete «${locationToDelete?.name}»?`)}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{t(locale, "إلغاء", "Cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>{pickText(locale, t.common.cancel, "Cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={() => void handleDeleteConfirmed()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-            {t(locale, "حذف", "Delete")}
+            {pickText(locale, t.common.delete, "Delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -611,3 +615,4 @@ export default function AttendanceSettingsClient({ locale }: { locale: Locale })
   </>
   );
 }
+

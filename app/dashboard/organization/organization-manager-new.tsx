@@ -55,6 +55,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { IconPencil, IconPlus, IconTrash, IconBuilding, IconMapPin, IconRefresh } from "@tabler/icons-react";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 // Types
 interface OrganizationProfile {
@@ -95,27 +99,27 @@ interface Branch {
 
 // Validation
 const companySchema = z.object({
-  name: z.string().min(2, "اسم الشركة مطلوب"),
+  name: z.string().min(2, t.organization.companyNameRequired),
   nameAr: z.string().optional(),
   commercialRegister: z.string().optional(),
   taxNumber: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  country: z.string().min(1, "الدولة مطلوبة"),
+  country: z.string().min(1, t.common.countryRequired),
   phone: z.string().optional(),
-  email: z.string().email("البريد غير صالح").optional().or(z.literal("")),
+  email: z.string().email(t.organization.emailInvalid).optional().or(z.literal("")),
   website: z.string().optional(),
 });
 
 const branchSchema = z.object({
-  name: z.string().min(2, "اسم الفرع مطلوب"),
+  name: z.string().min(2, t.organization.branchNameRequired),
   nameAr: z.string().optional(),
   code: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
-  country: z.string().min(1, "الدولة مطلوبة"),
+  country: z.string().min(1, t.common.countryRequired),
   phone: z.string().optional(),
-  email: z.string().email("البريد غير صالح").optional().or(z.literal("")),
+  email: z.string().email(t.organization.emailInvalid).optional().or(z.literal("")),
   isHeadquarters: z.boolean().optional(),
   isActive: z.boolean().optional(),
 });
@@ -124,6 +128,8 @@ type CompanyFormData = z.infer<typeof companySchema>;
 type BranchFormData = z.infer<typeof branchSchema>;
 
 export function OrganizationManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   // State
   const [company, setCompany] = useState<OrganizationProfile | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
@@ -204,9 +210,9 @@ export function OrganizationManager() {
       }
     } catch (error) {
       console.error("Error fetching organization:", error);
-      toast.error("حدث خطأ في جلب بيانات الشركة");
+      toast.error(t.organization.fetchCompanyError);
     }
-  }, [companyForm]);
+  }, [companyForm, t.organization.fetchCompanyError]);
 
   // Fetch branches
   const fetchBranches = useCallback(async () => {
@@ -224,9 +230,9 @@ export function OrganizationManager() {
       }
     } catch (error) {
       console.error("Error fetching branches:", error);
-      toast.error("حدث خطأ في جلب الفروع");
+      toast.error(t.organization.fetchBranchesError);
     }
-  }, []);
+  }, [t.organization.fetchBranchesError]);
 
   // Initial fetch
   useEffect(() => {
@@ -250,16 +256,16 @@ export function OrganizationManager() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "حدث خطأ");
+        throw new Error(error.error || t.organization.genericError);
       }
 
       const result = await res.json();
       setCompany(result.profile);
       setIsEditingCompany(false);
-      toast.success("تم تحديث بيانات الشركة بنجاح");
+      toast.success(t.organization.companyUpdated);
     } catch (error) {
       console.error("Error updating company:", error);
-      toast.error(error instanceof Error ? error.message : "حدث خطأ في التحديث");
+      toast.error(error instanceof Error ? error.message : t.organization.updateFailed);
     } finally {
       setIsSaving(false);
     }
@@ -315,16 +321,16 @@ export function OrganizationManager() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "حدث خطأ");
+        throw new Error(error.error || t.organization.genericError);
       }
 
       await fetchBranches();
       setBranchDialogOpen(false);
       branchForm.reset();
-      toast.success(editingBranch ? "تم تحديث الفرع بنجاح" : "تم إضافة الفرع بنجاح");
+      toast.success(editingBranch ? t.organization.branchUpdated : t.organization.branchAdded);
     } catch (error) {
       console.error("Error saving branch:", error);
-      toast.error(error instanceof Error ? error.message : "حدث خطأ");
+      toast.error(error instanceof Error ? error.message : t.organization.genericError);
     } finally {
       setIsSaving(false);
     }
@@ -346,16 +352,16 @@ export function OrganizationManager() {
 
       if (!res.ok) {
         const error = await res.json();
-        throw new Error(error.error || "حدث خطأ");
+        throw new Error(error.error || t.organization.genericError);
       }
 
       await fetchBranches();
       setDeleteDialogOpen(false);
       setBranchToDelete(null);
-      toast.success("تم حذف الفرع بنجاح");
+      toast.success(t.organization.branchDeleted);
     } catch (error) {
       console.error("Error deleting branch:", error);
-      toast.error(error instanceof Error ? error.message : "حدث خطأ في الحذف");
+      toast.error(error instanceof Error ? error.message : t.onboarding.deleteFailed);
     } finally {
       setIsSaving(false);
     }
@@ -395,19 +401,19 @@ export function OrganizationManager() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الفروع</CardDescription>
+            <CardDescription>{t.organization.totalBranches}</CardDescription>
             <CardTitle className="text-3xl">{branches.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>إجمالي الموظفين</CardDescription>
+            <CardDescription>{t.departments.totalEmployees}</CardDescription>
             <CardTitle className="text-3xl">{totalEmployees}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>المدن</CardDescription>
+            <CardDescription>{t.organization.cities}</CardDescription>
             <CardTitle className="text-3xl">
               {new Set(branches.map((b) => b.city).filter(Boolean)).size}
             </CardTitle>
@@ -417,8 +423,8 @@ export function OrganizationManager() {
 
       <Tabs defaultValue="company" className="w-full">
         <TabsList>
-          <TabsTrigger value="company">بيانات الشركة</TabsTrigger>
-          <TabsTrigger value="branches">الفروع</TabsTrigger>
+          <TabsTrigger value="company">{t.organization.companySection}</TabsTrigger>
+          <TabsTrigger value="branches">{t.organization.branches}</TabsTrigger>
         </TabsList>
 
         {/* Company Tab */}
@@ -431,7 +437,7 @@ export function OrganizationManager() {
                     <IconBuilding className="size-6 text-primary" />
                   </div>
                   <div>
-                    <CardTitle>{company?.nameAr || company?.name || "الشركة"}</CardTitle>
+                    <CardTitle>{company?.nameAr || company?.name || t.common.company}</CardTitle>
                     <CardDescription>{company?.name || ""}</CardDescription>
                   </div>
                 </div>
@@ -455,7 +461,7 @@ export function OrganizationManager() {
                     setIsEditingCompany(!isEditingCompany);
                   }}
                 >
-                  {isEditingCompany ? "إلغاء" : "تعديل"}
+                  {isEditingCompany ? t.common.cancel : t.common.edit}
                 </Button>
               </div>
             </CardHeader>
@@ -469,7 +475,7 @@ export function OrganizationManager() {
                         name="name"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>اسم الشركة (إنجليزي)</FormLabel>
+                            <FormLabel>{t.organization.companyNameEn}</FormLabel>
                             <FormControl>
                               <Input placeholder="Company Name" {...field} />
                             </FormControl>
@@ -482,9 +488,9 @@ export function OrganizationManager() {
                         name="nameAr"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>اسم الشركة (عربي)</FormLabel>
+                            <FormLabel>{t.organization.companyName}</FormLabel>
                             <FormControl>
-                              <Input placeholder="اسم الشركة" {...field} />
+                              <Input placeholder={t.organization.companyName} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -495,7 +501,7 @@ export function OrganizationManager() {
                         name="commercialRegister"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>السجل التجاري</FormLabel>
+                            <FormLabel>{t.organization.commercialReg}</FormLabel>
                             <FormControl>
                               <Input placeholder="1010123456" {...field} />
                             </FormControl>
@@ -508,7 +514,7 @@ export function OrganizationManager() {
                         name="taxNumber"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>الرقم الضريبي</FormLabel>
+                            <FormLabel>{t.organization.taxNumber}</FormLabel>
                             <FormControl>
                               <Input placeholder="300123456700003" {...field} />
                             </FormControl>
@@ -521,9 +527,9 @@ export function OrganizationManager() {
                         name="address"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>العنوان</FormLabel>
+                            <FormLabel>{t.common.title}</FormLabel>
                             <FormControl>
-                              <Input placeholder="العنوان التفصيلي" {...field} />
+                              <Input placeholder={t.organization.detailedAddress} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -534,9 +540,9 @@ export function OrganizationManager() {
                         name="city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>المدينة</FormLabel>
+                            <FormLabel>{t.common.city}</FormLabel>
                             <FormControl>
-                              <Input placeholder="الرياض" {...field} />
+                              <Input placeholder={t.jobPostings.riyadh} {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -547,7 +553,7 @@ export function OrganizationManager() {
                         name="country"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>الدولة</FormLabel>
+                            <FormLabel>{t.common.country}</FormLabel>
                             <FormControl>
                               <Input placeholder="SA" {...field} />
                             </FormControl>
@@ -560,7 +566,7 @@ export function OrganizationManager() {
                         name="phone"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>الهاتف</FormLabel>
+                            <FormLabel>{t.common.phone}</FormLabel>
                             <FormControl>
                               <Input placeholder="+966112345678" {...field} dir="ltr" />
                             </FormControl>
@@ -573,7 +579,7 @@ export function OrganizationManager() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>البريد الإلكتروني</FormLabel>
+                            <FormLabel>{t.common.email}</FormLabel>
                             <FormControl>
                               <Input placeholder="info@company.com" type="email" {...field} dir="ltr" />
                             </FormControl>
@@ -586,7 +592,7 @@ export function OrganizationManager() {
                         name="website"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>الموقع الإلكتروني</FormLabel>
+                            <FormLabel>{t.organization.website}</FormLabel>
                             <FormControl>
                               <Input placeholder="https://company.com" {...field} dir="ltr" />
                             </FormControl>
@@ -597,7 +603,7 @@ export function OrganizationManager() {
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button type="submit" disabled={isSaving}>
-                        {isSaving ? "جارٍ الحفظ..." : "حفظ التغييرات"}
+                        {isSaving ? t.common.saving : "${t.common.saveChanges}"}
                       </Button>
                     </div>
                   </form>
@@ -605,31 +611,31 @@ export function OrganizationManager() {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">السجل التجاري</p>
+                    <p className="text-sm text-muted-foreground">{t.organization.commercialReg}</p>
                     <p className="font-medium">{company?.commercialRegister || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">الرقم الضريبي</p>
+                    <p className="text-sm text-muted-foreground">{t.organization.taxNumber}</p>
                     <p className="font-medium">{company?.taxNumber || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">العنوان</p>
+                    <p className="text-sm text-muted-foreground">{t.common.title}</p>
                     <p className="font-medium">{company?.address || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">المدينة</p>
+                    <p className="text-sm text-muted-foreground">{t.common.city}</p>
                     <p className="font-medium">{company?.city || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">الهاتف</p>
+                    <p className="text-sm text-muted-foreground">{t.common.phone}</p>
                     <p className="font-medium" dir="ltr">{company?.phone || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">البريد الإلكتروني</p>
+                    <p className="text-sm text-muted-foreground">{t.common.email}</p>
                     <p className="font-medium" dir="ltr">{company?.email || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">الموقع الإلكتروني</p>
+                    <p className="text-sm text-muted-foreground">{t.organization.website}</p>
                     <p className="font-medium" dir="ltr">{company?.website || "-"}</p>
                   </div>
                 </div>
@@ -648,17 +654,17 @@ export function OrganizationManager() {
                     <IconMapPin className="size-5 text-primary" />
                   </div>
                   <div>
-                    <CardTitle>الفروع</CardTitle>
-                    <CardDescription>إدارة فروع الشركة ومواقع العمل</CardDescription>
+                    <CardTitle>{t.organization.branches}</CardTitle>
+                    <CardDescription>{t.organization.manageBranches}</CardDescription>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon" aria-label="تحديث" onClick={() => fetchBranches()}>
+                  <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchBranches()}>
                     <IconRefresh className="size-4" />
                   </Button>
                   <Button onClick={handleAddBranch}>
                     <IconPlus className="size-4 ms-2" />
-                    إضافة فرع
+                    {t.organization.pAddBranch}
                   </Button>
                 </div>
               </div>
@@ -667,21 +673,21 @@ export function OrganizationManager() {
               {branches.length === 0 ? (
                 <div className="text-center py-12">
                   <IconMapPin className="size-12 mx-auto text-muted-foreground/50 mb-4" />
-                  <p className="text-muted-foreground">لا توجد فروع</p>
+                  <p className="text-muted-foreground">{t.organization.noBranches}</p>
                   <Button variant="outline" className="mt-4" onClick={handleAddBranch}>
-                    إضافة فرع جديد
+                    {t.organization.pAddNewBranch}
                   </Button>
                 </div>
               ) : (
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>الفرع</TableHead>
-                      <TableHead>الكود</TableHead>
-                      <TableHead>المدينة</TableHead>
-                      <TableHead>الموظفين</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead className="text-start">الإجراءات</TableHead>
+                      <TableHead>{t.organization.branch}</TableHead>
+                      <TableHead>{t.common.code}</TableHead>
+                      <TableHead>{t.common.city}</TableHead>
+                      <TableHead>{t.common.employees}</TableHead>
+                      <TableHead>{t.common.status}</TableHead>
+                      <TableHead className="text-start">{t.common.actions}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -705,10 +711,10 @@ export function OrganizationManager() {
                         <TableCell>
                           <div className="flex gap-1">
                             {branch.isHeadquarters && (
-                              <Badge variant="default">المقر الرئيسي</Badge>
+                              <Badge variant="default">{t.organization.hq}</Badge>
                             )}
                             <Badge variant={branch.isActive ? "secondary" : "outline"}>
-                              {branch.isActive ? "نشط" : "غير نشط"}
+                              {branch.isActive ? t.common.active : t.common.inactive}
                             </Badge>
                           </div>
                         </TableCell>
@@ -717,7 +723,7 @@ export function OrganizationManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="تعديل"
+                              aria-label={t.common.edit}
                               onClick={() => handleEditBranch(branch)}
                             >
                               <IconPencil className="size-4" />
@@ -725,7 +731,7 @@ export function OrganizationManager() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              aria-label="حذف"
+                              aria-label={t.common.delete}
                               onClick={() => handleDeleteBranch(branch)}
                               disabled={branch.isHeadquarters || branch.employeesCount > 0}
                             >
@@ -748,12 +754,12 @@ export function OrganizationManager() {
         <DialogContent className="w-full sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
-              {editingBranch ? "تعديل الفرع" : "إضافة فرع جديد"}
+              {editingBranch ? t.organization.editBranch : t.organization.addNewBranch}
             </DialogTitle>
             <DialogDescription>
               {editingBranch 
-                ? "تعديل بيانات الفرع" 
-                : "إضافة فرع جديد للشركة"}
+                ? t.organization.editBranch 
+                : t.organization.addBranchDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...branchForm}>
@@ -764,7 +770,7 @@ export function OrganizationManager() {
                   name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>اسم الفرع (إنجليزي)</FormLabel>
+                      <FormLabel>{t.organization.branchNameEn}</FormLabel>
                       <FormControl>
                         <Input placeholder="Branch Name" {...field} />
                       </FormControl>
@@ -777,9 +783,9 @@ export function OrganizationManager() {
                   name="nameAr"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>اسم الفرع (عربي)</FormLabel>
+                      <FormLabel>{t.organization.branchNameAr}</FormLabel>
                       <FormControl>
-                        <Input placeholder="اسم الفرع" {...field} />
+                        <Input placeholder={t.organization.branchNamePlaceholder} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -790,7 +796,7 @@ export function OrganizationManager() {
                   name="code"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>كود الفرع</FormLabel>
+                      <FormLabel>{t.organization.branchCode}</FormLabel>
                       <FormControl>
                         <Input placeholder="JED" {...field} />
                       </FormControl>
@@ -803,9 +809,9 @@ export function OrganizationManager() {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>المدينة</FormLabel>
+                      <FormLabel>{t.common.city}</FormLabel>
                       <FormControl>
-                        <Input placeholder="جدة" {...field} />
+                        <Input placeholder={t.organization.jeddah} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -816,7 +822,7 @@ export function OrganizationManager() {
                   name="country"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الدولة</FormLabel>
+                      <FormLabel>{t.common.country}</FormLabel>
                       <FormControl>
                         <Input placeholder="SA" {...field} />
                       </FormControl>
@@ -829,9 +835,9 @@ export function OrganizationManager() {
                   name="address"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>العنوان</FormLabel>
+                      <FormLabel>{t.common.title}</FormLabel>
                       <FormControl>
-                        <Input placeholder="العنوان التفصيلي" {...field} />
+                        <Input placeholder={t.organization.detailedAddress} {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -842,7 +848,7 @@ export function OrganizationManager() {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>الهاتف</FormLabel>
+                      <FormLabel>{t.common.phone}</FormLabel>
                       <FormControl>
                         <Input placeholder="+966122345678" {...field} dir="ltr" />
                       </FormControl>
@@ -855,7 +861,7 @@ export function OrganizationManager() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>البريد الإلكتروني</FormLabel>
+                      <FormLabel>{t.common.email}</FormLabel>
                       <FormControl>
                         <Input placeholder="branch@company.com" type="email" {...field} dir="ltr" />
                       </FormControl>
@@ -877,7 +883,7 @@ export function OrganizationManager() {
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <Label>المقر الرئيسي</Label>
+                      <Label>{t.organization.hq}</Label>
                     </FormItem>
                   )}
                 />
@@ -892,7 +898,7 @@ export function OrganizationManager() {
                           onCheckedChange={field.onChange}
                         />
                       </FormControl>
-                      <Label>نشط</Label>
+                      <Label>{t.common.active}</Label>
                     </FormItem>
                   )}
                 />
@@ -903,11 +909,9 @@ export function OrganizationManager() {
                   type="button"
                   variant="outline"
                   onClick={() => setBranchDialogOpen(false)}
-                >
-                  إلغاء
-                </Button>
+                >{t.common.cancel}</Button>
                 <Button type="submit" disabled={isSaving}>
-                  {isSaving ? "جارٍ الحفظ..." : editingBranch ? "تحديث" : "إضافة"}
+                  {isSaving ? t.common.saving : editingBranch ? t.common.update : t.common.add}
                 </Button>
               </DialogFooter>
             </form>
@@ -919,20 +923,18 @@ export function OrganizationManager() {
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>حذف الفرع</AlertDialogTitle>
+            <AlertDialogTitle>{t.organization.deleteBranch}</AlertDialogTitle>
             <AlertDialogDescription>
-              هل أنت متأكد من حذف الفرع &quot;{branchToDelete?.nameAr || branchToDelete?.name}&quot;؟
-              <br />
-              لا يمكن التراجع عن هذا الإجراء.
-            </AlertDialogDescription>
+              {t.organization.pAreYouSureYouWantToDeleteTheBr} &quot;{branchToDelete?.nameAr || branchToDelete?.name}&quot;?
+              <br />{t.common.cannotUndo}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteBranch}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {isSaving ? "جارٍ الحذف..." : "حذف"}
+              {isSaving ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

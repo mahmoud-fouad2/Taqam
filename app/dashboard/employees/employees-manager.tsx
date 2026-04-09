@@ -29,8 +29,14 @@ import { EmployeesStats } from "./_components/employees-stats";
 import { EmployeesImportDialog } from "./_components/employees-import-dialog";
 import type { EmployeeFormData } from "./_components/employee-form-schema";
 import { employeeSchema } from "./_components/employee-form-schema";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
+import { getText } from "@/lib/i18n/text";
+
+const t = getText("ar");
 
 export function EmployeesManager() {
+  const locale = useClientLocale();
+  const t = getText(locale);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -229,7 +235,7 @@ export function EmployeesManager() {
           status: (data.status as EmployeeStatus) || editingEmployee.status,
         });
         if (!res.success) throw new Error(res.error || "Failed to update employee");
-        toast.success("تم تحديث بيانات الموظف بنجاح");
+        toast.success(t.employees.updatedSuccess);
         await fetchEmployees();
       } else {
         const res = await employeesService.create({
@@ -249,14 +255,14 @@ export function EmployeesManager() {
           basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined,
         });
         if (!res.success) throw new Error(res.error || "Failed to create employee");
-        toast.success("تم إضافة الموظف بنجاح");
+        toast.success(t.employees.addedSuccess);
         await fetchEmployees();
       }
       setIsDialogOpen(false);
       form.reset();
     } catch (error) {
       console.error("Error saving employee:", error);
-      toast.error(editingEmployee ? "فشل في تحديث الموظف" : "فشل في إضافة الموظف");
+      toast.error(editingEmployee ? t.employees.updateFailed : t.employees.addFailed);
     } finally {
       setSaving(false);
     }
@@ -276,13 +282,13 @@ export function EmployeesManager() {
         if (!res.success) throw new Error(res.error || "Failed to delete employee");
         toast.success(
           wasTerminated
-            ? "تم حذف الموظف نهائياً"
-            : "تم إنهاء خدمة الموظف (يمكن الحذف النهائي لاحقاً)"
+            ? t.employees.deletedPermanently
+            : t.employees.terminated
         );
         await fetchEmployees();
       } catch (error) {
         console.error("Error deleting employee:", error);
-        toast.error("فشل في حذف الموظف");
+        toast.error(t.employees.deleteFailed);
       } finally {
         setDeleteDialogOpen(false);
         setEmployeeToDelete(null);
@@ -340,8 +346,8 @@ export function EmployeesManager() {
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle>الموظفون</CardTitle>
-              <CardDescription>إدارة بيانات الموظفين</CardDescription>
+              <CardTitle>{t.employees.title}</CardTitle>
+              <CardDescription>{t.employees.subtitle}</CardDescription>
             </div>
             <div className="flex gap-2">
               <ExportButton 
@@ -352,14 +358,14 @@ export function EmployeesManager() {
                 }} 
               />
               <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
-                استيراد CSV
+                {t.employees.importCsv}
               </Button>
-              <Button variant="outline" size="icon" onClick={fetchEmployees} aria-label="تحديث" title="تحديث">
+              <Button variant="outline" size="icon" onClick={fetchEmployees} aria-label={t.common.refresh} title={t.common.refresh}>
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>
                 <IconPlus className="ms-2 h-4 w-4" />
-                إضافة موظف
+                {t.employees.addEmployee}
               </Button>
             </div>
           </div>
