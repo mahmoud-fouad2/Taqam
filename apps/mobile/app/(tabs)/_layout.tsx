@@ -51,14 +51,14 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: isAr ? 'الحضور' : 'Attendance',
-          tabBarIcon: ({ color }) => <TabIcon name="check-square-o" color={color} />,
+          title: isAr ? 'الرئيسية' : 'Home',
+          tabBarIcon: ({ color }) => <TabIcon name="home" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
-          title: isAr ? 'السجل' : 'History',
+          title: isAr ? 'الحضور' : 'Attendance',
           tabBarIcon: ({ color }) => <TabIcon name="clock-o" color={color} />,
         }}
       />
@@ -70,14 +70,18 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
+        name="more"
         options={{
-          title: isAr ? 'أنا' : 'Profile',
-          tabBarIcon: ({ color }) => <TabIcon name="user-circle-o" color={color} />,
+          title: isAr ? 'المزيد' : 'More',
+          tabBarIcon: ({ color }) => <TabIcon name="th-large" color={color} />,
         }}
       />
-      {/* Settings accessible from profile, hidden from tab bar */}
+      {/* Hidden screens accessible via navigation */}
+      <Tabs.Screen name="profile" options={{ href: null }} />
       <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="approvals" options={{ href: null }} />
+      <Tabs.Screen name="payslips" options={{ href: null }} />
+      <Tabs.Screen name="notifications" options={{ href: null }} />
     </Tabs>
   );
 }

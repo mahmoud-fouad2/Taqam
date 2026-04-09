@@ -131,6 +131,38 @@ const dict: Dict = {
   reason_placeholder: { ar: "سبب الإجازة...", en: "Reason for leave..." },
   back: { ar: "رجوع", en: "Back" },
 
+  // More screen
+  more_title: { ar: "المزيد", en: "More" },
+  payslips_title: { ar: "كشوف الرواتب", en: "Payslips" },
+  no_payslips: { ar: "لا توجد كشوف رواتب", en: "No payslips found" },
+  basic_salary: { ar: "الأساسي", en: "Basic" },
+  total_earnings: { ar: "الاستحقاقات", en: "Earnings" },
+  total_deductions: { ar: "الخصومات", en: "Deductions" },
+  net_salary: { ar: "الصافي", en: "Net Salary" },
+  payment_date: { ar: "تاريخ الدفع", en: "Payment date" },
+
+  // Approvals
+  approvals_title: { ar: "الموافقات", en: "Approvals" },
+  no_pending_approvals: { ar: "لا توجد طلبات معلقة", en: "No pending approvals" },
+  approve: { ar: "موافقة", en: "Approve" },
+  reject: { ar: "رفض", en: "Reject" },
+  approved_success: { ar: "تمت الموافقة ✓", en: "Approved ✓" },
+  rejected_success: { ar: "تم الرفض", en: "Rejected" },
+  rejection_reason: { ar: "سبب الرفض", en: "Rejection reason" },
+  optional: { ar: "اختياري", en: "Optional" },
+
+  // Notifications
+  notifications_title: { ar: "الإشعارات", en: "Notifications" },
+  no_notifications: { ar: "لا توجد إشعارات", en: "No notifications yet" },
+  mark_all_read: { ar: "قراءة الكل", en: "Mark all read" },
+  just_now: { ar: "الآن", en: "Just now" },
+
+  // Dashboard
+  leave_balances: { ar: "رصيد الإجازات", en: "Leave Balances" },
+  pending_requests: { ar: "طلبات معلقة", en: "Pending" },
+  need_approval: { ar: "بانتظار موافقتك", en: "Need approval" },
+  home: { ar: "الرئيسية", en: "Home" },
+
   // Profile screen
   account_info: { ar: "معلومات الحساب", en: "Account info" },
   signout_all_confirm_msg: { ar: "سيتم تسجيل خروجك من جميع الأجهزة. هل أنت متأكد؟", en: "You will be signed out from all devices. Are you sure?" },
