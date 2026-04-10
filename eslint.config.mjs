@@ -17,6 +17,8 @@ export default defineConfig([
             "**/tmp/**",
             "tmp/**",
         ],
+    },
+    {
         linterOptions: {
             reportUnusedDisableDirectives: "error",
         },

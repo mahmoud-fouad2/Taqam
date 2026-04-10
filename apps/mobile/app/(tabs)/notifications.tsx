@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
-
-const BRAND = "#3b82f6";
+import { useTheme } from "@/theme";
+import { SkeletonCard } from "@/components/ui";
 
 type NotificationItem = {
   id: string;
@@ -38,6 +36,7 @@ function timeAgo(iso: string, lang: "ar" | "en"): string {
 export default function NotificationsScreen() {
   const { authFetch } = useAuth();
   const { language } = useAppSettings();
+  const { colors, radius, spacing } = useTheme();
   const isRtl = language === "ar";
 
   const [items, setItems] = useState<NotificationItem[]>([]);
@@ -58,8 +57,11 @@ export default function NotificationsScreen() {
   }, [authFetch]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchData().finally(() => setLoading(false));
+    let cancelled = false;
+    (async () => {
+      try { await fetchData(); } finally { if (!cancelled) setLoading(false); }
+    })();
+    return () => { cancelled = true; };
   }, [fetchData]);
 
   const onRefresh = useCallback(async () => {
@@ -88,23 +90,28 @@ export default function NotificationsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={BRAND} />
+      <View style={{ flex: 1, backgroundColor: colors.background, padding: spacing.md, gap: 12, paddingTop: 40 }}>
+        <SkeletonCard style={{ height: 72 }} />
+        <SkeletonCard style={{ height: 72 }} />
+        <SkeletonCard style={{ height: 72 }} />
+        <SkeletonCard style={{ height: 72 }} />
       </View>
     );
   }
 
+  const rtl = isRtl ? { textAlign: "right" as const, writingDirection: "rtl" as const } : {};
+
   return (
-    <View style={styles.root}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={[styles.title, isRtl && styles.rtl]}>
+      <View style={{ flexDirection: isRtl ? "row-reverse" : "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: spacing.md, paddingTop: 12, paddingBottom: 8 }}>
+        <Text style={{ fontSize: 22, fontWeight: "800", color: colors.text, ...rtl }}>
           {isRtl ? "الإشعارات" : "Notifications"}
           {unreadCount > 0 ? ` (${unreadCount})` : ""}
         </Text>
         {unreadCount > 0 && (
-          <Pressable onPress={() => void markAllRead()} style={styles.readAllBtn}>
-            <Text style={styles.readAllText}>
+          <Pressable onPress={() => void markAllRead()} style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.lg, backgroundColor: colors.primaryLight }}>
+            <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "700" }}>
               {isRtl ? "قراءة الكل" : "Mark all read"}
             </Text>
           </Pressable>
@@ -112,14 +119,16 @@ export default function NotificationsScreen() {
       </View>
 
       <ScrollView
-        style={styles.list}
-        contentContainerStyle={items.length === 0 ? styles.emptyContainer : styles.listContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[BRAND]} />}
+        style={{ flex: 1 }}
+        contentContainerStyle={items.length === 0
+          ? { flex: 1, justifyContent: "center", alignItems: "center" }
+          : { paddingHorizontal: spacing.md, paddingTop: 4, paddingBottom: 30, gap: 8 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} />}
       >
         {items.length === 0 ? (
-          <View style={styles.emptyBox}>
-            <Text style={styles.emptyIcon}>🔔</Text>
-            <Text style={[styles.emptyText, isRtl && styles.rtl]}>
+          <View style={{ alignItems: "center", gap: 12 }}>
+            <Text style={{ fontSize: 48 }}>🔔</Text>
+            <Text style={{ fontSize: 16, color: colors.textMuted, fontWeight: "600" }}>
               {isRtl ? "لا توجد إشعارات" : "No notifications yet"}
             </Text>
           </View>
@@ -128,18 +137,25 @@ export default function NotificationsScreen() {
             <Pressable
               key={n.id}
               onPress={() => !n.isRead && void markRead(n.id)}
-              style={[styles.card, !n.isRead && styles.cardUnread]}
+              style={({ pressed }) => ({
+                backgroundColor: n.isRead ? colors.surface : colors.primaryLight,
+                borderRadius: radius.lg,
+                padding: 14,
+                borderWidth: 1,
+                borderColor: n.isRead ? colors.border : colors.primary + "33",
+                opacity: pressed ? 0.85 : 1,
+              })}
             >
-              <View style={[styles.cardRow, isRtl && { flexDirection: "row-reverse" }]}>
-                {!n.isRead && <View style={styles.unreadDot} />}
+              <View style={{ flexDirection: isRtl ? "row-reverse" : "row", alignItems: "flex-start", gap: 10 }}>
+                {!n.isRead && <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colors.primary, marginTop: 5 }} />}
                 <View style={{ flex: 1 }}>
-                  <Text style={[styles.notifTitle, isRtl && styles.rtl]} numberOfLines={1}>
+                  <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text, ...rtl }} numberOfLines={1}>
                     {n.title}
                   </Text>
-                  <Text style={[styles.notifMsg, isRtl && styles.rtl]} numberOfLines={2}>
+                  <Text style={{ fontSize: 13, color: colors.textSecondary, marginTop: 2, ...rtl }} numberOfLines={2}>
                     {n.message}
                   </Text>
-                  <Text style={[styles.notifTime, isRtl && styles.rtl]}>
+                  <Text style={{ fontSize: 11, color: colors.textMuted, marginTop: 4, ...rtl }}>
                     {timeAgo(n.createdAt, language)}
                   </Text>
                 </View>
@@ -151,56 +167,3 @@ export default function NotificationsScreen() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f8fafc" },
-  center: { flex: 1, backgroundColor: "#f8fafc", alignItems: "center", justifyContent: "center" },
-  rtl: { textAlign: "right", writingDirection: "rtl" },
-
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingTop: 12,
-    paddingBottom: 8,
-  },
-  title: { fontSize: 22, fontWeight: "800", color: "#0f172a" },
-  readAllBtn: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 10,
-    backgroundColor: "rgba(59,130,246,0.1)",
-  },
-  readAllText: { color: BRAND, fontSize: 12, fontWeight: "700" },
-
-  list: { flex: 1 },
-  listContent: { paddingHorizontal: 16, paddingTop: 4, paddingBottom: 30, gap: 8 },
-  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  emptyBox: { alignItems: "center", gap: 12 },
-  emptyIcon: { fontSize: 48 },
-  emptyText: { fontSize: 16, color: "#94a3b8", fontWeight: "600" },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-  },
-  cardUnread: {
-    backgroundColor: "rgba(59,130,246,0.04)",
-    borderColor: "rgba(59,130,246,0.2)",
-  },
-  cardRow: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: BRAND,
-    marginTop: 5,
-  },
-  notifTitle: { fontSize: 14, fontWeight: "700", color: "#0f172a", marginBottom: 2 },
-  notifMsg: { fontSize: 13, color: "#64748b", lineHeight: 18 },
-  notifTime: { fontSize: 11, color: "#94a3b8", marginTop: 6 },
-});

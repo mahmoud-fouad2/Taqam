@@ -129,6 +129,28 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    // Increment pending balance
+    const currentYear = start.getFullYear();
+    await prisma.leaveBalance.upsert({
+      where: {
+        employeeId_leaveTypeId_year: {
+          employeeId: payloadOrRes.employeeId,
+          leaveTypeId,
+          year: currentYear,
+        },
+      },
+      create: {
+        tenantId: payloadOrRes.tenantId,
+        employeeId: payloadOrRes.employeeId,
+        leaveTypeId,
+        year: currentYear,
+        pending: totalDays,
+      },
+      update: {
+        pending: { increment: totalDays },
+      },
+    });
+
     return NextResponse.json(
       {
         data: {

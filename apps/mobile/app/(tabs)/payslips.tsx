@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
 import {
-  ActivityIndicator,
   Pressable,
   RefreshControl,
   ScrollView,
-  StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useRouter } from "expo-router";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
-
-const BRAND = "#3b82f6";
+import { useTheme } from "@/theme";
+import { SkeletonCard } from "@/components/ui";
 
 type PayslipSummary = {
   id: string;
@@ -53,8 +50,11 @@ export default function PayslipsScreen() {
   }, [authFetch, year]);
 
   useEffect(() => {
-    setLoading(true);
-    fetchData().finally(() => setLoading(false));
+    let cancelled = false;
+    (async () => {
+      try { await fetchData(); } finally { if (!cancelled) setLoading(false); }
+    })();
+    return () => { cancelled = true; };
   }, [fetchData]);
 
   const onRefresh = useCallback(async () => {
@@ -65,71 +65,78 @@ export default function PayslipsScreen() {
 
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" color={BRAND} />
+      <View style={{ flex: 1, backgroundColor: colors.background, padding: spacing.md, gap: 12, paddingTop: 40 }}>
+        <SkeletonCard style={{ height: 100 }} />
+        <SkeletonCard style={{ height: 100 }} />
+        <SkeletonCard style={{ height: 100 }} />
       </View>
     );
   }
 
+  const rtl = isRtl ? { textAlign: "right" as const, writingDirection: "rtl" as const } : {};
+
   return (
     <ScrollView
-      style={styles.root}
-      contentContainerStyle={payslips.length === 0 ? styles.emptyContainer : styles.content}
-      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[BRAND]} />}
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={payslips.length === 0
+        ? { flex: 1 }
+        : { padding: spacing.md, paddingBottom: 40, gap: 12 }}
+      refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[colors.primary]} tintColor={colors.primary} />}
     >
       {/* Year selector */}
-      <View style={styles.yearRow}>
-        <Pressable onPress={() => setYear(year - 1)} style={styles.yearBtn}>
-          <Text style={styles.yearBtnText}>◀</Text>
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 12, marginTop: 8 }}>
+        <Pressable onPress={() => setYear(year - 1)} style={{ padding: 8, borderRadius: 8, backgroundColor: colors.border }}>
+          <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text }}>◀</Text>
         </Pressable>
-        <Text style={styles.yearLabel}>{year}</Text>
+        <Text style={{ fontSize: 20, fontWeight: "900", color: colors.text }}>{year}</Text>
         <Pressable
           onPress={() => year < new Date().getFullYear() ? setYear(year + 1) : null}
-          style={[styles.yearBtn, year >= new Date().getFullYear() && { opacity: 0.3 }]}
+          style={{ padding: 8, borderRadius: 8, backgroundColor: colors.border, opacity: year >= new Date().getFullYear() ? 0.3 : 1 }}
         >
-          <Text style={styles.yearBtnText}>▶</Text>
+          <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text }}>▶</Text>
         </Pressable>
       </View>
 
       {payslips.length === 0 ? (
-        <View style={styles.emptyBox}>
-          <Text style={styles.emptyIcon}>💰</Text>
-          <Text style={[styles.emptyText, isRtl && styles.rtl]}>
+        <View style={{ alignItems: "center", gap: 12, marginTop: 80 }}>
+          <Text style={{ fontSize: 48 }}>💰</Text>
+          <Text style={{ fontSize: 16, color: colors.textMuted, fontWeight: "600" }}>
             {isRtl ? "لا توجد كشوف رواتب" : "No payslips found"}
           </Text>
         </View>
       ) : (
         payslips.map((p) => (
-          <View key={p.id} style={styles.card}>
-            <Text style={[styles.periodName, isRtl && styles.rtl]}>{p.periodName}</Text>
-            <Text style={[styles.periodDates, isRtl && styles.rtl]}>
+          <View
+            key={p.id}
+            style={{ backgroundColor: colors.surface, borderRadius: radius.xl, padding: spacing.md, borderWidth: 1, borderColor: colors.border, gap: 8 }}
+          >
+            <Text style={{ fontSize: 16, fontWeight: "700", color: colors.text, ...rtl }}>{p.periodName}</Text>
+            <Text style={{ fontSize: 12, color: colors.textSecondary, ...rtl }}>
               {p.periodStart} → {p.periodEnd}
             </Text>
 
-            <View style={styles.salaryGrid}>
-              <View style={styles.salaryItem}>
-                <Text style={styles.salaryLabel}>{isRtl ? "الأساسي" : "Basic"}</Text>
-                <Text style={styles.salaryValue}>{fmt(p.basicSalary, p.currency)}</Text>
+            <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap", marginTop: 4 }}>
+              <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: radius.md, padding: 8, alignItems: "center" }}>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>{isRtl ? "الأساسي" : "Basic"}</Text>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: colors.text }}>{fmt(p.basicSalary, p.currency)}</Text>
               </View>
-              <View style={styles.salaryItem}>
-                <Text style={styles.salaryLabel}>{isRtl ? "الاستحقاقات" : "Earnings"}</Text>
-                <Text style={[styles.salaryValue, { color: "#16a34a" }]}>{fmt(p.totalEarnings, p.currency)}</Text>
+              <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: radius.md, padding: 8, alignItems: "center" }}>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>{isRtl ? "الاستحقاقات" : "Earnings"}</Text>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: "#16a34a" }}>{fmt(p.totalEarnings, p.currency)}</Text>
               </View>
-              <View style={styles.salaryItem}>
-                <Text style={styles.salaryLabel}>{isRtl ? "الخصومات" : "Deductions"}</Text>
-                <Text style={[styles.salaryValue, { color: "#dc2626" }]}>-{fmt(p.totalDeductions, p.currency)}</Text>
+              <View style={{ flex: 1, backgroundColor: colors.background, borderRadius: radius.md, padding: 8, alignItems: "center" }}>
+                <Text style={{ fontSize: 11, color: colors.textMuted }}>{isRtl ? "الخصومات" : "Deductions"}</Text>
+                <Text style={{ fontSize: 13, fontWeight: "700", color: "#dc2626" }}>-{fmt(p.totalDeductions, p.currency)}</Text>
               </View>
             </View>
 
-            <View style={styles.netRow}>
-              <Text style={[styles.netLabel, isRtl && styles.rtl]}>
-                {isRtl ? "الصافي" : "Net Salary"}
-              </Text>
-              <Text style={styles.netValue}>{fmt(p.netSalary, p.currency)}</Text>
+            <View style={{ flexDirection: isRtl ? "row-reverse" : "row", justifyContent: "space-between", alignItems: "center", paddingTop: 8, borderTopWidth: 1, borderTopColor: colors.border, marginTop: 4 }}>
+              <Text style={{ fontSize: 13, color: colors.textSecondary, ...rtl }}>{isRtl ? "الصافي" : "Net Salary"}</Text>
+              <Text style={{ fontSize: 18, fontWeight: "900", color: colors.primary }}>{fmt(p.netSalary, p.currency)}</Text>
             </View>
 
             {p.paymentDate && (
-              <Text style={[styles.payDate, isRtl && styles.rtl]}>
+              <Text style={{ fontSize: 11, color: colors.textMuted, ...rtl }}>
                 {isRtl ? `تاريخ الدفع: ${p.paymentDate}` : `Payment: ${p.paymentDate}`}
               </Text>
             )}
@@ -139,49 +146,3 @@ export default function PayslipsScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f8fafc" },
-  center: { flex: 1, backgroundColor: "#f8fafc", alignItems: "center", justifyContent: "center" },
-  content: { padding: 16, paddingBottom: 40, gap: 12 },
-  emptyContainer: { flex: 1 },
-  emptyBox: { alignItems: "center", gap: 12, marginTop: 80 },
-  emptyIcon: { fontSize: 48 },
-  emptyText: { fontSize: 16, color: "#94a3b8", fontWeight: "600" },
-  rtl: { textAlign: "right", writingDirection: "rtl" },
-
-  yearRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 20, marginBottom: 12, marginTop: 8 },
-  yearBtn: { padding: 8, borderRadius: 8, backgroundColor: "#e2e8f0" },
-  yearBtnText: { fontSize: 14, fontWeight: "700", color: "#0f172a" },
-  yearLabel: { fontSize: 20, fontWeight: "900", color: "#0f172a" },
-
-  card: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    gap: 10,
-  },
-  periodName: { fontSize: 16, fontWeight: "800", color: "#0f172a" },
-  periodDates: { fontSize: 12, color: "#64748b" },
-
-  salaryGrid: { flexDirection: "row", gap: 8, marginTop: 4 },
-  salaryItem: { flex: 1, gap: 2 },
-  salaryLabel: { fontSize: 11, color: "#94a3b8", fontWeight: "600" },
-  salaryValue: { fontSize: 13, fontWeight: "700", color: "#0f172a" },
-
-  netRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: "rgba(59,130,246,0.06)",
-    borderRadius: 10,
-    padding: 12,
-    marginTop: 4,
-  },
-  netLabel: { fontSize: 14, fontWeight: "700", color: "#334155" },
-  netValue: { fontSize: 18, fontWeight: "900", color: BRAND },
-
-  payDate: { fontSize: 11, color: "#94a3b8", fontWeight: "600" },
-});

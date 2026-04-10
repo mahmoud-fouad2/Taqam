@@ -1,10 +1,9 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useRouter } from "expo-router";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
-
-const BRAND = "#3b82f6";
+import { useTheme } from "@/theme";
 
 type MenuItem = {
   icon: string;
@@ -18,6 +17,7 @@ type MenuItem = {
 export default function MoreScreen() {
   const { user } = useAuth();
   const { language } = useAppSettings();
+  const { colors, spacing, radius } = useTheme();
   const router = useRouter();
   const isRtl = language === "ar";
   const role = user?.role ?? "EMPLOYEE";
@@ -33,20 +33,34 @@ export default function MoreScreen() {
   const visible = items.filter((it) => !it.roles || it.roles.includes(role));
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={styles.content}>
-      <Text style={[styles.title, isRtl && styles.rtl]}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      contentContainerStyle={{ padding: spacing.md, paddingBottom: 40 }}
+    >
+      <Text style={{ fontSize: 24, fontWeight: "800", color: colors.text, marginBottom: 20, marginTop: 8, textAlign: isRtl ? "right" : "left" }}>
         {isRtl ? "المزيد" : "More"}
       </Text>
 
-      <View style={styles.grid}>
+      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 12 }}>
         {visible.map((item) => (
           <Pressable
             key={item.route}
             onPress={() => router.push(item.route as any)}
-            style={({ pressed }) => [styles.card, pressed && { opacity: 0.75, transform: [{ scale: 0.97 }] }]}
+            style={({ pressed }) => ({
+              width: "47%",
+              backgroundColor: colors.surface,
+              borderRadius: radius.xl,
+              padding: 20,
+              borderWidth: 1,
+              borderColor: colors.border,
+              alignItems: "center",
+              gap: 10,
+              opacity: pressed ? 0.75 : 1,
+              transform: pressed ? [{ scale: 0.97 }] : [],
+            })}
           >
-            <Text style={styles.cardIcon}>{item.icon}</Text>
-            <Text style={[styles.cardLabel, isRtl && styles.rtl]}>
+            <Text style={{ fontSize: 32 }}>{item.icon}</Text>
+            <Text style={{ fontSize: 14, fontWeight: "700", color: colors.text, textAlign: "center" }}>
               {isRtl ? item.labelAr : item.labelEn}
             </Text>
           </Pressable>
@@ -55,23 +69,3 @@ export default function MoreScreen() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: "#f8fafc" },
-  content: { padding: 16, paddingBottom: 40 },
-  rtl: { textAlign: "right", writingDirection: "rtl" },
-  title: { fontSize: 24, fontWeight: "800", color: "#0f172a", marginBottom: 20, marginTop: 8 },
-  grid: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  card: {
-    width: "47%",
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#e2e8f0",
-    alignItems: "center",
-    gap: 10,
-  },
-  cardIcon: { fontSize: 32 },
-  cardLabel: { fontSize: 14, fontWeight: "700", color: "#0f172a", textAlign: "center" },
-});
