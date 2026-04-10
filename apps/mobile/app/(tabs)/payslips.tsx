@@ -33,6 +33,7 @@ function fmt(n: number, currency: string): string {
 export default function PayslipsScreen() {
   const { authFetch } = useAuth();
   const { language } = useAppSettings();
+  const { colors, radius, spacing } = useTheme();
   const isRtl = language === "ar";
 
   const [payslips, setPayslips] = useState<PayslipSummary[]>([]);

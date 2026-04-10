@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const formData = await request.formData();
-    const file = formData.get("file");
+    const file = formData.get("avatar");
 
     if (!file || !(file instanceof File)) {
       return NextResponse.json({ error: "Missing file" }, { status: 400 });

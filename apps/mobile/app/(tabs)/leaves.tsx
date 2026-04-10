@@ -45,9 +45,9 @@ type LeaveRequest = {
 
 type Ticket = {
   id: string;
-  requestType: string;
-  subject: string;
-  description: string;
+  type: string;
+  title: string;
+  description: string | undefined;
   status: string;
   createdAt: string;
 };
@@ -105,13 +105,13 @@ export default function LeavesScreen() {
   // ─────────────────── Data fetching ───────────────────
   const fetchData = useCallback(async () => {
     try {
-      const [leavesRes, ticketsRes, typesRes] = await Promise.all([
+      const [leavesRes, requestsRes, typesRes] = await Promise.all([
         authFetch<{ data: LeaveRequest[]; total: number }>("/api/mobile/leaves?limit=50"),
-        authFetch<{ data: Ticket[] }>("/api/mobile/my-requests?type=ticket").catch(() => ({ data: [] })),
+        authFetch<{ data: { items: Ticket[] } }>("/api/mobile/my-requests").catch(() => ({ data: { items: [] } })),
         authFetch<{ data: LeaveType[] }>("/api/mobile/leaves/types"),
       ]);
       setLeaves(leavesRes.data ?? []);
-      setTickets(ticketsRes.data ?? []);
+      setTickets((requestsRes.data?.items ?? []).filter((it: any) => it.type === "ticket"));
       setLeaveTypes(typesRes.data ?? []);
     } catch (e: any) {
       console.warn("Leaves fetchData error:", e?.message);
@@ -395,7 +395,8 @@ export default function LeavesScreen() {
 // ─────────────────── Sub-components ───────────────────
 
 function LeaveCard({ item, lang, isRtl }: { item: LeaveRequest; lang: "ar" | "en"; isRtl: boolean }) {
-  const sc = STATUS_COLORS[item.status] ?? STATUS_COLORS.PENDING;
+  const statusKey = item.status.toUpperCase();
+  const sc = STATUS_COLORS[statusKey] ?? STATUS_COLORS.PENDING;
   return (
     <View style={styles.card}>
       <View style={[styles.cardRow, isRtl && { flexDirection: "row-reverse" }]}>
@@ -415,7 +416,7 @@ function LeaveCard({ item, lang, isRtl }: { item: LeaveRequest; lang: "ar" | "en
         </View>
         <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
           <Text style={[styles.statusText, { color: sc.text }]}>
-            {statusLabel(item.status, lang)}
+            {statusLabel(statusKey, lang)}
           </Text>
         </View>
       </View>
@@ -424,14 +425,15 @@ function LeaveCard({ item, lang, isRtl }: { item: LeaveRequest; lang: "ar" | "en
 }
 
 function TicketCard({ item, lang, isRtl }: { item: Ticket; lang: "ar" | "en"; isRtl: boolean }) {
-  const sc = STATUS_COLORS[item.status] ?? STATUS_COLORS.OPEN;
+  const statusKey = item.status.toUpperCase();
+  const sc = STATUS_COLORS[statusKey] ?? STATUS_COLORS.OPEN;
   return (
     <View style={styles.card}>
       <View style={[styles.cardRow, isRtl && { flexDirection: "row-reverse" }]}>
         <Text style={styles.ticketIcon}>🎫</Text>
         <View style={{ flex: 1 }}>
           <Text style={[styles.cardTitle, isRtl && styles.rtl]} numberOfLines={1}>
-            {item.subject}
+            {item.title}
           </Text>
           <Text style={[styles.cardDates, isRtl && styles.rtl]} numberOfLines={2}>
             {item.description}
@@ -439,7 +441,7 @@ function TicketCard({ item, lang, isRtl }: { item: Ticket; lang: "ar" | "en"; is
         </View>
         <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
           <Text style={[styles.statusText, { color: sc.text }]}>
-            {statusLabel(item.status, lang)}
+            {statusLabel(statusKey, lang)}
           </Text>
         </View>
       </View>

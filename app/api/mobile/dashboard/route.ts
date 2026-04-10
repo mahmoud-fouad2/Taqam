@@ -70,7 +70,8 @@ export async function GET(request: NextRequest) {
             where: {
               tenantId,
               status: "PENDING",
-              employee: { managerId: employeeId },
+              // MANAGER: only direct reports; TENANT_ADMIN/HR_MANAGER: all pending
+              ...(role === "MANAGER" ? { employee: { managerId: employeeId } } : {}),
             },
           })
         : Promise.resolve(0),

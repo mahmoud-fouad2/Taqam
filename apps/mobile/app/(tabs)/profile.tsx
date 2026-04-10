@@ -156,6 +156,7 @@ export default function ProfileScreen() {
   };
 
   // --- Sign out ---
+  const doSignOut = async () => {
     setSigningOut(true);
     setMsg(null);
     try {
