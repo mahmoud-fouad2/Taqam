@@ -32,7 +32,7 @@ const applicantCreateSchema = z
     status: z.string().optional(),
     source: z.string().optional().default("career-portal"),
     rating: z.number().int().min(1).max(5).optional().nullable(),
-    notes: z.string().optional().nullable(),
+    notes: z.string().optional().nullable()
   })
   .strict();
 
@@ -40,18 +40,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -82,16 +76,16 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
-            titleAr: true,
-          },
+            titleAr: true
+          }
         },
         _count: {
           select: {
-            interviews: true,
-          },
-        },
+            interviews: true
+          }
+        }
       },
-      orderBy: { appliedAt: "desc" },
+      orderBy: { appliedAt: "desc" }
     });
 
     const result = applicants.map((a) => ({
@@ -111,7 +105,7 @@ export async function GET(request: NextRequest) {
       appliedAt: a.appliedAt.toISOString(),
       interviewsCount: a._count.interviews,
       createdAt: a.createdAt.toISOString(),
-      updatedAt: a.updatedAt.toISOString(),
+      updatedAt: a.updatedAt.toISOString()
     }));
 
     return NextResponse.json({ success: true, data: result });
@@ -128,18 +122,12 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const parsedBody = applicantCreateSchema.safeParse(await request.json());
@@ -176,8 +164,8 @@ export async function POST(request: NextRequest) {
         status,
         source: body.source,
         rating: body.rating ?? undefined,
-        notes: body.notes,
-      },
+        notes: body.notes
+      }
     });
 
     return NextResponse.json({
@@ -187,8 +175,8 @@ export async function POST(request: NextRequest) {
         firstName: applicant.firstName,
         lastName: applicant.lastName,
         status: mapStatus(applicant.status),
-        createdAt: applicant.createdAt.toISOString(),
-      },
+        createdAt: applicant.createdAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error creating applicant:", error);

@@ -6,7 +6,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PayrollPeriodStatus } from "@prisma/client";
 import { requireTenantSession } from "@/lib/api/route-helper";
-import { getPayrollPeriodById, mapPayrollPeriod, updatePayrollPeriodStatus } from "@/lib/payroll/periods";
+import {
+  getPayrollPeriodById,
+  mapPayrollPeriod,
+  updatePayrollPeriodStatus
+} from "@/lib/payroll/periods";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,10 +29,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ data: mapPayrollPeriod(period) });
   } catch (error) {
     console.error("Error fetching payroll period:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch payroll period" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch payroll period" }, { status: 500 });
   }
 }
 
@@ -58,7 +59,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       tenantId,
       id,
       status: nextStatusEnum,
-      note: body?.notes,
+      note: body?.notes
     });
 
     if (!updated) {
@@ -68,9 +69,6 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
     console.error("Error updating payroll period:", error);
-    return NextResponse.json(
-      { error: "Failed to update payroll period" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update payroll period" }, { status: 500 });
   }
 }

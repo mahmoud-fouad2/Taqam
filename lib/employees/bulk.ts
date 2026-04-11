@@ -30,7 +30,7 @@ export const employeeBulkInputSchema = z
     workLocation: z.string().trim().min(1).optional(),
 
     baseSalary: z.union([z.number(), z.string()]).optional(),
-    currency: z.string().trim().min(1).optional(),
+    currency: z.string().trim().min(1).optional()
   })
   .strict();
 
@@ -39,7 +39,7 @@ export const bulkEmployeesSchema = z
     tenantId: z.string().trim().min(1).optional(),
     dryRun: z.boolean().optional().default(false),
     atomic: z.boolean().optional().default(false),
-    employees: z.array(employeeBulkInputSchema).min(1).max(500),
+    employees: z.array(employeeBulkInputSchema).min(1).max(500)
   })
   .strict();
 
@@ -101,7 +101,7 @@ export async function prepareEmployeesForInsert(args: {
   const lastEmployee = await prisma.employee.findFirst({
     where: { tenantId },
     orderBy: { employeeNumber: "desc" },
-    select: { employeeNumber: true },
+    select: { employeeNumber: true }
   });
 
   const lastNumeric = parseLastNumericEmployeeNumber(lastEmployee?.employeeNumber);
@@ -138,7 +138,7 @@ export async function prepareEmployeesForInsert(args: {
       shiftId: e.shiftId ?? null,
       workLocation: e.workLocation ?? null,
       baseSalary: (e.baseSalary as any) ?? null,
-      currency: e.currency ?? "SAR",
+      currency: e.currency ?? "SAR"
     };
   });
 
@@ -171,7 +171,7 @@ export async function insertPreparedEmployees(args: {
     success: 0,
     failed: 0,
     errors: [],
-    created: [],
+    created: []
   };
 
   if (prepared.length === 0) return summary;
@@ -181,7 +181,7 @@ export async function insertPreparedEmployees(args: {
       prepared.map((r) =>
         prisma.employee.create({
           data: r as any,
-          select: { id: true, employeeNumber: true },
+          select: { id: true, employeeNumber: true }
         })
       )
     );
@@ -190,7 +190,7 @@ export async function insertPreparedEmployees(args: {
     summary.created = created.map((c, index) => ({
       index,
       id: c.id,
-      employeeNumber: c.employeeNumber,
+      employeeNumber: c.employeeNumber
     }));
 
     return summary;
@@ -201,7 +201,7 @@ export async function insertPreparedEmployees(args: {
     try {
       const created = await prisma.employee.create({
         data: r as any,
-        select: { id: true, employeeNumber: true },
+        select: { id: true, employeeNumber: true }
       });
       summary.success += 1;
       summary.created.push({ index: i, id: created.id, employeeNumber: created.employeeNumber });
@@ -210,7 +210,7 @@ export async function insertPreparedEmployees(args: {
       summary.errors.push({
         index: i,
         employeeNumber: r.employeeNumber,
-        message: e?.message ?? "Create failed",
+        message: e?.message ?? "Create failed"
       });
     }
   }

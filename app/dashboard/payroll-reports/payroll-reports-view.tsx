@@ -10,23 +10,17 @@ import {
   IconBuilding,
   IconTrendingUp,
   IconChartBar,
-  IconFileSpreadsheet,
+  IconFileSpreadsheet
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -34,7 +28,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -89,9 +83,7 @@ export function PayrollReportsView() {
   React.useEffect(() => {
     fetchJson<{ data: any[] }>("/api/departments")
       .then(({ data }) => {
-        setDepartments(
-          data.map((d) => ({ id: d.id, name: d.name, nameAr: d.nameAr }))
-        );
+        setDepartments(data.map((d) => ({ id: d.id, name: d.name, nameAr: d.nameAr })));
       })
       .catch((e) => {
         console.error(e);
@@ -128,25 +120,29 @@ export function PayrollReportsView() {
       : 0,
     gosiBase: departmentStats.reduce((sum, d) => sum + d.gosiBase, 0),
     gosiEmployee: departmentStats.reduce((sum, d) => sum + d.gosiEmployee, 0),
-    gosiEmployer: departmentStats.reduce((sum, d) => sum + d.gosiEmployer, 0),
+    gosiEmployer: departmentStats.reduce((sum, d) => sum + d.gosiEmployer, 0)
   };
 
   const handleExportCSV = () => {
     // Generate CSV content
-    const headers = [t.common.department, t.common.employees, t.payrollReports.totalSalaries, t.payroll.deductions, t.payroll.net, t.payrollReports.avgSalary];
+    const headers = [
+      t.common.department,
+      t.common.employees,
+      t.payrollReports.totalSalaries,
+      t.payroll.deductions,
+      t.payroll.net,
+      t.payrollReports.avgSalary
+    ];
     const rows = departmentStats.map((d) => [
       d.name,
       d.employeeCount,
       d.totalGross,
       d.totalDeductions,
       d.totalNet,
-      d.avgSalary,
+      d.avgSalary
     ]);
 
-    const csvContent = [
-      headers.join(","),
-      ...rows.map((r) => r.join(",")),
-    ].join("\n");
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
 
     const blob = new Blob(["\ufeff" + csvContent], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -162,8 +158,10 @@ export function PayrollReportsView() {
       <div className="grid gap-4 md:grid-cols-5">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.salaryStructures.totalSalaries}</CardTitle>
-            <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              {t.salaryStructures.totalSalaries}
+            </CardTitle>
+            <IconCurrencyRiyal className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold">{formatCurrency(totalStats.totalGross)}</div>
@@ -194,7 +192,7 @@ export function PayrollReportsView() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.employees}</CardTitle>
-            <IconUsers className="h-4 w-4 text-muted-foreground" />
+            <IconUsers className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{totalStats.totalEmployees}</div>
@@ -203,7 +201,7 @@ export function PayrollReportsView() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.salaryStructures.avgSalary}</CardTitle>
-            <IconChartBar className="h-4 w-4 text-muted-foreground" />
+            <IconChartBar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold">{formatCurrency(totalStats.avgSalary)}</div>
@@ -216,7 +214,7 @@ export function PayrollReportsView() {
         <div className="flex items-center gap-2">
           <Select value={yearFilter} onValueChange={setYearFilter}>
             <SelectTrigger className="w-[120px]">
-              <IconCalendar className="h-4 w-4 ms-2" />
+              <IconCalendar className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.year} />
             </SelectTrigger>
             <SelectContent>
@@ -239,7 +237,7 @@ export function PayrollReportsView() {
           </Select>
           <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
             <SelectTrigger className="w-[160px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.department} />
             </SelectTrigger>
             <SelectContent>
@@ -254,21 +252,23 @@ export function PayrollReportsView() {
         </div>
 
         <Button variant="outline" onClick={handleExportCSV}>
-          <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
+          <IconDownload className="ms-2 h-4 w-4" />
+          {t.common.exportData}
+        </Button>
       </div>
 
       <Tabs defaultValue="departments" className="space-y-4">
         <TabsList>
           <TabsTrigger value="departments">
-            <IconBuilding className="h-4 w-4 ms-2" />
+            <IconBuilding className="ms-2 h-4 w-4" />
             {t.payrollReports.pByDepartment}
           </TabsTrigger>
           <TabsTrigger value="trend">
-            <IconTrendingUp className="h-4 w-4 ms-2" />
+            <IconTrendingUp className="ms-2 h-4 w-4" />
             {t.payrollReports.pMonthlyTrend}
           </TabsTrigger>
           <TabsTrigger value="gosi">
-            <IconFileSpreadsheet className="h-4 w-4 ms-2" />
+            <IconFileSpreadsheet className="ms-2 h-4 w-4" />
             {t.payrollReports.pInsuranceReport}
           </TabsTrigger>
         </TabsList>
@@ -296,7 +296,9 @@ export function PayrollReportsView() {
                 <TableBody>
                   {isLoading && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">{t.common.loading}</TableCell>
+                      <TableCell colSpan={7} className="text-muted-foreground py-6 text-center">
+                        {t.common.loading}
+                      </TableCell>
                     </TableRow>
                   )}
                   {departmentStats.map((dept) => (
@@ -307,9 +309,7 @@ export function PayrollReportsView() {
                       <TableCell className="text-red-600">
                         -{formatCurrency(dept.totalDeductions)}
                       </TableCell>
-                      <TableCell className="font-bold">
-                        {formatCurrency(dept.totalNet)}
-                      </TableCell>
+                      <TableCell className="font-bold">{formatCurrency(dept.totalNet)}</TableCell>
                       <TableCell>{formatCurrency(dept.avgSalary)}</TableCell>
                       <TableCell className="w-32">
                         <div className="flex items-center gap-2">
@@ -317,14 +317,14 @@ export function PayrollReportsView() {
                             value={(dept.totalNet / totalStats.totalNet) * 100}
                             className="h-2"
                           />
-                          <span className="text-xs text-muted-foreground w-10">
+                          <span className="text-muted-foreground w-10 text-xs">
                             {((dept.totalNet / totalStats.totalNet) * 100).toFixed(0)}%
                           </span>
                         </div>
                       </TableCell>
                     </TableRow>
                   ))}
-                  <TableRow className="font-bold bg-muted">
+                  <TableRow className="bg-muted font-bold">
                     <TableCell>{t.common.total}</TableCell>
                     <TableCell>{totalStats.totalEmployees}</TableCell>
                     <TableCell>{formatCurrency(totalStats.totalGross)}</TableCell>
@@ -336,11 +336,13 @@ export function PayrollReportsView() {
                     <TableCell>100%</TableCell>
                   </TableRow>
                 </TableBody>
-                  {isLoading && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">{t.common.loading}</TableCell>
-                    </TableRow>
-                  )}
+                {isLoading && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-muted-foreground py-6 text-center">
+                      {t.common.loading}
+                    </TableCell>
+                  </TableRow>
+                )}
               </Table>
             </CardContent>
           </Card>
@@ -350,7 +352,9 @@ export function PayrollReportsView() {
         <TabsContent value="trend">
           <Card>
             <CardHeader>
-              <CardTitle>{t.payrollReports.monthlyTrend} {t.payrollReports.pForPayroll}</CardTitle>
+              <CardTitle>
+                {t.payrollReports.monthlyTrend} {t.payrollReports.pForPayroll}
+              </CardTitle>
               <CardDescription>{t.payrollReports.monthlyTrendDesc}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -380,13 +384,8 @@ export function PayrollReportsView() {
                           {index > 0 && (
                             <span
                               className={
-                                change > 0
-                                  ? "text-green-600"
-                                  : change < 0
-                                  ? "text-red-600"
-                                  : ""
-                              }
-                            >
+                                change > 0 ? "text-green-600" : change < 0 ? "text-red-600" : ""
+                              }>
                               {change > 0 ? "+" : ""}
                               {change.toFixed(1)}%
                             </span>
@@ -405,10 +404,8 @@ export function PayrollReportsView() {
         <TabsContent value="gosi">
           <Card>
             <CardHeader>
-              <CardTitle>{t.payrollReports.gosiReport}  (GOSI)</CardTitle>
-              <CardDescription>
-                {t.payrollReports.pSummaryOfSocialInsuranceSubscr}
-              </CardDescription>
+              <CardTitle>{t.payrollReports.gosiReport} (GOSI)</CardTitle>
+              <CardDescription>{t.payrollReports.pSummaryOfSocialInsuranceSubscr}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid gap-4 md:grid-cols-3">

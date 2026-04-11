@@ -1,17 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Tabs as TabsPrimitive } from "radix-ui"
+import * as React from "react";
+import { Tabs as TabsPrimitive } from "radix-ui";
 
-import { cn } from "@/lib/utils"
-import { useAppDir } from "@/components/direction-context"
+import { cn } from "@/lib/utils";
+import { useAppDir } from "@/components/direction-context";
 
-function Tabs({
-  className,
-  dir,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
-  const appDir = useAppDir()
+function Tabs({ className, dir, ...props }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+  const appDir = useAppDir();
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
@@ -19,13 +15,10 @@ function Tabs({
       dir={dir ?? appDir}
       {...props}
     />
-  )
+  );
 }
 
-function TabsList({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.List>) {
+function TabsList({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.List>) {
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -35,13 +28,10 @@ function TabsList({
       )}
       {...props}
     />
-  )
+  );
 }
 
-function TabsTrigger({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
@@ -51,20 +41,17 @@ function TabsTrigger({
       )}
       {...props}
     />
-  )
+  );
 }
 
-function TabsContent({
-  className,
-  ...props
-}: React.ComponentProps<typeof TabsPrimitive.Content>) {
+function TabsContent({ className, ...props }: React.ComponentProps<typeof TabsPrimitive.Content>) {
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
       className={cn("flex-1 outline-none", className)}
       {...props}
     />
-  )
+  );
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent }
+export { Tabs, TabsList, TabsTrigger, TabsContent };

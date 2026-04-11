@@ -39,15 +39,18 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         employee: {
           select: {
             id: true,
-            employeeNumber: true,
-          },
-        },
-      },
+            employeeNumber: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ success: true, data: users });
   } catch (error) {
     console.error("Error fetching tenant users:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch tenant users" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch tenant users" },
+      { status: 500 }
+    );
   }
 }

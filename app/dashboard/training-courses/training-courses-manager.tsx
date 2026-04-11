@@ -16,26 +16,20 @@ import {
   IconStar,
   IconStarFilled,
   IconMapPin,
-  IconVideo,
+  IconVideo
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
@@ -43,20 +37,20 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -66,7 +60,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -81,7 +75,7 @@ import {
   courseStatusLabels,
   courseStatusColors,
   courseTypeLabels,
-  courseCategoryLabels,
+  courseCategoryLabels
 } from "@/lib/types/training";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -125,7 +119,7 @@ export function TrainingCoursesManager() {
       instructorName: "",
       locationOrLink: "",
       description: "",
-      objectivesText: "",
+      objectivesText: ""
     }),
     []
   );
@@ -140,7 +134,7 @@ export function TrainingCoursesManager() {
     try {
       const [coursesRes, statsRes] = await Promise.all([
         fetch("/api/training/courses", { cache: "no-store" }),
-        fetch("/api/training/stats", { cache: "no-store" }),
+        fetch("/api/training/stats", { cache: "no-store" })
       ]);
 
       if (!coursesRes.ok) {
@@ -172,13 +166,11 @@ export function TrainingCoursesManager() {
     return courses.filter((course) => {
       const matchesSearch =
         course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (course.titleEn?.toLowerCase().includes(searchQuery.toLowerCase()));
+        course.titleEn?.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus =
-        statusFilter === "all" || course.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || course.status === statusFilter;
 
-      const matchesCategory =
-        categoryFilter === "all" || course.category === categoryFilter;
+      const matchesCategory = categoryFilter === "all" || course.category === categoryFilter;
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
@@ -213,13 +205,13 @@ export function TrainingCoursesManager() {
         location: !isUrl ? locationOrLink || null : null,
         meetingLink: isUrl ? locationOrLink : null,
         objectives,
-        prerequisites: [],
+        prerequisites: []
       };
 
       const res = await fetch("/api/training/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       if (!res.ok) {
@@ -227,7 +219,9 @@ export function TrainingCoursesManager() {
         throw new Error(err?.error || "Failed to create course");
       }
 
-      toast.success(status === "draft" ? t.trainingCourses.savedAsDraft : t.trainingCourses.createdSuccess);
+      toast.success(
+        status === "draft" ? t.trainingCourses.savedAsDraft : t.trainingCourses.createdSuccess
+      );
       setIsAddSheetOpen(false);
       resetForm();
       await refresh();
@@ -281,7 +275,7 @@ export function TrainingCoursesManager() {
             )}
           </span>
         ))}
-        <span className="text-xs text-muted-foreground me-1">({rating})</span>
+        <span className="text-muted-foreground me-1 text-xs">({rating})</span>
       </div>
     );
   };
@@ -304,11 +298,13 @@ export function TrainingCoursesManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.trainingCourses.totalCourses}</CardTitle>
-            <IconBook className="h-4 w-4 text-muted-foreground" />
+            <IconBook className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats?.totalCourses ?? 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.activeCourses ?? 0} {t.trainingCourses.activeCourses}</p>
+            <p className="text-muted-foreground text-xs">
+              {stats?.activeCourses ?? 0} {t.trainingCourses.activeCourses}
+            </p>
           </CardContent>
         </Card>
 
@@ -319,7 +315,9 @@ export function TrainingCoursesManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats?.totalEnrollments ?? 0}</div>
-            <p className="text-xs text-muted-foreground">{stats?.completedEnrollments ?? 0} {t.trainingCourses.completedTraining}</p>
+            <p className="text-muted-foreground text-xs">
+              {stats?.completedEnrollments ?? 0} {t.trainingCourses.completedTraining}
+            </p>
           </CardContent>
         </Card>
 
@@ -329,8 +327,10 @@ export function TrainingCoursesManager() {
             <IconClock className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats?.totalHoursCompleted ?? 0}</div>
-            <p className="text-xs text-muted-foreground">{t.trainingCourses.hoursCompleted}</p>
+            <div className="text-2xl font-bold text-green-600">
+              {stats?.totalHoursCompleted ?? 0}
+            </div>
+            <p className="text-muted-foreground text-xs">{t.trainingCourses.hoursCompleted}</p>
           </CardContent>
         </Card>
 
@@ -340,8 +340,10 @@ export function TrainingCoursesManager() {
             <IconCertificate className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats?.certificationRate ?? 0}%</div>
-            <p className="text-xs text-muted-foreground">{t.trainingCourses.receivedCerts}</p>
+            <div className="text-2xl font-bold text-purple-600">
+              {stats?.certificationRate ?? 0}%
+            </div>
+            <p className="text-muted-foreground text-xs">{t.trainingCourses.receivedCerts}</p>
           </CardContent>
         </Card>
       </div>
@@ -358,11 +360,14 @@ export function TrainingCoursesManager() {
               className="h-3 flex-1"
             />
             <span className="text-sm font-medium">
-              {(stats?.budgetUsed ?? 0).toLocaleString(numLocale)} / {(stats?.budgetTotal ?? 0).toLocaleString(numLocale)} {t.trainingCourses.sar}
+              {(stats?.budgetUsed ?? 0).toLocaleString(numLocale)} /{" "}
+              {(stats?.budgetTotal ?? 0).toLocaleString(numLocale)} {t.trainingCourses.sar}
             </span>
           </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {t.trainingCourses.pUsed} {stats?.budgetTotal ? Math.round((stats.budgetUsed / stats.budgetTotal) * 100) : 0}{t.trainingCourses.budgetPercent}
+          <p className="text-muted-foreground mt-1 text-xs">
+            {t.trainingCourses.pUsed}{" "}
+            {stats?.budgetTotal ? Math.round((stats.budgetUsed / stats.budgetTotal) * 100) : 0}
+            {t.trainingCourses.budgetPercent}
           </p>
         </CardContent>
       </Card>
@@ -382,12 +387,10 @@ export function TrainingCoursesManager() {
                   {t.trainingCourses.addCourse}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="sm:max-w-xl overflow-y-auto">
+              <SheetContent className="overflow-y-auto sm:max-w-xl">
                 <SheetHeader>
                   <SheetTitle>{t.trainingCourses.addDialog}</SheetTitle>
-                  <SheetDescription>
-                    {t.trainingCourses.enterCourseDetails}
-                  </SheetDescription>
+                  <SheetDescription>{t.trainingCourses.enterCourseDetails}</SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
@@ -408,15 +411,14 @@ export function TrainingCoursesManager() {
                       onChange={(e) => setForm((p) => ({ ...p, titleEn: e.target.value }))}
                     />
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="category">{t.common.category}</Label>
                       <Select
                         value={form.category}
                         onValueChange={(v) =>
                           setForm((p) => ({ ...p, category: v as CourseCategory }))
-                        }
-                      >
+                        }>
                         <SelectTrigger>
                           <SelectValue placeholder={t.trainingCourses.chooseCat} />
                         </SelectTrigger>
@@ -433,8 +435,7 @@ export function TrainingCoursesManager() {
                       <Label htmlFor="type">{t.trainingCourses.courseType}</Label>
                       <Select
                         value={form.type}
-                        onValueChange={(v) => setForm((p) => ({ ...p, type: v as CourseType }))}
-                      >
+                        onValueChange={(v) => setForm((p) => ({ ...p, type: v as CourseType }))}>
                         <SelectTrigger>
                           <SelectValue placeholder={t.common.selectType} />
                         </SelectTrigger>
@@ -448,7 +449,7 @@ export function TrainingCoursesManager() {
                       </Select>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="duration">{t.trainingCourses.durationHours}</Label>
                       <Input
@@ -459,7 +460,7 @@ export function TrainingCoursesManager() {
                         onChange={(e) =>
                           setForm((p) => ({
                             ...p,
-                            duration: Math.max(1, Number(e.target.value || "1")),
+                            duration: Math.max(1, Number(e.target.value || "1"))
                           }))
                         }
                       />
@@ -471,11 +472,13 @@ export function TrainingCoursesManager() {
                         type="number"
                         placeholder="20"
                         value={form.maxParticipants}
-                        onChange={(e) => setForm((p) => ({ ...p, maxParticipants: e.target.value }))}
+                        onChange={(e) =>
+                          setForm((p) => ({ ...p, maxParticipants: e.target.value }))
+                        }
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="startDate">{t.common.startDate}</Label>
                       <Input
@@ -537,7 +540,10 @@ export function TrainingCoursesManager() {
                     <Button className="flex-1" onClick={() => handleCreateCourse("draft")}>
                       {t.trainingCourses.saveAsDraft}
                     </Button>
-                    <Button variant="secondary" className="flex-1" onClick={() => handleCreateCourse("scheduled")}>
+                    <Button
+                      variant="secondary"
+                      className="flex-1"
+                      onClick={() => handleCreateCourse("scheduled")}>
                       {t.trainingCourses.publishCourse}
                     </Button>
                   </div>
@@ -548,9 +554,9 @@ export function TrainingCoursesManager() {
         </CardHeader>
         <CardContent>
           {/* {t.trainingCourses.searchFilter} */}
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.trainingCourses.searchPlaceholder}
                 value={searchQuery}
@@ -605,7 +611,7 @@ export function TrainingCoursesManager() {
               <TableBody>
                 {filteredCourses.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={8} className="py-8 text-center">
                       <p className="text-muted-foreground">{t.trainingCourses.noCourses}</p>
                     </TableCell>
                   </TableRow>
@@ -616,14 +622,12 @@ export function TrainingCoursesManager() {
                         <div>
                           <p className="font-medium">{course.title}</p>
                           {course.titleEn && (
-                            <p className="text-xs text-muted-foreground">{course.titleEn}</p>
+                            <p className="text-muted-foreground text-xs">{course.titleEn}</p>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {courseCategoryLabels[course.category]}
-                        </Badge>
+                        <Badge variant="outline">{courseCategoryLabels[course.category]}</Badge>
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
@@ -632,7 +636,9 @@ export function TrainingCoursesManager() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <span className="text-sm">{course.duration} {t.trainingCourses.hourUnit}</span>
+                        <span className="text-sm">
+                          {course.duration} {t.trainingCourses.hourUnit}
+                        </span>
                       </TableCell>
                       <TableCell>
                         <span className="font-medium">{course.currentParticipants}</span>
@@ -655,20 +661,27 @@ export function TrainingCoursesManager() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem onClick={() => handleViewCourse(course)}>
-                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
-                            <DropdownMenuItem disabled onClick={() => toast.message(t.common.notAvailable)}
-                            >
-                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
-                            <DropdownMenuItem disabled onClick={() => toast.message(t.common.notAvailable)}
-                            >
+                              <IconEye className="ms-2 h-4 w-4" />
+                              {t.common.viewDetails}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled
+                              onClick={() => toast.message(t.common.notAvailable)}>
+                              <IconEdit className="ms-2 h-4 w-4" />
+                              {t.common.edit}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              disabled
+                              onClick={() => toast.message(t.common.notAvailable)}>
                               <IconUsers className="ms-2 h-4 w-4" />
                               {t.trainingCourses.participants}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               className="text-destructive"
-                              onClick={() => handleDeleteCourse(course.id)}
-                            >
-                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
+                              onClick={() => handleDeleteCourse(course.id)}>
+                              <IconTrash className="ms-2 h-4 w-4" />
+                              {t.common.delete}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -683,7 +696,7 @@ export function TrainingCoursesManager() {
 
       {/* {t.trainingCourses.courseDetailsSheet} */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{selectedCourse?.title}</SheetTitle>
             <SheetDescription>{selectedCourse?.titleEn}</SheetDescription>
@@ -694,12 +707,8 @@ export function TrainingCoursesManager() {
                 <Badge className={courseStatusColors[selectedCourse.status]}>
                   {courseStatusLabels[selectedCourse.status]}
                 </Badge>
-                <Badge variant="outline">
-                  {courseCategoryLabels[selectedCourse.category]}
-                </Badge>
-                <Badge variant="outline">
-                  {courseTypeLabels[selectedCourse.type]}
-                </Badge>
+                <Badge variant="outline">{courseCategoryLabels[selectedCourse.category]}</Badge>
+                <Badge variant="outline">{courseTypeLabels[selectedCourse.type]}</Badge>
                 {selectedCourse.isMandatory && (
                   <Badge variant="destructive">{t.trainingCourses.mandatory}</Badge>
                 )}
@@ -707,29 +716,33 @@ export function TrainingCoursesManager() {
 
               <div className="grid gap-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <IconClock className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedCourse.duration} {t.trainingCourses.hourUnit}</span>
+                  <IconClock className="text-muted-foreground h-4 w-4" />
+                  <span>
+                    {selectedCourse.duration} {t.trainingCourses.hourUnit}
+                  </span>
                 </div>
                 {selectedCourse.startDate && (
                   <div className="flex items-center gap-2 text-sm">
-                    <IconCalendar className="h-4 w-4 text-muted-foreground" />
+                    <IconCalendar className="text-muted-foreground h-4 w-4" />
                     <span>
                       {new Date(selectedCourse.startDate).toLocaleDateString("ar-SA")}
-                      {selectedCourse.endDate && ` - ${new Date(selectedCourse.endDate).toLocaleDateString("ar-SA")}`}
+                      {selectedCourse.endDate &&
+                        ` - ${new Date(selectedCourse.endDate).toLocaleDateString("ar-SA")}`}
                     </span>
                   </div>
                 )}
                 {selectedCourse.location && (
                   <div className="flex items-center gap-2 text-sm">
-                    <IconMapPin className="h-4 w-4 text-muted-foreground" />
+                    <IconMapPin className="text-muted-foreground h-4 w-4" />
                     <span>{selectedCourse.location}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm">
-                  <IconUsers className="h-4 w-4 text-muted-foreground" />
+                  <IconUsers className="text-muted-foreground h-4 w-4" />
                   <span>
                     {selectedCourse.currentParticipants}
-                    {selectedCourse.maxParticipants && ` / ${selectedCourse.maxParticipants}`} {t.trainingCourses.participant}
+                    {selectedCourse.maxParticipants && ` / ${selectedCourse.maxParticipants}`}{" "}
+                    {t.trainingCourses.participant}
                   </span>
                 </div>
               </div>
@@ -738,18 +751,23 @@ export function TrainingCoursesManager() {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">{t.trainingCourses.instructor}</h4>
+                    <h4 className="mb-3 font-semibold">{t.trainingCourses.instructor}</h4>
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarImage src={selectedCourse.instructor.avatar} alt="" />
                         <AvatarFallback>
-                          {selectedCourse.instructor.name.split(" ").map(n => n[0]).join("")}
+                          {selectedCourse.instructor.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div>
                         <p className="font-medium">{selectedCourse.instructor.name}</p>
                         {selectedCourse.instructor.title && (
-                          <p className="text-sm text-muted-foreground">{selectedCourse.instructor.title}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {selectedCourse.instructor.title}
+                          </p>
                         )}
                       </div>
                     </div>
@@ -760,14 +778,14 @@ export function TrainingCoursesManager() {
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-2">{t.common.description}</h4>
-                <p className="text-sm text-muted-foreground">{selectedCourse.description}</p>
+                <h4 className="mb-2 font-semibold">{t.common.description}</h4>
+                <p className="text-muted-foreground text-sm">{selectedCourse.description}</p>
               </div>
 
               {selectedCourse.objectives.length > 0 && (
                 <div>
-                  <h4 className="font-semibold mb-2">{t.trainingCourses.courseObjectives}</h4>
-                  <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                  <h4 className="mb-2 font-semibold">{t.trainingCourses.courseObjectives}</h4>
+                  <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
                     {selectedCourse.objectives.map((obj, i) => (
                       <li key={i}>{obj}</li>
                     ))}
@@ -777,15 +795,16 @@ export function TrainingCoursesManager() {
 
               {selectedCourse.certificate && (
                 <div>
-                  <h4 className="font-semibold mb-2">{t.trainingCourses.certificate}</h4>
+                  <h4 className="mb-2 font-semibold">{t.trainingCourses.certificate}</h4>
                   <div className="bg-muted/50 rounded-lg p-3">
                     <div className="flex items-center gap-2">
-                      <IconCertificate className="h-5 w-5 text-primary" />
+                      <IconCertificate className="text-primary h-5 w-5" />
                       <span className="font-medium">{selectedCourse.certificate.name}</span>
                     </div>
                     {selectedCourse.certificate.validityPeriod && (
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {t.trainingCourses.validFor} {selectedCourse.certificate.validityPeriod} {t.trainingCourses.monthUnit}
+                      <p className="text-muted-foreground mt-1 text-sm">
+                        {t.trainingCourses.validFor} {selectedCourse.certificate.validityPeriod}{" "}
+                        {t.trainingCourses.monthUnit}
                       </p>
                     )}
                   </div>
@@ -793,11 +812,18 @@ export function TrainingCoursesManager() {
               )}
 
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1" disabled onClick={() => toast.message(t.common.notAvailable)}>
+                <Button
+                  className="flex-1"
+                  disabled
+                  onClick={() => toast.message(t.common.notAvailable)}>
                   <IconUsers className="ms-2 h-4 w-4" />
                   {t.trainingCourses.manageParticipants}
                 </Button>
-                <Button variant="outline" className="flex-1" disabled onClick={() => toast.message(t.common.notAvailable)}>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  disabled
+                  onClick={() => toast.message(t.common.notAvailable)}>
                   <IconEdit className="ms-2 h-4 w-4" />
                   {t.trainingCourses.editCourse}
                 </Button>
@@ -807,21 +833,20 @@ export function TrainingCoursesManager() {
         </SheetContent>
       </Sheet>
 
-      <AlertDialog open={deleteCourseId !== null} onOpenChange={(open) => !open && setDeleteCourseId(null)}>
+      <AlertDialog
+        open={deleteCourseId !== null}
+        onOpenChange={(open) => !open && setDeleteCourseId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.trainingCourses.deleteCourse}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t.trainingCourses.deleteConfirm}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t.trainingCourses.deleteConfirm}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeletingCourse}>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void confirmDeleteCourse()}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              disabled={isDeletingCourse}
-            >
+              disabled={isDeletingCourse}>
               {isDeletingCourse ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>

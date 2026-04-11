@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
     descriptionAr:
       "تفاصيل باقات طاقم: ما الذي ستحصل عليه في كل باقة، وما الإضافات المتاحة، وخيارات التوسع للشركات.",
     descriptionEn:
-      "Taqam plan details: what you get in each plan, available add-ons, and scaling options.",
+      "Taqam plan details: what you get in each plan, available add-ons, and scaling options."
   });
 }
 
@@ -39,7 +39,7 @@ const planDetails = [
       "تسجيل حضور من التطبيق",
       "التقارير الأساسية",
       "استيراد بيانات من Excel",
-      "واجهة عربية / إنجليزية كاملة",
+      "واجهة عربية / إنجليزية كاملة"
     ],
     highlightsEn: [
       "Full setup in one business day",
@@ -49,8 +49,8 @@ const planDetails = [
       "Mobile check-in via the app",
       "Basic reports",
       "Excel data import",
-      "Full Arabic / English interface",
-    ],
+      "Full Arabic / English interface"
+    ]
   },
   {
     nameAr: "الأعمال",
@@ -69,7 +69,7 @@ const planDetails = [
       "سجلات التدقيق للعمليات الحساسة",
       "تقييم الأداء وخطط التطوير",
       "إدارة التوظيف والمقابلات",
-      "الدعم الفني المتقدم",
+      "الدعم الفني المتقدم"
     ],
     highlightsEn: [
       "Everything in Starter",
@@ -81,9 +81,9 @@ const planDetails = [
       "Audit logs for sensitive actions",
       "Performance reviews & development plans",
       "Recruitment & interview management",
-      "Priority support",
+      "Priority support"
     ],
-    popular: true,
+    popular: true
   },
   {
     nameAr: "المؤسسات",
@@ -100,7 +100,7 @@ const planDetails = [
       "مدير حساب مخصص",
       "نشر على بنية تحتية مخصصة",
       "API Access حسب العقد",
-      "تدريب فريق HR",
+      "تدريب فريق HR"
     ],
     highlightsEn: [
       "Everything in Business",
@@ -110,28 +110,28 @@ const planDetails = [
       "Dedicated account manager",
       "Custom infrastructure deployment",
       "API access per contract",
-      "HR team training",
-    ],
-  },
+      "HR team training"
+    ]
+  }
 ];
 
 const addons = [
   {
     ar: "إعداد وهجرة البيانات (متاح لكل الباقات)",
-    en: "Data migration & setup (any plan)",
+    en: "Data migration & setup (any plan)"
   },
   {
     ar: "تدريب فريق HR منفصل عن الباقة",
-    en: "Standalone HR team training",
+    en: "Standalone HR team training"
   },
   {
     ar: "دعم تقني ميداني (زيارات مباشرة)",
-    en: "On-site technical support visits",
+    en: "On-site technical support visits"
   },
   {
     ar: "تخصيص قوالب الرواتب وهوية الشركة",
-    en: "Payslip templates & brand customisation",
-  },
+    en: "Payslip templates & brand customisation"
+  }
 ];
 
 export default async function PlansPage() {
@@ -146,20 +146,30 @@ export default async function PlansPage() {
         <MarketingPageHero
           icon={Layers3}
           badge={isAr ? "3 باقات واضحة وقابلة للتوسع" : "3 clear plans built to scale"}
-          title={isAr ? "اختَر الباقة المناسبة لحجم شركتك" : "Choose the right plan for your company"}
+          title={
+            isAr ? "اختَر الباقة المناسبة لحجم شركتك" : "Choose the right plan for your company"
+          }
           description={
             isAr
               ? "كل باقة مبنية على احتياج فعلي: تشغيل سريع، وضوح في المميزات، ومسار توسّع طبيعي كلما كبرت الشركة."
               : "Each plan is built around a real operating need: fast launch, clear features, and a natural upgrade path as you grow."
           }
           actions={[
-            { href: `${prefix}/pricing`, label: isAr ? "مقارنة الأسعار" : "Compare pricing", variant: "outline" },
-            { href: `${prefix}/request-demo`, label: isAr ? "طلب عرض تجريبي" : "Request a demo", variant: "brand" },
+            {
+              href: `${prefix}/pricing`,
+              label: isAr ? "مقارنة الأسعار" : "Compare pricing",
+              variant: "outline"
+            },
+            {
+              href: `${prefix}/request-demo`,
+              label: isAr ? "طلب عرض تجريبي" : "Request a demo",
+              variant: "brand"
+            }
           ]}
           stats={[
             { value: "3", label: isAr ? "باقات أساسية" : "Core plans" },
             { value: "1", label: isAr ? "يوم عمل للإعداد" : "Business day setup" },
-            { value: `${totalHighlights}+`, label: isAr ? "ميزة موضحة" : "Listed capabilities" },
+            { value: `${totalHighlights}+`, label: isAr ? "ميزة موضحة" : "Listed capabilities" }
           ]}
         />
       </FadeIn>
@@ -169,7 +179,7 @@ export default async function PlansPage() {
           <FadeIn>
             <div className="mb-8 max-w-2xl">
               <h2 className="text-2xl font-bold">{isAr ? "تفاصيل كل باقة" : "Plan breakdown"}</h2>
-              <p className="mt-2 text-muted-foreground">
+              <p className="text-muted-foreground mt-2">
                 {isAr
                   ? "المحتوى هنا مكتوب بلغة تشغيلية واضحة، عشان تعرف بالضبط ماذا ستحصل عليه في كل مستوى."
                   : "Each plan is written in operational terms, so you can quickly see what is included at every level."}
@@ -180,44 +190,53 @@ export default async function PlansPage() {
           <StaggerContainer className="grid gap-6 lg:grid-cols-3">
             {planDetails.map((plan) => {
               const PlanIcon =
-                plan.nameEn === "Starter" ? Rocket : plan.nameEn === "Business" ? Sparkles : ShieldCheck;
+                plan.nameEn === "Starter"
+                  ? Rocket
+                  : plan.nameEn === "Business"
+                    ? Sparkles
+                    : ShieldCheck;
 
               return (
                 <StaggerItem key={plan.nameEn}>
                   <Card
                     className={
                       plan.popular
-                        ? "relative overflow-hidden border-primary/40 shadow-lg shadow-primary/10 h-full"
-                        : "relative overflow-hidden border-border/80 shadow-sm h-full"
-                    }
-                  >
+                        ? "border-primary/40 shadow-primary/10 relative h-full overflow-hidden shadow-lg"
+                        : "border-border/80 relative h-full overflow-hidden shadow-sm"
+                    }>
                     {plan.popular ? (
-                      <div className="absolute end-5 top-5 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+                      <div className="bg-primary text-primary-foreground absolute end-5 top-5 rounded-full px-3 py-1 text-xs font-semibold">
                         {isAr ? "الأكثر طلبًا" : "Most popular"}
                       </div>
                     ) : null}
                     <CardHeader className="pb-4">
-                      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
-                        <PlanIcon className="h-6 w-6 text-primary" />
+                      <div className="bg-primary/10 mb-4 flex h-12 w-12 items-center justify-center rounded-2xl">
+                        <PlanIcon className="text-primary h-6 w-6" />
                       </div>
                       <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.nameEn}</CardTitle>
-                      <p className="mt-1 inline-flex items-center rounded-full border border-border/60 bg-muted/50 px-2.5 py-0.5 text-xs font-medium text-muted-foreground w-fit">
+                      <p className="border-border/60 bg-muted/50 text-muted-foreground mt-1 inline-flex w-fit items-center rounded-full border px-2.5 py-0.5 text-xs font-medium">
                         {isAr ? plan.sizeAr : plan.sizeEn}
                       </p>
-                      <p className="mt-1 text-sm font-medium text-primary">{isAr ? plan.tagAr : plan.tagEn}</p>
+                      <p className="text-primary mt-1 text-sm font-medium">
+                        {isAr ? plan.tagAr : plan.tagEn}
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-3">
                         {(isAr ? plan.highlightsAr : plan.highlightsEn).map((highlight) => (
                           <li key={highlight} className="flex items-start gap-3">
-                            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                            <span className="text-sm leading-6 text-foreground/90">{highlight}</span>
+                            <CheckCircle2 className="text-primary mt-0.5 h-4 w-4 shrink-0" />
+                            <span className="text-foreground/90 text-sm leading-6">
+                              {highlight}
+                            </span>
                           </li>
                         ))}
                       </ul>
                       <div className="mt-8">
                         <Link href={`${prefix}/request-demo`}>
-                          <Button className="w-full" variant={plan.popular ? "brand" : "brandOutline"}>
+                          <Button
+                            className="w-full"
+                            variant={plan.popular ? "brand" : "brandOutline"}>
                             {isAr ? "ناقش هذه الباقة" : "Discuss this plan"}
                           </Button>
                         </Link>
@@ -231,12 +250,14 @@ export default async function PlansPage() {
         </div>
       </section>
 
-      <section className="border-t bg-muted/30 py-16">
+      <section className="bg-muted/30 border-t py-16">
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="mb-8 max-w-2xl">
-              <h2 className="text-2xl font-bold">{isAr ? "إضافات اختيارية حسب الاحتياج" : "Optional add-ons"}</h2>
-              <p className="mt-2 text-muted-foreground">
+              <h2 className="text-2xl font-bold">
+                {isAr ? "إضافات اختيارية حسب الاحتياج" : "Optional add-ons"}
+              </h2>
+              <p className="text-muted-foreground mt-2">
                 {isAr
                   ? "خدمات إضافية تساعدك في سرعة الإطلاق أو ربط المنصة بعملياتك الحالية."
                   : "Additional services to help you launch faster or connect the platform to your current workflows."}
@@ -247,30 +268,35 @@ export default async function PlansPage() {
           <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {addons.map((addon) => (
               <StaggerItem key={addon.en}>
-                <div className="rounded-2xl border bg-background p-5 shadow-sm h-full">
-                  <div className="mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
+                <div className="bg-background h-full rounded-2xl border p-5 shadow-sm">
+                  <div className="bg-primary/10 mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl">
+                    <CheckCircle2 className="text-primary h-5 w-5" />
                   </div>
                   <p className="text-sm leading-6">{isAr ? addon.ar : addon.en}</p>
                 </div>
               </StaggerItem>
             ))}
           </StaggerContainer>
-
         </div>
       </section>
 
       <FadeIn>
         <MarketingPageCta
           title={isAr ? "غير متأكد أي باقة تناسبك؟" : "Not sure which plan fits best?"}
-        description={
-          isAr
-            ? "شاركنا عدد الموظفين، وهل تحتاج الرواتب فقط أم المنصة كاملة، وسنرشّح لك الباقة الأنسب بدون تعقيد تجاري زائد."
-            : "Tell us your headcount and whether you need payroll only or the full platform, and we will recommend the right plan without the usual sales noise."
-        }
-        primaryAction={{ href: `${prefix}/request-demo`, label: isAr ? "اطلب توصية مخصصة" : "Get a tailored recommendation" }}
-        secondaryAction={{ href: `${prefix}/features`, label: isAr ? "استعرض المميزات" : "Explore features" }}
-      />
+          description={
+            isAr
+              ? "شاركنا عدد الموظفين، وهل تحتاج الرواتب فقط أم المنصة كاملة، وسنرشّح لك الباقة الأنسب بدون تعقيد تجاري زائد."
+              : "Tell us your headcount and whether you need payroll only or the full platform, and we will recommend the right plan without the usual sales noise."
+          }
+          primaryAction={{
+            href: `${prefix}/request-demo`,
+            label: isAr ? "اطلب توصية مخصصة" : "Get a tailored recommendation"
+          }}
+          secondaryAction={{
+            href: `${prefix}/features`,
+            label: isAr ? "استعرض المميزات" : "Explore features"
+          }}
+        />
       </FadeIn>
     </main>
   );

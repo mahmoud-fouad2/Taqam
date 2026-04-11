@@ -19,11 +19,11 @@ export default function robots(): MetadataRoute.Robots {
           "/m/",
           "/404-page",
           "/500-page",
-          "/_next/",
-        ],
-      },
+          "/_next/"
+        ]
+      }
     ],
     sitemap: `${base}/sitemap.xml`,
-    host: base,
+    host: base
   };
 }

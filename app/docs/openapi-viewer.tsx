@@ -37,13 +37,13 @@ export default function OpenApiViewer() {
   }, [state]);
 
   if (state.status === "loading") {
-    return <div className="text-sm text-muted-foreground">Loading OpenAPI spec…</div>;
+    return <div className="text-muted-foreground text-sm">Loading OpenAPI spec…</div>;
   }
 
   if (state.status === "error") {
     return (
       <div className="space-y-2">
-        <div className="text-sm text-destructive">{state.message}</div>
+        <div className="text-destructive text-sm">{state.message}</div>
         <a className="text-sm underline" href="/api/openapi" target="_blank" rel="noreferrer">
           Open JSON
         </a>
@@ -64,7 +64,7 @@ export default function OpenApiViewer() {
         ) : null}
       </div>
 
-      <pre className="max-h-[70vh] overflow-auto rounded-md border bg-muted/30 p-3 text-xs">
+      <pre className="bg-muted/30 max-h-[70vh] overflow-auto rounded-md border p-3 text-xs">
         {JSON.stringify(state.spec, null, 2)}
       </pre>
     </div>

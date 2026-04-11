@@ -35,10 +35,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
             firstName: true,
             lastName: true,
             department: { select: { name: true } },
-            jobTitle: { select: { name: true } },
-          },
-        },
-      },
+            jobTitle: { select: { name: true } }
+          }
+        }
+      }
     });
 
     if (!p) {
@@ -60,11 +60,14 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         tasks: (p.tasks as any) ?? [],
         documents: (p.documents as any) ?? [],
         createdAt: p.createdAt.toISOString(),
-        updatedAt: p.updatedAt.toISOString(),
-      },
+        updatedAt: p.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error fetching onboarding process:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch onboarding process" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch onboarding process" },
+      { status: 500 }
+    );
   }
 }

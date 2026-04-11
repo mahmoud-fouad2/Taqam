@@ -69,11 +69,11 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             department: { select: { name: true } },
-            jobTitle: { select: { name: true } },
-          },
-        },
+            jobTitle: { select: { name: true } }
+          }
+        }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     });
 
     const result = processes.map((p) => ({
@@ -89,13 +89,16 @@ export async function GET(request: NextRequest) {
       tasks: (p.tasks as any) ?? [],
       documents: (p.documents as any) ?? [],
       createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString()
     }));
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error("Error fetching onboarding processes:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch onboarding processes" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch onboarding processes" },
+      { status: 500 }
+    );
   }
 }
 
@@ -120,8 +123,8 @@ export async function POST(request: NextRequest) {
       where: { id: body.employeeId, tenantId },
       include: {
         department: { select: { name: true } },
-        jobTitle: { select: { name: true } },
-      },
+        jobTitle: { select: { name: true } }
+      }
     });
 
     if (!employee) {
@@ -142,8 +145,8 @@ export async function POST(request: NextRequest) {
         progress: 0,
         tasks: (template?.tasks as any) ?? [],
         documents: (template?.documents as any) ?? [],
-        createdById: session.user.id,
-      },
+        createdById: session.user.id
+      }
     });
 
     return NextResponse.json({
@@ -161,11 +164,14 @@ export async function POST(request: NextRequest) {
         tasks: (created.tasks as any) ?? [],
         documents: (created.documents as any) ?? [],
         createdAt: created.createdAt.toISOString(),
-        updatedAt: created.updatedAt.toISOString(),
-      },
+        updatedAt: created.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error creating onboarding process:", error);
-    return NextResponse.json({ success: false, error: "Failed to create onboarding process" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to create onboarding process" },
+      { status: 500 }
+    );
   }
 }

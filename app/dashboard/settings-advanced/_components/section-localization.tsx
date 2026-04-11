@@ -1,19 +1,19 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from 'react';
-import { Globe } from 'lucide-react';
+import type { Dispatch, SetStateAction } from "react";
+import { Globe } from "lucide-react";
 
-import type { SystemSettings } from '@/lib/types/settings';
+import type { SystemSettings } from "@/lib/types/settings";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue
+} from "@/components/ui/select";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -21,7 +21,7 @@ const t = getText("ar");
 
 export function LocalizationSection({
   settings,
-  setSettings,
+  setSettings
 }: {
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
@@ -43,13 +43,12 @@ export function LocalizationSection({
             <Label>{t.common.options}</Label>
             <Select
               value={settings.localization.defaultLanguage}
-              onValueChange={(value: 'ar' | 'en') =>
+              onValueChange={(value: "ar" | "en") =>
                 setSettings({
                   ...settings,
-                  localization: { ...settings.localization, defaultLanguage: value },
+                  localization: { ...settings.localization, defaultLanguage: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -63,13 +62,12 @@ export function LocalizationSection({
             <Label>{t.generalSettings.pCalendarType}</Label>
             <Select
               value={settings.localization.calendarType}
-              onValueChange={(value: 'gregorian' | 'hijri' | 'both') =>
+              onValueChange={(value: "gregorian" | "hijri" | "both") =>
                 setSettings({
                   ...settings,
-                  localization: { ...settings.localization, calendarType: value },
+                  localization: { ...settings.localization, calendarType: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

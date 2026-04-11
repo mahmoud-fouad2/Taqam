@@ -3,7 +3,7 @@ export function formatTimeHHMM(date: Date, locale: "ar" | "en" = "ar") {
     return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
       hour: "2-digit",
       minute: "2-digit",
-      hour12: false,
+      hour12: false
     }).format(date);
   } catch {
     const h = String(date.getHours()).padStart(2, "0");
@@ -17,7 +17,7 @@ export function formatShortDate(date: Date, locale: "ar" | "en" = "ar") {
     return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
       day: "numeric",
       month: "long",
-      year: "numeric",
+      year: "numeric"
     }).format(date);
   } catch {
     return date.toISOString().split("T")[0];
@@ -29,7 +29,7 @@ export function formatArabicDate(date: Date, locale: "ar" | "en" = "ar") {
     return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", {
       day: "numeric",
       month: "long",
-      year: "numeric",
+      year: "numeric"
     }).format(date);
   } catch {
     return date.toISOString().split("T")[0];
@@ -38,7 +38,9 @@ export function formatArabicDate(date: Date, locale: "ar" | "en" = "ar") {
 
 export function formatDayName(date: Date, locale: "ar" | "en" = "ar") {
   try {
-    return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", { weekday: "long" }).format(date);
+    return new Intl.DateTimeFormat(locale === "ar" ? "ar-EG" : "en-US", { weekday: "long" }).format(
+      date
+    );
   } catch {
     return "";
   }
@@ -61,22 +63,27 @@ export function getInitials(first?: string | null, last?: string | null) {
   return (f + l).toUpperCase() || "U";
 }
 
-export async function getCurrentPositionSafe(opts?: { timeoutMs?: number; highAccuracy?: boolean }) {
+export async function getCurrentPositionSafe(opts?: {
+  timeoutMs?: number;
+  highAccuracy?: boolean;
+}) {
   const timeoutMs = opts?.timeoutMs ?? 8000;
   const enableHighAccuracy = opts?.highAccuracy ?? true;
 
   if (typeof navigator === "undefined" || !("geolocation" in navigator)) return null;
 
-  return await new Promise<{ latitude: number; longitude: number; accuracy?: number } | null>((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) =>
-        resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
-        }),
-      () => resolve(null),
-      { enableHighAccuracy, timeout: timeoutMs },
-    );
-  });
+  return await new Promise<{ latitude: number; longitude: number; accuracy?: number } | null>(
+    (resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (pos) =>
+          resolve({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+            accuracy: pos.coords.accuracy
+          }),
+        () => resolve(null),
+        { enableHighAccuracy, timeout: timeoutMs }
+      );
+    }
+  );
 }

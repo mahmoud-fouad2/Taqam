@@ -37,7 +37,9 @@ export function RegisterForm({ locale, labels }: RegisterFormProps) {
     const trimmedName = name.trim();
 
     if (!trimmedName || !trimmedEmail || !password) {
-      setError(locale === "ar" ? "يرجى إدخال البيانات المطلوبة" : "Please fill in all required fields");
+      setError(
+        locale === "ar" ? "يرجى إدخال البيانات المطلوبة" : "Please fill in all required fields"
+      );
       return;
     }
 
@@ -46,7 +48,7 @@ export function RegisterForm({ locale, labels }: RegisterFormProps) {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: trimmedName, email: trimmedEmail, password }),
+        body: JSON.stringify({ name: trimmedName, email: trimmedEmail, password })
       });
 
       const data = (await res.json().catch(() => null)) as null | { error?: string };
@@ -118,7 +120,7 @@ export function RegisterForm({ locale, labels }: RegisterFormProps) {
         </div>
       </div>
 
-      {error ? <p className="text-sm text-destructive">{error}</p> : null}
+      {error ? <p className="text-destructive text-sm">{error}</p> : null}
 
       <Button type="submit" className="h-11 w-full" disabled={isLoading}>
         {isLoading ? (locale === "ar" ? "جاري الإنشاء..." : "Creating...") : labels.submit}

@@ -25,7 +25,7 @@ const checks = [
   { name: "Departments API", path: "/api/departments", allowUnauthorized: true },
   { name: "Documents API", path: "/api/documents", allowUnauthorized: true },
   { name: "Attendance API", path: "/api/attendance", allowUnauthorized: true },
-  { name: "Notifications API", path: "/api/notifications", allowUnauthorized: true },
+  { name: "Notifications API", path: "/api/notifications", allowUnauthorized: true }
 ];
 
 function formatStatus(res) {
@@ -43,8 +43,8 @@ async function fetchWithTimeout(url, opts = {}) {
       signal: controller.signal,
       headers: {
         "user-agent": "taqam-smoke/1.0",
-        ...(opts.headers || {}),
-      },
+        ...(opts.headers || {})
+      }
     });
   } finally {
     clearTimeout(t);
@@ -89,7 +89,10 @@ for (const c of checks) {
     console.log(`[OK]   ${c.name}: ${c.path} -> ${formatStatus(res)}${extra}`);
   } catch (e) {
     failed++;
-    const msg = e && typeof e === "object" && "name" in e && e.name === "AbortError" ? "timeout" : (e?.message || String(e));
+    const msg =
+      e && typeof e === "object" && "name" in e && e.name === "AbortError"
+        ? "timeout"
+        : e?.message || String(e);
     console.log(`[FAIL] ${c.name}: ${c.path} -> ${msg}`);
   }
 }

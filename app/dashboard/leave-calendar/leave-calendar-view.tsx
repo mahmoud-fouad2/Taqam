@@ -9,7 +9,7 @@ import {
   IconDownload,
   IconBeach,
   IconFirstAidKit,
-  IconUsers,
+  IconUsers
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,19 +19,12 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import {
-  LeaveRequestStatus,
-} from "@/lib/types/leave";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { LeaveRequestStatus } from "@/lib/types/leave";
 import { useEmployees } from "@/hooks/use-employees";
 import { leavesApi } from "@/lib/api";
 import { getLeaveTheme } from "@/lib/ui/leave-color";
@@ -47,7 +40,7 @@ const statusLabels: Record<UiLeaveStatus | "all", string> = {
   pending: t.common.pending,
   approved: t.leaveCalendar.approved,
   rejected: t.common.rejected,
-  cancelled: t.common.cancelled,
+  cancelled: t.common.cancelled
 };
 
 function pickLeaveBgClass(color?: string | null): string {
@@ -106,11 +99,19 @@ const monthNames = [
   t.leaveCalendar.september,
   t.leaveCalendar.october,
   t.leaveCalendar.november,
-  t.leaveCalendar.december,
+  t.leaveCalendar.december
 ];
 
 // أسماء الأيام بالعربية
-const dayNames = [t.leaveCalendar.sunday, t.leaveCalendar.monday, t.leaveCalendar.tuesday, t.leaveCalendar.wednesday, t.leaveCalendar.thursday, t.leaveCalendar.friday, t.leaveCalendar.saturday];
+const dayNames = [
+  t.leaveCalendar.sunday,
+  t.leaveCalendar.monday,
+  t.leaveCalendar.tuesday,
+  t.leaveCalendar.wednesday,
+  t.leaveCalendar.thursday,
+  t.leaveCalendar.friday,
+  t.leaveCalendar.saturday
+];
 
 export function LeaveCalendarView() {
   const locale = useClientLocale();
@@ -153,7 +154,7 @@ export function LeaveCalendarView() {
                 color: String(r.leaveType?.color ?? "#6B7280"),
                 startDate: toYmd(r.startDate),
                 endDate: toYmd(r.endDate),
-                status: mapStatusFromApi(r.status),
+                status: mapStatusFromApi(r.status)
               };
             })
             .filter((e: CalendarEvent) => Boolean(e.startDate) && Boolean(e.endDate))
@@ -259,7 +260,7 @@ export function LeaveCalendarView() {
       const start = toLocalDateFromYmd(e.startDate);
       return start > today && e.status === "approved";
     }).length,
-    pendingApprovals: filteredEvents.filter((e) => e.status === "pending").length,
+    pendingApprovals: filteredEvents.filter((e) => e.status === "pending").length
   };
 
   const legendItems = useMemo(() => {
@@ -267,7 +268,10 @@ export function LeaveCalendarView() {
     for (const e of filteredEvents) {
       if (!e.leaveTypeId) continue;
       if (!map.has(e.leaveTypeId)) {
-        map.set(e.leaveTypeId, { name: e.leaveTypeName || t.leaveCalendar.leaveType, color: e.color });
+        map.set(e.leaveTypeId, {
+          name: e.leaveTypeName || t.leaveCalendar.leaveType,
+          color: e.color
+        });
       }
     }
     return Array.from(map.values()).slice(0, 12);
@@ -283,7 +287,9 @@ export function LeaveCalendarView() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
+            <IconDownload className="ms-2 h-4 w-4" />
+            {t.common.exportData}
+          </Button>
         </div>
       </div>
 
@@ -324,16 +330,26 @@ export function LeaveCalendarView() {
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             {/* Month Navigation */}
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" aria-label={t.common.lastMonth} onClick={goToPreviousMonth}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t.common.lastMonth}
+                onClick={goToPreviousMonth}>
                 <IconChevronRight className="h-5 w-5" />
               </Button>
               <h3 className="text-xl font-semibold">
                 {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
               </h3>
-              <Button variant="ghost" size="icon" aria-label={t.common.nextMonth} onClick={goToNextMonth}>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label={t.common.nextMonth}
+                onClick={goToNextMonth}>
                 <IconChevronLeft className="h-5 w-5" />
               </Button>
-              <Button variant="outline" size="sm" onClick={goToToday}>{t.common.today}</Button>
+              <Button variant="outline" size="sm" onClick={goToToday}>
+                {t.common.today}
+              </Button>
             </div>
 
             {/* Filters */}
@@ -351,7 +367,9 @@ export function LeaveCalendarView() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={filterStatus} onValueChange={(v) => setFilterStatus(v as UiLeaveStatus | "all")}>
+              <Select
+                value={filterStatus}
+                onValueChange={(v) => setFilterStatus(v as UiLeaveStatus | "all")}>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue placeholder={t.common.allStatuses} />
                 </SelectTrigger>
@@ -379,32 +397,28 @@ export function LeaveCalendarView() {
           )}
 
           {isLoading || isEmployeesLoading ? (
-            <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
+            <div className="text-muted-foreground py-10 text-center">{t.common.loading}</div>
           ) : (
             <>
               {/* Day Headers */}
-              <div className="grid grid-cols-7 gap-px mb-2">
+              <div className="mb-2 grid grid-cols-7 gap-px">
                 {dayNames.map((day, index) => (
                   <div
                     key={day}
                     className={`p-2 text-center text-sm font-medium ${
                       index === 5 || index === 6 ? "text-red-600" : "text-muted-foreground"
-                    }`}
-                  >
+                    }`}>
                     {day}
                   </div>
                 ))}
               </div>
 
               {/* Calendar Grid */}
-              <div className="grid grid-cols-7 gap-px rounded-lg border bg-muted">
+              <div className="bg-muted grid grid-cols-7 gap-px rounded-lg border">
                 {days.map((date, index) => {
                   if (!date) {
                     return (
-                      <div
-                        key={`empty-${index}`}
-                        className="min-h-[120px] bg-background p-2"
-                      />
+                      <div key={`empty-${index}`} className="bg-background min-h-[120px] p-2" />
                     );
                   }
 
@@ -415,20 +429,18 @@ export function LeaveCalendarView() {
                   return (
                     <div
                       key={date.toISOString()}
-                      className={`min-h-[120px] bg-background p-2 transition-colors ${
+                      className={`bg-background min-h-[120px] p-2 transition-colors ${
                         weekend ? "bg-gray-50" : ""
-                      } ${today ? "ring-2 ring-primary ring-inset" : ""}`}
-                    >
+                      } ${today ? "ring-primary ring-2 ring-inset" : ""}`}>
                       {/* Date Number */}
                       <div
                         className={`mb-1 text-sm font-medium ${
                           today
-                            ? "flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
+                            ? "bg-primary text-primary-foreground flex h-6 w-6 items-center justify-center rounded-full"
                             : weekend
                               ? "text-red-600"
                               : ""
-                        }`}
-                      >
+                        }`}>
                         {date.getDate()}
                       </div>
 
@@ -440,10 +452,9 @@ export function LeaveCalendarView() {
                               <TooltipTrigger asChild>
                                 <div
                                   className={cn(
-                                    "truncate rounded px-1.5 py-0.5 text-xs text-white cursor-pointer",
+                                    "cursor-pointer truncate rounded px-1.5 py-0.5 text-xs text-white",
                                     pickLeaveBgClass(event.color)
-                                  )}
-                                >
+                                  )}>
                                   {event.employeeName}
                                 </div>
                               </TooltipTrigger>
@@ -451,8 +462,11 @@ export function LeaveCalendarView() {
                                 <div className="space-y-1">
                                   <p className="font-medium">{event.employeeName}</p>
                                   <p className="text-sm">{event.leaveTypeName}</p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {toLocalDateFromYmd(event.startDate).toLocaleDateString("ar-SA")} -{" "}
+                                  <p className="text-muted-foreground text-xs">
+                                    {toLocalDateFromYmd(event.startDate).toLocaleDateString(
+                                      "ar-SA"
+                                    )}{" "}
+                                    -{" "}
                                     {toLocalDateFromYmd(event.endDate).toLocaleDateString("ar-SA")}
                                   </p>
                                   <Badge
@@ -465,8 +479,7 @@ export function LeaveCalendarView() {
                                           : event.status === "rejected"
                                             ? "bg-red-100 text-red-800"
                                             : "bg-gray-100 text-gray-800"
-                                    }
-                                  >
+                                    }>
                                     {statusLabels[event.status]}
                                   </Badge>
                                 </div>
@@ -474,7 +487,7 @@ export function LeaveCalendarView() {
                             </Tooltip>
                           ))}
                           {events.length > 3 && (
-                            <div className="text-xs text-muted-foreground text-center">
+                            <div className="text-muted-foreground text-center text-xs">
                               +{events.length - 3} {t.leaveCalendar.more}
                             </div>
                           )}
@@ -497,7 +510,7 @@ export function LeaveCalendarView() {
         <CardContent>
           <div className="flex flex-wrap gap-4">
             {legendItems.length === 0 ? (
-              <span className="text-sm text-muted-foreground">{t.leaveCalendar.noDataToShow}</span>
+              <span className="text-muted-foreground text-sm">{t.leaveCalendar.noDataToShow}</span>
             ) : (
               legendItems.map((item) => (
                 <div key={`${item.name}-${item.color}`} className="flex items-center gap-2">
@@ -518,7 +531,7 @@ export function LeaveCalendarView() {
         </CardHeader>
         <CardContent>
           {stats.onLeaveToday === 0 ? (
-            <p className="text-center text-muted-foreground py-8">
+            <p className="text-muted-foreground py-8 text-center">
               {t.leaveCalendar.pNoEmployeesOnLeaveToday}
             </p>
           ) : (
@@ -531,10 +544,7 @@ export function LeaveCalendarView() {
                   return today >= start && today <= end;
                 })
                 .map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-center gap-3 rounded-lg border p-3"
-                  >
+                  <div key={event.id} className="flex items-center gap-3 rounded-lg border p-3">
                     <Avatar>
                       <AvatarFallback>{event.employeeName.slice(0, 2)}</AvatarFallback>
                     </Avatar>
@@ -544,12 +554,10 @@ export function LeaveCalendarView() {
                         <div
                           className={cn("h-2 w-2 rounded-full", pickLeaveBgClass(event.color))}
                         />
-                        <span className="text-sm text-muted-foreground">
-                          {event.leaveTypeName}
-                        </span>
+                        <span className="text-muted-foreground text-sm">{event.leaveTypeName}</span>
                       </div>
                     </div>
-                    <div className="text-start text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-start text-sm">
                       حتى {toLocalDateFromYmd(event.endDate).toLocaleDateString("ar-SA")}
                     </div>
                   </div>

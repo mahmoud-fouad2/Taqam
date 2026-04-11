@@ -3,32 +3,31 @@
  * DELETE /api/notifications/read
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  errorResponse,
+  logApiError,
+  nullDataResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
-export async function DELETE() {
+export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
 
     await prisma.notification.deleteMany({
-      where: { userId, ...(tenantId ? { tenantId } : {}), isRead: true },
+      where: { userId, ...(tenantId ? { tenantId } : {}), isRead: true }
     });
 
-    return NextResponse.json({ data: null });
+    return nullDataResponse();
   } catch (error) {
-    console.error("Error deleting read notifications:", error);
-    return NextResponse.json(
-      { error: "Failed to delete read notifications" },
-      { status: 500 }
-    );
+    logApiError("Error deleting read notifications", error);
+    return errorResponse("Failed to delete read notifications");
   }
 }

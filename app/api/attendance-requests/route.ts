@@ -9,7 +9,9 @@ function isSuperAdmin(role: string | undefined) {
 }
 
 function canManageAttendanceRequests(role: string | undefined) {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+  return (
+    role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER"
+  );
 }
 
 function mapStatus(value: string) {
@@ -20,28 +22,26 @@ function mapType(value: string) {
   return value.toLowerCase();
 }
 
-function serializeAttendanceRequest(
-  item: {
-    id: string;
-    tenantId: string;
-    employeeId: string;
-    type: string;
-    status: string;
-    date: Date;
-    requestedCheckIn: Date | null;
-    requestedCheckOut: Date | null;
-    overtimeHours: { toString(): string } | number | null;
-    permissionStartTime: Date | null;
-    permissionEndTime: Date | null;
-    reason: string;
-    attachmentUrl: string | null;
-    approvedById: string | null;
-    approvedAt: Date | null;
-    rejectionReason: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-) {
+function serializeAttendanceRequest(item: {
+  id: string;
+  tenantId: string;
+  employeeId: string;
+  type: string;
+  status: string;
+  date: Date;
+  requestedCheckIn: Date | null;
+  requestedCheckOut: Date | null;
+  overtimeHours: { toString(): string } | number | null;
+  permissionStartTime: Date | null;
+  permissionEndTime: Date | null;
+  reason: string;
+  attachmentUrl: string | null;
+  approvedById: string | null;
+  approvedAt: Date | null;
+  rejectionReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
   return {
     id: item.id,
     tenantId: item.tenantId,
@@ -60,14 +60,14 @@ function serializeAttendanceRequest(
     approvedAt: item.approvedAt?.toISOString(),
     rejectionReason: item.rejectionReason ?? undefined,
     createdAt: item.createdAt.toISOString(),
-    updatedAt: item.updatedAt.toISOString(),
+    updatedAt: item.updatedAt.toISOString()
   };
 }
 
 const listQuerySchema = z.object({
   employeeId: z.string().optional(),
   status: z.string().optional(),
-  type: z.string().optional(),
+  type: z.string().optional()
 });
 
 const createSchema = z
@@ -81,7 +81,7 @@ const createSchema = z
     requestedCheckOut: z.string().datetime().optional(),
     overtimeHours: z.number().min(0).max(24).optional(),
     permissionStartTime: z.string().datetime().optional(),
-    permissionEndTime: z.string().datetime().optional(),
+    permissionEndTime: z.string().datetime().optional()
   })
   .strict();
 
@@ -101,7 +101,7 @@ export async function GET(request: NextRequest) {
     const parsed = listQuerySchema.safeParse({
       employeeId: searchParams.get("employeeId") ?? undefined,
       status: searchParams.get("status") ?? undefined,
-      type: searchParams.get("type") ?? undefined,
+      type: searchParams.get("type") ?? undefined
     });
 
     if (!parsed.success) {
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
 
     const requesterEmployee = await prisma.employee.findFirst({
       where: { tenantId, userId: session.user.id },
-      select: { id: true, userId: true },
+      select: { id: true, userId: true }
     });
 
     if (session.user.role === "MANAGER") {
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
         { employeeId: requesterEmployee.id },
         { employee: { managerId: requesterEmployee.id } }
       ];
-      
+
       if (parsed.data.employeeId) {
         where.employeeId = parsed.data.employeeId;
       }
@@ -134,9 +134,9 @@ export async function GET(request: NextRequest) {
       } else {
         where.employeeId = "NOT_FOUND";
       }
-      
+
       if (parsed.data.employeeId && parsed.data.employeeId !== requesterEmployee?.id) {
-         return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
       }
     } else {
       if (parsed.data.employeeId) {
@@ -144,15 +144,25 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    if (parsed.data.status) where.status = String(parsed.data.status).toUpperCase().replace(/-/g, "_");
+    if (parsed.data.status)
+      where.status = String(parsed.data.status).toUpperCase().replace(/-/g, "_");
     if (parsed.data.type) where.type = String(parsed.data.type).toUpperCase().replace(/-/g, "_");
 
     const items = await prisma.attendanceRequest.findMany({
       where,
       orderBy: { createdAt: "desc" },
       include: {
-        employee: { select: { id: true, firstName: true, lastName: true, firstNameAr: true, lastNameAr: true, userId: true } },
-      },
+        employee: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            firstNameAr: true,
+            lastNameAr: true,
+            userId: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ data: { items: items.map(serializeAttendanceRequest) } });
@@ -177,14 +187,17 @@ export async function POST(request: NextRequest) {
     const raw = await request.json();
     const parsed = createSchema.safeParse(raw);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     // Non-super-admin users can only create for themselves
     if (!isSuperAdmin(session.user.role)) {
       const employee = await prisma.employee.findFirst({
         where: { tenantId, userId: session.user.id },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!employee || employee.id !== parsed.data.employeeId) {
@@ -204,14 +217,22 @@ export async function POST(request: NextRequest) {
         type: parsed.data.type,
         status: "PENDING",
         date,
-        requestedCheckIn: parsed.data.requestedCheckIn ? new Date(parsed.data.requestedCheckIn) : undefined,
-        requestedCheckOut: parsed.data.requestedCheckOut ? new Date(parsed.data.requestedCheckOut) : undefined,
+        requestedCheckIn: parsed.data.requestedCheckIn
+          ? new Date(parsed.data.requestedCheckIn)
+          : undefined,
+        requestedCheckOut: parsed.data.requestedCheckOut
+          ? new Date(parsed.data.requestedCheckOut)
+          : undefined,
         overtimeHours: parsed.data.overtimeHours,
-        permissionStartTime: parsed.data.permissionStartTime ? new Date(parsed.data.permissionStartTime) : undefined,
-        permissionEndTime: parsed.data.permissionEndTime ? new Date(parsed.data.permissionEndTime) : undefined,
+        permissionStartTime: parsed.data.permissionStartTime
+          ? new Date(parsed.data.permissionStartTime)
+          : undefined,
+        permissionEndTime: parsed.data.permissionEndTime
+          ? new Date(parsed.data.permissionEndTime)
+          : undefined,
         reason: parsed.data.reason,
-        attachmentUrl: parsed.data.attachmentUrl,
-      },
+        attachmentUrl: parsed.data.attachmentUrl
+      }
     });
 
     return NextResponse.json({ data: serializeAttendanceRequest(created) }, { status: 201 });

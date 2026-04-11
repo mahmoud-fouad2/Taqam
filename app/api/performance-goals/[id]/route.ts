@@ -19,24 +19,18 @@ const goalUpdateSchema = z.object({
   dueDate: z.string().or(z.date()).optional(),
   managerId: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  progress: z.number().min(0).max(100).optional(),
+  progress: z.number().min(0).max(100).optional()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single goal
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -56,8 +50,8 @@ export async function GET(
             avatar: true,
             email: true,
             department: { select: { name: true, nameAr: true } },
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
         },
         manager: {
           select: {
@@ -66,42 +60,30 @@ export async function GET(
             lastName: true,
             firstNameAr: true,
             lastNameAr: true,
-            avatar: true,
-          },
-        },
-      },
+            avatar: true
+          }
+        }
+      }
     });
 
     if (!goal) {
-      return NextResponse.json(
-        { error: "الهدف غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الهدف غير موجود" }, { status: 404 });
     }
 
     return NextResponse.json(goal);
   } catch (error) {
     console.error("Error fetching goal:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات الهدف" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات الهدف" }, { status: 500 });
   }
 }
 
 // PATCH - Update goal
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -110,14 +92,11 @@ export async function PATCH(
 
     // Check goal exists and belongs to tenant
     const existingGoal = await prisma.performanceGoal.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingGoal) {
-      return NextResponse.json(
-        { error: "الهدف غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الهدف غير موجود" }, { status: 404 });
     }
 
     // Validate
@@ -126,20 +105,17 @@ export async function PATCH(
     // If manager specified, verify they belong to tenant
     if (validatedData.managerId) {
       const manager = await prisma.employee.findFirst({
-        where: { id: validatedData.managerId, tenantId },
+        where: { id: validatedData.managerId, tenantId }
       });
       if (!manager) {
-        return NextResponse.json(
-          { error: "المدير المحدد غير موجود" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "المدير المحدد غير موجود" }, { status: 400 });
       }
     }
 
     // Prepare update data
     const updateData: any = {
       ...validatedData,
-      updatedAt: new Date(),
+      updatedAt: new Date()
     };
 
     // Convert dates if provided
@@ -157,7 +133,11 @@ export async function PATCH(
     }
 
     // If status changed from COMPLETED, clear completedAt
-    if (validatedData.status && validatedData.status !== "COMPLETED" && existingGoal.status === "COMPLETED") {
+    if (
+      validatedData.status &&
+      validatedData.status !== "COMPLETED" &&
+      existingGoal.status === "COMPLETED"
+    ) {
       updateData.completedAt = null;
     }
 
@@ -172,46 +152,37 @@ export async function PATCH(
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
       message: "تم تحديث الهدف بنجاح",
-      goal: updatedGoal,
+      goal: updatedGoal
     });
   } catch (error) {
     console.error("Error updating goal:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث الهدف" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث الهدف" }, { status: 500 });
   }
 }
 
 // DELETE - Delete goal
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -219,37 +190,28 @@ export async function DELETE(
 
     // Check goal exists and belongs to tenant
     const goal = await prisma.performanceGoal.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!goal) {
-      return NextResponse.json(
-        { error: "الهدف غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الهدف غير موجود" }, { status: 404 });
     }
 
     // Cannot delete completed goals
     if (goal.status === "COMPLETED") {
-      return NextResponse.json(
-        { error: "لا يمكن حذف هدف مكتمل" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف هدف مكتمل" }, { status: 400 });
     }
 
     // Delete goal
     await prisma.performanceGoal.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف الهدف بنجاح",
+      message: "تم حذف الهدف بنجاح"
     });
   } catch (error) {
     console.error("Error deleting goal:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف الهدف" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف الهدف" }, { status: 500 });
   }
 }

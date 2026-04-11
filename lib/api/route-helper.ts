@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 import { getTenantAccessMessage, validateTenantAccess } from "@/lib/tenant-access";
 
 export type AuthenticatedSession = {
@@ -41,14 +42,14 @@ function isSuperAdminRole(role: string | undefined) {
  * Verify session exists — for routes that don't require a tenant
  */
 export async function requireSession(
-  _req: NextRequest
+  _req?: NextRequest
 ): Promise<{ ok: true; session: AuthenticatedSession } | { ok: false; response: NextResponse }> {
   const session = (await getServerSession(authOptions)) as AuthenticatedSession | null;
 
   if (!session?.user) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
+      response: NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     };
   }
 
@@ -58,9 +59,7 @@ export async function requireSession(
 /**
  * Verify session AND require a tenantId — for all tenant-scoped routes
  */
-export async function requireTenantSession(
-  req: NextRequest
-): Promise<TenantRouteResult> {
+export async function requireTenantSession(req?: NextRequest): Promise<TenantRouteResult> {
   const sessionResult = await requireSession(req);
   if (!sessionResult.ok) return sessionResult;
 
@@ -70,7 +69,7 @@ export async function requireTenantSession(
   if (!tenantId) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Tenant context required" }, { status: 400 }),
+      response: NextResponse.json({ error: "Tenant context required" }, { status: 400 })
     };
   }
 
@@ -81,10 +80,10 @@ export async function requireTenantSession(
       response: NextResponse.json(
         {
           error: getTenantAccessMessage(tenantAccess.issue, "ar"),
-          code: tenantAccess.issue.toUpperCase(),
+          code: tenantAccess.issue.toUpperCase()
         },
         { status: 403 }
-      ),
+      )
     };
   }
 
@@ -95,7 +94,7 @@ export async function requireTenantSession(
  * Verify session and tenant access, while still allowing super admins.
  */
 export async function requireTenantOrSuperAdminSession(
-  req: NextRequest
+  req?: NextRequest
 ): Promise<TenantOrSuperAdminRouteResult> {
   const sessionResult = await requireSession(req);
   if (!sessionResult.ok) return sessionResult;
@@ -107,7 +106,7 @@ export async function requireTenantOrSuperAdminSession(
       ok: true,
       session,
       tenantId: session.user.tenantId ?? null,
-      isSuperAdmin: true,
+      isSuperAdmin: true
     };
   }
 
@@ -115,7 +114,7 @@ export async function requireTenantOrSuperAdminSession(
   if (!tenantId) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Tenant context required" }, { status: 400 }),
+      response: NextResponse.json({ error: "Tenant context required" }, { status: 400 })
     };
   }
 
@@ -126,10 +125,10 @@ export async function requireTenantOrSuperAdminSession(
       response: NextResponse.json(
         {
           error: getTenantAccessMessage(tenantAccess.issue, "ar"),
-          code: tenantAccess.issue.toUpperCase(),
+          code: tenantAccess.issue.toUpperCase()
         },
         { status: 403 }
-      ),
+      )
     };
   }
 
@@ -140,7 +139,7 @@ export async function requireTenantOrSuperAdminSession(
  * Verify session AND require one of the given roles
  */
 export async function requireRole(
-  req: NextRequest,
+  req: NextRequest | undefined,
   allowedRoles: string[]
 ): Promise<TenantRouteResult> {
   const result = await requireTenantSession(req);
@@ -149,7 +148,7 @@ export async function requireRole(
   if (!allowedRoles.includes(result.session.user.role)) {
     return {
       ok: false,
-      response: NextResponse.json({ error: "Forbidden" }, { status: 403 }),
+      response: NextResponse.json({ error: "Forbidden" }, { status: 403 })
     };
   }
 
@@ -166,6 +165,38 @@ export function parsePagination(searchParams: URLSearchParams, maxLimit = 100) {
     Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20)
   );
   return { page, limit, skip: (page - 1) * limit };
+}
+
+export function dataResponse<T>(data: T, status = 200) {
+  return NextResponse.json({ data }, { status });
+}
+
+export function nullDataResponse(status = 200) {
+  return dataResponse(null, status);
+}
+
+export function errorResponse(message: string, status = 500, extra?: Record<string, unknown>) {
+  return NextResponse.json(extra ? { error: message, ...extra } : { error: message }, { status });
+}
+
+export function unauthorizedResponse(message = "Unauthorized") {
+  return errorResponse(message, 401);
+}
+
+export function forbiddenResponse(message = "Forbidden") {
+  return errorResponse(message, 403);
+}
+
+export function notFoundResponse(message = "Not found") {
+  return errorResponse(message, 404);
+}
+
+export function validationErrorResponse(details: unknown, message = "Invalid input") {
+  return errorResponse(message, 400, { details });
+}
+
+export function logApiError(message: string, error: unknown, meta?: Record<string, unknown>) {
+  logger.error(message, meta, error);
 }
 
 /**

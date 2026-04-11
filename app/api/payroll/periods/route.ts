@@ -44,16 +44,13 @@ export async function GET(request: NextRequest) {
 
     const periods = await prisma.payrollPeriod.findMany({
       where,
-      orderBy: [{ startDate: "desc" }, { createdAt: "desc" }],
+      orderBy: [{ startDate: "desc" }, { createdAt: "desc" }]
     });
 
     return NextResponse.json({ data: periods.map(mapPayrollPeriod) });
   } catch (error) {
     console.error("Error fetching payroll periods:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch payroll periods" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch payroll periods" }, { status: 500 });
   }
 }
 
@@ -88,16 +85,13 @@ export async function POST(request: NextRequest) {
         totalGross: 0,
         totalDeductions: 0,
         totalNet: 0,
-        employeeCount: 0,
-      },
+        employeeCount: 0
+      }
     });
 
     return NextResponse.json({ data: mapPayrollPeriod(period) }, { status: 201 });
   } catch (error) {
     console.error("Error creating payroll period:", error);
-    return NextResponse.json(
-      { error: "Failed to create payroll period" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create payroll period" }, { status: 500 });
   }
 }

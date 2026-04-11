@@ -3,73 +3,130 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  errorResponse,
+  logApiError,
+  notFoundResponse,
+  requireSession,
+  validationErrorResponse
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
-import bcrypt from "bcryptjs";
+import { hashPassword, verifyPassword } from "@/lib/auth";
+import { revokeAllRefreshTokensForUser } from "@/lib/mobile/refresh-tokens";
+import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
+import { z } from "zod";
+
+const PROFILE_CHANGE_PASSWORD_RATE_LIMIT = {
+  limit: 6,
+  windowMs: 15 * 60 * 1000,
+  keyPrefix: "api:profile:change_password:user"
+} as const;
+
+const schema = z.object({
+  currentPassword: z.string().min(1),
+  newPassword: z.string().min(8).max(200)
+});
 
 export async function POST(request: NextRequest) {
+  const auth = await requireSession(request);
+  if (!auth.ok) return auth.response;
+  const { session } = auth;
+
+  const limitInfo = await checkRateLimit(request, {
+    ...PROFILE_CHANGE_PASSWORD_RATE_LIMIT,
+    identifier: session.user.id
+  });
+
+  if (!limitInfo.allowed) {
+    return withRateLimitHeaders(
+      NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+      {
+        limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
+  }
+
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const { currentPassword, newPassword } = body;
-
-    if (!currentPassword || !newPassword) {
-      return NextResponse.json(
-        { error: "Current password and new password are required" },
-        { status: 400 }
+    const json = await request.json();
+    const parsed = schema.safeParse(json);
+    if (!parsed.success) {
+      return withRateLimitHeaders(
+        validationErrorResponse(parsed.error.flatten(), "بيانات غير صالحة"),
+        {
+          limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
       );
     }
-
-    if (newPassword.length < 8) {
-      return NextResponse.json(
-        { error: "New password must be at least 8 characters" },
-        { status: 400 }
-      );
-    }
+    const { currentPassword, newPassword } = parsed.data;
 
     // Get user with password
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
-      select: { password: true },
+      select: { id: true, password: true, tenantId: true }
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return withRateLimitHeaders(notFoundResponse("User not found"), {
+        limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     // Verify current password
-    const isValid = await bcrypt.compare(currentPassword, user.password);
+    const isValid = await verifyPassword(currentPassword, user.password);
     if (!isValid) {
-      return NextResponse.json(
-        { error: "Current password is incorrect" },
-        { status: 400 }
-      );
+      return withRateLimitHeaders(errorResponse("Current password is incorrect", 400), {
+        limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     // Hash new password
-    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    const hashedPassword = await hashPassword(newPassword);
+    const passwordChangedAt = new Date();
 
-    // Update password
-    await prisma.user.updateMany({
-      where: { id: session.user.id },
-      data: {
-        password: hashedPassword,
-        passwordChangedAt: new Date(),
-      },
+    await prisma.$transaction(async (tx) => {
+      await tx.user.update({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          passwordChangedAt
+        }
+      });
+
+      await revokeAllRefreshTokensForUser(tx as any, user.id);
+
+      await tx.auditLog.create({
+        data: {
+          tenantId: user.tenantId,
+          userId: user.id,
+          action: "PASSWORD_CHANGED",
+          entity: "User",
+          entityId: user.id
+        }
+      });
     });
 
-    return NextResponse.json({ message: "Password changed successfully" });
-  } catch (error) {
-    console.error("Error changing password:", error);
-    return NextResponse.json(
-      { error: "Failed to change password" },
-      { status: 500 }
+    return withRateLimitHeaders(
+      NextResponse.json({ success: true, message: "Password changed successfully" }),
+      {
+        limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
     );
+  } catch (error) {
+    logApiError("Error changing password", error, { userId: session.user.id });
+    return withRateLimitHeaders(errorResponse("Failed to change password"), {
+      limit: PROFILE_CHANGE_PASSWORD_RATE_LIMIT.limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   }
 }

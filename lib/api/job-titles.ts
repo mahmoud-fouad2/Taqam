@@ -41,7 +41,7 @@ function mapJobTitleFromApi(jt: ApiJobTitle): JobTitle {
     employeesCount: jt._count?.employees ?? 0,
     tenantId: jt.tenantId,
     createdAt: jt.createdAt,
-    updatedAt: jt.updatedAt,
+    updatedAt: jt.updatedAt
   };
 }
 
@@ -62,20 +62,22 @@ export const jobTitlesService = {
   async create(data: JobTitleCreateInput): Promise<ApiResponse<JobTitle>> {
     const res = await apiClient.post<ApiJobTitle>("/job-titles", data);
     if (!res.success) return res as ApiResponse<JobTitle>;
-    if (!res.data) return { success: false, error: "Failed to create job title" } as ApiResponse<JobTitle>;
+    if (!res.data)
+      return { success: false, error: "Failed to create job title" } as ApiResponse<JobTitle>;
     return { ...res, data: mapJobTitleFromApi(res.data) };
   },
 
   async update(id: string, data: Partial<JobTitleCreateInput>): Promise<ApiResponse<JobTitle>> {
     const res = await apiClient.put<ApiJobTitle>(`/job-titles/${id}`, data);
     if (!res.success) return res as ApiResponse<JobTitle>;
-    if (!res.data) return { success: false, error: "Failed to update job title" } as ApiResponse<JobTitle>;
+    if (!res.data)
+      return { success: false, error: "Failed to update job title" } as ApiResponse<JobTitle>;
     return { ...res, data: mapJobTitleFromApi(res.data) };
   },
 
   async delete(id: string): Promise<ApiResponse<void>> {
     return apiClient.delete(`/job-titles/${id}`);
-  },
+  }
 };
 
 export default jobTitlesService;

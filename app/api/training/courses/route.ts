@@ -84,7 +84,7 @@ const createCourseSchema = z.object({
     "compliance",
     "safety",
     "onboarding",
-    "other",
+    "other"
   ]),
   type: z.enum(["in-person", "online", "hybrid", "self-paced", "workshop", "conference"]),
   status: z.enum(["draft", "scheduled", "ongoing", "completed", "cancelled"]),
@@ -102,7 +102,7 @@ const createCourseSchema = z.object({
   currency: z.string().trim().min(1).optional().nullable(),
   isMandatory: z.boolean().optional(),
   targetDepartments: z.array(z.string().trim()).optional(),
-  targetRoles: z.array(z.string().trim()).optional(),
+  targetRoles: z.array(z.string().trim()).optional()
 });
 
 export async function GET(request: NextRequest) {
@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
     if (q) {
       where.OR = [
         { title: { contains: q, mode: "insensitive" } },
-        { titleEn: { contains: q, mode: "insensitive" } },
+        { titleEn: { contains: q, mode: "insensitive" } }
       ];
     }
 
@@ -132,8 +132,8 @@ export async function GET(request: NextRequest) {
       where,
       orderBy: [{ createdAt: "desc" }],
       include: {
-        _count: { select: { enrollments: true } },
-      },
+        _count: { select: { enrollments: true } }
+      }
     });
 
     return NextResponse.json({
@@ -151,7 +151,7 @@ export async function GET(request: NextRequest) {
             ? {
                 id: "external",
                 name: c.instructorName,
-                isExternal: true,
+                isExternal: true
               }
             : undefined,
           provider: c.provider ?? undefined,
@@ -174,9 +174,9 @@ export async function GET(request: NextRequest) {
           rating: undefined,
           createdBy: c.createdByUserId ?? "system",
           createdAt: c.createdAt.toISOString(),
-          updatedAt: c.updatedAt.toISOString(),
-        })),
-      },
+          updatedAt: c.updatedAt.toISOString()
+        }))
+      }
     });
   } catch (error) {
     console.error("Error fetching training courses:", error);
@@ -214,9 +214,7 @@ export async function POST(request: NextRequest) {
         titleEn: input.titleEn || null,
         description: input.description,
         descriptionEn: input.descriptionEn || null,
-        category: input.category
-          .toUpperCase()
-          .replace("-", "_") as any,
+        category: input.category.toUpperCase().replace("-", "_") as any,
         type: input.type.toUpperCase().replace("-", "_") as any,
         status: input.status.toUpperCase().replace("-", "_") as any,
         durationHours: input.duration,
@@ -234,15 +232,15 @@ export async function POST(request: NextRequest) {
         isMandatory: input.isMandatory ?? false,
         targetDepartments: input.targetDepartments ?? [],
         targetRoles: input.targetRoles ?? [],
-        createdByUserId: session.user.id ?? null,
+        createdByUserId: session.user.id ?? null
       },
-      include: { _count: { select: { enrollments: true } } },
+      include: { _count: { select: { enrollments: true } } }
     });
 
     return NextResponse.json({
       data: {
-        id: created.id,
-      },
+        id: created.id
+      }
     });
   } catch (error) {
     console.error("Error creating training course:", error);

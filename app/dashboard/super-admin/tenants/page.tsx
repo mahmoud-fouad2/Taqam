@@ -20,17 +20,17 @@ export default async function TenantsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="flex items-center gap-2 text-2xl font-bold">
             <Building2 className="h-6 w-6" />
             {t.tenants.pManageCompanies}
           </h1>
-          <p className="text-muted-foreground">
-            {t.tenants.pViewAndManageAllRegisteredComp}
-          </p>
+          <p className="text-muted-foreground">{t.tenants.pViewAndManageAllRegisteredComp}</p>
         </div>
         <Link href="/dashboard/super-admin/tenants/new">
           <Button>
-            <Plus className="h-4 w-4 me-2" />{t.common.add}</Button>
+            <Plus className="me-2 h-4 w-4" />
+            {t.common.add}
+          </Button>
         </Link>
       </div>
 

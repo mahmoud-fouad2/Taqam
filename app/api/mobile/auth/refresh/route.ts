@@ -6,11 +6,15 @@ import { logger } from "@/lib/logger";
 import { getMobileDeviceHeaders } from "@/lib/mobile/device";
 import { rotateRefreshToken } from "@/lib/mobile/refresh-tokens";
 import { issueMobileAccessToken } from "@/lib/mobile/jwt";
-import { clearMobileRefreshCookie, getMobileRefreshCookie, setMobileRefreshCookie } from "@/lib/mobile/cookies";
+import {
+  clearMobileRefreshCookie,
+  getMobileRefreshCookie,
+  setMobileRefreshCookie
+} from "@/lib/mobile/cookies";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 
 const schema = z.object({
-  refreshToken: z.string().min(10).optional(),
+  refreshToken: z.string().min(10).optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -19,7 +23,7 @@ export async function POST(request: NextRequest) {
     const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:refresh",
       limit,
-      windowMs: 5 * 60 * 1000,
+      windowMs: 5 * 60 * 1000
     });
 
     if (!limitInfo.allowed) {
@@ -68,19 +72,23 @@ export async function POST(request: NextRequest) {
       rawRefreshToken,
       deviceId: deviceHeaders.deviceId,
       userAgent: deviceHeaders.userAgent,
-      ipAddress,
+      ipAddress
     });
 
     if (!rotated.ok) {
       const res = NextResponse.json({ error: "Invalid refresh token" }, { status: 401 });
       // If the client relied on cookie-based refresh, clear it to avoid infinite refresh loops.
       if (fromCookie) clearMobileRefreshCookie(res);
-      return withRateLimitHeaders(res, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+      return withRateLimitHeaders(res, {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     await prisma.mobileDevice.update({
       where: { id: rotated.mobileDeviceId },
-      data: { lastSeenAt: new Date() },
+      data: { lastSeenAt: new Date() }
     });
 
     const user = await prisma.user.findUnique({
@@ -91,15 +99,16 @@ export async function POST(request: NextRequest) {
         tenantId: true,
         status: true,
         tenant: { select: { status: true } },
-        employee: { select: { id: true } },
-      },
+        employee: { select: { id: true } }
+      }
     });
 
     if (!user)
-      return withRateLimitHeaders(
-        NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
-      );
+      return withRateLimitHeaders(NextResponse.json({ error: "Unauthorized" }, { status: 401 }), {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
 
     if (user.status === "INACTIVE" || user.status === "SUSPENDED") {
       return withRateLimitHeaders(
@@ -135,8 +144,8 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         action: "MOBILE_REFRESH",
         entity: "User",
-        entityId: user.id,
-      },
+        entityId: user.id
+      }
     });
 
     const accessToken = await issueMobileAccessToken({
@@ -144,20 +153,24 @@ export async function POST(request: NextRequest) {
       tenantId: user.tenantId,
       role: user.role,
       employeeId: user.employee.id,
-      deviceId: deviceHeaders.deviceId,
+      deviceId: deviceHeaders.deviceId
     });
 
     const res = NextResponse.json({
-        data: {
-          accessToken,
-          refreshToken: rotated.refreshToken,
-        },
-      });
+      data: {
+        accessToken,
+        refreshToken: rotated.refreshToken
+      }
+    });
 
     // Rotate cookie alongside the DB refresh token rotation.
     setMobileRefreshCookie(res, rotated.refreshToken, { expiresAt: rotated.expiresAt });
 
-    return withRateLimitHeaders(res, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+    return withRateLimitHeaders(res, {
+      limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   } catch (error) {
     logger.error("Mobile refresh error", undefined, error);
     return NextResponse.json({ error: "Failed to refresh" }, { status: 500 });

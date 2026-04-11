@@ -13,7 +13,9 @@ export function ContactForm({ supportEmail, isAr }: Props) {
   const [form, setForm] = useState({ name: "", company: "", email: "", subject: "", message: "" });
   const [sent, setSent] = useState(false);
 
-  const handle = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handle = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     setForm((p) => ({ ...p, [e.target.name]: e.target.value }));
   };
 
@@ -24,7 +26,7 @@ export function ContactForm({ supportEmail, isAr }: Props) {
       form.company ? `${isAr ? "الشركة" : "Company"}: ${form.company}` : "",
       `${isAr ? "البريد الإلكتروني" : "Email"}: ${form.email}`,
       "",
-      form.message,
+      form.message
     ]
       .filter(Boolean)
       .join("\n");
@@ -40,20 +42,26 @@ export function ContactForm({ supportEmail, isAr }: Props) {
 
   if (sent) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 rounded-2xl border bg-primary/5 p-10 text-center">
-        <div className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary/10">
-          <Send className="h-6 w-6 text-primary" />
+      <div className="bg-primary/5 flex flex-col items-center justify-center gap-3 rounded-2xl border p-10 text-center">
+        <div className="bg-primary/10 inline-flex h-14 w-14 items-center justify-center rounded-full">
+          <Send className="text-primary h-6 w-6" />
         </div>
-        <p className="font-semibold">{isAr ? "شكرًا! جاري فتح تطبيق البريد الإلكتروني." : "Thanks! Your email client is opening."}</p>
-        <p className="text-sm text-muted-foreground">
-          {isAr ? "تأكد من إرسال الرسالة من برنامج البريد الخاص بك." : "Please send the message from your email client."}
+        <p className="font-semibold">
+          {isAr
+            ? "شكرًا! جاري فتح تطبيق البريد الإلكتروني."
+            : "Thanks! Your email client is opening."}
+        </p>
+        <p className="text-muted-foreground text-sm">
+          {isAr
+            ? "تأكد من إرسال الرسالة من برنامج البريد الخاص بك."
+            : "Please send the message from your email client."}
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border bg-card p-6 shadow-sm">
+    <form onSubmit={handleSubmit} className="bg-card space-y-4 rounded-2xl border p-6 shadow-sm">
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
           <label className="mb-1.5 block text-sm font-medium">
@@ -69,7 +77,9 @@ export function ContactForm({ supportEmail, isAr }: Props) {
           />
         </div>
         <div>
-          <label className="mb-1.5 block text-sm font-medium">{isAr ? "الشركة (اختياري)" : "Company (optional)"}</label>
+          <label className="mb-1.5 block text-sm font-medium">
+            {isAr ? "الشركة (اختياري)" : "Company (optional)"}
+          </label>
           <input
             name="company"
             value={form.company}
@@ -103,8 +113,7 @@ export function ContactForm({ supportEmail, isAr }: Props) {
           onChange={handle}
           className={input}
           aria-label={isAr ? "موضوع الرسالة" : "Message subject"}
-          title={isAr ? "موضوع الرسالة" : "Message subject"}
-        >
+          title={isAr ? "موضوع الرسالة" : "Message subject"}>
           <option value="">{isAr ? "اختر موضوعًا..." : "Select a subject..."}</option>
           <option value={isAr ? "استفسار عن الأسعار" : "Pricing inquiry"}>
             {isAr ? "استفسار عن الأسعار" : "Pricing inquiry"}

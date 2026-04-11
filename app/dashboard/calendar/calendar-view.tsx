@@ -10,37 +10,26 @@ import {
   IconClock,
   IconAlertCircle,
   IconBeach,
-  IconMoon,
+  IconMoon
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   type AttendanceRecord,
   type AttendanceStatus,
   type Holiday,
   attendanceStatusLabels,
   dayNames,
-  getStatusColor,
+  getStatusColor
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
@@ -85,7 +74,7 @@ export function CalendarView() {
     records,
     isLoading: isRecordsLoading,
     error: recordsError,
-    refetch,
+    refetch
   } = useAttendance({ employeeId: selectedEmployee || undefined, startDate, endDate });
 
   React.useEffect(() => {
@@ -127,9 +116,7 @@ export function CalendarView() {
   // Get attendance for a specific day
   const getAttendanceForDay = (day: number): AttendanceRecord | undefined => {
     const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
-    return records.find(
-      (r) => r.date === dateStr && r.employeeId === selectedEmployee
-    );
+    return records.find((r) => r.date === dateStr && r.employeeId === selectedEmployee);
   };
 
   // Check if day is holiday
@@ -157,12 +144,12 @@ export function CalendarView() {
 
   // Generate calendar grid
   const calendarDays: (number | null)[] = [];
-  
+
   // Add empty cells for days before the first day of month
   for (let i = 0; i < startingDayOfWeek; i++) {
     calendarDays.push(null);
   }
-  
+
   // Add days of the month
   for (let day = 1; day <= daysInMonth; day++) {
     calendarDays.push(day);
@@ -175,7 +162,7 @@ export function CalendarView() {
     present: monthRecords.filter((r) => r.status === "present").length,
     late: monthRecords.filter((r) => r.status === "late").length,
     absent: monthRecords.filter((r) => r.status === "absent").length,
-    onLeave: monthRecords.filter((r) => r.status === "on_leave").length,
+    onLeave: monthRecords.filter((r) => r.status === "on_leave").length
   };
 
   // Get status icon
@@ -200,14 +187,12 @@ export function CalendarView() {
 
   const today = new Date();
   const isToday = (day: number) =>
-    day === today.getDate() &&
-    month === today.getMonth() &&
-    year === today.getFullYear();
+    day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
 
   return (
     <div className="space-y-6">
       {recordsError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {recordsError}
         </div>
       )}
@@ -220,7 +205,7 @@ export function CalendarView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.present}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -230,7 +215,7 @@ export function CalendarView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.late}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -240,7 +225,7 @@ export function CalendarView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.absent}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -250,7 +235,7 @@ export function CalendarView() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.onLeave}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
       </div>
@@ -277,13 +262,21 @@ export function CalendarView() {
                 </SelectContent>
               </Select>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" aria-label={t.common.lastMonth} onClick={() => navigateMonth(-1)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t.common.lastMonth}
+                  onClick={() => navigateMonth(-1)}>
                   <IconChevronRight className="h-4 w-4" />
                 </Button>
-                <span className="font-medium min-w-[150px] text-center">
+                <span className="min-w-[150px] text-center font-medium">
                   {selectedDate.toLocaleString("ar-SA", { month: "long", year: "numeric" })}
                 </span>
-                <Button variant="outline" size="icon" aria-label={t.common.nextMonth} onClick={() => navigateMonth(1)}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  aria-label={t.common.nextMonth}
+                  onClick={() => navigateMonth(1)}>
                   <IconChevronLeft className="h-4 w-4" />
                 </Button>
               </div>
@@ -292,14 +285,13 @@ export function CalendarView() {
         </CardHeader>
         <CardContent>
           {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-2">
+          <div className="mb-2 grid grid-cols-7 gap-1">
             {dayNames.ar.map((day, index) => (
               <div
                 key={index}
-                className={`text-center text-sm font-medium py-2 ${
+                className={`py-2 text-center text-sm font-medium ${
                   index === 5 || index === 6 ? "text-red-500" : "text-muted-foreground"
-                }`}
-              >
+                }`}>
                 {day}
               </div>
             ))}
@@ -323,48 +315,39 @@ export function CalendarView() {
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div
-                        className={`h-20 p-2 border rounded-lg transition-colors cursor-pointer hover:border-primary/50 ${
+                        className={`hover:border-primary/50 h-20 cursor-pointer rounded-lg border p-2 transition-colors ${
                           isToday(day)
                             ? "border-primary bg-primary/5"
                             : holiday
-                            ? "bg-purple-50 border-purple-200"
-                            : isWeekend
-                            ? "bg-gray-50"
-                            : ""
-                        }`}
-                      >
+                              ? "border-purple-200 bg-purple-50"
+                              : isWeekend
+                                ? "bg-gray-50"
+                                : ""
+                        }`}>
                         <div className="flex items-start justify-between">
                           <span
                             className={`text-sm font-medium ${
-                              isToday(day)
-                                ? "text-primary"
-                                : isWeekend
-                                ? "text-red-500"
-                                : ""
-                            }`}
-                          >
+                              isToday(day) ? "text-primary" : isWeekend ? "text-red-500" : ""
+                            }`}>
                             {day}
                           </span>
                           {attendance && (
                             <div
-                              className={`w-6 h-6 rounded-full flex items-center justify-center text-white ${getStatusColor(
+                              className={`flex h-6 w-6 items-center justify-center rounded-full text-white ${getStatusColor(
                                 attendance.status
-                              )}`}
-                            >
+                              )}`}>
                               {getStatusIcon(attendance.status)}
                             </div>
                           )}
                         </div>
                         {holiday && (
-                          <p className="text-xs text-purple-600 mt-1 truncate">
-                            {holidayName}
-                          </p>
+                          <p className="mt-1 truncate text-xs text-purple-600">{holidayName}</p>
                         )}
                         {attendance?.checkInTime && (
-                          <p className="text-xs text-muted-foreground mt-1">
+                          <p className="text-muted-foreground mt-1 text-xs">
                             {new Date(attendance.checkInTime).toLocaleTimeString("ar-SA", {
                               hour: "2-digit",
-                              minute: "2-digit",
+                              minute: "2-digit"
                             })}
                           </p>
                         )}
@@ -381,7 +364,7 @@ export function CalendarView() {
                               {t.calendar.pCheckin}{" "}
                               {new Date(attendance.checkInTime).toLocaleTimeString("ar-SA", {
                                 hour: "2-digit",
-                                minute: "2-digit",
+                                minute: "2-digit"
                               })}
                             </p>
                           )}
@@ -390,7 +373,7 @@ export function CalendarView() {
                               {t.calendar.pClockOut}{" "}
                               {new Date(attendance.checkOutTime).toLocaleTimeString("ar-SA", {
                                 hour: "2-digit",
-                                minute: "2-digit",
+                                minute: "2-digit"
                               })}
                             </p>
                           )}
@@ -415,18 +398,20 @@ export function CalendarView() {
           </div>
 
           {/* Legend */}
-          <div className="flex flex-wrap items-center gap-4 mt-6 pt-4 border-t">
-            <span className="text-sm text-muted-foreground">{t.calendar.colorGuide}</span>
+          <div className="mt-6 flex flex-wrap items-center gap-4 border-t pt-4">
+            <span className="text-muted-foreground text-sm">{t.calendar.colorGuide}</span>
             {[
               { status: "present", label: t.calendar.present },
               { status: "late", label: t.calendar.late },
               { status: "absent", label: t.calendar.absent },
               { status: "on_leave", label: t.calendar.onLeave },
               { status: "holiday", label: t.calendar.officialHoliday },
-              { status: "weekend", label: t.calendar.weekendHoliday },
+              { status: "weekend", label: t.calendar.weekendHoliday }
             ].map(({ status, label }) => (
               <div key={status} className="flex items-center gap-1.5">
-                <div className={`w-3 h-3 rounded-full ${getStatusColor(status as AttendanceStatus)}`} />
+                <div
+                  className={`h-3 w-3 rounded-full ${getStatusColor(status as AttendanceStatus)}`}
+                />
                 <span className="text-xs">{label}</span>
               </div>
             ))}

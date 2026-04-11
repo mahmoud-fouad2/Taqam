@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
 
     const periods = await prisma.payrollPeriod.findMany({
       where: wherePeriods,
-      select: { id: true, startDate: true },
+      select: { id: true, startDate: true }
     });
 
     const periodIds = periods.map((p) => p.id);
@@ -74,20 +74,20 @@ export async function GET(request: NextRequest) {
             ...(departmentId !== "all"
               ? {
                   employee: {
-                    departmentId,
-                  },
+                    departmentId
+                  }
                 }
-              : {}),
+              : {})
           },
           include: {
             payrollPeriod: { select: { startDate: true } },
             employee: {
               select: {
                 departmentId: true,
-                department: { select: { id: true, name: true, nameAr: true } },
-              },
-            },
-          },
+                department: { select: { id: true, name: true, nameAr: true } }
+              }
+            }
+          }
         })
       : [];
 
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
         totalNet: 0,
         gosiBase: 0,
         gosiEmployee: 0,
-        gosiEmployer: 0,
+        gosiEmployer: 0
       };
 
       current.employeeCount += 1;
@@ -140,7 +140,7 @@ export async function GET(request: NextRequest) {
     const departmentStats = Array.from(byDept.values())
       .map((d) => ({
         ...d,
-        avgSalary: d.employeeCount ? d.totalGross / d.employeeCount : 0,
+        avgSalary: d.employeeCount ? d.totalGross / d.employeeCount : 0
       }))
       .sort((a, b) => b.totalGross - a.totalGross);
 
@@ -165,7 +165,7 @@ export async function GET(request: NextRequest) {
         month: label,
         totalGross: 0,
         totalNet: 0,
-        employeeCount: 0,
+        employeeCount: 0
       });
     }
 
@@ -179,11 +179,24 @@ export async function GET(request: NextRequest) {
       bucket.employeeCount += 1;
     }
 
-    const monthlyTrend = months.map(({ y, m }) => byMonth.get(`${y}-${String(m).padStart(2, "0")}`)!);
+    const monthlyTrend = months.map(
+      ({ y, m }) => byMonth.get(`${y}-${String(m).padStart(2, "0")}`)!
+    );
 
     if (format === "csv") {
       const csv = buildCsv(
-        ["section", "name", "employeeCount", "totalGross", "totalDeductions", "totalNet", "avgSalary", "gosiBase", "gosiEmployee", "gosiEmployer"],
+        [
+          "section",
+          "name",
+          "employeeCount",
+          "totalGross",
+          "totalDeductions",
+          "totalNet",
+          "avgSalary",
+          "gosiBase",
+          "gosiEmployee",
+          "gosiEmployer"
+        ],
         [
           ...departmentStats.map((item) => [
             "department",
@@ -195,7 +208,7 @@ export async function GET(request: NextRequest) {
             item.avgSalary,
             item.gosiBase,
             item.gosiEmployee,
-            item.gosiEmployer,
+            item.gosiEmployer
           ]),
           ...monthlyTrend.map((item) => [
             "trend",
@@ -207,24 +220,24 @@ export async function GET(request: NextRequest) {
             undefined,
             undefined,
             undefined,
-            undefined,
-          ]),
+            undefined
+          ])
         ]
       );
 
       return new NextResponse(`\ufeff${csv}`, {
         headers: {
           "Content-Type": "text/csv; charset=utf-8",
-          "Content-Disposition": `attachment; filename="payroll-report-${year}-${monthRaw}.csv"`,
-        },
+          "Content-Disposition": `attachment; filename="payroll-report-${year}-${monthRaw}.csv"`
+        }
       });
     }
 
     return NextResponse.json({
       data: {
         departmentStats,
-        monthlyTrend,
-      },
+        monthlyTrend
+      }
     });
   } catch (error) {
     console.error("Error generating payroll report:", error);

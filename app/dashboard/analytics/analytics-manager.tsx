@@ -1,23 +1,37 @@
-'use client';
+"use client";
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { 
-  TrendingUp, TrendingDown, Minus, Users, Clock, Wallet,
-  Target, GraduationCap, Briefcase, Building2, BarChart3,
-  PieChart, LineChart, ArrowUpRight, Calendar, Download, RefreshCw
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  TrendingUp,
+  TrendingDown,
+  Minus,
+  Users,
+  Clock,
+  Wallet,
+  Target,
+  GraduationCap,
+  Briefcase,
+  Building2,
+  BarChart3,
+  PieChart,
+  LineChart,
+  ArrowUpRight,
+  Calendar,
+  Download,
+  RefreshCw
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue
+} from "@/components/ui/select";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -29,7 +43,7 @@ type KPIMetric = {
   value: number;
   unit?: string;
   target?: number;
-  trend: 'up' | 'down' | 'neutral';
+  trend: "up" | "down" | "neutral";
   trendPercentage?: number;
 };
 
@@ -65,73 +79,89 @@ type AnalyticsOverview = {
 export default function AnalyticsManager() {
   const locale = useClientLocale();
   const t = getText(locale);
-  const [period, setPeriod] = useState('current-month');
+  const [period, setPeriod] = useState("current-month");
   const [data, setData] = useState<AnalyticsOverview | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const nationalityDotColors = [
-    'bg-blue-500',
-    'bg-emerald-500',
-    'bg-amber-500',
-    'bg-purple-500',
-    'bg-pink-500',
-    'bg-cyan-500',
-    'bg-orange-500',
+    "bg-blue-500",
+    "bg-emerald-500",
+    "bg-amber-500",
+    "bg-purple-500",
+    "bg-pink-500",
+    "bg-cyan-500",
+    "bg-orange-500"
   ];
 
   const getEmploymentTypeLabel = (type: string) => {
     switch (type) {
-      case 'FULL_TIME': return t.analytics.fullTime;
-      case 'PART_TIME': return t.analytics.partTime;
-      case 'CONTRACT': return t.analytics.contract;
-      case 'INTERN': return t.analytics.internship;
-      case 'TEMPORARY': return t.analytics.temporary;
-      default: return type;
+      case "FULL_TIME":
+        return t.analytics.fullTime;
+      case "PART_TIME":
+        return t.analytics.partTime;
+      case "CONTRACT":
+        return t.analytics.contract;
+      case "INTERN":
+        return t.analytics.internship;
+      case "TEMPORARY":
+        return t.analytics.temporary;
+      default:
+        return type;
     }
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-4 w-4 text-green-600" />;
-      case 'down': return <TrendingDown className="h-4 w-4 text-red-600" />;
-      default: return <Minus className="h-4 w-4 text-gray-600" />;
+      case "up":
+        return <TrendingUp className="h-4 w-4 text-green-600" />;
+      case "down":
+        return <TrendingDown className="h-4 w-4 text-red-600" />;
+      default:
+        return <Minus className="h-4 w-4 text-gray-600" />;
     }
   };
 
   const getTrendColor = (trend: string, isPositive: boolean = true) => {
-    if (trend === 'up') return isPositive ? 'text-green-600' : 'text-red-600';
-    if (trend === 'down') return isPositive ? 'text-red-600' : 'text-green-600';
-    return 'text-gray-600';
+    if (trend === "up") return isPositive ? "text-green-600" : "text-red-600";
+    if (trend === "down") return isPositive ? "text-red-600" : "text-green-600";
+    return "text-gray-600";
   };
 
   const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('ar-SA').format(num);
+    return new Intl.NumberFormat("ar-SA").format(num);
   };
 
   const formatCurrency = (num: number) => {
-    const c = data?.currency || 'SAR';
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: c, maximumFractionDigits: 0 }).format(num);
+    const c = data?.currency || "SAR";
+    return new Intl.NumberFormat("ar-SA", {
+      style: "currency",
+      currency: c,
+      maximumFractionDigits: 0
+    }).format(num);
   };
 
   const fetchOverview = useCallback(async (selectedPeriod: string) => {
     setIsLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/analytics/overview?period=${encodeURIComponent(selectedPeriod)}`, {
-        method: 'GET',
-        headers: { 'content-type': 'application/json' },
-      });
+      const res = await fetch(
+        `/api/analytics/overview?period=${encodeURIComponent(selectedPeriod)}`,
+        {
+          method: "GET",
+          headers: { "content-type": "application/json" }
+        }
+      );
 
       const json = await res.json();
       if (!res.ok) {
-        throw new Error(json?.error || 'Failed to load analytics');
+        throw new Error(json?.error || "Failed to load analytics");
       }
 
       setData(json.data as AnalyticsOverview);
     } catch (e: any) {
       setData(null);
-      setError(e?.message || 'Failed to load analytics');
+      setError(e?.message || "Failed to load analytics");
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +187,7 @@ export default function AnalyticsManager() {
         <div className="flex gap-2">
           <Select value={period} onValueChange={setPeriod}>
             <SelectTrigger className="w-[180px]">
-              <Calendar className="h-4 w-4 ms-2" />
+              <Calendar className="ms-2 h-4 w-4" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -169,11 +199,13 @@ export default function AnalyticsManager() {
             </SelectContent>
           </Select>
           <Button variant="outline" onClick={() => void fetchOverview(period)} disabled={isLoading}>
-            <RefreshCw className="h-4 w-4 ms-2" />
+            <RefreshCw className="ms-2 h-4 w-4" />
             {t.analytics.pRefresh}
           </Button>
           <Button variant="outline">
-            <Download className="h-4 w-4 ms-2" />{t.common.exportData}</Button>
+            <Download className="ms-2 h-4 w-4" />
+            {t.common.exportData}
+          </Button>
         </div>
       </div>
 
@@ -182,13 +214,13 @@ export default function AnalyticsManager() {
         {kpis.map((kpi) => (
           <Card key={kpi.id}>
             <CardContent className="pt-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-muted-foreground">{kpi.name}</span>
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">{kpi.name}</span>
                 {getTrendIcon(kpi.trend)}
               </div>
               <div className="flex items-baseline gap-2">
                 <span className="text-2xl font-bold">
-                  {kpi.unit && kpi.unit !== '%' && kpi.unit !== 'h'
+                  {kpi.unit && kpi.unit !== "%" && kpi.unit !== "h"
                     ? formatCurrency(kpi.value)
                     : kpi.unit
                       ? `${kpi.value}${kpi.unit}`
@@ -196,15 +228,17 @@ export default function AnalyticsManager() {
                 </span>
               </div>
               {kpi.trendPercentage !== undefined && (
-                <p className={`text-xs mt-1 ${getTrendColor(kpi.trend, kpi.id !== 'kpi-2')}`}>
-                  {kpi.trendPercentage > 0 ? '+' : ''}{kpi.trendPercentage}% {t.analytics.vsLastPeriod}
+                <p className={`mt-1 text-xs ${getTrendColor(kpi.trend, kpi.id !== "kpi-2")}`}>
+                  {kpi.trendPercentage > 0 ? "+" : ""}
+                  {kpi.trendPercentage}% {t.analytics.vsLastPeriod}
                 </p>
               )}
               {kpi.target && (
                 <div className="mt-2">
                   <Progress value={(kpi.value / kpi.target) * 100} className="h-1" />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {t.analytics.pTarget} {kpi.target}{kpi.unit}
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {t.analytics.pTarget} {kpi.target}
+                    {kpi.unit}
                   </p>
                 </div>
               )}
@@ -234,11 +268,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.totalEmployees}</p>
+                    <p className="text-muted-foreground text-sm">{t.analytics.totalEmployees}</p>
                     <p className="text-2xl font-bold">{formatNumber(hr?.totalEmployees || 0)}</p>
                   </div>
                 </div>
@@ -247,11 +281,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
                     <TrendingUp className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.newHires}</p>
+                    <p className="text-muted-foreground text-sm">{t.analytics.newHires}</p>
                     <p className="text-2xl font-bold">{hr?.newHires || 0}</p>
                   </div>
                 </div>
@@ -260,11 +294,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100">
                     <TrendingDown className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.leavers}</p>
+                    <p className="text-muted-foreground text-sm">{t.analytics.leavers}</p>
                     <p className="text-2xl font-bold">{hr?.terminations || 0}</p>
                   </div>
                 </div>
@@ -273,11 +307,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100">
                     <Target className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.turnoverRate}</p>
+                    <p className="text-muted-foreground text-sm">{t.analytics.turnoverRate}</p>
                     <p className="text-2xl font-bold">{hr?.turnoverRate || 0}%</p>
                   </div>
                 </div>
@@ -298,11 +332,14 @@ export default function AnalyticsManager() {
                   {(hr?.headcountByDepartment || []).map((item, index) => (
                     <div key={index} className="flex items-center gap-4">
                       <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
+                        <div className="mb-1 flex items-center justify-between">
                           <span className="text-sm font-medium">{item.department}</span>
-                          <span className="text-sm text-muted-foreground">{item.count}</span>
+                          <span className="text-muted-foreground text-sm">{item.count}</span>
                         </div>
-                        <Progress value={(item.count / Math.max(1, hr?.totalEmployees || 0)) * 100} className="h-2" />
+                        <Progress
+                          value={(item.count / Math.max(1, hr?.totalEmployees || 0)) * 100}
+                          className="h-2"
+                        />
                       </div>
                     </div>
                   ))}
@@ -329,8 +366,9 @@ export default function AnalyticsManager() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{item.count}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({((item.count / Math.max(1, hr?.totalEmployees || 0)) * 100).toFixed(1)}%)
+                        <span className="text-muted-foreground text-xs">
+                          ({((item.count / Math.max(1, hr?.totalEmployees || 0)) * 100).toFixed(1)}
+                          %)
                         </span>
                       </div>
                     </div>
@@ -350,11 +388,16 @@ export default function AnalyticsManager() {
                 <div className="space-y-3">
                   {(hr?.ageDistribution || []).map((item, index) => (
                     <div key={index} className="flex items-center gap-4">
-                      <span className="text-sm w-16">{item.range}</span>
+                      <span className="w-16 text-sm">{item.range}</span>
                       <div className="flex-1">
-                        <Progress value={(item.count / Math.max(1, hr?.totalEmployees || 0)) * 100} className="h-2" />
+                        <Progress
+                          value={(item.count / Math.max(1, hr?.totalEmployees || 0)) * 100}
+                          className="h-2"
+                        />
                       </div>
-                      <span className="text-sm text-muted-foreground w-12 text-start">{item.count}</span>
+                      <span className="text-muted-foreground w-12 text-start text-sm">
+                        {item.count}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -371,7 +414,9 @@ export default function AnalyticsManager() {
               <CardContent>
                 <div className="space-y-3">
                   {(hr?.employmentTypeDistribution || []).map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                    <div
+                      key={index}
+                      className="bg-muted flex items-center justify-between rounded-lg p-3">
                       <span className="font-medium">{getEmploymentTypeLabel(item.type)}</span>
                       <Badge variant="secondary">{item.count}</Badge>
                     </div>
@@ -388,11 +433,13 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
                     <Target className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.attendanceRateLabel}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {t.analytics.attendanceRateLabel}
+                    </p>
                     <p className="text-2xl font-bold">{attendance?.averageAttendanceRate || 0}%</p>
                   </div>
                 </div>
@@ -401,11 +448,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-yellow-100">
                     <Clock className="h-6 w-6 text-yellow-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.analytics.delays}</p>
+                    <p className="text-muted-foreground text-sm">{t.analytics.delays}</p>
                     <p className="text-2xl font-bold">{attendance?.lateArrivals || 0}</p>
                   </div>
                 </div>
@@ -414,11 +461,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-red-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-red-100">
                     <Users className="h-6 w-6 text-red-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.attendance.absent}</p>
+                    <p className="text-muted-foreground text-sm">{t.attendance.absent}</p>
                     <p className="text-2xl font-bold">{attendance?.absences || 0}</p>
                   </div>
                 </div>
@@ -427,11 +474,11 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                     <Clock className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.common.overtime}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.overtime}</p>
                     <p className="text-2xl font-bold">{attendance?.overtimeHours || 0}</p>
                   </div>
                 </div>
@@ -450,14 +497,18 @@ export default function AnalyticsManager() {
               <div className="space-y-4">
                 {(attendance?.attendanceByDepartment || []).map((item, index) => (
                   <div key={index} className="flex items-center gap-4">
-                    <span className="text-sm w-32">{item.department}</span>
+                    <span className="w-32 text-sm">{item.department}</span>
                     <div className="flex-1">
                       <Progress value={item.rate} className="h-3" />
                     </div>
-                    <span className={`text-sm font-medium w-16 text-start ${
-                      item.rate >= 95 ? 'text-green-600' : 
-                      item.rate >= 90 ? 'text-yellow-600' : 'text-red-600'
-                    }`}>
+                    <span
+                      className={`w-16 text-start text-sm font-medium ${
+                        item.rate >= 95
+                          ? "text-green-600"
+                          : item.rate >= 90
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                      }`}>
                       {item.rate}%
                     </span>
                   </div>
@@ -473,12 +524,16 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-green-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
                     <Wallet className="h-6 w-6 text-green-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.salaryStructures.totalSalaries}</p>
-                    <p className="text-2xl font-bold">{formatCurrency(payroll?.totalPayroll || 0)}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {t.salaryStructures.totalSalaries}
+                    </p>
+                    <p className="text-2xl font-bold">
+                      {formatCurrency(payroll?.totalPayroll || 0)}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -486,12 +541,14 @@ export default function AnalyticsManager() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-lg bg-blue-100 flex items-center justify-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100">
                     <Users className="h-6 w-6 text-blue-600" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.salaryStructures.avgSalary}</p>
-                    <p className="text-2xl font-bold">{formatCurrency(payroll?.averageSalary || 0)}</p>
+                    <p className="text-muted-foreground text-sm">{t.salaryStructures.avgSalary}</p>
+                    <p className="text-2xl font-bold">
+                      {formatCurrency(payroll?.averageSalary || 0)}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -509,10 +566,12 @@ export default function AnalyticsManager() {
               <CardContent>
                 <div className="space-y-3">
                   {(payroll?.salaryByDepartment || []).map((item, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-muted">
+                    <div
+                      key={index}
+                      className="bg-muted flex items-center justify-between rounded-lg p-3">
                       <div>
                         <span className="font-medium">{item.department}</span>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {t.analytics.pAverage} {formatCurrency(item.average)}
                         </p>
                       </div>
@@ -538,11 +597,16 @@ export default function AnalyticsManager() {
                       <span className="font-medium">{formatCurrency(item.amount)}</span>
                     </div>
                   ))}
-                  <div className="border-t pt-3 flex items-center justify-between font-bold">
+                  <div className="flex items-center justify-between border-t pt-3 font-bold">
                     <span>{t.common.total}</span>
-                    <span>{formatCurrency(
-                      (payroll?.allowancesBreakdown || []).reduce((sum, item) => sum + item.amount, 0)
-                    )}</span>
+                    <span>
+                      {formatCurrency(
+                        (payroll?.allowancesBreakdown || []).reduce(
+                          (sum, item) => sum + item.amount,
+                          0
+                        )
+                      )}
+                    </span>
                   </div>
                 </div>
               </CardContent>

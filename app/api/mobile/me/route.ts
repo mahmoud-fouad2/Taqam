@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 export async function GET(request: NextRequest) {
@@ -18,9 +19,11 @@ export async function GET(request: NextRequest) {
         role: true,
         permissions: true,
         tenantId: true,
-        tenant: { select: { id: true, slug: true, name: true, nameAr: true, status: true, plan: true } },
-        employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true } },
-      },
+        tenant: {
+          select: { id: true, slug: true, name: true, nameAr: true, status: true, plan: true }
+        },
+        employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true } }
+      }
     });
 
     if (!user) {
@@ -29,7 +32,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: user });
   } catch (error) {
-    console.error("Mobile me error:", error);
+    logger.error("Mobile me error", undefined, error);
     return NextResponse.json({ error: "Failed to load profile" }, { status: 500 });
   }
 }
@@ -63,14 +66,16 @@ export async function PUT(request: NextRequest) {
         role: true,
         permissions: true,
         tenantId: true,
-        tenant: { select: { id: true, slug: true, name: true, nameAr: true, status: true, plan: true } },
-        employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true } },
-      },
+        tenant: {
+          select: { id: true, slug: true, name: true, nameAr: true, status: true, plan: true }
+        },
+        employee: { select: { id: true, employeeNumber: true, firstName: true, lastName: true } }
+      }
     });
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Mobile me update error:", error);
+    logger.error("Mobile me update error", undefined, error);
     return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
   }
 }

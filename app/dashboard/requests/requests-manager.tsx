@@ -11,19 +11,13 @@ import {
   IconFileDescription,
   IconCalendarTime,
   IconHome,
-  IconClockEdit,
+  IconClockEdit
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -31,14 +25,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -46,7 +40,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -56,7 +50,7 @@ import {
   type AttendanceRequestStatus,
   type AttendanceRequestType,
   requestStatusLabels,
-  requestTypeLabels,
+  requestTypeLabels
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
@@ -101,7 +95,7 @@ function formatDateTime(value: string, locale: "ar" | "en") {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
-    minute: "2-digit",
+    minute: "2-digit"
   });
 }
 
@@ -112,7 +106,7 @@ function formatTime(value: string | undefined, locale: "ar" | "en") {
 
   return new Date(value).toLocaleTimeString(localeTag(locale), {
     hour: "2-digit",
-    minute: "2-digit",
+    minute: "2-digit"
   });
 }
 
@@ -147,13 +141,17 @@ function RequestsTable({
   getTypeIcon,
   getStatusVariant,
   onApprove,
-  onReject,
+  onReject
 }: RequestsTableProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isApprovalMode ? t.requests.needsApproval : t.requests.myRequestsLabel}</CardTitle>
-        <CardDescription>{requests.length} {t.requests.requestCount}</CardDescription>
+        <CardTitle>
+          {isApprovalMode ? t.requests.needsApproval : t.requests.myRequestsLabel}
+        </CardTitle>
+        <CardDescription>
+          {requests.length} {t.requests.requestCount}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
@@ -172,19 +170,27 @@ function RequestsTable({
           <TableBody>
             {isLoading ? (
               <TableRow>
-                <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center text-muted-foreground">{t.requests.loadingRequests}</TableCell>
+                <TableCell
+                  colSpan={isApprovalMode ? 8 : 7}
+                  className="text-muted-foreground py-8 text-center">
+                  {t.requests.loadingRequests}
+                </TableCell>
               </TableRow>
             ) : requests.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={isApprovalMode ? 8 : 7} className="py-8 text-center">
-                  <IconFileDescription className="mx-auto mb-2 h-12 w-12 text-muted-foreground" />
+                  <IconFileDescription className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
                   <p className="text-muted-foreground">{t.requests.noRequests}</p>
                 </TableCell>
               </TableRow>
             ) : (
               requests.map((request) => (
                 <TableRow key={request.id}>
-                  {isApprovalMode && <TableCell className="font-medium">{getEmployeeName(request.employeeId)}</TableCell>}
+                  {isApprovalMode && (
+                    <TableCell className="font-medium">
+                      {getEmployeeName(request.employeeId)}
+                    </TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center gap-2">
                       {getTypeIcon(request.type)}
@@ -195,13 +201,19 @@ function RequestsTable({
                   <TableCell className="text-sm">
                     {request.type === "check_correction" && request.requestedCheckIn && (
                       <span>
-                        {formatTime(request.requestedCheckIn, locale)} - {formatTime(request.requestedCheckOut, locale)}
+                        {formatTime(request.requestedCheckIn, locale)} -{" "}
+                        {formatTime(request.requestedCheckOut, locale)}
                       </span>
                     )}
-                    {request.type === "overtime" && <span>{request.overtimeHours} {t.requests.hoursUnit}</span>}
+                    {request.type === "overtime" && (
+                      <span>
+                        {request.overtimeHours} {t.requests.hoursUnit}
+                      </span>
+                    )}
                     {request.type === "permission" && (
                       <span>
-                        {formatTime(request.permissionStartTime, locale)} - {formatTime(request.permissionEndTime, locale)}
+                        {formatTime(request.permissionStartTime, locale)} -{" "}
+                        {formatTime(request.permissionEndTime, locale)}
                       </span>
                     )}
                     {request.type === "work_from_home" && <span>{t.requests.fullDay}</span>}
@@ -212,14 +224,23 @@ function RequestsTable({
                       {requestStatusLabels[request.status][locale]}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{formatDateTime(request.createdAt, locale)}</TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {formatDateTime(request.createdAt, locale)}
+                  </TableCell>
                   {isApprovalMode && (
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button size="sm" onClick={() => onApprove?.(request.id)}>
-                          <IconCheck className="ms-2 h-4 w-4" />{t.common.accept}</Button>
-                        <Button size="sm" variant="destructive" onClick={() => onReject?.(request.id)}>
-                          <IconX className="ms-2 h-4 w-4" />{t.common.reject}</Button>
+                          <IconCheck className="ms-2 h-4 w-4" />
+                          {t.common.accept}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => onReject?.(request.id)}>
+                          <IconX className="ms-2 h-4 w-4" />
+                          {t.common.reject}
+                        </Button>
                       </div>
                     </TableCell>
                   )}
@@ -259,7 +280,7 @@ export function RequestsManager() {
     overtimeHours: 1,
     permissionStartTime: "",
     permissionEndTime: "",
-    reason: "",
+    reason: ""
   });
 
   const canApprove = currentUserRole ? APPROVER_ROLES.includes(currentUserRole) : false;
@@ -275,7 +296,9 @@ export function RequestsManager() {
           return;
         }
 
-        setCurrentUserId(typeof json.data?.employee?.id === "string" ? json.data.employee.id : null);
+        setCurrentUserId(
+          typeof json.data?.employee?.id === "string" ? json.data.employee.id : null
+        );
         setCurrentUserRole(typeof json.data?.role === "string" ? json.data.role : null);
       } catch {
         if (!mounted) {
@@ -325,7 +348,9 @@ export function RequestsManager() {
     }
   }, [activeTab, canApprove]);
 
-  const myRequests = currentUserId ? requests.filter((item) => item.employeeId === currentUserId) : [];
+  const myRequests = currentUserId
+    ? requests.filter((item) => item.employeeId === currentUserId)
+    : [];
   const pendingApprovalRequests = requests.filter(
     (item) => item.status === "pending" && (!currentUserId || item.employeeId !== currentUserId)
   );
@@ -365,7 +390,7 @@ export function RequestsManager() {
     pending: myRequests.filter((item) => item.status === "pending").length,
     approved: myRequests.filter((item) => item.status === "approved").length,
     rejected: myRequests.filter((item) => item.status === "rejected").length,
-    pendingApproval: canApprove ? pendingApprovalRequests.length : 0,
+    pendingApproval: canApprove ? pendingApprovalRequests.length : 0
   };
 
   const resetForm = () => {
@@ -377,7 +402,7 @@ export function RequestsManager() {
       overtimeHours: 1,
       permissionStartTime: "",
       permissionEndTime: "",
-      reason: "",
+      reason: ""
     });
   };
 
@@ -400,7 +425,7 @@ export function RequestsManager() {
         employeeId: currentUserId,
         type: formData.type,
         date: formData.date,
-        reason: formData.reason.trim(),
+        reason: formData.reason.trim()
       };
 
       if (formData.type === "check_correction") {
@@ -517,7 +542,7 @@ export function RequestsManager() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
       )}
@@ -526,7 +551,7 @@ export function RequestsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.requests.totalMyRequests}</CardTitle>
-            <IconFileDescription className="h-4 w-4 text-muted-foreground" />
+            <IconFileDescription className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -563,10 +588,10 @@ export function RequestsManager() {
           <Card className="border-primary/30 bg-primary/5">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.requests.needsYourApproval}</CardTitle>
-              <IconClock className="h-4 w-4 text-primary" />
+              <IconClock className="text-primary h-4 w-4" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{stats.pendingApproval}</div>
+              <div className="text-primary text-2xl font-bold">{stats.pendingApproval}</div>
             </CardContent>
           </Card>
         )}
@@ -590,7 +615,7 @@ export function RequestsManager() {
 
           <div className="flex flex-1 flex-wrap items-center gap-2 sm:justify-end">
             <div className="relative w-full sm:w-72">
-              <IconSearch className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
@@ -599,11 +624,13 @@ export function RequestsManager() {
               />
             </div>
 
-            <Badge variant="outline" className="h-9 px-3 text-xs text-muted-foreground">
+            <Badge variant="outline" className="text-muted-foreground h-9 px-3 text-xs">
               {pendingCountLabel}: {activeTab === "my" ? stats.pending : stats.pendingApproval}
             </Badge>
 
-            <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as AttendanceRequestType | "all")}>
+            <Select
+              value={typeFilter}
+              onValueChange={(value) => setTypeFilter(value as AttendanceRequestType | "all")}>
               <SelectTrigger className="w-[150px]">
                 <IconFilter className="ms-2 h-4 w-4" />
                 <SelectValue placeholder={t.common.type} />
@@ -618,7 +645,9 @@ export function RequestsManager() {
               </SelectContent>
             </Select>
 
-            <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AttendanceRequestStatus | "all")}>
+            <Select
+              value={statusFilter}
+              onValueChange={(value) => setStatusFilter(value as AttendanceRequestStatus | "all")}>
               <SelectTrigger className="w-[150px]">
                 <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
@@ -635,7 +664,9 @@ export function RequestsManager() {
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
-                  <IconPlus className="ms-2 h-4 w-4" />{t.myRequests.newRequest}</Button>
+                  <IconPlus className="ms-2 h-4 w-4" />
+                  {t.myRequests.newRequest}
+                </Button>
               </DialogTrigger>
               <DialogContent className="w-full sm:max-w-[520px]">
                 <DialogHeader>
@@ -649,9 +680,11 @@ export function RequestsManager() {
                     <Select
                       value={formData.type}
                       onValueChange={(value) =>
-                        setFormData((current) => ({ ...current, type: value as AttendanceRequestType }))
-                      }
-                    >
+                        setFormData((current) => ({
+                          ...current,
+                          type: value as AttendanceRequestType
+                        }))
+                      }>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -673,19 +706,24 @@ export function RequestsManager() {
                     <Input
                       type="date"
                       value={formData.date}
-                      onChange={(event) => setFormData((current) => ({ ...current, date: event.target.value }))}
+                      onChange={(event) =>
+                        setFormData((current) => ({ ...current, date: event.target.value }))
+                      }
                     />
                   </div>
 
                   {formData.type === "check_correction" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>{t.requests.correctAttendance}</Label>
                         <Input
                           type="time"
                           value={formData.requestedCheckIn}
                           onChange={(event) =>
-                            setFormData((current) => ({ ...current, requestedCheckIn: event.target.value }))
+                            setFormData((current) => ({
+                              ...current,
+                              requestedCheckIn: event.target.value
+                            }))
                           }
                         />
                       </div>
@@ -695,7 +733,10 @@ export function RequestsManager() {
                           type="time"
                           value={formData.requestedCheckOut}
                           onChange={(event) =>
-                            setFormData((current) => ({ ...current, requestedCheckOut: event.target.value }))
+                            setFormData((current) => ({
+                              ...current,
+                              requestedCheckOut: event.target.value
+                            }))
                           }
                         />
                       </div>
@@ -711,21 +752,27 @@ export function RequestsManager() {
                         max={12}
                         value={formData.overtimeHours}
                         onChange={(event) =>
-                          setFormData((current) => ({ ...current, overtimeHours: Number(event.target.value || 1) }))
+                          setFormData((current) => ({
+                            ...current,
+                            overtimeHours: Number(event.target.value || 1)
+                          }))
                         }
                       />
                     </div>
                   )}
 
                   {formData.type === "permission" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label>{t.requests.fromTime}</Label>
                         <Input
                           type="time"
                           value={formData.permissionStartTime}
                           onChange={(event) =>
-                            setFormData((current) => ({ ...current, permissionStartTime: event.target.value }))
+                            setFormData((current) => ({
+                              ...current,
+                              permissionStartTime: event.target.value
+                            }))
                           }
                         />
                       </div>
@@ -735,7 +782,10 @@ export function RequestsManager() {
                           type="time"
                           value={formData.permissionEndTime}
                           onChange={(event) =>
-                            setFormData((current) => ({ ...current, permissionEndTime: event.target.value }))
+                            setFormData((current) => ({
+                              ...current,
+                              permissionEndTime: event.target.value
+                            }))
                           }
                         />
                       </div>
@@ -747,15 +797,21 @@ export function RequestsManager() {
                     <Textarea
                       rows={3}
                       value={formData.reason}
-                      onChange={(event) => setFormData((current) => ({ ...current, reason: event.target.value }))}
+                      onChange={(event) =>
+                        setFormData((current) => ({ ...current, reason: event.target.value }))
+                      }
                       placeholder={t.requests.writeReason}
                     />
                   </div>
                 </div>
 
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddOpen(false)}>{t.common.cancel}</Button>
-                  <Button onClick={handleSubmit} disabled={isSubmitting}>{t.common.submitRequest}</Button>
+                  <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+                    {t.common.cancel}
+                  </Button>
+                  <Button onClick={handleSubmit} disabled={isSubmitting}>
+                    {t.common.submitRequest}
+                  </Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -794,7 +850,9 @@ export function RequestsManager() {
         </TabsContent>
       </Tabs>
 
-      <Dialog open={Boolean(rejectRequestId)} onOpenChange={(open) => !open && setRejectRequestId(null)}>
+      <Dialog
+        open={Boolean(rejectRequestId)}
+        onOpenChange={(open) => !open && setRejectRequestId(null)}>
         <DialogContent className="w-full sm:max-w-md">
           <DialogHeader>
             <DialogTitle>{t.common.reject}</DialogTitle>
@@ -811,7 +869,9 @@ export function RequestsManager() {
             />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectRequestId(null)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setRejectRequestId(null)}>
+              {t.common.cancel}
+            </Button>
             <Button variant="destructive" onClick={handleReject} disabled={isRejecting}>
               {t.requests.pConfirmRejection}
             </Button>

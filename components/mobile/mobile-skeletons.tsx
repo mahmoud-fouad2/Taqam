@@ -45,7 +45,9 @@ export function HomeSkeleton() {
         <SkeletonPulse className="mb-3 h-5 w-24" />
         <div className="grid grid-cols-4 gap-3">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-slate-100">
+            <div
+              key={i}
+              className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 ring-1 ring-slate-100">
               <SkeletonPulse className="size-10 !rounded-xl" />
               <SkeletonPulse className="h-3 w-12" />
             </div>
@@ -127,7 +129,9 @@ export function ProfileSkeleton() {
         <SkeletonPulse className="mt-2 h-4 w-40" />
       </div>
       {[0, 1, 2, 3].map((i) => (
-        <div key={i} className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
+        <div
+          key={i}
+          className="flex items-center gap-3 rounded-2xl bg-white p-4 ring-1 ring-slate-100">
           <SkeletonCircle className="size-[18px]" />
           <div className="flex-1 space-y-1.5">
             <SkeletonPulse className="h-3 w-14" />

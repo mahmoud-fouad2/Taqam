@@ -69,13 +69,13 @@ export default function UsersDataTable({ data }: { data: User[] }) {
   const router = useRouter();
   const [uiLocale, setUiLocale] = React.useState<"ar" | "en">("ar");
   const [mounted, setMounted] = React.useState(false);
-  
+
   React.useEffect(() => {
     setMounted(true);
     const lang = typeof document !== "undefined" ? document.documentElement.lang : "ar";
     setUiLocale(lang === "en" ? "en" : "ar");
   }, []);
-  
+
   const isRtl = uiLocale === "ar";
 
   const [tableData, setTableData] = React.useState<User[]>(data);
@@ -102,8 +102,8 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       const response = await fetch(`/api/users/${userId}`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
-        },
+          "Content-Type": "application/json"
+        }
       });
 
       const payload = await response.json().catch(() => null);
@@ -115,7 +115,11 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       router.refresh();
     } catch (error) {
       setActionError(
-        error instanceof Error ? error.message : isRtl ? t.common.unexpectedError : "Unexpected error"
+        error instanceof Error
+          ? error.message
+          : isRtl
+            ? t.common.unexpectedError
+            : "Unexpected error"
       );
     } finally {
       setDeletingUserId(null);
@@ -139,7 +143,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       month: "short",
       day: "2-digit",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -148,7 +152,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
       {
         accessorKey: "id",
         header: "#",
-        cell: ({ row }) => row.getValue("id"),
+        cell: ({ row }) => row.getValue("id")
       },
       {
         accessorKey: "name",
@@ -161,7 +165,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             </Avatar>
             <div className="capitalize">{row.getValue("name")}</div>
           </div>
-        ),
+        )
       },
       {
         accessorKey: "role",
@@ -170,14 +174,13 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <Button
               className="-ms-3"
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
               {isRtl ? t.common.role : "Role"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
           );
         },
-        cell: ({ row }) => row.getValue("role"),
+        cell: ({ row }) => row.getValue("role")
       },
       {
         accessorKey: "email",
@@ -186,14 +189,13 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <Button
               className="-ms-3"
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
               {isRtl ? "البريد" : "Email"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
           );
         },
-        cell: ({ row }) => row.getValue("email"),
+        cell: ({ row }) => row.getValue("email")
       },
       {
         accessorKey: "status",
@@ -202,8 +204,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <Button
               className="-ms-3"
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
               {isRtl ? t.common.status : "Status"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
@@ -216,9 +217,8 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             return (
               <Badge
                 className={cn("capitalize", {
-                  "bg-green-100 text-green-700 hover:bg-green-100": status === "ACTIVE",
-                })}
-              >
+                  "bg-green-100 text-green-700 hover:bg-green-100": status === "ACTIVE"
+                })}>
                 {label}
               </Badge>
             );
@@ -227,9 +227,8 @@ export default function UsersDataTable({ data }: { data: User[] }) {
               <Badge
                 className={cn("capitalize", {
                   "bg-orange-100 text-orange-700 hover:bg-orange-100":
-                    status === "PENDING_VERIFICATION",
-                })}
-              >
+                    status === "PENDING_VERIFICATION"
+                })}>
                 {label}
               </Badge>
             );
@@ -237,19 +236,16 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             return (
               <Badge
                 className={cn("capitalize", {
-                  "bg-gray-100 text-gray-700 hover:bg-gray-100": status === "INACTIVE",
-                })}
-              >
+                  "bg-gray-100 text-gray-700 hover:bg-gray-100": status === "INACTIVE"
+                })}>
                 {label}
               </Badge>
             );
           } else if (status === "SUSPENDED") {
-            return (
-              <Badge className="bg-red-100 text-red-700 hover:bg-red-100">{label}</Badge>
-            );
+            return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">{label}</Badge>;
           }
           return <span className="capitalize">{label}</span>;
-        },
+        }
       },
       {
         accessorKey: "lastLoginAt",
@@ -258,14 +254,13 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             <Button
               className="-ms-3"
               variant="ghost"
-              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-            >
+              onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
               {isRtl ? "آخر دخول" : "Last login"}
               <ArrowUpDown className="ms-2 h-4 w-4" />
             </Button>
           );
         },
-        cell: ({ row }) => formatLastLogin(row.original.lastLoginAt),
+        cell: ({ row }) => formatLastLogin(row.original.lastLoginAt)
       },
       {
         id: "actions",
@@ -297,8 +292,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
                   onSelect={(e) => {
                     e.preventDefault();
                     void handleDelete(row.original.id);
-                  }}
-                >
+                  }}>
                   {deletingUserId === row.original.id
                     ? isRtl
                       ? t.common.deleting
@@ -310,8 +304,8 @@ export default function UsersDataTable({ data }: { data: User[] }) {
               </DropdownMenuContent>
             </DropdownMenu>
           );
-        },
-      },
+        }
+      }
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deletingUserId, isRtl, router, tableData]);
@@ -398,7 +392,7 @@ export default function UsersDataTable({ data }: { data: User[] }) {
 
   return (
     <div className="w-full">
-      <div className="flex items-center gap-4 mb-4">
+      <div className="mb-4 flex items-center gap-4">
         <div className="flex gap-2">
           <Input
             placeholder={isRtl ? "بحث عن مستخدم..." : "Search users..."}
@@ -539,45 +533,45 @@ export default function UsersDataTable({ data }: { data: User[] }) {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      {actionError ? <p className="mb-4 text-sm text-destructive">{actionError}</p> : null}
-        <Table className="border-t">
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableHead>
-                  );
-                })}
+      {actionError ? <p className="text-destructive mb-4 text-sm">{actionError}</p> : null}
+      <Table className="border-t">
+        <TableHeader>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => {
+                return (
+                  <TableHead key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableHead>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableHeader>
+        <TableBody>
+          {table.getRowModel().rows?.length ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={columns.length} className="h-24 text-center">
-                  {isRtl ? "لا توجد نتائج." : "No results."}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                {isRtl ? "لا توجد نتائج." : "No results."}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
       <div className="flex items-center justify-end gap-2 pt-4">
-        <div className="flex-1 text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex-1 text-sm">
           {isRtl
             ? `${table.getFilteredSelectedRowModel().rows.length} من ${table.getFilteredRowModel().rows.length} صف(وف) محدد.`
             : `${table.getFilteredSelectedRowModel().rows.length} of ${table.getFilteredRowModel().rows.length} row(s) selected.`}

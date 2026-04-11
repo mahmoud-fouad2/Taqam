@@ -6,7 +6,7 @@ import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 const updateSchema = z.object({
   status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).optional(),
-  assignedToId: z.string().nullable().optional(),
+  assignedToId: z.string().nullable().optional()
 });
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -33,10 +33,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         messages: {
           orderBy: { createdAt: "asc" },
           include: {
-            sender: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
-          },
-        },
-      },
+            sender: {
+              select: { id: true, firstName: true, lastName: true, email: true, role: true }
+            }
+          }
+        }
+      }
     });
 
     if (!ticket) {
@@ -63,7 +65,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     const body = await request.json();
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const existing = await prisma.supportTicket.findUnique({ where: { id } });
@@ -95,8 +100,8 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
         tenant: { select: { id: true, slug: true, name: true, nameAr: true } },
         createdBy: { select: { id: true, firstName: true, lastName: true, email: true } },
         assignedTo: { select: { id: true, firstName: true, lastName: true, email: true } },
-        _count: { select: { messages: true } },
-      },
+        _count: { select: { messages: true } }
+      }
     });
 
     return NextResponse.json({ data: updated });

@@ -16,20 +16,18 @@ export default async function CreateTenantPage() {
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Building2 className="h-6 w-6" />{t.common.add}</h1>
-        <p className="text-muted-foreground">
-          {t.tenant.pEnterCompanyDataToCreateANewAc}
-        </p>
+        <h1 className="flex items-center gap-2 text-2xl font-bold">
+          <Building2 className="h-6 w-6" />
+          {t.common.add}
+        </h1>
+        <p className="text-muted-foreground">{t.tenant.pEnterCompanyDataToCreateANewAc}</p>
       </div>
 
       {/* Form Card */}
       <Card>
         <CardHeader>
           <CardTitle>{t.organization.companySection}</CardTitle>
-          <CardDescription>
-            {t.tenant.requiredFieldsNote}
-          </CardDescription>
+          <CardDescription>{t.tenant.requiredFieldsNote}</CardDescription>
         </CardHeader>
         <CardContent>
           <CreateTenantForm />

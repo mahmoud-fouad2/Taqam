@@ -14,7 +14,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       tenantId,
       loanId: id,
       userId: session.user.id,
-      role: session.user.role,
+      role: session.user.role
     });
 
     if (!("loan" in result)) {

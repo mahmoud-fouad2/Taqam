@@ -4,7 +4,12 @@ import { z } from "zod";
 
 import prisma from "@/lib/db";
 import { parsePagination, requireTenantSession } from "@/lib/api/route-helper";
-import { mapLoan, parseLoanStatus, parseLoanType, resolveLoanEmployeeScope } from "@/lib/payroll/loans";
+import {
+  mapLoan,
+  parseLoanStatus,
+  parseLoanType,
+  resolveLoanEmployeeScope
+} from "@/lib/payroll/loans";
 
 const createLoanSchema = z.object({
   employeeId: z.string().min(1, "Employee is required"),
@@ -14,7 +19,7 @@ const createLoanSchema = z.object({
   interestRate: z.number().min(0).max(100).optional().default(0),
   startDate: z.string().optional().nullable(),
   reason: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export async function GET(request: NextRequest) {
@@ -32,11 +37,14 @@ export async function GET(request: NextRequest) {
       tenantId,
       userId: session.user.id,
       role: session.user.role,
-      requestedEmployeeId,
+      requestedEmployeeId
     });
 
     if (!("employeeId" in employeeScope)) {
-      return NextResponse.json({ error: employeeScope.error.message }, { status: employeeScope.error.status });
+      return NextResponse.json(
+        { error: employeeScope.error.message },
+        { status: employeeScope.error.status }
+      );
     }
 
     const parsedStatus = statusRaw && statusRaw !== "all" ? parseLoanStatus(statusRaw) : null;
@@ -47,7 +55,7 @@ export async function GET(request: NextRequest) {
     const where: any = {
       tenantId,
       ...(employeeScope.employeeId ? { employeeId: employeeScope.employeeId } : {}),
-      ...(parsedStatus ? { status: parsedStatus } : {}),
+      ...(parsedStatus ? { status: parsedStatus } : {})
     };
 
     const [total, loans] = await Promise.all([
@@ -56,13 +64,13 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           approvedBy: {
-            select: { firstName: true, lastName: true },
-          },
+            select: { firstName: true, lastName: true }
+          }
         },
         orderBy: { createdAt: "desc" },
         skip,
-        take: limit,
-      }),
+        take: limit
+      })
     ]);
 
     return NextResponse.json({
@@ -71,8 +79,8 @@ export async function GET(request: NextRequest) {
         page,
         pageSize: limit,
         total,
-        totalPages: Math.ceil(total / limit),
-      },
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     console.error("Error fetching payroll loans:", error);
@@ -98,11 +106,14 @@ export async function POST(request: NextRequest) {
       tenantId,
       userId: session.user.id,
       role: session.user.role,
-      requestedEmployeeId: validated.employeeId,
+      requestedEmployeeId: validated.employeeId
     });
 
     if (!("employeeId" in employeeScope)) {
-      return NextResponse.json({ error: employeeScope.error.message }, { status: employeeScope.error.status });
+      return NextResponse.json(
+        { error: employeeScope.error.message },
+        { status: employeeScope.error.status }
+      );
     }
 
     const loan = await prisma.loan.create({
@@ -119,19 +130,22 @@ export async function POST(request: NextRequest) {
         interestRate: new Prisma.Decimal(validated.interestRate || 0),
         startDate: validated.startDate ? new Date(validated.startDate) : null,
         reason: validated.reason,
-        notes: validated.notes,
+        notes: validated.notes
       },
       include: {
         approvedBy: {
-          select: { firstName: true, lastName: true },
-        },
-      },
+          select: { firstName: true, lastName: true }
+        }
+      }
     });
 
     return NextResponse.json({ data: mapLoan(loan) }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors[0]?.message || "Invalid payload" }, { status: 400 });
+      return NextResponse.json(
+        { error: error.errors[0]?.message || "Invalid payload" },
+        { status: 400 }
+      );
     }
 
     console.error("Error creating payroll loan:", error);

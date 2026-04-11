@@ -1,20 +1,13 @@
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 import { DashboardHeaderActions } from "@/components/dashboard-header-actions";
 
-export function SiteHeader({
-  locale,
-  dir,
-}: {
-  locale: "ar" | "en";
-  dir: "rtl" | "ltr";
-}) {
+export function SiteHeader({ locale, dir }: { locale: "ar" | "en"; dir: "rtl" | "ltr" }) {
   return (
     <header
       data-dir={dir}
-      className="dashboard-header sticky top-0 z-30 flex h-(--header-height) shrink-0 items-center gap-2 border-b border-border/70 bg-background/80 backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)"
-    >
+      className="dashboard-header border-border/70 bg-background/80 sticky top-0 z-30 flex h-(--header-height) shrink-0 items-center gap-2 border-b backdrop-blur-xl transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
       <div className="dashboard-header-inner flex w-full items-center gap-2 px-3 lg:px-5">
         <SidebarTrigger className="-ms-1 rounded-lg" />
         <Separator
@@ -29,5 +22,5 @@ export function SiteHeader({
         </div>
       </div>
     </header>
-  )
+  );
 }

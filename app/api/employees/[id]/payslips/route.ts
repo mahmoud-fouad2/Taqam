@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  requireTenantSession
+} from "@/lib/api/route-helper";
 import { listPayslipsForEmployee } from "@/lib/payroll/payslips";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -17,12 +22,12 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const payslips = await listPayslipsForEmployee(tenantId, id, {
       year: Number.isFinite(year) ? year : undefined,
-      status,
+      status
     });
 
-    return NextResponse.json({ data: payslips });
+    return dataResponse(payslips);
   } catch (error) {
-    console.error("Error fetching employee payslips:", error);
-    return NextResponse.json({ error: "Failed to fetch employee payslips" }, { status: 500 });
+    logApiError("Error fetching employee payslips", error);
+    return errorResponse("Failed to fetch employee payslips");
   }
 }

@@ -15,15 +15,15 @@ const statusLabels = {
     ONGOING: "جاري الآن",
     COMPLETED: "مكتمل",
     CANCELLED: "ملغي",
-    DRAFT: "مسودة",
+    DRAFT: "مسودة"
   },
   en: {
     SCHEDULED: "Scheduled",
     ONGOING: "Ongoing",
     COMPLETED: "Completed",
     CANCELLED: "Cancelled",
-    DRAFT: "Draft",
-  },
+    DRAFT: "Draft"
+  }
 } as const;
 
 const typeLabels = {
@@ -33,7 +33,7 @@ const typeLabels = {
     HYBRID: "مختلط",
     SELF_PACED: "ذاتي",
     WORKSHOP: "ورشة",
-    CONFERENCE: "مؤتمر",
+    CONFERENCE: "مؤتمر"
   },
   en: {
     IN_PERSON: "In person",
@@ -41,8 +41,8 @@ const typeLabels = {
     HYBRID: "Hybrid",
     SELF_PACED: "Self-paced",
     WORKSHOP: "Workshop",
-    CONFERENCE: "Conference",
-  },
+    CONFERENCE: "Conference"
+  }
 } as const;
 
 export default async function AcademyPage() {
@@ -79,33 +79,40 @@ export default async function AcademyPage() {
     );
   }
 
-  const [totalCourses, activeCourses, mandatoryCourses, totalEnrollments, upcomingCourses, latestCourses] = await Promise.all([
+  const [
+    totalCourses,
+    activeCourses,
+    mandatoryCourses,
+    totalEnrollments,
+    upcomingCourses,
+    latestCourses
+  ] = await Promise.all([
     prisma.trainingCourse.count({
-      where: { tenantId, status: { not: "DRAFT" } },
+      where: { tenantId, status: { not: "DRAFT" } }
     }),
     prisma.trainingCourse.count({
-      where: { tenantId, status: { in: ["SCHEDULED", "ONGOING"] } },
+      where: { tenantId, status: { in: ["SCHEDULED", "ONGOING"] } }
     }),
     prisma.trainingCourse.count({
-      where: { tenantId, status: { not: "DRAFT" }, isMandatory: true },
+      where: { tenantId, status: { not: "DRAFT" }, isMandatory: true }
     }),
     prisma.trainingEnrollment.count({ where: { tenantId } }),
     prisma.trainingCourse.findMany({
       where: {
         tenantId,
         status: { in: ["SCHEDULED", "ONGOING"] },
-        startDate: { not: null },
+        startDate: { not: null }
       },
       orderBy: [{ startDate: "asc" }, { createdAt: "desc" }],
       take: 4,
-      include: { _count: { select: { enrollments: true } } },
+      include: { _count: { select: { enrollments: true } } }
     }),
     prisma.trainingCourse.findMany({
       where: { tenantId, status: { not: "DRAFT" } },
       orderBy: { createdAt: "desc" },
       take: 4,
-      include: { _count: { select: { enrollments: true } } },
-    }),
+      include: { _count: { select: { enrollments: true } } }
+    })
   ]);
 
   const dateFormatter = new Intl.DateTimeFormat(isAr ? "ar-SA" : "en-US", { dateStyle: "medium" });
@@ -126,23 +133,23 @@ export default async function AcademyPage() {
           {
             label: isAr ? "الدورات المنشورة" : "Published courses",
             value: totalCourses,
-            icon: BookOpen,
+            icon: BookOpen
           },
           {
             label: isAr ? "الدورات النشطة" : "Active courses",
             value: activeCourses,
-            icon: CalendarClock,
+            icon: CalendarClock
           },
           {
             label: isAr ? "الدورات الإلزامية" : "Mandatory courses",
             value: mandatoryCourses,
-            icon: GraduationCap,
+            icon: GraduationCap
           },
           {
             label: isAr ? "إجمالي التسجيلات" : "Total enrollments",
             value: totalEnrollments,
-            icon: Users,
-          },
+            icon: Users
+          }
         ].map((item) => {
           const Icon = item.icon;
 
@@ -152,7 +159,7 @@ export default async function AcademyPage() {
                 <CardDescription>{item.label}</CardDescription>
                 <div className="flex items-center justify-between gap-3">
                   <CardTitle className="text-3xl">{item.value}</CardTitle>
-                  <div className="rounded-lg bg-muted p-2">
+                  <div className="bg-muted rounded-lg p-2">
                     <Icon className="h-5 w-5" />
                   </div>
                 </div>
@@ -167,12 +174,14 @@ export default async function AcademyPage() {
           <CardHeader>
             <CardTitle>{isAr ? "الجلسات القادمة" : "Upcoming sessions"}</CardTitle>
             <CardDescription>
-              {isAr ? "مستمد مباشرة من الدورات المجدولة والجارية داخل النظام." : "Pulled directly from scheduled and ongoing courses."}
+              {isAr
+                ? "مستمد مباشرة من الدورات المجدولة والجارية داخل النظام."
+                : "Pulled directly from scheduled and ongoing courses."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {upcomingCourses.length === 0 ? (
-              <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
+              <div className="text-muted-foreground rounded-xl border border-dashed p-6 text-sm">
                 {isAr
                   ? "لا توجد جلسات قادمة الآن. ابدأ بإضافة دورة من إدارة التدريب لتظهر هنا تلقائيًا."
                   : "There are no upcoming sessions yet. Create a course in Training Management and it will appear here automatically."}
@@ -181,7 +190,9 @@ export default async function AcademyPage() {
               upcomingCourses.map((course) => (
                 <div key={course.id} className="rounded-xl border p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium">{isAr ? course.title : course.titleEn || course.title}</h3>
+                    <h3 className="font-medium">
+                      {isAr ? course.title : course.titleEn || course.title}
+                    </h3>
                     <Badge variant={course.status === "ONGOING" ? "default" : "secondary"}>
                       {statusLabels[isAr ? "ar" : "en"][course.status]}
                     </Badge>
@@ -190,13 +201,14 @@ export default async function AcademyPage() {
                       <Badge variant="outline">{isAr ? "إلزامية" : "Mandatory"}</Badge>
                     ) : null}
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="text-muted-foreground mt-2 text-sm">
                     {isAr ? course.description : course.descriptionEn || course.description}
                   </p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground mt-3 flex flex-wrap gap-3 text-xs">
                     <span>{dateFormatter.format(course.startDate as Date)}</span>
                     <span>
-                      {isAr ? t.common.duration : "Duration:"} {course.durationHours} {isAr ? t.common.hour : "hours"}
+                      {isAr ? t.common.duration : "Duration:"} {course.durationHours}{" "}
+                      {isAr ? t.common.hour : "hours"}
                     </span>
                     <span>
                       {isAr ? "المسجلون:" : "Enrollments:"} {course._count.enrollments}
@@ -212,32 +224,39 @@ export default async function AcademyPage() {
           <CardHeader>
             <CardTitle>{isAr ? "أحدث الدورات المفعلة" : "Latest live courses"}</CardTitle>
             <CardDescription>
-              {isAr ? "آخر الدورات المنشورة فعليًا داخل مساحة الشركة." : "Recently published training content in the current tenant."}
+              {isAr
+                ? "آخر الدورات المنشورة فعليًا داخل مساحة الشركة."
+                : "Recently published training content in the current tenant."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {latestCourses.length === 0 ? (
-              <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">
+              <div className="text-muted-foreground rounded-xl border border-dashed p-6 text-sm">
                 {isAr
-                  ? "لا توجد دورات منشورة بعد. استخدم إدارة الدورات التدريبية لبدء مكتبة التعلم." 
+                  ? "لا توجد دورات منشورة بعد. استخدم إدارة الدورات التدريبية لبدء مكتبة التعلم."
                   : "No published courses yet. Use training management to start the learning library."}
               </div>
             ) : (
               latestCourses.map((course) => (
                 <div key={course.id} className="rounded-xl border p-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h3 className="font-medium">{isAr ? course.title : course.titleEn || course.title}</h3>
-                    <Badge variant="outline">{statusLabels[isAr ? "ar" : "en"][course.status]}</Badge>
+                    <h3 className="font-medium">
+                      {isAr ? course.title : course.titleEn || course.title}
+                    </h3>
+                    <Badge variant="outline">
+                      {statusLabels[isAr ? "ar" : "en"][course.status]}
+                    </Badge>
                   </div>
-                  <div className="mt-2 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground mt-2 text-sm">
                     {isAr ? course.description : course.descriptionEn || course.description}
                   </div>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-muted-foreground">
+                  <div className="text-muted-foreground mt-3 flex flex-wrap gap-3 text-xs">
                     <span>
                       {isAr ? "المُنشأة:" : "Created:"} {dateFormatter.format(course.createdAt)}
                     </span>
                     <span>
-                      {isAr ? t.common.duration : "Duration:"} {course.durationHours} {isAr ? t.common.hour : "hours"}
+                      {isAr ? t.common.duration : "Duration:"} {course.durationHours}{" "}
+                      {isAr ? t.common.hour : "hours"}
                     </span>
                   </div>
                 </div>
@@ -261,26 +280,35 @@ export default async function AcademyPage() {
             {
               href: `${prefix}/dashboard/training-courses`,
               title: isAr ? "إدارة الدورات" : "Manage courses",
-              desc: isAr ? "إنشاء وجدولة ومتابعة الدورات التدريبية." : "Create, schedule, and manage training programs.",
+              desc: isAr
+                ? "إنشاء وجدولة ومتابعة الدورات التدريبية."
+                : "Create, schedule, and manage training programs."
             },
             {
               href: `${prefix}/dashboard/training-enrollments`,
               title: isAr ? "تسجيلات التدريب" : "Training enrollments",
-              desc: isAr ? "مراجعة المشاركين والحالات والتقدم." : "Review participants, statuses, and progress.",
+              desc: isAr
+                ? "مراجعة المشاركين والحالات والتقدم."
+                : "Review participants, statuses, and progress."
             },
             {
               href: `${prefix}/dashboard/help-center`,
               title: isAr ? t.helpCenter.title : "Help center",
-              desc: isAr ? "الرجوع إلى الأدلة ومسارات الاستخدام الأساسية." : "Open the help center and operational guides.",
-            },
+              desc: isAr
+                ? "الرجوع إلى الأدلة ومسارات الاستخدام الأساسية."
+                : "Open the help center and operational guides."
+            }
           ].map((item) => (
-            <Link key={item.href} href={item.href} className="rounded-xl border p-4 transition hover:bg-muted/40">
+            <Link
+              key={item.href}
+              href={item.href}
+              className="hover:bg-muted/40 rounded-xl border p-4 transition">
               <div className="flex items-start justify-between gap-3">
                 <div>
                   <div className="font-medium">{item.title}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{item.desc}</div>
+                  <div className="text-muted-foreground mt-1 text-sm">{item.desc}</div>
                 </div>
-                <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <ArrowUpRight className="text-muted-foreground h-4 w-4 shrink-0" />
               </div>
             </Link>
           ))}

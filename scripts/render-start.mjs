@@ -22,7 +22,9 @@ async function main() {
     console.log("[render-start] startup migrations disabled; relying on preDeployCommand.");
   } else {
     console.log("[render-start] Running prisma migrate deploy as a startup safety net...");
-    const migrate = await run(bin("prisma"), ["migrate", "deploy"], { label: "prisma-migrate-deploy" });
+    const migrate = await run(bin("prisma"), ["migrate", "deploy"], {
+      label: "prisma-migrate-deploy"
+    });
     if (migrate.code !== 0) {
       // Do NOT exit — a transient DB unreachability (e.g. Neon cold start, network blip)
       // must not create a crash loop. The app itself handles DB errors gracefully per-request.
@@ -36,7 +38,9 @@ async function main() {
 
   // 2) Ensure bootstrap super admin.
   if (bootstrapEnabled) {
-    const ensure = await run("node", ["scripts/ensure-super-admin.mjs"], { label: "ensure-super-admin" });
+    const ensure = await run("node", ["scripts/ensure-super-admin.mjs"], {
+      label: "ensure-super-admin"
+    });
     if (ensure.code !== 0) {
       console.error("[render-start] ensure-super-admin failed; continuing to start app anyway.");
     }
@@ -60,10 +64,13 @@ async function main() {
     // Help Next.js locate sharp for image optimization in non-standalone mode.
     ...(!process.env.NEXT_SHARP_PATH
       ? { NEXT_SHARP_PATH: "/opt/render/project/src/node_modules/sharp" }
-      : {}),
+      : {})
   };
 
-  const next = await run(bin("next"), ["start", "--hostname", "0.0.0.0"], { label: "next-start", env: nextEnv });
+  const next = await run(bin("next"), ["start", "--hostname", "0.0.0.0"], {
+    label: "next-start",
+    env: nextEnv
+  });
   process.exit(next.code);
 }
 

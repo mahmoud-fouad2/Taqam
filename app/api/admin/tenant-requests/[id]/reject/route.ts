@@ -15,7 +15,7 @@ function mapRequest(r: any) {
     employeesCount: r.employeeCount,
     status: r.status === "PENDING" ? "pending" : r.status === "APPROVED" ? "approved" : "rejected",
     createdAt: r.createdAt,
-    message: r.message,
+    message: r.message
   };
 }
 
@@ -48,8 +48,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       status: "REJECTED",
       processedAt: new Date(),
       processedById: session.user.id ?? null,
-      rejectionReason: reason || null,
-    },
+      rejectionReason: reason || null
+    }
   });
 
   return NextResponse.json({ data: mapRequest(updated) });

@@ -1,4 +1,5 @@
-import { PayrollReportsView } from "./payroll-reports-view";import { getText } from "@/lib/i18n/text";
+import { PayrollReportsView } from "./payroll-reports-view";
+import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export default async function PayrollReportsPage() {

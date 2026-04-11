@@ -31,32 +31,31 @@ export function MarketingPageCta({
   primaryAction,
   secondaryAction,
   tone = "gradient",
-  className,
+  className
 }: MarketingPageCtaProps) {
   return (
     <section
       className={cn(
         "border-t py-24",
-        tone === "gradient" ? "bg-gradient-to-b from-primary/5 to-background" : "bg-muted/20",
+        tone === "gradient" ? "from-primary/5 to-background bg-gradient-to-b" : "bg-muted/20",
         className
-      )}
-    >
+      )}>
       <div className="container mx-auto px-4">
-        <div className="mx-auto max-w-3xl rounded-[2.5rem] border border-border/50 bg-card/90 p-10 text-center shadow-sm backdrop-blur-sm sm:p-14">
+        <div className="border-border/50 bg-card/90 mx-auto max-w-3xl rounded-[2.5rem] border p-10 text-center shadow-sm backdrop-blur-sm sm:p-14">
           {Icon ? (
-            <div className="mx-auto mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/[0.07]">
-              <Icon className="h-7 w-7 text-primary" />
+            <div className="bg-primary/[0.07] mx-auto mb-5 inline-flex h-14 w-14 items-center justify-center rounded-2xl">
+              <Icon className="text-primary h-7 w-7" />
             </div>
           ) : null}
 
           {badge ? (
-            <span className="inline-flex rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
+            <span className="border-primary/20 bg-primary/10 text-primary inline-flex rounded-full border px-4 py-1.5 text-sm font-medium">
               {badge}
             </span>
           ) : null}
 
           <h2 className="mt-4 text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-muted-foreground/80">{description}</p>
+          <p className="text-muted-foreground/80 mx-auto mt-4 max-w-2xl">{description}</p>
 
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Link href={primaryAction.href}>
@@ -66,7 +65,9 @@ export function MarketingPageCta({
             </Link>
             {secondaryAction ? (
               <Link href={secondaryAction.href}>
-                <Button size={secondaryAction.size ?? "lg"} variant={secondaryAction.variant ?? "outline"}>
+                <Button
+                  size={secondaryAction.size ?? "lg"}
+                  variant={secondaryAction.variant ?? "outline"}>
                   {secondaryAction.label}
                 </Button>
               </Link>

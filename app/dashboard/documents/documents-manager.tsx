@@ -15,17 +15,11 @@ import {
   IconX,
   IconEye,
   IconClock,
-  IconAlertCircle,
+  IconAlertCircle
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -33,7 +27,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -44,14 +38,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -59,7 +53,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/skeletons/table-skeleton";
 import { TableEmptyRow } from "@/components/empty-states/table-empty-row";
@@ -69,7 +63,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
-  EmptyTitle,
+  EmptyTitle
 } from "@/components/ui/empty";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -82,7 +76,7 @@ import {
   documentCategoryLabels,
   documentStatusLabels,
   formatFileSize,
-  isDocumentExpired,
+  isDocumentExpired
 } from "@/lib/types/documents";
 import { documentsService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
@@ -164,7 +158,7 @@ export function DocumentsManager() {
         (new Date(d.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
       );
       return daysUntilExpiry > 0 && daysUntilExpiry <= 30;
-    }).length,
+    }).length
   };
 
   // Handle file select
@@ -189,7 +183,7 @@ export function DocumentsManager() {
         titleAr: uploadTitleAr || undefined,
         description: uploadDescription || undefined,
         expiryDate: uploadExpiry || undefined,
-        issuedDate: uploadIssued || undefined,
+        issuedDate: uploadIssued || undefined
       });
 
       if (!res.success) {
@@ -262,7 +256,9 @@ export function DocumentsManager() {
   };
 
   // Get status badge variant
-  const getStatusVariant = (status: DocumentStatus): "default" | "secondary" | "destructive" | "outline" => {
+  const getStatusVariant = (
+    status: DocumentStatus
+  ): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case "approved":
         return "default";
@@ -281,7 +277,8 @@ export function DocumentsManager() {
   const FileIconComponent = ({ mimeType }: { mimeType: string }) => {
     if (mimeType.includes("pdf")) return <IconFileTypePdf className="h-5 w-5 text-red-500" />;
     if (mimeType.includes("image")) return <IconPhoto className="h-5 w-5 text-blue-500" />;
-    if (mimeType.includes("word") || mimeType.includes("document")) return <IconFileTypeDoc className="h-5 w-5 text-blue-600" />;
+    if (mimeType.includes("word") || mimeType.includes("document"))
+      return <IconFileTypeDoc className="h-5 w-5 text-blue-600" />;
     return <IconFile className="h-5 w-5 text-gray-500" />;
   };
 
@@ -299,7 +296,8 @@ export function DocumentsManager() {
         return;
       }
 
-      const blob = res.data instanceof Blob ? res.data : new Blob([res.data as unknown as BlobPart]);
+      const blob =
+        res.data instanceof Blob ? res.data : new Blob([res.data as unknown as BlobPart]);
       const url = URL.createObjectURL(blob);
       window.open(url, "_blank");
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
@@ -311,7 +309,7 @@ export function DocumentsManager() {
   return (
     <div className="space-y-6">
       {(error || actionError) && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {actionError ?? error}
         </div>
       )}
@@ -320,7 +318,7 @@ export function DocumentsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.documents.totalDocuments}</CardTitle>
-            <IconFile className="h-4 w-4 text-muted-foreground" />
+            <IconFile className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -358,8 +356,8 @@ export function DocumentsManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
-            <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative max-w-sm flex-1">
+            <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder={t.documents.searchPlaceholder}
               value={searchQuery}
@@ -369,10 +367,9 @@ export function DocumentsManager() {
           </div>
           <Select
             value={categoryFilter}
-            onValueChange={(value) => setCategoryFilter(value as DocumentCategory | "all")}
-          >
+            onValueChange={(value) => setCategoryFilter(value as DocumentCategory | "all")}>
             <SelectTrigger className="w-[160px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.category} />
             </SelectTrigger>
             <SelectContent>
@@ -386,8 +383,7 @@ export function DocumentsManager() {
           </Select>
           <Select
             value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value as DocumentStatus | "all")}
-          >
+            onValueChange={(value) => setStatusFilter(value as DocumentStatus | "all")}>
             <SelectTrigger className="w-[140px]">
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
@@ -406,14 +402,14 @@ export function DocumentsManager() {
         <Dialog open={isUploadOpen} onOpenChange={setIsUploadOpen}>
           <DialogTrigger asChild>
             <Button>
-              <IconUpload className="ms-2 h-4 w-4" />{t.documents.upload}</Button>
+              <IconUpload className="ms-2 h-4 w-4" />
+              {t.documents.upload}
+            </Button>
           </DialogTrigger>
-          <DialogContent className="w-full sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[500px]">
             <DialogHeader>
               <DialogTitle>{t.documents.uploadDialog}</DialogTitle>
-              <DialogDescription>
-                {t.documents.uploadDesc}
-              </DialogDescription>
+              <DialogDescription>{t.documents.uploadDesc}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               {/* File Input */}
@@ -429,9 +425,8 @@ export function DocumentsManager() {
                 />
                 <button
                   type="button"
-                  className="w-full border-2 border-dashed rounded-lg p-6 text-center cursor-pointer hover:border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  onClick={() => fileInputRef.current?.click()}
-                >
+                  className="hover:border-primary focus-visible:ring-ring w-full cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                  onClick={() => fileInputRef.current?.click()}>
                   {uploadFile ? (
                     <div className="flex items-center justify-center gap-2">
                       <FileIconComponent mimeType={uploadFile.type} />
@@ -442,10 +437,8 @@ export function DocumentsManager() {
                     </div>
                   ) : (
                     <>
-                      <IconUpload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">
-                        {t.documents.clickToChoose}
-                      </p>
+                      <IconUpload className="text-muted-foreground mx-auto mb-2 h-8 w-8" />
+                      <p className="text-muted-foreground text-sm">{t.documents.clickToChoose}</p>
                     </>
                   )}
                 </button>
@@ -479,8 +472,7 @@ export function DocumentsManager() {
                 <Label>{t.common.category}</Label>
                 <Select
                   value={uploadCategory}
-                  onValueChange={(v) => setUploadCategory(v as DocumentCategory)}
-                >
+                  onValueChange={(v) => setUploadCategory(v as DocumentCategory)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -495,7 +487,7 @@ export function DocumentsManager() {
               </div>
 
               {/* Title */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.documents.titleAr}</Label>
                   <Input
@@ -526,7 +518,7 @@ export function DocumentsManager() {
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.documents.issueDateOptional}</Label>
                   <Input
@@ -546,11 +538,12 @@ export function DocumentsManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>{t.common.cancel}</Button>
+              <Button variant="outline" onClick={() => setIsUploadOpen(false)}>
+                {t.common.cancel}
+              </Button>
               <Button
                 onClick={handleUpload}
-                disabled={isSubmitting || !uploadFile || !uploadEmployeeId || !uploadTitle}
-              >
+                disabled={isSubmitting || !uploadFile || !uploadEmployeeId || !uploadTitle}>
                 {isSubmitting ? t.documents.uploading : t.documents.uploadDoc}
               </Button>
             </DialogFooter>
@@ -568,13 +561,13 @@ export function DocumentsManager() {
         </CardHeader>
         <CardContent>
           {/* Mobile: Cards */}
-          <div className="md:hidden space-y-3">
+          <div className="space-y-3 md:hidden">
             {isLoading ? (
               Array.from({ length: 6 }).map((_, i) => (
                 <Card key={i} className="overflow-hidden">
-                  <CardContent className="p-4 space-y-3">
+                  <CardContent className="space-y-3 p-4">
                     <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex min-w-0 items-center gap-2">
                         <Skeleton className="h-9 w-9 rounded-lg" />
                         <div className="min-w-0 space-y-2">
                           <Skeleton className="h-4 w-40" />
@@ -586,7 +579,7 @@ export function DocumentsManager() {
                         <Skeleton className="h-8 w-8 rounded-md" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2">
+                    <div className="grid grid-cols-1 gap-x-3 gap-y-2 md:grid-cols-2">
                       <Skeleton className="h-3 w-16" />
                       <Skeleton className="h-4 w-24" />
                       <Skeleton className="h-3 w-16" />
@@ -598,19 +591,19 @@ export function DocumentsManager() {
                 </Card>
               ))
             ) : filteredDocuments.length === 0 ? (
-              <Empty className="border rounded-lg">
+              <Empty className="rounded-lg border">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <IconFile className="size-5" />
                   </EmptyMedia>
                   <EmptyTitle>{t.common.noData}</EmptyTitle>
-                  <EmptyDescription>
-                    {t.documents.emptyState}
-                  </EmptyDescription>
+                  <EmptyDescription>{t.documents.emptyState}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button onClick={() => setIsUploadOpen(true)}>
-                    <IconUpload className="ms-2 h-4 w-4" />{t.documents.upload}</Button>
+                    <IconUpload className="ms-2 h-4 w-4" />
+                    {t.documents.upload}
+                  </Button>
                 </EmptyContent>
               </Empty>
             ) : (
@@ -620,22 +613,30 @@ export function DocumentsManager() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <div className="size-9 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                          <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
                             <FileIconComponent mimeType={doc.mimeType} />
                           </div>
                           <div className="min-w-0">
-                            <div className="font-medium text-sm truncate">{doc.titleAr || doc.title}</div>
-                            <div className="text-xs text-muted-foreground truncate">{formatFileSize(doc.size)}</div>
+                            <div className="truncate text-sm font-medium">
+                              {doc.titleAr || doc.title}
+                            </div>
+                            <div className="text-muted-foreground truncate text-xs">
+                              {formatFileSize(doc.size)}
+                            </div>
                           </div>
                         </div>
 
-                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                        <div className="mt-3 grid grid-cols-1 gap-x-3 gap-y-2 text-sm md:grid-cols-2">
                           <div className="text-muted-foreground">{t.common.employee}</div>
-                          <div className="text-start truncate">{getEmployeeName(doc.employeeId)}</div>
+                          <div className="truncate text-start">
+                            {getEmployeeName(doc.employeeId)}
+                          </div>
 
                           <div className="text-muted-foreground">{t.common.category}</div>
                           <div className="text-start">
-                            <Badge variant="outline">{documentCategoryLabels[doc.category].ar}</Badge>
+                            <Badge variant="outline">
+                              {documentCategoryLabels[doc.category].ar}
+                            </Badge>
                           </div>
 
                           <div className="text-muted-foreground">{t.common.status}</div>
@@ -646,12 +647,17 @@ export function DocumentsManager() {
                           </div>
 
                           <div className="text-muted-foreground">{t.common.date}</div>
-                          <div className="text-start text-sm">{new Date(doc.uploadedAt).toLocaleDateString("ar-SA")}</div>
+                          <div className="text-start text-sm">
+                            {new Date(doc.uploadedAt).toLocaleDateString("ar-SA")}
+                          </div>
 
                           <div className="text-muted-foreground">{t.common.endDate}</div>
                           <div className="text-start">
                             {doc.expiryDate ? (
-                              <span className={isDocumentExpired(doc) ? "text-red-600" : "text-muted-foreground"}>
+                              <span
+                                className={
+                                  isDocumentExpired(doc) ? "text-red-600" : "text-muted-foreground"
+                                }>
                                 {new Date(doc.expiryDate).toLocaleDateString("ar-SA")}
                               </span>
                             ) : (
@@ -661,7 +667,7 @@ export function DocumentsManager() {
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center gap-1 shrink-0">
+                      <div className="flex shrink-0 flex-col items-center gap-1">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -669,12 +675,15 @@ export function DocumentsManager() {
                           onClick={() => {
                             setSelectedDocument(doc);
                             setIsPreviewOpen(true);
-                          }}
-                        >
+                          }}>
                           <IconEye className="h-4 w-4" />
                         </Button>
 
-                        <Button variant="ghost" size="icon" aria-label={t.common.download} onClick={() => handleDownload(doc)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t.common.download}
+                          onClick={() => handleDownload(doc)}>
                           <IconDownload className="h-4 w-4" />
                         </Button>
 
@@ -685,8 +694,7 @@ export function DocumentsManager() {
                               size="icon"
                               aria-label={t.common.accept}
                               className="text-green-600"
-                              onClick={() => handleStatusChange(doc.id, "approved")}
-                            >
+                              onClick={() => handleStatusChange(doc.id, "approved")}>
                               <IconCheck className="h-4 w-4" />
                             </Button>
                             <Button
@@ -694,8 +702,7 @@ export function DocumentsManager() {
                               size="icon"
                               aria-label={t.common.reject}
                               className="text-red-600"
-                              onClick={() => handleStatusChange(doc.id, "rejected")}
-                            >
+                              onClick={() => handleStatusChange(doc.id, "rejected")}>
                               <IconX className="h-4 w-4" />
                             </Button>
                           </>
@@ -703,7 +710,11 @@ export function DocumentsManager() {
 
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
-                            <Button variant="ghost" size="icon" aria-label={t.common.delete} className="text-destructive">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              aria-label={t.common.delete}
+                              className="text-destructive">
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
@@ -711,15 +722,17 @@ export function DocumentsManager() {
                             <AlertDialogHeader>
                               <AlertDialogTitle>{t.common.delete}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}&quot;?
+                                {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}
+                                &quot;?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(doc.id)}
-                                className="bg-destructive"
-                              >{t.common.delete}</AlertDialogAction>
+                                className="bg-destructive">
+                                {t.common.delete}
+                              </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -768,8 +781,8 @@ export function DocumentsManager() {
                         <div className="flex items-center gap-2">
                           <FileIconComponent mimeType={doc.mimeType} />
                           <div>
-                            <p className="font-medium text-sm">{doc.titleAr || doc.title}</p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-sm font-medium">{doc.titleAr || doc.title}</p>
+                            <p className="text-muted-foreground text-xs">
                               {formatFileSize(doc.size)}
                             </p>
                           </div>
@@ -777,9 +790,7 @@ export function DocumentsManager() {
                       </TableCell>
                       <TableCell>{getEmployeeName(doc.employeeId)}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">
-                          {documentCategoryLabels[doc.category].ar}
-                        </Badge>
+                        <Badge variant="outline">{documentCategoryLabels[doc.category].ar}</Badge>
                       </TableCell>
                       <TableCell>
                         <Badge variant={getStatusVariant(doc.status)}>
@@ -793,11 +804,8 @@ export function DocumentsManager() {
                         {doc.expiryDate ? (
                           <span
                             className={
-                              isDocumentExpired(doc)
-                                ? "text-red-600"
-                                : "text-muted-foreground"
-                            }
-                          >
+                              isDocumentExpired(doc) ? "text-red-600" : "text-muted-foreground"
+                            }>
                             {new Date(doc.expiryDate).toLocaleDateString("ar-SA")}
                           </span>
                         ) : (
@@ -813,8 +821,7 @@ export function DocumentsManager() {
                             onClick={() => {
                               setSelectedDocument(doc);
                               setIsPreviewOpen(true);
-                            }}
-                          >
+                            }}>
                             <IconEye className="h-4 w-4" />
                           </Button>
 
@@ -822,8 +829,7 @@ export function DocumentsManager() {
                             variant="ghost"
                             size="icon"
                             aria-label={t.common.download}
-                            onClick={() => handleDownload(doc)}
-                          >
+                            onClick={() => handleDownload(doc)}>
                             <IconDownload className="h-4 w-4" />
                           </Button>
 
@@ -834,8 +840,7 @@ export function DocumentsManager() {
                                 size="icon"
                                 aria-label={t.common.accept}
                                 className="text-green-600"
-                                onClick={() => handleStatusChange(doc.id, "approved")}
-                              >
+                                onClick={() => handleStatusChange(doc.id, "approved")}>
                                 <IconCheck className="h-4 w-4" />
                               </Button>
                               <Button
@@ -843,8 +848,7 @@ export function DocumentsManager() {
                                 size="icon"
                                 aria-label={t.common.reject}
                                 className="text-red-600"
-                                onClick={() => handleStatusChange(doc.id, "rejected")}
-                              >
+                                onClick={() => handleStatusChange(doc.id, "rejected")}>
                                 <IconX className="h-4 w-4" />
                               </Button>
                             </>
@@ -852,7 +856,11 @@ export function DocumentsManager() {
 
                           <AlertDialog>
                             <AlertDialogTrigger asChild>
-                              <Button variant="ghost" size="icon" aria-label={t.common.delete} className="text-destructive">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label={t.common.delete}
+                                className="text-destructive">
                                 <IconTrash className="h-4 w-4" />
                               </Button>
                             </AlertDialogTrigger>
@@ -860,15 +868,17 @@ export function DocumentsManager() {
                               <AlertDialogHeader>
                                 <AlertDialogTitle>{t.common.delete}</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}&quot;?
+                                  {t.documents.deleteConfirmPrefix} &quot;{doc.titleAr || doc.title}
+                                  &quot;?
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
                                 <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                                 <AlertDialogAction
                                   onClick={() => handleDelete(doc.id)}
-                                  className="bg-destructive"
-                                >{t.common.delete}</AlertDialogAction>
+                                  className="bg-destructive">
+                                  {t.common.delete}
+                                </AlertDialogAction>
                               </AlertDialogFooter>
                             </AlertDialogContent>
                           </AlertDialog>
@@ -891,10 +901,12 @@ export function DocumentsManager() {
           </DialogHeader>
           {selectedDocument && (
             <div className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                 <div>
                   <p className="text-muted-foreground">{t.common.title}</p>
-                  <p className="font-medium">{selectedDocument.titleAr || selectedDocument.title}</p>
+                  <p className="font-medium">
+                    {selectedDocument.titleAr || selectedDocument.title}
+                  </p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">{t.documents.size}</p>
@@ -928,8 +940,7 @@ export function DocumentsManager() {
                     <p
                       className={`font-medium ${
                         isDocumentExpired(selectedDocument) ? "text-red-600" : ""
-                      }`}
-                    >
+                      }`}>
                       {new Date(selectedDocument.expiryDate).toLocaleDateString("ar-SA")}
                     </p>
                   </div>

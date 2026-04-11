@@ -70,7 +70,7 @@ export function PlatformSettingsManager() {
       const res = await fetch("/api/super-admin/platform-settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(settings),
+        body: JSON.stringify(settings)
       });
 
       if (res.ok) {
@@ -89,14 +89,14 @@ export function PlatformSettingsManager() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     );
   }
 
   if (!settings) {
     return (
-      <div className="text-center py-12 text-muted-foreground">{t.platformSettings.notFound}</div>
+      <div className="text-muted-foreground py-12 text-center">{t.platformSettings.notFound}</div>
     );
   }
 
@@ -105,13 +105,21 @@ export function PlatformSettingsManager() {
       <Tabs defaultValue="general" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general" className="gap-2">
-            <Settings className="h-4 w-4" />{t.common.general}</TabsTrigger>
+            <Settings className="h-4 w-4" />
+            {t.common.general}
+          </TabsTrigger>
           <TabsTrigger value="trial" className="gap-2">
-            <Globe className="h-4 w-4" />{t.platformSettings.trial}</TabsTrigger>
+            <Globe className="h-4 w-4" />
+            {t.platformSettings.trial}
+          </TabsTrigger>
           <TabsTrigger value="appearance" className="gap-2">
-            <Palette className="h-4 w-4" />{t.platformSettings.appearance}</TabsTrigger>
+            <Palette className="h-4 w-4" />
+            {t.platformSettings.appearance}
+          </TabsTrigger>
           <TabsTrigger value="maintenance" className="gap-2">
-            <Shield className="h-4 w-4" />{t.platformSettings.maintenance}</TabsTrigger>
+            <Shield className="h-4 w-4" />
+            {t.platformSettings.maintenance}
+          </TabsTrigger>
         </TabsList>
 
         {/* General Settings */}
@@ -129,18 +137,14 @@ export function PlatformSettingsManager() {
                   <Label>{t.platformSettings.platformNameAr}</Label>
                   <Input
                     value={settings.platformName}
-                    onChange={(e) =>
-                      setSettings({ ...settings, platformName: e.target.value })
-                    }
+                    onChange={(e) => setSettings({ ...settings, platformName: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label>{t.platformSettings.platformNameEn}</Label>
                   <Input
                     value={settings.platformNameEn}
-                    onChange={(e) =>
-                      setSettings({ ...settings, platformNameEn: e.target.value })
-                    }
+                    onChange={(e) => setSettings({ ...settings, platformNameEn: e.target.value })}
                   />
                 </div>
               </div>
@@ -151,9 +155,7 @@ export function PlatformSettingsManager() {
                   <Input
                     type="email"
                     value={settings.supportEmail}
-                    onChange={(e) =>
-                      setSettings({ ...settings, supportEmail: e.target.value })
-                    }
+                    onChange={(e) => setSettings({ ...settings, supportEmail: e.target.value })}
                   />
                 </div>
                 <div className="space-y-2">
@@ -172,9 +174,7 @@ export function PlatformSettingsManager() {
                   <Label>{t.platformSettings.termsUrl}</Label>
                   <Input
                     value={settings.termsUrl || ""}
-                    onChange={(e) =>
-                      setSettings({ ...settings, termsUrl: e.target.value || null })
-                    }
+                    onChange={(e) => setSettings({ ...settings, termsUrl: e.target.value || null })}
                     placeholder="https://..."
                   />
                 </div>
@@ -249,7 +249,10 @@ export function PlatformSettingsManager() {
                     max={100}
                     value={settings.trialMaxEmployees}
                     onChange={(e) =>
-                      setSettings({ ...settings, trialMaxEmployees: parseInt(e.target.value) || 10 })
+                      setSettings({
+                        ...settings,
+                        trialMaxEmployees: parseInt(e.target.value) || 10
+                      })
                     }
                   />
                 </div>
@@ -273,16 +276,12 @@ export function PlatformSettingsManager() {
                     <Input
                       type="color"
                       value={settings.primaryColor}
-                      onChange={(e) =>
-                        setSettings({ ...settings, primaryColor: e.target.value })
-                      }
-                      className="w-16 h-10 p-1"
+                      onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                      className="h-10 w-16 p-1"
                     />
                     <Input
                       value={settings.primaryColor}
-                      onChange={(e) =>
-                        setSettings({ ...settings, primaryColor: e.target.value })
-                      }
+                      onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
                       className="flex-1"
                     />
                   </div>
@@ -294,9 +293,7 @@ export function PlatformSettingsManager() {
                   <Label>{t.platformSettings.logoUrl}</Label>
                   <Input
                     value={settings.logoUrl || ""}
-                    onChange={(e) =>
-                      setSettings({ ...settings, logoUrl: e.target.value || null })
-                    }
+                    onChange={(e) => setSettings({ ...settings, logoUrl: e.target.value || null })}
                     placeholder="https://..."
                   />
                 </div>
@@ -356,10 +353,14 @@ export function PlatformSettingsManager() {
         <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.common.saving}</>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {t.common.saving}
+            </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" />{t.common.saveChanges}</>
+              <Save className="mr-2 h-4 w-4" />
+              {t.common.saveChanges}
+            </>
           )}
         </Button>
       </div>

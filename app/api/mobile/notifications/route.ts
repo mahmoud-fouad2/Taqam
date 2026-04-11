@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 /**
@@ -38,27 +39,27 @@ export async function GET(request: NextRequest) {
         message: true,
         link: true,
         isRead: true,
-        createdAt: true,
-      },
+        createdAt: true
+      }
     });
 
     const hasMore = notifications.length > limit;
     if (hasMore) notifications.pop();
 
     const unreadCount = await prisma.notification.count({
-      where: { userId, ...(tenantId ? { tenantId } : {}), isRead: false },
+      where: { userId, ...(tenantId ? { tenantId } : {}), isRead: false }
     });
 
     return NextResponse.json({
       data: notifications.map((n) => ({
         ...n,
-        createdAt: n.createdAt.toISOString(),
+        createdAt: n.createdAt.toISOString()
       })),
       unreadCount,
-      nextCursor: hasMore ? notifications[notifications.length - 1]?.id : null,
+      nextCursor: hasMore ? notifications[notifications.length - 1]?.id : null
     });
   } catch (error) {
-    console.error("Mobile notifications GET error:", error);
+    logger.error("Mobile notifications GET error", undefined, error);
     return NextResponse.json({ error: "Failed to load notifications" }, { status: 500 });
   }
 }
@@ -78,12 +79,12 @@ export async function POST(request: NextRequest) {
 
     await prisma.notification.updateMany({
       where,
-      data: { isRead: true, readAt: new Date() },
+      data: { isRead: true, readAt: new Date() }
     });
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
-    console.error("Mobile notifications POST error:", error);
+    logger.error("Mobile notifications POST error", undefined, error);
     return NextResponse.json({ error: "Failed to mark as read" }, { status: 500 });
   }
 }

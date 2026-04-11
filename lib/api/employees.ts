@@ -9,7 +9,7 @@ import type {
   EmployeeCreateInput,
   EmployeeStatus,
   Gender,
-  MaritalStatus,
+  MaritalStatus
 } from "@/lib/types/core-hr";
 
 type ApiEmploymentType = "FULL_TIME" | "PART_TIME" | "CONTRACT" | "INTERN" | "TEMPORARY";
@@ -133,9 +133,12 @@ function mapGenderFromApi(value?: ApiGender | null): Gender | undefined {
   return undefined;
 }
 
-function mapMaritalStatusToApi(value?: MaritalStatus | string | null): ApiMaritalStatus | undefined {
+function mapMaritalStatusToApi(
+  value?: MaritalStatus | string | null
+): ApiMaritalStatus | undefined {
   const normalized = String(value || "").toUpperCase();
-  if (["SINGLE", "MARRIED", "DIVORCED", "WIDOWED"].includes(normalized)) return normalized as ApiMaritalStatus;
+  if (["SINGLE", "MARRIED", "DIVORCED", "WIDOWED"].includes(normalized))
+    return normalized as ApiMaritalStatus;
   switch (value) {
     case "single":
       return "SINGLE";
@@ -201,7 +204,7 @@ function mapEmployeeFromApi(emp: ApiEmployee): Employee {
     tenantId: emp.tenantId,
     createdAt: emp.createdAt,
     updatedAt: emp.updatedAt,
-    createdBy: "",
+    createdBy: ""
   };
 }
 
@@ -220,7 +223,7 @@ function mapEmployeeCreateToApi(input: EmployeeCreateInput) {
     managerId: input.managerId,
     hireDate: input.hireDate,
     employmentType: mapEmploymentTypeToApi(input.contractType),
-    baseSalary: input.basicSalary,
+    baseSalary: input.basicSalary
   };
 }
 
@@ -244,7 +247,7 @@ function mapEmployeeUpdateToApi(input: Partial<Employee>) {
     employmentType: input.contractType ? mapEmploymentTypeToApi(input.contractType) : undefined,
     status: input.status ? mapStatusToApi(input.status) : undefined,
     baseSalary: input.basicSalary,
-    currency: input.currency,
+    currency: input.currency
   };
 }
 
@@ -262,7 +265,7 @@ export const employeesService = {
    */
   async getAll(filters?: EmployeeFilters): Promise<ApiResponse<Employee[]>> {
     const res = await apiClient.get<ApiEmployee[]>("/employees", {
-      params: filters as Record<string, string | number>,
+      params: filters as Record<string, string | number>
     });
 
     if (!res.success) {
@@ -270,12 +273,12 @@ export const employeesService = {
         success: false,
         error: res.error,
         message: res.message,
-        meta: res.meta,
+        meta: res.meta
       };
     }
     return {
       ...res,
-      data: (res.data || []).map(mapEmployeeFromApi),
+      data: (res.data || []).map(mapEmployeeFromApi)
     };
   },
 
@@ -289,7 +292,7 @@ export const employeesService = {
         success: false,
         error: res.error,
         message: res.message,
-        meta: res.meta,
+        meta: res.meta
       };
     }
     if (!res.data) return { success: false, error: "Employee not found" } as ApiResponse<Employee>;
@@ -306,10 +309,11 @@ export const employeesService = {
         success: false,
         error: res.error,
         message: res.message,
-        meta: res.meta,
+        meta: res.meta
       };
     }
-    if (!res.data) return { success: false, error: "Failed to create employee" } as ApiResponse<Employee>;
+    if (!res.data)
+      return { success: false, error: "Failed to create employee" } as ApiResponse<Employee>;
     return { ...res, data: mapEmployeeFromApi(res.data) };
   },
 
@@ -323,10 +327,11 @@ export const employeesService = {
         success: false,
         error: res.error,
         message: res.message,
-        meta: res.meta,
+        meta: res.meta
       };
     }
-    if (!res.data) return { success: false, error: "Failed to update employee" } as ApiResponse<Employee>;
+    if (!res.data)
+      return { success: false, error: "Failed to update employee" } as ApiResponse<Employee>;
     return { ...res, data: mapEmployeeFromApi(res.data) };
   },
 
@@ -366,11 +371,11 @@ export const employeesService = {
    * Export employees to CSV
    */
   async exportCSV(filters?: EmployeeFilters): Promise<ApiResponse<Blob>> {
-    return apiClient.get<Blob>("/employees/export", { 
+    return apiClient.get<Blob>("/employees/export", {
       params: filters as Record<string, string | number>,
       headers: { Accept: "text/csv" }
     });
-  },
+  }
 };
 
 export default employeesService;

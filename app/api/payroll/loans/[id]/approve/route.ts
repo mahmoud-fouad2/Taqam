@@ -15,15 +15,22 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const existing = await prisma.loan.findFirst({
       where: { id, tenantId },
-      include: { employee: { select: { userId: true } } },
+      include: { employee: { select: { userId: true } } }
     });
 
     if (!existing) {
       return NextResponse.json({ error: "Loan not found" }, { status: 404 });
     }
 
-    if (existing.status === "REJECTED" || existing.status === "CANCELLED" || existing.status === "COMPLETED") {
-      return NextResponse.json({ error: "Loan cannot be approved in its current state" }, { status: 400 });
+    if (
+      existing.status === "REJECTED" ||
+      existing.status === "CANCELLED" ||
+      existing.status === "COMPLETED"
+    ) {
+      return NextResponse.json(
+        { error: "Loan cannot be approved in its current state" },
+        { status: 400 }
+      );
     }
 
     const updated = await prisma.loan.update({
@@ -31,11 +38,11 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       data: {
         status: "APPROVED",
         approvedById: session.user.id,
-        approvedAt: new Date(),
+        approvedAt: new Date()
       },
       include: {
-        approvedBy: { select: { firstName: true, lastName: true } },
-      },
+        approvedBy: { select: { firstName: true, lastName: true } }
+      }
     });
 
     const employeeUserId = existing.employee.userId;
@@ -44,7 +51,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         tenantId,
         employeeUserId,
         amount: Number(existing.amount),
-        loanId: id,
+        loanId: id
       }).catch(console.error);
     }
 

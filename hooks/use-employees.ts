@@ -22,7 +22,9 @@ type DepartmentsApiResponse = {
   error?: string;
 };
 
-function mapEmploymentTypeToContractType(value: string | null | undefined): Employee["contractType"] {
+function mapEmploymentTypeToContractType(
+  value: string | null | undefined
+): Employee["contractType"] {
   switch (value) {
     case "FULL_TIME":
       return "full_time";
@@ -80,16 +82,20 @@ function mapEmployeeFromApi(emp: any): Employee {
     branchId: undefined,
     hireDate: emp.hireDate ? new Date(emp.hireDate).toISOString().slice(0, 10) : "",
     contractType: mapEmploymentTypeToContractType(emp.employmentType),
-    probationEndDate: emp.probationEndDate ? new Date(emp.probationEndDate).toISOString().slice(0, 10) : undefined,
+    probationEndDate: emp.probationEndDate
+      ? new Date(emp.probationEndDate).toISOString().slice(0, 10)
+      : undefined,
     status: mapEmployeeStatusToUi(emp.status),
-    terminationDate: emp.terminationDate ? new Date(emp.terminationDate).toISOString().slice(0, 10) : undefined,
+    terminationDate: emp.terminationDate
+      ? new Date(emp.terminationDate).toISOString().slice(0, 10)
+      : undefined,
     terminationReason: undefined,
     basicSalary: emp.baseSalary != null ? Number(emp.baseSalary) : undefined,
     currency: emp.currency ?? undefined,
     tenantId: String(emp.tenantId ?? ""),
     createdAt: emp.createdAt ? new Date(emp.createdAt).toISOString() : new Date().toISOString(),
     updatedAt: emp.updatedAt ? new Date(emp.updatedAt).toISOString() : new Date().toISOString(),
-    createdBy: emp.userId ? String(emp.userId) : "",
+    createdBy: emp.userId ? String(emp.userId) : ""
   };
 }
 
@@ -106,7 +112,7 @@ function mapDepartmentFromApi(dept: any, employees: Employee[]): Department {
     employeesCount: employees.filter((e) => e.departmentId === id).length,
     tenantId: String(dept.tenantId ?? ""),
     createdAt: dept.createdAt ? new Date(dept.createdAt).toISOString() : new Date().toISOString(),
-    updatedAt: dept.updatedAt ? new Date(dept.updatedAt).toISOString() : new Date().toISOString(),
+    updatedAt: dept.updatedAt ? new Date(dept.updatedAt).toISOString() : new Date().toISOString()
   };
 }
 
@@ -133,14 +139,16 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
     data,
     isLoading,
     error: queryError,
-    refetch,
+    refetch
   } = useQuery({
     queryKey: ["useEmployees", options.departmentId, options.status, options.search],
     queryFn: async () => {
       const [empRes, deptRes] = await Promise.all([
         fetch(
           `/api/employees?limit=1000&search=${encodeURIComponent(options.search || "")}` +
-            (options.departmentId ? `&departmentId=${encodeURIComponent(options.departmentId)}` : "") +
+            (options.departmentId
+              ? `&departmentId=${encodeURIComponent(options.departmentId)}`
+              : "") +
             (options.status
               ? `&status=${encodeURIComponent(
                   options.status === "active"
@@ -153,7 +161,7 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
                 )}`
               : "")
         ),
-        fetch("/api/departments"),
+        fetch("/api/departments")
       ]);
 
       const empJson = (await empRes.json()) as EmployeesApiResponse;
@@ -166,18 +174,21 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
         throw new Error(deptJson.error || "فشل تحميل الأقسام");
       }
 
-      const mappedEmployees = Array.isArray(empJson.data) ? empJson.data.map(mapEmployeeFromApi) : [];
+      const mappedEmployees = Array.isArray(empJson.data)
+        ? empJson.data.map(mapEmployeeFromApi)
+        : [];
       const mappedDepartments = Array.isArray(deptJson.data)
         ? deptJson.data.map((d) => mapDepartmentFromApi(d, mappedEmployees))
         : [];
 
       return { employees: mappedEmployees, departments: mappedDepartments };
-    },
+    }
   });
 
   const employees = data?.employees || INITIAL_EMPLOYEES;
   const departments = data?.departments || INITIAL_DEPARTMENTS;
-  const error = queryError instanceof Error ? queryError.message : queryError ? "فشل تحميل البيانات" : null;
+  const error =
+    queryError instanceof Error ? queryError.message : queryError ? "فشل تحميل البيانات" : null;
 
   const getEmployeeById = useCallback(
     (id: string) => employees.find((e) => e.id === id),
@@ -231,13 +242,14 @@ export function useEmployees(options: UseEmployeesOptions = {}): UseEmployeesRet
     departments,
     isLoading,
     error,
-    refetch: async () => { await refetch(); },
+    refetch: async () => {
+      await refetch();
+    },
     getEmployeeById,
     getEmployeeFullName,
     getDepartmentById,
-    getEmployeesByDepartment,
+    getEmployeesByDepartment
   };
 }
 
 export default useEmployees;
-

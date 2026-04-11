@@ -1,7 +1,7 @@
 /**
  * Database Seed Script
  * Creates initial super admin and demo tenant
- * 
+ *
  * Run with: npx prisma db seed
  */
 
@@ -10,13 +10,16 @@ import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
+import { normalizePostgresConnectionString } from "../lib/postgres-connection-string";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   throw new Error("DATABASE_URL environment variable is not set");
 }
 
-const adapter = new PrismaPg({ connectionString });
+const adapter = new PrismaPg({
+  connectionString: normalizePostgresConnectionString(connectionString)
+});
 const prisma = new PrismaClient({ adapter });
 
 function resolveSeedSecret(envName: string, fallbackValue: string) {
@@ -26,8 +29,7 @@ function resolveSeedSecret(envName: string, fallbackValue: string) {
   }
 
   const allowInsecureDefaults =
-    process.env.ALLOW_INSECURE_SEED_DEFAULTS === "true" ||
-    process.env.NODE_ENV !== "production";
+    process.env.ALLOW_INSECURE_SEED_DEFAULTS === "true" || process.env.NODE_ENV !== "production";
 
   if (allowInsecureDefaults) {
     return fallbackValue;
@@ -47,10 +49,13 @@ async function main() {
   // ============================================
   const superAdminEmail = resolveSeedSecret("SUPER_ADMIN_EMAIL", "admin@taqam.local");
   const superAdminPassword = resolveSeedSecret("SUPER_ADMIN_PASSWORD", "Admin@123456");
-  const defaultTenantAdminPassword = resolveSeedSecret("DEFAULT_TENANT_ADMIN_PASSWORD", "Admin@123456");
+  const defaultTenantAdminPassword = resolveSeedSecret(
+    "DEFAULT_TENANT_ADMIN_PASSWORD",
+    "Admin@123456"
+  );
 
   const existingSuperAdmin = await prisma.user.findUnique({
-    where: { email: superAdminEmail },
+    where: { email: superAdminEmail }
   });
 
   if (!existingSuperAdmin) {
@@ -64,8 +69,8 @@ async function main() {
         lastName: "Admin",
         role: "SUPER_ADMIN",
         status: "ACTIVE",
-        permissions: ["*"], // All permissions
-      },
+        permissions: ["*"] // All permissions
+      }
     });
 
     console.log(`✅ Super Admin created: ${superAdminEmail}`);
@@ -82,34 +87,34 @@ async function main() {
       name: "Demo Company",
       nameAr: "شركة تجريبية",
       plan: "PROFESSIONAL" as const,
-      adminEmail: "admin@demo.taqam.local",
+      adminEmail: "admin@demo.taqam.local"
     },
     {
       slug: "elite-tech",
       name: "Elite Technology Co.",
       nameAr: "شركة النخبة للتقنية",
       plan: "PROFESSIONAL" as const,
-      adminEmail: "admin@elite-tech.taqam.local",
+      adminEmail: "admin@elite-tech.taqam.local"
     },
     {
       slug: "riyadh-trading",
       name: "Riyadh Trading Est.",
       nameAr: "مؤسسة الرياض التجارية",
       plan: "BASIC" as const,
-      adminEmail: "admin@riyadh-trading.taqam.local",
+      adminEmail: "admin@riyadh-trading.taqam.local"
     },
     {
       slug: "future-co",
       name: "Future Company",
       nameAr: "شركة المستقبل",
       plan: "ENTERPRISE" as const,
-      adminEmail: "admin@future-co.taqam.local",
-    },
+      adminEmail: "admin@future-co.taqam.local"
+    }
   ];
 
   for (const tenantData of tenants) {
     const existingTenant = await prisma.tenant.findUnique({
-      where: { slug: tenantData.slug },
+      where: { slug: tenantData.slug }
     });
 
     if (!existingTenant) {
@@ -126,10 +131,10 @@ async function main() {
           settings: {
             language: "ar",
             dateFormat: "DD/MM/YYYY",
-            timeFormat: "12h",
-          },
-        },
-        });
+            timeFormat: "12h"
+          }
+        }
+      });
 
       // Create tenant admin
       const tenantAdminPassword = await hash(defaultTenantAdminPassword, 12);
@@ -143,8 +148,8 @@ async function main() {
           lastName: tenantData.nameAr,
           role: "TENANT_ADMIN",
           status: "ACTIVE",
-          permissions: [],
-        },
+          permissions: []
+        }
       });
 
       // Create default department
@@ -154,8 +159,8 @@ async function main() {
           name: "General",
           nameAr: "إدارة عامة",
           code: "GEN",
-          isActive: true,
-        },
+          isActive: true
+        }
       });
 
       // Create default job title
@@ -166,8 +171,8 @@ async function main() {
           nameAr: "موظف",
           code: "EMP",
           level: 1,
-          isActive: true,
-        },
+          isActive: true
+        }
       });
 
       // Create default shift
@@ -189,8 +194,8 @@ async function main() {
           overtimeMultiplier: 1.5,
           color: "#3B82F6",
           isDefault: true,
-          isActive: true,
-        },
+          isActive: true
+        }
       });
 
       // Create default leave types
@@ -203,7 +208,7 @@ async function main() {
           maxDays: 30,
           carryOverDays: 5,
           isPaid: true,
-          color: "#10B981",
+          color: "#10B981"
         },
         {
           name: "Sick Leave",
@@ -213,7 +218,7 @@ async function main() {
           maxDays: 120,
           isPaid: true,
           requiresAttachment: true,
-          color: "#EF4444",
+          color: "#EF4444"
         },
         {
           name: "Unpaid Leave",
@@ -222,8 +227,8 @@ async function main() {
           defaultDays: 0,
           maxDays: 60,
           isPaid: false,
-          color: "#6B7280",
-        },
+          color: "#6B7280"
+        }
       ];
 
       for (const lt of leaveTypes) {
@@ -231,8 +236,8 @@ async function main() {
           data: {
             tenantId: tenant.id,
             ...lt,
-            isActive: true,
-          },
+            isActive: true
+          }
         });
       }
 
@@ -252,8 +257,8 @@ async function main() {
           employmentType: "FULL_TIME",
           status: "ACTIVE",
           baseSalary: 15000,
-          currency: "SAR",
-        },
+          currency: "SAR"
+        }
       });
 
       console.log(`✅ Tenant created: ${tenantData.slug}`);
@@ -281,7 +286,7 @@ async function main() {
       featuresEn: ["Employee management", "Time & attendance", "Leave management", "Basic reports"],
       planType: "BASIC" as const,
       isPopular: false,
-      sortOrder: 1,
+      sortOrder: 1
     },
     {
       name: "Business",
@@ -297,7 +302,7 @@ async function main() {
       featuresEn: ["Everything in Starter", "Payroll", "WPS export", "Priority support"],
       planType: "PROFESSIONAL" as const,
       isPopular: true,
-      sortOrder: 2,
+      sortOrder: 2
     },
     {
       name: "Enterprise",
@@ -310,21 +315,26 @@ async function main() {
       employeesLabel: "غير محدود",
       employeesLabelEn: "Unlimited",
       featuresAr: ["كل مميزات الأعمال", "تكاملات مخصصة", "وصول API", "مدير حساب مخصص"],
-      featuresEn: ["Everything in Business", "Custom integrations", "API access", "Dedicated account manager"],
+      featuresEn: [
+        "Everything in Business",
+        "Custom integrations",
+        "API access",
+        "Dedicated account manager"
+      ],
       planType: "ENTERPRISE" as const,
       isPopular: false,
-      sortOrder: 3,
-    },
+      sortOrder: 3
+    }
   ];
 
   for (const plan of pricingPlans) {
     const existing = await prisma.pricingPlan.findUnique({
-      where: { slug: plan.slug },
+      where: { slug: plan.slug }
     });
 
     if (!existing) {
       await prisma.pricingPlan.create({
-        data: plan,
+        data: plan
       });
       console.log(`✅ Pricing plan created: ${plan.name}`);
     } else {
@@ -336,22 +346,92 @@ async function main() {
   // 4. Seed Feature Comparison
   // ============================================
   const features = [
-    { featureAr: "إدارة الموظفين", featureEn: "Employee management", inStarter: true, inBusiness: true, inEnterprise: true, sortOrder: 1 },
-    { featureAr: "الحضور والانصراف", featureEn: "Time & attendance", inStarter: true, inBusiness: true, inEnterprise: true, sortOrder: 2 },
-    { featureAr: "إدارة الإجازات", featureEn: "Leave management", inStarter: true, inBusiness: true, inEnterprise: true, sortOrder: 3 },
-    { featureAr: "الرواتب", featureEn: "Payroll", inStarter: false, inBusiness: true, inEnterprise: true, sortOrder: 4 },
-    { featureAr: "تصدير WPS", featureEn: "WPS export", inStarter: false, inBusiness: true, inEnterprise: true, sortOrder: 5 },
-    { featureAr: "صلاحيات وأدوار", featureEn: "Roles & permissions", inStarter: true, inBusiness: true, inEnterprise: true, sortOrder: 6 },
-    { featureAr: "التقارير المتقدمة", featureEn: "Advanced reports", inStarter: false, inBusiness: true, inEnterprise: true, sortOrder: 7 },
-    { featureAr: "تكاملات مخصصة", featureEn: "Custom integrations", inStarter: false, inBusiness: false, inEnterprise: true, sortOrder: 8 },
-    { featureAr: "وصول API", featureEn: "API access", inStarter: false, inBusiness: false, inEnterprise: true, sortOrder: 9 },
-    { featureAr: "مدير حساب مخصص", featureEn: "Dedicated account manager", inStarter: false, inBusiness: false, inEnterprise: true, sortOrder: 10 },
+    {
+      featureAr: "إدارة الموظفين",
+      featureEn: "Employee management",
+      inStarter: true,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 1
+    },
+    {
+      featureAr: "الحضور والانصراف",
+      featureEn: "Time & attendance",
+      inStarter: true,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 2
+    },
+    {
+      featureAr: "إدارة الإجازات",
+      featureEn: "Leave management",
+      inStarter: true,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 3
+    },
+    {
+      featureAr: "الرواتب",
+      featureEn: "Payroll",
+      inStarter: false,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 4
+    },
+    {
+      featureAr: "تصدير WPS",
+      featureEn: "WPS export",
+      inStarter: false,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 5
+    },
+    {
+      featureAr: "صلاحيات وأدوار",
+      featureEn: "Roles & permissions",
+      inStarter: true,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 6
+    },
+    {
+      featureAr: "التقارير المتقدمة",
+      featureEn: "Advanced reports",
+      inStarter: false,
+      inBusiness: true,
+      inEnterprise: true,
+      sortOrder: 7
+    },
+    {
+      featureAr: "تكاملات مخصصة",
+      featureEn: "Custom integrations",
+      inStarter: false,
+      inBusiness: false,
+      inEnterprise: true,
+      sortOrder: 8
+    },
+    {
+      featureAr: "وصول API",
+      featureEn: "API access",
+      inStarter: false,
+      inBusiness: false,
+      inEnterprise: true,
+      sortOrder: 9
+    },
+    {
+      featureAr: "مدير حساب مخصص",
+      featureEn: "Dedicated account manager",
+      inStarter: false,
+      inBusiness: false,
+      inEnterprise: true,
+      sortOrder: 10
+    }
   ];
 
   const existingFeatures = await prisma.planFeatureComparison.count();
   if (existingFeatures === 0) {
     await prisma.planFeatureComparison.createMany({
-      data: features,
+      data: features
     });
     console.log(`✅ Feature comparison seeded: ${features.length} features`);
   } else {
@@ -370,8 +450,8 @@ async function main() {
         supportEmail: "support@taqam.net",
         trialDays: 14,
         trialMaxEmployees: 10,
-        primaryColor: "#0284c7",
-      },
+        primaryColor: "#0284c7"
+      }
     });
     console.log(`✅ Platform settings created`);
   } else {

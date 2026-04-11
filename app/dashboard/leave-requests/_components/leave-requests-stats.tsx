@@ -7,7 +7,7 @@ import { getText } from "@/lib/i18n/text";
 const t = getText("ar");
 
 export function LeaveRequestsStats({
-  stats,
+  stats
 }: {
   stats: {
     total: number;

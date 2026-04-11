@@ -1,8 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import {
+  dataResponse,
+  forbiddenResponse,
+  logApiError,
+  notFoundResponse,
+  requireSession,
+  errorResponse
+} from "@/lib/api/route-helper";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -19,92 +25,78 @@ const updateSchema = z.object({
   lat: z.coerce.number().min(-90).max(90).optional(),
   lng: z.coerce.number().min(-180).max(180).optional(),
   radiusMeters: z.coerce.number().int().min(10).max(5000).optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean().optional()
 });
 
-export async function PATCH(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     if (!canManageAttendanceSettings(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const { id } = await context.params;
 
     const existing = await prisma.tenantWorkLocation.findUnique({
       where: { id },
-      select: { id: true, tenantId: true },
+      select: { id: true, tenantId: true }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return notFoundResponse();
     }
 
     if (!isSuperAdmin(session.user.role)) {
       if (!session.user.tenantId || existing.tenantId !== session.user.tenantId) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        return forbiddenResponse();
       }
     }
 
     const body = await request.json();
     const parsed = updateSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid payload", issues: parsed.error.issues },
-        { status: 400 }
-      );
+      return errorResponse("Invalid payload", 400, { issues: parsed.error.issues });
     }
 
     const updated = await prisma.tenantWorkLocation.update({
       where: { id },
-      data: parsed.data,
+      data: parsed.data
     });
 
-    return NextResponse.json({ data: updated }, { status: 200 });
+    return dataResponse(updated);
   } catch (error) {
-    console.error("Error updating work location:", error);
-    return NextResponse.json(
-      { error: "Failed to update work location" },
-      { status: 500 }
-    );
+    logApiError("Error updating work location", error);
+    return errorResponse("Failed to update work location");
   }
 }
 
-export async function DELETE(
-  _request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(_request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     if (!canManageAttendanceSettings(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const { id } = await context.params;
 
     const existing = await prisma.tenantWorkLocation.findUnique({
       where: { id },
-      select: { id: true, tenantId: true },
+      select: { id: true, tenantId: true }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return notFoundResponse();
     }
 
     if (!isSuperAdmin(session.user.role)) {
       if (!session.user.tenantId || existing.tenantId !== session.user.tenantId) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        return forbiddenResponse();
       }
     }
 
@@ -112,10 +104,7 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true }, { status: 200 });
   } catch (error) {
-    console.error("Error deleting work location:", error);
-    return NextResponse.json(
-      { error: "Failed to delete work location" },
-      { status: 500 }
-    );
+    logApiError("Error deleting work location", error);
+    return errorResponse("Failed to delete work location");
   }
 }

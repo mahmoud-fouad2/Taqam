@@ -47,7 +47,7 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
       const response = await attendanceService.getRecords({
         employeeId: options.employeeId,
         startDate: options.startDate,
-        endDate: options.endDate,
+        endDate: options.endDate
       });
 
       if (response.success && response.data) {
@@ -60,27 +60,33 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
     }
   }, [options.employeeId, options.startDate, options.endDate]);
 
-  const checkIn = useCallback(async (employeeId: string, notes?: string) => {
-    try {
-      const response = await attendanceService.checkIn({ employeeId, notes });
-      if (response.success) {
-        await fetchAttendance();
+  const checkIn = useCallback(
+    async (employeeId: string, notes?: string) => {
+      try {
+        const response = await attendanceService.checkIn({ employeeId, notes });
+        if (response.success) {
+          await fetchAttendance();
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "فشل تسجيل الحضور");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "فشل تسجيل الحضور");
-    }
-  }, [fetchAttendance]);
+    },
+    [fetchAttendance]
+  );
 
-  const checkOut = useCallback(async (employeeId: string, notes?: string) => {
-    try {
-      const response = await attendanceService.checkOut({ employeeId, notes });
-      if (response.success) {
-        await fetchAttendance();
+  const checkOut = useCallback(
+    async (employeeId: string, notes?: string) => {
+      try {
+        const response = await attendanceService.checkOut({ employeeId, notes });
+        if (response.success) {
+          await fetchAttendance();
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "فشل تسجيل الانصراف");
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "فشل تسجيل الانصراف");
-    }
-  }, [fetchAttendance]);
+    },
+    [fetchAttendance]
+  );
 
   const filteredRecords = useMemo(() => {
     let result = records;
@@ -112,7 +118,7 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
       absentDays,
       lateDays,
       earlyLeaveDays,
-      attendanceRate,
+      attendanceRate
     };
   }, [filteredRecords]);
 
@@ -123,7 +129,7 @@ export function useAttendance(options: UseAttendanceOptions = {}): UseAttendance
     error,
     checkIn,
     checkOut,
-    refetch: fetchAttendance,
+    refetch: fetchAttendance
   };
 }
 

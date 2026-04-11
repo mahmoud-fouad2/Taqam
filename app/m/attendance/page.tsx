@@ -2,7 +2,15 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDownToLine, ArrowUpFromLine, Calendar, ChevronRight, Loader2, RefreshCw, WifiOff } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowUpFromLine,
+  Calendar,
+  ChevronRight,
+  Loader2,
+  RefreshCw,
+  WifiOff
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { loadMobileAuth, mobileAuthFetch } from "@/lib/mobile/web-client";
@@ -41,7 +49,9 @@ export default function MobileAttendancePage() {
     try {
       setLoading(true);
       setError(false);
-      const res = await mobileAuthFetch<ListResult>(`/api/mobile/attendance?page=${p}&limit=${limit}`);
+      const res = await mobileAuthFetch<ListResult>(
+        `/api/mobile/attendance?page=${p}&limit=${limit}`
+      );
       setItems(res.data.items);
       setTotal(res.data.total);
       setPage(p);
@@ -91,8 +101,7 @@ export default function MobileAttendancePage() {
           <button
             type="button"
             onClick={() => router.back()}
-            className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90"
-          >
+            className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90">
             <ChevronRight className="size-5 text-slate-400" />
           </button>
           <div>
@@ -124,18 +133,16 @@ export default function MobileAttendancePage() {
                 <button
                   disabled={page <= 1 || loading}
                   onClick={() => fetch_(page - 1)}
-                  className="rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95 disabled:opacity-40"
-                >
+                  className="rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95 disabled:opacity-40">
                   السابق
                 </button>
-                <span className="text-[12px] tabular-nums text-slate-400">
+                <span className="text-[12px] text-slate-400 tabular-nums">
                   {page} / {totalPages}
                 </span>
                 <button
                   disabled={page >= totalPages || loading}
                   onClick={() => fetch_(page + 1)}
-                  className="rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95 disabled:opacity-40"
-                >
+                  className="rounded-xl bg-white px-4 py-2 text-[13px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95 disabled:opacity-40">
                   التالي
                 </button>
               </div>
@@ -160,9 +167,12 @@ function AttendanceCard({ row }: { row: AttendanceRow }) {
     ABSENT: { label: "غائب", cls: "bg-red-50 text-red-600" },
     LATE: { label: "متأخر", cls: "bg-amber-50 text-amber-600" },
     EARLY_LEAVE: { label: "خروج مبكر", cls: "bg-orange-50 text-orange-600" },
-    ON_LEAVE: { label: "إجازة", cls: "bg-blue-50 text-blue-600" },
+    ON_LEAVE: { label: "إجازة", cls: "bg-blue-50 text-blue-600" }
   };
-  const status = statusMap[row.status] || { label: row.status || "—", cls: "bg-slate-50 text-slate-500" };
+  const status = statusMap[row.status] || {
+    label: row.status || "—",
+    cls: "bg-slate-50 text-slate-500"
+  };
 
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.99]">
@@ -180,7 +190,7 @@ function AttendanceCard({ row }: { row: AttendanceRow }) {
           <ArrowDownToLine className="size-4 text-emerald-500" />
           <div>
             <p className="text-[10px] text-slate-400">حضور</p>
-            <p className="text-[14px] font-bold tabular-nums text-slate-700">
+            <p className="text-[14px] font-bold text-slate-700 tabular-nums">
               {row.checkInTime ? formatTimeHHMM(new Date(row.checkInTime)) : "--:--"}
             </p>
           </div>
@@ -189,7 +199,7 @@ function AttendanceCard({ row }: { row: AttendanceRow }) {
           <ArrowUpFromLine className="size-4 text-sky-500" />
           <div>
             <p className="text-[10px] text-slate-400">انصراف</p>
-            <p className="text-[14px] font-bold tabular-nums text-slate-700">
+            <p className="text-[14px] font-bold text-slate-700 tabular-nums">
               {row.checkOutTime ? formatTimeHHMM(new Date(row.checkOutTime)) : "--:--"}
             </p>
           </div>

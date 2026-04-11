@@ -24,20 +24,20 @@ export async function GET() {
     database: {
       status: dbStatus,
       userCount,
-      error: dbError,
+      error: dbError
     },
     env: {
       hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
       hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
       hasDatabaseUrl: !!process.env.DATABASE_URL,
       hasSuperAdminEmail: !!process.env.SUPER_ADMIN_EMAIL,
-      hasSupportEmail: !!process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
+      hasSupportEmail: !!process.env.NEXT_PUBLIC_SUPPORT_EMAIL
     },
     integrations: runtimeIntegrations.items.map((item) => ({
       id: item.id,
       name: item.name,
       configured: item.configured,
-      mode: item.mode,
-    })),
+      mode: item.mode
+    }))
   });
 }

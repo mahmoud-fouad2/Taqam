@@ -36,11 +36,14 @@ class ApiClient {
   constructor(baseUrl: string = "/api") {
     this.baseUrl = baseUrl;
     this.defaultHeaders = {
-      "Content-Type": "application/json",
+      "Content-Type": "application/json"
     };
   }
 
-  private buildUrl(endpoint: string, params?: Record<string, string | number | boolean | undefined>): string {
+  private buildUrl(
+    endpoint: string,
+    params?: Record<string, string | number | boolean | undefined>
+  ): string {
     let url = `${this.baseUrl}${endpoint}`;
     if (!params) return url;
 
@@ -58,10 +61,10 @@ class ApiClient {
 
   private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
     const contentType = response.headers.get("content-type");
-    
+
     if (!response.ok) {
       let errorMessage = "حدث خطأ غير متوقع";
-      
+
       if (contentType?.includes("application/json")) {
         const errorData = await response.json();
         errorMessage = errorData.message || errorData.error || errorMessage;
@@ -73,10 +76,10 @@ class ApiClient {
           // ignore
         }
       }
-      
+
       return {
         success: false,
-        error: errorMessage,
+        error: errorMessage
       };
     }
 
@@ -92,18 +95,25 @@ class ApiClient {
 
       const error = payload?.error || payload?.message;
       const pagination = payload?.pagination;
-      const meta = payload?.meta ||
+      const meta =
+        payload?.meta ||
         (pagination
           ? {
               page: pagination.page,
               pageSize: pagination.limit,
               total: pagination.total,
-              totalPages: pagination.totalPages,
+              totalPages: pagination.totalPages
             }
           : undefined);
 
       if (payloadSuccess === false) {
-        return { success: false, error: String(error || "Request failed"), data: payload?.data, message: payload?.message, meta };
+        return {
+          success: false,
+          error: String(error || "Request failed"),
+          data: payload?.data,
+          message: payload?.message,
+          meta
+        };
       }
 
       // If backend doesn't send {success}, treat 2xx as success.
@@ -111,7 +121,7 @@ class ApiClient {
         success: true,
         data: payload?.data ?? payload,
         message: payload?.message,
-        meta,
+        meta
       };
     }
 
@@ -130,7 +140,7 @@ class ApiClient {
       const response = await fetch(url, {
         method: "GET",
         headers: { ...this.defaultHeaders, ...options?.headers },
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {
@@ -141,13 +151,17 @@ class ApiClient {
     }
   }
 
-  async post<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async post<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions
+  ): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "POST",
         headers: { ...this.defaultHeaders, ...options?.headers },
         body: body ? JSON.stringify(body) : undefined,
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {
@@ -155,13 +169,17 @@ class ApiClient {
     }
   }
 
-  async put<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async put<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions
+  ): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "PUT",
         headers: { ...this.defaultHeaders, ...options?.headers },
         body: body ? JSON.stringify(body) : undefined,
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {
@@ -169,13 +187,17 @@ class ApiClient {
     }
   }
 
-  async patch<T>(endpoint: string, body?: unknown, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async patch<T>(
+    endpoint: string,
+    body?: unknown,
+    options?: RequestOptions
+  ): Promise<ApiResponse<T>> {
     try {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "PATCH",
         headers: { ...this.defaultHeaders, ...options?.headers },
         body: body ? JSON.stringify(body) : undefined,
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {
@@ -188,7 +210,7 @@ class ApiClient {
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "DELETE",
         headers: { ...this.defaultHeaders, ...options?.headers },
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {
@@ -196,17 +218,21 @@ class ApiClient {
     }
   }
 
-  async upload<T>(endpoint: string, formData: FormData, options?: RequestOptions): Promise<ApiResponse<T>> {
+  async upload<T>(
+    endpoint: string,
+    formData: FormData,
+    options?: RequestOptions
+  ): Promise<ApiResponse<T>> {
     try {
       const headers = { ...options?.headers };
       // Don't set Content-Type for FormData, browser will set it with boundary
       delete headers["Content-Type"];
-      
+
       const response = await fetch(`${this.baseUrl}${endpoint}`, {
         method: "POST",
         headers,
         body: formData,
-        signal: options?.signal,
+        signal: options?.signal
       });
       return this.handleResponse<T>(response);
     } catch (error) {

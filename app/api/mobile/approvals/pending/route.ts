@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { APPROVER_ROLES } from "@/lib/access-control";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 /**
@@ -13,14 +15,14 @@ export async function GET(request: NextRequest) {
   const { tenantId, employeeId, role } = payloadOrRes;
 
   // Only managers/admins can view approvals
-  if (!["TENANT_ADMIN", "HR_MANAGER", "MANAGER"].includes(role)) {
+  if (!APPROVER_ROLES.includes(role as (typeof APPROVER_ROLES)[number])) {
     return NextResponse.json({ data: [], total: 0 });
   }
 
   try {
     const where: any = {
       tenantId,
-      status: "PENDING",
+      status: "PENDING"
     };
 
     // MANAGER can only see their direct reports
@@ -41,17 +43,17 @@ export async function GET(request: NextRequest) {
               lastNameAr: true,
               employeeNumber: true,
               department: { select: { name: true, nameAr: true } },
-              jobTitle: { select: { name: true, nameAr: true } },
-            },
+              jobTitle: { select: { name: true, nameAr: true } }
+            }
           },
           leaveType: {
-            select: { name: true, nameAr: true, color: true },
-          },
+            select: { name: true, nameAr: true, color: true }
+          }
         },
         orderBy: { createdAt: "asc" },
-        take: 50,
+        take: 50
       }),
-      prisma.leaveRequest.count({ where }),
+      prisma.leaveRequest.count({ where })
     ]);
 
     return NextResponse.json({
@@ -67,12 +69,12 @@ export async function GET(request: NextRequest) {
         endDate: r.endDate.toISOString().slice(0, 10),
         totalDays: Number(r.totalDays),
         reason: r.reason,
-        createdAt: r.createdAt.toISOString(),
+        createdAt: r.createdAt.toISOString()
       })),
-      total,
+      total
     });
   } catch (error) {
-    console.error("Mobile approvals GET error:", error);
+    logger.error("Mobile approvals GET error", undefined, error);
     return NextResponse.json({ error: "Failed to load approvals" }, { status: 500 });
   }
 }

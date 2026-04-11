@@ -71,10 +71,10 @@ export async function GET(_request: NextRequest) {
             lastName: true,
             firstNameAr: true,
             lastNameAr: true,
-            department: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            department: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -101,10 +101,10 @@ export async function GET(_request: NextRequest) {
             feedback: e.feedback ?? undefined,
             certificate: undefined,
             createdAt: e.createdAt.toISOString(),
-            updatedAt: e.updatedAt.toISOString(),
+            updatedAt: e.updatedAt.toISOString()
           };
-        }),
-      },
+        })
+      }
     });
   } catch (error) {
     console.error("Error fetching training enrollments:", error);

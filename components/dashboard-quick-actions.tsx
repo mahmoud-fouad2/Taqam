@@ -31,35 +31,35 @@ export function DashboardQuickActions({ locale, pendingLeaves, role, t }: Props)
           {
             href: `${prefix}/dashboard/employees/new`,
             label: t.addEmployee,
-            icon: UserPlus,
-          },
+            icon: UserPlus
+          }
         ]
       : []),
     {
       href: `${prefix}/dashboard/my-requests`,
       label: t.requestLeave,
-      icon: CalendarOff,
+      icon: CalendarOff
     },
     {
       href: `${prefix}/dashboard/attendance`,
       label: t.recordAttendance,
-      icon: Clock,
+      icon: Clock
     },
     ...(isHrOrAdmin
       ? [
           {
             href: `${prefix}/dashboard/payroll`,
             label: t.runPayroll,
-            icon: DollarSign,
-          },
+            icon: DollarSign
+          }
         ]
-      : []),
+      : [])
   ];
 
   return (
-    <div className="space-y-3 rounded-2xl border bg-card p-3 sm:p-4">
+    <div className="bg-card space-y-3 rounded-2xl border p-3 sm:p-4">
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+        <p className="text-muted-foreground text-xs font-semibold tracking-[0.08em] uppercase">
           {t.quickActions}
         </p>
         {isManager && pendingLeaves > 0 ? (
@@ -87,8 +87,7 @@ export function DashboardQuickActions({ locale, pendingLeaves, role, t }: Props)
               key={action.href}
               asChild
               variant="outline"
-              className="h-10 justify-between rounded-xl border-border/70 bg-background px-3 hover:bg-muted/60"
-            >
+              className="border-border/70 bg-background hover:bg-muted/60 h-10 justify-between rounded-xl px-3">
               <Link href={action.href}>
                 <span className="truncate text-sm font-medium">{action.label}</span>
                 <Icon className="h-4 w-4 shrink-0 opacity-80" />

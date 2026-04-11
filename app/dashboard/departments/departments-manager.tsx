@@ -15,7 +15,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -23,14 +23,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -38,7 +38,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { TableEmptyRow } from "@/components/empty-states/table-empty-row";
 import {
@@ -47,15 +47,9 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
-  EmptyTitle,
+  EmptyTitle
 } from "@/components/ui/empty";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,7 +58,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -81,7 +75,7 @@ function createDepartmentSchema(nameRequiredMessage: string) {
     nameAr: z.string().optional(),
     code: z.string().optional(),
     description: z.string().optional(),
-    parentId: z.string().optional(),
+    parentId: z.string().optional()
   });
 }
 
@@ -102,14 +96,18 @@ export function DepartmentsManager() {
   const [departmentToDelete, setDepartmentToDelete] = useState<Department | null>(null);
 
   // Fetch departments from API using React Query
-  const { data: departments = [], isLoading: loading, refetch: fetchDepartments } = useQuery<Department[]>({
+  const {
+    data: departments = [],
+    isLoading: loading,
+    refetch: fetchDepartments
+  } = useQuery<Department[]>({
     queryKey: ["departments"],
     queryFn: async () => {
       const res = await fetch("/api/departments");
       if (!res.ok) throw new Error("Failed to fetch departments");
       const data = await res.json();
       return data.data || [];
-    },
+    }
   });
 
   const form = useForm<DepartmentFormData>({
@@ -119,8 +117,8 @@ export function DepartmentsManager() {
       nameAr: "",
       code: "",
       description: "",
-      parentId: "",
-    },
+      parentId: ""
+    }
   });
 
   // Filter departments
@@ -141,7 +139,7 @@ export function DepartmentsManager() {
       nameAr: "",
       code: "",
       description: "",
-      parentId: "",
+      parentId: ""
     });
     setIsDialogOpen(true);
   };
@@ -154,7 +152,7 @@ export function DepartmentsManager() {
       nameAr: dept.nameAr || "",
       code: dept.code || "",
       description: dept.description || "",
-      parentId: dept.parentId || "",
+      parentId: dept.parentId || ""
     });
     setIsDialogOpen(true);
   };
@@ -166,15 +164,15 @@ export function DepartmentsManager() {
       // Convert "none" to undefined for parentId
       const payload = {
         ...data,
-        parentId: data.parentId === "none" || data.parentId === "" ? undefined : data.parentId,
+        parentId: data.parentId === "none" || data.parentId === "" ? undefined : data.parentId
       };
-      
+
       if (editingDepartment) {
         // Update existing
         const res = await fetch(`/api/departments/${editingDepartment.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("Failed to update department");
         toast.success(t.departments.updatedSuccess);
@@ -184,7 +182,7 @@ export function DepartmentsManager() {
         const res = await fetch("/api/departments", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         });
         if (!res.ok) throw new Error("Failed to create department");
         toast.success(t.departments.addedSuccess);
@@ -210,7 +208,7 @@ export function DepartmentsManager() {
     if (departmentToDelete) {
       try {
         const res = await fetch(`/api/departments/${departmentToDelete.id}`, {
-          method: "DELETE",
+          method: "DELETE"
         });
         if (!res.ok) throw new Error("Failed to delete department");
         toast.success(t.departments.deletedSuccess);
@@ -237,7 +235,7 @@ export function DepartmentsManager() {
             <Card key={i}>
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-16 mt-2" />
+                <Skeleton className="mt-2 h-8 w-16" />
               </CardHeader>
             </Card>
           ))}
@@ -245,7 +243,7 @@ export function DepartmentsManager() {
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48 mt-2" />
+            <Skeleton className="mt-2 h-4 w-48" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -294,7 +292,12 @@ export function DepartmentsManager() {
               <CardDescription>{t.departments.subtitle}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchDepartments()} title={t.common.refresh}>
+              <Button
+                variant="outline"
+                size="icon"
+                aria-label={t.common.refresh}
+                onClick={() => fetchDepartments()}
+                title={t.common.refresh}>
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>
@@ -307,8 +310,8 @@ export function DepartmentsManager() {
         <CardContent>
           {/* Search */}
           <div className="mb-4 flex items-center gap-2">
-            <div className="relative flex-1 max-w-sm">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="relative max-w-sm flex-1">
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.common.searchDots}
                 value={searchQuery}
@@ -319,17 +322,15 @@ export function DepartmentsManager() {
           </div>
 
           {/* Mobile: Cards */}
-          <div className="md:hidden space-y-3">
+          <div className="space-y-3 md:hidden">
             {filteredDepartments.length === 0 ? (
-              <Empty className="border rounded-lg">
+              <Empty className="rounded-lg border">
                 <EmptyHeader>
                   <EmptyMedia variant="icon">
                     <IconPlus className="size-5" />
                   </EmptyMedia>
                   <EmptyTitle>{t.departments.noDepartments}</EmptyTitle>
-                  <EmptyDescription>
-                    {t.departments.noDepartmentsDesc}
-                  </EmptyDescription>
+                  <EmptyDescription>{t.departments.noDepartmentsDesc}</EmptyDescription>
                 </EmptyHeader>
                 <EmptyContent>
                   <Button onClick={handleAdd}>
@@ -344,15 +345,19 @@ export function DepartmentsManager() {
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <div className="font-medium truncate">{dept.nameAr || dept.name}</div>
+                        <div className="truncate font-medium">{dept.nameAr || dept.name}</div>
                         {dept.nameAr ? (
-                          <div className="text-sm text-muted-foreground truncate">{dept.name}</div>
+                          <div className="text-muted-foreground truncate text-sm">{dept.name}</div>
                         ) : null}
 
-                        <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-x-3 gap-y-2 text-sm">
+                        <div className="mt-3 grid grid-cols-1 gap-x-3 gap-y-2 text-sm md:grid-cols-2">
                           <div className="text-muted-foreground">{t.common.code}</div>
                           <div className="text-start">
-                            {dept.code ? <Badge variant="outline">{dept.code}</Badge> : <span className="text-muted-foreground">-</span>}
+                            {dept.code ? (
+                              <Badge variant="outline">{dept.code}</Badge>
+                            ) : (
+                              <span className="text-muted-foreground">-</span>
+                            )}
                           </div>
 
                           <div className="text-muted-foreground">{t.common.employees}</div>
@@ -361,12 +366,16 @@ export function DepartmentsManager() {
                           </div>
 
                           <div className="text-muted-foreground">{t.common.description}</div>
-                          <div className="text-start line-clamp-2">{dept.description || "-"}</div>
+                          <div className="line-clamp-2 text-start">{dept.description || "-"}</div>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-center gap-1 shrink-0">
-                        <Button variant="ghost" size="icon" aria-label={t.common.edit} onClick={() => handleEdit(dept)}>
+                      <div className="flex shrink-0 flex-col items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t.common.edit}
+                          onClick={() => handleEdit(dept)}>
                           <IconPencil className="h-4 w-4" />
                         </Button>
                         <Button
@@ -374,8 +383,7 @@ export function DepartmentsManager() {
                           size="icon"
                           aria-label={t.common.delete}
                           onClick={() => handleDeleteClick(dept)}
-                          disabled={dept.employeesCount > 0}
-                        >
+                          disabled={dept.employeesCount > 0}>
                           <IconTrash className="h-4 w-4" />
                         </Button>
                       </div>
@@ -387,7 +395,7 @@ export function DepartmentsManager() {
           </div>
 
           {/* Desktop: Table */}
-          <div className="hidden md:block rounded-md border overflow-x-auto">
+          <div className="hidden overflow-x-auto rounded-md border md:block">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -395,7 +403,7 @@ export function DepartmentsManager() {
                   <TableHead className="text-start">{t.common.code}</TableHead>
                   <TableHead className="text-start">{t.common.description}</TableHead>
                   <TableHead className="text-start">{t.common.employees}</TableHead>
-                  <TableHead className="text-start w-[100px]">{t.common.actions}</TableHead>
+                  <TableHead className="w-[100px] text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -415,7 +423,7 @@ export function DepartmentsManager() {
                         <div>
                           <div className="font-medium">{dept.nameAr || dept.name}</div>
                           {dept.nameAr && (
-                            <div className="text-sm text-muted-foreground">{dept.name}</div>
+                            <div className="text-muted-foreground text-sm">{dept.name}</div>
                           )}
                         </div>
                       </TableCell>
@@ -434,8 +442,7 @@ export function DepartmentsManager() {
                             variant="ghost"
                             size="icon"
                             aria-label={t.common.edit}
-                            onClick={() => handleEdit(dept)}
-                          >
+                            onClick={() => handleEdit(dept)}>
                             <IconPencil className="h-4 w-4" />
                           </Button>
                           <Button
@@ -443,8 +450,7 @@ export function DepartmentsManager() {
                             size="icon"
                             aria-label={t.common.delete}
                             onClick={() => handleDeleteClick(dept)}
-                            disabled={dept.employeesCount > 0}
-                          >
+                            disabled={dept.employeesCount > 0}>
                             <IconTrash className="h-4 w-4" />
                           </Button>
                         </div>
@@ -466,9 +472,7 @@ export function DepartmentsManager() {
               {editingDepartment ? t.departments.editDepartment : t.departments.addNewDepartment}
             </DialogTitle>
             <DialogDescription>
-              {editingDepartment
-                ? t.departments.editDesc
-                : t.departments.addDesc}
+              {editingDepartment ? t.departments.editDesc : t.departments.addDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -518,10 +522,7 @@ export function DepartmentsManager() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>{t.common.parentDepartment}</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder={t.common.selectParentOptional} />
@@ -564,12 +565,15 @@ export function DepartmentsManager() {
                   type="button"
                   variant="outline"
                   onClick={() => setIsDialogOpen(false)}
-                  disabled={saving}
-                >
+                  disabled={saving}>
                   {t.common.cancel}
                 </Button>
                 <Button type="submit" disabled={saving}>
-                  {saving ? t.common.saving : editingDepartment ? t.common.saveChanges : t.common.add}
+                  {saving
+                    ? t.common.saving
+                    : editingDepartment
+                      ? t.common.saveChanges
+                      : t.common.add}
                 </Button>
               </DialogFooter>
             </form>
@@ -583,13 +587,16 @@ export function DepartmentsManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.departments.deleteConfirmPrefix} &quot;{departmentToDelete?.nameAr || departmentToDelete?.name}&quot; {t.departments.deleteConfirmSuffix}{" "}
-              {t.common.cannotUndo}
+              {t.departments.deleteConfirmPrefix} &quot;
+              {departmentToDelete?.nameAr || departmentToDelete?.name}&quot;{" "}
+              {t.departments.deleteConfirmSuffix} {t.common.cannotUndo}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground">
               {t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>

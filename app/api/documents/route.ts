@@ -56,7 +56,7 @@ function normalizeDocumentCategory(value: string): PrismaDocumentCategory | null
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -67,22 +67,19 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get("category");
 
     const where: any = {};
-    
+
     if (tenantId) {
       where.tenantId = tenantId;
     }
-    
+
     if (employeeId) {
       where.employeeId = employeeId;
     }
-    
+
     if (category) {
       const normalized = normalizeDocumentCategory(category);
       if (!normalized) {
-        return NextResponse.json(
-          { error: "Invalid category" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Invalid category" }, { status: 400 });
       }
       where.category = normalized;
     }
@@ -95,34 +92,31 @@ export async function GET(request: NextRequest) {
             id: true,
             firstName: true,
             lastName: true,
-            employeeNumber: true,
-          },
-        },
+            employeeNumber: true
+          }
+        }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     });
 
     return NextResponse.json({ data: documents });
   } catch (error) {
     console.error("Error fetching documents:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch documents" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch documents" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     const userId = session.user.id;
-    
+
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant required" }, { status: 400 });
     }
@@ -151,10 +145,19 @@ export async function POST(request: NextRequest) {
 
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
-    const upload = await uploadFile(buffer, file.name, file.type, tenantId, `documents/${employeeId}`);
+    const upload = await uploadFile(
+      buffer,
+      file.name,
+      file.type,
+      tenantId,
+      `documents/${employeeId}`
+    );
 
     if (!upload.success || !upload.key || !upload.url) {
-      return NextResponse.json({ error: upload.error || "Failed to upload document" }, { status: 500 });
+      return NextResponse.json(
+        { error: upload.error || "Failed to upload document" },
+        { status: 500 }
+      );
     }
 
     // Create document record
@@ -173,25 +176,22 @@ export async function POST(request: NextRequest) {
         category,
         description,
         expiryDate: expiryDate ? new Date(expiryDate) : null,
-        status: "PENDING",
+        status: "PENDING"
       },
       include: {
         employee: {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
-          },
-        },
-      },
+            lastName: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ data: document }, { status: 201 });
   } catch (error) {
     console.error("Error uploading document:", error);
-    return NextResponse.json(
-      { error: "Failed to upload document" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to upload document" }, { status: 500 });
   }
 }

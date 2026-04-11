@@ -11,47 +11,41 @@ import {
   IconPlus,
   IconSearch,
   IconTrash,
-  IconUsers,
+  IconUsers
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
@@ -61,7 +55,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -70,7 +64,7 @@ import {
   createJobPosting,
   deleteJobPosting,
   getJobPostings,
-  updateJobPosting,
+  updateJobPosting
 } from "@/lib/api/recruitment";
 import type { Department } from "@/lib/types/core-hr";
 import {
@@ -81,7 +75,7 @@ import {
   jobStatusColors,
   jobStatusLabels,
   type JobType,
-  jobTypeLabels,
+  jobTypeLabels
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -117,7 +111,7 @@ const emptyJobForm: JobFormState = {
   openPositions: "1",
   requirements: "",
   benefits: "",
-  applicationDeadline: "",
+  applicationDeadline: ""
 };
 
 function linesToText(lines?: string[]) {
@@ -138,7 +132,7 @@ function buildJobForm(job: JobPosting): JobFormState {
     openPositions: job.openPositions.toString(),
     requirements: linesToText(job.requirements),
     benefits: linesToText(job.benefits),
-    applicationDeadline: job.applicationDeadline?.slice(0, 10) ?? "",
+    applicationDeadline: job.applicationDeadline?.slice(0, 10) ?? ""
   };
 }
 
@@ -171,7 +165,7 @@ export function JobPostingsManager() {
     try {
       const [jobsRes, departmentsRes] = await Promise.all([
         getJobPostings(),
-        departmentsService.getAll(),
+        departmentsService.getAll()
       ]);
 
       setJobs(jobsRes);
@@ -215,7 +209,7 @@ export function JobPostingsManager() {
       total: jobs.length,
       active: jobs.filter((job) => job.status === "active").length,
       filled: jobs.filter((job) => job.status === "filled").length,
-      totalPositions: jobs.reduce((sum, job) => sum + job.openPositions, 0),
+      totalPositions: jobs.reduce((sum, job) => sum + job.openPositions, 0)
     }),
     [jobs]
   );
@@ -278,7 +272,7 @@ export function JobPostingsManager() {
         postedDate:
           targetStatus === "active"
             ? editingJob?.postedDate || new Date().toISOString()
-            : editingJob?.postedDate,
+            : editingJob?.postedDate
       };
 
       const savedJob = editingJob
@@ -338,11 +332,11 @@ export function JobPostingsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.jobPostings.totalJobs}</CardTitle>
-            <IconBriefcase className="h-4 w-4 text-muted-foreground" />
+            <IconBriefcase className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.jobPostings.announcedJobs}</p>
+            <p className="text-muted-foreground text-xs">{t.jobPostings.announcedJobs}</p>
           </CardContent>
         </Card>
 
@@ -353,7 +347,7 @@ export function JobPostingsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">{t.jobPostings.acceptingApplications}</p>
+            <p className="text-muted-foreground text-xs">{t.jobPostings.acceptingApplications}</p>
           </CardContent>
         </Card>
 
@@ -364,7 +358,7 @@ export function JobPostingsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.filled}</div>
-            <p className="text-xs text-muted-foreground">{t.jobPostings.completedRecruitment}</p>
+            <p className="text-muted-foreground text-xs">{t.jobPostings.completedRecruitment}</p>
           </CardContent>
         </Card>
 
@@ -375,7 +369,7 @@ export function JobPostingsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.totalPositions}</div>
-            <p className="text-xs text-muted-foreground">{t.jobPostings.positionRequired}</p>
+            <p className="text-muted-foreground text-xs">{t.jobPostings.positionRequired}</p>
           </CardContent>
         </Card>
       </div>
@@ -401,7 +395,7 @@ export function JobPostingsManager() {
         <CardContent>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.jobPostings.searchPlaceholder}
                 value={searchQuery}
@@ -452,7 +446,9 @@ export function JobPostingsManager() {
                       <TableCell>
                         <div>
                           <p className="font-medium">{job.title}</p>
-                          {job.titleEn && <p className="text-xs text-muted-foreground">{job.titleEn}</p>}
+                          {job.titleEn && (
+                            <p className="text-muted-foreground text-xs">{job.titleEn}</p>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>{job.departmentName}</TableCell>
@@ -468,7 +464,9 @@ export function JobPostingsManager() {
                         <span className="text-muted-foreground">/{job.openPositions}</span>
                       </TableCell>
                       <TableCell>
-                        <Badge className={jobStatusColors[job.status]}>{jobStatusLabels[job.status]}</Badge>
+                        <Badge className={jobStatusColors[job.status]}>
+                          {jobStatusLabels[job.status]}
+                        </Badge>
                       </TableCell>
                       <TableCell>{new Date(job.postedDate).toLocaleDateString("ar-SA")}</TableCell>
                       <TableCell>
@@ -483,13 +481,20 @@ export function JobPostingsManager() {
                               onClick={() => {
                                 setSelectedJob(job);
                                 setIsViewSheetOpen(true);
-                              }}
-                            >
-                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
+                              }}>
+                              <IconEye className="ms-2 h-4 w-4" />
+                              {t.common.viewDetails}
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditSheet(job)}>
-                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
-                            <DropdownMenuItem className="text-destructive" onClick={() => setDeleteJobId(job.id)}>
-                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
+                              <IconEdit className="ms-2 h-4 w-4" />
+                              {t.common.edit}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => setDeleteJobId(job.id)}>
+                              <IconTrash className="ms-2 h-4 w-4" />
+                              {t.common.delete}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -535,8 +540,9 @@ export function JobPostingsManager() {
                 <Label>{t.common.department}</Label>
                 <Select
                   value={jobForm.departmentId || "none"}
-                  onValueChange={(value) => updateFormValue("departmentId", value === "none" ? "" : value)}
-                >
+                  onValueChange={(value) =>
+                    updateFormValue("departmentId", value === "none" ? "" : value)
+                  }>
                   <SelectTrigger>
                     <SelectValue placeholder={t.jobPostings.chooseDept} />
                   </SelectTrigger>
@@ -565,7 +571,9 @@ export function JobPostingsManager() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t.jobPostings.jobType}</Label>
-                <Select value={jobForm.jobType} onValueChange={(value) => updateFormValue("jobType", value as JobType)}>
+                <Select
+                  value={jobForm.jobType}
+                  onValueChange={(value) => updateFormValue("jobType", value as JobType)}>
                   <SelectTrigger>
                     <SelectValue placeholder={t.common.selectType} />
                   </SelectTrigger>
@@ -583,8 +591,9 @@ export function JobPostingsManager() {
                 <Label>{t.jobPostings.experienceLevel}</Label>
                 <Select
                   value={jobForm.experienceLevel}
-                  onValueChange={(value) => updateFormValue("experienceLevel", value as ExperienceLevel)}
-                >
+                  onValueChange={(value) =>
+                    updateFormValue("experienceLevel", value as ExperienceLevel)
+                  }>
                   <SelectTrigger>
                     <SelectValue placeholder={t.common.selectLevel} />
                   </SelectTrigger>
@@ -680,11 +689,19 @@ export function JobPostingsManager() {
             </div>
 
             <div className="flex gap-2 pt-4">
-              <Button variant="outline" className="flex-1" onClick={() => void saveJob("draft")} disabled={isSaving}>
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => void saveJob("draft")}
+                disabled={isSaving}>
                 {isSaving ? t.common.saving : t.jobPostings.saveAsDraft}
               </Button>
               <Button className="flex-1" onClick={() => void saveJob("active")} disabled={isSaving}>
-                {isSaving ? t.jobPostings.publishing : editingJob ? t.jobPostings.updateAndPublish : t.jobPostings.publishJob}
+                {isSaving
+                  ? t.jobPostings.publishing
+                  : editingJob
+                    ? t.jobPostings.updateAndPublish
+                    : t.jobPostings.publishJob}
               </Button>
             </div>
           </div>
@@ -701,43 +718,51 @@ export function JobPostingsManager() {
           {selectedJob && (
             <div className="space-y-6 py-4">
               <div className="flex flex-wrap gap-2">
-                <Badge className={jobStatusColors[selectedJob.status]}>{jobStatusLabels[selectedJob.status]}</Badge>
+                <Badge className={jobStatusColors[selectedJob.status]}>
+                  {jobStatusLabels[selectedJob.status]}
+                </Badge>
                 <Badge variant="outline">{jobTypeLabels[selectedJob.jobType]}</Badge>
-                <Badge variant="outline">{experienceLevelLabels[selectedJob.experienceLevel]}</Badge>
+                <Badge variant="outline">
+                  {experienceLevelLabels[selectedJob.experienceLevel]}
+                </Badge>
               </div>
 
               <div className="grid gap-4">
                 <div className="flex items-center gap-2 text-sm">
-                  <IconBriefcase className="h-4 w-4 text-muted-foreground" />
+                  <IconBriefcase className="text-muted-foreground h-4 w-4" />
                   <span>{selectedJob.departmentName}</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <IconMapPin className="h-4 w-4 text-muted-foreground" />
+                  <IconMapPin className="text-muted-foreground h-4 w-4" />
                   <span>{selectedJob.location}</span>
                 </div>
                 {selectedJob.showSalary && (
                   <div className="flex items-center gap-2 text-sm">
-                    <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
+                    <IconCurrencyDollar className="text-muted-foreground h-4 w-4" />
                     <span>
-                      {selectedJob.salaryMin?.toLocaleString(numLocale) || "0"} - {selectedJob.salaryMax?.toLocaleString(numLocale) || "0"} {selectedJob.currency}
+                      {selectedJob.salaryMin?.toLocaleString(numLocale) || "0"} -{" "}
+                      {selectedJob.salaryMax?.toLocaleString(numLocale) || "0"}{" "}
+                      {selectedJob.currency}
                     </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-sm">
-                  <IconUsers className="h-4 w-4 text-muted-foreground" />
-                  <span>{selectedJob.openPositions} {t.jobPostings.requiredPositions}</span>
+                  <IconUsers className="text-muted-foreground h-4 w-4" />
+                  <span>
+                    {selectedJob.openPositions} {t.jobPostings.requiredPositions}
+                  </span>
                 </div>
               </div>
 
               <div>
                 <h4 className="mb-2 font-semibold">{t.common.description}</h4>
-                <p className="text-sm text-muted-foreground">{selectedJob.description}</p>
+                <p className="text-muted-foreground text-sm">{selectedJob.description}</p>
               </div>
 
               {selectedJob.requirements.length > 0 && (
                 <div>
                   <h4 className="mb-2 font-semibold">{t.jobPostings.requirements}</h4>
-                  <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+                  <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
                     {selectedJob.requirements.map((requirement) => (
                       <li key={requirement}>{requirement}</li>
                     ))}
@@ -761,7 +786,7 @@ export function JobPostingsManager() {
               {selectedJob.applicationDeadline && (
                 <div>
                   <h4 className="mb-2 font-semibold">{t.jobPostings.applicationDeadline}</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {new Date(selectedJob.applicationDeadline).toLocaleDateString("ar-SA")}
                   </p>
                 </div>
@@ -771,7 +796,9 @@ export function JobPostingsManager() {
         </SheetContent>
       </Sheet>
 
-      <AlertDialog open={deleteJobId !== null} onOpenChange={(open) => !open && setDeleteJobId(null)}>
+      <AlertDialog
+        open={deleteJobId !== null}
+        onOpenChange={(open) => !open && setDeleteJobId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.jobPostings.deleteJob}</AlertDialogTitle>
@@ -784,8 +811,7 @@ export function JobPostingsManager() {
             <AlertDialogAction
               onClick={() => void confirmDeleteJob()}
               disabled={isDeleting}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {isDeleting ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>

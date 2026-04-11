@@ -14,7 +14,7 @@ import type { AppLocale } from "@/lib/i18n/types";
 export default function Providers({
   children,
   dir,
-  locale,
+  locale
 }: {
   children: React.ReactNode;
   dir: "ltr" | "rtl";
@@ -23,7 +23,11 @@ export default function Providers({
   return (
     <SessionProvider>
       <QueryProvider>
-        <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false} disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="light"
+          enableSystem={false}
+          disableTransitionOnChange>
           <AppLocaleProvider locale={locale}>
             <AppDirectionProvider dir={dir}>
               {children}

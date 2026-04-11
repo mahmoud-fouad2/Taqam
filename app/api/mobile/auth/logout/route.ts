@@ -9,7 +9,7 @@ import { clearMobileRefreshCookie, getMobileRefreshCookie } from "@/lib/mobile/c
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 
 const schema = z.object({
-  refreshToken: z.string().min(10).optional(),
+  refreshToken: z.string().min(10).optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
     const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:logout",
       limit,
-      windowMs: 5 * 60 * 1000,
+      windowMs: 5 * 60 * 1000
     });
 
     if (!limitInfo.allowed) {
@@ -52,12 +52,16 @@ export async function POST(request: NextRequest) {
     if (!rawRefreshToken) {
       const res = NextResponse.json({ error: "Invalid payload" }, { status: 400 });
       clearMobileRefreshCookie(res);
-      return withRateLimitHeaders(res, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+      return withRateLimitHeaders(res, {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     const ok = await revokeRefreshToken(prisma, {
       rawRefreshToken,
-      deviceId: deviceHeaders.deviceId,
+      deviceId: deviceHeaders.deviceId
     });
 
     // best-effort audit log: only if token was valid (otherwise we don't know user)
@@ -65,7 +69,7 @@ export async function POST(request: NextRequest) {
       const tokenHash = hashRefreshToken(rawRefreshToken);
       const row = await prisma.mobileRefreshToken.findUnique({
         where: { tokenHash },
-        select: { userId: true, user: { select: { tenantId: true } } },
+        select: { userId: true, user: { select: { tenantId: true } } }
       });
       if (row) {
         await prisma.auditLog.create({
@@ -74,15 +78,19 @@ export async function POST(request: NextRequest) {
             userId: row.userId,
             action: "MOBILE_LOGOUT",
             entity: "User",
-            entityId: row.userId,
-          },
+            entityId: row.userId
+          }
         });
       }
     }
 
     const res = NextResponse.json({ data: { ok: true } });
     clearMobileRefreshCookie(res);
-    return withRateLimitHeaders(res, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+    return withRateLimitHeaders(res, {
+      limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   } catch (error) {
     logger.error("Mobile logout error", undefined, error);
     return NextResponse.json({ error: "Failed to logout" }, { status: 500 });

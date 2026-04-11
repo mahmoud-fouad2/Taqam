@@ -7,7 +7,7 @@ import { ErrorScreen } from "@/components/error-screen";
 
 export default function GlobalError({
   error,
-  reset,
+  reset
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -16,7 +16,8 @@ export default function GlobalError({
     Sentry.captureException(error);
   }, [error]);
 
-  const locale = typeof document !== "undefined" && document.documentElement.lang === "en" ? "en" : "ar";
+  const locale =
+    typeof document !== "undefined" && document.documentElement.lang === "en" ? "en" : "ar";
 
   return (
     <html>

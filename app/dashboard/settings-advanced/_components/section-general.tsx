@@ -1,20 +1,20 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from 'react';
-import { Building2 } from 'lucide-react';
+import type { Dispatch, SetStateAction } from "react";
+import { Building2 } from "lucide-react";
 
-import type { SystemSettings } from '@/lib/types/settings';
+import type { SystemSettings } from "@/lib/types/settings";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+  SelectValue
+} from "@/components/ui/select";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -22,7 +22,7 @@ const t = getText("ar");
 
 export function GeneralSettingsSection({
   settings,
-  setSettings,
+  setSettings
 }: {
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
@@ -47,7 +47,7 @@ export function GeneralSettingsSection({
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, companyName: e.target.value },
+                  general: { ...settings.general, companyName: e.target.value }
                 })
               }
             />
@@ -55,11 +55,11 @@ export function GeneralSettingsSection({
           <div className="space-y-2">
             <Label>{t.organization.companyNameEn}</Label>
             <Input
-              value={settings.general.companyNameEn || ''}
+              value={settings.general.companyNameEn || ""}
               onChange={(e) =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, companyNameEn: e.target.value },
+                  general: { ...settings.general, companyNameEn: e.target.value }
                 })
               }
             />
@@ -71,10 +71,9 @@ export function GeneralSettingsSection({
               onValueChange={(value) =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, timezone: value },
+                  general: { ...settings.general, timezone: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -92,10 +91,9 @@ export function GeneralSettingsSection({
               onValueChange={(value) =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, currency: value },
+                  general: { ...settings.general, currency: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -113,10 +111,9 @@ export function GeneralSettingsSection({
               onValueChange={(value) =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, dateFormat: value },
+                  general: { ...settings.general, dateFormat: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -131,13 +128,12 @@ export function GeneralSettingsSection({
             <Label>{t.generalSettings.timeFormat}</Label>
             <Select
               value={settings.general.timeFormat}
-              onValueChange={(value: '12h' | '24h') =>
+              onValueChange={(value: "12h" | "24h") =>
                 setSettings({
                   ...settings,
-                  general: { ...settings.general, timeFormat: value },
+                  general: { ...settings.general, timeFormat: value }
                 })
-              }
-            >
+              }>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>

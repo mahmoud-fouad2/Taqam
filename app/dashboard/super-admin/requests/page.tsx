@@ -15,17 +15,17 @@ export default async function RequestsPage() {
   const t = getText(locale);
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+      <section className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/70 rounded-2xl border p-5 shadow-sm backdrop-blur">
         <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
           <Inbox className="h-6 w-6" />
           {t.superAdmin.pSubscriptionRequests}
         </h1>
-        <p className="mt-1 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-1 text-sm">
           {t.superAdmin.pManageIncomingSubscriptionRequ}
         </p>
       </section>
 
-      <Card className="overflow-hidden border-border/60 bg-card/85 shadow-sm">
+      <Card className="border-border/60 bg-card/85 overflow-hidden shadow-sm">
         <CardContent className="p-0">
           <Suspense fallback={<div className="p-8 text-center">{t.common.loading}</div>}>
             <RequestsTable />

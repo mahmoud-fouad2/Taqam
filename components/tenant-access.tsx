@@ -26,7 +26,7 @@ type TenantPreset = {
 export function TenantAccess({
   nextPath,
   locale = "ar",
-  presets,
+  presets
 }: {
   nextPath?: string;
   locale?: "ar" | "en";
@@ -61,7 +61,7 @@ export function TenantAccess({
     <div className="w-full space-y-3">
       {presets?.length ? (
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-muted-foreground">
+          <span className="text-muted-foreground text-xs">
             {locale === "ar" ? "اختيار سريع:" : "Quick pick:"}
           </span>
           {presets.map((p) => (
@@ -70,8 +70,7 @@ export function TenantAccess({
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() => router.push(buildTenantUrl(p.slug))}
-            >
+              onClick={() => router.push(buildTenantUrl(p.slug))}>
               {locale === "ar" ? p.labelAr : p.labelEn}
             </Button>
           ))}
@@ -87,7 +86,7 @@ export function TenantAccess({
           aria-label="Tenant slug"
         />
         <Button type="submit">{locale === "ar" ? "الدخول للداشبورد" : "Go to dashboard"}</Button>
-        {error ? <p className="text-sm text-destructive">{error}</p> : null}
+        {error ? <p className="text-destructive text-sm">{error}</p> : null}
       </form>
     </div>
   );

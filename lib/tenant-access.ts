@@ -26,7 +26,9 @@ export function getTenantAccessIssue(
   return null;
 }
 
-export async function validateTenantAccess(tenantId: string | null | undefined): Promise<TenantAccessCheck> {
+export async function validateTenantAccess(
+  tenantId: string | null | undefined
+): Promise<TenantAccessCheck> {
   if (!tenantId) {
     return { ok: false, issue: "tenant_not_found" };
   }
@@ -39,8 +41,8 @@ export async function validateTenantAccess(tenantId: string | null | undefined):
       slug: true,
       status: true,
       plan: true,
-      planExpiresAt: true,
-    },
+      planExpiresAt: true
+    }
   });
 
   const issue = getTenantAccessIssue(tenant);
@@ -55,16 +57,16 @@ export function getTenantAccessMessage(issue: TenantAccessIssue, locale: "ar" | 
   const copy = {
     tenant_not_found: {
       ar: "تعذر العثور على الشركة المرتبطة بحسابك.",
-      en: "We could not find the company linked to your account.",
+      en: "We could not find the company linked to your account."
     },
     tenant_inactive: {
       ar: "حساب الشركة غير نشط حاليًا. تواصل مع الدعم الفني.",
-      en: "Your company workspace is not active right now. Please contact support.",
+      en: "Your company workspace is not active right now. Please contact support."
     },
     plan_expired: {
       ar: "انتهت صلاحية اشتراك الشركة. تواصل مع الدعم لتجديد الخدمة.",
-      en: "Your company subscription has expired. Please contact support to renew service.",
-    },
+      en: "Your company subscription has expired. Please contact support to renew service."
+    }
   } as const;
 
   return copy[issue][locale];

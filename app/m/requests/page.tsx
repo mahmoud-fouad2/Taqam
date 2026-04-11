@@ -13,7 +13,7 @@ import {
   Send,
   TicketCheck,
   WifiOff,
-  X,
+  X
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -35,14 +35,14 @@ const statusMap: Record<string, { label: string; cls: string }> = {
   pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-600" },
   approved: { label: "مقبول", cls: "bg-emerald-50 text-emerald-600" },
   rejected: { label: "مرفوض", cls: "bg-red-50 text-red-600" },
-  cancelled: { label: "ملغي", cls: "bg-slate-100 text-slate-500" },
+  cancelled: { label: "ملغي", cls: "bg-slate-100 text-slate-500" }
 };
 
 const typeIcons: Record<string, typeof FileText> = {
   leave: Plane,
   attendance: CalendarCheck,
   ticket: TicketCheck,
-  training: FileText,
+  training: FileText
 };
 
 export default function MobileRequestsPage() {
@@ -104,8 +104,7 @@ export default function MobileRequestsPage() {
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90"
-            >
+              className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90">
               <ChevronRight className="size-5 text-slate-400" />
             </button>
             <div>
@@ -115,9 +114,8 @@ export default function MobileRequestsPage() {
           </div>
           <Button
             size="sm"
-            className="h-9 gap-1.5 rounded-xl text-[13px] font-semibold shadow-sm shadow-primary/20 transition-transform active:scale-95"
-            onClick={() => setShowForm(true)}
-          >
+            className="shadow-primary/20 h-9 gap-1.5 rounded-xl text-[13px] font-semibold shadow-sm transition-transform active:scale-95"
+            onClick={() => setShowForm(true)}>
             <Plus className="size-4" />
             طلب جديد
           </Button>
@@ -167,8 +165,8 @@ function RequestCard({ item }: { item: Req }) {
   return (
     <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-[0.99]">
       <div className="flex items-start gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/5">
-          <Icon className="size-5 text-primary/70" />
+        <div className="bg-primary/5 flex size-10 shrink-0 items-center justify-center rounded-xl">
+          <Icon className="text-primary/70 size-5" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="truncate text-[13px] font-bold text-slate-700">{item.title}</p>
@@ -200,7 +198,12 @@ function CreateTicketForm({ onClose, onCreated }: { onClose: () => void; onCreat
       await mobileAuthFetch("/api/mobile/my-requests", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ type: "ticket", title: title.trim(), description: description.trim(), priority }),
+        body: JSON.stringify({
+          type: "ticket",
+          title: title.trim(),
+          description: description.trim(),
+          priority
+        })
       });
       onCreated();
     } catch (err: any) {
@@ -217,8 +220,7 @@ function CreateTicketForm({ onClose, onCreated }: { onClose: () => void; onCreat
         <button
           type="button"
           onClick={onClose}
-          className="rounded-lg p-1.5 text-slate-300 transition-colors hover:text-slate-500"
-        >
+          className="rounded-lg p-1.5 text-slate-300 transition-colors hover:text-slate-500">
           <X className="size-5" />
         </button>
       </div>
@@ -258,10 +260,9 @@ function CreateTicketForm({ onClose, onCreated }: { onClose: () => void; onCreat
                 className={
                   "rounded-xl py-2 text-[12px] font-semibold transition-all active:scale-95 " +
                   (priority === p
-                    ? "bg-primary text-white shadow-sm shadow-primary/20"
+                    ? "bg-primary shadow-primary/20 text-white shadow-sm"
                     : "bg-slate-50 text-slate-500 ring-1 ring-slate-100")
-                }
-              >
+                }>
                 {p === "low" ? "منخفضة" : p === "medium" ? "متوسطة" : "عالية"}
               </button>
             ))}
@@ -275,8 +276,7 @@ function CreateTicketForm({ onClose, onCreated }: { onClose: () => void; onCreat
         <Button
           type="submit"
           disabled={busy || title.trim().length < 3 || description.trim().length < 3}
-          className="h-11 w-full gap-2 rounded-xl text-[14px] font-semibold shadow-sm shadow-primary/20 transition-transform active:scale-[0.98]"
-        >
+          className="shadow-primary/20 h-11 w-full gap-2 rounded-xl text-[14px] font-semibold shadow-sm transition-transform active:scale-[0.98]">
           {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
           إرسال
         </Button>

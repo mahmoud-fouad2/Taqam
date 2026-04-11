@@ -1,15 +1,6 @@
 import type { Metadata } from "next";
 import type { LucideIcon } from "lucide-react";
-import {
-  Ban,
-  CheckCircle2,
-  Clock3,
-  FileText,
-  Mail,
-  Scale,
-  Shield,
-  Users,
-} from "lucide-react";
+import { Ban, CheckCircle2, Clock3, FileText, Mail, Scale, Shield, Users } from "lucide-react";
 
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
@@ -45,13 +36,13 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "تشمل الخدمة الواجهات والتقارير والتكاملات والمزايا التي تم تفعيلها للحساب فعليًا.",
       "قد تُطرح مزايا جديدة أو تُحدّث المسارات الحالية بهدف تحسين الأداء أو الأمان أو سهولة الاستخدام.",
-      "بعض الوظائف قد تعتمد على بيانات صحيحة من العميل أو على أطراف ثالثة أو خدمات حكومية خارج سيطرتنا المباشرة.",
+      "بعض الوظائف قد تعتمد على بيانات صحيحة من العميل أو على أطراف ثالثة أو خدمات حكومية خارج سيطرتنا المباشرة."
     ],
     bulletsEn: [
       "The service includes the interfaces, reports, integrations, and features actually enabled for the account.",
       "New features or workflow updates may be introduced to improve performance, security, or usability.",
-      "Some functionality depends on accurate customer data or on third-party and government services outside our direct control.",
-    ],
+      "Some functionality depends on accurate customer data or on third-party and government services outside our direct control."
+    ]
   },
   {
     id: "account-responsibility",
@@ -66,13 +57,13 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "تحديد من يملك حق الوصول، ومراجعة الصلاحيات، وإلغاء أي مستخدم لم يعد مخولًا بالدخول.",
       "عدم مشاركة كلمات المرور أو الرموز أو الوصول الإداري مع أشخاص غير مصرح لهم.",
-      "مراجعة المخرجات التشغيلية قبل اعتمادها النهائي، خصوصًا ما يتعلق بالرواتب والملفات الرسمية والتقارير.",
+      "مراجعة المخرجات التشغيلية قبل اعتمادها النهائي، خصوصًا ما يتعلق بالرواتب والملفات الرسمية والتقارير."
     ],
     bulletsEn: [
       "Define who has access, review permissions, and revoke access for anyone no longer authorized.",
       "Do not share passwords, tokens, or administrative access with unauthorized individuals.",
-      "Review operational outputs before final approval, especially payroll, official files, and reports.",
-    ],
+      "Review operational outputs before final approval, especially payroll, official files, and reports."
+    ]
   },
   {
     id: "acceptable-use",
@@ -87,15 +78,17 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "منع رفع بيانات مضللة عمدًا أو استخدام الخدمة في أي نشاط احتيالي أو غير نظامي.",
       "منع محاولة فحص الثغرات أو عكس هندسة المنصة أو تعطيلها أو التحايل على آليات الحماية.",
-      "منع إساءة استخدام التكاملات أو واجهات API أو الموارد المشتركة بشكل يضر بالاستقرار أو الأداء.",
+      "منع إساءة استخدام التكاملات أو واجهات API أو الموارد المشتركة بشكل يضر بالاستقرار أو الأداء."
     ],
     bulletsEn: [
       "Do not upload deliberately misleading data or use the service for fraud or unlawful activity.",
       "Do not probe for vulnerabilities, reverse engineer the platform, disrupt it, or bypass protection mechanisms.",
-      "Do not abuse integrations, APIs, or shared resources in a way that harms stability or performance.",
+      "Do not abuse integrations, APIs, or shared resources in a way that harms stability or performance."
     ],
-    noteAr: "يجوز تعليق الحساب مؤقتًا أو تقييد بعض الوظائف عند وجود شبهة إساءة استخدام أو خطر أمني واضح لحين اكتمال التحقق.",
-    noteEn: "Accounts or features may be temporarily restricted if there is suspected misuse or a clear security risk while review is in progress.",
+    noteAr:
+      "يجوز تعليق الحساب مؤقتًا أو تقييد بعض الوظائف عند وجود شبهة إساءة استخدام أو خطر أمني واضح لحين اكتمال التحقق.",
+    noteEn:
+      "Accounts or features may be temporarily restricted if there is suspected misuse or a clear security risk while review is in progress."
   },
   {
     id: "billing-subscription",
@@ -110,13 +103,13 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "قد تختلف الأسعار والمزايا وحدود المستخدمين أو الوحدات بين الباقات أو الاتفاقات الخاصة.",
       "قد يؤدي عدم السداد أو انتهاء الاشتراك إلى إيقاف بعض الوظائف أو الوصول حتى تتم المعالجة أو التجديد.",
-      "الخدمات الإضافية أو التخصيصات أو التكاملات الخاصة قد تُسعّر وتُدار خارج الباقة الأساسية.",
+      "الخدمات الإضافية أو التخصيصات أو التكاملات الخاصة قد تُسعّر وتُدار خارج الباقة الأساسية."
     ],
     bulletsEn: [
       "Pricing, features, and user or module limits may differ between plans and custom agreements.",
       "Non-payment or subscription expiry may lead to suspension of certain features or access until resolved or renewed.",
-      "Add-ons, customizations, and private integrations may be priced and managed outside the base plan.",
-    ],
+      "Add-ons, customizations, and private integrations may be priced and managed outside the base plan."
+    ]
   },
   {
     id: "availability-support",
@@ -131,13 +124,13 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "قد نجري تحديثات مجدولة أو تغييرات أمنية أو تحسينات بنيوية تتطلب نافذة صيانة محدودة.",
       "الدعم يُقدَّم عبر القنوات الرسمية المعتمدة وبحسب نوع الطلب وأولويته وساعات التغطية.",
-      "لا تمثل الخدمة تعهدًا بعدم الانقطاع مطلقًا، خصوصًا في حالات البنية التحتية الخارجية أو القوى القاهرة.",
+      "لا تمثل الخدمة تعهدًا بعدم الانقطاع مطلقًا، خصوصًا في حالات البنية التحتية الخارجية أو القوى القاهرة."
     ],
     bulletsEn: [
       "We may perform scheduled updates, security changes, or structural improvements that require limited maintenance windows.",
       "Support is provided through official channels based on request type, priority, and coverage hours.",
-      "The service is not a guarantee of zero interruption, especially in external infrastructure or force majeure scenarios.",
-    ],
+      "The service is not a guarantee of zero interruption, especially in external infrastructure or force majeure scenarios."
+    ]
   },
   {
     id: "ownership-termination",
@@ -152,13 +145,13 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "يجوز للعميل طلب تصدير بياناته وفق الإمكانات المتاحة قبل الإنهاء النهائي أو خلال نافذة الاحتفاظ التشغيلية.",
       "يجوز إنهاء أو تعليق الوصول عند خرق مادي للشروط أو عند وجود مخاطر أمنية أو نظامية مؤثرة.",
-      "بعد الإلغاء، تُدار البيانات وفق سياسة الخصوصية وفترات الاحتفاظ المعتمدة قبل الحذف أو إزالة الهوية.",
+      "بعد الإلغاء، تُدار البيانات وفق سياسة الخصوصية وفترات الاحتفاظ المعتمدة قبل الحذف أو إزالة الهوية."
     ],
     bulletsEn: [
       "Customers may request export of their data through available tools before final termination or during the retention window.",
       "Access may be suspended or terminated for material breaches or significant legal or security risks.",
-      "After cancellation, data is handled under the privacy policy and approved retention windows before deletion or de-identification.",
-    ],
+      "After cancellation, data is handled under the privacy policy and approved retention windows before deletion or de-identification."
+    ]
   },
   {
     id: "governing-law",
@@ -173,14 +166,14 @@ const termsSections: TermsSection[] = [
     bulletsAr: [
       "نوصي برفع أي ملاحظات تعاقدية أو تشغيلية أو قانونية عبر الدعم أو من خلال قناة التواصل المعتمدة في العقد.",
       "في حال تعذر المعالجة الودية، يبقى الاختصاص للجهات المختصة وفق النظام والعقد الساري بين الطرفين.",
-      "للاستفسارات العامة: support@taqam.net.",
+      "للاستفسارات العامة: support@taqam.net."
     ],
     bulletsEn: [
       "Contractual, operational, or legal concerns should be raised through support or the agreed communication channel in the contract.",
       "If a dispute cannot be resolved amicably, jurisdiction remains with the competent authorities under applicable law and contract.",
-      "For general questions: support@taqam.net.",
-    ],
-  },
+      "For general questions: support@taqam.net."
+    ]
+  }
 ];
 
 const termsHighlights = [
@@ -188,28 +181,30 @@ const termsHighlights = [
     labelAr: "آخر تحديث",
     labelEn: "Last updated",
     valueAr: "7 أبريل 2026",
-    valueEn: "April 7, 2026",
+    valueEn: "April 7, 2026"
   },
   {
     labelAr: "نطاق التطبيق",
     labelEn: "Applies to",
     valueAr: "الحسابات والخطط والخدمات المفعلة",
-    valueEn: "Enabled accounts, plans, and services",
+    valueEn: "Enabled accounts, plans, and services"
   },
   {
     labelAr: "التواصل",
     labelEn: "Contact",
-    value: "support@taqam.net",
-  },
+    value: "support@taqam.net"
+  }
 ];
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
     titleAr: "الشروط والأحكام | طاقم",
     titleEn: "Terms & Conditions | Taqam",
-    descriptionAr: "الشروط المنظمة لاستخدام منصة طاقم، بما يشمل نطاق الخدمة، مسؤوليات العميل، والاشتراكات والالتزامات التشغيلية.",
-    descriptionEn: "The terms governing use of Taqam, including service scope, customer responsibilities, subscriptions, and operational commitments.",
-    path: "/terms",
+    descriptionAr:
+      "الشروط المنظمة لاستخدام منصة طاقم، بما يشمل نطاق الخدمة، مسؤوليات العميل، والاشتراكات والالتزامات التشغيلية.",
+    descriptionEn:
+      "The terms governing use of Taqam, including service scope, customer responsibilities, subscriptions, and operational commitments.",
+    path: "/terms"
   });
 }
 
@@ -234,12 +229,19 @@ export default async function TermsPage() {
           }
           actions={[
             { href: `${p}/support`, label: isAr ? "تواصل معنا" : "Contact us", variant: "outline" },
-            { href: `${p}/request-demo`, label: isAr ? "اطلب عرضًا" : "Request a demo", variant: "brand" },
+            {
+              href: `${p}/request-demo`,
+              label: isAr ? "اطلب عرضًا" : "Request a demo",
+              variant: "brand"
+            }
           ]}
           stats={[
             { value: `${termsSections.length}`, label: isAr ? "محاور تعاقدية" : "Contract topics" },
-            { value: isAr ? "تشغيل SaaS" : "SaaS operations", label: isAr ? "طبيعة الخدمة" : "Service model" },
-            { value: "support@taqam.net", label: isAr ? "قناة التواصل" : "Contact channel" },
+            {
+              value: isAr ? "تشغيل SaaS" : "SaaS operations",
+              label: isAr ? "طبيعة الخدمة" : "Service model"
+            },
+            { value: "support@taqam.net", label: isAr ? "قناة التواصل" : "Contact channel" }
           ]}
         />
       </FadeIn>
@@ -248,26 +250,28 @@ export default async function TermsPage() {
         <div className="grid gap-8 lg:grid-cols-[20rem_minmax(0,1fr)] lg:items-start">
           <FadeIn direction="up">
             <div className="space-y-4 lg:sticky lg:top-24">
-              <div className="rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <div className="border-border/50 bg-card/80 rounded-[2rem] border p-6 shadow-sm backdrop-blur-sm">
+                <p className="text-muted-foreground text-xs font-semibold tracking-[0.2em] uppercase">
                   {isAr ? "ملخص تنفيذي" : "Quick summary"}
                 </p>
                 <div className="mt-4 space-y-3">
                   {termsHighlights.map((item) => (
-                    <div key={item.labelEn} className="rounded-2xl border border-border/50 bg-background/70 px-4 py-3">
-                      <p className="text-xs font-medium text-muted-foreground">
+                    <div
+                      key={item.labelEn}
+                      className="border-border/50 bg-background/70 rounded-2xl border px-4 py-3">
+                      <p className="text-muted-foreground text-xs font-medium">
                         {isAr ? item.labelAr : item.labelEn}
                       </p>
-                      <p className="mt-1 text-sm font-semibold text-foreground">
-                        {isAr ? item.valueAr ?? item.value : item.valueEn ?? item.value}
+                      <p className="text-foreground mt-1 text-sm font-semibold">
+                        {isAr ? (item.valueAr ?? item.value) : (item.valueEn ?? item.value)}
                       </p>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <nav className="rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <nav className="border-border/50 bg-card/80 rounded-[2rem] border p-6 shadow-sm backdrop-blur-sm">
+                <p className="text-muted-foreground text-xs font-semibold tracking-[0.2em] uppercase">
                   {isAr ? "التنقل داخل الصفحة" : "On this page"}
                 </p>
                 <div className="mt-4 space-y-2">
@@ -275,9 +279,8 @@ export default async function TermsPage() {
                     <a
                       key={section.id}
                       href={`#${section.id}`}
-                      className="flex items-center gap-3 rounded-xl px-3 py-2 text-sm text-muted-foreground transition hover:bg-muted/40 hover:text-foreground"
-                    >
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      className="text-muted-foreground hover:bg-muted/40 hover:text-foreground flex items-center gap-3 rounded-xl px-3 py-2 text-sm transition">
+                      <span className="bg-primary/10 text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
                         {index + 1}
                       </span>
                       <span>{isAr ? section.titleAr : section.titleEn}</span>
@@ -295,23 +298,23 @@ export default async function TermsPage() {
                 <StaggerItem key={section.id}>
                   <section
                     id={section.id}
-                    className="scroll-mt-24 rounded-[2rem] border border-border/50 bg-card/80 p-6 shadow-sm backdrop-blur-sm sm:p-8"
-                  >
+                    className="border-border/50 bg-card/80 scroll-mt-24 rounded-[2rem] border p-6 shadow-sm backdrop-blur-sm sm:p-8">
                     <div className="flex flex-wrap items-center gap-4">
-                      <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${section.iconClassName}`}>
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl ${section.iconClassName}`}>
                         <Icon className="h-6 w-6" />
                       </div>
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+                        <p className="text-muted-foreground text-xs font-semibold tracking-[0.18em] uppercase">
                           {isAr ? `البند ${index + 1}` : `Clause ${index + 1}`}
                         </p>
-                        <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-foreground">
+                        <h2 className="text-foreground mt-1 text-2xl font-extrabold tracking-tight">
                           {isAr ? section.titleAr : section.titleEn}
                         </h2>
                       </div>
                     </div>
 
-                    <p className="mt-5 text-sm leading-7 text-muted-foreground sm:text-[15px]">
+                    <p className="text-muted-foreground mt-5 text-sm leading-7 sm:text-[15px]">
                       {isAr ? section.summaryAr : section.summaryEn}
                     </p>
 
@@ -319,16 +322,15 @@ export default async function TermsPage() {
                       {(isAr ? section.bulletsAr : section.bulletsEn).map((bullet) => (
                         <li
                           key={bullet}
-                          className="flex items-start gap-3 rounded-2xl border border-border/40 bg-background/60 px-4 py-3 text-sm leading-7 text-foreground/90"
-                        >
-                          <span className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-primary/60" />
+                          className="border-border/40 bg-background/60 text-foreground/90 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm leading-7">
+                          <span className="bg-primary/60 mt-1 h-2.5 w-2.5 shrink-0 rounded-full" />
                           <span>{bullet}</span>
                         </li>
                       ))}
                     </ul>
 
                     {section.noteAr || section.noteEn ? (
-                      <div className="mt-5 rounded-2xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm leading-7 text-foreground/85">
+                      <div className="border-primary/15 bg-primary/5 text-foreground/85 mt-5 rounded-2xl border px-4 py-3 text-sm leading-7">
                         {isAr ? section.noteAr : section.noteEn}
                       </div>
                     ) : null}
@@ -344,14 +346,26 @@ export default async function TermsPage() {
         <MarketingPageCta
           icon={Mail}
           badge={isAr ? "استفسارات تعاقدية وتشغيلية" : "Contract and operations questions"}
-          title={isAr ? "هل تحتاج توضيحًا قبل الاشتراك أو التفعيل؟" : "Need clarification before activation?"}
+          title={
+            isAr
+              ? "هل تحتاج توضيحًا قبل الاشتراك أو التفعيل؟"
+              : "Need clarification before activation?"
+          }
           description={
             isAr
               ? "إذا كنت تراجع البنود أو تحتاج توضيحًا يتعلق بالخطة أو المسؤوليات أو التفعيل، تواصل معنا وسنساعدك بالمعلومة الصحيحة."
               : "If you are reviewing the terms or need clarification about plans, responsibilities, or activation, contact us and we will help."
           }
-          primaryAction={{ href: `${p}/support`, label: isAr ? "راسل الدعم" : "Contact support", variant: "brand" }}
-          secondaryAction={{ href: `${p}/pricing`, label: isAr ? "راجع الباقات" : "Review pricing", variant: "outline" }}
+          primaryAction={{
+            href: `${p}/support`,
+            label: isAr ? "راسل الدعم" : "Contact support",
+            variant: "brand"
+          }}
+          secondaryAction={{
+            href: `${p}/pricing`,
+            label: isAr ? "راجع الباقات" : "Review pricing",
+            variant: "outline"
+          }}
         />
       </FadeIn>
     </main>

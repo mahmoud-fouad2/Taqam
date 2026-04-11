@@ -2,28 +2,28 @@
 
 // ==================== أنواع التقارير ====================
 
-export type ReportCategory = 
-  | 'hr' 
-  | 'payroll' 
-  | 'attendance' 
-  | 'leaves' 
-  | 'performance' 
-  | 'recruitment' 
-  | 'training'
-  | 'custom';
+export type ReportCategory =
+  | "hr"
+  | "payroll"
+  | "attendance"
+  | "leaves"
+  | "performance"
+  | "recruitment"
+  | "training"
+  | "custom";
 
 export const reportCategoryLabels: Record<ReportCategory, string> = {
-  'hr': 'الموارد البشرية',
-  'payroll': 'الرواتب',
-  'attendance': 'الحضور والانصراف',
-  'leaves': 'الإجازات',
-  'performance': 'الأداء',
-  'recruitment': 'التوظيف',
-  'training': 'التدريب',
-  'custom': 'تقارير مخصصة',
+  hr: "الموارد البشرية",
+  payroll: "الرواتب",
+  attendance: "الحضور والانصراف",
+  leaves: "الإجازات",
+  performance: "الأداء",
+  recruitment: "التوظيف",
+  training: "التدريب",
+  custom: "تقارير مخصصة"
 };
 
-export type ReportFormat = 'table' | 'chart' | 'pivot' | 'summary';
+export type ReportFormat = "table" | "chart" | "pivot" | "summary";
 
 export interface ReportDefinition {
   id: string;
@@ -45,7 +45,7 @@ export interface ReportDefinition {
 export interface ReportParameter {
   id: string;
   name: string;
-  type: 'date' | 'daterange' | 'select' | 'multiselect' | 'text' | 'number';
+  type: "date" | "daterange" | "select" | "multiselect" | "text" | "number";
   required: boolean;
   defaultValue?: unknown;
   options?: { value: string; label: string }[];
@@ -54,7 +54,7 @@ export interface ReportParameter {
 export interface ReportColumn {
   id: string;
   name: string;
-  type: 'string' | 'number' | 'date' | 'currency' | 'percentage' | 'boolean';
+  type: "string" | "number" | "date" | "currency" | "percentage" | "boolean";
   sortable?: boolean;
   filterable?: boolean;
   aggregatable?: boolean;
@@ -62,14 +62,14 @@ export interface ReportColumn {
 
 // ==================== التقارير المجدولة ====================
 
-export type ScheduleFrequency = 'daily' | 'weekly' | 'monthly' | 'quarterly' | 'yearly';
+export type ScheduleFrequency = "daily" | "weekly" | "monthly" | "quarterly" | "yearly";
 
 export const scheduleFrequencyLabels: Record<ScheduleFrequency, string> = {
-  'daily': 'يومياً',
-  'weekly': 'أسبوعياً',
-  'monthly': 'شهرياً',
-  'quarterly': 'ربع سنوياً',
-  'yearly': 'سنوياً',
+  daily: "يومياً",
+  weekly: "أسبوعياً",
+  monthly: "شهرياً",
+  quarterly: "ربع سنوياً",
+  yearly: "سنوياً"
 };
 
 export interface ScheduledReport {
@@ -81,7 +81,7 @@ export interface ScheduledReport {
   dayOfMonth?: number; // 1-31 للشهري
   time: string; // HH:mm
   recipients: string[];
-  format: 'pdf' | 'excel' | 'csv';
+  format: "pdf" | "excel" | "csv";
   isActive: boolean;
   lastRun?: string;
   nextRun: string;
@@ -101,21 +101,21 @@ export interface AnalyticsDashboard {
   updatedAt: string;
 }
 
-export type WidgetType = 
-  | 'kpi' 
-  | 'chart-bar' 
-  | 'chart-line' 
-  | 'chart-pie' 
-  | 'chart-donut'
-  | 'table' 
-  | 'trend' 
-  | 'comparison';
+export type WidgetType =
+  | "kpi"
+  | "chart-bar"
+  | "chart-line"
+  | "chart-pie"
+  | "chart-donut"
+  | "table"
+  | "trend"
+  | "comparison";
 
 export interface DashboardWidget {
   id: string;
   title: string;
   type: WidgetType;
-  size: 'small' | 'medium' | 'large' | 'full';
+  size: "small" | "medium" | "large" | "full";
   dataSource: string;
   config?: Record<string, unknown>;
   position: { x: number; y: number };
@@ -130,7 +130,7 @@ export interface KPIMetric {
   previousValue?: number;
   target?: number;
   unit?: string;
-  trend: 'up' | 'down' | 'stable';
+  trend: "up" | "down" | "stable";
   trendPercentage?: number;
   category: string;
   description?: string;

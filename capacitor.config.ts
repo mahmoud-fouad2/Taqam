@@ -15,10 +15,10 @@ const config: CapacitorConfig = {
         server: {
           url: serverUrl,
           // Allow http:// for LAN testing. Use https in production.
-          cleartext: isHttp,
-        },
+          cleartext: isHttp
+        }
       }
-    : {}),
+    : {})
 };
 
 export default config;

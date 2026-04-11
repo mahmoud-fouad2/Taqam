@@ -69,7 +69,7 @@ export function organizationSchema(opts: { url: string }): OrganizationJsonLd {
     url: opts.url,
     logo: `${opts.url}/icons/logo-navbar-light-1200.png`,
     description: "Saudi HR, payroll, attendance, and workforce operations platform.",
-    ...(sameAs.length > 0 ? { sameAs } : {}),
+    ...(sameAs.length > 0 ? { sameAs } : {})
   };
 }
 
@@ -79,8 +79,9 @@ export function websiteSchema(opts: { url: string; locale: MarketingLocale }): W
     "@type": "WebSite",
     name: "Taqam",
     url: opts.url,
-    description: "Taqam is a bilingual Saudi HR platform for payroll, attendance, and employee operations.",
-    inLanguage: opts.locale === "ar" ? "ar-SA" : "en-US",
+    description:
+      "Taqam is a bilingual Saudi HR platform for payroll, attendance, and employee operations.",
+    inLanguage: opts.locale === "ar" ? "ar-SA" : "en-US"
   };
 }
 
@@ -96,21 +97,23 @@ export function softwareAppSchema(opts: {
 }): SoftwareApplicationJsonLd {
   const ratingValue = typeof opts.ratingValue === "number" ? opts.ratingValue : undefined;
   const ratingCount = typeof opts.ratingCount === "number" ? opts.ratingCount : undefined;
-  const hasRating = typeof ratingValue === "number" && typeof ratingCount === "number" && ratingCount > 0;
+  const hasRating =
+    typeof ratingValue === "number" && typeof ratingCount === "number" && ratingCount > 0;
 
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "Taqam",
     url: opts.url,
-    description: "HR, payroll, attendance, leave, and workforce operations platform built for Saudi Arabia.",
+    description:
+      "HR, payroll, attendance, leave, and workforce operations platform built for Saudi Arabia.",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     availableLanguage: ["ar", "en"],
     offers: {
       "@type": "Offer",
       priceCurrency: "SAR",
-      url: opts.pricingUrl,
+      url: opts.pricingUrl
     },
     ...(hasRating
       ? {
@@ -119,10 +122,10 @@ export function softwareAppSchema(opts: {
             ratingValue,
             ratingCount,
             bestRating: 5,
-            worstRating: 1,
-          },
+            worstRating: 1
+          }
         }
-      : {}),
+      : {})
   };
 }
 
@@ -135,8 +138,8 @@ export function faqSchema(faqs: Array<{ q: string; a: string }>): FaqPageJsonLd 
       name: f.q,
       acceptedAnswer: {
         "@type": "Answer",
-        text: f.a,
-      },
-    })),
+        text: f.a
+      }
+    }))
   };
 }

@@ -1,16 +1,37 @@
 # 🚀 دليل إعداد الميزات الجديدة
 
+## Baseline الحالي للمشروع
+
+- **Node.js:** 24 LTS
+- **pnpm:** 9.15.9
+- **التحقق الكامل:** `pnpm validate:ci`
+- **تنسيق الويب + الموبايل:** `pnpm format:all`
+
+### أوامر البداية المقترحة
+
+```bash
+corepack enable
+corepack prepare pnpm@9.15.9 --activate
+pnpm install --frozen-lockfile
+pnpm validate:ci
+pnpm dev
+```
+
+---
+
 ## 1. Sentry Error Monitoring
 
 ### الإعداد:
 
 #### أ) إنشاء حساب Sentry
+
 1. انتقل إلى https://sentry.io
 2. أنشئ حساب جديد (مجاني للمشاريع الصغيرة)
 3. أنشئ مشروع جديد > Next.js
 4. انسخ الـ DSN الخاص بك
 
 #### ب) إضافة متغيرات البيئة
+
 أضف إلى `.env.local`:
 
 ```bash
@@ -22,9 +43,10 @@ SENTRY_AUTH_TOKEN=your-auth-token  # Optional for source maps
 ```
 
 #### ج) التحقق من التكامل
+
 ```bash
 # سيبدأ Sentry بالعمل تلقائياً
-npm run dev
+pnpm dev
 
 # للتأكد من التكامل، ارمِ خطأ تجريبي:
 # في أي API route:
@@ -38,12 +60,13 @@ throw new Error("Test Sentry Integration");
 ### الاستخدام:
 
 #### في API Routes:
+
 ```typescript
 import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   logger.info("Fetching employees");
-  
+
   try {
     const result = await prisma.employee.findMany();
     logger.info("Employees fetched successfully", { count: result.length });
@@ -56,21 +79,23 @@ export async function GET(request: NextRequest) {
 ```
 
 #### قياس الأداء:
+
 ```typescript
 import { createTimer } from "@/lib/logger";
 
 async function heavyOperation() {
   const timer = createTimer();
-  
+
   // Your heavy operation
   await processPayroll();
-  
+
   timer.log("Payroll Processing");
   // Output: "Payroll Processing took 2345ms"
 }
 ```
 
 #### الأحداث الأمنية:
+
 ```typescript
 import { logger } from "@/lib/logger";
 
@@ -78,7 +103,7 @@ import { logger } from "@/lib/logger";
 logger.security("unauthorized_access", {
   userId: "user-123",
   resource: "/api/admin/users",
-  ipAddress: "192.168.1.1",
+  ipAddress: "192.168.1.1"
 });
 ```
 
@@ -89,6 +114,7 @@ logger.security("unauthorized_access", {
 ### الإعداد:
 
 #### أ) تفعيل Middleware (مفعّل افتراضياً)
+
 ```bash
 # في .env.local - اتركه فارغاً للتفعيل
 ENABLE_AUDIT_LOGGING=true  # أو لا تضفه (مفعّل تلقائياً)
@@ -98,6 +124,7 @@ ENABLE_AUDIT_LOGGING=false
 ```
 
 #### ب) استخدام Audit Context في API Routes
+
 ```typescript
 import { setAuditContext, clearAuditContext } from "@/lib/audit/middleware";
 import { getRequestMetadata } from "@/lib/audit/logger";
@@ -105,7 +132,7 @@ import { getRequestMetadata } from "@/lib/audit/logger";
 export async function POST(request: NextRequest) {
   const session = await getServerSession(authOptions);
   const metadata = getRequestMetadata(request);
-  
+
   // Set audit context before any DB operations
   setAuditContext({
     tenantId: session.user.tenantId,
@@ -113,11 +140,11 @@ export async function POST(request: NextRequest) {
     ipAddress: metadata.ipAddress,
     userAgent: metadata.userAgent,
   });
-  
+
   try {
     // Any Prisma operations here will be logged automatically
     await prisma.employee.create({ data: {...} });
-    
+
     return NextResponse.json({ success: true });
   } finally {
     clearAuditContext();
@@ -126,6 +153,7 @@ export async function POST(request: NextRequest) {
 ```
 
 #### ج) تسجيل يدوي لعمليات خاصة
+
 ```typescript
 import { createAuditLog } from "@/lib/audit/logger";
 
@@ -137,11 +165,12 @@ await createAuditLog({
   entity: "Employee",
   metadata: { count: 1000, format: "csv" },
   ipAddress: metadata.ipAddress,
-  userAgent: metadata.userAgent,
+  userAgent: metadata.userAgent
 });
 ```
 
 #### د) عرض Audit Logs
+
 1. انتقل إلى: `/dashboard/audit-logs`
 2. صفّي حسب:
    - نوع العملية (CREATE, UPDATE, DELETE...)
@@ -172,22 +201,24 @@ await createAuditLog({
 ### Logging Guidelines:
 
 #### ✅ افعل:
+
 ```typescript
 // Use appropriate log levels
-logger.debug("User clicked button");  // Development
-logger.info("User logged in");        // Normal operations
-logger.warn("High memory usage");     // Potential issues
-logger.error("Database connection failed", { error });  // Errors
+logger.debug("User clicked button"); // Development
+logger.info("User logged in"); // Normal operations
+logger.warn("High memory usage"); // Potential issues
+logger.error("Database connection failed", { error }); // Errors
 
 // Add context
 logger.info("Payroll processed", {
   periodId: "period-123",
   employeeCount: 45,
-  totalAmount: 150000,
+  totalAmount: 150000
 });
 ```
 
 #### ❌ لا تفعل:
+
 ```typescript
 // Don't log sensitive data
 logger.info("User password", { password: "123456" });  // ❌
@@ -202,6 +233,7 @@ logger.info("All employees", { employees: [...1000 employees] });  // ❌
 ### Audit Logging Guidelines:
 
 #### ✅ سجّل هذه العمليات:
+
 - تسجيل الدخول/الخروج
 - إنشاء/تحديث/حذف الموظفين
 - معالجة الرواتب
@@ -210,6 +242,7 @@ logger.info("All employees", { employees: [...1000 employees] });  // ❌
 - تغيير الصلاحيات
 
 #### ❌ لا تسجّل:
+
 - قراءة البيانات العادية (GET requests)
 - عمليات النظام الداخلية
 - Heartbeat checks
@@ -219,6 +252,7 @@ logger.info("All employees", { employees: [...1000 employees] });  // ❌
 ## 6. Monitoring Dashboard
 
 ### Sentry Dashboard:
+
 1. انتقل إلى: https://sentry.io/organizations/[org]/issues/
 2. شاهد:
    - أحدث الأخطاء
@@ -227,6 +261,7 @@ logger.info("All employees", { employees: [...1000 employees] });  // ❌
    - Performance metrics
 
 ### Audit Logs Dashboard:
+
 1. انتقل إلى: `/dashboard/audit-logs`
 2. شاهد:
    - إجمالي العمليات
@@ -239,6 +274,7 @@ logger.info("All employees", { employees: [...1000 employees] });  // ❌
 ## 7. Troubleshooting
 
 ### Sentry لا يعمل؟
+
 ```bash
 # تحقق من وجود DSN
 echo $NEXT_PUBLIC_SENTRY_DSN
@@ -247,27 +283,29 @@ echo $NEXT_PUBLIC_SENTRY_DSN
 ls sentry.*.config.ts
 
 # أعد تشغيل السيرفر
-npm run dev
+pnpm dev
 ```
 
 ### Audit Logs لا تظهر؟
+
 ```bash
 # تحقق من الـ middleware
 # في lib/db.ts يجب أن يكون موجود:
 client.$use(createAuditMiddleware());
 
 # تحقق من الجدول في قاعدة البيانات
-npx prisma studio
+pnpm prisma studio
 # افتح AuditLog table
 ```
 
 ### Logs لا تظهر بشكل جميل في Development؟
+
 ```bash
 # تأكد من تثبيت pino-pretty
-npm ls pino-pretty
+pnpm list pino-pretty
 
 # إن لم يكن موجوداً:
-npm install pino-pretty --save-dev --legacy-peer-deps
+pnpm add -D pino-pretty
 ```
 
 ---
@@ -290,7 +328,7 @@ npm install pino-pretty --save-dev --legacy-peer-deps
 
 ```bash
 # Database
-DATABASE_URL=postgresql://...
+DATABASE_URL=postgresql://...?...&sslmode=verify-full
 
 # Authentication
 NEXTAUTH_SECRET=...
@@ -312,17 +350,22 @@ R2_SECRET_ACCESS_KEY=...
 R2_BUCKET_NAME=...
 ```
 
+ملاحظة: إذا كنت تستخدم Neon أو PostgreSQL مُدارًا، فاجعل `sslmode` صريحًا داخل `DATABASE_URL`. القيمة `verify-full` تحافظ على السلوك الآمن الحالي وتمنع تحذير `pg` المستقبلي.
+
 ---
 
 ## 10. الدعم والتوثيق
 
 ### Resources:
+
 - Sentry Docs: https://docs.sentry.io/platforms/javascript/guides/nextjs/
 - Pino Docs: https://getpino.io/
 - Prisma Middleware: https://www.prisma.io/docs/concepts/components/prisma-client/middleware
 
 ### Contact:
+
 إذا واجهت مشاكل، راجع:
+
 1. `/FEATURES_AUDIT.md` - قائمة الميزات
 2. `/IMPLEMENTATION_SUMMARY.md` - ملخص التنفيذ
 3. Sentry Dashboard - للأخطاء

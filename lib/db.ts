@@ -7,6 +7,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { createAuditExtension } from "./audit/extension";
+import { normalizePostgresConnectionString } from "./postgres-connection-string";
 
 function createPrismaClient() {
   const connectionString = process.env.DATABASE_URL;
@@ -15,11 +16,13 @@ function createPrismaClient() {
     throw new Error("DATABASE_URL environment variable is not set");
   }
 
-  const adapter = new PrismaPg({ connectionString });
+  const adapter = new PrismaPg({
+    connectionString: normalizePostgresConnectionString(connectionString)
+  });
 
   const baseClient = new PrismaClient({
     adapter,
-    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"]
   });
 
   // Always return the same extended client shape so delegate overloads like groupBy stay callable.

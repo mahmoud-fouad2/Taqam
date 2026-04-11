@@ -10,9 +10,13 @@ import { authOptions } from "@/lib/auth";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 import type { Prisma } from "@prisma/client";
 
+const UNLIMITED_EMPLOYEES = 1_000_000;
+
 const VALID_TENANT_STATUSES = new Set(["PENDING", "ACTIVE", "SUSPENDED", "CANCELLED"]);
 
-function normalizeTenantStatus(input: unknown): "PENDING" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | undefined {
+function normalizeTenantStatus(
+  input: unknown
+): "PENDING" | "ACTIVE" | "SUSPENDED" | "CANCELLED" | undefined {
   const v = String(input ?? "").trim();
   if (!v) return undefined;
   const upper = v.toUpperCase();
@@ -27,7 +31,8 @@ function mapPlanFromDb(plan: unknown): Tenant["plan"] {
   if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
   // Also accept already-normalized values.
   const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter") return lower as Tenant["plan"];
+  if (lower === "enterprise" || lower === "business" || lower === "starter")
+    return lower as Tenant["plan"];
   return "starter";
 }
 
@@ -38,6 +43,14 @@ function mapPlanToDb(plan: unknown): "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTER
   if (v === "enterprise") return "ENTERPRISE";
   if (v === "trial") return "TRIAL";
   return "TRIAL";
+}
+
+function planToPricingSlug(
+  plan: ReturnType<typeof mapPlanToDb>
+): "starter" | "business" | "enterprise" {
+  if (plan === "ENTERPRISE") return "enterprise";
+  if (plan === "PROFESSIONAL") return "business";
+  return "starter";
 }
 
 function readSettings(t: any): Record<string, unknown> {
@@ -79,7 +92,7 @@ function mapTenant(t: any): Tenant {
     employeesCount: t._count?.employees ?? 0,
     createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
-    createdBy: t.createdBy ?? "",
+    createdBy: t.createdBy ?? ""
   };
 }
 
@@ -88,18 +101,12 @@ export async function GET(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     // Only Super Admin can access this
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -111,7 +118,7 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       // Default: hide cancelled/deleted tenants unless explicitly requested.
-      status: { not: "CANCELLED" },
+      status: { not: "CANCELLED" }
     };
 
     if (search) {
@@ -119,7 +126,7 @@ export async function GET(request: NextRequest) {
         { name: { contains: search, mode: "insensitive" } },
         { nameAr: { contains: search, mode: "insensitive" } },
         { slug: { contains: search, mode: "insensitive" } },
-        { domain: { contains: search, mode: "insensitive" } },
+        { domain: { contains: search, mode: "insensitive" } }
       ];
     }
 
@@ -145,15 +152,15 @@ export async function GET(request: NextRequest) {
           _count: {
             select: {
               employees: true,
-              users: true,
-            },
-          },
+              users: true
+            }
+          }
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * pageSize,
-        take: pageSize,
+        take: pageSize
       }),
-      prisma.tenant.count({ where }),
+      prisma.tenant.count({ where })
     ]);
 
     return NextResponse.json({
@@ -163,15 +170,12 @@ export async function GET(request: NextRequest) {
         page,
         pageSize,
         total,
-        totalPages: Math.ceil(total / pageSize),
-      },
+        totalPages: Math.ceil(total / pageSize)
+      }
     });
   } catch (error) {
     console.error("Error fetching tenants:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch tenants" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to fetch tenants" }, { status: 500 });
   }
 }
 
@@ -180,17 +184,11 @@ export async function POST(request: NextRequest) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const body = await request.json();
@@ -209,7 +207,7 @@ export async function POST(request: NextRequest) {
         : {}),
       ...(incomingSettings.companyPhone !== undefined && incomingSettings.contactPhone === undefined
         ? { contactPhone: incomingSettings.companyPhone }
-        : {}),
+        : {})
     } as Prisma.InputJsonObject;
 
     // Check if slug is unique
@@ -217,8 +215,8 @@ export async function POST(request: NextRequest) {
       where: {
         OR: [{ slug: body.slug }, body.domain ? { domain: body.domain } : {}].filter(
           (c) => Object.keys(c).length > 0
-        ),
-      },
+        )
+      }
     });
 
     if (existingTenant) {
@@ -226,6 +224,83 @@ export async function POST(request: NextRequest) {
         { success: false, error: "Slug or domain already exists" },
         { status: 400 }
       );
+    }
+
+    const plan = mapPlanToDb(body.plan);
+
+    const platformSettings = await prisma.platformSettings.findFirst({
+      select: { trialDays: true, trialMaxEmployees: true }
+    });
+    const trialDaysRaw = platformSettings?.trialDays ?? 14;
+    const trialDays = Number.isFinite(trialDaysRaw) && trialDaysRaw > 0 ? trialDaysRaw : 14;
+    const trialMaxEmployeesRaw = platformSettings?.trialMaxEmployees ?? 10;
+    const trialMaxEmployees =
+      Number.isFinite(trialMaxEmployeesRaw) && trialMaxEmployeesRaw > 0 ? trialMaxEmployeesRaw : 10;
+
+    const planSlugFromBody = typeof body.plan === "string" ? body.plan.trim().toLowerCase() : "";
+    const pricingSlug: "starter" | "business" | "enterprise" =
+      planSlugFromBody === "starter" ||
+      planSlugFromBody === "business" ||
+      planSlugFromBody === "enterprise"
+        ? (planSlugFromBody as any)
+        : planToPricingSlug(plan);
+
+    const pricingPlan =
+      plan === "TRIAL"
+        ? null
+        : await prisma.pricingPlan.findUnique({
+            where: { slug: pricingSlug },
+            select: { maxEmployees: true }
+          });
+
+    const maxEmployeesValueRaw = body.maxEmployees;
+    const maxEmployeesValue =
+      typeof maxEmployeesValueRaw === "number"
+        ? maxEmployeesValueRaw
+        : typeof maxEmployeesValueRaw === "string" && maxEmployeesValueRaw.trim()
+          ? Number(maxEmployeesValueRaw)
+          : undefined;
+    const maxEmployeesInput =
+      maxEmployeesValue !== undefined && Number.isFinite(maxEmployeesValue) && maxEmployeesValue > 0
+        ? Math.trunc(maxEmployeesValue)
+        : undefined;
+    if (body.maxEmployees !== undefined && maxEmployeesInput === undefined) {
+      return NextResponse.json({ success: false, error: "Invalid maxEmployees" }, { status: 400 });
+    }
+
+    const maxEmployees =
+      maxEmployeesInput ??
+      (plan === "TRIAL"
+        ? trialMaxEmployees
+        : pricingPlan
+          ? pricingPlan.maxEmployees === null
+            ? UNLIMITED_EMPLOYEES
+            : pricingPlan.maxEmployees
+          : plan === "BASIC"
+            ? 25
+            : plan === "PROFESSIONAL"
+              ? 100
+              : UNLIMITED_EMPLOYEES);
+
+    const hasPlanExpiresAt = Object.prototype.hasOwnProperty.call(body, "planExpiresAt");
+    const planExpiresAtRaw = body.planExpiresAt;
+    let planExpiresAt: Date | null;
+    if (!hasPlanExpiresAt) {
+      planExpiresAt =
+        plan === "TRIAL" ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000) : null;
+    } else if (planExpiresAtRaw === null || planExpiresAtRaw === "") {
+      planExpiresAt = null;
+    } else if (typeof planExpiresAtRaw === "string") {
+      const d = new Date(planExpiresAtRaw);
+      if (Number.isNaN(d.getTime())) {
+        return NextResponse.json(
+          { success: false, error: "Invalid planExpiresAt" },
+          { status: 400 }
+        );
+      }
+      planExpiresAt = d;
+    } else {
+      return NextResponse.json({ success: false, error: "Invalid planExpiresAt" }, { status: 400 });
     }
 
     const tenant = await prisma.tenant.create({
@@ -238,30 +313,25 @@ export async function POST(request: NextRequest) {
         timezone: body.timezone || "Asia/Riyadh",
         currency: body.currency || "SAR",
         weekStartDay: body.weekStartDay || 0,
-        plan: mapPlanToDb(body.plan),
-        planExpiresAt: body.planExpiresAt
-          ? new Date(body.planExpiresAt)
-          : new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
-        maxEmployees: body.maxEmployees || 10,
+        plan,
+        planExpiresAt,
+        maxEmployees,
         status: "ACTIVE",
-        settings: normalizedSettings,
+        settings: normalizedSettings
       },
       include: {
         _count: {
           select: {
             employees: true,
-            users: true,
-          },
-        },
-      },
+            users: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ success: true, data: mapTenant(tenant) }, { status: 201 });
   } catch (error) {
     console.error("Error creating tenant:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to create tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to create tenant" }, { status: 500 });
   }
 }

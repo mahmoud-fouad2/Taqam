@@ -9,7 +9,7 @@ import {
   DialogContent,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import type { Employee } from "@/lib/types/core-hr";
 import { getEmployeeFullName } from "@/lib/types/core-hr";
@@ -25,7 +25,7 @@ export function EmployeeViewDialog({
   onClose,
   onEdit,
   getDeptName,
-  getJobName,
+  getJobName
 }: {
   employee: Employee | null;
   onClose: () => void;
@@ -45,12 +45,12 @@ export function EmployeeViewDialog({
         {employee && (
           <div className="space-y-4">
             <div className="flex items-center gap-4">
-              <div className="size-16 rounded-full bg-muted flex items-center justify-center">
+              <div className="bg-muted flex size-16 items-center justify-center rounded-full">
                 <IconUser className="size-8" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold">{getEmployeeFullName(employee, "ar")}</h3>
-                <p className="text-sm text-muted-foreground">{employee.email}</p>
+                <p className="text-muted-foreground text-sm">{employee.email}</p>
               </div>
             </div>
 
@@ -92,15 +92,18 @@ export function EmployeeViewDialog({
         )}
 
         <DialogFooter>
-          <Button variant="outline" onClick={onClose}>{t.common.close}</Button>
+          <Button variant="outline" onClick={onClose}>
+            {t.common.close}
+          </Button>
           <Button
             onClick={() => {
               if (!employee) return;
               onEdit(employee);
               onClose();
             }}
-            disabled={!employee}
-          >{t.common.edit}</Button>
+            disabled={!employee}>
+            {t.common.edit}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

@@ -9,7 +9,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
-import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle
+} from "@/components/ui/empty";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
@@ -20,13 +26,15 @@ export async function generateMetadata(): Promise<Metadata> {
     path: "/careers",
     titleAr: "بوابة الوظائف | طاقم",
     titleEn: "Careers Portal | Taqam",
-    descriptionAr: "بوابة توظيف مجمعة تعرض الوظائف المفتوحة لدى الشركات العاملة على طاقم مع تقديم مباشر من نفس المكان.",
-    descriptionEn: "An aggregate careers portal listing active roles across companies running on Taqam, with direct applications in one place.",
+    descriptionAr:
+      "بوابة توظيف مجمعة تعرض الوظائف المفتوحة لدى الشركات العاملة على طاقم مع تقديم مباشر من نفس المكان.",
+    descriptionEn:
+      "An aggregate careers portal listing active roles across companies running on Taqam, with direct applications in one place."
   });
 }
 
 export default async function CareersPage({
-  searchParams,
+  searchParams
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
@@ -37,240 +45,297 @@ export default async function CareersPage({
   const query = typeof sp?.q === "string" ? sp.q.trim() : "";
   const location = typeof sp?.location === "string" ? sp.location.trim() : "";
   const departmentId = typeof sp?.department === "string" ? sp.department.trim() : "";
-  const jobType = normalizePublicJobType(typeof sp?.jobType === "string" ? sp.jobType : undefined) ?? "";
+  const jobType =
+    normalizePublicJobType(typeof sp?.jobType === "string" ? sp.jobType : undefined) ?? "";
   const [jobs, filters] = await Promise.all([
     listPublicJobPostings({
       query: query || undefined,
       location: location || undefined,
       departmentId: departmentId || undefined,
       jobType: jobType || undefined,
-      limit: 60,
+      limit: 60
     }),
-    listPublicJobFilters(),
+    listPublicJobFilters()
   ]);
   const tenantCount = new Set(jobs.map((job) => job.tenantSlug)).size;
   const nf = new Intl.NumberFormat(isAr ? "ar-SA" : "en-US");
-  const selectedDepartment = filters.departments.find((department) => department.id === departmentId);
+  const selectedDepartment = filters.departments.find(
+    (department) => department.id === departmentId
+  );
   const hasFilters = Boolean(query || location || departmentId || jobType);
 
   return (
     <main className="bg-background pb-20">
       <StaggerContainer>
-      <section className="relative overflow-hidden border-b pb-20 pt-20 sm:pt-28">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.14),transparent_65%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.22),transparent_65%)]" />
-          <div className="absolute start-0 top-20 h-64 w-64 rounded-full bg-indigo-500/[0.06] blur-[100px]" />
-          <div className="absolute end-0 top-32 h-56 w-56 rounded-full bg-sky-500/[0.06] blur-[80px]" />
-        </div>
+        <section className="relative overflow-hidden border-b pt-20 pb-20 sm:pt-28">
+          <div className="pointer-events-none absolute inset-0 -z-10">
+            <div className="absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.14),transparent_65%)] dark:bg-[radial-gradient(ellipse_60%_45%_at_50%_0%,rgba(99,102,241,0.22),transparent_65%)]" />
+            <div className="absolute start-0 top-20 h-64 w-64 rounded-full bg-indigo-500/[0.06] blur-[100px]" />
+            <div className="absolute end-0 top-32 h-56 w-56 rounded-full bg-sky-500/[0.06] blur-[80px]" />
+          </div>
 
-        <div className="container mx-auto px-4">
-          <div className="grid items-center gap-12 lg:grid-cols-2 lg:pb-8">
-            <StaggerItem direction="right" className="text-center lg:text-start">
-              <span className="mb-5 flex justify-center lg:justify-start">
-                <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/[0.07] px-4 py-1.5 text-xs font-semibold text-primary">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  {isAr ? "بوابة وظائف مجمعة لكل الشركات على طاقم" : "Unified careers portal across Taqam companies"}
+          <div className="container mx-auto px-4">
+            <div className="grid items-center gap-12 lg:grid-cols-2 lg:pb-8">
+              <StaggerItem direction="right" className="text-center lg:text-start">
+                <span className="mb-5 flex justify-center lg:justify-start">
+                  <span className="border-primary/20 bg-primary/[0.07] text-primary inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
+                    <Sparkles className="h-3.5 w-3.5" />
+                    {isAr
+                      ? "بوابة وظائف مجمعة لكل الشركات على طاقم"
+                      : "Unified careers portal across Taqam companies"}
+                  </span>
                 </span>
-              </span>
 
-              <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-                {isAr ? "اكتشف فرصك التالية من بوابة توظيف واحدة" : "Discover your next move from one careers portal"}
-              </h1>
-              <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-muted-foreground lg:mx-0">
-                {isAr
-                  ? "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة."
-                  : "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."}
-              </p>
+                <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
+                  {isAr
+                    ? "اكتشف فرصك التالية من بوابة توظيف واحدة"
+                    : "Discover your next move from one careers portal"}
+                </h1>
+                <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8 lg:mx-0">
+                  {isAr
+                    ? "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة."
+                    : "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."}
+                </p>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-3">
-                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                  <CardContent className="p-5">
-                    <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.length)}</div>
-                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "وظيفة مفتوحة الآن" : "Active openings"}</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                  <CardContent className="p-5">
-                    <div className="text-3xl font-extrabold text-primary">{nf.format(tenantCount)}</div>
-                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "شركة توظف" : "Hiring companies"}</p>
-                  </CardContent>
-                </Card>
-                <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-                  <CardContent className="p-5">
-                    <div className="text-3xl font-extrabold text-primary">{nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}</div>
-                    <p className="mt-1 text-xs text-muted-foreground/80">{isAr ? "مقاعد معلنة" : "Positions"}</p>
-                  </CardContent>
-                </Card>
-              </div>
-            </StaggerItem>
-
-            {/* Visual */}
-            <StaggerItem direction="left" className="relative mx-auto hidden w-full max-w-md lg:block">
-              {/* Decorative shapes */}
-              <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-gradient-to-tr from-amber-200 to-rose-200 blur-2xl dark:from-amber-900/40 dark:to-rose-900/40" />
-              <div className="pointer-events-none absolute -end-10 bottom-10 -z-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
-              
-              <div className="relative overflow-hidden rounded-[2.5rem] rounded-bl-[6rem] rounded-tr-[6rem] border-[4px] border-white/60 bg-card/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
-                <div className="relative aspect-[4/5] w-full">
-                  <Image
-                    src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80"
-                    alt={isAr ? "التوظيف والمستقبل" : "Careers and future"}
-                    fill
-                    sizes="420px"
-                    className="object-cover transition-transform duration-700 hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent" />
+                <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                  <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="text-primary text-3xl font-extrabold">
+                        {nf.format(jobs.length)}
+                      </div>
+                      <p className="text-muted-foreground/80 mt-1 text-xs">
+                        {isAr ? "وظيفة مفتوحة الآن" : "Active openings"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="text-primary text-3xl font-extrabold">
+                        {nf.format(tenantCount)}
+                      </div>
+                      <p className="text-muted-foreground/80 mt-1 text-xs">
+                        {isAr ? "شركة توظف" : "Hiring companies"}
+                      </p>
+                    </CardContent>
+                  </Card>
+                  <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+                    <CardContent className="p-5">
+                      <div className="text-primary text-3xl font-extrabold">
+                        {nf.format(jobs.reduce((sum, job) => sum + job.positions, 0))}
+                      </div>
+                      <p className="text-muted-foreground/80 mt-1 text-xs">
+                        {isAr ? "مقاعد معلنة" : "Positions"}
+                      </p>
+                    </CardContent>
+                  </Card>
                 </div>
-              </div>
-
-              {/* Floating badge */}
-              <div className="absolute -end-6 bottom-16 rounded-2xl border border-white/60 bg-card/60 p-3.5 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-inner">
-                    <BriefcaseBusiness className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-foreground">{isAr ? "فرص لا تنتهي" : "Endless opportunities"}</p>
-                    <p className="text-xs font-medium text-muted-foreground">{isAr ? "التحق بأفضل الشركات" : "Join the best companies"}</p>
-                  </div>
-                </div>
-              </div>
-            </StaggerItem>
-          </div>
-
-          <StaggerItem direction="up" className="mx-auto max-w-4xl pt-8">
-            <PublicJobFilters
-              basePath={`${p}/careers`}
-              key={`careers-filters:${query}:${location}:${departmentId}:${jobType}`}
-              departments={filters.departments.map((department) => ({
-                value: department.id,
-                label: department.nameAr || department.name,
-              }))}
-              initialDepartmentId={departmentId}
-              initialJobType={jobType}
-              initialLocation={location}
-              initialQuery={query}
-              jobTypes={filters.jobTypes.map((value) => ({
-                value,
-                label: getPublicJobTypeLabel(locale, value),
-              }))}
-              locale={locale}
-              locations={filters.locations.map((value) => ({ value, label: value }))}
-              searchPlaceholder={isAr ? "ابحث بالمسمى الوظيفي، المدينة أو اسم الشركة" : "Search by role, city, or company"}
-            />
-          </StaggerItem>
-        </div>
-      </section>
-
-      <section className="container mx-auto px-4 py-14">
-        <FadeIn direction="up">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold">{isAr ? "الفرص المتاحة الآن" : "Open roles right now"}</h2>
-            <p className="mt-1 text-muted-foreground">
-              {hasFilters
-                ? isAr
-                  ? "نتائج الفلاتر الحالية على الوظائف النشطة المنشورة من الشركات على طاقم."
-                  : "Filtered results across active roles published by companies on Taqam."
-                : query
-                ? isAr
-                  ? `نتائج البحث عن: ${query}`
-                  : `Search results for: ${query}`
-                : isAr
-                  ? "وظائف حقيقية مأخوذة مباشرة من لوحات الشركات داخل طاقم."
-                  : "Real roles pulled directly from company dashboards inside Taqam."}
-            </p>
-            {hasFilters ? (
-              <div className="mt-3 flex flex-wrap gap-2">
-                {query ? <Badge variant="outline">{isAr ? `بحث: ${query}` : `Query: ${query}`}</Badge> : null}
-                {location ? <Badge variant="outline">{isAr ? `الموقع: ${location}` : `Location: ${location}`}</Badge> : null}
-                {selectedDepartment ? (
-                  <Badge variant="outline">{isAr ? `القسم: ${selectedDepartment.nameAr || selectedDepartment.name}` : `Department: ${selectedDepartment.name}`}</Badge>
-                ) : null}
-                {jobType ? <Badge variant="outline">{isAr ? `النوع: ${getPublicJobTypeLabel(locale, jobType)}` : `Job type: ${getPublicJobTypeLabel(locale, jobType)}`}</Badge> : null}
-              </div>
-            ) : null}
-          </div>
-
-          <div className="flex gap-2">
-            <Button asChild variant="outline">
-              <Link href={`${p}/request-demo`}>{isAr ? "أضف شركتك إلى طاقم" : "Bring your company to Taqam"}</Link>
-            </Button>
-          </div>
-        </div>
-        </FadeIn>
-
-        {jobs.length === 0 ? (
-          <FadeIn direction="up">
-          <Empty className="border py-16">
-            <EmptyMedia variant="icon">
-              <BriefcaseBusiness />
-            </EmptyMedia>
-            <EmptyHeader>
-              <EmptyTitle>{isAr ? "لا توجد وظائف مطابقة الآن" : "No matching roles right now"}</EmptyTitle>
-              <EmptyDescription>
-                {isAr
-                  ? "جرّب تعديل كلمات البحث أو راقب البوابة لاحقًا مع إضافة وظائف جديدة من الشركات المشتركة."
-                  : "Try another search or check back soon as more companies publish new openings."}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-          </FadeIn>
-        ) : (
-          <StaggerContainer className="grid gap-5 lg:grid-cols-2">
-            {jobs.map((job) => (
-              <StaggerItem direction="up" key={job.id}>
-                <PublicJobCard job={job} locale={locale} />
               </StaggerItem>
-            ))}
-          </StaggerContainer>
-        )}
-      </section>
 
-      <section className="relative border-t py-24">
-        <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.3),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.5)_50%)]" />
-        <FadeIn direction="up" className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
-          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <CardContent className="space-y-3 p-7">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
-                <Building2 className="h-5 w-5 text-primary" />
+              {/* Visual */}
+              <StaggerItem
+                direction="left"
+                className="relative mx-auto hidden w-full max-w-md lg:block">
+                {/* Decorative shapes */}
+                <div className="pointer-events-none absolute -inset-6 -z-10 rounded-full bg-gradient-to-tr from-amber-200 to-rose-200 blur-2xl dark:from-amber-900/40 dark:to-rose-900/40" />
+                <div className="pointer-events-none absolute -end-10 bottom-10 -z-10 h-32 w-32 rounded-full bg-blue-400/20 blur-3xl" />
+
+                <div className="bg-card/60 relative overflow-hidden rounded-[2.5rem] rounded-tr-[6rem] rounded-bl-[6rem] border-[4px] border-white/60 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                  <div className="relative aspect-[4/5] w-full">
+                    <Image
+                      src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=800&q=80"
+                      alt={isAr ? "التوظيف والمستقبل" : "Careers and future"}
+                      fill
+                      sizes="420px"
+                      className="object-cover transition-transform duration-700 hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-gray-900/40 via-transparent to-transparent" />
+                  </div>
+                </div>
+
+                {/* Floating badge */}
+                <div className="bg-card/60 absolute -end-6 bottom-16 rounded-2xl border border-white/60 p-3.5 shadow-xl backdrop-blur-lg dark:border-white/10 dark:bg-slate-950/60 dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-rose-500 text-white shadow-inner">
+                      <BriefcaseBusiness className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className="text-foreground text-sm font-bold">
+                        {isAr ? "فرص لا تنتهي" : "Endless opportunities"}
+                      </p>
+                      <p className="text-muted-foreground text-xs font-medium">
+                        {isAr ? "التحق بأفضل الشركات" : "Join the best companies"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </StaggerItem>
+            </div>
+
+            <StaggerItem direction="up" className="mx-auto max-w-4xl pt-8">
+              <PublicJobFilters
+                basePath={`${p}/careers`}
+                key={`careers-filters:${query}:${location}:${departmentId}:${jobType}`}
+                departments={filters.departments.map((department) => ({
+                  value: department.id,
+                  label: department.nameAr || department.name
+                }))}
+                initialDepartmentId={departmentId}
+                initialJobType={jobType}
+                initialLocation={location}
+                initialQuery={query}
+                jobTypes={filters.jobTypes.map((value) => ({
+                  value,
+                  label: getPublicJobTypeLabel(locale, value)
+                }))}
+                locale={locale}
+                locations={filters.locations.map((value) => ({ value, label: value }))}
+                searchPlaceholder={
+                  isAr
+                    ? "ابحث بالمسمى الوظيفي، المدينة أو اسم الشركة"
+                    : "Search by role, city, or company"
+                }
+              />
+            </StaggerItem>
+          </div>
+        </section>
+
+        <section className="container mx-auto px-4 py-14">
+          <FadeIn direction="up">
+            <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-2xl font-bold">
+                  {isAr ? "الفرص المتاحة الآن" : "Open roles right now"}
+                </h2>
+                <p className="text-muted-foreground mt-1">
+                  {hasFilters
+                    ? isAr
+                      ? "نتائج الفلاتر الحالية على الوظائف النشطة المنشورة من الشركات على طاقم."
+                      : "Filtered results across active roles published by companies on Taqam."
+                    : query
+                      ? isAr
+                        ? `نتائج البحث عن: ${query}`
+                        : `Search results for: ${query}`
+                      : isAr
+                        ? "وظائف حقيقية مأخوذة مباشرة من لوحات الشركات داخل طاقم."
+                        : "Real roles pulled directly from company dashboards inside Taqam."}
+                </p>
+                {hasFilters ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {query ? (
+                      <Badge variant="outline">{isAr ? `بحث: ${query}` : `Query: ${query}`}</Badge>
+                    ) : null}
+                    {location ? (
+                      <Badge variant="outline">
+                        {isAr ? `الموقع: ${location}` : `Location: ${location}`}
+                      </Badge>
+                    ) : null}
+                    {selectedDepartment ? (
+                      <Badge variant="outline">
+                        {isAr
+                          ? `القسم: ${selectedDepartment.nameAr || selectedDepartment.name}`
+                          : `Department: ${selectedDepartment.name}`}
+                      </Badge>
+                    ) : null}
+                    {jobType ? (
+                      <Badge variant="outline">
+                        {isAr
+                          ? `النوع: ${getPublicJobTypeLabel(locale, jobType)}`
+                          : `Job type: ${getPublicJobTypeLabel(locale, jobType)}`}
+                      </Badge>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
-              <h3 className="text-lg font-semibold">{isAr ? "بوابة خاصة بكل شركة" : "Dedicated portal per company"}</h3>
-              <p className="text-sm leading-7 text-muted-foreground">
-                {isAr
-                  ? "لكل شركة صفحة توظيف مستقلة يمكن مشاركتها مباشرة مع المرشحين على رابط خاص بها."
-                  : "Each company gets a dedicated careers portal that can be shared directly with candidates."}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <CardContent className="space-y-3 p-7">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
-                <BriefcaseBusiness className="h-5 w-5 text-primary" />
+
+              <div className="flex gap-2">
+                <Button asChild variant="outline">
+                  <Link href={`${p}/request-demo`}>
+                    {isAr ? "أضف شركتك إلى طاقم" : "Bring your company to Taqam"}
+                  </Link>
+                </Button>
               </div>
-              <h3 className="text-lg font-semibold">{isAr ? "مجمّع وظائف المنصة" : "Platform-wide jobs hub"}</h3>
-              <p className="text-sm leading-7 text-muted-foreground">
-                {isAr
-                  ? "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة."
-                  : "Candidates can browse all active openings across the platform and jump into either a job page or a company portal."}
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="rounded-[2rem] border-border/50 bg-card/80 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-            <CardContent className="space-y-3 p-7">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/[0.07]">
-                <Sparkles className="h-5 w-5 text-primary" />
-              </div>
-              <h3 className="text-lg font-semibold">{isAr ? "تقديم مباشر ومتكامل" : "Direct integrated applications"}</h3>
-              <p className="text-sm leading-7 text-muted-foreground">
-                {isAr
-                  ? "أي طلب يصل مباشرة إلى قاعدة البيانات وإلى لوحة المتقدمين داخل الشركة المعنية مع إشعارات بريدية عند تفعيل SMTP."
-                  : "Every application lands directly in the database and the tenant's applicants dashboard, with optional email alerts when SMTP is enabled."}
-              </p>
-            </CardContent>
-          </Card>
-        </FadeIn>
-      </section>
+            </div>
+          </FadeIn>
+
+          {jobs.length === 0 ? (
+            <FadeIn direction="up">
+              <Empty className="border py-16">
+                <EmptyMedia variant="icon">
+                  <BriefcaseBusiness />
+                </EmptyMedia>
+                <EmptyHeader>
+                  <EmptyTitle>
+                    {isAr ? "لا توجد وظائف مطابقة الآن" : "No matching roles right now"}
+                  </EmptyTitle>
+                  <EmptyDescription>
+                    {isAr
+                      ? "جرّب تعديل كلمات البحث أو راقب البوابة لاحقًا مع إضافة وظائف جديدة من الشركات المشتركة."
+                      : "Try another search or check back soon as more companies publish new openings."}
+                  </EmptyDescription>
+                </EmptyHeader>
+              </Empty>
+            </FadeIn>
+          ) : (
+            <StaggerContainer className="grid gap-5 lg:grid-cols-2">
+              {jobs.map((job) => (
+                <StaggerItem direction="up" key={job.id}>
+                  <PublicJobCard job={job} locale={locale} />
+                </StaggerItem>
+              ))}
+            </StaggerContainer>
+          )}
+        </section>
+
+        <section className="relative border-t py-24">
+          <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.3),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.5)_50%)]" />
+          <FadeIn direction="up" className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
+            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <CardContent className="space-y-3 p-7">
+                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
+                  <Building2 className="text-primary h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold">
+                  {isAr ? "بوابة خاصة بكل شركة" : "Dedicated portal per company"}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-7">
+                  {isAr
+                    ? "لكل شركة صفحة توظيف مستقلة يمكن مشاركتها مباشرة مع المرشحين على رابط خاص بها."
+                    : "Each company gets a dedicated careers portal that can be shared directly with candidates."}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <CardContent className="space-y-3 p-7">
+                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
+                  <BriefcaseBusiness className="text-primary h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold">
+                  {isAr ? "مجمّع وظائف المنصة" : "Platform-wide jobs hub"}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-7">
+                  {isAr
+                    ? "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة."
+                    : "Candidates can browse all active openings across the platform and jump into either a job page or a company portal."}
+                </p>
+              </CardContent>
+            </Card>
+            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <CardContent className="space-y-3 p-7">
+                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
+                  <Sparkles className="text-primary h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-semibold">
+                  {isAr ? "تقديم مباشر ومتكامل" : "Direct integrated applications"}
+                </h3>
+                <p className="text-muted-foreground text-sm leading-7">
+                  {isAr
+                    ? "أي طلب يصل مباشرة إلى قاعدة البيانات وإلى لوحة المتقدمين داخل الشركة المعنية مع إشعارات بريدية عند تفعيل SMTP."
+                    : "Every application lands directly in the database and the tenant's applicants dashboard, with optional email alerts when SMTP is enabled."}
+                </p>
+              </CardContent>
+            </Card>
+          </FadeIn>
+        </section>
       </StaggerContainer>
     </main>
   );

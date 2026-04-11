@@ -16,17 +16,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const tenant = await prisma.tenant.update({
@@ -36,10 +30,10 @@ export async function POST(request: NextRequest, context: RouteContext) {
         _count: {
           select: {
             employees: true,
-            users: true,
-          },
-        },
-      },
+            users: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -49,8 +43,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         name: tenant.name,
         nameAr: tenant.nameAr,
         slug: tenant.slug,
-        status: tenant.status.toLowerCase(),
-      },
+        status: tenant.status.toLowerCase()
+      }
     });
   } catch (error) {
     console.error("Error activating tenant:", error);

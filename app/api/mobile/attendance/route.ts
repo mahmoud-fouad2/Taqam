@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 import { submitAttendance } from "@/lib/attendance/submit-attendance";
 import { consumeChallenge } from "@/lib/mobile/challenge";
@@ -18,13 +19,13 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       tenantId: payloadOrRes.tenantId,
-      employeeId: payloadOrRes.employeeId,
+      employeeId: payloadOrRes.employeeId
     };
 
     if (startDate && endDate) {
       where.date = {
         gte: new Date(startDate),
-        lte: new Date(endDate),
+        lte: new Date(endDate)
       };
     }
 
@@ -33,9 +34,9 @@ export async function GET(request: NextRequest) {
         where,
         orderBy: { date: "desc" },
         skip: (page - 1) * limit,
-        take: limit,
+        take: limit
       }),
-      prisma.attendanceRecord.count({ where }),
+      prisma.attendanceRecord.count({ where })
     ]);
 
     return NextResponse.json({
@@ -43,11 +44,11 @@ export async function GET(request: NextRequest) {
         items,
         page,
         limit,
-        total,
-      },
+        total
+      }
     });
   } catch (error) {
-    console.error("Mobile attendance GET error:", error);
+    logger.error("Mobile attendance GET error", undefined, error);
     return NextResponse.json({ error: "Failed to load attendance" }, { status: 500 });
   }
 }
@@ -57,7 +58,7 @@ const schema = z.object({
   latitude: z.number().optional(),
   longitude: z.number().optional(),
   accuracy: z.number().optional(),
-  address: z.string().optional(),
+  address: z.string().optional()
 });
 
 export async function POST(request: NextRequest) {
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
 
     const device = await prisma.mobileDevice.findUnique({
       where: { userId_deviceId: { userId: payloadOrRes.userId, deviceId: payloadOrRes.deviceId } },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!device) {
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
     const ok = await consumeChallenge(prisma, {
       nonce,
       userId: payloadOrRes.userId,
-      mobileDeviceId: device.id,
+      mobileDeviceId: device.id
     });
 
     if (!ok) {
@@ -93,7 +94,10 @@ export async function POST(request: NextRequest) {
     const parsed = schema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const record = await submitAttendance({
@@ -104,14 +108,15 @@ export async function POST(request: NextRequest) {
       latitude: parsed.data.latitude,
       longitude: parsed.data.longitude,
       accuracy: parsed.data.accuracy,
-      address: parsed.data.address,
+      address: parsed.data.address
     });
 
     return NextResponse.json({ data: record }, { status: 201 });
   } catch (error: any) {
     const status = typeof error?.status === "number" ? error.status : 500;
-    const message = typeof error?.message === "string" ? error.message : "Failed to record attendance";
-    if (status >= 500) console.error("Mobile attendance error:", error);
+    const message =
+      typeof error?.message === "string" ? error.message : "Failed to record attendance";
+    if (status >= 500) logger.error("Mobile attendance error", undefined, error);
     return NextResponse.json({ error: message }, { status });
   }
 }

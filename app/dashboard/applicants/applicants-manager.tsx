@@ -13,48 +13,42 @@ import {
   IconSearch,
   IconStar,
   IconStarFilled,
-  IconUser,
+  IconUser
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
@@ -63,7 +57,7 @@ import {
   getApplicants,
   getJobPostings,
   updateApplicantRating,
-  updateApplicantStatus,
+  updateApplicantStatus
 } from "@/lib/api/recruitment";
 import {
   type Applicant,
@@ -71,7 +65,7 @@ import {
   applicationStatusLabels,
   type ApplicationStatus,
   type JobPosting,
-  sourceChannelLabels,
+  sourceChannelLabels
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -133,7 +127,7 @@ export function ApplicantsManager() {
       total: applicants.length,
       new: applicants.filter((applicant) => applicant.status === "new").length,
       interview: applicants.filter((applicant) => applicant.status === "interview").length,
-      accepted: applicants.filter((applicant) => applicant.status === "accepted").length,
+      accepted: applicants.filter((applicant) => applicant.status === "accepted").length
     }),
     [applicants]
   );
@@ -162,7 +156,9 @@ export function ApplicantsManager() {
     try {
       const updatedApplicant = await updateApplicantStatus(applicantId, newStatus);
       setApplicants((current) =>
-        current.map((applicant) => (applicant.id === updatedApplicant.id ? updatedApplicant : applicant))
+        current.map((applicant) =>
+          applicant.id === updatedApplicant.id ? updatedApplicant : applicant
+        )
       );
 
       if (selectedApplicant?.id === updatedApplicant.id) {
@@ -182,7 +178,9 @@ export function ApplicantsManager() {
     try {
       const updatedApplicant = await updateApplicantRating(applicantId, rating);
       setApplicants((current) =>
-        current.map((applicant) => (applicant.id === updatedApplicant.id ? updatedApplicant : applicant))
+        current.map((applicant) =>
+          applicant.id === updatedApplicant.id ? updatedApplicant : applicant
+        )
       );
 
       if (selectedApplicant?.id === updatedApplicant.id) {
@@ -208,9 +206,12 @@ export function ApplicantsManager() {
             type="button"
             disabled={isUpdating}
             onClick={() => void handleRatingChange(applicantId, star)}
-            className="text-yellow-500 transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-60"
-          >
-            {rating && star <= rating ? <IconStarFilled className="h-4 w-4" /> : <IconStar className="h-4 w-4" />}
+            className="text-yellow-500 transition-transform hover:scale-110 disabled:cursor-not-allowed disabled:opacity-60">
+            {rating && star <= rating ? (
+              <IconStarFilled className="h-4 w-4" />
+            ) : (
+              <IconStar className="h-4 w-4" />
+            )}
           </button>
         ))}
       </div>
@@ -223,11 +224,11 @@ export function ApplicantsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.applicants.total}</CardTitle>
-            <IconUser className="h-4 w-4 text-muted-foreground" />
+            <IconUser className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.applicants.pApplicant}</p>
+            <p className="text-muted-foreground text-xs">{t.applicants.pApplicant}</p>
           </CardContent>
         </Card>
 
@@ -238,7 +239,7 @@ export function ApplicantsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.new}</div>
-            <p className="text-xs text-muted-foreground">{t.superAdmin.awaitingReview}</p>
+            <p className="text-muted-foreground text-xs">{t.superAdmin.awaitingReview}</p>
           </CardContent>
         </Card>
 
@@ -249,7 +250,7 @@ export function ApplicantsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-purple-600">{stats.interview}</div>
-            <p className="text-xs text-muted-foreground">{t.applicants.evaluating}</p>
+            <p className="text-muted-foreground text-xs">{t.applicants.evaluating}</p>
           </CardContent>
         </Card>
 
@@ -260,7 +261,7 @@ export function ApplicantsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.accepted}</div>
-            <p className="text-xs text-muted-foreground">{t.applicants.accepted}</p>
+            <p className="text-muted-foreground text-xs">{t.applicants.accepted}</p>
           </CardContent>
         </Card>
       </div>
@@ -273,7 +274,7 @@ export function ApplicantsManager() {
         <CardContent>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.applicants.pSearchApplicant}
                 value={searchQuery}
@@ -310,7 +311,7 @@ export function ApplicantsManager() {
             </Select>
           </div>
 
-          <div className="rounded-md border overflow-x-auto">
+          <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -345,7 +346,7 @@ export function ApplicantsManager() {
                             <p className="font-medium">
                               {applicant.firstName} {applicant.lastName}
                             </p>
-                            <p className="text-xs text-muted-foreground">{applicant.email}</p>
+                            <p className="text-muted-foreground text-xs">{applicant.email}</p>
                           </div>
                         </div>
                       </TableCell>
@@ -353,7 +354,9 @@ export function ApplicantsManager() {
                         <div>
                           <p className="font-medium">{applicant.jobTitle}</p>
                           {applicant.currentCompany && (
-                            <p className="text-xs text-muted-foreground">{t.applicants.pCurrently} {applicant.currentCompany}</p>
+                            <p className="text-muted-foreground text-xs">
+                              {t.applicants.pCurrently} {applicant.currentCompany}
+                            </p>
                           )}
                         </div>
                       </TableCell>
@@ -364,9 +367,10 @@ export function ApplicantsManager() {
                       <TableCell>
                         <Select
                           value={applicant.status}
-                          onValueChange={(value) => void handleStatusChange(applicant.id, value as ApplicationStatus)}
-                          disabled={updatingStatusId === applicant.id}
-                        >
+                          onValueChange={(value) =>
+                            void handleStatusChange(applicant.id, value as ApplicationStatus)
+                          }
+                          disabled={updatingStatusId === applicant.id}>
                           <SelectTrigger className="h-8 w-36">
                             <Badge className={applicationStatusColors[applicant.status]}>
                               {applicationStatusLabels[applicant.status]}
@@ -375,13 +379,18 @@ export function ApplicantsManager() {
                           <SelectContent>
                             {Object.entries(applicationStatusLabels).map(([value, label]) => (
                               <SelectItem key={value} value={value}>
-                                <Badge className={applicationStatusColors[value as ApplicationStatus]}>{label}</Badge>
+                                <Badge
+                                  className={applicationStatusColors[value as ApplicationStatus]}>
+                                  {label}
+                                </Badge>
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </TableCell>
-                      <TableCell>{new Date(applicant.appliedAt).toLocaleDateString("ar-SA")}</TableCell>
+                      <TableCell>
+                        {new Date(applicant.appliedAt).toLocaleDateString("ar-SA")}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -401,7 +410,11 @@ export function ApplicantsManager() {
                               </a>
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-destructive" onClick={() => void handleStatusChange(applicant.id, "rejected")}>{t.applicants.rejectApplication}</DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => void handleStatusChange(applicant.id, "rejected")}>
+                              {t.applicants.rejectApplication}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -436,7 +449,9 @@ export function ApplicantsManager() {
                   </h3>
                   <p className="text-muted-foreground">{selectedApplicant.jobTitle}</p>
                   {selectedApplicant.currentCompany && (
-                    <p className="text-sm text-muted-foreground">{selectedApplicant.currentCompany}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {selectedApplicant.currentCompany}
+                    </p>
                   )}
                   <div className="mt-2 flex items-center gap-2">
                     <Badge className={applicationStatusColors[selectedApplicant.status]}>
@@ -453,14 +468,16 @@ export function ApplicantsManager() {
                 <h4 className="mb-3 font-semibold">{t.organization.contactInfo}</h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2 text-sm">
-                    <IconMail className="h-4 w-4 text-muted-foreground" />
-                    <a href={`mailto:${selectedApplicant.email}`} className="text-primary hover:underline">
+                    <IconMail className="text-muted-foreground h-4 w-4" />
+                    <a
+                      href={`mailto:${selectedApplicant.email}`}
+                      className="text-primary hover:underline">
                       {selectedApplicant.email}
                     </a>
                   </div>
                   {selectedApplicant.phone && (
                     <div className="flex items-center gap-2 text-sm">
-                      <IconPhone className="h-4 w-4 text-muted-foreground" />
+                      <IconPhone className="text-muted-foreground h-4 w-4" />
                       <a href={`tel:${selectedApplicant.phone}`} className="hover:underline">
                         {selectedApplicant.phone}
                       </a>
@@ -468,26 +485,26 @@ export function ApplicantsManager() {
                   )}
                   {selectedApplicant.linkedinUrl && (
                     <div className="flex items-center gap-2 text-sm">
-                      <IconExternalLink className="h-4 w-4 text-muted-foreground" />
+                      <IconExternalLink className="text-muted-foreground h-4 w-4" />
                       <a
                         href={selectedApplicant.linkedinUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >
+                        className="text-primary hover:underline">
                         LinkedIn
                       </a>
                     </div>
                   )}
                   {selectedApplicant.resumeUrl && (
                     <div className="flex items-center gap-2 text-sm">
-                      <IconFileText className="h-4 w-4 text-muted-foreground" />
+                      <IconFileText className="text-muted-foreground h-4 w-4" />
                       <a
                         href={selectedApplicant.resumeUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-primary hover:underline"
-                      >{t.applicants.openResume}</a>
+                        className="text-primary hover:underline">
+                        {t.applicants.openResume}
+                      </a>
                     </div>
                   )}
                 </div>
@@ -497,11 +514,18 @@ export function ApplicantsManager() {
 
               <div>
                 <h4 className="mb-3 font-semibold">{t.applicants.pApplicationDetails}</h4>
-                <div className="rounded-lg bg-muted/50 p-3 text-sm">
+                <div className="bg-muted/50 rounded-lg p-3 text-sm">
                   <p className="font-medium">{selectedApplicant.jobTitle}</p>
-                  <div className="mt-2 flex flex-wrap gap-2 text-muted-foreground">
-                    <span>{t.applicants.pSource} {sourceChannelLabels[selectedApplicant.source]}</span>
-                    <span>{t.applicants.applicationDate} {new Date(selectedApplicant.appliedAt).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}</span>
+                  <div className="text-muted-foreground mt-2 flex flex-wrap gap-2">
+                    <span>
+                      {t.applicants.pSource} {sourceChannelLabels[selectedApplicant.source]}
+                    </span>
+                    <span>
+                      {t.applicants.applicationDate}{" "}
+                      {new Date(selectedApplicant.appliedAt).toLocaleDateString(
+                        locale === "ar" ? "ar-SA" : "en-US"
+                      )}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -509,14 +533,18 @@ export function ApplicantsManager() {
               {selectedApplicant.coverLetter && (
                 <div>
                   <h4 className="mb-3 font-semibold">{t.applicants.pCoverLetter}</h4>
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.coverLetter}</p>
+                  <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+                    {selectedApplicant.coverLetter}
+                  </p>
                 </div>
               )}
 
               {selectedApplicant.notes && (
                 <div>
                   <h4 className="mb-3 font-semibold">{t.applicants.pInternalNotes}</h4>
-                  <p className="whitespace-pre-wrap text-sm text-muted-foreground">{selectedApplicant.notes}</p>
+                  <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+                    {selectedApplicant.notes}
+                  </p>
                 </div>
               )}
 
@@ -534,7 +562,9 @@ export function ApplicantsManager() {
               )}
 
               <div className="flex gap-2 pt-4">
-                <Button className="flex-1" onClick={() => void handleStatusChange(selectedApplicant.id, "interview")}>
+                <Button
+                  className="flex-1"
+                  onClick={() => void handleStatusChange(selectedApplicant.id, "interview")}>
                   <IconCalendar className="ms-2 h-4 w-4" />
                   {t.applicants.pMoveToInterview}
                 </Button>

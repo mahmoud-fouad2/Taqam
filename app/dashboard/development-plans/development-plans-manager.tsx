@@ -13,48 +13,42 @@ import {
   IconCheck,
   IconCalendar,
   IconPlayerPlay,
-  IconClock,
+  IconClock
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
@@ -67,15 +61,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useEmployees } from "@/hooks/use-employees";
-import {
-  developmentPlansApi,
-  type DevelopmentPlanUpsertInput,
-} from "@/lib/api/training";
+import { developmentPlansApi, type DevelopmentPlanUpsertInput } from "@/lib/api/training";
 import {
   type DevelopmentPlan,
   type DevelopmentGoal,
@@ -88,7 +79,7 @@ import {
   developmentPlanTypeLabels,
   developmentPlanPriorityLabels,
   developmentPlanPriorityColors,
-  activityTypeLabels,
+  activityTypeLabels
 } from "@/lib/types/training";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -145,7 +136,7 @@ const EMPTY_FORM: PlanFormState = {
   status: "draft",
   goals: [],
   activities: [],
-  notes: "",
+  notes: ""
 };
 
 function createEditorId(prefix: string) {
@@ -165,7 +156,7 @@ function createEmptyGoal(targetDate = ""): EditablePlanGoal {
     status: "not-started",
     progress: 0,
     metrics: "",
-    completedDate: "",
+    completedDate: ""
   };
 }
 
@@ -179,7 +170,7 @@ function createEmptyActivity(dueDate = ""): EditablePlanActivity {
     dueDate,
     status: "pending",
     completedDate: "",
-    notes: "",
+    notes: ""
   };
 }
 
@@ -203,7 +194,7 @@ function normalizeEditableGoal(goal: EditablePlanGoal): EditablePlanGoal {
       ...goal,
       status: "completed",
       progress: 100,
-      completedDate: goal.completedDate || goal.targetDate,
+      completedDate: goal.completedDate || goal.targetDate
     };
   }
 
@@ -212,7 +203,7 @@ function normalizeEditableGoal(goal: EditablePlanGoal): EditablePlanGoal {
       ...goal,
       status: "not-started",
       progress: 0,
-      completedDate: "",
+      completedDate: ""
     };
   }
 
@@ -220,7 +211,7 @@ function normalizeEditableGoal(goal: EditablePlanGoal): EditablePlanGoal {
     ...goal,
     status: "in-progress",
     progress: progress || 50,
-    completedDate: "",
+    completedDate: ""
   };
 }
 
@@ -228,13 +219,13 @@ function normalizeEditableActivity(activity: EditablePlanActivity): EditablePlan
   if (activity.status === "completed") {
     return {
       ...activity,
-      completedDate: activity.completedDate || activity.dueDate,
+      completedDate: activity.completedDate || activity.dueDate
     };
   }
 
   return {
     ...activity,
-    completedDate: "",
+    completedDate: ""
   };
 }
 
@@ -286,7 +277,7 @@ function buildFormState(plan: DevelopmentPlan): PlanFormState {
         status: goal.status,
         progress: goal.progress,
         metrics: goal.metrics || "",
-        completedDate: toDateInputValue(goal.completedDate || ""),
+        completedDate: toDateInputValue(goal.completedDate || "")
       })
     ),
     activities: plan.activities.map((activity) =>
@@ -299,10 +290,10 @@ function buildFormState(plan: DevelopmentPlan): PlanFormState {
         dueDate: toDateInputValue(activity.dueDate) || toDateInputValue(plan.targetDate),
         status: activity.status,
         completedDate: toDateInputValue(activity.completedDate || ""),
-        notes: activity.notes || "",
+        notes: activity.notes || ""
       })
     ),
-    notes: plan.notes || "",
+    notes: plan.notes || ""
   };
 }
 
@@ -314,7 +305,7 @@ function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
     .map((goal) => {
       const normalizedGoal = normalizeEditableGoal({
         ...goal,
-        targetDate: goal.targetDate || fallbackTargetDate,
+        targetDate: goal.targetDate || fallbackTargetDate
       });
 
       return {
@@ -328,7 +319,7 @@ function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
         completedDate:
           normalizedGoal.status === "completed"
             ? normalizedGoal.completedDate || normalizedGoal.targetDate || fallbackTargetDate
-            : undefined,
+            : undefined
       };
     });
 
@@ -337,7 +328,7 @@ function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
     .map((activity) => {
       const normalizedActivity = normalizeEditableActivity({
         ...activity,
-        dueDate: activity.dueDate || fallbackTargetDate,
+        dueDate: activity.dueDate || fallbackTargetDate
       });
 
       return {
@@ -352,7 +343,7 @@ function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
           normalizedActivity.status === "completed"
             ? normalizedActivity.completedDate || normalizedActivity.dueDate || fallbackTargetDate
             : undefined,
-        notes: normalizedActivity.notes.trim() || undefined,
+        notes: normalizedActivity.notes.trim() || undefined
       };
     });
 
@@ -368,7 +359,7 @@ function buildPayload(form: PlanFormState): DevelopmentPlanUpsertInput {
     status: form.status,
     goals,
     activities,
-    notes: form.notes || undefined,
+    notes: form.notes || undefined
   };
 }
 
@@ -457,14 +448,15 @@ export function DevelopmentPlansManager() {
 
   const stats = React.useMemo(() => {
     const total = plans.length;
-    const avgProgress = total > 0 ? Math.round(plans.reduce((sum, plan) => sum + plan.progress, 0) / total) : 0;
+    const avgProgress =
+      total > 0 ? Math.round(plans.reduce((sum, plan) => sum + plan.progress, 0) / total) : 0;
 
     return {
       total,
       active: plans.filter((plan) => plan.status === "active").length,
       pendingApproval: plans.filter((plan) => plan.status === "pending-approval").length,
       completed: plans.filter((plan) => plan.status === "completed").length,
-      avgProgress,
+      avgProgress
     };
   }, [plans]);
 
@@ -477,7 +469,7 @@ export function DevelopmentPlansManager() {
     setForm({
       ...EMPTY_FORM,
       goals: [createEmptyGoal()],
-      activities: [createEmptyActivity()],
+      activities: [createEmptyActivity()]
     });
     setIsFormSheetOpen(true);
   }
@@ -504,7 +496,7 @@ export function DevelopmentPlansManager() {
   function addGoal() {
     setForm((current) => ({
       ...current,
-      goals: [...current.goals, createEmptyGoal(current.targetDate)],
+      goals: [...current.goals, createEmptyGoal(current.targetDate)]
     }));
   }
 
@@ -513,21 +505,21 @@ export function DevelopmentPlansManager() {
       ...current,
       goals: current.goals.map((goal) =>
         goal.id === goalId ? normalizeEditableGoal({ ...goal, ...changes }) : goal
-      ),
+      )
     }));
   }
 
   function removeGoal(goalId: string) {
     setForm((current) => ({
       ...current,
-      goals: current.goals.filter((goal) => goal.id !== goalId),
+      goals: current.goals.filter((goal) => goal.id !== goalId)
     }));
   }
 
   function addActivity() {
     setForm((current) => ({
       ...current,
-      activities: [...current.activities, createEmptyActivity(current.targetDate)],
+      activities: [...current.activities, createEmptyActivity(current.targetDate)]
     }));
   }
 
@@ -535,15 +527,17 @@ export function DevelopmentPlansManager() {
     setForm((current) => ({
       ...current,
       activities: current.activities.map((activity) =>
-        activity.id === activityId ? normalizeEditableActivity({ ...activity, ...changes }) : activity
-      ),
+        activity.id === activityId
+          ? normalizeEditableActivity({ ...activity, ...changes })
+          : activity
+      )
     }));
   }
 
   function removeActivity(activityId: string) {
     setForm((current) => ({
       ...current,
-      activities: current.activities.filter((activity) => activity.id !== activityId),
+      activities: current.activities.filter((activity) => activity.id !== activityId)
     }));
   }
 
@@ -593,7 +587,9 @@ export function DevelopmentPlansManager() {
         setSelectedPlan(response.data);
       }
     } catch (statusError) {
-      toast.error(statusError instanceof Error ? statusError.message : t.developmentPlans.statusUpdateFailed);
+      toast.error(
+        statusError instanceof Error ? statusError.message : t.developmentPlans.statusUpdateFailed
+      );
     } finally {
       setUpdatingId(null);
     }
@@ -622,7 +618,9 @@ export function DevelopmentPlansManager() {
         setSelectedPlan(null);
       }
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : t.developmentPlans.deleteFailed);
+      toast.error(
+        deleteError instanceof Error ? deleteError.message : t.developmentPlans.deleteFailed
+      );
     } finally {
       setDeletingId(null);
     }
@@ -630,330 +628,292 @@ export function DevelopmentPlansManager() {
 
   return (
     <>
-    <div className="space-y-6">
-      {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
-          {error}
+      <div className="space-y-6">
+        {error && (
+          <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
+            {error}
+          </div>
+        )}
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t.developmentPlans.totalPlans}</CardTitle>
+              <IconTarget className="text-muted-foreground h-4 w-4" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+              <p className="text-muted-foreground text-xs">{t.developmentPlans.devPlan}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                {t.developmentPlans.activePlans}
+              </CardTitle>
+              <IconProgress className="h-4 w-4 text-blue-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-blue-600">{stats.active}</div>
+              <p className="text-muted-foreground text-xs">{t.common.inProgress}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
+              <IconClock className="h-4 w-4 text-yellow-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-yellow-600">{stats.pendingApproval}</div>
+              <p className="text-muted-foreground text-xs">{t.documents.pendingApproval}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">{t.common.completed}</CardTitle>
+              <IconCheck className="h-4 w-4 text-green-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+              <p className="text-muted-foreground text-xs">{t.developmentPlans.completedPlan}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
+              <CardTitle className="text-sm font-medium">
+                {t.developmentPlans.avgProgress}
+              </CardTitle>
+              <IconTarget className="h-4 w-4 text-purple-600" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-purple-600">{stats.avgProgress}%</div>
+              <p className="text-muted-foreground text-xs">{t.developmentPlans.forAllPlans}</p>
+            </CardContent>
+          </Card>
         </div>
-      )}
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t.developmentPlans.totalPlans}</CardTitle>
-            <IconTarget className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.developmentPlans.devPlan}</p>
-          </CardContent>
-        </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t.developmentPlans.activePlans}</CardTitle>
-            <IconProgress className="h-4 w-4 text-blue-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-blue-600">{stats.active}</div>
-            <p className="text-xs text-muted-foreground">{t.common.inProgress}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
-            <IconClock className="h-4 w-4 text-yellow-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pendingApproval}</div>
-            <p className="text-xs text-muted-foreground">{t.documents.pendingApproval}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t.common.completed}</CardTitle>
-            <IconCheck className="h-4 w-4 text-green-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">{t.developmentPlans.completedPlan}</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">{t.developmentPlans.avgProgress}</CardTitle>
-            <IconTarget className="h-4 w-4 text-purple-600" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.avgProgress}%</div>
-            <p className="text-xs text-muted-foreground">{t.developmentPlans.forAllPlans}</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <CardTitle>{t.developmentPlans.pageTitle}</CardTitle>
-              <CardDescription>{t.developmentPlans.pageSubtitle}</CardDescription>
+          <CardHeader>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <CardTitle>{t.developmentPlans.pageTitle}</CardTitle>
+                <CardDescription>{t.developmentPlans.pageSubtitle}</CardDescription>
+              </div>
+              <Button onClick={openCreateSheet}>
+                <IconPlus className="ms-2 h-4 w-4" />
+                {t.developmentPlans.newPlan}
+              </Button>
             </div>
-            <Button onClick={openCreateSheet}>
-              <IconPlus className="ms-2 h-4 w-4" />
-              {t.developmentPlans.newPlan}
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
-            <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder={t.developmentPlans.searchPlaceholder}
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                className="ps-9"
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue placeholder={t.common.status} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">{t.common.allStatuses}</SelectItem>
-                {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="rounded-md border">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t.common.employee}</TableHead>
-                  <TableHead>{t.developmentPlans.planTitle}</TableHead>
-                  <TableHead>{t.performanceGoals.dueDate}</TableHead>
-                  <TableHead>{t.common.inProgress}</TableHead>
-                  <TableHead>{t.common.status}</TableHead>
-                  <TableHead className="text-start">{t.common.actions}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isLoading ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
-                      {t.developmentPlans.loadingPlans}
-                    </TableCell>
-                  </TableRow>
-                ) : filteredPlans.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center">
-                      <p className="text-muted-foreground">{t.developmentPlans.noMatchingPlans}</p>
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredPlans.map((plan) => (
-                    <TableRow key={plan.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage src={plan.employeeAvatar} alt="" />
-                            <AvatarFallback>
-                              {plan.employeeName
-                                .split(" ")
-                                .map((part) => part[0])
-                                .join("")
-                                .slice(0, 2)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="font-medium">{plan.employeeName}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-2">
-                          <p className="font-medium">{plan.title}</p>
-                          <div className="flex flex-wrap gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {developmentPlanTypeLabels[plan.type]}
-                            </Badge>
-                            <Badge className={developmentPlanPriorityColors[plan.priority]}>
-                              {developmentPlanPriorityLabels[plan.priority]}
-                            </Badge>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{formatDate(plan.targetDate)}</TableCell>
-                      <TableCell>
-                        <div className="flex w-24 items-center gap-2">
-                          <Progress value={plan.progress} className="h-2" />
-                          <span className="text-xs text-muted-foreground">{plan.progress}%</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={developmentPlanStatusColors[plan.status]}>
-                          {developmentPlanStatusLabels[plan.status]}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              •••
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => openViewSheet(plan)}>
-                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEditSheet(plan)}>
-                              <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            {plan.status === "draft" && (
-                              <DropdownMenuItem
-                                disabled={updatingId === plan.id}
-                                onClick={() => void handleStatusChange(plan, "pending-approval")}
-                              >
-                                <IconCheck className="ms-2 h-4 w-4" />
-                                {t.developmentPlans.submitForApproval}
-                              </DropdownMenuItem>
-                            )}
-                            {plan.status !== "active" && plan.status !== "completed" && plan.status !== "cancelled" && (
-                              <DropdownMenuItem
-                                disabled={updatingId === plan.id}
-                                onClick={() => void handleStatusChange(plan, "active")}
-                              >
-                                <IconPlayerPlay className="ms-2 h-4 w-4" />{t.common.startExecution}</DropdownMenuItem>
-                            )}
-                            {plan.status !== "completed" && (
-                              <DropdownMenuItem
-                                disabled={updatingId === plan.id}
-                                onClick={() => void handleStatusChange(plan, "completed")}
-                              >
-                                <IconCheck className="ms-2 h-4 w-4" />
-                                {t.developmentPlans.markAsComplete}
-                              </DropdownMenuItem>
-                            )}
-                            {plan.status !== "cancelled" && plan.status !== "completed" && (
-                              <DropdownMenuItem
-                                disabled={updatingId === plan.id}
-                                onClick={() => void handleStatusChange(plan, "cancelled")}
-                              >
-                                <IconX className="ms-2 h-4 w-4" />
-                                {t.developmentPlans.cancelPlan}
-                              </DropdownMenuItem>
-                            )}
-                            {plan.status === "cancelled" && (
-                              <DropdownMenuItem
-                                disabled={updatingId === plan.id}
-                                onClick={() => void handleStatusChange(plan, "draft")}
-                              >
-                                <IconEdit className="ms-2 h-4 w-4" />
-                                {t.developmentPlans.reopenAsDraft}
-                              </DropdownMenuItem>
-                            )}
-                            {plan.status !== "completed" && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  className="text-destructive focus:text-destructive"
-                                  disabled={deletingId === plan.id}
-                                  onClick={() => void handleDelete(plan)}
-                                >
-                                  <IconTrash className="ms-2 h-4 w-4" />
-                                  {deletingId === plan.id ? t.common.deleting : t.developmentPlans.deletePlan}
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
-        <SheetContent className="overflow-y-auto sm:max-w-xl">
-          <SheetHeader>
-            <SheetTitle>{editingPlan ? t.developmentPlans.editPlan : t.developmentPlans.createPlan}</SheetTitle>
-            <SheetDescription>{t.developmentPlans.formDesc}</SheetDescription>
-          </SheetHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t.common.employee}</Label>
-              <Select value={form.employeeId} onValueChange={(value) => updateFormValue("employeeId", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={isEmployeesLoading ? t.developmentPlans.loadingEmployees : t.common.selectEmployee} />
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+              <div className="relative flex-1">
+                <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                <Input
+                  placeholder={t.developmentPlans.searchPlaceholder}
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  className="ps-9"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue placeholder={t.common.status} />
                 </SelectTrigger>
                 <SelectContent>
-                  {employees.map((employee) => (
-                    <SelectItem key={employee.id} value={employee.id}>
-                      {employee.firstName} {employee.lastName}
+                  <SelectItem value="all">{t.common.allStatuses}</SelectItem>
+                  {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="grid gap-2">
-              <Label>{t.developmentPlans.planTitle}</Label>
-              <Input value={form.title} onChange={(event) => updateFormValue("title", event.target.value)} />
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{t.common.employee}</TableHead>
+                    <TableHead>{t.developmentPlans.planTitle}</TableHead>
+                    <TableHead>{t.performanceGoals.dueDate}</TableHead>
+                    <TableHead>{t.common.inProgress}</TableHead>
+                    <TableHead>{t.common.status}</TableHead>
+                    <TableHead className="text-start">{t.common.actions}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isLoading ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-muted-foreground py-8 text-center">
+                        {t.developmentPlans.loadingPlans}
+                      </TableCell>
+                    </TableRow>
+                  ) : filteredPlans.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="py-8 text-center">
+                        <p className="text-muted-foreground">
+                          {t.developmentPlans.noMatchingPlans}
+                        </p>
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    filteredPlans.map((plan) => (
+                      <TableRow key={plan.id}>
+                        <TableCell>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={plan.employeeAvatar} alt="" />
+                              <AvatarFallback>
+                                {plan.employeeName
+                                  .split(" ")
+                                  .map((part) => part[0])
+                                  .join("")
+                                  .slice(0, 2)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="font-medium">{plan.employeeName}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-2">
+                            <p className="font-medium">{plan.title}</p>
+                            <div className="flex flex-wrap gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {developmentPlanTypeLabels[plan.type]}
+                              </Badge>
+                              <Badge className={developmentPlanPriorityColors[plan.priority]}>
+                                {developmentPlanPriorityLabels[plan.priority]}
+                              </Badge>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>{formatDate(plan.targetDate)}</TableCell>
+                        <TableCell>
+                          <div className="flex w-24 items-center gap-2">
+                            <Progress value={plan.progress} className="h-2" />
+                            <span className="text-muted-foreground text-xs">{plan.progress}%</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={developmentPlanStatusColors[plan.status]}>
+                            {developmentPlanStatusLabels[plan.status]}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                •••
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => openViewSheet(plan)}>
+                                <IconEye className="ms-2 h-4 w-4" />
+                                {t.common.viewDetails}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => openEditSheet(plan)}>
+                                <IconEdit className="ms-2 h-4 w-4" />
+                                {t.common.edit}
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              {plan.status === "draft" && (
+                                <DropdownMenuItem
+                                  disabled={updatingId === plan.id}
+                                  onClick={() => void handleStatusChange(plan, "pending-approval")}>
+                                  <IconCheck className="ms-2 h-4 w-4" />
+                                  {t.developmentPlans.submitForApproval}
+                                </DropdownMenuItem>
+                              )}
+                              {plan.status !== "active" &&
+                                plan.status !== "completed" &&
+                                plan.status !== "cancelled" && (
+                                  <DropdownMenuItem
+                                    disabled={updatingId === plan.id}
+                                    onClick={() => void handleStatusChange(plan, "active")}>
+                                    <IconPlayerPlay className="ms-2 h-4 w-4" />
+                                    {t.common.startExecution}
+                                  </DropdownMenuItem>
+                                )}
+                              {plan.status !== "completed" && (
+                                <DropdownMenuItem
+                                  disabled={updatingId === plan.id}
+                                  onClick={() => void handleStatusChange(plan, "completed")}>
+                                  <IconCheck className="ms-2 h-4 w-4" />
+                                  {t.developmentPlans.markAsComplete}
+                                </DropdownMenuItem>
+                              )}
+                              {plan.status !== "cancelled" && plan.status !== "completed" && (
+                                <DropdownMenuItem
+                                  disabled={updatingId === plan.id}
+                                  onClick={() => void handleStatusChange(plan, "cancelled")}>
+                                  <IconX className="ms-2 h-4 w-4" />
+                                  {t.developmentPlans.cancelPlan}
+                                </DropdownMenuItem>
+                              )}
+                              {plan.status === "cancelled" && (
+                                <DropdownMenuItem
+                                  disabled={updatingId === plan.id}
+                                  onClick={() => void handleStatusChange(plan, "draft")}>
+                                  <IconEdit className="ms-2 h-4 w-4" />
+                                  {t.developmentPlans.reopenAsDraft}
+                                </DropdownMenuItem>
+                              )}
+                              {plan.status !== "completed" && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    disabled={deletingId === plan.id}
+                                    onClick={() => void handleDelete(plan)}>
+                                    <IconTrash className="ms-2 h-4 w-4" />
+                                    {deletingId === plan.id
+                                      ? t.common.deleting
+                                      : t.developmentPlans.deletePlan}
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="grid gap-2">
-              <Label>{t.common.description}</Label>
-              <Textarea
-                rows={3}
-                value={form.description}
-                onChange={(event) => updateFormValue("description", event.target.value)}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
+        <Sheet open={isFormSheetOpen} onOpenChange={handleFormSheetOpenChange}>
+          <SheetContent className="overflow-y-auto sm:max-w-xl">
+            <SheetHeader>
+              <SheetTitle>
+                {editingPlan ? t.developmentPlans.editPlan : t.developmentPlans.createPlan}
+              </SheetTitle>
+              <SheetDescription>{t.developmentPlans.formDesc}</SheetDescription>
+            </SheetHeader>
+            <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label>{t.common.startDate}</Label>
-                <Input type="date" value={form.startDate} onChange={(event) => updateFormValue("startDate", event.target.value)} />
-              </div>
-              <div className="grid gap-2">
-                <Label>{t.performanceGoals.dueDate}</Label>
-                <Input type="date" value={form.targetDate} onChange={(event) => updateFormValue("targetDate", event.target.value)} />
-              </div>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="grid gap-2">
-                <Label>{t.common.status}</Label>
-                <Select value={form.status} onValueChange={(value) => updateFormValue("status", value as DevelopmentPlanStatus)}>
+                <Label>{t.common.employee}</Label>
+                <Select
+                  value={form.employeeId}
+                  onValueChange={(value) => updateFormValue("employeeId", value)}>
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue
+                      placeholder={
+                        isEmployeesLoading
+                          ? t.developmentPlans.loadingEmployees
+                          : t.common.selectEmployee
+                      }
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="grid gap-2">
-                <Label>{t.developmentPlans.mentor}</Label>
-                <Select value={form.mentorId || "none"} onValueChange={(value) => updateFormValue("mentorId", value === "none" ? "" : value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t.developmentPlans.chooseMentor} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">{t.developmentPlans.noMentor}</SelectItem>
                     {employees.map((employee) => (
                       <SelectItem key={employee.id} value={employee.id}>
                         {employee.firstName} {employee.lastName}
@@ -962,456 +922,661 @@ export function DevelopmentPlansManager() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
-                <Label>{t.developmentPlans.planType}</Label>
-                <Select value={form.type} onValueChange={(value) => updateFormValue("type", value as DevelopmentPlanType)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(developmentPlanTypeLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>{t.developmentPlans.planTitle}</Label>
+                <Input
+                  value={form.title}
+                  onChange={(event) => updateFormValue("title", event.target.value)}
+                />
               </div>
+
               <div className="grid gap-2">
-                <Label>{t.common.priority}</Label>
-                <Select value={form.priority} onValueChange={(value) => updateFormValue("priority", value as DevelopmentPlanPriority)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(developmentPlanPriorityLabels).map(([value, label]) => (
-                      <SelectItem key={value} value={value}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-3 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <Label>{t.developmentPlans.goalsSection}</Label>
-                  <p className="text-sm text-muted-foreground">{t.developmentPlans.goalsDescription}</p>
-                </div>
-                <Button type="button" variant="outline" size="sm" onClick={addGoal}>
-                  <IconPlus className="ms-2 h-4 w-4" />{t.performanceGoals.addGoal}</Button>
+                <Label>{t.common.description}</Label>
+                <Textarea
+                  rows={3}
+                  value={form.description}
+                  onChange={(event) => updateFormValue("description", event.target.value)}
+                />
               </div>
 
-              {form.goals.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  {t.developmentPlans.noGoalsYet}
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label>{t.common.startDate}</Label>
+                  <Input
+                    type="date"
+                    value={form.startDate}
+                    onChange={(event) => updateFormValue("startDate", event.target.value)}
+                  />
                 </div>
-              ) : (
-                <div className="space-y-3">
-                  {form.goals.map((goal, index) => (
-                    <div key={goal.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium">{t.developmentPlans.goalN} {index + 1}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeGoal(goal.id)}>
-                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</Button>
-                      </div>
+                <div className="grid gap-2">
+                  <Label>{t.performanceGoals.dueDate}</Label>
+                  <Input
+                    type="date"
+                    value={form.targetDate}
+                    onChange={(event) => updateFormValue("targetDate", event.target.value)}
+                  />
+                </div>
+              </div>
 
-                      <div className="grid gap-2">
-                        <Label>{t.common.title}</Label>
-                        <Input value={goal.title} onChange={(event) => updateGoal(goal.id, { title: event.target.value })} />
-                      </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label>{t.common.status}</Label>
+                  <Select
+                    value={form.status}
+                    onValueChange={(value) =>
+                      updateFormValue("status", value as DevelopmentPlanStatus)
+                    }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(developmentPlanStatusLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>{t.developmentPlans.mentor}</Label>
+                  <Select
+                    value={form.mentorId || "none"}
+                    onValueChange={(value) =>
+                      updateFormValue("mentorId", value === "none" ? "" : value)
+                    }>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t.developmentPlans.chooseMentor} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">{t.developmentPlans.noMentor}</SelectItem>
+                      {employees.map((employee) => (
+                        <SelectItem key={employee.id} value={employee.id}>
+                          {employee.firstName} {employee.lastName}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-                      <div className="grid gap-2">
-                        <Label>{t.common.description}</Label>
-                        <Textarea
-                          rows={2}
-                          value={goal.description}
-                          onChange={(event) => updateGoal(goal.id, { description: event.target.value })}
-                        />
-                      </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label>{t.developmentPlans.planType}</Label>
+                  <Select
+                    value={form.type}
+                    onValueChange={(value) =>
+                      updateFormValue("type", value as DevelopmentPlanType)
+                    }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(developmentPlanTypeLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label>{t.common.priority}</Label>
+                  <Select
+                    value={form.priority}
+                    onValueChange={(value) =>
+                      updateFormValue("priority", value as DevelopmentPlanPriority)
+                    }>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(developmentPlanPriorityLabels).map(([value, label]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-                      <div className="grid gap-4 md:grid-cols-2">
+              <div className="space-y-3 rounded-lg border p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label>{t.developmentPlans.goalsSection}</Label>
+                    <p className="text-muted-foreground text-sm">
+                      {t.developmentPlans.goalsDescription}
+                    </p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={addGoal}>
+                    <IconPlus className="ms-2 h-4 w-4" />
+                    {t.performanceGoals.addGoal}
+                  </Button>
+                </div>
+
+                {form.goals.length === 0 ? (
+                  <div className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+                    {t.developmentPlans.noGoalsYet}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {form.goals.map((goal, index) => (
+                      <div key={goal.id} className="bg-muted/20 space-y-3 rounded-lg border p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium">
+                            {t.developmentPlans.goalN} {index + 1}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeGoal(goal.id)}>
+                            <IconTrash className="ms-2 h-4 w-4" />
+                            {t.common.delete}
+                          </Button>
+                        </div>
+
                         <div className="grid gap-2">
-                          <Label>{t.performanceGoals.dueDate}</Label>
+                          <Label>{t.common.title}</Label>
                           <Input
-                            type="date"
-                            value={goal.targetDate}
-                            onChange={(event) => updateGoal(goal.id, { targetDate: event.target.value })}
+                            value={goal.title}
+                            onChange={(event) => updateGoal(goal.id, { title: event.target.value })}
                           />
                         </div>
-                        <div className="grid gap-2">
-                          <Label>{t.common.status}</Label>
-                          <Select value={goal.status} onValueChange={(value) => updateGoal(goal.id, { status: value as DevelopmentGoal["status"] })}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="not-started">{t.common.notStarted}</SelectItem>
-                              <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
-                              <SelectItem value="completed">{t.common.completed}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
 
-                      <div className="grid gap-4 md:grid-cols-2">
                         <div className="grid gap-2">
-                          <Label>{t.developmentPlans.completionPercentage}</Label>
-                          <Input
-                            type="number"
-                            min={0}
-                            max={100}
-                            value={goal.progress}
-                            onChange={(event) => updateGoal(goal.id, { progress: Number(event.target.value || 0) })}
+                          <Label>{t.common.description}</Label>
+                          <Textarea
+                            rows={2}
+                            value={goal.description}
+                            onChange={(event) =>
+                              updateGoal(goal.id, { description: event.target.value })
+                            }
                           />
                         </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label>{t.performanceGoals.dueDate}</Label>
+                            <Input
+                              type="date"
+                              value={goal.targetDate}
+                              onChange={(event) =>
+                                updateGoal(goal.id, { targetDate: event.target.value })
+                              }
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>{t.common.status}</Label>
+                            <Select
+                              value={goal.status}
+                              onValueChange={(value) =>
+                                updateGoal(goal.id, { status: value as DevelopmentGoal["status"] })
+                              }>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="not-started">{t.common.notStarted}</SelectItem>
+                                <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
+                                <SelectItem value="completed">{t.common.completed}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label>{t.developmentPlans.completionPercentage}</Label>
+                            <Input
+                              type="number"
+                              min={0}
+                              max={100}
+                              value={goal.progress}
+                              onChange={(event) =>
+                                updateGoal(goal.id, { progress: Number(event.target.value || 0) })
+                              }
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>{t.developmentPlans.completionDate}</Label>
+                            <Input
+                              type="date"
+                              value={goal.completedDate}
+                              disabled={goal.status !== "completed"}
+                              onChange={(event) =>
+                                updateGoal(goal.id, { completedDate: event.target.value })
+                              }
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label>{t.developmentPlans.measurementIndicators}</Label>
+                          <Textarea
+                            rows={2}
+                            value={goal.metrics}
+                            onChange={(event) =>
+                              updateGoal(goal.id, { metrics: event.target.value })
+                            }
+                            placeholder={t.developmentPlans.indicatorsExample}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-3 rounded-lg border p-4">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <Label>{t.developmentPlans.activitiesSection}</Label>
+                    <p className="text-muted-foreground text-sm">
+                      {t.developmentPlans.activitiesDescription}
+                    </p>
+                  </div>
+                  <Button type="button" variant="outline" size="sm" onClick={addActivity}>
+                    <IconPlus className="ms-2 h-4 w-4" />
+                    {t.developmentPlans.addActivity}
+                  </Button>
+                </div>
+
+                {form.activities.length === 0 ? (
+                  <div className="text-muted-foreground rounded-lg border border-dashed p-4 text-sm">
+                    {t.developmentPlans.noActivitiesYet}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {form.activities.map((activity, index) => (
+                      <div
+                        key={activity.id}
+                        className="bg-muted/20 space-y-3 rounded-lg border p-3">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium">
+                            {t.developmentPlans.activityN} {index + 1}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeActivity(activity.id)}>
+                            <IconTrash className="ms-2 h-4 w-4" />
+                            {t.common.delete}
+                          </Button>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label>{t.common.title}</Label>
+                          <Input
+                            value={activity.title}
+                            onChange={(event) =>
+                              updateActivity(activity.id, { title: event.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label>{t.common.type}</Label>
+                            <Select
+                              value={activity.type}
+                              onValueChange={(value) =>
+                                updateActivity(activity.id, {
+                                  type: value as DevelopmentActivity["type"]
+                                })
+                              }>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.entries(activityTypeLabels).map(([value, label]) => (
+                                  <SelectItem key={value} value={value}>
+                                    {label}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>{t.developmentPlans.linkOrReference}</Label>
+                            <Input
+                              value={activity.courseId}
+                              onChange={(event) =>
+                                updateActivity(activity.id, { courseId: event.target.value })
+                              }
+                              placeholder={t.developmentPlans.linkPlaceholder}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label>{t.common.description}</Label>
+                          <Textarea
+                            rows={2}
+                            value={activity.description}
+                            onChange={(event) =>
+                              updateActivity(activity.id, { description: event.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                          <div className="grid gap-2">
+                            <Label>{t.developmentPlans.targetDate}</Label>
+                            <Input
+                              type="date"
+                              value={activity.dueDate}
+                              onChange={(event) =>
+                                updateActivity(activity.id, { dueDate: event.target.value })
+                              }
+                            />
+                          </div>
+                          <div className="grid gap-2">
+                            <Label>{t.common.status}</Label>
+                            <Select
+                              value={activity.status}
+                              onValueChange={(value) =>
+                                updateActivity(activity.id, {
+                                  status: value as DevelopmentActivity["status"]
+                                })
+                              }>
+                              <SelectTrigger>
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="pending">{t.common.pending}</SelectItem>
+                                <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
+                                <SelectItem value="completed">{t.common.completed}</SelectItem>
+                                <SelectItem value="skipped">{t.common.skipped}</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </div>
+
                         <div className="grid gap-2">
                           <Label>{t.developmentPlans.completionDate}</Label>
                           <Input
                             type="date"
-                            value={goal.completedDate}
-                            disabled={goal.status !== "completed"}
-                            onChange={(event) => updateGoal(goal.id, { completedDate: event.target.value })}
+                            value={activity.completedDate}
+                            disabled={activity.status !== "completed"}
+                            onChange={(event) =>
+                              updateActivity(activity.id, { completedDate: event.target.value })
+                            }
+                          />
+                        </div>
+
+                        <div className="grid gap-2">
+                          <Label>{t.common.notes}</Label>
+                          <Textarea
+                            rows={2}
+                            value={activity.notes}
+                            onChange={(event) =>
+                              updateActivity(activity.id, { notes: event.target.value })
+                            }
                           />
                         </div>
                       </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
-                      <div className="grid gap-2">
-                        <Label>{t.developmentPlans.measurementIndicators}</Label>
-                        <Textarea
-                          rows={2}
-                          value={goal.metrics}
-                          onChange={(event) => updateGoal(goal.id, { metrics: event.target.value })}
-                          placeholder={t.developmentPlans.indicatorsExample}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+              <div className="grid gap-2">
+                <Label>{t.common.notes}</Label>
+                <Textarea
+                  rows={3}
+                  value={form.notes}
+                  onChange={(event) => updateFormValue("notes", event.target.value)}
+                />
+              </div>
 
-            <div className="space-y-3 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <Label>{t.developmentPlans.activitiesSection}</Label>
-                  <p className="text-sm text-muted-foreground">{t.developmentPlans.activitiesDescription}</p>
-                </div>
-                <Button type="button" variant="outline" size="sm" onClick={addActivity}>
-                  <IconPlus className="ms-2 h-4 w-4" />
-                  {t.developmentPlans.addActivity}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => handleFormSheetOpenChange(false)}>
+                  {t.common.cancel}
+                </Button>
+                <Button onClick={() => void handleSave()} disabled={isSaving}>
+                  {editingPlan ? t.common.saveChanges : t.developmentPlans.createPlan}
                 </Button>
               </div>
-
-              {form.activities.length === 0 ? (
-                <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-                  {t.developmentPlans.noActivitiesYet}
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {form.activities.map((activity, index) => (
-                    <div key={activity.id} className="space-y-3 rounded-lg border bg-muted/20 p-3">
-                      <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-medium">{t.developmentPlans.activityN} {index + 1}</p>
-                        <Button type="button" variant="ghost" size="sm" onClick={() => removeActivity(activity.id)}>
-                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</Button>
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label>{t.common.title}</Label>
-                        <Input value={activity.title} onChange={(event) => updateActivity(activity.id, { title: event.target.value })} />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                          <Label>{t.common.type}</Label>
-                          <Select value={activity.type} onValueChange={(value) => updateActivity(activity.id, { type: value as DevelopmentActivity["type"] })}>
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.entries(activityTypeLabels).map(([value, label]) => (
-                                <SelectItem key={value} value={value}>
-                                  {label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="grid gap-2">
-                          <Label>{t.developmentPlans.linkOrReference}</Label>
-                          <Input
-                            value={activity.courseId}
-                            onChange={(event) => updateActivity(activity.id, { courseId: event.target.value })}
-                            placeholder={t.developmentPlans.linkPlaceholder}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label>{t.common.description}</Label>
-                        <Textarea
-                          rows={2}
-                          value={activity.description}
-                          onChange={(event) => updateActivity(activity.id, { description: event.target.value })}
-                        />
-                      </div>
-
-                      <div className="grid gap-4 md:grid-cols-2">
-                        <div className="grid gap-2">
-                          <Label>{t.developmentPlans.targetDate}</Label>
-                          <Input
-                            type="date"
-                            value={activity.dueDate}
-                            onChange={(event) => updateActivity(activity.id, { dueDate: event.target.value })}
-                          />
-                        </div>
-                        <div className="grid gap-2">
-                          <Label>{t.common.status}</Label>
-                          <Select
-                            value={activity.status}
-                            onValueChange={(value) => updateActivity(activity.id, { status: value as DevelopmentActivity["status"] })}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="pending">{t.common.pending}</SelectItem>
-                              <SelectItem value="in-progress">{t.common.inProgress}</SelectItem>
-                              <SelectItem value="completed">{t.common.completed}</SelectItem>
-                              <SelectItem value="skipped">{t.common.skipped}</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label>{t.developmentPlans.completionDate}</Label>
-                        <Input
-                          type="date"
-                          value={activity.completedDate}
-                          disabled={activity.status !== "completed"}
-                          onChange={(event) => updateActivity(activity.id, { completedDate: event.target.value })}
-                        />
-                      </div>
-
-                      <div className="grid gap-2">
-                        <Label>{t.common.notes}</Label>
-                        <Textarea
-                          rows={2}
-                          value={activity.notes}
-                          onChange={(event) => updateActivity(activity.id, { notes: event.target.value })}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+          </SheetContent>
+        </Sheet>
 
-            <div className="grid gap-2">
-              <Label>{t.common.notes}</Label>
-              <Textarea
-                rows={3}
-                value={form.notes}
-                onChange={(event) => updateFormValue("notes", event.target.value)}
-              />
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => handleFormSheetOpenChange(false)}>{t.common.cancel}</Button>
-              <Button onClick={() => void handleSave()} disabled={isSaving}>
-                {editingPlan ? t.common.saveChanges : t.developmentPlans.createPlan}
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="overflow-y-auto sm:max-w-xl">
-          <SheetHeader>
-            <SheetTitle>{selectedPlan?.title}</SheetTitle>
-            <SheetDescription>{t.developmentPlans.planDetails}</SheetDescription>
-          </SheetHeader>
-          {selectedPlan && (
-            <div className="space-y-6 py-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={selectedPlan.employeeAvatar} alt="" />
-                  <AvatarFallback>
-                    {selectedPlan.employeeName
-                      .split(" ")
-                      .map((part) => part[0])
-                      .join("")
-                      .slice(0, 2)}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="font-semibold">{selectedPlan.employeeName}</h3>
-                  <Badge className={developmentPlanStatusColors[selectedPlan.status]}>
-                    {developmentPlanStatusLabels[selectedPlan.status]}
-                  </Badge>
-                </div>
-              </div>
-
-              <div>
-                <div className="mb-2 flex justify-between text-sm">
-                  <span>{t.onboarding.totalProgress}</span>
-                  <span>{selectedPlan.progress}%</span>
-                </div>
-                <Progress value={selectedPlan.progress} className="h-3" />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground">{t.common.startDate}</p>
-                  <p className="font-medium">{formatDate(selectedPlan.startDate)}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">{t.performanceGoals.dueDate}</p>
-                  <p className="font-medium">{formatDate(selectedPlan.targetDate)}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">{t.developmentPlans.planType}</p>
-                  <p className="font-medium">{developmentPlanTypeLabels[selectedPlan.type]}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground">{t.common.priority}</p>
-                  <Badge className={developmentPlanPriorityColors[selectedPlan.priority]}>
-                    {developmentPlanPriorityLabels[selectedPlan.priority]}
-                  </Badge>
-                </div>
-              </div>
-
-              {(selectedPlan.description || selectedPlan.notes) && (
-                <>
-                  <Separator />
-                  <div className="space-y-4">
-                    {selectedPlan.description && (
-                      <div>
-                        <h4 className="mb-2 font-semibold">{t.developmentPlans.planDescription}</h4>
-                        <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.description}</p>
-                      </div>
-                    )}
-                    {selectedPlan.notes && (
-                      <div>
-                        <h4 className="mb-2 font-semibold">{t.developmentPlans.generalNotes}</h4>
-                        <p className="rounded-lg bg-muted/40 p-3 text-sm leading-6">{selectedPlan.notes}</p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {selectedPlan.mentor && (
-                <>
-                  <Separator />
+        <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
+          <SheetContent className="overflow-y-auto sm:max-w-xl">
+            <SheetHeader>
+              <SheetTitle>{selectedPlan?.title}</SheetTitle>
+              <SheetDescription>{t.developmentPlans.planDetails}</SheetDescription>
+            </SheetHeader>
+            {selectedPlan && (
+              <div className="space-y-6 py-4">
+                <div className="flex items-center gap-4">
+                  <Avatar className="h-12 w-12">
+                    <AvatarImage src={selectedPlan.employeeAvatar} alt="" />
+                    <AvatarFallback>
+                      {selectedPlan.employeeName
+                        .split(" ")
+                        .map((part) => part[0])
+                        .join("")
+                        .slice(0, 2)}
+                    </AvatarFallback>
+                  </Avatar>
                   <div>
-                    <h4 className="mb-3 font-semibold">{t.developmentPlans.mentor}</h4>
-                    <div className="flex items-center gap-3 rounded-lg bg-muted/50 p-3">
-                      <Avatar className="h-10 w-10">
-                        <AvatarImage src={selectedPlan.mentor.avatar} alt="" />
-                        <AvatarFallback>
-                          {selectedPlan.mentor.name
-                            .split(" ")
-                            .map((part) => part[0])
-                            .join("")
-                            .slice(0, 2)}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium">{selectedPlan.mentor.name}</p>
-                        <p className="text-sm text-muted-foreground">{selectedPlan.mentor.role}</p>
+                    <h3 className="font-semibold">{selectedPlan.employeeName}</h3>
+                    <Badge className={developmentPlanStatusColors[selectedPlan.status]}>
+                      {developmentPlanStatusLabels[selectedPlan.status]}
+                    </Badge>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="mb-2 flex justify-between text-sm">
+                    <span>{t.onboarding.totalProgress}</span>
+                    <span>{selectedPlan.progress}%</span>
+                  </div>
+                  <Progress value={selectedPlan.progress} className="h-3" />
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
+                  <div>
+                    <p className="text-muted-foreground">{t.common.startDate}</p>
+                    <p className="font-medium">{formatDate(selectedPlan.startDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">{t.performanceGoals.dueDate}</p>
+                    <p className="font-medium">{formatDate(selectedPlan.targetDate)}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">{t.developmentPlans.planType}</p>
+                    <p className="font-medium">{developmentPlanTypeLabels[selectedPlan.type]}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">{t.common.priority}</p>
+                    <Badge className={developmentPlanPriorityColors[selectedPlan.priority]}>
+                      {developmentPlanPriorityLabels[selectedPlan.priority]}
+                    </Badge>
+                  </div>
+                </div>
+
+                {(selectedPlan.description || selectedPlan.notes) && (
+                  <>
+                    <Separator />
+                    <div className="space-y-4">
+                      {selectedPlan.description && (
+                        <div>
+                          <h4 className="mb-2 font-semibold">
+                            {t.developmentPlans.planDescription}
+                          </h4>
+                          <p className="bg-muted/40 rounded-lg p-3 text-sm leading-6">
+                            {selectedPlan.description}
+                          </p>
+                        </div>
+                      )}
+                      {selectedPlan.notes && (
+                        <div>
+                          <h4 className="mb-2 font-semibold">{t.developmentPlans.generalNotes}</h4>
+                          <p className="bg-muted/40 rounded-lg p-3 text-sm leading-6">
+                            {selectedPlan.notes}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+
+                {selectedPlan.mentor && (
+                  <>
+                    <Separator />
+                    <div>
+                      <h4 className="mb-3 font-semibold">{t.developmentPlans.mentor}</h4>
+                      <div className="bg-muted/50 flex items-center gap-3 rounded-lg p-3">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={selectedPlan.mentor.avatar} alt="" />
+                          <AvatarFallback>
+                            {selectedPlan.mentor.name
+                              .split(" ")
+                              .map((part) => part[0])
+                              .join("")
+                              .slice(0, 2)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium">{selectedPlan.mentor.name}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {selectedPlan.mentor.role}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </>
-              )}
+                  </>
+                )}
 
-              <Separator />
+                <Separator />
 
-              <div>
-                <h4 className="mb-3 font-semibold">{t.developmentPlans.goalsSection}</h4>
-                <div className="space-y-3">
-                  {selectedPlan.goals.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t.developmentPlans.noGoalsForThisPlan}</p>
-                  ) : (
-                    selectedPlan.goals.map((goal) => (
-                      <div key={goal.id} className="rounded-lg border p-3">
-                        <div className="mb-2 flex items-start justify-between gap-3">
-                          <p className="font-medium">{goal.title}</p>
-                          <Badge className={getGoalStatusColor(goal.status)}>{getGoalStatusLabel(goal.status)}</Badge>
-                        </div>
-                        {goal.description && <p className="mb-2 text-sm text-muted-foreground">{goal.description}</p>}
-                        <Progress value={goal.progress} className="h-2" />
-                        <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                          <span>{t.developmentPlans.dueDate} {formatDate(goal.targetDate)}</span>
-                          {goal.completedDate && <span>{t.developmentPlans.completedDate} {formatDate(goal.completedDate)}</span>}
-                          {goal.metrics && <span>{t.developmentPlans.metrics} {goal.metrics}</span>}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="mb-3 font-semibold">{t.developmentPlans.activitiesSection}</h4>
-                <div className="space-y-2">
-                  {selectedPlan.activities.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t.developmentPlans.noRelatedActivities}</p>
-                  ) : (
-                    selectedPlan.activities.map((activity) => (
-                      <div key={activity.id} className="flex items-center gap-3 rounded-lg border p-2">
-                        <Checkbox checked={activity.status === "completed"} disabled />
-                        <div className="flex-1">
-                          <p className={`text-sm ${activity.status === "completed" ? "line-through text-muted-foreground" : ""}`}>
-                            {activity.title}
-                          </p>
-                          {activity.description && <p className="mt-1 text-xs text-muted-foreground">{activity.description}</p>}
-                          <div className="mt-1 flex gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {activityTypeLabels[activity.type]}
+                <div>
+                  <h4 className="mb-3 font-semibold">{t.developmentPlans.goalsSection}</h4>
+                  <div className="space-y-3">
+                    {selectedPlan.goals.length === 0 ? (
+                      <p className="text-muted-foreground text-sm">
+                        {t.developmentPlans.noGoalsForThisPlan}
+                      </p>
+                    ) : (
+                      selectedPlan.goals.map((goal) => (
+                        <div key={goal.id} className="rounded-lg border p-3">
+                          <div className="mb-2 flex items-start justify-between gap-3">
+                            <p className="font-medium">{goal.title}</p>
+                            <Badge className={getGoalStatusColor(goal.status)}>
+                              {getGoalStatusLabel(goal.status)}
                             </Badge>
-                            <Badge className={getActivityStatusColor(activity.status)}>{getActivityStatusLabel(activity.status)}</Badge>
-                            <span className="text-xs text-muted-foreground">{formatDate(activity.dueDate)}</span>
-                            {activity.completedDate && <span className="text-xs text-muted-foreground">{t.developmentPlans.completedOn} {formatDate(activity.completedDate)}</span>}
                           </div>
-                          {activity.notes && <p className="mt-1 text-xs text-muted-foreground">{activity.notes}</p>}
+                          {goal.description && (
+                            <p className="text-muted-foreground mb-2 text-sm">{goal.description}</p>
+                          )}
+                          <Progress value={goal.progress} className="h-2" />
+                          <div className="text-muted-foreground mt-2 flex flex-wrap gap-3 text-xs">
+                            <span>
+                              {t.developmentPlans.dueDate} {formatDate(goal.targetDate)}
+                            </span>
+                            {goal.completedDate && (
+                              <span>
+                                {t.developmentPlans.completedDate} {formatDate(goal.completedDate)}
+                              </span>
+                            )}
+                            {goal.metrics && (
+                              <span>
+                                {t.developmentPlans.metrics} {goal.metrics}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))
-                  )}
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div>
+                  <h4 className="mb-3 font-semibold">{t.developmentPlans.activitiesSection}</h4>
+                  <div className="space-y-2">
+                    {selectedPlan.activities.length === 0 ? (
+                      <p className="text-muted-foreground text-sm">
+                        {t.developmentPlans.noRelatedActivities}
+                      </p>
+                    ) : (
+                      selectedPlan.activities.map((activity) => (
+                        <div
+                          key={activity.id}
+                          className="flex items-center gap-3 rounded-lg border p-2">
+                          <Checkbox checked={activity.status === "completed"} disabled />
+                          <div className="flex-1">
+                            <p
+                              className={`text-sm ${activity.status === "completed" ? "text-muted-foreground line-through" : ""}`}>
+                              {activity.title}
+                            </p>
+                            {activity.description && (
+                              <p className="text-muted-foreground mt-1 text-xs">
+                                {activity.description}
+                              </p>
+                            )}
+                            <div className="mt-1 flex gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {activityTypeLabels[activity.type]}
+                              </Badge>
+                              <Badge className={getActivityStatusColor(activity.status)}>
+                                {getActivityStatusLabel(activity.status)}
+                              </Badge>
+                              <span className="text-muted-foreground text-xs">
+                                {formatDate(activity.dueDate)}
+                              </span>
+                              {activity.completedDate && (
+                                <span className="text-muted-foreground text-xs">
+                                  {t.developmentPlans.completedOn}{" "}
+                                  {formatDate(activity.completedDate)}
+                                </span>
+                              )}
+                            </div>
+                            {activity.notes && (
+                              <p className="text-muted-foreground mt-1 text-xs">{activity.notes}</p>
+                            )}
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-        </SheetContent>
-      </Sheet>
-    </div>
+            )}
+          </SheetContent>
+        </Sheet>
+      </div>
 
-    <AlertDialog open={!!planToDelete} onOpenChange={(open) => { if (!open) setPlanToDelete(null); }}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t.common.confirmDeleteTitle}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t.developmentPlans.pAreYouSureYouWantToDelete} &ldquo;{planToDelete?.title}&rdquo;? {t.developmentPlans.deleteConfirm}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => void confirmDelete()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">{t.common.delete}</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </>
+      <AlertDialog
+        open={!!planToDelete}
+        onOpenChange={(open) => {
+          if (!open) setPlanToDelete(null);
+        }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.common.confirmDeleteTitle}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.developmentPlans.pAreYouSureYouWantToDelete} &ldquo;{planToDelete?.title}&rdquo;?{" "}
+              {t.developmentPlans.deleteConfirm}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void confirmDelete()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t.common.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

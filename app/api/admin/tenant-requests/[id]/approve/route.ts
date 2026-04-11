@@ -9,13 +9,78 @@ import { createActionToken } from "@/lib/security/action-tokens";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 
+const UNLIMITED_EMPLOYEES = 1_000_000;
+
+type DbTenantPlan = "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE";
+
+function normalizeDbPlan(value: unknown): DbTenantPlan | undefined {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return undefined;
+
+  const v = raw.toLowerCase();
+  if (v === "trial") return "TRIAL";
+  if (v === "starter" || v === "basic") return "BASIC";
+  if (v === "business" || v === "professional") return "PROFESSIONAL";
+  if (v === "enterprise") return "ENTERPRISE";
+
+  const upper = raw.toUpperCase();
+  if (
+    upper === "TRIAL" ||
+    upper === "BASIC" ||
+    upper === "PROFESSIONAL" ||
+    upper === "ENTERPRISE"
+  ) {
+    return upper;
+  }
+
+  return undefined;
+}
+
+function planToPricingSlug(plan: DbTenantPlan): "starter" | "business" | "enterprise" {
+  if (plan === "ENTERPRISE") return "enterprise";
+  if (plan === "PROFESSIONAL") return "business";
+  return "starter";
+}
+
+function parseOptionalPositiveInt(value: unknown): number | undefined {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    const n = Math.trunc(value);
+    return n > 0 ? n : undefined;
+  }
+
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return undefined;
+    const n = Math.trunc(Number(trimmed));
+    return Number.isFinite(n) && n > 0 ? n : undefined;
+  }
+
+  return undefined;
+}
+
+function parseOptionalDateInput(
+  value: unknown
+): { provided: boolean; value: Date | null } | { provided: false } | { error: string } {
+  if (value === undefined) return { provided: false };
+  if (value === null) return { provided: true, value: null };
+  if (typeof value !== "string") return { error: "Invalid planExpiresAt" };
+
+  const trimmed = value.trim();
+  if (!trimmed) return { provided: true, value: null };
+
+  const d = new Date(trimmed);
+  if (Number.isNaN(d.getTime())) return { error: "Invalid planExpiresAt" };
+  return { provided: true, value: d };
+}
+
 function mapPlanFromDb(plan: unknown): Tenant["plan"] {
   const v = String(plan ?? "").toUpperCase();
   if (v === "ENTERPRISE") return "enterprise";
   if (v === "PROFESSIONAL" || v === "BUSINESS") return "business";
   if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
   const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter") return lower as Tenant["plan"];
+  if (lower === "enterprise" || lower === "business" || lower === "starter")
+    return lower as Tenant["plan"];
   return "starter";
 }
 
@@ -40,7 +105,7 @@ function splitName(name: string) {
 
   return {
     firstName: parts[0]!,
-    lastName: parts.slice(1).join(" "),
+    lastName: parts.slice(1).join(" ")
   };
 }
 
@@ -61,7 +126,7 @@ function mapTenant(t: any): Tenant {
     employeesCount: t._count?.employees ?? 0,
     createdAt: t.createdAt?.toISOString?.() ?? new Date().toISOString(),
     updatedAt: t.updatedAt?.toISOString?.() ?? new Date().toISOString(),
-    createdBy: "",
+    createdBy: ""
   };
 }
 
@@ -86,6 +151,60 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     body = {};
   }
 
+  const platformSettings = await prisma.platformSettings.findFirst({
+    select: { trialDays: true, trialMaxEmployees: true }
+  });
+  const trialDaysRaw = platformSettings?.trialDays ?? 14;
+  const trialDays = Number.isFinite(trialDaysRaw) && trialDaysRaw > 0 ? trialDaysRaw : 14;
+  const trialMaxEmployeesRaw = platformSettings?.trialMaxEmployees ?? 10;
+  const trialMaxEmployees =
+    Number.isFinite(trialMaxEmployeesRaw) && trialMaxEmployeesRaw > 0 ? trialMaxEmployeesRaw : 10;
+
+  const expiresAtInput = parseOptionalDateInput(body.planExpiresAt);
+  if ("error" in expiresAtInput) {
+    return NextResponse.json({ error: expiresAtInput.error }, { status: 400 });
+  }
+
+  const requestedPlan = normalizeDbPlan(body.plan);
+  if (body.plan !== undefined && !requestedPlan) {
+    return NextResponse.json({ error: "Invalid plan" }, { status: 400 });
+  }
+  const plan = (requestedPlan ?? item.plan) as DbTenantPlan;
+
+  const requestedMaxEmployees = parseOptionalPositiveInt(body.maxEmployees);
+  if (body.maxEmployees !== undefined && !requestedMaxEmployees) {
+    return NextResponse.json({ error: "Invalid maxEmployees" }, { status: 400 });
+  }
+
+  const pricingSlug = planToPricingSlug(plan);
+  const pricingPlan =
+    plan === "TRIAL"
+      ? null
+      : await prisma.pricingPlan.findUnique({
+          where: { slug: pricingSlug },
+          select: { maxEmployees: true }
+        });
+
+  const pricingMaxEmployees =
+    pricingPlan === null
+      ? undefined
+      : pricingPlan.maxEmployees === null
+        ? UNLIMITED_EMPLOYEES
+        : pricingPlan.maxEmployees;
+
+  const maxEmployees =
+    requestedMaxEmployees ??
+    (plan === "TRIAL"
+      ? trialMaxEmployees
+      : (pricingMaxEmployees ??
+        (plan === "BASIC" ? 25 : plan === "PROFESSIONAL" ? 100 : UNLIMITED_EMPLOYEES)));
+
+  const planExpiresAt = expiresAtInput.provided
+    ? expiresAtInput.value
+    : plan === "TRIAL"
+      ? new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000)
+      : null;
+
   const preferredSlug = typeof body.slug === "string" ? body.slug.trim().toLowerCase() : "";
   let baseSlug = preferredSlug || slugify(item.companyNameAr ?? item.companyName);
   if (!isValidSlug(baseSlug)) {
@@ -105,7 +224,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const adminEmail = item.contactEmail.trim().toLowerCase();
   const existingUser = await prisma.user.findUnique({
     where: { email: adminEmail },
-    select: { id: true },
+    select: { id: true }
   });
 
   if (existingUser) {
@@ -125,14 +244,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         name: body.name ?? item.companyName,
         nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
         slug,
-        plan: item.plan,
+        plan,
         status: "ACTIVE",
+        maxEmployees,
         settings: {
           defaultLocale: body.defaultLocale ?? "ar",
-          defaultTheme: body.defaultTheme ?? "shadcn",
+          defaultTheme: body.defaultTheme ?? "shadcn"
         },
-        planExpiresAt: item.plan === "TRIAL" ? new Date(Date.now() + 14 * 24 * 60 * 60 * 1000) : null,
-      },
+        planExpiresAt
+      }
     });
 
     await tx.organizationProfile.create({
@@ -142,8 +262,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
         email: adminEmail,
         phone: item.contactPhone ?? null,
-        country: "SA",
-      },
+        country: "SA"
+      }
     });
 
     const createdAdmin = await tx.user.create({
@@ -155,15 +275,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         role: "TENANT_ADMIN",
         status: "PENDING_VERIFICATION",
         permissions: [],
-        tenantId: createdTenant.id,
+        tenantId: createdTenant.id
       },
       select: {
         id: true,
         email: true,
         firstName: true,
         lastName: true,
-        passwordChangedAt: true,
-      },
+        passwordChangedAt: true
+      }
     });
 
     await tx.tenantRequest.update({
@@ -173,8 +293,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         processedAt: new Date(),
         processedById: session.user.id ?? null,
         tenantId: createdTenant.id,
-        rejectionReason: null,
-      },
+        rejectionReason: null
+      }
     });
 
     await tx.auditLog.create({
@@ -183,15 +303,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         userId: session.user.id ?? null,
         action: "TENANT_REQUEST_APPROVED",
         entity: "Tenant",
-        entityId: createdTenant.id,
-      },
+        entityId: createdTenant.id
+      }
     });
 
     const tenantWithCounts = await tx.tenant.findUnique({
       where: { id: createdTenant.id },
       include: {
-        _count: { select: { users: true, employees: true } },
-      },
+        _count: { select: { users: true, employees: true } }
+      }
     });
 
     return { tenant: tenantWithCounts!, adminUser: createdAdmin };
@@ -203,7 +323,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       userId: adminUser.id,
       email: adminUser.email,
       tenantId: tenant.id,
-      passwordChangedAt: adminUser.passwordChangedAt?.toISOString() ?? null,
+      passwordChangedAt: adminUser.passwordChangedAt?.toISOString() ?? null
     },
     "72h"
   );
@@ -219,7 +339,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         `مرحبًا ${item.contactName}`,
         `تمت الموافقة على طلب شركتك ${tenant.nameAr ?? tenant.name}.`,
         `فعّل حسابك من الرابط التالي:`,
-        activationUrl,
+        activationUrl
       ].join("\n\n"),
       html: `
         <div style="font-family:Arial,sans-serif;line-height:1.8;color:#111827">
@@ -234,7 +354,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           <p><a href="${activationUrl}">${activationUrl}</a></p>
         </div>
       `,
-      replyTo: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? undefined,
+      replyTo: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? undefined
     });
     activationEmailSent = emailResult.sent;
   } catch {
@@ -246,7 +366,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     activation: {
       email: adminUser.email,
       sent: activationEmailSent,
-      activationUrl,
-    },
+      activationUrl
+    }
   });
 }

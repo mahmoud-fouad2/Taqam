@@ -1,10 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function DashboardSkeleton() {
   return (
@@ -20,7 +15,7 @@ export function DashboardSkeleton() {
               <Skeleton className="h-4 w-4 rounded-full" />
             </CardHeader>
             <CardContent>
-              <Skeleton className="h-8 w-16 mb-1" />
+              <Skeleton className="mb-1 h-8 w-16" />
               <Skeleton className="h-3 w-32" />
             </CardContent>
           </Card>

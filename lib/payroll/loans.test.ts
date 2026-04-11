@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("@/lib/db", () => ({
-  default: {},
+  default: {}
 }));
 
 import { mapLoan, mapLoanPayment, parseLoanStatus, parseLoanType } from "@/lib/payroll/loans";
@@ -39,7 +39,7 @@ describe("payroll loan helpers", () => {
       rejectedReason: null,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-03T00:00:00.000Z"),
-      approvedBy: { firstName: "Alya", lastName: "Hassan" },
+      approvedBy: { firstName: "Alya", lastName: "Hassan" }
     });
 
     expect(mapped.type).toBe("emergency_loan");
@@ -61,7 +61,7 @@ describe("payroll loan helpers", () => {
         reference: "TX-100",
         notes: "Partial deduction",
         createdAt: new Date("2026-02-15T00:00:00.000Z"),
-        updatedAt: new Date("2026-02-15T00:00:00.000Z"),
+        updatedAt: new Date("2026-02-15T00:00:00.000Z")
       },
       2
     );

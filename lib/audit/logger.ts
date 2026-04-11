@@ -97,7 +97,7 @@ function sanitizeData(data: Record<string, any> | null | undefined): Record<stri
     "privateKey",
     "creditCard",
     "ssn",
-    "nationalId",
+    "nationalId"
   ];
 
   for (const key of Object.keys(sanitized)) {
@@ -131,8 +131,8 @@ export async function createAuditLog(data: AuditLogData): Promise<void> {
           ? (sanitizedNewData as unknown as Prisma.InputJsonValue)
           : undefined,
         ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
-      },
+        userAgent: data.userAgent
+      }
     });
   } catch (error) {
     // Don't let audit logging failure break the main operation
@@ -187,7 +187,7 @@ export async function getAuditLogs(filters: AuditLogFilters = {}) {
     startDate,
     endDate,
     page = 1,
-    pageSize = 50,
+    pageSize = 50
   } = filters;
 
   const where: Prisma.AuditLogWhereInput = {};
@@ -215,15 +215,15 @@ export async function getAuditLogs(filters: AuditLogFilters = {}) {
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
-        },
+            email: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
-      take: pageSize,
+      take: pageSize
     }),
-    prisma.auditLog.count({ where }),
+    prisma.auditLog.count({ where })
   ]);
 
   return {
@@ -232,18 +232,18 @@ export async function getAuditLogs(filters: AuditLogFilters = {}) {
       user: log.user
         ? {
             ...log.user,
-            name: `${log.user.firstName ?? ""} ${log.user.lastName ?? ""}`.trim() || null,
+            name: `${log.user.firstName ?? ""} ${log.user.lastName ?? ""}`.trim() || null
           }
         : null,
       oldData: log.oldData as Record<string, any> | null,
-      newData: log.newData as Record<string, any> | null,
+      newData: log.newData as Record<string, any> | null
     })),
     pagination: {
       page,
       pageSize,
       total,
-      totalPages: Math.ceil(total / pageSize),
-    },
+      totalPages: Math.ceil(total / pageSize)
+    }
   };
 }
 
@@ -260,14 +260,14 @@ export async function getAuditLogStats(tenantId?: string) {
       where,
       _count: true,
       orderBy: { _count: { action: "desc" } },
-      take: 10,
+      take: 10
     }),
     prisma.auditLog.groupBy({
       by: ["userId"],
       where: { ...where, userId: { not: null } },
       _count: true,
       orderBy: { _count: { userId: "desc" } },
-      take: 10,
+      take: 10
     }),
     prisma.auditLog.findMany({
       where,
@@ -277,27 +277,27 @@ export async function getAuditLogStats(tenantId?: string) {
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
-        },
+            email: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
-      take: 20,
-    }),
+      take: 20
+    })
   ]);
 
   return {
     total,
     byAction: byAction.map((item) => ({
       action: item.action,
-      count: item._count,
+      count: item._count
     })),
     byUser: await Promise.all(
       byUser.map(async (item) => {
         const user = item.userId
           ? await prisma.user.findUnique({
               where: { id: item.userId },
-              select: { id: true, firstName: true, lastName: true, email: true },
+              select: { id: true, firstName: true, lastName: true, email: true }
             })
           : null;
         return {
@@ -305,10 +305,10 @@ export async function getAuditLogStats(tenantId?: string) {
           user: user
             ? {
                 ...user,
-                name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null,
+                name: `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || null
               }
             : null,
-          count: item._count,
+          count: item._count
         };
       })
     ),
@@ -317,12 +317,12 @@ export async function getAuditLogStats(tenantId?: string) {
       user: log.user
         ? {
             ...log.user,
-            name: `${log.user.firstName ?? ""} ${log.user.lastName ?? ""}`.trim() || null,
+            name: `${log.user.firstName ?? ""} ${log.user.lastName ?? ""}`.trim() || null
           }
         : null,
       oldData: log.oldData as Record<string, any> | null,
-      newData: log.newData as Record<string, any> | null,
-    })),
+      newData: log.newData as Record<string, any> | null
+    }))
   };
 }
 
@@ -342,7 +342,7 @@ export function generateDiff(
     if (JSON.stringify(oldData[key]) !== JSON.stringify(newData[key])) {
       diff[key] = {
         old: oldData[key],
-        new: newData[key],
+        new: newData[key]
       };
     }
   }
@@ -352,7 +352,7 @@ export function generateDiff(
     if (!(key in newData)) {
       diff[key] = {
         old: oldData[key],
-        new: undefined,
+        new: undefined
       };
     }
   }

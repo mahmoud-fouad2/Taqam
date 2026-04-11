@@ -7,13 +7,13 @@ import { isAllowedFileSize, isAllowedFileType, isR2Configured, uploadFile } from
 const RATE_LIMIT = {
   limit: 8,
   windowMs: 15 * 60 * 1000,
-  keyPrefix: "public-job-resume-upload",
+  keyPrefix: "public-job-resume-upload"
 } as const;
 
 const ALLOWED_RESUME_TYPES = [
   "application/pdf",
   "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ];
 
 export async function POST(request: NextRequest) {
@@ -39,10 +39,11 @@ export async function POST(request: NextRequest) {
     const tenantSlug = formData.get("tenantSlug");
 
     if (!(file instanceof File)) {
-      return withRateLimitHeaders(
-        NextResponse.json({ error: "Missing file" }, { status: 400 }),
-        { remaining: rate.remaining, resetAt: rate.resetAt, limit: RATE_LIMIT.limit }
-      );
+      return withRateLimitHeaders(NextResponse.json({ error: "Missing file" }, { status: 400 }), {
+        remaining: rate.remaining,
+        resetAt: rate.resetAt,
+        limit: RATE_LIMIT.limit
+      });
     }
 
     if (typeof jobPostingId !== "string" || !jobPostingId.trim()) {
@@ -60,13 +61,17 @@ export async function POST(request: NextRequest) {
     }
 
     if (!isAllowedFileSize(file.size, 5)) {
-      return withRateLimitHeaders(
-        NextResponse.json({ error: "File too large" }, { status: 400 }),
-        { remaining: rate.remaining, resetAt: rate.resetAt, limit: RATE_LIMIT.limit }
-      );
+      return withRateLimitHeaders(NextResponse.json({ error: "File too large" }, { status: 400 }), {
+        remaining: rate.remaining,
+        resetAt: rate.resetAt,
+        limit: RATE_LIMIT.limit
+      });
     }
 
-    const job = await getPublicJobPostingById(jobPostingId.trim(), typeof tenantSlug === "string" ? tenantSlug.trim() || undefined : undefined);
+    const job = await getPublicJobPostingById(
+      jobPostingId.trim(),
+      typeof tenantSlug === "string" ? tenantSlug.trim() || undefined : undefined
+    );
     if (!job) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "Job posting not found" }, { status: 404 }),
@@ -75,7 +80,13 @@ export async function POST(request: NextRequest) {
     }
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const upload = await uploadFile(fileBuffer, file.name, file.type, job.tenantId, "career-resumes");
+    const upload = await uploadFile(
+      fileBuffer,
+      file.name,
+      file.type,
+      job.tenantId,
+      "career-resumes"
+    );
 
     if (!upload.success || !upload.url) {
       return withRateLimitHeaders(
@@ -92,8 +103,8 @@ export async function POST(request: NextRequest) {
             url: upload.url,
             fileName: file.name,
             contentType: file.type,
-            size: file.size,
-          },
+            size: file.size
+          }
         },
         { status: 201 }
       ),

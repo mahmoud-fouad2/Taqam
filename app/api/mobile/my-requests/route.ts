@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
-import type { RequestStatus, SelfServiceRequest, SelfServiceRequestType } from "@/lib/types/self-service";
+import type {
+  RequestStatus,
+  SelfServiceRequest,
+  SelfServiceRequestType
+} from "@/lib/types/self-service";
 
 function employeeDisplayName(employee: {
   firstName: string;
@@ -67,7 +72,7 @@ const createSchema = z
     title: z.string().trim().min(3).max(160),
     description: z.string().trim().min(3).max(5000),
     category: z.string().trim().max(60).optional(),
-    priority: z.enum(["low", "medium", "high"]).optional(),
+    priority: z.enum(["low", "medium", "high"]).optional()
   })
   .strict();
 
@@ -86,8 +91,8 @@ export async function GET(request: NextRequest) {
         firstName: true,
         lastName: true,
         firstNameAr: true,
-        lastNameAr: true,
-      },
+        lastNameAr: true
+      }
     });
 
     if (!employee) {
@@ -102,27 +107,27 @@ export async function GET(request: NextRequest) {
         ? prisma.leaveRequest.findMany({
             where: { tenantId, employeeId },
             orderBy: { createdAt: "desc" },
-            include: { leaveType: { select: { name: true, nameAr: true } } },
+            include: { leaveType: { select: { name: true, nameAr: true } } }
           })
         : Promise.resolve([]),
       employeeId
         ? prisma.attendanceRequest.findMany({
             where: { tenantId, employeeId },
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: "desc" }
           })
         : Promise.resolve([]),
       employeeId
         ? prisma.trainingEnrollment.findMany({
             where: { tenantId, employeeId },
             orderBy: { createdAt: "desc" },
-            include: { course: { select: { title: true } } },
+            include: { course: { select: { title: true } } }
           })
         : Promise.resolve([]),
       prisma.supportTicket.findMany({
         where: { tenantId, createdById: userId },
         orderBy: { lastMessageAt: "desc" },
-        include: { _count: { select: { messages: true } } },
-      }),
+        include: { _count: { select: { messages: true } } }
+      })
     ]);
 
     const items: SelfServiceRequest[] = [];
@@ -145,7 +150,7 @@ export async function GET(request: NextRequest) {
         createdAt: lr.createdAt.toISOString(),
         updatedAt: lr.updatedAt.toISOString(),
         resolvedAt: lr.approvedAt ? lr.approvedAt.toISOString() : undefined,
-        metadata: { source: "leave", sourceId: lr.id },
+        metadata: { source: "leave", sourceId: lr.id }
       });
     }
 
@@ -182,7 +187,7 @@ export async function GET(request: NextRequest) {
         createdAt: ar.createdAt.toISOString(),
         updatedAt: ar.updatedAt.toISOString(),
         resolvedAt: ar.approvedAt ? ar.approvedAt.toISOString() : undefined,
-        metadata: { source: "attendance", sourceId: ar.id },
+        metadata: { source: "attendance", sourceId: ar.id }
       });
     }
 
@@ -200,7 +205,7 @@ export async function GET(request: NextRequest) {
         createdAt: e.createdAt.toISOString(),
         updatedAt: e.updatedAt.toISOString(),
         resolvedAt: e.approvedAt ? e.approvedAt.toISOString() : undefined,
-        metadata: { source: "training", sourceId: e.id },
+        metadata: { source: "training", sourceId: e.id }
       });
     }
 
@@ -225,8 +230,10 @@ export async function GET(request: NextRequest) {
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
         resolvedAt:
-          String(t.status) === "RESOLVED" || String(t.status) === "CLOSED" ? t.updatedAt.toISOString() : undefined,
-        metadata: { source: "ticket", sourceId: t.id, messageCount: (t as any)._count?.messages },
+          String(t.status) === "RESOLVED" || String(t.status) === "CLOSED"
+            ? t.updatedAt.toISOString()
+            : undefined,
+        metadata: { source: "ticket", sourceId: t.id, messageCount: (t as any)._count?.messages }
       });
     }
 
@@ -234,7 +241,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: { items } });
   } catch (error) {
-    console.error("Mobile my-requests GET error:", error);
+    logger.error("Mobile my-requests GET error", undefined, error);
     return NextResponse.json({ error: "Failed to fetch requests" }, { status: 500 });
   }
 }
@@ -247,7 +254,10 @@ export async function POST(request: NextRequest) {
     const raw = await request.json();
     const parsed = createSchema.safeParse(raw);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const now = new Date();
@@ -260,23 +270,27 @@ export async function POST(request: NextRequest) {
         subject: parsed.data.title,
         category: parsed.data.category,
         priority:
-          parsed.data.priority === "low" ? "LOW" : parsed.data.priority === "high" ? "HIGH" : "NORMAL",
+          parsed.data.priority === "low"
+            ? "LOW"
+            : parsed.data.priority === "high"
+              ? "HIGH"
+              : "NORMAL",
         status,
         lastMessageAt: now,
         messages: {
           create: {
             senderId: payloadOrRes.userId,
             body: parsed.data.description,
-            isInternal: false,
-          },
-        },
+            isInternal: false
+          }
+        }
       },
-      include: { _count: { select: { messages: true } } },
+      include: { _count: { select: { messages: true } } }
     });
 
     const employee = await prisma.employee.findFirst({
       where: { tenantId: payloadOrRes.tenantId, id: payloadOrRes.employeeId },
-      select: { firstName: true, lastName: true, firstNameAr: true, lastNameAr: true, id: true },
+      select: { firstName: true, lastName: true, firstNameAr: true, lastNameAr: true, id: true }
     });
 
     if (!employee) {
@@ -298,12 +312,16 @@ export async function POST(request: NextRequest) {
       createdAt: created.createdAt.toISOString(),
       updatedAt: created.updatedAt.toISOString(),
       resolvedAt: undefined,
-      metadata: { source: "ticket", sourceId: created.id, messageCount: (created as any)._count?.messages },
+      metadata: {
+        source: "ticket",
+        sourceId: created.id,
+        messageCount: (created as any)._count?.messages
+      }
     };
 
     return NextResponse.json({ data: responseItem }, { status: 201 });
   } catch (error) {
-    console.error("Mobile my-requests POST error:", error);
+    logger.error("Mobile my-requests POST error", undefined, error);
     return NextResponse.json({ error: "Failed to create request" }, { status: 500 });
   }
 }

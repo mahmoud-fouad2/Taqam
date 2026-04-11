@@ -10,38 +10,43 @@ const evaluationUpdateSchema = z.object({
   // NOTE: Prisma enum `EvaluationStatus` does not include ACKNOWLEDGED.
   // We still accept it here as a backwards-compatible action that only sets `employeeAcknowledgedAt`.
   status: z
-    .enum(["NOT_STARTED", "IN_PROGRESS", "PENDING_REVIEW", "COMPLETED", "CANCELLED", "ACKNOWLEDGED"])
+    .enum([
+      "NOT_STARTED",
+      "IN_PROGRESS",
+      "PENDING_REVIEW",
+      "COMPLETED",
+      "CANCELLED",
+      "ACKNOWLEDGED"
+    ])
     .optional(),
   overallScore: z.number().min(0).max(5).optional().nullable(),
   overallRating: z.string().optional().nullable(),
-  scores: z.array(z.object({
-    criteriaId: z.string(),
-    criteriaName: z.string(),
-    score: z.number().min(0).max(5),
-    weight: z.number().optional(),
-    comment: z.string().optional(),
-  })).optional(),
+  scores: z
+    .array(
+      z.object({
+        criteriaId: z.string(),
+        criteriaName: z.string(),
+        score: z.number().min(0).max(5),
+        weight: z.number().optional(),
+        comment: z.string().optional()
+      })
+    )
+    .optional(),
   strengths: z.string().optional().nullable(),
   areasForImprovement: z.string().optional().nullable(),
   comments: z.string().optional().nullable(),
-  employeeComments: z.string().optional().nullable(),
+  employeeComments: z.string().optional().nullable()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single evaluation
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -70,10 +75,10 @@ export async function GET(
                 firstName: true,
                 lastName: true,
                 firstNameAr: true,
-                lastNameAr: true,
-              },
-            },
-          },
+                lastNameAr: true
+              }
+            }
+          }
         },
         evaluator: {
           select: {
@@ -82,42 +87,30 @@ export async function GET(
             lastName: true,
             firstNameAr: true,
             lastNameAr: true,
-            avatar: true,
-          },
-        },
-      },
+            avatar: true
+          }
+        }
+      }
     });
 
     if (!evaluation) {
-      return NextResponse.json(
-        { error: "التقييم غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "التقييم غير موجود" }, { status: 404 });
     }
 
     return NextResponse.json(evaluation);
   } catch (error) {
     console.error("Error fetching evaluation:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات التقييم" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات التقييم" }, { status: 500 });
   }
 }
 
 // PATCH - Update evaluation
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -126,14 +119,11 @@ export async function PATCH(
 
     // Check evaluation exists
     const existingEvaluation = await prisma.employeeEvaluation.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingEvaluation) {
-      return NextResponse.json(
-        { error: "التقييم غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "التقييم غير موجود" }, { status: 404 });
     }
 
     // Validate
@@ -166,7 +156,7 @@ export async function PATCH(
       ...restValidated,
       overallScore: calculatedOverallScore,
       overallRating,
-      updatedAt: new Date(),
+      updatedAt: new Date()
     };
 
     // Set timestamps based on status
@@ -200,55 +190,43 @@ export async function PATCH(
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
       message: "تم تحديث التقييم بنجاح",
-      evaluation: updatedEvaluation,
+      evaluation: updatedEvaluation
     });
   } catch (error) {
     console.error("Error updating evaluation:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث التقييم" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث التقييم" }, { status: 500 });
   }
 }
 
 // DELETE - Delete evaluation
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف التقييم" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف التقييم" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -256,14 +234,11 @@ export async function DELETE(
 
     // Check evaluation exists
     const evaluation = await prisma.employeeEvaluation.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!evaluation) {
-      return NextResponse.json(
-        { error: "التقييم غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "التقييم غير موجود" }, { status: 404 });
     }
 
     // Cannot delete evaluations acknowledged by employee
@@ -276,17 +251,14 @@ export async function DELETE(
 
     // Delete evaluation
     await prisma.employeeEvaluation.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف التقييم بنجاح",
+      message: "تم حذف التقييم بنجاح"
     });
   } catch (error) {
     console.error("Error deleting evaluation:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف التقييم" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف التقييم" }, { status: 500 });
   }
 }

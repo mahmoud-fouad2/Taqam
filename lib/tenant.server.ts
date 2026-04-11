@@ -16,17 +16,11 @@ export async function getTenantContext(): Promise<TenantContext> {
   const headerStore = await headers();
 
   // Try header first (set by proxy), then fallback to cookie
-  const slug =
-    headerStore.get("x-tenant-slug") ||
-    cookieStore.get("taqam_tenant")?.value ||
-    null;
+  const slug = headerStore.get("x-tenant-slug") || cookieStore.get("taqam_tenant")?.value || null;
 
-  const locale =
-    (cookieStore.get("taqam_locale")?.value as "ar" | "en") || "ar";
+  const locale = (cookieStore.get("taqam_locale")?.value as "ar" | "en") || "ar";
 
-  const theme =
-    (cookieStore.get("taqam_ui_theme")?.value as "shadcn" | "mantine") ||
-    "shadcn";
+  const theme = (cookieStore.get("taqam_ui_theme")?.value as "shadcn" | "mantine") || "shadcn";
 
   return { slug, locale, theme };
 }

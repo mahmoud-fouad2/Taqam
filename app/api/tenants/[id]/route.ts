@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -32,10 +32,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             employees: true,
             departments: true,
             shifts: true,
-            leaveTypes: true,
-          },
-        },
-      },
+            leaveTypes: true
+          }
+        }
+      }
     });
 
     if (!tenant) {
@@ -45,10 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: tenant });
   } catch (error) {
     console.error("Error fetching tenant:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch tenant" }, { status: 500 });
   }
 }
 
@@ -56,7 +53,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -66,7 +63,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     }
 
     const existingTenant = await prisma.tenant.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingTenant) {
@@ -78,13 +75,10 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     // Check slug uniqueness if changed
     if (body.slug && body.slug !== existingTenant.slug) {
       const duplicateSlug = await prisma.tenant.findFirst({
-        where: { slug: body.slug, id: { not: id } },
+        where: { slug: body.slug, id: { not: id } }
       });
       if (duplicateSlug) {
-        return NextResponse.json(
-          { error: "Slug already exists" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
       }
     }
 
@@ -103,17 +97,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         planExpiresAt: body.planExpiresAt ? new Date(body.planExpiresAt) : undefined,
         maxEmployees: body.maxEmployees,
         status: body.status,
-        settings: body.settings,
-      },
+        settings: body.settings
+      }
     });
 
     return NextResponse.json({ data: tenant });
   } catch (error) {
     console.error("Error updating tenant:", error);
-    return NextResponse.json(
-      { error: "Failed to update tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update tenant" }, { status: 500 });
   }
 }
 
@@ -121,7 +112,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -131,7 +122,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     const existingTenant = await prisma.tenant.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingTenant) {
@@ -141,15 +132,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Soft delete - set status to CANCELLED
     await prisma.tenant.update({
       where: { id },
-      data: { status: "CANCELLED" },
+      data: { status: "CANCELLED" }
     });
 
     return NextResponse.json({ message: "Tenant deleted successfully" });
   } catch (error) {
     console.error("Error deleting tenant:", error);
-    return NextResponse.json(
-      { error: "Failed to delete tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete tenant" }, { status: 500 });
   }
 }

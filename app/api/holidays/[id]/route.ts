@@ -15,13 +15,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const holiday = await prisma.holiday.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!holiday) {
@@ -35,10 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: holiday });
   } catch (error) {
     console.error("Error fetching holiday:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch holiday" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch holiday" }, { status: 500 });
   }
 }
 
@@ -46,13 +43,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingHoliday = await prisma.holiday.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingHoliday) {
@@ -72,17 +69,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         nameAr: body.nameAr,
         date: body.date ? new Date(body.date) : undefined,
         endDate: body.endDate ? new Date(body.endDate) : null,
-        isRecurring: body.isRecurring,
-      },
+        isRecurring: body.isRecurring
+      }
     });
 
     return NextResponse.json({ data: holiday });
   } catch (error) {
     console.error("Error updating holiday:", error);
-    return NextResponse.json(
-      { error: "Failed to update holiday" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update holiday" }, { status: 500 });
   }
 }
 
@@ -90,13 +84,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingHoliday = await prisma.holiday.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingHoliday) {
@@ -108,15 +102,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await prisma.holiday.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ message: "Holiday deleted successfully" });
   } catch (error) {
     console.error("Error deleting holiday:", error);
-    return NextResponse.json(
-      { error: "Failed to delete holiday" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete holiday" }, { status: 500 });
   }
 }

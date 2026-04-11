@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -14,7 +14,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -22,14 +22,14 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 
 interface AuditLog {
@@ -83,7 +83,7 @@ export default function AuditLogsManager() {
     try {
       const params = new URLSearchParams({
         page: page.toString(),
-        pageSize: "50",
+        pageSize: "50"
       });
 
       if (actionFilter !== "all") params.append("action", actionFilter);
@@ -94,7 +94,7 @@ export default function AuditLogsManager() {
 
       const [logsRes, statsRes] = await Promise.all([
         fetch(`/api/audit-logs?${params.toString()}`),
-        page === 1 ? fetch("/api/audit-logs/stats") : Promise.resolve(null),
+        page === 1 ? fetch("/api/audit-logs/stats") : Promise.resolve(null)
       ]);
 
       if (!logsRes.ok) {
@@ -122,7 +122,7 @@ export default function AuditLogsManager() {
     page,
     userFilter,
     t.auditLogs.loadFailed,
-    t.organization.genericError,
+    t.organization.genericError
   ]);
 
   useEffect(() => {
@@ -157,7 +157,7 @@ export default function AuditLogsManager() {
       ATTENDANCE_CHECK_IN: t.auditLogs.checkIn,
       ATTENDANCE_CHECK_OUT: t.auditLogs.checkOut,
       DATA_EXPORT: t.common.exportData,
-      BULK_DELETE: t.auditLogs.bulkDelete,
+      BULK_DELETE: t.auditLogs.bulkDelete
     };
     return labels[action] || action;
   };
@@ -168,7 +168,7 @@ export default function AuditLogsManager() {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -186,7 +186,9 @@ export default function AuditLogsManager() {
           <p className="text-muted-foreground">{t.auditLogs.description}</p>
         </div>
         <Button variant="outline">
-          <Download className="h-4 w-4 ms-2" />{t.auditLogs.export}</Button>
+          <Download className="ms-2 h-4 w-4" />
+          {t.auditLogs.export}
+        </Button>
       </div>
 
       {/* Statistics Cards */}
@@ -209,7 +211,7 @@ export default function AuditLogsManager() {
               <div className="text-2xl font-bold">
                 {stats.byAction[0] ? getActionLabel(stats.byAction[0].action) : "-"}
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {stats.byAction[0] ? `${stats.byAction[0].count} ${t.auditLogs.timesUnit}` : ""}
               </p>
             </CardContent>
@@ -230,9 +232,7 @@ export default function AuditLogsManager() {
             </CardHeader>
             <CardContent>
               <div className="text-sm font-medium">
-                {stats.recentActivity[0]
-                  ? formatDate(stats.recentActivity[0].createdAt)
-                  : "-"}
+                {stats.recentActivity[0] ? formatDate(stats.recentActivity[0].createdAt) : "-"}
               </div>
             </CardContent>
           </Card>
@@ -243,7 +243,9 @@ export default function AuditLogsManager() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Filter className="h-5 w-5" />{t.auditLogs.filter}</CardTitle>
+            <Filter className="h-5 w-5" />
+            {t.auditLogs.filter}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-4 md:grid-cols-5">
@@ -284,20 +286,12 @@ export default function AuditLogsManager() {
 
             <div>
               <Label>{t.auditLogs.fromDate}</Label>
-              <Input
-                type="date"
-                value={dateFrom}
-                onChange={(e) => setDateFrom(e.target.value)}
-              />
+              <Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
             </div>
 
             <div>
               <Label>{t.auditLogs.toDate}</Label>
-              <Input
-                type="date"
-                value={dateTo}
-                onChange={(e) => setDateTo(e.target.value)}
-              />
+              <Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
             </div>
 
             <div className="flex items-end">
@@ -310,8 +304,9 @@ export default function AuditLogsManager() {
                   setDateFrom("");
                   setDateTo("");
                   setPage(1);
-                }}
-              >{t.common.reset}</Button>
+                }}>
+                {t.common.reset}
+              </Button>
             </div>
           </div>
         </CardContent>
@@ -325,80 +320,79 @@ export default function AuditLogsManager() {
             {t.auditLogs.logCount} ({logs.length})
           </CardTitle>
           <CardDescription>
-            {isLoading ? t.common.loading : loadError || `${t.auditLogs.pageOf} ${page} ${t.auditLogs.ofPages} ${totalPages}`}
+            {isLoading
+              ? t.common.loading
+              : loadError || `${t.auditLogs.pageOf} ${page} ${t.auditLogs.ofPages} ${totalPages}`}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t.interviews.time}</TableHead>
-                <TableHead>{t.auditLogs.operation}</TableHead>
-                <TableHead>{t.common.company}</TableHead>
-                <TableHead>{t.common.user}</TableHead>
-                <TableHead>IP Address</TableHead>
-                <TableHead>{t.common.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {logs.length === 0 && !isLoading ? (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={6} className="py-12 text-center text-muted-foreground">{t.auditLogs.noRecords}</TableCell>
+                  <TableHead>{t.interviews.time}</TableHead>
+                  <TableHead>{t.auditLogs.operation}</TableHead>
+                  <TableHead>{t.common.company}</TableHead>
+                  <TableHead>{t.common.user}</TableHead>
+                  <TableHead>IP Address</TableHead>
+                  <TableHead>{t.common.actions}</TableHead>
                 </TableRow>
-              ) : (
-              logs.map((log) => (
-                <TableRow key={log.id}>
-                  <TableCell className="whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
-                      {formatDate(log.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge className={getActionColor(log.action)}>
-                      {getActionLabel(log.action)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div>
-                      <div className="font-medium">{log.entity}</div>
-                      {log.entityId && (
-                        <div className="text-xs text-muted-foreground">
-                          ID: {log.entityId.substring(0, 8)}...
+              </TableHeader>
+              <TableBody>
+                {logs.length === 0 && !isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-muted-foreground py-12 text-center">
+                      {t.auditLogs.noRecords}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  logs.map((log) => (
+                    <TableRow key={log.id}>
+                      <TableCell className="whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="text-muted-foreground h-4 w-4" />
+                          {formatDate(log.createdAt)}
                         </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {log.user ? (
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
+                      </TableCell>
+                      <TableCell>
+                        <Badge className={getActionColor(log.action)}>
+                          {getActionLabel(log.action)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
                         <div>
-                          <div className="font-medium">{log.user.name || log.user.email}</div>
-                          <div className="text-xs text-muted-foreground">{log.user.email}</div>
+                          <div className="font-medium">{log.entity}</div>
+                          {log.entityId && (
+                            <div className="text-muted-foreground text-xs">
+                              ID: {log.entityId.substring(0, 8)}...
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ) : (
-                      <span className="text-muted-foreground">{t.auditLogs.pSystem}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="font-mono text-xs">
-                    {log.ipAddress || "-"}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => viewDetails(log)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))) }
-            </TableBody>
-          </Table>
+                      </TableCell>
+                      <TableCell>
+                        {log.user ? (
+                          <div className="flex items-center gap-2">
+                            <User className="text-muted-foreground h-4 w-4" />
+                            <div>
+                              <div className="font-medium">{log.user.name || log.user.email}</div>
+                              <div className="text-muted-foreground text-xs">{log.user.email}</div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground">{t.auditLogs.pSystem}</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-mono text-xs">{log.ipAddress || "-"}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="sm" onClick={() => viewDetails(log)}>
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </div>
 
           {/* Pagination */}
@@ -408,17 +402,19 @@ export default function AuditLogsManager() {
                 variant="outline"
                 size="sm"
                 disabled={page === 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >{t.common.previous}</Button>
-              <span className="text-sm text-muted-foreground">
+                onClick={() => setPage((p) => Math.max(1, p - 1))}>
+                {t.common.previous}
+              </Button>
+              <span className="text-muted-foreground text-sm">
                 {t.auditLogs.pPage} {page} {t.auditLogs.pOf} {totalPages}
               </span>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={page === totalPages}
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              >{t.common.next}</Button>
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+                {t.common.next}
+              </Button>
             </div>
           )}
         </CardContent>
@@ -426,7 +422,7 @@ export default function AuditLogsManager() {
 
       {/* Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="w-full max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] w-full max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.auditLogs.details}</DialogTitle>
             <DialogDescription>
@@ -460,16 +456,14 @@ export default function AuditLogsManager() {
 
                 <div>
                   <Label>IP Address</Label>
-                  <div className="mt-1 font-mono text-sm">
-                    {selectedLog.ipAddress || "-"}
-                  </div>
+                  <div className="mt-1 font-mono text-sm">{selectedLog.ipAddress || "-"}</div>
                 </div>
               </div>
 
               {selectedLog.oldData && (
                 <div>
                   <Label>{t.auditLogs.oldData}</Label>
-                  <pre className="mt-1 rounded-md bg-muted p-4 text-xs overflow-x-auto">
+                  <pre className="bg-muted mt-1 overflow-x-auto rounded-md p-4 text-xs">
                     {JSON.stringify(selectedLog.oldData, null, 2)}
                   </pre>
                 </div>
@@ -478,7 +472,7 @@ export default function AuditLogsManager() {
               {selectedLog.newData && (
                 <div>
                   <Label>{t.auditLogs.newData}</Label>
-                  <pre className="mt-1 rounded-md bg-muted p-4 text-xs overflow-x-auto">
+                  <pre className="bg-muted mt-1 overflow-x-auto rounded-md p-4 text-xs">
                     {JSON.stringify(selectedLog.newData, null, 2)}
                   </pre>
                 </div>
@@ -487,7 +481,7 @@ export default function AuditLogsManager() {
               {selectedLog.userAgent && (
                 <div>
                   <Label>User Agent</Label>
-                  <div className="mt-1 text-xs text-muted-foreground break-all">
+                  <div className="text-muted-foreground mt-1 text-xs break-all">
                     {selectedLog.userAgent}
                   </div>
                 </div>

@@ -29,7 +29,10 @@ export async function fetchBlobOrThrow(url: string, init?: RequestInit) {
   }
 
   const blob = await response.blob();
-  const filename = parseFilenameFromDisposition(response.headers.get("content-disposition"), "download.bin");
+  const filename = parseFilenameFromDisposition(
+    response.headers.get("content-disposition"),
+    "download.bin"
+  );
   return { blob, filename, contentType: response.headers.get("content-type") || blob.type };
 }
 

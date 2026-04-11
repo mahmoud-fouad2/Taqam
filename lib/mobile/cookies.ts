@@ -13,7 +13,7 @@ function getMobileCookieOptions(opts?: { expiresAt?: Date }) {
     secure: isProd(),
     sameSite: "lax" as const,
     path: "/api/mobile/auth",
-    ...(opts?.expiresAt ? { expires: opts.expiresAt } : {}),
+    ...(opts?.expiresAt ? { expires: opts.expiresAt } : {})
   };
 }
 
@@ -33,17 +33,17 @@ export function setMobileRefreshCookie(
   res.cookies.set(MOBILE_REFRESH_COOKIE, refreshToken, getMobileCookieOptions(opts));
   res.cookies.set(LEGACY_MOBILE_REFRESH_COOKIE, "", {
     ...getMobileCookieOptions(),
-    expires: new Date(0),
+    expires: new Date(0)
   });
 }
 
 export function clearMobileRefreshCookie(res: NextResponse) {
   res.cookies.set(MOBILE_REFRESH_COOKIE, "", {
     ...getMobileCookieOptions(),
-    expires: new Date(0),
+    expires: new Date(0)
   });
   res.cookies.set(LEGACY_MOBILE_REFRESH_COOKIE, "", {
     ...getMobileCookieOptions(),
-    expires: new Date(0),
+    expires: new Date(0)
   });
 }

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { APPROVER_ROLES } from "@/lib/access-control";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
   const { tenantId, employeeId, role } = payloadOrRes;
   const { id } = await context.params;
 
-  if (!["TENANT_ADMIN", "HR_MANAGER", "MANAGER"].includes(role)) {
+  if (!APPROVER_ROLES.includes(role as (typeof APPROVER_ROLES)[number])) {
     return NextResponse.json({ error: "Insufficient permissions" }, { status: 403 });
   }
 
@@ -29,11 +31,14 @@ export async function POST(request: NextRequest, context: RouteContext) {
 
     const leave = await prisma.leaveRequest.findFirst({
       where: { id, tenantId, status: "PENDING" },
-      include: { employee: { select: { managerId: true } } },
+      include: { employee: { select: { managerId: true } } }
     });
 
     if (!leave) {
-      return NextResponse.json({ error: "Request not found or already processed" }, { status: 404 });
+      return NextResponse.json(
+        { error: "Request not found or already processed" },
+        { status: 404 }
+      );
     }
 
     if (role === "MANAGER" && leave.employee.managerId !== employeeId) {
@@ -47,8 +52,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
           status: "REJECTED",
           approvedById: payloadOrRes.userId,
           approvedAt: new Date(),
-          rejectionReason: typeof body.reason === "string" ? body.reason.trim().slice(0, 500) : null,
-        },
+          rejectionReason: typeof body.reason === "string" ? body.reason.trim().slice(0, 500) : null
+        }
       });
 
       // Remove pending days from balance
@@ -57,17 +62,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
           tenantId,
           employeeId: leave.employeeId,
           leaveTypeId: leave.leaveTypeId,
-          year: leave.startDate.getFullYear(),
+          year: leave.startDate.getFullYear()
         },
         data: {
-          pending: { decrement: leave.totalDays },
-        },
+          pending: { decrement: leave.totalDays }
+        }
       });
     });
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
-    console.error("Mobile reject error:", error);
+    logger.error("Mobile reject error", undefined, error);
     return NextResponse.json({ error: "Failed to reject" }, { status: 500 });
   }
 }

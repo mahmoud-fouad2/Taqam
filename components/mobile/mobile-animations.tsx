@@ -6,8 +6,8 @@ import { motion } from "framer-motion";
 export const staggerContainer = {
   hidden: {},
   visible: {
-    transition: { staggerChildren: 0.06, delayChildren: 0.04 },
-  },
+    transition: { staggerChildren: 0.06, delayChildren: 0.04 }
+  }
 };
 
 /* ── Fade-up item ── */
@@ -16,8 +16,8 @@ export const fadeUpItem = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  },
+    transition: { duration: 0.35, ease: [0.25, 0.46, 0.45, 0.94] as const }
+  }
 };
 
 /* ── Scale-in (for cards) ── */
@@ -26,8 +26,8 @@ export const scaleIn = {
   visible: {
     opacity: 1,
     scale: 1,
-    transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  },
+    transition: { duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const }
+  }
 };
 
 type WrapperProps = {
@@ -44,8 +44,7 @@ export function AnimatedPage({ children, className, dir }: WrapperProps) {
       animate="visible"
       variants={staggerContainer}
       className={className}
-      dir={dir}
-    >
+      dir={dir}>
       {children}
     </motion.div>
   );

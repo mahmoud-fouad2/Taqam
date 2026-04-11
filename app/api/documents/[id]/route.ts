@@ -16,7 +16,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -29,10 +29,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             id: true,
             firstName: true,
             lastName: true,
-            employeeNumber: true,
-          },
-        },
-      },
+            employeeNumber: true
+          }
+        }
+      }
     });
 
     if (!document) {
@@ -46,10 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: document });
   } catch (error) {
     console.error("Error fetching document:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch document" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch document" }, { status: 500 });
   }
 }
 
@@ -57,13 +54,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingDocument = await prisma.document.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingDocument) {
@@ -81,7 +78,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       titleAr: body.titleAr,
       category: body.category,
       description: body.description,
-      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null,
+      expiryDate: body.expiryDate ? new Date(body.expiryDate) : null
     };
 
     // Handle approval
@@ -102,19 +99,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
-          },
-        },
-      },
+            lastName: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ data: document });
   } catch (error) {
     console.error("Error updating document:", error);
-    return NextResponse.json(
-      { error: "Failed to update document" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update document" }, { status: 500 });
   }
 }
 
@@ -122,13 +116,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingDocument = await prisma.document.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingDocument) {
@@ -151,15 +145,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     // Delete from database
     await prisma.document.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ message: "Document deleted successfully" });
   } catch (error) {
     console.error("Error deleting document:", error);
-    return NextResponse.json(
-      { error: "Failed to delete document" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
   }
 }

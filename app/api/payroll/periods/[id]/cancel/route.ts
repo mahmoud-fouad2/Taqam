@@ -17,7 +17,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       tenantId,
       id,
       status: "CANCELLED",
-      note: reason ? `Cancellation reason: ${reason}` : body?.notes,
+      note: reason ? `Cancellation reason: ${reason}` : body?.notes
     });
 
     if (!updated) {

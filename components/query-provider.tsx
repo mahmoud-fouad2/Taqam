@@ -11,15 +11,11 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
           queries: {
             staleTime: 60 * 1000, // Cache results for 1 minute
             refetchOnWindowFocus: false, // Prevents aggressive refetching when switching tabs
-            retry: 1, // Only retry failed requests once
-          },
-        },
+            retry: 1 // Only retry failed requests once
+          }
+        }
       })
   );
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
-  );
+  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 }

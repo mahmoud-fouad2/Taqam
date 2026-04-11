@@ -44,16 +44,29 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
 
   "form.submit": { ar: "إرسال الطلب", en: "Submit request" },
   "form.submitting": { ar: "جاري الإرسال...", en: "Submitting..." },
-  "form.agreePrefix": { ar: "بإرسال هذا النموذج، أنت توافق على ", en: "By submitting this form, you agree to the " },
+  "form.agreePrefix": {
+    ar: "بإرسال هذا النموذج، أنت توافق على ",
+    en: "By submitting this form, you agree to the "
+  },
   "form.and": { ar: "و", en: "and " },
   "form.privacyPolicy": { ar: "سياسة الخصوصية", en: "Privacy Policy" },
   "form.terms": { ar: "شروط الاستخدام", en: "Terms" },
 
-  "captcha.required": { ar: "يرجى إكمال التحقق (reCAPTCHA) قبل الإرسال.", en: "Please complete the reCAPTCHA verification before submitting." },
-  "captcha.missingConfig": { ar: "reCAPTCHA غير مُهيأ. تواصل مع الإدارة لإضافة المفاتيح.", en: "reCAPTCHA is not configured. Please contact the admin to add the keys." },
+  "captcha.required": {
+    ar: "يرجى إكمال التحقق (reCAPTCHA) قبل الإرسال.",
+    en: "Please complete the reCAPTCHA verification before submitting."
+  },
+  "captcha.missingConfig": {
+    ar: "reCAPTCHA غير مُهيأ. تواصل مع الإدارة لإضافة المفاتيح.",
+    en: "reCAPTCHA is not configured. Please contact the admin to add the keys."
+  }
 };
 
-export function t(locale: AppLocale, key: WebMessageKey, vars?: Record<string, string | number>): string {
+export function t(
+  locale: AppLocale,
+  key: WebMessageKey,
+  vars?: Record<string, string | number>
+): string {
   const template = webMessages[key]?.[locale] ?? webMessages[key]?.en ?? String(key);
   if (!vars) return template;
 

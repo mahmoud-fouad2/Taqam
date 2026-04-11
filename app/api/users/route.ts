@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
       where.OR = [
         { email: { contains: q, mode: "insensitive" } },
         { firstName: { contains: q, mode: "insensitive" } },
-        { lastName: { contains: q, mode: "insensitive" } },
+        { lastName: { contains: q, mode: "insensitive" } }
       ];
     }
 
@@ -69,9 +69,9 @@ export async function GET(request: NextRequest) {
           status: true,
           tenantId: true,
           lastLoginAt: true,
-          createdAt: true,
-        },
-      }),
+          createdAt: true
+        }
+      })
     ]);
 
     return NextResponse.json({
@@ -80,8 +80,8 @@ export async function GET(request: NextRequest) {
         page,
         pageSize,
         total,
-        totalPages: Math.ceil(total / pageSize),
-      },
+        totalPages: Math.ceil(total / pageSize)
+      }
     });
   } catch (error) {
     logger.error("Error fetching users", undefined, error);
@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     // Check if email already exists
     const existingUser = await prisma.user.findFirst({
-      where: { email: email.toLowerCase() },
+      where: { email: email.toLowerCase() }
     });
 
     if (existingUser) {
@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
         role,
         phone: phone || null,
         tenantId,
-        status: "ACTIVE",
+        status: "ACTIVE"
       },
       select: {
         id: true,
@@ -149,8 +149,8 @@ export async function POST(request: NextRequest) {
         lastName: true,
         role: true,
         status: true,
-        tenantId: true,
-      },
+        tenantId: true
+      }
     });
 
     logger.info("User created", { userId: user.id, email: user.email, tenantId });

@@ -23,18 +23,25 @@ const initialForm = {
   lastName: "",
   email: "",
   phone: "",
-  coverLetter: "",
+  coverLetter: ""
 };
 
 const RESUME_MAX_SIZE = 5 * 1024 * 1024;
-const RESUME_ACCEPT = ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+const RESUME_ACCEPT =
+  ".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 const ALLOWED_RESUME_TYPES = new Set([
   "application/pdf",
   "application/msword",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ]);
 
-export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTitle, companyName }: Props) {
+export function PublicApplicationForm({
+  locale,
+  jobPostingId,
+  tenantSlug,
+  jobTitle,
+  companyName
+}: Props) {
   const p = locale === "en" ? "/en" : "";
   const [form, setForm] = useState(initialForm);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
@@ -121,7 +128,7 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
 
       const uploadResponse = await fetch("/api/public/job-applications/resume", {
         method: "POST",
-        body: formData,
+        body: formData
       });
 
       const uploadPayload = await uploadResponse.json().catch(() => null);
@@ -157,7 +164,7 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
       const response = await fetch("/api/public/job-applications", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           jobPostingId,
@@ -167,15 +174,17 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
           email: form.email.trim(),
           phone: form.phone.trim() || undefined,
           resumeUrl,
-          coverLetter: form.coverLetter.trim() || undefined,
-        }),
+          coverLetter: form.coverLetter.trim() || undefined
+        })
       });
 
       const payload = await response.json().catch(() => null);
       if (!response.ok) {
         throw new Error(
           payload?.error ||
-            (locale === "ar" ? "تعذر إرسال الطلب الآن. حاول مرة أخرى." : "We could not submit the application right now.")
+            (locale === "ar"
+              ? "تعذر إرسال الطلب الآن. حاول مرة أخرى."
+              : "We could not submit the application right now.")
         );
       }
 
@@ -199,7 +208,7 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
     return (
       <Card className="border-primary/25 bg-primary/5">
         <CardHeader>
-          <div className="mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <div className="bg-primary/10 text-primary mb-3 inline-flex h-12 w-12 items-center justify-center rounded-2xl">
             <CheckCircle2 className="h-6 w-6" />
           </div>
           <CardTitle>{locale === "ar" ? "تم إرسال طلبك بنجاح" : "Application submitted"}</CardTitle>
@@ -238,22 +247,42 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="firstName">{locale === "ar" ? "الاسم الأول" : "First name"}</Label>
-              <Input id="firstName" value={form.firstName} onChange={(event) => setValue("firstName", event.target.value)} />
+              <Input
+                id="firstName"
+                value={form.firstName}
+                onChange={(event) => setValue("firstName", event.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="lastName">{locale === "ar" ? "الاسم الأخير" : "Last name"}</Label>
-              <Input id="lastName" value={form.lastName} onChange={(event) => setValue("lastName", event.target.value)} />
+              <Input
+                id="lastName"
+                value={form.lastName}
+                onChange={(event) => setValue("lastName", event.target.value)}
+              />
             </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="email">{locale === "ar" ? "البريد الإلكتروني" : "Email"}</Label>
-              <Input id="email" type="email" dir="ltr" value={form.email} onChange={(event) => setValue("email", event.target.value)} />
+              <Input
+                id="email"
+                type="email"
+                dir="ltr"
+                value={form.email}
+                onChange={(event) => setValue("email", event.target.value)}
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">{locale === "ar" ? "رقم الجوال" : "Phone"}</Label>
-              <Input id="phone" type="tel" dir="ltr" value={form.phone} onChange={(event) => setValue("phone", event.target.value)} />
+              <Input
+                id="phone"
+                type="tel"
+                dir="ltr"
+                value={form.phone}
+                onChange={(event) => setValue("phone", event.target.value)}
+              />
             </div>
           </div>
 
@@ -276,20 +305,26 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
               type="file"
             />
 
-            <div className="rounded-xl border bg-muted/20 px-4 py-3 text-xs leading-6 text-muted-foreground">
+            <div className="bg-muted/20 text-muted-foreground rounded-xl border px-4 py-3 text-xs leading-6">
               {locale === "ar"
                 ? "الملفات المقبولة: PDF و DOC و DOCX بحد أقصى 5 ميجابايت. سيتم رفع الملف إلى تخزين المنصة مباشرة عند إرسال الطلب."
                 : "Accepted files: PDF, DOC, and DOCX up to 5MB. The file is uploaded directly to platform storage when you submit the application."}
             </div>
 
             {resumeFile || uploadedResumeUrl ? (
-              <div className="flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm">
-                <div className="mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  {uploadingResume ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
+              <div className="border-primary/20 bg-primary/5 flex items-start gap-3 rounded-2xl border px-4 py-3 text-sm">
+                <div className="bg-primary/10 text-primary mt-0.5 inline-flex h-9 w-9 items-center justify-center rounded-xl">
+                  {uploadingResume ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <FileText className="h-4 w-4" />
+                  )}
                 </div>
                 <div className="flex-1 space-y-1">
-                  <p className="font-medium text-foreground">{uploadedResumeName || resumeFile?.name}</p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-foreground font-medium">
+                    {uploadedResumeName || resumeFile?.name}
+                  </p>
+                  <p className="text-muted-foreground text-xs">
                     {uploadingResume
                       ? locale === "ar"
                         ? "جاري رفع السيرة الذاتية..."
@@ -303,13 +338,15 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
                           : "The resume will upload automatically when you submit the application."}
                   </p>
                 </div>
-                <Upload className="mt-1 h-4 w-4 text-primary" />
+                <Upload className="text-primary mt-1 h-4 w-4" />
               </div>
             ) : null}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="coverLetter">{locale === "ar" ? "رسالة مختصرة (اختياري)" : "Short note (optional)"}</Label>
+            <Label htmlFor="coverLetter">
+              {locale === "ar" ? "رسالة مختصرة (اختياري)" : "Short note (optional)"}
+            </Label>
             <Textarea
               id="coverLetter"
               rows={6}
@@ -323,9 +360,13 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
             />
           </div>
 
-          {error ? <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">{error}</div> : null}
+          {error ? (
+            <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm">
+              {error}
+            </div>
+          ) : null}
 
-          <div className="rounded-xl border bg-muted/30 px-4 py-3 text-xs leading-6 text-muted-foreground">
+          <div className="bg-muted/30 text-muted-foreground rounded-xl border px-4 py-3 text-xs leading-6">
             {locale === "ar"
               ? "بتقديمك على الوظيفة، فأنت توافق على مشاركة بياناتك مع فريق التوظيف داخل الشركة المعنية فقط لغرض التقييم والتواصل بخصوص هذا الدور."
               : "By applying, you agree that your information will be shared only with the relevant company's recruitment team to evaluate and contact you about this role."}
@@ -335,7 +376,9 @@ export function PublicApplicationForm({ locale, jobPostingId, tenantSlug, jobTit
             {submitting || uploadingResume ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                {locale === "ar" ? "جاري رفع السيرة وإرسال الطلب..." : "Uploading resume and submitting..."}
+                {locale === "ar"
+                  ? "جاري رفع السيرة وإرسال الطلب..."
+                  : "Uploading resume and submitting..."}
               </>
             ) : (
               <>

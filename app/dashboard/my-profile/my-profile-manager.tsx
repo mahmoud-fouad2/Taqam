@@ -1,28 +1,41 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { 
-  User, Mail, Phone, MapPin, Building2, Calendar, CreditCard,
-  Shield, Edit, Save, X, Camera, FileText, AlertCircle, Loader2
-} from 'lucide-react';
-import { useSession } from 'next-auth/react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Separator } from '@/components/ui/separator';
-import { 
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
+  Building2,
+  Calendar,
+  CreditCard,
+  Shield,
+  Edit,
+  Save,
+  X,
+  Camera,
+  FileText,
+  AlertCircle,
+  Loader2
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { toast } from 'sonner';
-import type { EmployeeDocument, EmployeeProfile } from '@/lib/types/self-service';
+  SelectValue
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import type { EmployeeDocument, EmployeeProfile } from "@/lib/types/self-service";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -46,9 +59,9 @@ type ProfileApiResponse = {
       lastNameAr: string | null;
       nationalId: string | null;
       dateOfBirth: string | null;
-      gender: 'MALE' | 'FEMALE' | null;
+      gender: "MALE" | "FEMALE" | null;
       nationality: string | null;
-      maritalStatus: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | null;
+      maritalStatus: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | null;
       address?: {
         street?: string;
         city?: string;
@@ -93,46 +106,46 @@ type DocumentsApiResponse = {
   error?: string;
 };
 
-type DocumentItem = NonNullable<DocumentsApiResponse['data']>[number];
+type DocumentItem = NonNullable<DocumentsApiResponse["data"]>[number];
 
-function mapGenderToUi(value: 'MALE' | 'FEMALE' | null | undefined): 'male' | 'female' {
-  if (value === 'FEMALE') return 'female';
-  return 'male';
+function mapGenderToUi(value: "MALE" | "FEMALE" | null | undefined): "male" | "female" {
+  if (value === "FEMALE") return "female";
+  return "male";
 }
 
 function mapMaritalStatusToUi(
-  value: 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | null | undefined
-): EmployeeProfile['maritalStatus'] {
+  value: "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | null | undefined
+): EmployeeProfile["maritalStatus"] {
   switch (value) {
-    case 'SINGLE':
-      return 'single';
-    case 'MARRIED':
-      return 'married';
-    case 'DIVORCED':
-      return 'divorced';
-    case 'WIDOWED':
-      return 'widowed';
+    case "SINGLE":
+      return "single";
+    case "MARRIED":
+      return "married";
+    case "DIVORCED":
+      return "divorced";
+    case "WIDOWED":
+      return "widowed";
     default:
       return undefined;
   }
 }
 
-function mapUiGenderToDb(value: 'male' | 'female'): 'MALE' | 'FEMALE' {
-  return value === 'female' ? 'FEMALE' : 'MALE';
+function mapUiGenderToDb(value: "male" | "female"): "MALE" | "FEMALE" {
+  return value === "female" ? "FEMALE" : "MALE";
 }
 
 function mapUiMaritalStatusToDb(
-  value: EmployeeProfile['maritalStatus']
-): 'SINGLE' | 'MARRIED' | 'DIVORCED' | 'WIDOWED' | null {
+  value: EmployeeProfile["maritalStatus"]
+): "SINGLE" | "MARRIED" | "DIVORCED" | "WIDOWED" | null {
   switch (value) {
-    case 'single':
-      return 'SINGLE';
-    case 'married':
-      return 'MARRIED';
-    case 'divorced':
-      return 'DIVORCED';
-    case 'widowed':
-      return 'WIDOWED';
+    case "single":
+      return "SINGLE";
+    case "married":
+      return "MARRIED";
+    case "divorced":
+      return "DIVORCED";
+    case "widowed":
+      return "WIDOWED";
     default:
       return null;
   }
@@ -142,32 +155,37 @@ function mapDocumentToEmployeeDocument(doc: DocumentItem): EmployeeDocument {
   return {
     id: doc.id,
     name: doc.titleAr || doc.title,
-    type: 'other',
+    type: "other",
     fileUrl: doc.url,
     expiryDate: doc.expiryDate || undefined,
-    uploadedAt: doc.createdAt,
+    uploadedAt: doc.createdAt
   };
 }
 
-function mapProfileApiToEmployeeProfile(api: NonNullable<ProfileApiResponse['data']>, documents: EmployeeDocument[]): EmployeeProfile {
+function mapProfileApiToEmployeeProfile(
+  api: NonNullable<ProfileApiResponse["data"]>,
+  documents: EmployeeDocument[]
+): EmployeeProfile {
   const employee = api.employee;
 
   return {
     id: employee?.id ?? api.id,
-    employeeNumber: employee?.employeeNumber ?? '-',
+    employeeNumber: employee?.employeeNumber ?? "-",
     firstName: employee?.firstNameAr || api.firstName,
     lastName: employee?.lastNameAr || api.lastName,
     firstNameEn: api.firstName,
     lastNameEn: api.lastName,
     email: api.email,
-    phone: api.phone ?? '',
+    phone: api.phone ?? "",
     avatar: api.avatar ?? undefined,
-    departmentId: employee?.department?.id ?? '',
-    departmentName: employee?.department?.nameAr || employee?.department?.name || '-',
-    jobTitleId: employee?.jobTitle?.id ?? '',
-    jobTitle: employee?.jobTitle?.nameAr || employee?.jobTitle?.name || '-',
+    departmentId: employee?.department?.id ?? "",
+    departmentName: employee?.department?.nameAr || employee?.department?.name || "-",
+    jobTitleId: employee?.jobTitle?.id ?? "",
+    jobTitle: employee?.jobTitle?.nameAr || employee?.jobTitle?.name || "-",
     managerId: employee?.manager?.id ?? undefined,
-    managerName: employee?.manager ? `${employee.manager.firstName} ${employee.manager.lastName}` : undefined,
+    managerName: employee?.manager
+      ? `${employee.manager.firstName} ${employee.manager.lastName}`
+      : undefined,
     hireDate: employee?.hireDate ?? new Date().toISOString(),
     birthDate: employee?.dateOfBirth ?? undefined,
     gender: mapGenderToUi(employee?.gender ?? null),
@@ -177,14 +195,14 @@ function mapProfileApiToEmployeeProfile(api: NonNullable<ProfileApiResponse['dat
     address: employee?.address ?? undefined,
     emergencyContact: employee?.emergencyContact
       ? {
-          name: employee.emergencyContact.name ?? '',
-          relationship: employee.emergencyContact.relationship ?? '',
-          phone: employee.emergencyContact.phone ?? '',
-          email: employee.emergencyContact.email ?? undefined,
+          name: employee.emergencyContact.name ?? "",
+          relationship: employee.emergencyContact.relationship ?? "",
+          phone: employee.emergencyContact.phone ?? "",
+          email: employee.emergencyContact.email ?? undefined
         }
       : undefined,
     bankInfo: employee?.bankInfo ?? undefined,
-    documents,
+    documents
   };
 }
 
@@ -205,29 +223,29 @@ export default function MyProfileManager() {
   const employeeIdForDocs = useMemo(() => {
     if (!profile) return null;
     // If user has no employee record, profile.id is userId.
-    if (profile.employeeNumber === '-' || !profile.employeeNumber) return null;
+    if (profile.employeeNumber === "-" || !profile.employeeNumber) return null;
     return profile.id;
   }, [profile]);
 
   async function loadProfile() {
     setIsLoading(true);
     try {
-      const res = await fetch('/api/profile', { cache: 'no-store' });
+      const res = await fetch("/api/profile", { cache: "no-store" });
       const json = (await res.json()) as ProfileApiResponse;
 
       if (!res.ok) {
-        throw new Error(json.error || 'Failed to fetch profile');
+        throw new Error(json.error || "Failed to fetch profile");
       }
 
       if (!json.data) {
-        throw new Error('Invalid profile response');
+        throw new Error("Invalid profile response");
       }
 
       let documents: EmployeeDocument[] = [];
       const employeeId = json.data.employee?.id;
       if (employeeId) {
         const docsRes = await fetch(`/api/documents?employeeId=${encodeURIComponent(employeeId)}`, {
-          cache: 'no-store',
+          cache: "no-store"
         });
         const docsJson = (await docsRes.json()) as DocumentsApiResponse;
         if (docsRes.ok && Array.isArray(docsJson.data)) {
@@ -239,7 +257,7 @@ export default function MyProfileManager() {
       setProfile(mapped);
       setEditedProfile(mapped);
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to load profile';
+      const message = e instanceof Error ? e.message : "Failed to load profile";
       toast.error(message);
       setProfile(null);
       setEditedProfile(null);
@@ -261,18 +279,18 @@ export default function MyProfileManager() {
         firstName: editedProfile.firstNameEn || editedProfile.firstName,
         lastName: editedProfile.lastNameEn || editedProfile.lastName,
         phone: editedProfile.phone,
-        avatar: editedProfile.avatar,
+        avatar: editedProfile.avatar
       };
 
-      const userRes = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userPayload),
+      const userRes = await fetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userPayload)
       });
 
       const userJson = await userRes.json();
       if (!userRes.ok) {
-        throw new Error(userJson.error || 'Failed to update profile');
+        throw new Error(userJson.error || "Failed to update profile");
       }
 
       // Refresh NextAuth session (sidebar avatar/name) if supported
@@ -281,14 +299,14 @@ export default function MyProfileManager() {
           avatar: userJson?.data?.avatar ?? editedProfile.avatar,
           firstName: userJson?.data?.firstName,
           lastName: userJson?.data?.lastName,
-          name: `${userJson?.data?.firstName ?? ''} ${userJson?.data?.lastName ?? ''}`.trim(),
+          name: `${userJson?.data?.firstName ?? ""} ${userJson?.data?.lastName ?? ""}`.trim()
         } as any);
       } catch {
         // Ignore session update errors
       }
 
       // Update employee-level fields when employee exists
-      const hasEmployee = profile.employeeNumber !== '-' && !!profile.employeeNumber;
+      const hasEmployee = profile.employeeNumber !== "-" && !!profile.employeeNumber;
       if (hasEmployee) {
         const employeePayload = {
           firstNameAr: editedProfile.firstName,
@@ -301,17 +319,17 @@ export default function MyProfileManager() {
           maritalStatus: mapUiMaritalStatusToDb(editedProfile.maritalStatus),
           nationality: editedProfile.nationality || null,
           address: editedProfile.address || null,
-          emergencyContact: editedProfile.emergencyContact || null,
+          emergencyContact: editedProfile.emergencyContact || null
         };
 
         const empRes = await fetch(`/api/employees/${encodeURIComponent(profile.id)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(employeePayload),
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(employeePayload)
         });
         const empJson = await empRes.json();
         if (!empRes.ok) {
-          throw new Error(empJson.error || 'Failed to update employee profile');
+          throw new Error(empJson.error || "Failed to update employee profile");
         }
       }
 
@@ -319,7 +337,7 @@ export default function MyProfileManager() {
       setIsEditing(false);
       await loadProfile();
     } catch (e) {
-      const message = e instanceof Error ? e.message : 'Failed to save';
+      const message = e instanceof Error ? e.message : "Failed to save";
       toast.error(message);
     } finally {
       setIsSaving(false);
@@ -341,7 +359,7 @@ export default function MyProfileManager() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
+    if (!file.type.startsWith("image/")) {
       toast.error(t.myProfile.notImage);
       return;
     }
@@ -353,11 +371,11 @@ export default function MyProfileManager() {
     setIsUploadingAvatar(true);
     try {
       const formData = new FormData();
-      formData.set('file', file);
+      formData.set("file", file);
 
-      const res = await fetch('/api/profile/avatar', {
-        method: 'POST',
-        body: formData,
+      const res = await fetch("/api/profile/avatar", {
+        method: "POST",
+        body: formData
       });
       const json = await res.json();
 
@@ -375,7 +393,7 @@ export default function MyProfileManager() {
       toast.error(message);
     } finally {
       setIsUploadingAvatar(false);
-      if (e.target) e.target.value = '';
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -398,14 +416,14 @@ export default function MyProfileManager() {
     setIsUploadingDoc(true);
     try {
       const formData = new FormData();
-      formData.set('file', file);
-      formData.set('employeeId', employeeIdForDocs);
-      formData.set('title', file.name);
-      formData.set('category', 'PERSONAL');
+      formData.set("file", file);
+      formData.set("employeeId", employeeIdForDocs);
+      formData.set("title", file.name);
+      formData.set("category", "PERSONAL");
 
-      const res = await fetch('/api/documents', {
-        method: 'POST',
-        body: formData,
+      const res = await fetch("/api/documents", {
+        method: "POST",
+        body: formData
       });
       const json = await res.json();
 
@@ -420,7 +438,7 @@ export default function MyProfileManager() {
       toast.error(message);
     } finally {
       setIsUploadingDoc(false);
-      if (e.target) e.target.value = '';
+      if (e.target) e.target.value = "";
     }
   };
 
@@ -447,7 +465,9 @@ export default function MyProfileManager() {
           <h1 className="text-2xl font-bold">{t.myProfile.title}</h1>
           <p className="text-muted-foreground">{t.myProfile.loadFailed}</p>
         </div>
-        <Button variant="outline" onClick={() => void loadProfile()}>{t.common.retry}</Button>
+        <Button variant="outline" onClick={() => void loadProfile()}>
+          {t.common.retry}
+        </Button>
       </div>
     );
   }
@@ -464,15 +484,19 @@ export default function MyProfileManager() {
           {isEditing ? (
             <>
               <Button variant="outline" onClick={handleCancel}>
-                <X className="h-4 w-4 me-2" />{t.common.cancel}</Button>
+                <X className="me-2 h-4 w-4" />
+                {t.common.cancel}
+              </Button>
               <Button onClick={handleSave} disabled={isSaving}>
-                <Save className="h-4 w-4 me-2" />
-                {isSaving ? '${t.myProfile.saving}' : '${t.common.saveChanges}'}
+                <Save className="me-2 h-4 w-4" />
+                {isSaving ? "${t.myProfile.saving}" : "${t.common.saveChanges}"}
               </Button>
             </>
           ) : (
             <Button onClick={() => setIsEditing(true)}>
-              <Edit className="h-4 w-4 me-2" />{t.myProfile.editData}</Button>
+              <Edit className="me-2 h-4 w-4" />
+              {t.myProfile.editData}
+            </Button>
           )}
         </div>
       </div>
@@ -484,23 +508,30 @@ export default function MyProfileManager() {
             <div className="relative">
               <Avatar className="h-24 w-24">
                 <AvatarImage
-                  src={(isEditing ? (editedProfile?.avatar || profile.avatar) : profile.avatar) || undefined}
+                  src={
+                    (isEditing ? editedProfile?.avatar || profile.avatar : profile.avatar) ||
+                    undefined
+                  }
                   alt=""
                 />
                 <AvatarFallback className="text-2xl">
-                  {profile.firstName.charAt(0)}{profile.lastName.charAt(0)}
+                  {profile.firstName.charAt(0)}
+                  {profile.lastName.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               {isEditing && (
-                <Button 
-                  size="icon" 
-                  variant="secondary" 
-                  className="absolute bottom-0 start-0 h-8 w-8 rounded-full"
+                <Button
+                  size="icon"
+                  variant="secondary"
+                  className="absolute start-0 bottom-0 h-8 w-8 rounded-full"
                   aria-label={t.myProfile.changeImage}
                   onClick={openAvatarPicker}
-                  disabled={isUploadingAvatar}
-                >
-                  {isUploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+                  disabled={isUploadingAvatar}>
+                  {isUploadingAvatar ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
                 </Button>
               )}
               <input
@@ -512,19 +543,23 @@ export default function MyProfileManager() {
                 onChange={onAvatarSelected}
               />
             </div>
-            <div className="text-center sm:text-start flex-1">
-              <h2 className="text-2xl font-bold">{profile.firstName} {profile.lastName}</h2>
+            <div className="flex-1 text-center sm:text-start">
+              <h2 className="text-2xl font-bold">
+                {profile.firstName} {profile.lastName}
+              </h2>
               <p className="text-muted-foreground">{profile.jobTitle}</p>
-              <div className="flex flex-wrap items-center justify-center gap-2 mt-2 sm:justify-start">
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 <Badge variant="secondary">{profile.departmentName}</Badge>
                 <Badge variant="outline">#{profile.employeeNumber}</Badge>
               </div>
             </div>
             <div className="text-center sm:text-start">
-              <p className="text-sm text-muted-foreground">{t.myProfile.joinDate}</p>
-              <p className="font-medium">{new Date(profile.hireDate).toLocaleDateString('ar-SA')}</p>
-              <p className="text-sm text-muted-foreground mt-2">{t.onboarding.directManager}</p>
-              <p className="font-medium">{profile.managerName || '-'}</p>
+              <p className="text-muted-foreground text-sm">{t.myProfile.joinDate}</p>
+              <p className="font-medium">
+                {new Date(profile.hireDate).toLocaleDateString("ar-SA")}
+              </p>
+              <p className="text-muted-foreground mt-2 text-sm">{t.onboarding.directManager}</p>
+              <p className="font-medium">{profile.managerName || "-"}</p>
             </div>
           </div>
         </CardContent>
@@ -544,75 +579,94 @@ export default function MyProfileManager() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />{t.myProfile.personalInfo}</CardTitle>
+                <User className="h-5 w-5" />
+                {t.myProfile.personalInfo}
+              </CardTitle>
               <CardDescription>{t.myProfile.personalInfoDesc}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.myProfile.firstNameAr}</Label>
                 {isEditing ? (
-                  <Input 
+                  <Input
                     value={editedProfile.firstName}
-                    onChange={(e) => setEditedProfile({...editedProfile, firstName: e.target.value})}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, firstName: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.firstName}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">{profile.firstName}</p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.lastNameAr}</Label>
                 {isEditing ? (
-                  <Input 
+                  <Input
                     value={editedProfile.lastName}
-                    onChange={(e) => setEditedProfile({...editedProfile, lastName: e.target.value})}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, lastName: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.lastName}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">{profile.lastName}</p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.firstNameEn}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.firstNameEn || ''}
-                    onChange={(e) => setEditedProfile({...editedProfile, firstNameEn: e.target.value})}
+                  <Input
+                    value={editedProfile.firstNameEn || ""}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, firstNameEn: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.firstNameEn || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.firstNameEn || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.lastNameEn}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.lastNameEn || ''}
-                    onChange={(e) => setEditedProfile({...editedProfile, lastNameEn: e.target.value})}
+                  <Input
+                    value={editedProfile.lastNameEn || ""}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, lastNameEn: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.lastNameEn || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.lastNameEn || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.birthDate}</Label>
                 {isEditing ? (
-                  <Input 
+                  <Input
                     type="date"
-                    value={editedProfile.birthDate || ''}
-                    onChange={(e) => setEditedProfile({...editedProfile, birthDate: e.target.value})}
+                    value={editedProfile.birthDate || ""}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, birthDate: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">
-                    {profile.birthDate ? new Date(profile.birthDate).toLocaleDateString('ar-SA') : '-'}
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.birthDate
+                      ? new Date(profile.birthDate).toLocaleDateString("ar-SA")
+                      : "-"}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.gender}</Label>
                 {isEditing ? (
-                  <Select 
+                  <Select
                     value={editedProfile.gender}
-                    onValueChange={(value: 'male' | 'female') => setEditedProfile({...editedProfile, gender: value})}
-                  >
+                    onValueChange={(value: "male" | "female") =>
+                      setEditedProfile({ ...editedProfile, gender: value })
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -622,19 +676,19 @@ export default function MyProfileManager() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">
-                    {profile.gender === 'male' ? t.myProfile.male : t.myProfile.female}
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.gender === "male" ? t.myProfile.male : t.myProfile.female}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.maritalStatus}</Label>
                 {isEditing ? (
-                  <Select 
-                    value={editedProfile.maritalStatus || ''}
-                    onValueChange={(value: 'single' | 'married' | 'divorced' | 'widowed') => 
-                      setEditedProfile({...editedProfile, maritalStatus: value})}
-                  >
+                  <Select
+                    value={editedProfile.maritalStatus || ""}
+                    onValueChange={(value: "single" | "married" | "divorced" | "widowed") =>
+                      setEditedProfile({ ...editedProfile, maritalStatus: value })
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -646,29 +700,37 @@ export default function MyProfileManager() {
                     </SelectContent>
                   </Select>
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">
-                    {profile.maritalStatus === 'single' ? t.myProfile.single : 
-                     profile.maritalStatus === 'married' ? t.myProfile.married : 
-                     profile.maritalStatus === 'divorced' ? t.myProfile.divorced : t.myProfile.widowed}
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.maritalStatus === "single"
+                      ? t.myProfile.single
+                      : profile.maritalStatus === "married"
+                        ? t.myProfile.married
+                        : profile.maritalStatus === "divorced"
+                          ? t.myProfile.divorced
+                          : t.myProfile.widowed}
                   </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.nationality}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.nationality || ''}
-                    onChange={(e) => setEditedProfile({...editedProfile, nationality: e.target.value})}
+                  <Input
+                    value={editedProfile.nationality || ""}
+                    onChange={(e) =>
+                      setEditedProfile({ ...editedProfile, nationality: e.target.value })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.nationality || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.nationality || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.employees.nationalId}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-muted-foreground" />
-                  {profile.nationalId || '-'}
+                <p className="bg-muted flex items-center gap-2 rounded p-2 text-sm font-medium">
+                  <Shield className="text-muted-foreground h-4 w-4" />
+                  {profile.nationalId || "-"}
                 </p>
               </div>
             </CardContent>
@@ -688,89 +750,107 @@ export default function MyProfileManager() {
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.common.email}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded flex items-center gap-2">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                <p className="bg-muted flex items-center gap-2 rounded p-2 text-sm font-medium">
+                  <Mail className="text-muted-foreground h-4 w-4" />
                   {profile.email}
                 </p>
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.mobile}</Label>
                 {isEditing ? (
-                  <Input 
+                  <Input
                     value={editedProfile.phone}
-                    onChange={(e) => setEditedProfile({...editedProfile, phone: e.target.value})}
+                    onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded flex items-center gap-2">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                  <p className="bg-muted flex items-center gap-2 rounded p-2 text-sm font-medium">
+                    <Phone className="text-muted-foreground h-4 w-4" />
                     {profile.phone}
                   </p>
                 )}
               </div>
               <div className="md:col-span-2">
                 <Separator className="my-4" />
-                <h4 className="font-semibold mb-4 flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />{t.myProfile.address}</h4>
+                <h4 className="mb-4 flex items-center gap-2 font-semibold">
+                  <MapPin className="h-4 w-4" />
+                  {t.myProfile.address}
+                </h4>
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.street}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.address?.street || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      address: { ...(editedProfile.address || {}), street: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.address?.street || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        address: { ...(editedProfile.address || {}), street: e.target.value }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.address?.street || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.address?.street || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.common.city}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.address?.city || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      address: { ...(editedProfile.address || {}), city: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.address?.city || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        address: { ...(editedProfile.address || {}), city: e.target.value }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.address?.city || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.address?.city || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.common.country}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.address?.country || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      address: { ...(editedProfile.address || {}), country: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.address?.country || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        address: { ...(editedProfile.address || {}), country: e.target.value }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.address?.country || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.address?.country || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.postalCode}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.address?.postalCode || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      address: { ...(editedProfile.address || {}), postalCode: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.address?.postalCode || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        address: { ...(editedProfile.address || {}), postalCode: e.target.value }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.address?.postalCode || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.address?.postalCode || "-"}
+                  </p>
                 )}
               </div>
               <div className="md:col-span-2">
                 <Separator className="my-4" />
-                <h4 className="font-semibold mb-4 flex items-center gap-2">
+                <h4 className="mb-4 flex items-center gap-2 font-semibold">
                   <AlertCircle className="h-4 w-4" />
                   {t.myProfile.pEmergencyContact}
                 </h4>
@@ -778,43 +858,76 @@ export default function MyProfileManager() {
               <div className="space-y-2">
                 <Label>{t.common.name}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.emergencyContact?.name || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      emergencyContact: { ...(editedProfile.emergencyContact || { name: '', relationship: '', phone: '' }), name: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.emergencyContact?.name || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        emergencyContact: {
+                          ...(editedProfile.emergencyContact || {
+                            name: "",
+                            relationship: "",
+                            phone: ""
+                          }),
+                          name: e.target.value
+                        }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.emergencyContact?.name || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.emergencyContact?.name || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.relationship}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.emergencyContact?.relationship || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      emergencyContact: { ...(editedProfile.emergencyContact || { name: '', relationship: '', phone: '' }), relationship: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.emergencyContact?.relationship || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        emergencyContact: {
+                          ...(editedProfile.emergencyContact || {
+                            name: "",
+                            relationship: "",
+                            phone: ""
+                          }),
+                          relationship: e.target.value
+                        }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.emergencyContact?.relationship || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.emergencyContact?.relationship || "-"}
+                  </p>
                 )}
               </div>
               <div className="space-y-2">
                 <Label>{t.common.phone}</Label>
                 {isEditing ? (
-                  <Input 
-                    value={editedProfile.emergencyContact?.phone || ''}
-                    onChange={(e) => setEditedProfile({
-                      ...editedProfile, 
-                      emergencyContact: { ...(editedProfile.emergencyContact || { name: '', relationship: '', phone: '' }), phone: e.target.value }
-                    })}
+                  <Input
+                    value={editedProfile.emergencyContact?.phone || ""}
+                    onChange={(e) =>
+                      setEditedProfile({
+                        ...editedProfile,
+                        emergencyContact: {
+                          ...(editedProfile.emergencyContact || {
+                            name: "",
+                            relationship: "",
+                            phone: ""
+                          }),
+                          phone: e.target.value
+                        }
+                      })
+                    }
                   />
                 ) : (
-                  <p className="text-sm font-medium p-2 bg-muted rounded">{profile.emergencyContact?.phone || '-'}</p>
+                  <p className="bg-muted rounded p-2 text-sm font-medium">
+                    {profile.emergencyContact?.phone || "-"}
+                  </p>
                 )}
               </div>
             </CardContent>
@@ -826,29 +939,39 @@ export default function MyProfileManager() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5" />{t.common.bankData}</CardTitle>
+                <CreditCard className="h-5 w-5" />
+                {t.common.bankData}
+              </CardTitle>
               <CardDescription>{t.myProfile.bankAccountDesc}</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.myProfile.bankName}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.bankName || '-'}</p>
+                <p className="bg-muted rounded p-2 text-sm font-medium">
+                  {profile.bankInfo?.bankName || "-"}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.accountNumber}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.accountNumber || '-'}</p>
+                <p className="bg-muted rounded p-2 text-sm font-medium">
+                  {profile.bankInfo?.accountNumber || "-"}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.ibanNumber}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.iban || '-'}</p>
+                <p className="bg-muted rounded p-2 text-sm font-medium">
+                  {profile.bankInfo?.iban || "-"}
+                </p>
               </div>
               <div className="space-y-2">
                 <Label>{t.myProfile.swiftCode}</Label>
-                <p className="text-sm font-medium p-2 bg-muted rounded">{profile.bankInfo?.swiftCode || '-'}</p>
+                <p className="bg-muted rounded p-2 text-sm font-medium">
+                  {profile.bankInfo?.swiftCode || "-"}
+                </p>
               </div>
               <div className="md:col-span-2">
-                <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800 dark:text-yellow-200 flex items-center gap-2">
+                <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900/20">
+                  <p className="flex items-center gap-2 text-sm text-yellow-800 dark:text-yellow-200">
                     <AlertCircle className="h-4 w-4" />
                     {t.myProfile.pToUpdateBankDetailsPleaseConta}
                   </p>
@@ -871,26 +994,27 @@ export default function MyProfileManager() {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
                 {(profile.documents || []).length === 0 ? (
-                  <div className="md:col-span-2 lg:col-span-3 text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm md:col-span-2 lg:col-span-3">
                     {t.myProfile.pNoDocumentsYet}
                   </div>
                 ) : (
                   (profile.documents || []).map((doc) => (
-                    <div key={doc.id} className="border rounded-lg p-4 flex items-center gap-3">
-                      <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
+                    <div key={doc.id} className="flex items-center gap-3 rounded-lg border p-4">
+                      <div className="bg-muted flex h-10 w-10 items-center justify-center rounded">
+                        <FileText className="text-muted-foreground h-5 w-5" />
                       </div>
                       <div className="flex-1">
-                        <p className="font-medium text-sm">{doc.name}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
-                          {doc.expiryDate ? `${t.myProfile.expires} ${new Date(doc.expiryDate).toLocaleDateString('ar-SA')}` : '—'}
+                        <p className="text-sm font-medium">{doc.name}</p>
+                        <p className="text-muted-foreground mt-1 text-xs">
+                          {doc.expiryDate
+                            ? `${t.myProfile.expires} ${new Date(doc.expiryDate).toLocaleDateString("ar-SA")}`
+                            : "—"}
                         </p>
                       </div>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => window.open(doc.fileUrl, '_blank', 'noopener,noreferrer')}
-                      >
+                        onClick={() => window.open(doc.fileUrl, "_blank", "noopener,noreferrer")}>
                         {t.myProfile.pView}
                       </Button>
                     </div>
@@ -898,8 +1022,12 @@ export default function MyProfileManager() {
                 )}
               </div>
               <div className="mt-4">
-                <Button variant="outline" className="w-full" onClick={openDocumentPicker} disabled={isUploadingDoc}>
-                  <Camera className="h-4 w-4 me-2" />
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={openDocumentPicker}
+                  disabled={isUploadingDoc}>
+                  <Camera className="me-2 h-4 w-4" />
                   {isUploadingDoc ? t.myProfile.uploading : t.myProfile.uploadNewDoc}
                 </Button>
                 <input

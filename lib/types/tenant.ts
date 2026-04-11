@@ -13,7 +13,7 @@ export interface Tenant {
   nameAr: string;
   status: TenantStatus;
   plan: SubscriptionPlan;
-  
+
   // Company Info
   commercialRegister?: string;
   taxNumber?: string;
@@ -22,19 +22,19 @@ export interface Tenant {
   address?: string;
   city?: string;
   country: string;
-  
+
   // Settings
   defaultLocale: "ar" | "en";
   defaultTheme: "shadcn" | "mantine";
   timezone: string;
-  
+
   // Metadata
   usersCount: number;
   employeesCount: number;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
-  
+
   // Soft delete
   deletedAt?: string;
   suspendedAt?: string;
@@ -51,7 +51,7 @@ export interface TenantCreateInput {
   plan: SubscriptionPlan;
   defaultLocale: "ar" | "en";
   defaultTheme: "shadcn" | "mantine";
-  
+
   // Company Admin
   adminName: string;
   adminEmail: string;
@@ -84,5 +84,3 @@ export interface SubscriptionRequest {
   reviewedBy?: string;
   notes?: string;
 }
-
-

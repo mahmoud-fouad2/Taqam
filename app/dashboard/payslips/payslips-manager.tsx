@@ -13,30 +13,19 @@ import {
   IconUser,
   IconBuilding,
   IconCalendar,
-  IconFileInvoice,
+  IconFileInvoice
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -44,7 +33,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -53,12 +42,10 @@ import {
   type Payslip,
   type PayslipStatus,
   formatCurrency,
-  type PayrollPeriod,
+  type PayrollPeriod
 } from "@/lib/types/payroll";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
-
-const t = getText("ar");
 
 async function fetchJson<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await fetch(url, { cache: "no-store", ...init });
@@ -83,7 +70,9 @@ export function PayslipsManager() {
 
   const loadPeriods = React.useCallback(async () => {
     const year = new Date().getFullYear();
-    const { data } = await fetchJson<{ data: PayrollPeriod[] }>(`/api/payroll/periods?year=${year}`);
+    const { data } = await fetchJson<{ data: PayrollPeriod[] }>(
+      `/api/payroll/periods?year=${year}`
+    );
     setPeriods(data);
     if (!periodFilter && data.length > 0) {
       setPeriodFilter(data[0].id);
@@ -132,13 +121,13 @@ export function PayslipsManager() {
     total: payslips.length,
     sent: payslips.filter((p) => p.status === "sent").length,
     viewed: payslips.filter((p) => p.status === "viewed").length,
-    totalNet: payslips.reduce((sum, p) => sum + p.netSalary, 0),
+    totalNet: payslips.reduce((sum, p) => sum + p.netSalary, 0)
   };
 
   const handleSendPayslip = async (payslipId: string) => {
     try {
       await fetchJson(`/api/payroll/payslips/${encodeURIComponent(payslipId)}/send`, {
-        method: "POST",
+        method: "POST"
       });
       toast.success(t.payslips.sendSuccess);
       await loadPayslips(periodFilter);
@@ -155,7 +144,7 @@ export function PayslipsManager() {
       await fetchJson("/api/payroll/payslips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ periodId: periodFilter }),
+        body: JSON.stringify({ periodId: periodFilter })
       });
       toast.success(t.payslips.sendAllSuccess);
       await loadPayslips(periodFilter);
@@ -173,7 +162,7 @@ export function PayslipsManager() {
         `/api/payroll/payslips/${encodeURIComponent(payslipId)}/download`,
         { cache: "no-store" }
       );
-      downloadBlob(blob, filename || `payslip-${payslipId}.html`);
+      downloadBlob(blob, filename || `payslip-${payslipId}.pdf`);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || t.payslips.loadOneFailed);
@@ -194,7 +183,15 @@ export function PayslipsManager() {
   };
 
   const handleExportPayslips = () => {
-    const headers = [t.employees.employeeNumber, t.common.employee, t.common.department, t.payslips.totalLabel, t.payroll.deductions, t.payroll.net, t.common.status];
+    const headers = [
+      t.employees.employeeNumber,
+      t.common.employee,
+      t.common.department,
+      t.payslips.totalLabel,
+      t.payroll.deductions,
+      t.payroll.net,
+      t.common.status
+    ];
     const rows = filteredPayslips.map((payslip) => [
       payslip.employeeNumber,
       payslip.employeeNameAr,
@@ -202,7 +199,7 @@ export function PayslipsManager() {
       payslip.totalEarnings,
       payslip.totalDeductions,
       payslip.netSalary,
-      payslip.status,
+      payslip.status
     ]);
 
     const csvContent = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n");
@@ -213,16 +210,21 @@ export function PayslipsManager() {
   };
 
   const getStatusBadge = (status: PayslipStatus) => {
-    const labels: Record<PayslipStatus, { label: string; variant: "default" | "secondary" | "outline" }> = {
+    const labels: Record<
+      PayslipStatus,
+      { label: string; variant: "default" | "secondary" | "outline" }
+    > = {
       draft: { label: t.common.draft, variant: "secondary" },
       generated: { label: t.payslips.created, variant: "outline" },
       sent: { label: t.payslips.sent, variant: "default" },
-      viewed: { label: t.payslips.viewed, variant: "default" },
+      viewed: { label: t.payslips.viewed, variant: "default" }
     };
 
-    const meta = (labels as Record<string, { label: string; variant: "default" | "secondary" | "outline" }>)[status] ?? {
+    const meta = (
+      labels as Record<string, { label: string; variant: "default" | "secondary" | "outline" }>
+    )[status] ?? {
       label: String(status ?? t.common.unknown),
-      variant: "outline" as const,
+      variant: "outline" as const
     };
 
     return <Badge variant={meta.variant}>{meta.label}</Badge>;
@@ -237,7 +239,7 @@ export function PayslipsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.payslips.totalPayslips}</CardTitle>
-            <IconFileInvoice className="h-4 w-4 text-muted-foreground" />
+            <IconFileInvoice className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -254,7 +256,9 @@ export function PayslipsManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.evaluations.confirmAcknowledgement}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t.evaluations.confirmAcknowledgement}
+            </CardTitle>
             <IconEye className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -264,7 +268,7 @@ export function PayslipsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.payslips.totalNet}</CardTitle>
-            <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
+            <IconCurrencyRiyal className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold">{formatCurrency(stats.totalNet)}</div>
@@ -275,8 +279,8 @@ export function PayslipsManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
-            <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative max-w-sm flex-1">
+            <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder={t.payslips.searchPlaceholder}
               value={searchQuery}
@@ -286,7 +290,7 @@ export function PayslipsManager() {
           </div>
           <Select value={periodFilter} onValueChange={setPeriodFilter}>
             <SelectTrigger className="w-[180px]">
-              <IconCalendar className="h-4 w-4 ms-2" />
+              <IconCalendar className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.period} />
             </SelectTrigger>
             <SelectContent>
@@ -300,10 +304,9 @@ export function PayslipsManager() {
 
           <Select
             value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as PayslipStatus | "all")}
-          >
+            onValueChange={(v) => setStatusFilter(v as PayslipStatus | "all")}>
             <SelectTrigger className="w-[140px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
@@ -317,12 +320,20 @@ export function PayslipsManager() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleSendAll} disabled={!periodFilter || isSendingAll}>
+          <Button
+            variant="outline"
+            onClick={handleSendAll}
+            disabled={!periodFilter || isSendingAll}>
             <IconSend className="ms-2 h-4 w-4" />
             {t.payslips.pSendAll}
           </Button>
-          <Button variant="outline" onClick={handleExportPayslips} disabled={filteredPayslips.length === 0}>
-            <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
+          <Button
+            variant="outline"
+            onClick={handleExportPayslips}
+            disabled={filteredPayslips.length === 0}>
+            <IconDownload className="ms-2 h-4 w-4" />
+            {t.common.exportData}
+          </Button>
         </div>
       </div>
 
@@ -332,11 +343,11 @@ export function PayslipsManager() {
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-muted-foreground">{t.payslips.currentPeriod}</p>
+                <p className="text-muted-foreground text-sm">{t.payslips.currentPeriod}</p>
                 <p className="font-semibold">{currentPeriod.nameAr}</p>
               </div>
               <div className="text-start">
-                <p className="text-sm text-muted-foreground">{t.payroll.paymentDate}</p>
+                <p className="text-muted-foreground text-sm">{t.payroll.paymentDate}</p>
                 <p className="font-semibold">{currentPeriod.paymentDate}</p>
               </div>
             </div>
@@ -366,14 +377,14 @@ export function PayslipsManager() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
+                  <TableCell colSpan={7} className="py-8 text-center">
                     <p className="text-muted-foreground">{t.common.loading}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredPayslips.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-8">
-                    <IconFileInvoice className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <TableCell colSpan={7} className="py-8 text-center">
+                    <IconFileInvoice className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
                     <p className="text-muted-foreground">{t.payslips.noPayslips}</p>
                   </TableCell>
                 </TableRow>
@@ -382,20 +393,18 @@ export function PayslipsManager() {
                   <TableRow key={payslip.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center">
+                        <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full">
                           <IconUser className="h-4 w-4" />
                         </div>
                         <div>
                           <p className="font-medium">{payslip.employeeNameAr}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {payslip.employeeNumber}
-                          </p>
+                          <p className="text-muted-foreground text-xs">{payslip.employeeNumber}</p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <IconBuilding className="h-4 w-4 text-muted-foreground" />
+                        <IconBuilding className="text-muted-foreground h-4 w-4" />
                         <span>{payslip.departmentAr}</span>
                       </div>
                     </TableCell>
@@ -409,13 +418,25 @@ export function PayslipsManager() {
                     <TableCell>{getStatusBadge(payslip.status)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" aria-label={t.common.view} onClick={() => setSelectedPayslip(payslip)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t.common.view}
+                          onClick={() => setSelectedPayslip(payslip)}>
                           <IconEye className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" aria-label={t.common.download} onClick={() => handleDownloadPayslip(payslip.id)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t.common.download}
+                          onClick={() => handleDownloadPayslip(payslip.id)}>
                           <IconDownload className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" aria-label={t.payslips.print} onClick={() => handlePrintPayslip(payslip.id)}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={t.payslips.print}
+                          onClick={() => handlePrintPayslip(payslip.id)}>
                           <IconPrinter className="h-4 w-4" />
                         </Button>
                         {payslip.status !== "sent" && payslip.status !== "viewed" && (
@@ -423,8 +444,7 @@ export function PayslipsManager() {
                             variant="ghost"
                             size="icon"
                             aria-label={t.common.send}
-                            onClick={() => handleSendPayslip(payslip.id)}
-                          >
+                            onClick={() => handleSendPayslip(payslip.id)}>
                             <IconSend className="h-4 w-4" />
                           </Button>
                         )}
@@ -440,20 +460,20 @@ export function PayslipsManager() {
 
       {/* Payslip Preview Dialog */}
       <Dialog open={!!selectedPayslip} onOpenChange={() => setSelectedPayslip(null)}>
-        <DialogContent className="w-full sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[700px]">
           <DialogHeader>
             <DialogTitle>{t.payslips.payslipTitle}</DialogTitle>
           </DialogHeader>
           {selectedPayslip && (
-            <div className="space-y-6 p-4 border rounded-lg">
+            <div className="space-y-6 rounded-lg border p-4">
               {/* Header */}
-              <div className="text-center border-b pb-4">
+              <div className="border-b pb-4 text-center">
                 <h2 className="text-xl font-bold">{t.payslips.payslipLabel}</h2>
                 <p className="text-muted-foreground">{currentPeriod?.nameAr}</p>
               </div>
 
               {/* Employee Info */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="grid grid-cols-1 gap-4 text-sm md:grid-cols-2">
                 <div>
                   <p className="text-muted-foreground">{t.payslips.employeeName}</p>
                   <p className="font-medium">{selectedPayslip.employeeNameAr}</p>
@@ -476,7 +496,7 @@ export function PayslipsManager() {
 
               {/* Earnings */}
               <div>
-                <h3 className="font-semibold mb-2">{t.payslips.entitlements}</h3>
+                <h3 className="mb-2 font-semibold">{t.payslips.entitlements}</h3>
                 <Table>
                   <TableBody>
                     {selectedPayslip.earnings.map((earning, index) => (
@@ -487,7 +507,7 @@ export function PayslipsManager() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    <TableRow className="font-bold bg-muted">
+                    <TableRow className="bg-muted font-bold">
                       <TableCell>{t.payslips.totalEntitlements}</TableCell>
                       <TableCell className="text-start">
                         {formatCurrency(selectedPayslip.totalEarnings)}
@@ -499,7 +519,7 @@ export function PayslipsManager() {
 
               {/* Deductions */}
               <div>
-                <h3 className="font-semibold mb-2">{t.payroll.deductionsCol}</h3>
+                <h3 className="mb-2 font-semibold">{t.payroll.deductionsCol}</h3>
                 <Table>
                   <TableBody>
                     {selectedPayslip.deductions.map((deduction, index) => (
@@ -510,7 +530,7 @@ export function PayslipsManager() {
                         </TableCell>
                       </TableRow>
                     ))}
-                    <TableRow className="font-bold bg-muted">
+                    <TableRow className="bg-muted font-bold">
                       <TableCell>{t.payroll.totalDeductions}</TableCell>
                       <TableCell className="text-start text-red-600">
                         -{formatCurrency(selectedPayslip.totalDeductions)}
@@ -523,7 +543,7 @@ export function PayslipsManager() {
               <Separator />
 
               {/* Net Salary */}
-              <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+              <div className="flex items-center justify-between rounded-lg bg-green-50 p-4">
                 <span className="text-lg font-bold">{t.payslips.netSalary}</span>
                 <span className="text-2xl font-bold text-green-600">
                   {formatCurrency(selectedPayslip.netSalary)}
@@ -531,29 +551,31 @@ export function PayslipsManager() {
               </div>
 
               {/* Attendance Summary */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center text-sm">
-                <div className="p-2 bg-muted rounded">
+              <div className="grid grid-cols-1 gap-4 text-center text-sm sm:grid-cols-2 md:grid-cols-4">
+                <div className="bg-muted rounded p-2">
                   <p className="text-muted-foreground">{t.shifts.workingDays}</p>
                   <p className="font-bold">{selectedPayslip.workingDays}</p>
                 </div>
-                <div className="p-2 bg-muted rounded">
+                <div className="bg-muted rounded p-2">
                   <p className="text-muted-foreground">{t.payslips.attendanceDays}</p>
                   <p className="font-bold">{selectedPayslip.actualWorkDays}</p>
                 </div>
-                <div className="p-2 bg-muted rounded">
+                <div className="bg-muted rounded p-2">
                   <p className="text-muted-foreground">{t.payslips.absenceDays}</p>
                   <p className="font-bold text-red-600">{selectedPayslip.absentDays}</p>
                 </div>
-                <div className="p-2 bg-muted rounded">
+                <div className="bg-muted rounded p-2">
                   <p className="text-muted-foreground">{t.common.overtime}</p>
                   <p className="font-bold text-blue-600">{selectedPayslip.overtimeHours}</p>
                 </div>
               </div>
 
               {/* Bank Info */}
-              <div className="text-sm text-muted-foreground">
+              <div className="text-muted-foreground text-sm">
                 <p>{t.payslips.paymentMethod}</p>
-                <p>{t.payslips.bank} {selectedPayslip.bankName}</p>
+                <p>
+                  {t.payslips.bank} {selectedPayslip.bankName}
+                </p>
               </div>
 
               {/* Actions */}

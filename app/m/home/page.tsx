@@ -15,7 +15,7 @@ import {
   Plane,
   RefreshCw,
   TicketCheck,
-  WifiOff,
+  WifiOff
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -28,13 +28,9 @@ import {
   formatDayName,
   greeting,
   getInitials,
-  getCurrentPositionSafe,
+  getCurrentPositionSafe
 } from "@/components/mobile/mobile-utils";
-import {
-  loadMobileAuth,
-  mobileAuthFetch,
-  mobileChallenge,
-} from "@/lib/mobile/web-client";
+import { loadMobileAuth, mobileAuthFetch, mobileChallenge } from "@/lib/mobile/web-client";
 
 type TodayStatus = {
   status: "NONE" | "CHECKED_IN" | "CHECKED_OUT";
@@ -55,23 +51,38 @@ type RecentRequest = {
 };
 
 const quickActions = [
-  { label: "تصحيح حضور", href: "/m/attendance", icon: CalendarCheck, color: "from-blue-500 to-blue-600" },
-  { label: "طلب إجازة", href: "/m/requests", icon: Plane, color: "from-emerald-500 to-emerald-600" },
+  {
+    label: "تصحيح حضور",
+    href: "/m/attendance",
+    icon: CalendarCheck,
+    color: "from-blue-500 to-blue-600"
+  },
+  {
+    label: "طلب إجازة",
+    href: "/m/requests",
+    icon: Plane,
+    color: "from-emerald-500 to-emerald-600"
+  },
   { label: "الطلبات", href: "/m/requests", icon: FileText, color: "from-amber-500 to-amber-600" },
-  { label: "السجل", href: "/m/attendance", icon: ClipboardList, color: "from-violet-500 to-violet-600" },
+  {
+    label: "السجل",
+    href: "/m/attendance",
+    icon: ClipboardList,
+    color: "from-violet-500 to-violet-600"
+  }
 ];
 
 const typeIcons: Record<string, typeof FileText> = {
   leave: Plane,
   attendance: CalendarCheck,
   ticket: TicketCheck,
-  training: FileText,
+  training: FileText
 };
 const statusBadge: Record<string, { label: string; cls: string }> = {
   pending: { label: "قيد المراجعة", cls: "bg-amber-50 text-amber-600" },
   approved: { label: "مقبول", cls: "bg-emerald-50 text-emerald-600" },
   rejected: { label: "مرفوض", cls: "bg-red-50 text-red-600" },
-  cancelled: { label: "ملغي", cls: "bg-slate-100 text-slate-500" },
+  cancelled: { label: "ملغي", cls: "bg-slate-100 text-slate-500" }
 };
 
 export default function MobileHomePage() {
@@ -109,7 +120,7 @@ export default function MobileHomePage() {
     try {
       const [todayRes, reqRes] = await Promise.allSettled([
         mobileAuthFetch<{ data: TodayStatus }>("/api/mobile/attendance/today"),
-        mobileAuthFetch<{ data: { items: RecentRequest[] } }>("/api/mobile/my-requests"),
+        mobileAuthFetch<{ data: { items: RecentRequest[] } }>("/api/mobile/my-requests")
       ]);
       if (todayRes.status === "fulfilled") setToday(todayRes.value.data);
       if (reqRes.status === "fulfilled") setRecentRequests(reqRes.value.data.items.slice(0, 3));
@@ -141,14 +152,14 @@ export default function MobileHomePage() {
         method: "POST",
         headers: {
           "content-type": "application/json",
-          "x-mobile-challenge": nonce,
+          "x-mobile-challenge": nonce
         },
         body: JSON.stringify({
           type,
           latitude: pos?.latitude,
           longitude: pos?.longitude,
-          accuracy: pos?.accuracy,
-        }),
+          accuracy: pos?.accuracy
+        })
       });
 
       await fetchAll();
@@ -184,8 +195,7 @@ export default function MobileHomePage() {
           onClick={() => {
             didFetch.current = false;
             fetchAll();
-          }}
-        >
+          }}>
           <RefreshCw className="size-4" />
           إعادة المحاولة
         </Button>
@@ -217,8 +227,8 @@ export default function MobileHomePage() {
       <AnimatedCard>
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950 p-5 text-white shadow-xl shadow-slate-900/20">
           {/* Decorative orbs */}
-          <div className="pointer-events-none absolute -left-10 -top-10 size-40 rounded-full bg-primary/15 blur-3xl" />
-          <div className="pointer-events-none absolute -bottom-6 -right-6 size-32 rounded-full bg-cyan-400/10 blur-3xl" />
+          <div className="bg-primary/15 pointer-events-none absolute -top-10 -left-10 size-40 rounded-full blur-3xl" />
+          <div className="pointer-events-none absolute -right-6 -bottom-6 size-32 rounded-full bg-cyan-400/10 blur-3xl" />
 
           {/* Status Chip */}
           <div className="mb-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold backdrop-blur">
@@ -226,7 +236,7 @@ export default function MobileHomePage() {
               className={
                 "inline-block size-1.5 rounded-full " +
                 (today?.status === "CHECKED_IN"
-                  ? "bg-emerald-400 animate-pulse"
+                  ? "animate-pulse bg-emerald-400"
                   : today?.status === "CHECKED_OUT"
                     ? "bg-sky-400"
                     : "bg-slate-400")
@@ -241,7 +251,7 @@ export default function MobileHomePage() {
 
           {/* Clock */}
           <div className="mb-5 flex items-end gap-2">
-            <span className="text-[42px] font-extrabold tabular-nums leading-none tracking-tight">
+            <span className="text-[42px] leading-none font-extrabold tracking-tight tabular-nums">
               {formatTimeHHMM(now)}
             </span>
             <Clock className="mb-1 size-5 text-white/40" />
@@ -276,16 +286,14 @@ export default function MobileHomePage() {
             <Button
               onClick={() => handleAttendance("check-in")}
               disabled={actionBusy}
-              className="h-12 w-full rounded-2xl bg-emerald-500 text-[15px] font-bold shadow-lg shadow-emerald-500/30 transition-transform active:scale-[0.97] hover:bg-emerald-600"
-            >
+              className="h-12 w-full rounded-2xl bg-emerald-500 text-[15px] font-bold shadow-lg shadow-emerald-500/30 transition-transform hover:bg-emerald-600 active:scale-[0.97]">
               {actionBusy ? <Loader2 className="size-5 animate-spin" /> : "تسجيل الحضور"}
             </Button>
           ) : today?.canCheckOut ? (
             <Button
               onClick={() => handleAttendance("check-out")}
               disabled={actionBusy}
-              className="h-12 w-full rounded-2xl bg-sky-500 text-[15px] font-bold shadow-lg shadow-sky-500/30 transition-transform active:scale-[0.97] hover:bg-sky-600"
-            >
+              className="h-12 w-full rounded-2xl bg-sky-500 text-[15px] font-bold shadow-lg shadow-sky-500/30 transition-transform hover:bg-sky-600 active:scale-[0.97]">
               {actionBusy ? <Loader2 className="size-5 animate-spin" /> : "تسجيل الانصراف"}
             </Button>
           ) : (
@@ -304,14 +312,12 @@ export default function MobileHomePage() {
             <Link
               key={action.label}
               href={action.href}
-              className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95"
-            >
+              className="flex flex-col items-center gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 transition-transform active:scale-95">
               <div
-                className={`flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${action.color} shadow-sm`}
-              >
+                className={`flex size-10 items-center justify-center rounded-xl bg-gradient-to-br ${action.color} shadow-sm`}>
                 <action.icon className="size-5 text-white" strokeWidth={2} />
               </div>
-              <span className="text-center text-[11px] font-semibold leading-tight text-slate-600">
+              <span className="text-center text-[11px] leading-tight font-semibold text-slate-600">
                 {action.label}
               </span>
             </Link>
@@ -328,7 +334,7 @@ export default function MobileHomePage() {
               {today.record.checkInTime && (
                 <div className="flex justify-between">
                   <span>وقت الحضور</span>
-                  <span className="tabular-nums font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 tabular-nums">
                     {formatTimeHHMM(new Date(today.record.checkInTime))}
                   </span>
                 </div>
@@ -336,7 +342,7 @@ export default function MobileHomePage() {
               {today.record.checkOutTime && (
                 <div className="flex justify-between">
                   <span>وقت الانصراف</span>
-                  <span className="tabular-nums font-medium text-slate-700">
+                  <span className="font-medium text-slate-700 tabular-nums">
                     {formatTimeHHMM(new Date(today.record.checkOutTime))}
                   </span>
                 </div>
@@ -351,7 +357,7 @@ export default function MobileHomePage() {
         <AnimatedItem>
           <div className="flex items-center justify-between">
             <h2 className="text-[15px] font-bold text-slate-700">آخر الطلبات</h2>
-            <Link href="/m/requests" className="text-[12px] font-semibold text-primary">
+            <Link href="/m/requests" className="text-primary text-[12px] font-semibold">
               عرض الكل
             </Link>
           </div>
@@ -364,16 +370,16 @@ export default function MobileHomePage() {
               return (
                 <div
                   key={r.id}
-                  className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100"
-                >
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/5">
-                    <Icon className="size-4 text-primary/70" />
+                  className="flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-sm ring-1 ring-slate-100">
+                  <div className="bg-primary/5 flex size-9 shrink-0 items-center justify-center rounded-xl">
+                    <Icon className="text-primary/70 size-4" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-[13px] font-semibold text-slate-700">{r.title}</p>
                     <p className="text-[11px] text-slate-400">{dateStr}</p>
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${st!.cls}`}>
+                  <span
+                    className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${st!.cls}`}>
                     {st!.label}
                   </span>
                 </div>
@@ -391,7 +397,7 @@ export default function MobileHomePage() {
 function TimeChip({
   label,
   time,
-  icon,
+  icon
 }: {
   label: string;
   time?: string | null;

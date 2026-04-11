@@ -40,7 +40,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
@@ -50,7 +50,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { id } = await params;
 
     const existing = await prisma.leaveType.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existing) {
@@ -76,19 +76,30 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         nameAr: body.nameAr === undefined ? undefined : body.nameAr,
         code: code ?? undefined,
         description: body.description === undefined ? undefined : body.description,
-        defaultDays: body.defaultDays === undefined ? undefined : parseOptionalInt(body.defaultDays) ?? 0,
+        defaultDays:
+          body.defaultDays === undefined ? undefined : (parseOptionalInt(body.defaultDays) ?? 0),
         maxDays: body.maxDays === undefined ? undefined : parseOptionalInt(body.maxDays),
-        carryOverDays: body.carryOverDays === undefined ? undefined : parseOptionalInt(body.carryOverDays) ?? 0,
-        carryOverExpiry: body.carryOverExpiry === undefined ? undefined : parseOptionalInt(body.carryOverExpiry),
+        carryOverDays:
+          body.carryOverDays === undefined
+            ? undefined
+            : (parseOptionalInt(body.carryOverDays) ?? 0),
+        carryOverExpiry:
+          body.carryOverExpiry === undefined ? undefined : parseOptionalInt(body.carryOverExpiry),
         isPaid: body.isPaid === undefined ? undefined : Boolean(body.isPaid),
-        requiresApproval: body.requiresApproval === undefined ? undefined : Boolean(body.requiresApproval),
-        requiresAttachment: body.requiresAttachment === undefined ? undefined : Boolean(body.requiresAttachment),
+        requiresApproval:
+          body.requiresApproval === undefined ? undefined : Boolean(body.requiresApproval),
+        requiresAttachment:
+          body.requiresAttachment === undefined ? undefined : Boolean(body.requiresAttachment),
         minServiceMonths:
-          body.minServiceMonths === undefined ? undefined : parseOptionalInt(body.minServiceMonths) ?? 0,
-        applicableGenders: Array.isArray(body.applicableGenders) ? body.applicableGenders : undefined,
+          body.minServiceMonths === undefined
+            ? undefined
+            : (parseOptionalInt(body.minServiceMonths) ?? 0),
+        applicableGenders: Array.isArray(body.applicableGenders)
+          ? body.applicableGenders
+          : undefined,
         color: body.color === undefined ? undefined : String(body.color),
-        isActive: body.isActive === undefined ? undefined : Boolean(body.isActive),
-      },
+        isActive: body.isActive === undefined ? undefined : Boolean(body.isActive)
+      }
     });
 
     return NextResponse.json({ data: updated });
@@ -117,7 +128,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
@@ -128,7 +139,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     const existing = await prisma.leaveType.findFirst({
       where: { id, tenantId },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!existing) {

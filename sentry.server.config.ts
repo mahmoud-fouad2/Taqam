@@ -17,14 +17,14 @@ Sentry.init({
     "Non-Error promise rejection captured",
     "NetworkError",
     "Network request failed",
-    "Failed to fetch",
+    "Failed to fetch"
   ],
 
   beforeSend(event, hint) {
     // Filter out sensitive data from server-side errors
     if (event.request) {
       delete event.request.cookies;
-      
+
       if (event.request.headers) {
         delete event.request.headers.authorization;
         delete event.request.headers.cookie;
@@ -34,7 +34,7 @@ Sentry.init({
     // Sanitize user info
     if (event.user) {
       event.user = {
-        id: event.user.id,
+        id: event.user.id
       };
     }
 
@@ -49,5 +49,5 @@ Sentry.init({
     }
 
     return event;
-  },
+  }
 });

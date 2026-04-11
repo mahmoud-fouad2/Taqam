@@ -89,10 +89,9 @@ export function RouteProgress() {
       className={
         "pointer-events-none fixed inset-x-0 top-0 z-[60] h-0.5 overflow-hidden transition-opacity duration-200 motion-reduce:transition-none " +
         (active ? "opacity-100" : "opacity-0")
-      }
-    >
+      }>
       <div
-        className="h-full bg-gradient-to-r from-primary via-blue-500 to-purple-500 transition-[width] duration-200 ease-out motion-reduce:transition-none"
+        className="from-primary h-full bg-gradient-to-r via-blue-500 to-purple-500 transition-[width] duration-200 ease-out motion-reduce:transition-none"
         ref={barRef}
       />
     </div>

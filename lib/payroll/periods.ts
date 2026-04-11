@@ -15,13 +15,13 @@ export function mapPayrollPeriod(period: any) {
     status: String(period.status).toUpperCase(),
     totalGross: Number(period.totalGross),
     totalDeductions: Number(period.totalDeductions),
-    totalNet: Number(period.totalNet),
+    totalNet: Number(period.totalNet)
   };
 }
 
 export async function getPayrollPeriodById(tenantId: string, id: string) {
   return prisma.payrollPeriod.findFirst({
-    where: { id, tenantId },
+    where: { id, tenantId }
   });
 }
 
@@ -42,7 +42,7 @@ export async function updatePayrollPeriodStatus(input: {
     where: { id: input.id },
     data: {
       status: input.status,
-      ...(mergedNotes ? { notes: mergedNotes } : {}),
-    },
+      ...(mergedNotes ? { notes: mergedNotes } : {})
+    }
   });
 }

@@ -23,6 +23,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
     return NextResponse.json({ data: { id: updated.id } });
   } catch (error) {
     console.error("Error sending payslip:", error);
-    return NextResponse.json({ error: "Failed to send payslip" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to send payslip";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

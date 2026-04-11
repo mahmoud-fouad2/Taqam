@@ -48,4 +48,34 @@ describe("checkRateLimit", () => {
 
     expect((await checkRateLimit(req, { keyPrefix: "t2", limit, windowMs })).allowed).toBe(true);
   });
+
+  it("supports custom identifiers independently from IP", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2025-01-01T00:00:00Z"));
+
+    const req = makeReq("9.8.7.6");
+
+    const first = await checkRateLimit(req, {
+      keyPrefix: "t3",
+      limit: 1,
+      windowMs: 1000,
+      identifier: "user-a@example.com"
+    });
+    const blocked = await checkRateLimit(req, {
+      keyPrefix: "t3",
+      limit: 1,
+      windowMs: 1000,
+      identifier: "user-a@example.com"
+    });
+    const second = await checkRateLimit(req, {
+      keyPrefix: "t3",
+      limit: 1,
+      windowMs: 1000,
+      identifier: "user-b@example.com"
+    });
+
+    expect(first.allowed).toBe(true);
+    expect(blocked.allowed).toBe(false);
+    expect(second.allowed).toBe(true);
+  });
 });

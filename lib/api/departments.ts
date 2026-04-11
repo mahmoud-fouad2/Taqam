@@ -34,7 +34,7 @@ function mapDepartmentFromApi(dept: ApiDepartment): Department {
     employeesCount: dept._count?.employees ?? 0,
     tenantId: dept.tenantId,
     createdAt: dept.createdAt,
-    updatedAt: dept.updatedAt,
+    updatedAt: dept.updatedAt
   };
 }
 
@@ -49,7 +49,9 @@ export const departmentsService = {
    * Get all departments
    */
   async getAll(filters?: DepartmentFilters): Promise<ApiResponse<Department[]>> {
-    const res = await apiClient.get<ApiDepartment[]>("/departments", { params: filters as Record<string, string | number> });
+    const res = await apiClient.get<ApiDepartment[]>("/departments", {
+      params: filters as Record<string, string | number>
+    });
     if (!res.success) return res as ApiResponse<Department[]>;
     return { ...res, data: (res.data || []).map(mapDepartmentFromApi) };
   },
@@ -60,7 +62,8 @@ export const departmentsService = {
   async getById(id: string): Promise<ApiResponse<Department>> {
     const res = await apiClient.get<ApiDepartment>(`/departments/${id}`);
     if (!res.success) return res as ApiResponse<Department>;
-    if (!res.data) return { success: false, error: "Department not found" } as ApiResponse<Department>;
+    if (!res.data)
+      return { success: false, error: "Department not found" } as ApiResponse<Department>;
     return { ...res, data: mapDepartmentFromApi(res.data) };
   },
 
@@ -70,7 +73,8 @@ export const departmentsService = {
   async create(data: DepartmentCreateInput): Promise<ApiResponse<Department>> {
     const res = await apiClient.post<ApiDepartment>("/departments", data);
     if (!res.success) return res as ApiResponse<Department>;
-    if (!res.data) return { success: false, error: "Failed to create department" } as ApiResponse<Department>;
+    if (!res.data)
+      return { success: false, error: "Failed to create department" } as ApiResponse<Department>;
     return { ...res, data: mapDepartmentFromApi(res.data) };
   },
 
@@ -80,7 +84,8 @@ export const departmentsService = {
   async update(id: string, data: Partial<DepartmentCreateInput>): Promise<ApiResponse<Department>> {
     const res = await apiClient.put<ApiDepartment>(`/departments/${id}`, data);
     if (!res.success) return res as ApiResponse<Department>;
-    if (!res.data) return { success: false, error: "Failed to update department" } as ApiResponse<Department>;
+    if (!res.data)
+      return { success: false, error: "Failed to update department" } as ApiResponse<Department>;
     return { ...res, data: mapDepartmentFromApi(res.data) };
   },
 
@@ -101,13 +106,15 @@ export const departmentsService = {
   /**
    * Get department stats
    */
-  async getStats(id: string): Promise<ApiResponse<{
-    employeeCount: number;
-    avgSalary: number;
-    attendanceRate: number;
-  }>> {
+  async getStats(id: string): Promise<
+    ApiResponse<{
+      employeeCount: number;
+      avgSalary: number;
+      attendanceRate: number;
+    }>
+  > {
     return apiClient.get(`/departments/${id}/stats`);
-  },
+  }
 };
 
 export default departmentsService;

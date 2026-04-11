@@ -14,7 +14,7 @@ const objectiveSchema = z.object({
   progress: z.number().min(0).max(100).optional(),
   metrics: z.string().optional().nullable(),
   isCompleted: z.boolean().default(false),
-  completedAt: z.string().optional().nullable(),
+  completedAt: z.string().optional().nullable()
 });
 
 const resourceSchema = z.object({
@@ -26,7 +26,7 @@ const resourceSchema = z.object({
   dueDate: z.string().optional().nullable(),
   completedDate: z.string().optional().nullable(),
   status: z.enum(["pending", "in-progress", "completed", "skipped"]).optional(),
-  notes: z.string().optional().nullable(),
+  notes: z.string().optional().nullable()
 });
 
 // Validation schema for updates
@@ -35,10 +35,16 @@ const planUpdateSchema = z.object({
   title: z.string().min(2).optional(),
   titleAr: z.string().optional().nullable(),
   description: z.string().optional().nullable(),
-  type: z.enum([
-    "INDIVIDUAL", "TEAM", "ONBOARDING", 
-    "PERFORMANCE_IMPROVEMENT", "CAREER_GROWTH", "SKILL_DEVELOPMENT"
-  ]).optional(),
+  type: z
+    .enum([
+      "INDIVIDUAL",
+      "TEAM",
+      "ONBOARDING",
+      "PERFORMANCE_IMPROVEMENT",
+      "CAREER_GROWTH",
+      "SKILL_DEVELOPMENT"
+    ])
+    .optional(),
   status: z.enum(["DRAFT", "PENDING_APPROVAL", "IN_PROGRESS", "COMPLETED", "CANCELLED"]).optional(),
   priority: z.enum(["LOW", "MEDIUM", "HIGH", "CRITICAL"]).optional(),
   startDate: z.string().or(z.date()).optional(),
@@ -48,7 +54,7 @@ const planUpdateSchema = z.object({
   relatedTrainings: z.array(z.string()).optional(),
   mentorId: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
-  progress: z.number().min(0).max(100).optional(),
+  progress: z.number().min(0).max(100).optional()
 });
 
 type ObjectiveInput = z.infer<typeof objectiveSchema>;
@@ -91,7 +97,7 @@ function normalizeObjective(objective: ObjectiveInput) {
     status,
     progress,
     isCompleted: status === "completed",
-    completedAt: status === "completed" ? objective.completedAt || new Date().toISOString() : null,
+    completedAt: status === "completed" ? objective.completedAt || new Date().toISOString() : null
   };
 }
 
@@ -107,7 +113,8 @@ function normalizeResource(resource: ResourceInput) {
     ...(resource.dueDate ? { dueDate: resource.dueDate } : {}),
     ...(resource.notes ? { notes: resource.notes } : {}),
     status,
-    completedDate: status === "completed" ? resource.completedDate || new Date().toISOString() : null,
+    completedDate:
+      status === "completed" ? resource.completedDate || new Date().toISOString() : null
   };
 }
 
@@ -141,18 +148,12 @@ function calculatePlanProgress(
 type Params = Promise<{ id: string }>;
 
 // GET - Get single plan
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -178,10 +179,10 @@ export async function GET(
                 firstName: true,
                 lastName: true,
                 firstNameAr: true,
-                lastNameAr: true,
-              },
-            },
-          },
+                lastNameAr: true
+              }
+            }
+          }
         },
         mentor: {
           select: {
@@ -192,51 +193,36 @@ export async function GET(
             lastNameAr: true,
             avatar: true,
             email: true,
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     if (!plan) {
-      return NextResponse.json(
-        { error: "خطة التطوير غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "خطة التطوير غير موجودة" }, { status: 404 });
     }
 
     return NextResponse.json(plan);
   } catch (error) {
     console.error("Error fetching plan:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات الخطة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات الخطة" }, { status: 500 });
   }
 }
 
 // PATCH - Update plan
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // RBAC: only managers and above can update development plans
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER", "MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية تعديل خطط التطوير" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية تعديل خطط التطوير" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -247,15 +233,12 @@ export async function PATCH(
     const existingPlan = await prisma.developmentPlan.findFirst({
       where: { id, tenantId, deletedAt: null },
       include: {
-        employee: { include: { user: { select: { id: true } } } },
-      },
+        employee: { include: { user: { select: { id: true } } } }
+      }
     });
 
     if (!existingPlan) {
-      return NextResponse.json(
-        { error: "خطة التطوير غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "خطة التطوير غير موجودة" }, { status: 404 });
     }
 
     // Validate
@@ -263,26 +246,20 @@ export async function PATCH(
 
     if (validatedData.employeeId) {
       const employee = await prisma.employee.findFirst({
-        where: { id: validatedData.employeeId, tenantId },
+        where: { id: validatedData.employeeId, tenantId }
       });
       if (!employee) {
-        return NextResponse.json(
-          { error: "الموظف المحدد غير موجود" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "الموظف المحدد غير موجود" }, { status: 400 });
       }
     }
 
     // If mentor specified, verify they belong to tenant
     if (validatedData.mentorId) {
       const mentor = await prisma.employee.findFirst({
-        where: { id: validatedData.mentorId, tenantId },
+        where: { id: validatedData.mentorId, tenantId }
       });
       if (!mentor) {
-        return NextResponse.json(
-          { error: "المرشد المحدد غير موجود" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "المرشد المحدد غير موجود" }, { status: 400 });
       }
     }
 
@@ -311,11 +288,19 @@ export async function PATCH(
     if (validatedData.status === "COMPLETED" && existingPlan.status !== "COMPLETED") {
       updateData.completedAt = new Date();
       updateData.progress = 100;
-    } else if (validatedData.status && validatedData.status !== "COMPLETED" && existingPlan.status === "COMPLETED") {
+    } else if (
+      validatedData.status &&
+      validatedData.status !== "COMPLETED" &&
+      existingPlan.status === "COMPLETED"
+    ) {
       updateData.completedAt = null;
     }
 
-    if (validatedData.progress !== undefined && validatedData.objectives === undefined && validatedData.status !== "COMPLETED") {
+    if (
+      validatedData.progress !== undefined &&
+      validatedData.objectives === undefined &&
+      validatedData.status !== "COMPLETED"
+    ) {
       updateData.progress = validatedData.progress;
     }
 
@@ -324,7 +309,7 @@ export async function PATCH(
       where: { id },
       data: {
         ...updateData,
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       include: {
         employee: {
@@ -335,8 +320,8 @@ export async function PATCH(
             firstNameAr: true,
             lastNameAr: true,
             avatar: true,
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
         },
         mentor: {
           select: {
@@ -347,10 +332,10 @@ export async function PATCH(
             lastNameAr: true,
             avatar: true,
             email: true,
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     // ── Notifications on status change ──────────────────────────────────────
@@ -362,20 +347,20 @@ export async function PATCH(
       const statusMessages: Record<string, { title: string; message: string }> = {
         IN_PROGRESS: {
           title: "بدأت خطة تطويرك",
-          message: `خطة التطوير "${updatedPlan.title}" أصبحت نشطة الآن`,
+          message: `خطة التطوير "${updatedPlan.title}" أصبحت نشطة الآن`
         },
         COMPLETED: {
           title: "تهانينا! اكتملت خطة تطويرك",
-          message: `تم إنهاء خطة التطوير "${updatedPlan.title}" بنجاح`,
+          message: `تم إنهاء خطة التطوير "${updatedPlan.title}" بنجاح`
         },
         CANCELLED: {
           title: "تم إلغاء خطة تطويرك",
-          message: `خطة التطوير "${updatedPlan.title}" تم إلغاؤها`,
+          message: `خطة التطوير "${updatedPlan.title}" تم إلغاؤها`
         },
         PENDING_APPROVAL: {
           title: "خطة تطوير تنتظر موافقتك",
-          message: `خطة التطوير "${updatedPlan.title}" تحتاج مراجعتك وموافقتك`,
-        },
+          message: `خطة التطوير "${updatedPlan.title}" تحتاج مراجعتك وموافقتك`
+        }
       };
 
       const notifyPayload = statusMessages[validatedData.status as string];
@@ -391,75 +376,66 @@ export async function PATCH(
             title: notifyPayload.title,
             message: notifyPayload.message,
             link: `/dashboard/development-plans`,
-            metadata: { planId: id },
+            metadata: { planId: id }
           }).catch((err) => console.error("[notifications] dev-plan status:", err));
         }
 
         // For PENDING_APPROVAL — also notify HR managers in tenant
         if (validatedData.status === "PENDING_APPROVAL") {
-          prisma.user.findMany({
-            where: { tenantId, role: { in: ["HR_MANAGER", "TENANT_ADMIN"] }, status: "ACTIVE" },
-            select: { id: true },
-          }).then((hrUsers) => {
-            hrUsers.forEach(({ id: hrUserId }) => {
-              sendNotification({
-                tenantId,
-                userId: hrUserId,
-                type: "general",
-                title: "خطة تطوير تنتظر الموافقة",
-                message: `خطة التطوير "${updatedPlan.title}" تحتاج مراجعتك`,
-                link: `/dashboard/development-plans`,
-                metadata: { planId: id },
-              }).catch(() => undefined);
-            });
-          }).catch(() => undefined);
+          prisma.user
+            .findMany({
+              where: { tenantId, role: { in: ["HR_MANAGER", "TENANT_ADMIN"] }, status: "ACTIVE" },
+              select: { id: true }
+            })
+            .then((hrUsers) => {
+              hrUsers.forEach(({ id: hrUserId }) => {
+                sendNotification({
+                  tenantId,
+                  userId: hrUserId,
+                  type: "general",
+                  title: "خطة تطوير تنتظر الموافقة",
+                  message: `خطة التطوير "${updatedPlan.title}" تحتاج مراجعتك`,
+                  link: `/dashboard/development-plans`,
+                  metadata: { planId: id }
+                }).catch(() => undefined);
+              });
+            })
+            .catch(() => undefined);
         }
       }
     }
 
     return NextResponse.json({
       message: "تم تحديث خطة التطوير بنجاح",
-      plan: updatedPlan,
+      plan: updatedPlan
     });
   } catch (error) {
     console.error("Error updating plan:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث الخطة" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث الخطة" }, { status: 500 });
   }
 }
 
 // DELETE - Delete plan
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف خطة التطوير" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف خطة التطوير" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -467,38 +443,29 @@ export async function DELETE(
 
     // Check plan exists
     const plan = await prisma.developmentPlan.findFirst({
-      where: { id, tenantId, deletedAt: null },
+      where: { id, tenantId, deletedAt: null }
     });
 
     if (!plan) {
-      return NextResponse.json(
-        { error: "خطة التطوير غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "خطة التطوير غير موجودة" }, { status: 404 });
     }
 
     // Cannot delete completed plans
     if (plan.status === "COMPLETED") {
-      return NextResponse.json(
-        { error: "لا يمكن حذف خطة مكتملة" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف خطة مكتملة" }, { status: 400 });
     }
 
     // Soft-delete: set deletedAt instead of hard delete
     await prisma.developmentPlan.update({
       where: { id },
-      data: { deletedAt: new Date() },
+      data: { deletedAt: new Date() }
     });
 
     return NextResponse.json({
-      message: "تم حذف خطة التطوير بنجاح",
+      message: "تم حذف خطة التطوير بنجاح"
     });
   } catch (error) {
     console.error("Error deleting plan:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف الخطة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف الخطة" }, { status: 500 });
   }
 }

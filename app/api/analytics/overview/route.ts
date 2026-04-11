@@ -10,12 +10,7 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 
-type PeriodKey =
-  | "this-week"
-  | "current-month"
-  | "last-month"
-  | "this-quarter"
-  | "this-year";
+type PeriodKey = "this-week" | "current-month" | "last-month" | "this-quarter" | "this-year";
 
 function startOfDay(d: Date) {
   const x = new Date(d);
@@ -130,7 +125,7 @@ export async function GET(request: NextRequest) {
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
-      select: { currency: true, weekStartDay: true },
+      select: { currency: true, weekStartDay: true }
     });
 
     const currency = tenant?.currency || "SAR";
@@ -147,10 +142,12 @@ export async function GET(request: NextRequest) {
       departments,
       nationalityGroups,
       employmentTypeGroups,
-      employeesForAge,
+      employeesForAge
     ] = await Promise.all([
       prisma.employee.count({ where: { tenantId } }),
-      prisma.employee.count({ where: { tenantId, hireDate: { gte: range.start, lte: range.end } } }),
+      prisma.employee.count({
+        where: { tenantId, hireDate: { gte: range.start, lte: range.end } }
+      }),
       prisma.employee.count({
         where: {
           tenantId,
@@ -159,52 +156,52 @@ export async function GET(request: NextRequest) {
             {
               terminationDate: null,
               status: { in: ["TERMINATED", "RESIGNED"] },
-              updatedAt: { gte: range.start, lte: range.end },
-            },
-          ],
-        },
+              updatedAt: { gte: range.start, lte: range.end }
+            }
+          ]
+        }
       }),
       prisma.department.findMany({
         where: { tenantId },
         include: { _count: { select: { employees: true } } },
-        orderBy: { name: "asc" },
+        orderBy: { name: "asc" }
       }),
       prisma.employee.groupBy({
         by: ["nationality"],
         where: { tenantId, nationality: { not: null } },
         _count: { _all: true },
-        orderBy: { nationality: "asc" },
+        orderBy: { nationality: "asc" }
       }),
       prisma.employee.groupBy({
         by: ["employmentType"],
         where: { tenantId },
         _count: { _all: true },
-        orderBy: { employmentType: "asc" },
+        orderBy: { employmentType: "asc" }
       }),
       prisma.employee.findMany({
         where: { tenantId, dateOfBirth: { not: null } },
-        select: { dateOfBirth: true },
-      }),
+        select: { dateOfBirth: true }
+      })
     ]);
 
     const headcountByDepartment = departments
       .map((d) => ({
         department: d.nameAr || d.name,
-        count: d._count.employees,
+        count: d._count.employees
       }))
       .filter((d) => d.count > 0);
 
     const headcountByNationality = nationalityGroups
       .map((g) => ({
         nationality: g.nationality || "غير محدد",
-        count: g._count._all,
+        count: g._count._all
       }))
       .filter((g) => g.count > 0);
 
     const employmentTypeDistribution = employmentTypeGroups
       .map((g) => ({
         type: g.employmentType,
-        count: g._count._all,
+        count: g._count._all
       }))
       .filter((g) => g.count > 0);
 
@@ -220,23 +217,24 @@ export async function GET(request: NextRequest) {
       .map((rangeLabel) => ({ range: rangeLabel, count: ageDistributionMap.get(rangeLabel) || 0 }))
       .filter((x) => x.count > 0);
 
-    const turnoverRate = totalEmployees > 0 ? Number(((terminations / totalEmployees) * 100).toFixed(1)) : 0;
+    const turnoverRate =
+      totalEmployees > 0 ? Number(((terminations / totalEmployees) * 100).toFixed(1)) : 0;
 
     // Attendance analytics
     const attendanceRecords = await prisma.attendanceRecord.findMany({
       where: {
         tenantId,
-        date: { gte: range.start, lte: range.end },
+        date: { gte: range.start, lte: range.end }
       },
       select: {
         status: true,
         overtimeMinutes: true,
         employee: {
           select: {
-            department: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            department: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     let lateArrivals = 0;
@@ -244,7 +242,10 @@ export async function GET(request: NextRequest) {
     let present = 0;
     let overtimeMinutes = 0;
 
-    const attendanceByDepartment = new Map<string, { department: string; rate: number; present: number; total: number }>();
+    const attendanceByDepartment = new Map<
+      string,
+      { department: string; rate: number; present: number; total: number }
+    >();
 
     for (const r of attendanceRecords as any[]) {
       const status = r.status;
@@ -254,7 +255,7 @@ export async function GET(request: NextRequest) {
         department: deptName,
         rate: 0,
         present: 0,
-        total: 0,
+        total: 0
       };
 
       // Exclude non-working statuses from rate calculations
@@ -275,7 +276,7 @@ export async function GET(request: NextRequest) {
     const attendanceByDepartmentList = Array.from(attendanceByDepartment.values())
       .map((d) => ({
         department: d.department,
-        rate: d.total > 0 ? Math.round((d.present / d.total) * 100) : 0,
+        rate: d.total > 0 ? Math.round((d.present / d.total) * 100) : 0
       }))
       .sort((a, b) => b.rate - a.rate);
 
@@ -289,8 +290,8 @@ export async function GET(request: NextRequest) {
       where: {
         tenantId,
         payrollPeriod: {
-          startDate: { gte: range.start, lte: range.end },
-        },
+          startDate: { gte: range.start, lte: range.end }
+        }
       },
       select: {
         netSalary: true,
@@ -299,10 +300,10 @@ export async function GET(request: NextRequest) {
         employeeId: true,
         employee: {
           select: {
-            department: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            department: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     let totalPayroll = 0;
@@ -316,7 +317,10 @@ export async function GET(request: NextRequest) {
       employeeIds.add(p.employeeId);
 
       const deptName = p.employee?.department?.nameAr || p.employee?.department?.name || "غير محدد";
-      const deptAgg = salaryByDepartment.get(deptName) || { total: 0, employeeIds: new Set<string>() };
+      const deptAgg = salaryByDepartment.get(deptName) || {
+        total: 0,
+        employeeIds: new Set<string>()
+      };
       deptAgg.total += net;
       deptAgg.employeeIds.add(p.employeeId);
       salaryByDepartment.set(deptName, deptAgg);
@@ -328,7 +332,7 @@ export async function GET(request: NextRequest) {
         const current = allowances.get(type) || {
           name: e.name || type,
           nameAr: e.nameAr,
-          amount: 0,
+          amount: 0
         };
         current.amount += toNumber(e.amount);
         allowances.set(type, current);
@@ -341,14 +345,14 @@ export async function GET(request: NextRequest) {
       .map(([department, agg]) => ({
         department,
         total: agg.total,
-        average: agg.employeeIds.size > 0 ? agg.total / agg.employeeIds.size : 0,
+        average: agg.employeeIds.size > 0 ? agg.total / agg.employeeIds.size : 0
       }))
       .sort((a, b) => b.total - a.total);
 
     const allowancesBreakdown = Array.from(allowances.values())
       .map((a) => ({
         name: a.nameAr || a.name,
-        amount: Math.round(a.amount),
+        amount: Math.round(a.amount)
       }))
       .sort((a, b) => b.amount - a.amount);
 
@@ -357,39 +361,39 @@ export async function GET(request: NextRequest) {
       {
         id: "kpi-employees",
         name: "الموظفين",
-        value: totalEmployees,
+        value: totalEmployees
       },
       {
         id: "kpi-attendance",
         name: "الحضور",
         value: averageAttendanceRate,
-        unit: "%",
+        unit: "%"
       },
       {
         id: "kpi-payroll",
         name: "إجمالي الرواتب",
         value: Math.round(totalPayroll),
-        unit: currency,
+        unit: currency
       },
       {
         id: "kpi-newhires",
         name: "تعيينات جديدة",
-        value: newHires,
+        value: newHires
       },
       {
         id: "kpi-terminations",
         name: "مغادرون",
-        value: terminations,
+        value: terminations
       },
       {
         id: "kpi-overtime",
         name: "ساعات إضافية",
         value: overtimeHours,
-        unit: "س",
-      },
+        unit: "س"
+      }
     ].map((k) => ({
       ...k,
-      trend: "neutral" as const,
+      trend: "neutral" as const
     }));
 
     return NextResponse.json({
@@ -405,14 +409,14 @@ export async function GET(request: NextRequest) {
           headcountByDepartment,
           headcountByNationality,
           ageDistribution,
-          employmentTypeDistribution,
+          employmentTypeDistribution
         },
         attendance: {
           averageAttendanceRate,
           lateArrivals,
           absences,
           overtimeHours,
-          attendanceByDepartment: attendanceByDepartmentList,
+          attendanceByDepartment: attendanceByDepartmentList
         },
         payroll: {
           totalPayroll: Math.round(totalPayroll),
@@ -420,11 +424,11 @@ export async function GET(request: NextRequest) {
           salaryByDepartment: salaryByDepartmentList.map((x) => ({
             department: x.department,
             total: Math.round(x.total),
-            average: Math.round(x.average),
+            average: Math.round(x.average)
           })),
-          allowancesBreakdown,
-        },
-      },
+          allowancesBreakdown
+        }
+      }
     });
   } catch (error) {
     logger.error("Error fetching analytics overview", undefined, error);

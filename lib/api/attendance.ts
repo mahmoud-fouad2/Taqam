@@ -78,7 +78,7 @@ function mapAttendanceRequestFromApi(item: ApiAttendanceRequest): AttendanceRequ
     approvedAt: item.approvedAt ?? undefined,
     rejectionReason: item.rejectionReason ?? undefined,
     createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    updatedAt: item.updatedAt
   };
 }
 
@@ -107,7 +107,7 @@ function toAttendanceRequestPayload(
     requestedCheckOut: data.requestedCheckOut,
     overtimeHours: data.overtimeHours,
     permissionStartTime: data.permissionStartTime,
-    permissionEndTime: data.permissionEndTime,
+    permissionEndTime: data.permissionEndTime
   };
 }
 
@@ -133,12 +133,14 @@ export interface AttendanceStats {
 
 export const attendanceService = {
   // ============ Attendance Records ============
-  
+
   /**
    * Get attendance records with filters
    */
   async getRecords(filters?: AttendanceFilters): Promise<ApiResponse<AttendanceRecord[]>> {
-    return apiClient.get<AttendanceRecord[]>("/attendance", { params: filters as Record<string, string | number> });
+    return apiClient.get<AttendanceRecord[]>("/attendance", {
+      params: filters as Record<string, string | number>
+    });
   },
 
   /**
@@ -184,9 +186,13 @@ export const attendanceService = {
   /**
    * Get monthly attendance calendar
    */
-  async getMonthlyCalendar(employeeId: string, year: number, month: number): Promise<ApiResponse<AttendanceRecord[]>> {
+  async getMonthlyCalendar(
+    employeeId: string,
+    year: number,
+    month: number
+  ): Promise<ApiResponse<AttendanceRecord[]>> {
     return apiClient.get<AttendanceRecord[]>(`/attendance/calendar/${employeeId}`, {
-      params: { year, month },
+      params: { year, month }
     });
   },
 
@@ -238,7 +244,7 @@ export const attendanceService = {
     type?: string;
   }): Promise<ApiResponse<AttendanceRequest[]>> {
     const res = await apiClient.get<{ items: ApiAttendanceRequest[] }>("/attendance-requests", {
-      params: filters,
+      params: filters
     });
 
     if (!res.success) {
@@ -250,7 +256,7 @@ export const attendanceService = {
       success: true,
       data: items.map(mapAttendanceRequestFromApi),
       message: res.message,
-      meta: res.meta,
+      meta: res.meta
     };
   },
 
@@ -285,7 +291,7 @@ export const attendanceService = {
       success: true,
       data: mapAttendanceRequestFromApi(res.data),
       message: res.message,
-      meta: res.meta,
+      meta: res.meta
     };
   },
 
@@ -295,7 +301,7 @@ export const attendanceService = {
   async approveRequest(id: string, comment?: string): Promise<ApiResponse<AttendanceRequest>> {
     const res = await apiClient.patch<ApiAttendanceRequest>(`/attendance-requests/${id}`, {
       status: "approved",
-      rejectionReason: comment,
+      rejectionReason: comment
     });
 
     if (!res.success || !res.data) {
@@ -306,7 +312,7 @@ export const attendanceService = {
       success: true,
       data: mapAttendanceRequestFromApi(res.data),
       message: res.message,
-      meta: res.meta,
+      meta: res.meta
     };
   },
 
@@ -316,7 +322,7 @@ export const attendanceService = {
   async rejectRequest(id: string, reason: string): Promise<ApiResponse<AttendanceRequest>> {
     const res = await apiClient.patch<ApiAttendanceRequest>(`/attendance-requests/${id}`, {
       status: "rejected",
-      rejectionReason: reason,
+      rejectionReason: reason
     });
 
     if (!res.success || !res.data) {
@@ -327,7 +333,7 @@ export const attendanceService = {
       success: true,
       data: mapAttendanceRequestFromApi(res.data),
       message: res.message,
-      meta: res.meta,
+      meta: res.meta
     };
   },
 
@@ -366,7 +372,7 @@ export const attendanceService = {
     format?: "json" | "csv" | "pdf";
   }): Promise<ApiResponse<Blob | AttendanceRecord[]>> {
     return apiClient.get("/attendance/reports", { params: filters });
-  },
+  }
 };
 
 export default attendanceService;

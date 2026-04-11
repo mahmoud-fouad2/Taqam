@@ -28,6 +28,17 @@ export interface TenantFilters {
   pageSize?: number;
 }
 
+export type TenantRequestApprovalInput = {
+  slug?: string;
+  name?: string;
+  nameAr?: string;
+  defaultLocale?: "ar" | "en";
+  defaultTheme?: "shadcn" | "mantine";
+  plan?: "trial" | "starter" | "business" | "enterprise";
+  planExpiresAt?: string | null;
+  maxEmployees?: number;
+};
+
 export const tenantsService = {
   // ============ Tenants CRUD ============
 
@@ -35,7 +46,9 @@ export const tenantsService = {
    * Get all tenants (Super Admin only)
    */
   async getAll(filters?: TenantFilters): Promise<ApiResponse<Tenant[]>> {
-    return apiClient.get<Tenant[]>("/admin/tenants", { params: filters as Record<string, string | number> });
+    return apiClient.get<Tenant[]>("/admin/tenants", {
+      params: filters as Record<string, string | number>
+    });
   },
 
   /**
@@ -99,7 +112,10 @@ export const tenantsService = {
   /**
    * Update tenant settings
    */
-  async updateSettings(id: string, settings: Partial<TenantSettings>): Promise<ApiResponse<TenantSettings>> {
+  async updateSettings(
+    id: string,
+    settings: Partial<TenantSettings>
+  ): Promise<ApiResponse<TenantSettings>> {
     return apiClient.put<TenantSettings>(`/admin/tenants/${id}/settings`, settings);
   },
 
@@ -122,7 +138,10 @@ export const tenantsService = {
   /**
    * Approve tenant request and create tenant
    */
-  async approveRequest(id: string, tenantData: Partial<Tenant>): Promise<ApiResponse<Tenant>> {
+  async approveRequest(
+    id: string,
+    tenantData: TenantRequestApprovalInput
+  ): Promise<ApiResponse<Tenant>> {
     return apiClient.post<Tenant>(`/admin/tenant-requests/${id}/approve`, tenantData);
   },
 
@@ -156,7 +175,7 @@ export const tenantsService = {
     const formData = new FormData();
     formData.append("logo", file);
     return apiClient.upload<{ url: string }>("/tenant/logo", formData);
-  },
+  }
 };
 
 export default tenantsService;

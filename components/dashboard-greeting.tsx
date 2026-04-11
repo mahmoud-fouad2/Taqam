@@ -31,13 +31,13 @@ export function DashboardGreeting({ name, locale, headingLabel }: Props) {
 
   return (
     <div className="space-y-1">
-      <p className="text-xs font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+      <p className="text-muted-foreground text-xs font-semibold tracking-[0.08em] uppercase">
         {headingLabel}
       </p>
       <h1 className="text-2xl font-semibold tracking-tight">
         {greeting} {firstName}
       </h1>
-      <p className="text-sm text-muted-foreground">{subtitle}</p>
+      <p className="text-muted-foreground text-sm">{subtitle}</p>
     </div>
   );
 }

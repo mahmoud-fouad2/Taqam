@@ -10,7 +10,7 @@ export function startLocaleTransition(onCovered?: () => void) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(
     new CustomEvent<{ onCovered?: () => void }>(EVENT_NAME, {
-      detail: { onCovered },
+      detail: { onCovered }
     })
   );
 }
@@ -66,32 +66,26 @@ export function LocaleTransitionOverlay() {
   return (
     <div
       aria-hidden="true"
-      style={{ willChange: "transform" }}
       className={[
         "pointer-events-none fixed inset-0 z-[9999]",
         "bg-primary",
+        "will-change-transform",
         "transition-transform duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
         phase === "idle"
           ? "translate-x-full"
           : phase === "in"
             ? "translate-x-0"
-            : "-translate-x-full",
-      ].join(" ")}
-    >
+            : "-translate-x-full"
+      ].join(" ")}>
       {/* Logo centered on the curtain — fades in once fully covering */}
       <div
         className={cn(
           "absolute inset-0 flex items-center justify-center",
           "transition-all duration-200 ease-out",
-          phase === "in" ? "opacity-100 scale-100" : "opacity-0 scale-90",
-        )}
-      >
+          phase === "in" ? "scale-100 opacity-100" : "scale-90 opacity-0"
+        )}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src="/logo-dark.png"
-          alt="Taqam"
-          style={{ height: 72, width: "auto", filter: "brightness(0) invert(1)" }}
-        />
+        <img src="/logo-dark.png" alt="Taqam" className="h-[72px] w-auto brightness-0 invert" />
       </div>
     </div>
   );

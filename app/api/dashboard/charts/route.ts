@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -26,14 +26,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: {
-        ...chartData,
-      },
+        ...chartData
+      }
     });
   } catch (error) {
     logger.error("Error fetching chart data", undefined, error);
-    return NextResponse.json(
-      { error: "Failed to fetch chart data" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch chart data" }, { status: 500 });
   }
 }

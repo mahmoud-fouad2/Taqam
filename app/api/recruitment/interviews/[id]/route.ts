@@ -6,10 +6,7 @@ import prisma from "@/lib/db";
 type RouteContext = { params: Promise<{ id: string }> };
 
 // ==================== GET - Get Single Interview ====================
-export async function GET(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -17,15 +14,15 @@ export async function GET(
     }
 
     const { id } = await context.params;
-    
+
     const interview = await prisma.interview.findFirst({
       where: {
         id,
         applicant: {
           jobPosting: {
-            tenantId: session.user.tenantId,
-          },
-        },
+            tenantId: session.user.tenantId
+          }
+        }
       },
       include: {
         applicant: {
@@ -33,10 +30,10 @@ export async function GET(
             jobPosting: {
               include: {
                 department: true,
-                jobTitle: true,
-              },
-            },
-          },
+                jobTitle: true
+              }
+            }
+          }
         },
         interviewer: {
           select: {
@@ -45,23 +42,20 @@ export async function GET(
             lastNameAr: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
+            email: true
+          }
         },
         jobPosting: {
           include: {
             department: true,
-            jobTitle: true,
-          },
-        },
-      },
+            jobTitle: true
+          }
+        }
+      }
     });
 
     if (!interview) {
-      return NextResponse.json(
-        { error: "المقابلة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "المقابلة غير موجودة" }, { status: 404 });
     }
 
     // Map status to kebab-case
@@ -71,31 +65,25 @@ export async function GET(
       status: interview.status.toLowerCase().replace(/_/g, "-"),
       applicant: {
         ...interview.applicant,
-        status: interview.applicant.status.toLowerCase().replace(/_/g, "-"),
+        status: interview.applicant.status.toLowerCase().replace(/_/g, "-")
       },
       jobPosting: {
         ...interview.jobPosting,
         status: interview.jobPosting.status.toLowerCase().replace(/_/g, "-"),
         jobType: interview.jobPosting.jobType.toLowerCase().replace(/_/g, "-"),
-        experienceLevel: interview.jobPosting.experienceLevel.toLowerCase().replace(/_/g, "-"),
-      },
+        experienceLevel: interview.jobPosting.experienceLevel.toLowerCase().replace(/_/g, "-")
+      }
     };
 
     return NextResponse.json(mappedInterview);
   } catch (error) {
     console.error("Error fetching interview:", error);
-    return NextResponse.json(
-      { error: "فشل في جلب المقابلة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في جلب المقابلة" }, { status: 500 });
   }
 }
 
 // ==================== DELETE - Delete Interview ====================
-export async function DELETE(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -110,37 +98,28 @@ export async function DELETE(
         id,
         applicant: {
           jobPosting: {
-            tenantId: session.user.tenantId,
-          },
-        },
-      },
+            tenantId: session.user.tenantId
+          }
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "المقابلة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "المقابلة غير موجودة" }, { status: 404 });
     }
 
     // Don't allow deletion if interview is completed
     if (existing.status === "COMPLETED") {
-      return NextResponse.json(
-        { error: "لا يمكن حذف مقابلة مكتملة" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف مقابلة مكتملة" }, { status: 400 });
     }
 
     await prisma.interview.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting interview:", error);
-    return NextResponse.json(
-      { error: "فشل في حذف المقابلة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في حذف المقابلة" }, { status: 500 });
   }
 }

@@ -8,12 +8,12 @@ services:
     runtime: node
     region: frankfurt # Closest to Middle East
     plan: starter
-    buildCommand: npm install -g pnpm && pnpm install && pnpm prisma db push && rm -rf .next && SKIP_BUILD_VALIDATION=true NEXT_DISABLE_STANDALONE_OUTPUT=true NODE_OPTIONS=--max-old-space-size=448 pnpm build:webpack && rm -rf .next/standalone
-    startCommand: pnpm start:render
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm install --frozen-lockfile && pnpm prisma db push && rm -rf .next && SKIP_BUILD_VALIDATION=true NEXT_DISABLE_STANDALONE_OUTPUT=true NODE_OPTIONS=--max-old-space-size=448 pnpm build:webpack && rm -rf .next/standalone
+    startCommand: corepack pnpm start:render
     healthCheckPath: /api/health
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 24
       - key: DATABASE_URL
         sync: false
       - key: DIRECT_URL

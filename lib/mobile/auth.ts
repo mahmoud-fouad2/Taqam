@@ -2,7 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyMobileAccessToken, type MobileTokenPayload } from "@/lib/mobile/jwt";
 import { getMobileDeviceHeaders } from "@/lib/mobile/device";
 
-export async function getMobileAuthPayload(request: NextRequest): Promise<MobileTokenPayload | null> {
+export async function getMobileAuthPayload(
+  request: NextRequest
+): Promise<MobileTokenPayload | null> {
   const header = request.headers.get("authorization") ?? request.headers.get("Authorization");
   if (!header) return null;
 
@@ -16,7 +18,9 @@ export async function getMobileAuthPayload(request: NextRequest): Promise<Mobile
   }
 }
 
-export async function requireMobileAuth(request: NextRequest): Promise<MobileTokenPayload | NextResponse> {
+export async function requireMobileAuth(
+  request: NextRequest
+): Promise<MobileTokenPayload | NextResponse> {
   const payload = await getMobileAuthPayload(request);
   if (!payload) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -46,7 +50,9 @@ export async function requireMobileAuthWithDevice(
 
 export async function requireMobileEmployeeAuthWithDevice(
   request: NextRequest
-): Promise<(MobileTokenPayload & { deviceId: string; tenantId: string; employeeId: string }) | NextResponse> {
+): Promise<
+  (MobileTokenPayload & { deviceId: string; tenantId: string; employeeId: string }) | NextResponse
+> {
   const payloadOrRes = await requireMobileAuthWithDevice(request);
   if (payloadOrRes instanceof NextResponse) return payloadOrRes;
 
@@ -61,6 +67,6 @@ export async function requireMobileEmployeeAuthWithDevice(
   return {
     ...payloadOrRes,
     tenantId: payloadOrRes.tenantId,
-    employeeId: payloadOrRes.employeeId,
+    employeeId: payloadOrRes.employeeId
   };
 }

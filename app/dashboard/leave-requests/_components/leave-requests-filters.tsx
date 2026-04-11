@@ -10,7 +10,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -25,7 +25,7 @@ export function LeaveRequestsFilters({
   onSearchQueryChange,
   filterDepartment,
   onFilterDepartmentChange,
-  departments,
+  departments
 }: {
   activeTab: LeaveRequestStatus | "all";
   onActiveTabChange: (value: LeaveRequestStatus | "all") => void;
@@ -39,7 +39,9 @@ export function LeaveRequestsFilters({
   const t = getText(locale);
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-      <Tabs value={activeTab} onValueChange={(v) => onActiveTabChange(v as LeaveRequestStatus | "all")}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => onActiveTabChange(v as LeaveRequestStatus | "all")}>
         <TabsList>
           <TabsTrigger value="all">{t.common.all}</TabsTrigger>
           <TabsTrigger value="pending">{t.common.pending}</TabsTrigger>
@@ -51,7 +53,7 @@ export function LeaveRequestsFilters({
 
       <div className="flex gap-2">
         <div className="relative">
-          <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder={t.common.searchDots}
             value={searchQuery}

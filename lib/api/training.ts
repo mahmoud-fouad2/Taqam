@@ -9,7 +9,7 @@ import type {
   DevelopmentPlan,
   CourseCategory,
   CourseStatus,
-  EnrollmentStatus,
+  EnrollmentStatus
 } from "@/lib/types/training";
 
 // Alias for backward compat
@@ -42,7 +42,7 @@ export const trainingCoursesApi = {
    */
   getAll: (filters?: CourseFilters) =>
     apiClient.get<CourseListResponse>("/training/courses", {
-      params: filters as Record<string, string | number | boolean>,
+      params: filters as Record<string, string | number | boolean>
     }),
 
   /**
@@ -80,7 +80,7 @@ export const trainingCoursesApi = {
   /**
    * Get course categories
    */
-  getCategories: () => apiClient.get<TrainingCategory[]>("/training/categories"),
+  getCategories: () => apiClient.get<TrainingCategory[]>("/training/categories")
 };
 
 // =====================
@@ -110,7 +110,7 @@ export const trainingEnrollmentsApi = {
    */
   getAll: (filters?: EnrollmentFilters) =>
     apiClient.get<EnrollmentListResponse>("/training/enrollments", {
-      params: filters as Record<string, string | number>,
+      params: filters as Record<string, string | number>
     }),
 
   /**
@@ -136,7 +136,7 @@ export const trainingEnrollmentsApi = {
   bulkEnroll: (courseId: string, employeeIds: string[]) =>
     apiClient.post<{ enrolled: number; errors: string[] }>("/training/enrollments/bulk", {
       courseId,
-      employeeIds,
+      employeeIds
     }),
 
   /**
@@ -151,14 +151,14 @@ export const trainingEnrollmentsApi = {
   complete: (id: string, score?: number, feedback?: string) =>
     apiClient.patch<TrainingEnrollment>(`/training/enrollments/${id}/complete`, {
       score,
-      feedback,
+      feedback
     }),
 
   /**
    * Update progress
    */
   updateProgress: (id: string, progress: number) =>
-    apiClient.patch<TrainingEnrollment>(`/training/enrollments/${id}/progress`, { progress }),
+    apiClient.patch<TrainingEnrollment>(`/training/enrollments/${id}/progress`, { progress })
 };
 
 // =====================
@@ -260,15 +260,18 @@ type ApiDevelopmentPlan = {
   updatedAt: string;
 };
 
-function getPersonName(person?: {
-  firstName?: string | null;
-  lastName?: string | null;
-  firstNameAr?: string | null;
-  lastNameAr?: string | null;
-} | null): string {
+function getPersonName(
+  person?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    firstNameAr?: string | null;
+    lastNameAr?: string | null;
+  } | null
+): string {
   if (!person) return "غير معروف";
 
-  const preferred = `${person.firstNameAr || person.firstName || ""} ${person.lastNameAr || person.lastName || ""}`.trim();
+  const preferred =
+    `${person.firstNameAr || person.firstName || ""} ${person.lastNameAr || person.lastName || ""}`.trim();
   return preferred || "غير معروف";
 }
 
@@ -452,7 +455,7 @@ function mapDevelopmentPlan(raw: ApiDevelopmentPlan): DevelopmentPlan {
         const progress =
           status === "completed"
             ? 100
-            : clampDevelopmentProgress(objective.progress) ?? (status === "in-progress" ? 50 : 0);
+            : (clampDevelopmentProgress(objective.progress) ?? (status === "in-progress" ? 50 : 0));
 
         return {
           id: objective.id || `goal-${index + 1}`,
@@ -462,7 +465,7 @@ function mapDevelopmentPlan(raw: ApiDevelopmentPlan): DevelopmentPlan {
           completedDate: objective.completedAt || undefined,
           status,
           progress,
-          metrics: objective.metrics || undefined,
+          metrics: objective.metrics || undefined
         };
       })
     : [];
@@ -480,15 +483,20 @@ function mapDevelopmentPlan(raw: ApiDevelopmentPlan): DevelopmentPlan {
           dueDate: resource.dueDate || raw.endDate,
           completedDate: resource.completedDate || undefined,
           status,
-          notes: resource.notes || undefined,
+          notes: resource.notes || undefined
         };
       })
     : [];
 
   const fallbackProgress =
-    goals.length > 0 ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length) : 0;
+    goals.length > 0
+      ? Math.round(goals.reduce((sum, goal) => sum + goal.progress, 0) / goals.length)
+      : 0;
   const rawProgress = clampDevelopmentProgress(raw.progress);
-  const progress = rawProgress === undefined || (rawProgress === 0 && fallbackProgress > 0) ? fallbackProgress : rawProgress;
+  const progress =
+    rawProgress === undefined || (rawProgress === 0 && fallbackProgress > 0)
+      ? fallbackProgress
+      : rawProgress;
 
   return {
     id: raw.id,
@@ -511,13 +519,13 @@ function mapDevelopmentPlan(raw: ApiDevelopmentPlan): DevelopmentPlan {
           name: getPersonName(raw.mentor),
           role: raw.mentor.jobTitle?.nameAr || raw.mentor.jobTitle?.name || "مرشد",
           avatar: raw.mentor.avatar || undefined,
-          email: raw.mentor.email || "",
+          email: raw.mentor.email || ""
         }
       : undefined,
     progress,
     createdBy: raw.employeeId,
     createdAt: new Date(raw.createdAt).toISOString(),
-    updatedAt: new Date(raw.updatedAt).toISOString(),
+    updatedAt: new Date(raw.updatedAt).toISOString()
   };
 }
 
@@ -575,7 +583,8 @@ function buildDevelopmentPlanPayload(data: Partial<DevelopmentPlanUpsertInput>) 
       progress: goal.progress,
       metrics: goal.metrics,
       isCompleted: goal.status === "completed",
-      completedAt: goal.status === "completed" ? goal.completedDate || new Date().toISOString() : null,
+      completedAt:
+        goal.status === "completed" ? goal.completedDate || new Date().toISOString() : null
     }));
   }
 
@@ -586,10 +595,11 @@ function buildDevelopmentPlanPayload(data: Partial<DevelopmentPlanUpsertInput>) 
       title: activity.title,
       url: activity.courseId,
       dueDate: activity.dueDate,
-      completedDate: activity.status === "completed" ? activity.completedDate || new Date().toISOString() : null,
+      completedDate:
+        activity.status === "completed" ? activity.completedDate || new Date().toISOString() : null,
       status: activity.status,
       notes: activity.notes,
-      description: activity.description || activity.notes,
+      description: activity.description || activity.notes
     }));
     payload.relatedTrainings = data.activities
       .map((activity) => activity.courseId)
@@ -603,7 +613,9 @@ export const developmentPlansApi = {
   /**
    * Get all development plans
    */
-  async getAll(filters?: DevelopmentPlanFilters): Promise<ApiResponse<DevelopmentPlanListResponse>> {
+  async getAll(
+    filters?: DevelopmentPlanFilters
+  ): Promise<ApiResponse<DevelopmentPlanListResponse>> {
     const response = await apiClient.get<{
       plans?: ApiDevelopmentPlan[];
       total?: number;
@@ -615,8 +627,8 @@ export const developmentPlansApi = {
         status: mapDevelopmentPlanStatusToApi(filters?.status),
         type: mapDevelopmentPlanTypeToApi(filters?.type),
         page: filters?.page,
-        limit: filters?.pageSize,
-      },
+        limit: filters?.pageSize
+      }
     });
 
     if (!response.success) {
@@ -631,8 +643,8 @@ export const developmentPlansApi = {
           : [],
         total: Number(response.data?.total ?? 0),
         page: Number(response.data?.page ?? filters?.page ?? 1),
-        pageSize: Number(response.data?.limit ?? filters?.pageSize ?? 20),
-      },
+        pageSize: Number(response.data?.limit ?? filters?.pageSize ?? 20)
+      }
     };
   },
 
@@ -647,7 +659,7 @@ export const developmentPlansApi = {
 
     return {
       success: true,
-      data: mapDevelopmentPlan(response.data),
+      data: mapDevelopmentPlan(response.data)
     };
   },
 
@@ -662,7 +674,7 @@ export const developmentPlansApi = {
 
     return {
       success: true,
-      data: response.data.plans,
+      data: response.data.plans
     };
   },
 
@@ -683,14 +695,17 @@ export const developmentPlansApi = {
     return {
       success: true,
       data: mapDevelopmentPlan(rawPlan),
-      message: response.message,
+      message: response.message
     };
   },
 
   /**
    * Update plan
    */
-  async update(id: string, data: Partial<DevelopmentPlanUpsertInput>): Promise<ApiResponse<DevelopmentPlan>> {
+  async update(
+    id: string,
+    data: Partial<DevelopmentPlanUpsertInput>
+  ): Promise<ApiResponse<DevelopmentPlan>> {
     const response = await apiClient.patch<{ plan?: ApiDevelopmentPlan }>(
       `/development-plans/${id}`,
       buildDevelopmentPlanPayload(data)
@@ -704,7 +719,7 @@ export const developmentPlansApi = {
     return {
       success: true,
       data: mapDevelopmentPlan(rawPlan),
-      message: response.message,
+      message: response.message
     };
   },
 
@@ -722,14 +737,14 @@ export const developmentPlansApi = {
    * Complete plan
    */
   complete: (id: string, notes?: string) =>
-    developmentPlansApi.update(id, { status: "completed", notes }),
+    developmentPlansApi.update(id, { status: "completed", notes })
 };
 
 // Unified Training API export
 export const trainingApi = {
   courses: trainingCoursesApi,
   enrollments: trainingEnrollmentsApi,
-  developmentPlans: developmentPlansApi,
+  developmentPlans: developmentPlansApi
 };
 
 export default trainingApi;

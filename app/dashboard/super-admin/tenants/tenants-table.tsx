@@ -7,13 +7,13 @@
 
 import Link from "next/link";
 import * as React from "react";
-import { 
+import {
   Search,
-  MoreHorizontal, 
-  Eye, 
-  Settings, 
-  Pause, 
-  Play, 
+  MoreHorizontal,
+  Eye,
+  Settings,
+  Pause,
+  Play,
   Trash2,
   ExternalLink,
   CheckCircle2,
@@ -30,7 +30,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   Table,
@@ -38,7 +38,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 import { buildTenantUrl } from "@/lib/tenant";
@@ -53,7 +53,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import {
   Dialog,
@@ -61,7 +61,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
+  DialogDescription
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -73,33 +73,37 @@ type LocaleText = ReturnType<typeof getText>;
 function getStatusMeta(status: string, t: LocaleText) {
   const statusConfig: Record<
     TenantStatus,
-    { label: string; variant: "default" | "secondary" | "destructive" | "outline"; icon: React.ReactNode }
+    {
+      label: string;
+      variant: "default" | "secondary" | "destructive" | "outline";
+      icon: React.ReactNode;
+    }
   > = {
     active: {
       label: t.common.active,
       variant: "default",
-      icon: <CheckCircle2 className="h-3 w-3" />,
+      icon: <CheckCircle2 className="h-3 w-3" />
     },
     pending: {
       label: t.common.pending,
       variant: "secondary",
-      icon: <Clock className="h-3 w-3" />,
+      icon: <Clock className="h-3 w-3" />
     },
     suspended: {
       label: t.common.suspended,
       variant: "destructive",
-      icon: <AlertCircle className="h-3 w-3" />,
+      icon: <AlertCircle className="h-3 w-3" />
     },
     cancelled: {
       label: t.common.cancelled,
       variant: "outline",
-      icon: <XCircle className="h-3 w-3" />,
+      icon: <XCircle className="h-3 w-3" />
     },
     deleted: {
       label: t.common.deleted,
       variant: "outline",
-      icon: <XCircle className="h-3 w-3" />,
-    },
+      icon: <XCircle className="h-3 w-3" />
+    }
   };
 
   const meta = statusConfig[status as TenantStatus];
@@ -107,7 +111,7 @@ function getStatusMeta(status: string, t: LocaleText) {
     meta ?? {
       label: status,
       variant: "outline" as const,
-      icon: <AlertCircle className="h-3 w-3" />,
+      icon: <AlertCircle className="h-3 w-3" />
     }
   );
 }
@@ -115,7 +119,7 @@ function getStatusMeta(status: string, t: LocaleText) {
 const planLabels: Record<string, { ar: string; en: string }> = {
   starter: { ar: "ستارتر", en: "Starter" },
   business: { ar: "بيزنس", en: "Business" },
-  enterprise: { ar: "إنتربرايز", en: "Enterprise" },
+  enterprise: { ar: "إنتربرايز", en: "Enterprise" }
 };
 
 export function TenantsTable() {
@@ -124,15 +128,22 @@ export function TenantsTable() {
   const [tenants, setTenants] = React.useState<Tenant[]>([]);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [busy, setBusy] = React.useState<{ id: string; action: "suspend" | "activate" | "delete" } | null>(null);
+  const [busy, setBusy] = React.useState<{
+    id: string;
+    action: "suspend" | "activate" | "delete";
+  } | null>(null);
   const [tenantToDelete, setTenantToDelete] = React.useState<Tenant | null>(null);
   const [tenantToSuspend, setTenantToSuspend] = React.useState<Tenant | null>(null);
   const defaultSuspendReason = locale === "ar" ? "تم الإيقاف بواسطة المشرف" : "Suspended by admin";
   const [suspendReason, setSuspendReason] = React.useState(defaultSuspendReason);
   const [searchTerm, setSearchTerm] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState<TenantStatus | "all">("all");
-  const [planFilter, setPlanFilter] = React.useState<"all" | "starter" | "business" | "enterprise">("all");
-  const [sortBy, setSortBy] = React.useState<"newest" | "oldest" | "usersDesc" | "employeesDesc" | "nameAsc">("newest");
+  const [planFilter, setPlanFilter] = React.useState<"all" | "starter" | "business" | "enterprise">(
+    "all"
+  );
+  const [sortBy, setSortBy] = React.useState<
+    "newest" | "oldest" | "usersDesc" | "employeesDesc" | "nameAsc"
+  >("newest");
   const [density, setDensity] = React.useState<"comfortable" | "compact">("comfortable");
 
   const loadTenants = React.useCallback(async () => {
@@ -176,7 +187,7 @@ export function TenantsTable() {
       all: tenants.length,
       active: tenants.filter((item) => item.status === "active").length,
       pending: tenants.filter((item) => item.status === "pending").length,
-      suspended: tenants.filter((item) => item.status === "suspended").length,
+      suspended: tenants.filter((item) => item.status === "suspended").length
     }),
     [tenants]
   );
@@ -203,7 +214,7 @@ export function TenantsTable() {
         tenant.name ?? "",
         tenant.slug ?? "",
         tenant.status ?? "",
-        planKey,
+        planKey
       ]
         .join(" ")
         .toLowerCase();
@@ -224,7 +235,10 @@ export function TenantsTable() {
       if (sortBy === "employeesDesc") {
         return Number(b.employeesCount ?? 0) - Number(a.employeesCount ?? 0);
       }
-      return String(a.nameAr ?? a.name ?? "").localeCompare(String(b.nameAr ?? b.name ?? ""), locale);
+      return String(a.nameAr ?? a.name ?? "").localeCompare(
+        String(b.nameAr ?? b.name ?? ""),
+        locale
+      );
     });
   }, [locale, planFilter, searchTerm, sortBy, statusFilter, tenants]);
 
@@ -261,7 +275,10 @@ export function TenantsTable() {
     setTenantToSuspend(null);
     setBusy({ id: tenant.id, action: "suspend" });
     try {
-      const res = await tenantsService.suspend(tenant.id, suspendReason.trim() || defaultSuspendReason);
+      const res = await tenantsService.suspend(
+        tenant.id,
+        suspendReason.trim() || defaultSuspendReason
+      );
       if (!res.success) {
         toast.error(res.error || t.tenants.suspendFailed);
         return;
@@ -300,14 +317,14 @@ export function TenantsTable() {
           oldest: "الأقدم أولاً",
           usersDesc: "الأكثر مستخدمين",
           employeesDesc: "الأكثر موظفين",
-          nameAsc: "الاسم أ - ي",
+          nameAsc: "الاسم أ - ي"
         }
       : {
           newest: "Newest first",
           oldest: "Oldest first",
           usersDesc: "Most users",
           employeesDesc: "Most employees",
-          nameAsc: "Name A-Z",
+          nameAsc: "Name A-Z"
         };
 
   const noFilterResultsText =
@@ -323,17 +340,15 @@ export function TenantsTable() {
   };
 
   if (isLoading) {
-    return (
-      <TableSkeleton rows={7} columns={8} />
-    );
+    return <TableSkeleton rows={7} columns={8} />;
   }
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center">
-        <AlertCircle className="mb-3 h-10 w-10 text-destructive" />
+        <AlertCircle className="text-destructive mb-3 h-10 w-10" />
         <p className="font-medium">{t.tenants.loadFailed}</p>
-        <p className="text-sm text-muted-foreground">{error}</p>
+        <p className="text-muted-foreground text-sm">{error}</p>
       </div>
     );
   }
@@ -341,7 +356,7 @@ export function TenantsTable() {
   if (tenants.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <CheckCircle2 className="mb-4 h-12 w-12 text-muted-foreground" />
+        <CheckCircle2 className="text-muted-foreground mb-4 h-12 w-12" />
         <h3 className="text-lg font-medium">{t.tenants.noTenants}</h3>
         <p className="text-muted-foreground">{t.tenants.noTenantsDesc}</p>
       </div>
@@ -352,15 +367,23 @@ export function TenantsTable() {
     <>
       <div className="space-y-3 border-b p-4">
         <div className="flex flex-wrap items-center gap-2">
-          <Badge variant="outline">{t.common.total}: {totals.all}</Badge>
-          <Badge variant="default">{t.common.active}: {totals.active}</Badge>
-          <Badge variant="secondary">{t.common.pending}: {totals.pending}</Badge>
-          <Badge variant="destructive">{t.common.suspended}: {totals.suspended}</Badge>
+          <Badge variant="outline">
+            {t.common.total}: {totals.all}
+          </Badge>
+          <Badge variant="default">
+            {t.common.active}: {totals.active}
+          </Badge>
+          <Badge variant="secondary">
+            {t.common.pending}: {totals.pending}
+          </Badge>
+          <Badge variant="destructive">
+            {t.common.suspended}: {totals.suspended}
+          </Badge>
         </div>
 
         <div className="flex flex-col gap-2 lg:flex-row">
           <div className="relative flex-1">
-            <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               value={searchTerm}
               onChange={(event) => setSearchTerm(event.target.value)}
@@ -371,11 +394,10 @@ export function TenantsTable() {
           </div>
 
           <select
-            className="h-9 min-w-40 rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 min-w-40 rounded-md border px-3 text-sm"
             aria-label={t.common.filterByStatus}
             value={statusFilter}
-            onChange={(event) => setStatusFilter(event.target.value as TenantStatus | "all")}
-          >
+            onChange={(event) => setStatusFilter(event.target.value as TenantStatus | "all")}>
             <option value="all">{t.common.allStatuses}</option>
             <option value="active">{t.common.active}</option>
             <option value="pending">{t.common.pending}</option>
@@ -384,13 +406,12 @@ export function TenantsTable() {
           </select>
 
           <select
-            className="h-9 min-w-40 rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 min-w-40 rounded-md border px-3 text-sm"
             aria-label={t.tenants.filterByPlan}
             value={planFilter}
             onChange={(event) =>
               setPlanFilter(event.target.value as "all" | "starter" | "business" | "enterprise")
-            }
-          >
+            }>
             <option value="all">{t.tenants.pAllPlans}</option>
             <option value="starter">{planLabels.starter[locale]}</option>
             <option value="business">{planLabels.business[locale]}</option>
@@ -398,13 +419,19 @@ export function TenantsTable() {
           </select>
 
           <select
-            className="h-9 min-w-44 rounded-md border border-input bg-background px-3 text-sm"
+            className="border-input bg-background h-9 min-w-44 rounded-md border px-3 text-sm"
             aria-label={locale === "ar" ? "الترتيب" : "Sort"}
             value={sortBy}
             onChange={(event) =>
-              setSortBy(event.target.value as "newest" | "oldest" | "usersDesc" | "employeesDesc" | "nameAsc")
-            }
-          >
+              setSortBy(
+                event.target.value as
+                  | "newest"
+                  | "oldest"
+                  | "usersDesc"
+                  | "employeesDesc"
+                  | "nameAsc"
+              )
+            }>
             <option value="newest">{sortLabels.newest}</option>
             <option value="oldest">{sortLabels.oldest}</option>
             <option value="usersDesc">{sortLabels.usersDesc}</option>
@@ -412,14 +439,13 @@ export function TenantsTable() {
             <option value="nameAsc">{sortLabels.nameAsc}</option>
           </select>
 
-          <div className="inline-flex rounded-md border border-input p-0.5">
+          <div className="border-input inline-flex rounded-md border p-0.5">
             <Button
               type="button"
               variant={density === "comfortable" ? "secondary" : "ghost"}
               size="sm"
               className="h-8 rounded-sm px-2"
-              onClick={() => setDensity("comfortable")}
-            >
+              onClick={() => setDensity("comfortable")}>
               {locale === "ar" ? "مريح" : "Comfortable"}
             </Button>
             <Button
@@ -427,8 +453,7 @@ export function TenantsTable() {
               variant={density === "compact" ? "secondary" : "ghost"}
               size="sm"
               className="h-8 rounded-sm px-2"
-              onClick={() => setDensity("compact")}
-            >
+              onClick={() => setDensity("compact")}>
               {locale === "ar" ? "مكثف" : "Compact"}
             </Button>
           </div>
@@ -437,7 +462,7 @@ export function TenantsTable() {
 
       {filteredTenants.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-10 text-center">
-          <Search className="mb-3 h-8 w-8 text-muted-foreground" />
+          <Search className="text-muted-foreground mb-3 h-8 w-8" />
           <p className="font-medium">{noFilterResultsText}</p>
         </div>
       ) : (
@@ -456,22 +481,21 @@ export function TenantsTable() {
           </TableHeader>
           <TableBody>
             {filteredTenants.map((tenant) => (
-              <TableRow key={tenant.id} className={density === "compact" ? "[&>td]:py-2" : "[&>td]:py-3"}>
+              <TableRow
+                key={tenant.id}
+                className={density === "compact" ? "[&>td]:py-2" : "[&>td]:py-3"}>
                 <TableCell>
                   <div>
                     <Link
                       href={`/dashboard/super-admin/tenants/${tenant.id}`}
-                      className="font-medium hover:text-primary hover:underline"
-                    >
+                      className="hover:text-primary font-medium hover:underline">
                       {tenant.nameAr}
                     </Link>
-                    <p className="text-sm text-muted-foreground">{tenant.name}</p>
+                    <p className="text-muted-foreground text-sm">{tenant.name}</p>
                   </div>
                 </TableCell>
                 <TableCell>
-                  <code className="rounded bg-muted px-2 py-1 text-sm">
-                    {tenant.slug}
-                  </code>
+                  <code className="bg-muted rounded px-2 py-1 text-sm">{tenant.slug}</code>
                 </TableCell>
                 <TableCell>
                   {(() => {
@@ -485,15 +509,11 @@ export function TenantsTable() {
                   })()}
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">
-                    {getPlanLabel((tenant as any)?.plan)}
-                  </Badge>
+                  <Badge variant="outline">{getPlanLabel((tenant as any)?.plan)}</Badge>
                 </TableCell>
                 <TableCell className="text-center">{tenant.usersCount}</TableCell>
                 <TableCell className="text-center">{tenant.employeesCount}</TableCell>
-                <TableCell>
-                  {new Date(tenant.createdAt).toLocaleDateString(dateLocale)}
-                </TableCell>
+                <TableCell>{new Date(tenant.createdAt).toLocaleDateString(dateLocale)}</TableCell>
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -507,19 +527,24 @@ export function TenantsTable() {
                       <DropdownMenuSeparator />
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/super-admin/tenants/${tenant.id}`}>
-                          <Eye className="me-2 h-4 w-4" />{t.common.viewDetails}</Link>
+                          <Eye className="me-2 h-4 w-4" />
+                          {t.common.viewDetails}
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <Link href={`/dashboard/super-admin/tenants/${tenant.id}/settings`}>
-                          <Settings className="me-2 h-4 w-4" />{t.common.settings}</Link>
+                          <Settings className="me-2 h-4 w-4" />
+                          {t.common.settings}
+                        </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
                         <a
                           href={buildTenantUrl(tenant.slug, "/dashboard")}
                           target="_blank"
-                          rel="noreferrer"
-                        >
-                          <ExternalLink className="me-2 h-4 w-4" />{t.common.open}</a>
+                          rel="noreferrer">
+                          <ExternalLink className="me-2 h-4 w-4" />
+                          {t.common.open}
+                        </a>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       {tenant.status === "active" ? (
@@ -529,11 +554,13 @@ export function TenantsTable() {
                           onSelect={(e) => {
                             e.preventDefault();
                             void handleSuspendTenant(tenant);
-                          }}
-                        >
+                          }}>
                           <Pause className="me-2 h-4 w-4" />
                           {busy?.id === tenant.id && busy?.action === "suspend" ? (
-                            <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{t.tenants.suspending}</span>
+                            <span className="inline-flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              {t.tenants.suspending}
+                            </span>
                           ) : (
                             t.tenant.suspend
                           )}
@@ -545,11 +572,13 @@ export function TenantsTable() {
                           onSelect={(e) => {
                             e.preventDefault();
                             void handleActivateTenant(tenant);
-                          }}
-                        >
+                          }}>
                           <Play className="me-2 h-4 w-4" />
                           {busy?.id === tenant.id && busy?.action === "activate" ? (
-                            <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{t.tenants.activating}</span>
+                            <span className="inline-flex items-center gap-2">
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              {t.tenants.activating}
+                            </span>
                           ) : (
                             t.tenant.activate
                           )}
@@ -561,11 +590,13 @@ export function TenantsTable() {
                         onSelect={(e) => {
                           e.preventDefault();
                           void handleDeleteTenant(tenant);
-                        }}
-                      >
+                        }}>
                         <Trash2 className="me-2 h-4 w-4" />
                         {busy?.id === tenant.id && busy?.action === "delete" ? (
-                          <span className="inline-flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />{t.common.deleting}</span>
+                          <span className="inline-flex items-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            {t.common.deleting}
+                          </span>
                         ) : (
                           t.tenants.deleteTenant
                         )}
@@ -579,52 +610,59 @@ export function TenantsTable() {
         </Table>
       )}
 
-    {/* Delete Confirmation */}
-    <AlertDialog open={tenantToDelete !== null} onOpenChange={(open) => !open && setTenantToDelete(null)}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>{t.tenant.deleteConfirm}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {t.tenants.pAreYouSureYouWantToDelete} &quot;{tenantToDelete?.nameAr}&quot;? {t.tenants.deleteConfirmMsg}
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-          <AlertDialogAction
-            onClick={() => void confirmDeleteTenant()}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-          >{t.common.delete}</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      {/* Delete Confirmation */}
+      <AlertDialog
+        open={tenantToDelete !== null}
+        onOpenChange={(open) => !open && setTenantToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.tenant.deleteConfirm}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.tenants.pAreYouSureYouWantToDelete} &quot;{tenantToDelete?.nameAr}&quot;?{" "}
+              {t.tenants.deleteConfirmMsg}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => void confirmDeleteTenant()}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t.common.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-    {/* Suspend Dialog with reason input */}
-    <Dialog open={tenantToSuspend !== null} onOpenChange={(open) => !open && setTenantToSuspend(null)}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t.tenant.suspend}</DialogTitle>
-          <DialogDescription>{t.tenant.suspendWarning}</DialogDescription>
-        </DialogHeader>
-        <div className="space-y-2 py-2">
-          <Label htmlFor="suspend-reason">{t.common.reason}</Label>
-          <Input
-            id="suspend-reason"
-            value={suspendReason}
-            onChange={(e) => setSuspendReason(e.target.value)}
-            placeholder={t.tenant.suspendReasonExample}
-          />
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setTenantToSuspend(null)}>{t.common.cancel}</Button>
-          <Button
-            className="bg-amber-600 hover:bg-amber-700"
-            onClick={() => void confirmSuspendTenant()}
-          >
-            {t.tenants.confirmSuspend}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      {/* Suspend Dialog with reason input */}
+      <Dialog
+        open={tenantToSuspend !== null}
+        onOpenChange={(open) => !open && setTenantToSuspend(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t.tenant.suspend}</DialogTitle>
+            <DialogDescription>{t.tenant.suspendWarning}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2 py-2">
+            <Label htmlFor="suspend-reason">{t.common.reason}</Label>
+            <Input
+              id="suspend-reason"
+              value={suspendReason}
+              onChange={(e) => setSuspendReason(e.target.value)}
+              placeholder={t.tenant.suspendReasonExample}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setTenantToSuspend(null)}>
+              {t.common.cancel}
+            </Button>
+            <Button
+              className="bg-amber-600 hover:bg-amber-700"
+              onClick={() => void confirmSuspendTenant()}>
+              {t.tenants.confirmSuspend}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

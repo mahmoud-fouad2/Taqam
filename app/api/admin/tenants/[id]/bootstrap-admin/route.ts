@@ -26,7 +26,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: tenantId },
-    select: { id: true, slug: true, name: true, status: true },
+    select: { id: true, slug: true, name: true, status: true }
   });
 
   if (!tenant) {
@@ -44,7 +44,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     body = {};
   }
 
-  const email = String(body.email || "").trim().toLowerCase();
+  const email = String(body.email || "")
+    .trim()
+    .toLowerCase();
   const password = String(body.password || "");
   const firstName = String(body.firstName || "Tenant").trim() || "Tenant";
   const lastName = String(body.lastName || "Admin").trim() || "Admin";
@@ -61,7 +63,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
   const existing = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, tenantId: true },
+    select: { id: true, tenantId: true }
   });
 
   const user = existing
@@ -75,9 +77,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           failedLoginAttempts: 0,
           lockedUntil: null,
           firstName,
-          lastName,
+          lastName
         },
-        select: { id: true, email: true, role: true, status: true, tenantId: true },
+        select: { id: true, email: true, role: true, status: true, tenantId: true }
       })
     : await prisma.user.create({
         data: {
@@ -88,9 +90,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           role: "TENANT_ADMIN",
           status: "ACTIVE",
           permissions: [],
-          tenantId,
+          tenantId
         },
-        select: { id: true, email: true, role: true, status: true, tenantId: true },
+        select: { id: true, email: true, role: true, status: true, tenantId: true }
       });
 
   await prisma.auditLog.create({
@@ -102,15 +104,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       entityId: user.id,
       newData: {
         targetEmail: user.email,
-        tenantSlug: tenant.slug,
-      },
-    },
+        tenantSlug: tenant.slug
+      }
+    }
   });
 
   return NextResponse.json({
     data: {
       tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
-      user,
-    },
+      user
+    }
   });
 }

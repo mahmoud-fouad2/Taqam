@@ -13,7 +13,7 @@ import { z } from "zod";
 const offerBenefitSchema = z.object({
   name: z.string().min(1),
   value: z.string().optional(),
-  description: z.string().optional(),
+  description: z.string().optional()
 });
 
 const offerApproverSchema = z.object({
@@ -22,7 +22,7 @@ const offerApproverSchema = z.object({
   role: z.string(),
   status: z.enum(["pending", "approved", "rejected"]),
   comments: z.string().optional(),
-  actionAt: z.string().optional(),
+  actionAt: z.string().optional()
 });
 
 const updateOfferSchema = z.object({
@@ -41,7 +41,7 @@ const updateOfferSchema = z.object({
   approvers: z.array(offerApproverSchema).nullable().optional(),
   sentAt: z.string().nullable().optional(),
   respondedAt: z.string().nullable().optional(),
-  declineReason: z.string().nullable().optional(),
+  declineReason: z.string().nullable().optional()
 });
 
 function mapStatus(status: string): string {
@@ -98,7 +98,7 @@ function mapOffer(offer: JobOfferRecord) {
     declineReason: offer.declineReason ?? undefined,
     createdBy: offer.createdById,
     createdAt: offer.createdAt.toISOString(),
-    updatedAt: offer.updatedAt.toISOString(),
+    updatedAt: offer.updatedAt.toISOString()
   };
 }
 
@@ -121,8 +121,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       include: {
         applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
         jobPosting: { select: { id: true, title: true } },
-        department: { select: { id: true, name: true } },
-      },
+        department: { select: { id: true, name: true } }
+      }
     });
 
     if (!offer) {
@@ -132,7 +132,10 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
     return NextResponse.json({ success: true, data: mapOffer(offer) });
   } catch (error) {
     console.error("Error fetching job offer:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch job offer" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch job offer" },
+      { status: 500 }
+    );
   }
 }
 
@@ -152,7 +155,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     const body = updateOfferSchema.parse(await request.json());
 
     const existing = await prisma.jobOffer.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existing) {
@@ -160,27 +163,40 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     }
 
     if (body.applicantId) {
-      const applicant = await prisma.applicant.findFirst({ where: { id: body.applicantId, tenantId } });
+      const applicant = await prisma.applicant.findFirst({
+        where: { id: body.applicantId, tenantId }
+      });
       if (!applicant) {
         return NextResponse.json({ success: false, error: "Applicant not found" }, { status: 400 });
       }
     }
 
     if (body.jobPostingId) {
-      const jobPosting = await prisma.jobPosting.findFirst({ where: { id: body.jobPostingId, tenantId } });
+      const jobPosting = await prisma.jobPosting.findFirst({
+        where: { id: body.jobPostingId, tenantId }
+      });
       if (!jobPosting) {
-        return NextResponse.json({ success: false, error: "Job posting not found" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: "Job posting not found" },
+          { status: 400 }
+        );
       }
     }
 
     if (body.departmentId) {
-      const department = await prisma.department.findFirst({ where: { id: body.departmentId, tenantId } });
+      const department = await prisma.department.findFirst({
+        where: { id: body.departmentId, tenantId }
+      });
       if (!department) {
-        return NextResponse.json({ success: false, error: "Department not found" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: "Department not found" },
+          { status: 400 }
+        );
       }
     }
 
-    const parsedJobType = body.jobType === null ? null : body.jobType ? parseJobType(body.jobType) : undefined;
+    const parsedJobType =
+      body.jobType === null ? null : body.jobType ? parseJobType(body.jobType) : undefined;
     if (body.jobType && !parsedJobType) {
       return NextResponse.json({ success: false, error: "Invalid job type" }, { status: 400 });
     }
@@ -198,12 +214,15 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     if (body.offeredSalary !== undefined) updateData.offeredSalary = body.offeredSalary;
     if (body.currency !== undefined) updateData.currency = body.currency;
     if (body.jobType !== undefined) updateData.jobType = parsedJobType;
-    if (body.startDate !== undefined) updateData.startDate = body.startDate ? new Date(body.startDate) : null;
+    if (body.startDate !== undefined)
+      updateData.startDate = body.startDate ? new Date(body.startDate) : null;
     if (body.probationPeriod !== undefined) updateData.probationPeriod = body.probationPeriod;
     if (body.benefits !== undefined) updateData.benefits = body.benefits ?? Prisma.JsonNull;
-    if (body.termsAndConditions !== undefined) updateData.termsAndConditions = body.termsAndConditions;
+    if (body.termsAndConditions !== undefined)
+      updateData.termsAndConditions = body.termsAndConditions;
     if (parsedStatus !== undefined) updateData.status = parsedStatus;
-    if (body.validUntil !== undefined) updateData.validUntil = body.validUntil ? new Date(body.validUntil) : null;
+    if (body.validUntil !== undefined)
+      updateData.validUntil = body.validUntil ? new Date(body.validUntil) : null;
     if (body.approvers !== undefined) updateData.approvers = body.approvers ?? Prisma.JsonNull;
     if (body.declineReason !== undefined) updateData.declineReason = body.declineReason;
 
@@ -212,7 +231,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     } else if (parsedStatus === OfferStatus.DRAFT) {
       updateData.sentAt = null;
     } else if (
-      (parsedStatus === OfferStatus.SENT || parsedStatus === OfferStatus.ACCEPTED || parsedStatus === OfferStatus.DECLINED) &&
+      (parsedStatus === OfferStatus.SENT ||
+        parsedStatus === OfferStatus.ACCEPTED ||
+        parsedStatus === OfferStatus.DECLINED) &&
       !existing.sentAt
     ) {
       updateData.sentAt = new Date();
@@ -222,7 +243,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       updateData.respondedAt = body.respondedAt ? new Date(body.respondedAt) : null;
     } else if (parsedStatus === OfferStatus.DRAFT || parsedStatus === OfferStatus.SENT) {
       updateData.respondedAt = null;
-    } else if ((parsedStatus === OfferStatus.ACCEPTED || parsedStatus === OfferStatus.DECLINED) && !existing.respondedAt) {
+    } else if (
+      (parsedStatus === OfferStatus.ACCEPTED || parsedStatus === OfferStatus.DECLINED) &&
+      !existing.respondedAt
+    ) {
       updateData.respondedAt = new Date();
     }
 
@@ -236,8 +260,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       include: {
         applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
         jobPosting: { select: { id: true, title: true } },
-        department: { select: { id: true, name: true } },
-      },
+        department: { select: { id: true, name: true } }
+      }
     });
 
     return NextResponse.json({ success: true, data: mapOffer(updated) });
@@ -248,7 +272,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
     }
 
-    return NextResponse.json({ success: false, error: "Failed to update job offer" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update job offer" },
+      { status: 500 }
+    );
   }
 }
 
@@ -270,6 +297,9 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting job offer:", error);
-    return NextResponse.json({ success: false, error: "Failed to delete job offer" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to delete job offer" },
+      { status: 500 }
+    );
   }
 }

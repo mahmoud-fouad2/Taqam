@@ -1,4 +1,4 @@
-import MyRequestsManager from './my-requests-manager';
+import MyRequestsManager from "./my-requests-manager";
 
 export default function MyRequestsPage() {
   return <MyRequestsManager />;

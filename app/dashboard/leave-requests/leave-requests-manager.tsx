@@ -2,9 +2,7 @@
 
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import {
-  IconPlus,
-} from "@tabler/icons-react";
+import { IconPlus } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,7 +11,7 @@ import { toast } from "sonner";
 import {
   LeaveRequestStatus,
   leaveRequestStatusLabels,
-  leaveRequestStatusColors,
+  leaveRequestStatusColors
 } from "@/lib/types/leave";
 import { useEmployees } from "@/hooks/use-employees";
 import { leavesApi } from "@/lib/api";
@@ -42,7 +40,12 @@ export function LeaveRequestsManager() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { employees, departments, isLoading: isEmployeesLoading, error: employeesError } = useEmployees();
+  const {
+    employees,
+    departments,
+    isLoading: isEmployeesLoading,
+    error: employeesError
+  } = useEmployees();
 
   const [requests, setRequests] = useState<UiLeaveRequest[]>([]);
   const [leaveTypes, setLeaveTypes] = useState<ApiLeaveType[]>([]);
@@ -68,7 +71,7 @@ export function LeaveRequestsManager() {
       else p.set(key, value);
       router.replace(`${pathname}?${p.toString()}`, { scroll: false });
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams]
   );
 
   const setActiveTab = (v: LeaveRequestStatus | "all") => updateFilter("tab", v);
@@ -94,8 +97,8 @@ export function LeaveRequestsManager() {
       halfDayPeriod: "morning",
       delegateEmployeeId: "",
       emergencyContact: "",
-      emergencyPhone: "",
-    },
+      emergencyPhone: ""
+    }
   });
 
   // Form state for new request normalized for dialog compatibility.
@@ -110,7 +113,7 @@ export function LeaveRequestsManager() {
     halfDayPeriod: watchedFormData.halfDayPeriod ?? "morning",
     delegateEmployeeId: watchedFormData.delegateEmployeeId ?? "",
     emergencyContact: watchedFormData.emergencyContact ?? "",
-    emergencyPhone: watchedFormData.emergencyPhone ?? "",
+    emergencyPhone: watchedFormData.emergencyPhone ?? ""
   };
 
   const onFormDataChange = (next: LeaveRequestFormData) => {
@@ -128,7 +131,7 @@ export function LeaveRequestsManager() {
       halfDayPeriod: "morning",
       delegateEmployeeId: "",
       emergencyContact: "",
-      emergencyPhone: "",
+      emergencyPhone: ""
     });
   };
 
@@ -149,7 +152,7 @@ export function LeaveRequestsManager() {
     try {
       const [leavesRes, typesRes] = await Promise.all([
         leavesApi.requests.getAll({ limit: 200 }),
-        leavesApi.types.getAll(),
+        leavesApi.types.getAll()
       ]);
 
       if (!leavesRes.success) {
@@ -167,7 +170,7 @@ export function LeaveRequestsManager() {
             nameAr: t.nameAr ?? null,
             code: String(t.code ?? ""),
             color: t.color ?? null,
-            isActive: Boolean(t.isActive),
+            isActive: Boolean(t.isActive)
           }))
         : [];
       setLeaveTypes(mappedTypes);
@@ -198,7 +201,7 @@ export function LeaveRequestsManager() {
               updatedAt: toIso(r.updatedAt),
               approvedAt: toIso(r.approvedAt) ?? null,
               approvedById: r.approvedById ?? null,
-              rejectionReason: r.rejectionReason ?? null,
+              rejectionReason: r.rejectionReason ?? null
             };
           })
         : [];
@@ -217,10 +220,11 @@ export function LeaveRequestsManager() {
   const handleAddRequest = leaveForm.handleSubmit(async (data: LeaveRequestFormData) => {
     try {
       // Convert "none" to undefined for delegateEmployeeId
-      const delegateId = data.delegateEmployeeId === "none" || !data.delegateEmployeeId 
-        ? undefined 
-        : data.delegateEmployeeId;
-        
+      const delegateId =
+        data.delegateEmployeeId === "none" || !data.delegateEmployeeId
+          ? undefined
+          : data.delegateEmployeeId;
+
       const res = await leavesApi.requests.create({
         employeeId: data.employeeId,
         leaveTypeId: data.leaveTypeId,
@@ -231,7 +235,7 @@ export function LeaveRequestsManager() {
         halfDayPeriod: data.halfDayPeriod,
         delegateEmployeeId: delegateId,
         emergencyContact: data.emergencyContact || undefined,
-        emergencyPhone: data.emergencyPhone || undefined,
+        emergencyPhone: data.emergencyPhone || undefined
       });
 
       if (!res.success) {
@@ -250,7 +254,10 @@ export function LeaveRequestsManager() {
   const handleApprove = async () => {
     if (!selectedRequest) return;
     try {
-      const res = await leavesApi.requests.approve(selectedRequest.id, approvalComment || undefined);
+      const res = await leavesApi.requests.approve(
+        selectedRequest.id,
+        approvalComment || undefined
+      );
       if (!res.success) {
         throw new Error(res.error || t.leaveRequests.approveFailed);
       }
@@ -306,7 +313,9 @@ export function LeaveRequestsManager() {
 
   const handleBulkReject = async (ids: string[]) => {
     try {
-      await Promise.all(ids.map((id) => leavesApi.requests.reject(id, t.leaveRequests.pBulkRejection)));
+      await Promise.all(
+        ids.map((id) => leavesApi.requests.reject(id, t.leaveRequests.pBulkRejection))
+      );
       toast.success(`${t.leaveRequests.rejectedCount} ${ids.length} ${t.leaveRequests.pRequest}`);
       await loadData();
     } catch {
@@ -335,13 +344,11 @@ export function LeaveRequestsManager() {
     pending: requests.filter((r) => r.status === "pending").length,
     approved: requests.filter((r) => r.status === "approved").length,
     rejected: requests.filter((r) => r.status === "rejected").length,
-    taken: requests.filter((r) => r.status === "taken").length,
+    taken: requests.filter((r) => r.status === "taken").length
   };
 
   const getStatusBadge = (status: LeaveRequestStatus) => (
-    <Badge className={leaveRequestStatusColors[status]}>
-      {leaveRequestStatusLabels[status]}
-    </Badge>
+    <Badge className={leaveRequestStatusColors[status]}>{leaveRequestStatusLabels[status]}</Badge>
   );
 
   return (
@@ -376,8 +383,10 @@ export function LeaveRequestsManager() {
             </div>
           )}
           {(isLoading || isEmployeesLoading) && (
-            <div className="mb-4 flex items-center gap-3 text-sm text-muted-foreground">
-              <Progress value={35} className="h-2 w-40" />{t.common.loading}</div>
+            <div className="text-muted-foreground mb-4 flex items-center gap-3 text-sm">
+              <Progress value={35} className="h-2 w-40" />
+              {t.common.loading}
+            </div>
           )}
           <LeaveRequestsTable
             requests={filteredRequests}

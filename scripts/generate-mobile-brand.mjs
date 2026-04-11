@@ -23,7 +23,7 @@ async function makeIcon(targetFile, size) {
 
   // Composite onto white canvas
   await sharp({
-    create: { width: size, height: size, channels: 4, background: WHITE },
+    create: { width: size, height: size, channels: 4, background: WHITE }
   })
     .composite([{ input: logoResized, gravity: "center" }])
     .png()
@@ -42,7 +42,7 @@ async function makeLogo(targetFile, width) {
     .toBuffer();
 
   await sharp({
-    create: { width, height, channels: 4, background: WHITE },
+    create: { width, height, channels: 4, background: WHITE }
   })
     .composite([{ input: logoResized, gravity: "center" }])
     .png()
@@ -61,7 +61,7 @@ async function makeSplash(targetFile) {
     .toBuffer();
 
   await sharp({
-    create: { width: W, height: H, channels: 4, background: WHITE },
+    create: { width: W, height: H, channels: 4, background: WHITE }
   })
     .composite([{ input: logoResized, gravity: "center" }])
     .png()
@@ -73,7 +73,7 @@ await Promise.all([
   makeIcon("adaptive-foreground.png", 1024),
   makeIcon("favicon.png", 256),
   makeLogo("logo-light.png", 1200),
-  makeSplash("splash.png"),
+  makeSplash("splash.png")
 ]);
 
 console.log("✓ Mobile brand assets generated from original Taqam logo.");

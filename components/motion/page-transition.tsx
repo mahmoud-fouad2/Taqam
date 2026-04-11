@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 export function PageTransition({
   children,
-  className,
+  className
 }: {
   children: React.ReactNode;
   className?: string;
@@ -29,9 +29,8 @@ export function PageTransition({
         exit={{ opacity: 0, y: -distance }}
         transition={{
           duration,
-          ease: [0.22, 1, 0.36, 1],
-        }}
-      >
+          ease: [0.22, 1, 0.36, 1]
+        }}>
         {children}
       </motion.div>
     </AnimatePresence>

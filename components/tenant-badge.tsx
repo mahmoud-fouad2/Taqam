@@ -22,9 +22,9 @@ export async function TenantBadge() {
       (locale === "ar" ? "شركة غير محددة" : "Tenant not set");
 
   return (
-    <div className="rounded-full border px-3 py-1 text-xs text-muted-foreground">
+    <div className="text-muted-foreground rounded-full border px-3 py-1 text-xs">
       {locale === "ar" ? "مساحة العمل:" : "Workspace:"}{" "}
-      <span className="font-medium text-foreground">{workspaceLabel}</span>
+      <span className="text-foreground font-medium">{workspaceLabel}</span>
     </div>
   );
 }

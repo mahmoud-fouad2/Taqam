@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:logout_all",
       limit,
-      windowMs: 5 * 60 * 1000,
+      windowMs: 5 * 60 * 1000
     });
 
     if (!limitInfo.allowed) {
@@ -25,7 +25,11 @@ export async function POST(request: NextRequest) {
 
     const payloadOrRes = await requireMobileAuthWithDevice(request);
     if (payloadOrRes instanceof NextResponse)
-      return withRateLimitHeaders(payloadOrRes, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+      return withRateLimitHeaders(payloadOrRes, {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
 
     const count = await revokeAllRefreshTokensForUser(prisma, payloadOrRes.userId);
 
@@ -35,13 +39,17 @@ export async function POST(request: NextRequest) {
         userId: payloadOrRes.userId,
         action: "MOBILE_LOGOUT_ALL",
         entity: "User",
-        entityId: payloadOrRes.userId,
-      },
+        entityId: payloadOrRes.userId
+      }
     });
 
     const res = NextResponse.json({ data: { ok: true, revoked: count } });
     clearMobileRefreshCookie(res);
-    return withRateLimitHeaders(res, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+    return withRateLimitHeaders(res, {
+      limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   } catch (error) {
     logger.error("Mobile logout-all error", undefined, error);
     return NextResponse.json({ error: "Failed to logout" }, { status: 500 });

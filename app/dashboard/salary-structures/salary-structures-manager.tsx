@@ -11,18 +11,12 @@ import {
   IconPercentage,
   IconCurrencyRiyal,
   IconBuildingBank,
-  IconShieldCheck,
+  IconShieldCheck
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -30,7 +24,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -41,14 +35,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -56,7 +50,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -68,7 +62,7 @@ import {
   type SalaryComponentItem,
   type SalaryComponent,
   salaryComponentLabels,
-  formatCurrency,
+  formatCurrency
 } from "@/lib/types/payroll";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -102,13 +96,21 @@ export function SalaryStructuresManager() {
   const [formIsDefault, setFormIsDefault] = React.useState(false);
   const [formIsActive, setFormIsActive] = React.useState(true);
   const [formComponents, setFormComponents] = React.useState<SalaryComponentItem[]>([
-    { id: "basic", type: "basic", name: "Basic Salary", nameAr: t.common.basicSalary, isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
+    {
+      id: "basic",
+      type: "basic",
+      name: "Basic Salary",
+      nameAr: t.common.basicSalary,
+      isPercentage: false,
+      value: 0,
+      isTaxable: true,
+      isGOSIApplicable: true
+    }
   ]);
 
   const filteredStructures = structures.filter(
     (s) =>
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.nameAr.includes(searchQuery)
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.nameAr.includes(searchQuery)
   );
 
   const resetForm = () => {
@@ -118,7 +120,16 @@ export function SalaryStructuresManager() {
     setFormIsDefault(false);
     setFormIsActive(true);
     setFormComponents([
-      { id: "basic", type: "basic", name: "Basic Salary", nameAr: t.common.basicSalary, isPercentage: false, value: 0, isTaxable: true, isGOSIApplicable: true },
+      {
+        id: "basic",
+        type: "basic",
+        name: "Basic Salary",
+        nameAr: t.common.basicSalary,
+        isPercentage: false,
+        value: 0,
+        isTaxable: true,
+        isGOSIApplicable: true
+      }
     ]);
     setEditingStructure(null);
   };
@@ -168,8 +179,8 @@ export function SalaryStructuresManager() {
               description: formDescription,
               isDefault: formIsDefault,
               isActive: formIsActive,
-              components: formComponents,
-            }),
+              components: formComponents
+            })
           }
         );
         toast.success(t.salaryStructures.savedChanges);
@@ -183,8 +194,8 @@ export function SalaryStructuresManager() {
             description: formDescription,
             isDefault: formIsDefault,
             isActive: formIsActive,
-            components: formComponents,
-          }),
+            components: formComponents
+          })
         });
         toast.success(t.salaryStructures.createdSuccess);
       }
@@ -203,7 +214,7 @@ export function SalaryStructuresManager() {
   const handleDelete = async (id: string) => {
     try {
       await fetchJson(`/api/payroll/structures/${encodeURIComponent(id)}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
       toast.success(t.salaryStructures.deletedSuccess);
       await loadStructures();
@@ -224,8 +235,8 @@ export function SalaryStructuresManager() {
           description: structure.description,
           isDefault: false,
           isActive: structure.isActive,
-          components: structure.components,
-        }),
+          components: structure.components
+        })
       });
       toast.success(t.salaryStructures.copiedSuccess);
       await loadStructures();
@@ -244,7 +255,7 @@ export function SalaryStructuresManager() {
       isPercentage: true,
       value: 25,
       isTaxable: true,
-      isGOSIApplicable: true,
+      isGOSIApplicable: true
     };
     setFormComponents((prev) => [...prev, newComp]);
   };
@@ -266,8 +277,10 @@ export function SalaryStructuresManager() {
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.salaryStructures.totalStructures}</CardTitle>
-            <IconBuildingBank className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              {t.salaryStructures.totalStructures}
+            </CardTitle>
+            <IconBuildingBank className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{structures.length}</div>
@@ -297,14 +310,15 @@ export function SalaryStructuresManager() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.salaryStructures.avgComponents}</CardTitle>
-            <IconPercentage className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">
+              {t.salaryStructures.avgComponents}
+            </CardTitle>
+            <IconPercentage className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
               {Math.round(
-                structures.reduce((sum, s) => sum + s.components.length, 0) /
-                  structures.length || 0
+                structures.reduce((sum, s) => sum + s.components.length, 0) / structures.length || 0
               )}
             </div>
           </CardContent>
@@ -313,8 +327,8 @@ export function SalaryStructuresManager() {
 
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-sm">
-          <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <div className="relative max-w-sm flex-1">
+          <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder={t.salaryStructures.searchPlaceholder}
             value={searchQuery}
@@ -323,20 +337,24 @@ export function SalaryStructuresManager() {
           />
         </div>
 
-        <Dialog open={isFormOpen} onOpenChange={(open) => {
-          setIsFormOpen(open);
-          if (!open) resetForm();
-        }}>
+        <Dialog
+          open={isFormOpen}
+          onOpenChange={(open) => {
+            setIsFormOpen(open);
+            if (!open) resetForm();
+          }}>
           <DialogTrigger asChild>
             <Button>
               <IconPlus className="ms-2 h-4 w-4" />
               {t.salaryStructures.pNewStructure}
             </Button>
           </DialogTrigger>
-          <DialogContent className="w-full sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[700px]">
             <DialogHeader>
               <DialogTitle>
-                {editingStructure ? t.salaryStructures.editStructure : t.salaryStructures.createStructure}
+                {editingStructure
+                  ? t.salaryStructures.editStructure
+                  : t.salaryStructures.createStructure}
               </DialogTitle>
               <DialogDescription>
                 {t.salaryStructures.pDefineSalaryComponentsAndTheir}
@@ -375,17 +393,11 @@ export function SalaryStructuresManager() {
 
               <div className="flex items-center gap-6">
                 <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formIsActive}
-                    onCheckedChange={setFormIsActive}
-                  />
+                  <Switch checked={formIsActive} onCheckedChange={setFormIsActive} />
                   <Label>{t.common.active}</Label>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Switch
-                    checked={formIsDefault}
-                    onCheckedChange={setFormIsDefault}
-                  />
+                  <Switch checked={formIsDefault} onCheckedChange={setFormIsDefault} />
                   <Label>{t.salaryStructures.default}</Label>
                 </div>
               </div>
@@ -395,17 +407,14 @@ export function SalaryStructuresManager() {
                 <div className="flex items-center justify-between">
                   <Label className="text-base font-semibold">{t.salaryStructures.components}</Label>
                   <Button type="button" variant="outline" size="sm" onClick={addComponent}>
-                    <IconPlus className="h-4 w-4 ms-1" />
+                    <IconPlus className="ms-1 h-4 w-4" />
                     {t.salaryStructures.pAddComponent}
                   </Button>
                 </div>
 
                 <div className="space-y-3">
                   {formComponents.map((comp, index) => (
-                    <div
-                      key={comp.id}
-                      className="p-4 border rounded-lg space-y-3 bg-muted/30"
-                    >
+                    <div key={comp.id} className="bg-muted/30 space-y-3 rounded-lg border p-4">
                       <div className="flex items-center justify-between">
                         <span className="font-medium">{comp.nameAr}</span>
                         {comp.type !== "basic" && (
@@ -414,15 +423,14 @@ export function SalaryStructuresManager() {
                             variant="ghost"
                             size="icon"
                             aria-label={t.salaryStructures.deleteComponent}
-                            className="h-8 w-8 text-destructive"
-                            onClick={() => removeComponent(index)}
-                          >
+                            className="text-destructive h-8 w-8"
+                            onClick={() => removeComponent(index)}>
                             <IconTrash className="h-4 w-4" />
                           </Button>
                         )}
                       </div>
 
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                         <div className="space-y-1">
                           <Label className="text-xs">{t.common.type}</Label>
                           <Select
@@ -432,17 +440,19 @@ export function SalaryStructuresManager() {
                               updateComponent(index, {
                                 type,
                                 name: salaryComponentLabels[type].en,
-                                nameAr: salaryComponentLabels[type].ar,
+                                nameAr: salaryComponentLabels[type].ar
                               });
                             }}
-                            disabled={comp.type === "basic"}
-                          >
+                            disabled={comp.type === "basic"}>
                             <SelectTrigger>
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
                               {Object.entries(salaryComponentLabels).map(([key, label]) => (
-                                <SelectItem key={key} value={key} disabled={key === "basic" && comp.type !== "basic"}>
+                                <SelectItem
+                                  key={key}
+                                  value={key}
+                                  disabled={key === "basic" && comp.type !== "basic"}>
                                   {label.ar}
                                 </SelectItem>
                               ))}
@@ -463,7 +473,7 @@ export function SalaryStructuresManager() {
                                   }
                                   className="flex-1"
                                 />
-                                <span className="text-sm text-muted-foreground">
+                                <span className="text-muted-foreground text-sm">
                                   {comp.isPercentage ? "%" : t.salaryStructures.sar}
                                 </span>
                               </div>
@@ -475,14 +485,17 @@ export function SalaryStructuresManager() {
                                 value={comp.isPercentage ? "percentage" : "fixed"}
                                 onValueChange={(v) =>
                                   updateComponent(index, { isPercentage: v === "percentage" })
-                                }
-                              >
+                                }>
                                 <SelectTrigger>
                                   <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  <SelectItem value="percentage">{t.salaryStructures.percentOfBasic}</SelectItem>
-                                  <SelectItem value="fixed">{t.salaryStructures.fixedAmount}</SelectItem>
+                                  <SelectItem value="percentage">
+                                    {t.salaryStructures.percentOfBasic}
+                                  </SelectItem>
+                                  <SelectItem value="fixed">
+                                    {t.salaryStructures.fixedAmount}
+                                  </SelectItem>
                                 </SelectContent>
                               </Select>
                             </div>
@@ -526,7 +539,9 @@ export function SalaryStructuresManager() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsFormOpen(false)}>{t.common.cancel}</Button>
+              <Button variant="outline" onClick={() => setIsFormOpen(false)}>
+                {t.common.cancel}
+              </Button>
               <Button onClick={handleSubmit} disabled={!formName || !formNameAr || isSaving}>
                 {editingStructure ? t.common.saveChanges : t.salaryStructures.createStructure}
               </Button>
@@ -555,14 +570,14 @@ export function SalaryStructuresManager() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
+                  <TableCell colSpan={5} className="py-8 text-center">
                     <p className="text-muted-foreground">{t.common.loading}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredStructures.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="text-center py-8">
-                    <IconBuildingBank className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <TableCell colSpan={5} className="py-8 text-center">
+                    <IconBuildingBank className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
                     <p className="text-muted-foreground">{t.salaryStructures.noStructures}</p>
                   </TableCell>
                 </TableRow>
@@ -572,7 +587,7 @@ export function SalaryStructuresManager() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{structure.nameAr}</p>
-                        <p className="text-sm text-muted-foreground">{structure.name}</p>
+                        <p className="text-muted-foreground text-sm">{structure.name}</p>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -582,7 +597,8 @@ export function SalaryStructuresManager() {
                             {comp.nameAr}
                             {comp.type !== "basic" && (
                               <span className="me-1">
-                                ({comp.isPercentage ? `${comp.value}%` : formatCurrency(comp.value)})
+                                ({comp.isPercentage ? `${comp.value}%` : formatCurrency(comp.value)}
+                                )
                               </span>
                             )}
                           </Badge>
@@ -602,7 +618,7 @@ export function SalaryStructuresManager() {
                     <TableCell>
                       {structure.isDefault && (
                         <Badge variant="outline" className="text-blue-600">
-                          <IconCheck className="h-3 w-3 ms-1" />
+                          <IconCheck className="ms-1 h-3 w-3" />
                           {t.salaryStructures.pDefault}
                         </Badge>
                       )}
@@ -613,24 +629,21 @@ export function SalaryStructuresManager() {
                           variant="ghost"
                           size="icon"
                           aria-label={t.common.view}
-                          onClick={() => setSelectedStructure(structure)}
-                        >
+                          onClick={() => setSelectedStructure(structure)}>
                           <IconCurrencyRiyal className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           aria-label={t.common.edit}
-                          onClick={() => openEditForm(structure)}
-                        >
+                          onClick={() => openEditForm(structure)}>
                           <IconEdit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           aria-label={t.salaryStructures.copyLabel}
-                          onClick={() => handleDuplicate(structure)}
-                        >
+                          onClick={() => handleDuplicate(structure)}>
                           <IconCopy className="h-4 w-4" />
                         </Button>
                         <AlertDialog>
@@ -640,24 +653,27 @@ export function SalaryStructuresManager() {
                               size="icon"
                               aria-label={t.common.delete}
                               className="text-destructive"
-                              disabled={structure.isDefault}
-                            >
+                              disabled={structure.isDefault}>
                               <IconTrash className="h-4 w-4" />
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>{t.salaryStructures.deleteStructure}</AlertDialogTitle>
+                              <AlertDialogTitle>
+                                {t.salaryStructures.deleteStructure}
+                              </AlertDialogTitle>
                               <AlertDialogDescription>
-                                {t.salaryStructures.pAreYouSureYouWantToDelete} &quot;{structure.nameAr}&quot;?
+                                {t.salaryStructures.pAreYouSureYouWantToDelete} &quot;
+                                {structure.nameAr}&quot;?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleDelete(structure.id)}
-                                className="bg-destructive"
-                              >{t.common.delete}</AlertDialogAction>
+                                className="bg-destructive">
+                                {t.common.delete}
+                              </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
                         </AlertDialog>
@@ -680,8 +696,10 @@ export function SalaryStructuresManager() {
           </DialogHeader>
           {selectedStructure && (
             <div className="space-y-4">
-              <div className="p-4 bg-muted rounded-lg">
-                <p className="text-sm text-muted-foreground mb-2">{t.salaryStructures.exampleSalary}</p>
+              <div className="bg-muted rounded-lg p-4">
+                <p className="text-muted-foreground mb-2 text-sm">
+                  {t.salaryStructures.exampleSalary}
+                </p>
                 <Table>
                   <TableBody>
                     <TableRow>
@@ -700,7 +718,7 @@ export function SalaryStructuresManager() {
                           </TableCell>
                         </TableRow>
                       ))}
-                    <TableRow className="font-bold border-t-2">
+                    <TableRow className="border-t-2 font-bold">
                       <TableCell>{t.common.total}</TableCell>
                       <TableCell className="text-start">
                         {formatCurrency(

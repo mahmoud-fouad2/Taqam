@@ -8,7 +8,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import type { Employee } from "@/lib/types/core-hr";
 import { getEmployeeFullName } from "@/lib/types/core-hr";
@@ -21,7 +21,7 @@ export function EmployeeDeleteDialog({
   open,
   onOpenChange,
   employee,
-  onConfirm,
+  onConfirm
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,12 +40,15 @@ export function EmployeeDeleteDialog({
           <AlertDialogDescription>
             {isTerminated ? (
               <>
-                {t.employees.pTheEmployeeWillBeDeleted} &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot; {t.employees.pPermanently}
+                {t.employees.pTheEmployeeWillBeDeleted} &quot;
+                {employee ? getEmployeeFullName(employee, "ar") : ""}&quot;{" "}
+                {t.employees.pPermanently}
                 {t.employees.pThisActionCannotBeUndone}
               </>
             ) : (
               <>
-                {t.employees.pTheEmployeeServiceWillBeTermin} &quot;{employee ? getEmployeeFullName(employee, "ar") : ""}&quot;.
+                {t.employees.pTheEmployeeServiceWillBeTermin} &quot;
+                {employee ? getEmployeeFullName(employee, "ar") : ""}&quot;.
                 {t.employees.pYouCanPressDeleteAgainLaterFor}
               </>
             )}
@@ -56,8 +59,7 @@ export function EmployeeDeleteDialog({
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground"
-            disabled={!employee}
-          >
+            disabled={!employee}>
             {isTerminated ? t.employees.permanentDelete : t.employees.terminateService}
           </AlertDialogAction>
         </AlertDialogFooter>

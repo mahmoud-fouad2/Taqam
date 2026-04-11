@@ -17,7 +17,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import type { Tenant } from "@/lib/types/tenant";
@@ -41,7 +41,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
     phone: tenant.phone || "",
     plan: tenant.plan,
     defaultLocale: tenant.defaultLocale,
-    defaultTheme: tenant.defaultTheme,
+    defaultTheme: tenant.defaultTheme
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -62,7 +62,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
         phone: formData.phone?.trim() || undefined,
         plan: formData.plan,
         defaultLocale: formData.defaultLocale,
-        defaultTheme: formData.defaultTheme,
+        defaultTheme: formData.defaultTheme
       });
 
       if (!res.success) {
@@ -84,7 +84,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
       {/* Company Info */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">{t.organization.companySection}</h3>
-        
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="nameAr">{t.tenant.pCompanyNameArabic}</Label>
@@ -94,7 +94,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
               onChange={(e) => setFormData({ ...formData, nameAr: e.target.value })}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="name">{t.tenant.pCompanyNameEnglish}</Label>
             <Input
@@ -115,7 +115,7 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="phone">{t.common.phone}</Label>
             <Input
@@ -132,14 +132,13 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
       {/* Settings */}
       <div className="space-y-4">
         <h3 className="text-lg font-medium">{t.common.options}</h3>
-        
+
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label>{t.common.type}</Label>
             <Select
               value={formData.plan}
-              onValueChange={(value) => setFormData({ ...formData, plan: value as any })}
-            >
+              onValueChange={(value) => setFormData({ ...formData, plan: value as any })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -150,13 +149,12 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label>{t.common.options}</Label>
             <Select
               value={formData.defaultLocale}
-              onValueChange={(value) => setFormData({ ...formData, defaultLocale: value as any })}
-            >
+              onValueChange={(value) => setFormData({ ...formData, defaultLocale: value as any })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -166,13 +164,12 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label>{t.tenant.defaultTheme}</Label>
             <Select
               value={formData.defaultTheme}
-              onValueChange={(value) => setFormData({ ...formData, defaultTheme: value as any })}
-            >
+              onValueChange={(value) => setFormData({ ...formData, defaultTheme: value as any })}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -189,7 +186,9 @@ export function TenantSettingsForm({ tenant }: TenantSettingsFormProps) {
 
       {/* Actions */}
       <div className="flex justify-end gap-4">
-        <Button type="button" variant="outline" onClick={() => router.back()}>{t.common.cancel}</Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          {t.common.cancel}
+        </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           {t.tenant.pSaveChanges}

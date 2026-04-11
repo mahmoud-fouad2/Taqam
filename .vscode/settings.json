@@ -1,12 +1,7 @@
 {
   "eslint.run": "onType",
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "powershell.scriptAnalysis.enable": true,
-"powershell.scriptAnalysis.settingsPath": ".vscode/analyzersettings.psd1",
-"java.compile.nullAnalysis.mode": "automatic"
+  "powershell.scriptAnalysis.settingsPath": ".vscode/analyzersettings.psd1",
+  "java.compile.nullAnalysis.mode": "automatic"
 }

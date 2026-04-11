@@ -45,7 +45,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
     const updateResult = await prisma.jobOffer.updateMany({
       where: { id, tenantId },
-      data: { status: nextStatus },
+      data: { status: nextStatus }
     });
 
     if (updateResult.count === 0) {
@@ -57,8 +57,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       include: {
         applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
         jobPosting: { select: { id: true, title: true } },
-        department: { select: { id: true, name: true } },
-      },
+        department: { select: { id: true, name: true } }
+      }
     });
 
     if (!offer) {
@@ -91,11 +91,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         declineReason: offer.declineReason ?? undefined,
         createdBy: offer.createdById,
         createdAt: offer.createdAt.toISOString(),
-        updatedAt: offer.updatedAt.toISOString(),
-      },
+        updatedAt: offer.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error updating offer status:", error);
-    return NextResponse.json({ success: false, error: "Failed to update offer status" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update offer status" },
+      { status: 500 }
+    );
   }
 }

@@ -17,18 +17,18 @@ export interface GeneralSettings {
   companyLogo?: string;
   timezone: string;
   dateFormat: string;
-  timeFormat: '12h' | '24h';
+  timeFormat: "12h" | "24h";
   currency: string;
   fiscalYearStart: string; // MM-DD
   weekStartDay: 0 | 1 | 5 | 6; // 0=Sunday, 1=Monday, 5=Friday, 6=Saturday
 }
 
 export interface LocalizationSettings {
-  defaultLanguage: 'ar' | 'en';
-  supportedLanguages: ('ar' | 'en')[];
-  direction: 'rtl' | 'ltr';
+  defaultLanguage: "ar" | "en";
+  supportedLanguages: ("ar" | "en")[];
+  direction: "rtl" | "ltr";
   numberFormat: string;
-  calendarType: 'gregorian' | 'hijri' | 'both';
+  calendarType: "gregorian" | "hijri" | "both";
 }
 
 export interface SecuritySettings {
@@ -43,7 +43,7 @@ export interface SecuritySettings {
   };
   sessionTimeout: number; // minutes
   maxLoginAttempts: number;
-  twoFactorAuth: 'disabled' | 'optional' | 'required';
+  twoFactorAuth: "disabled" | "optional" | "required";
   ipWhitelist: string[];
   auditLogging: boolean;
 }
@@ -52,8 +52,8 @@ export interface NotificationSettings {
   emailEnabled: boolean;
   smsEnabled: boolean;
   pushEnabled: boolean;
-  defaultChannels: ('email' | 'sms' | 'push' | 'in-app')[];
-  digestFrequency: 'immediate' | 'hourly' | 'daily' | 'weekly';
+  defaultChannels: ("email" | "sms" | "push" | "in-app")[];
+  digestFrequency: "immediate" | "hourly" | "daily" | "weekly";
 }
 
 export interface IntegrationSettings {
@@ -95,15 +95,15 @@ export interface MudadIntegration {
 export interface ERPIntegration {
   id: string;
   name: string;
-  type: 'sap' | 'oracle' | 'odoo' | 'custom';
-  status: 'connected' | 'disconnected' | 'error';
+  type: "sap" | "oracle" | "odoo" | "custom";
+  status: "connected" | "disconnected" | "error";
   lastSync?: string;
   config?: Record<string, unknown>;
 }
 
 export interface BackupSettings {
   autoBackup: boolean;
-  frequency: 'daily' | 'weekly' | 'monthly';
+  frequency: "daily" | "weekly" | "monthly";
   retentionDays: number;
   includeAttachments: boolean;
   lastBackup?: string;
@@ -126,19 +126,19 @@ export interface EmploymentSettings {
   defaultWorkingDays: number[];
   defaultWorkingHours: number;
   overtimeRules: OvertimeRule[];
-  endOfServiceFormula: 'saudi-labor-law' | 'custom';
+  endOfServiceFormula: "saudi-labor-law" | "custom";
 }
 
 export interface OvertimeRule {
   id: string;
   name: string;
-  type: 'weekday' | 'weekend' | 'holiday';
+  type: "weekday" | "weekend" | "holiday";
   multiplier: number;
   maxHours?: number;
 }
 
 export interface AttendanceSettings {
-  checkInMethod: ('biometric' | 'mobile' | 'web' | 'manual')[];
+  checkInMethod: ("biometric" | "mobile" | "web" | "manual")[];
   gracePeroidMinutes: number;
   lateDeductionRules: LateDeductionRule[];
   autoCheckoutTime?: string;
@@ -150,13 +150,13 @@ export interface LateDeductionRule {
   id: string;
   fromMinutes: number;
   toMinutes: number;
-  deductionType: 'fixed' | 'percentage' | 'hourly';
+  deductionType: "fixed" | "percentage" | "hourly";
   deductionValue: number;
 }
 
 export interface LeaveSettings {
   leaveTypes: LeaveTypeConfig[];
-  accrualMethod: 'monthly' | 'yearly' | 'custom';
+  accrualMethod: "monthly" | "yearly" | "custom";
   carryOverEnabled: boolean;
   maxCarryOverDays: number;
   encashmentEnabled: boolean;
@@ -176,13 +176,13 @@ export interface LeaveTypeConfig {
   requiresAttachment: boolean;
   maxDaysPerRequest?: number;
   minNoticeDays: number;
-  applicableGenders: ('male' | 'female')[];
+  applicableGenders: ("male" | "female")[];
   isActive: boolean;
 }
 
 export interface PayrollSettings {
   paymentDay: number;
-  paymentMethod: 'bank-transfer' | 'check' | 'cash';
+  paymentMethod: "bank-transfer" | "check" | "cash";
   salaryComponents: SalaryComponent[];
   deductionComponents: DeductionComponent[];
   taxSettings: TaxSettings;
@@ -194,7 +194,7 @@ export interface SalaryComponent {
   name: string;
   nameEn: string;
   code: string;
-  type: 'fixed' | 'percentage' | 'formula';
+  type: "fixed" | "percentage" | "formula";
   value?: number;
   formula?: string;
   isTaxable: boolean;
@@ -207,7 +207,7 @@ export interface DeductionComponent {
   name: string;
   nameEn: string;
   code: string;
-  type: 'fixed' | 'percentage' | 'formula';
+  type: "fixed" | "percentage" | "formula";
   value?: number;
   formula?: string;
   isActive: boolean;
@@ -234,7 +234,7 @@ export interface PerformanceSettings {
 export interface ReviewCycleConfig {
   id: string;
   name: string;
-  frequency: 'monthly' | 'quarterly' | 'semi-annual' | 'annual';
+  frequency: "monthly" | "quarterly" | "semi-annual" | "annual";
   startMonth: number;
   selfAssessment: boolean;
   peerReview: boolean;
@@ -266,7 +266,7 @@ export interface WorkflowSettings {
 export interface ApprovalWorkflow {
   id: string;
   name: string;
-  type: 'leave' | 'expense' | 'loan' | 'overtime' | 'document' | 'general';
+  type: "leave" | "expense" | "loan" | "overtime" | "document" | "general";
   steps: ApprovalStep[];
   isActive: boolean;
 }
@@ -274,7 +274,7 @@ export interface ApprovalWorkflow {
 export interface ApprovalStep {
   id: string;
   order: number;
-  approverType: 'direct-manager' | 'department-head' | 'hr' | 'specific-user' | 'role';
+  approverType: "direct-manager" | "department-head" | "hr" | "specific-user" | "role";
   approverId?: string;
   roleId?: string;
   canSkip: boolean;
@@ -285,7 +285,7 @@ export interface EscalationRule {
   id: string;
   workflowId: string;
   waitHours: number;
-  escalateTo: 'skip-level-manager' | 'hr' | 'specific-user';
+  escalateTo: "skip-level-manager" | "hr" | "specific-user";
   escalateToId?: string;
   notifyOriginal: boolean;
 }
@@ -306,22 +306,19 @@ export interface Role {
 export interface Permission {
   id: string;
   module: string;
-  action: 'view' | 'create' | 'edit' | 'delete' | 'approve' | 'export' | 'admin';
+  action: "view" | "create" | "edit" | "delete" | "approve" | "export" | "admin";
   granted: boolean;
 }
 
 export const moduleLabels: Record<string, string> = {
-  'dashboard': 'لوحة التحكم',
-  'employees': 'الموظفين',
-  'attendance': 'الحضور والانصراف',
-  'leaves': 'الإجازات',
-  'payroll': 'الرواتب',
-  'recruitment': 'التوظيف',
-  'performance': 'الأداء',
-  'training': 'التدريب',
-  'reports': 'التقارير',
-  'settings': 'الإعدادات',
+  dashboard: "لوحة التحكم",
+  employees: "الموظفين",
+  attendance: "الحضور والانصراف",
+  leaves: "الإجازات",
+  payroll: "الرواتب",
+  recruitment: "التوظيف",
+  performance: "الأداء",
+  training: "التدريب",
+  reports: "التقارير",
+  settings: "الإعدادات"
 };
-
-
-

@@ -16,7 +16,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       tenantId,
       id,
       status: "DRAFT",
-      note: reason ? `Rejection reason: ${reason}` : "Returned to draft for review.",
+      note: reason ? `Rejection reason: ${reason}` : "Returned to draft for review."
     });
 
     if (!updated) {

@@ -70,10 +70,19 @@ type SystemSettings = {
   };
 };
 
-function defaultSystemSettings(input: { timezone: string; currency: string; weekStartDay: number; tenantName: string }): SystemSettings {
-  const weekStartDay = (input.weekStartDay === 0 || input.weekStartDay === 1 || input.weekStartDay === 5 || input.weekStartDay === 6)
-    ? (input.weekStartDay as 0 | 1 | 5 | 6)
-    : 0;
+function defaultSystemSettings(input: {
+  timezone: string;
+  currency: string;
+  weekStartDay: number;
+  tenantName: string;
+}): SystemSettings {
+  const weekStartDay =
+    input.weekStartDay === 0 ||
+    input.weekStartDay === 1 ||
+    input.weekStartDay === 5 ||
+    input.weekStartDay === 6
+      ? (input.weekStartDay as 0 | 1 | 5 | 6)
+      : 0;
 
   return {
     general: {
@@ -84,14 +93,14 @@ function defaultSystemSettings(input: { timezone: string; currency: string; week
       timeFormat: "12h",
       currency: input.currency || "SAR",
       fiscalYearStart: "01-01",
-      weekStartDay,
+      weekStartDay
     },
     localization: {
       defaultLanguage: "ar",
       supportedLanguages: ["ar", "en"],
       direction: "rtl",
       numberFormat: "ar-SA",
-      calendarType: "both",
+      calendarType: "both"
     },
     security: {
       passwordPolicy: {
@@ -101,34 +110,34 @@ function defaultSystemSettings(input: { timezone: string; currency: string; week
         requireNumbers: true,
         requireSpecialChars: false,
         expiryDays: 90,
-        preventReuse: 3,
+        preventReuse: 3
       },
       sessionTimeout: 30,
       maxLoginAttempts: 5,
       twoFactorAuth: "optional",
       ipWhitelist: [],
-      auditLogging: true,
+      auditLogging: true
     },
     notifications: {
       emailEnabled: true,
       smsEnabled: false,
       pushEnabled: false,
       defaultChannels: ["email", "in-app"],
-      digestFrequency: "immediate",
+      digestFrequency: "immediate"
     },
     integrations: {
       gosi: { enabled: false, autoSync: false },
       mol: { enabled: false, autoSync: false },
       muqeem: { enabled: false, autoSync: false },
       mudad: { enabled: false, autoSync: false },
-      erpIntegrations: [],
+      erpIntegrations: []
     },
     backup: {
       autoBackup: false,
       frequency: "daily",
       retentionDays: 30,
-      includeAttachments: true,
-    },
+      includeAttachments: true
+    }
   };
 }
 
@@ -146,30 +155,40 @@ export async function GET() {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { id: true, name: true, timezone: true, currency: true, weekStartDay: true, settings: true },
+      select: {
+        id: true,
+        name: true,
+        timezone: true,
+        currency: true,
+        weekStartDay: true,
+        settings: true
+      }
     });
 
     if (!tenant) {
       return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
     }
 
-    const settingsObj = (tenant.settings && typeof tenant.settings === "object") ? (tenant.settings as any) : {};
+    const settingsObj =
+      tenant.settings && typeof tenant.settings === "object" ? (tenant.settings as any) : {};
     const existing = settingsObj?.systemSettings as SystemSettings | undefined;
 
-    const systemSettings = existing ?? defaultSystemSettings({
-      tenantName: tenant.name,
-      timezone: tenant.timezone,
-      currency: tenant.currency,
-      weekStartDay: tenant.weekStartDay,
-    });
+    const systemSettings =
+      existing ??
+      defaultSystemSettings({
+        tenantName: tenant.name,
+        timezone: tenant.timezone,
+        currency: tenant.currency,
+        weekStartDay: tenant.weekStartDay
+      });
 
     if (!existing) {
       const nextSettings = { ...settingsObj, systemSettings };
       await prisma.tenant.update({
         where: { id: tenantId },
         data: {
-          settings: nextSettings as unknown as Prisma.InputJsonValue,
-        },
+          settings: nextSettings as unknown as Prisma.InputJsonValue
+        }
       });
     }
 
@@ -201,10 +220,11 @@ export async function PUT(request: NextRequest) {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
-    const settingsObj = (tenant?.settings && typeof tenant.settings === "object") ? (tenant.settings as any) : {};
+    const settingsObj =
+      tenant?.settings && typeof tenant.settings === "object" ? (tenant.settings as any) : {};
     const nextSettings = { ...settingsObj, systemSettings };
 
     await prisma.tenant.update({
@@ -213,8 +233,8 @@ export async function PUT(request: NextRequest) {
         timezone: systemSettings.general.timezone,
         currency: systemSettings.general.currency,
         weekStartDay: Number(systemSettings.general.weekStartDay),
-        settings: nextSettings as unknown as Prisma.InputJsonValue,
-      },
+        settings: nextSettings as unknown as Prisma.InputJsonValue
+      }
     });
 
     return NextResponse.json({ data: systemSettings });

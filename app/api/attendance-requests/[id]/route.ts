@@ -9,7 +9,9 @@ function isSuperAdmin(role: string | undefined) {
 }
 
 function canManageAttendanceRequests(role: string | undefined) {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+  return (
+    role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER"
+  );
 }
 
 async function canManagerAccessEmployee(params: {
@@ -19,34 +21,32 @@ async function canManagerAccessEmployee(params: {
 }) {
   const requesterEmployee = await prisma.employee.findFirst({
     where: { tenantId: params.tenantId, userId: params.managerUserId },
-    select: { id: true },
+    select: { id: true }
   });
 
   return Boolean(requesterEmployee && params.targetEmployeeManagerId === requesterEmployee.id);
 }
 
-function serializeAttendanceRequest(
-  item: {
-    id: string;
-    tenantId: string;
-    employeeId: string;
-    type: string;
-    status: string;
-    date: Date;
-    requestedCheckIn: Date | null;
-    requestedCheckOut: Date | null;
-    overtimeHours: { toString(): string } | number | null;
-    permissionStartTime: Date | null;
-    permissionEndTime: Date | null;
-    reason: string;
-    attachmentUrl: string | null;
-    approvedById: string | null;
-    approvedAt: Date | null;
-    rejectionReason: string | null;
-    createdAt: Date;
-    updatedAt: Date;
-  }
-) {
+function serializeAttendanceRequest(item: {
+  id: string;
+  tenantId: string;
+  employeeId: string;
+  type: string;
+  status: string;
+  date: Date;
+  requestedCheckIn: Date | null;
+  requestedCheckOut: Date | null;
+  overtimeHours: { toString(): string } | number | null;
+  permissionStartTime: Date | null;
+  permissionEndTime: Date | null;
+  reason: string;
+  attachmentUrl: string | null;
+  approvedById: string | null;
+  approvedAt: Date | null;
+  rejectionReason: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}) {
   return {
     id: item.id,
     tenantId: item.tenantId,
@@ -65,13 +65,13 @@ function serializeAttendanceRequest(
     approvedAt: item.approvedAt?.toISOString(),
     rejectionReason: item.rejectionReason ?? undefined,
     createdAt: item.createdAt.toISOString(),
-    updatedAt: item.updatedAt.toISOString(),
+    updatedAt: item.updatedAt.toISOString()
   };
 }
 
 const updateSchema = z.object({
   status: z.enum(["approved", "rejected"]),
-  rejectionReason: z.string().trim().min(3).max(2000).optional().nullable(),
+  rejectionReason: z.string().trim().min(3).max(2000).optional().nullable()
 });
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -92,7 +92,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     const requestItem = await prisma.attendanceRequest.findFirst({
       where: { id, ...(tenantId ? { tenantId } : {}) },
-      include: { employee: { select: { userId: true, managerId: true } } },
+      include: { employee: { select: { userId: true, managerId: true } } }
     });
 
     if (!requestItem) {
@@ -108,7 +108,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         (await canManagerAccessEmployee({
           tenantId: requestItem.tenantId,
           managerUserId: session.user.id,
-          targetEmployeeManagerId: requestItem.employee.managerId ?? null,
+          targetEmployeeManagerId: requestItem.employee.managerId ?? null
         }));
 
       if (!canAccess) {
@@ -144,12 +144,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
     const parsed = updateSchema.safeParse(await request.json());
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const existing = await prisma.attendanceRequest.findFirst({
       where: { id, ...(tenantId ? { tenantId } : {}) },
-      include: { employee: { select: { userId: true, managerId: true } } },
+      include: { employee: { select: { userId: true, managerId: true } } }
     });
 
     if (!existing) {
@@ -160,7 +163,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       const canAccess = await canManagerAccessEmployee({
         tenantId: existing.tenantId,
         managerUserId: session.user.id,
-        targetEmployeeManagerId: existing.employee.managerId ?? null,
+        targetEmployeeManagerId: existing.employee.managerId ?? null
       });
 
       if (!canAccess) {
@@ -183,8 +186,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         status: nextStatus,
         approvedById: nextStatus === "APPROVED" ? session.user.id : null,
         approvedAt: nextStatus === "APPROVED" ? new Date() : null,
-        rejectionReason: nextStatus === "REJECTED" ? parsed.data.rejectionReason ?? null : null,
-      },
+        rejectionReason: nextStatus === "REJECTED" ? (parsed.data.rejectionReason ?? null) : null
+      }
     });
 
     return NextResponse.json({ data: serializeAttendanceRequest(updated) });
@@ -210,7 +213,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     const existing = await prisma.attendanceRequest.findFirst({
       where: { id, ...(tenantId ? { tenantId } : {}) },
-      include: { employee: { select: { userId: true } } },
+      include: { employee: { select: { userId: true } } }
     });
 
     if (!existing) {
@@ -229,7 +232,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     await prisma.attendanceRequest.update({
       where: { id },
-      data: { status: "CANCELLED" },
+      data: { status: "CANCELLED" }
     });
 
     return NextResponse.json({ success: true });

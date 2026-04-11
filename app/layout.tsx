@@ -11,24 +11,23 @@ export const metadata: Metadata = {
   applicationName: "Taqam",
   title: {
     default: "Taqam | طاقم",
-    template: "%s | Taqam",
+    template: "%s | Taqam"
   },
-  description: "Saudi HR, payroll, attendance, and workforce operations platform with Arabic and English support.",
+  description:
+    "Saudi HR, payroll, attendance, and workforce operations platform with Arabic and English support.",
   manifest: "/manifest.webmanifest",
   verification: {
-    google: "googlec1df282af5d25af4",
+    google: "googlec1df282af5d25af4"
   },
   icons: {
     icon: [
       { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
       { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" },
-      { url: "/icons/taqam-icon.svg", type: "image/svg+xml" },
+      { url: "/icons/taqam-icon.svg", type: "image/svg+xml" }
     ],
-    apple: [
-      { url: "/icons/mark-light-256.png", sizes: "256x256" },
-    ],
-    shortcut: "/icons/favicon-32.png",
+    apple: [{ url: "/icons/mark-light-256.png", sizes: "256x256" }],
+    shortcut: "/icons/favicon-32.png"
   },
   openGraph: {
     type: "website",
@@ -38,21 +37,21 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/opengraph-image",
-        alt: "Taqam",
-      },
-    ],
+        alt: "Taqam"
+      }
+    ]
   },
   twitter: {
     card: "summary_large_image",
     title: "Taqam | طاقم",
     description: "Saudi HR, payroll, attendance, and workforce operations platform.",
-    images: ["/twitter-image"],
+    images: ["/twitter-image"]
   },
   other: {
-    "mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes"
   },
   authors: [{ name: "ma-fo.info", url: "https://ma-fo.info" }],
-  creator: "ma-fo.info",
+  creator: "ma-fo.info"
 };
 
 export const viewport: Viewport = {
@@ -61,8 +60,8 @@ export const viewport: Viewport = {
   colorScheme: "light dark",
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#0b1220" },
-  ],
+    { media: "(prefers-color-scheme: dark)", color: "#0b1220" }
+  ]
 };
 
 const ibmPlexSansArabic = localFont({
@@ -73,44 +72,44 @@ const ibmPlexSansArabic = localFont({
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-400-normal.woff2",
       weight: "400",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-500-normal.woff2",
       weight: "500",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-600-normal.woff2",
       weight: "600",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-latin-700-normal.woff2",
       weight: "700",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-400-normal.woff2",
       weight: "400",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-500-normal.woff2",
       weight: "500",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-600-normal.woff2",
       weight: "600",
-      style: "normal",
+      style: "normal"
     },
     {
       path: "./fonts/ibm-plex-sans-arabic/ibm-plex-sans-arabic-arabic-700-normal.woff2",
       weight: "700",
-      style: "normal",
-    },
-  ],
+      style: "normal"
+    }
+  ]
 });
 
 export default async function RootLayout({
@@ -124,7 +123,9 @@ export default async function RootLayout({
   return (
     <html lang={locale} dir={dir} suppressHydrationWarning>
       <body className={`${ibmPlexSansArabic.variable} font-sans`}>
-        <Providers dir={dir} locale={locale}>{children}</Providers>
+        <Providers dir={dir} locale={locale}>
+          {children}
+        </Providers>
       </body>
     </html>
   );

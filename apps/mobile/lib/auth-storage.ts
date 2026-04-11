@@ -18,7 +18,7 @@ export async function setStoredAccessToken(token: string): Promise<void> {
   await SecureStore.setItemAsync(ACCESS_KEY, token);
 }
 
-export async function clearStoredAccessToken(): Promise<void> {
+async function clearStoredAccessToken(): Promise<void> {
   await SecureStore.deleteItemAsync(ACCESS_KEY);
 }
 
@@ -30,7 +30,7 @@ export async function setStoredRefreshToken(token: string): Promise<void> {
   await SecureStore.setItemAsync(REFRESH_KEY, token);
 }
 
-export async function clearStoredRefreshToken(): Promise<void> {
+async function clearStoredRefreshToken(): Promise<void> {
   await SecureStore.deleteItemAsync(REFRESH_KEY);
 }
 

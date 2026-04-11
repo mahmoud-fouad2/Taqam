@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = getText(locale);
   return generateMeta({
     title: t.register.metaTitle,
-    description: t.register.metaDescription,
+    description: t.register.metaDescription
   });
 }
 
@@ -25,7 +25,14 @@ export default async function RegisterPage() {
   return (
     <div className="flex pb-8 lg:h-screen lg:pb-0">
       <div className="hidden w-1/2 bg-gray-100 lg:block">
-        <Image src="/images/cover.png" alt="Cover" fill className="object-cover" sizes="50vw" priority />
+        <Image
+          src="/images/cover.png"
+          alt="Cover"
+          fill
+          className="object-cover"
+          sizes="50vw"
+          priority
+        />
       </div>
 
       <div className="flex w-full items-center justify-center lg:w-1/2">
@@ -51,7 +58,7 @@ export default async function RegisterPage() {
                   emailPlaceholder: t.register.emailPlaceholder,
                   password: t.register.password,
                   passwordPlaceholder: t.register.passwordPlaceholder,
-                  submit: t.register.submit,
+                  submit: t.register.submit
                 }}
               />
             </div>

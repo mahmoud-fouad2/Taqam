@@ -18,7 +18,9 @@ export function LeaveRequestsHeader({ onAdd }: { onAdd: () => void }) {
         <p className="text-muted-foreground">{t.leaveRequests.pManageAndTrackLeaveRequests}</p>
       </div>
       <Button onClick={onAdd}>
-        <IconPlus className="ms-2 h-4 w-4" />{t.leaveRequests.newRequest}</Button>
+        <IconPlus className="ms-2 h-4 w-4" />
+        {t.leaveRequests.newRequest}
+      </Button>
     </div>
   );
 }

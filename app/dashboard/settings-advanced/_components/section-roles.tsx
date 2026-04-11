@@ -1,13 +1,13 @@
 "use client";
 
-import { Plus, Users, Edit } from 'lucide-react';
+import { Plus, Users, Edit } from "lucide-react";
 
-import type { Role } from '@/lib/types/settings';
+import type { Role } from "@/lib/types/settings";
 
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toast } from 'sonner';
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -28,7 +28,7 @@ export function RolesSection({ roles }: { roles: Role[] }) {
             <CardDescription>{t.generalSettings.pManageUserRolesAndPermissions}</CardDescription>
           </div>
           <Button disabled onClick={() => toast.message(t.common.notAvailable)}>
-            <Plus className="h-4 w-4 ms-2" />
+            <Plus className="ms-2 h-4 w-4" />
             {t.generalSettings.pNewRole}
           </Button>
         </div>
@@ -36,24 +36,32 @@ export function RolesSection({ roles }: { roles: Role[] }) {
       <CardContent>
         <div className="space-y-4">
           {roles.length === 0 ? (
-            <div className="py-10 text-center text-muted-foreground">{t.generalSettings.pNoRolesFound}</div>
+            <div className="text-muted-foreground py-10 text-center">
+              {t.generalSettings.pNoRolesFound}
+            </div>
           ) : (
             roles.map((role) => (
-              <div key={role.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={role.id}
+                className="flex items-center justify-between rounded-lg border p-4">
                 <div className="flex items-center gap-4">
-                  <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center">
+                  <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-lg">
                     <Users className="h-5 w-5" />
                   </div>
                   <div>
                     <h4 className="font-semibold">{role.name}</h4>
-                    <p className="text-sm text-muted-foreground">{role.description}</p>
+                    <p className="text-muted-foreground text-sm">{role.description}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
-                  <Badge variant="secondary">{role.usersCount} {t.generalSettings.pUser}</Badge>
+                  <Badge variant="secondary">
+                    {role.usersCount} {t.generalSettings.pUser}
+                  </Badge>
                   {role.isSystem && <Badge variant="outline">{t.generalSettings.pSystem}</Badge>}
                   <Button variant="outline" size="sm" disabled>
-                    <Edit className="h-4 w-4 ms-1" />{t.common.edit}</Button>
+                    <Edit className="ms-1 h-4 w-4" />
+                    {t.common.edit}
+                  </Button>
                 </div>
               </div>
             ))

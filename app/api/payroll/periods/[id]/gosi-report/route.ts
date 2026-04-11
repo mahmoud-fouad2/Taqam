@@ -17,7 +17,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
     }
 
     const csv = buildCsv(
-      ["employeeNumber", "employeeName", "department", "basicSalary", "gosiEmployee", "gosiEmployer", "totalGosi"],
+      [
+        "employeeNumber",
+        "employeeName",
+        "department",
+        "basicSalary",
+        "gosiEmployee",
+        "gosiEmployer",
+        "totalGosi"
+      ],
       result.payslips.map((payslip) => [
         payslip.employeeNumber,
         payslip.employeeName,
@@ -25,15 +33,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         payslip.basicSalary,
         payslip.gosiEmployee,
         payslip.gosiEmployer,
-        payslip.gosiEmployee + payslip.gosiEmployer,
+        payslip.gosiEmployee + payslip.gosiEmployer
       ])
     );
 
     return new NextResponse(`\ufeff${csv}`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${sanitizeFilename(`gosi-report-${result.period.name || result.period.id}`)}.csv"`,
-      },
+        "Content-Disposition": `attachment; filename="${sanitizeFilename(`gosi-report-${result.period.name || result.period.id}`)}.csv"`
+      }
     });
   } catch (error) {
     console.error("Error generating GOSI report:", error);

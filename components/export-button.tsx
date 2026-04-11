@@ -6,7 +6,7 @@ import {
   IconFileSpreadsheet,
   IconFileTypePdf,
   IconFileTypeCsv,
-  IconLoader,
+  IconLoader
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,7 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-  DropdownMenuLabel,
+  DropdownMenuLabel
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 
@@ -45,7 +45,7 @@ const typeLabels: Record<string, string> = {
   employees: "الموظفين",
   attendance: "الحضور والانصراف",
   payroll: "الرواتب",
-  loans: "القروض",
+  loans: "القروض"
 };
 
 export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps) {
@@ -63,7 +63,7 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
     setExporting(true);
     try {
       const response = await fetch(`/api/export?${buildQueryString("csv")}`);
-      
+
       if (!response.ok) {
         throw new Error("فشل في تصدير البيانات");
       }
@@ -91,13 +91,13 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
     setExporting(true);
     try {
       const response = await fetch(`/api/export?${buildQueryString("excel-json")}`);
-      
+
       if (!response.ok) {
         throw new Error("فشل في تصدير البيانات");
       }
 
       const exportData: ExportData = await response.json();
-      
+
       // Generate Excel using simple XML format (compatible with Excel)
       const generateExcelXML = (data: ExportData) => {
         const worksheet = data.data.map((row) => {
@@ -111,7 +111,9 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
       };
 
       const excelContent = generateExcelXML(exportData);
-      const blob = new Blob(["\uFEFF" + excelContent], { type: "application/vnd.ms-excel;charset=utf-8" });
+      const blob = new Blob(["\uFEFF" + excelContent], {
+        type: "application/vnd.ms-excel;charset=utf-8"
+      });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -134,13 +136,13 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
     setExporting(true);
     try {
       const response = await fetch(`/api/export?${buildQueryString("json")}`);
-      
+
       if (!response.ok) {
         throw new Error("فشل في جلب البيانات");
       }
 
       const exportData: ExportData = await response.json();
-      
+
       // Generate printable HTML for PDF
       const generatePrintableHTML = (data: ExportData) => {
         const title = typeLabels[type] || type;
@@ -289,9 +291,9 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
       <DropdownMenuTrigger asChild>
         <Button variant="outline" disabled={disabled || exporting}>
           {exporting ? (
-            <IconLoader className="h-4 w-4 ms-2 animate-spin" />
+            <IconLoader className="ms-2 h-4 w-4 animate-spin" />
           ) : (
-            <IconDownload className="h-4 w-4 ms-2" />
+            <IconDownload className="ms-2 h-4 w-4" />
           )}
           تصدير
         </Button>
@@ -300,15 +302,15 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
         <DropdownMenuLabel>تصدير {typeLabels[type]}</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={handleExportExcel}>
-          <IconFileSpreadsheet className="h-4 w-4 ms-2 text-green-600" />
+          <IconFileSpreadsheet className="ms-2 h-4 w-4 text-green-600" />
           <span>Excel (.xls)</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportCSV}>
-          <IconFileTypeCsv className="h-4 w-4 ms-2 text-blue-600" />
+          <IconFileTypeCsv className="ms-2 h-4 w-4 text-blue-600" />
           <span>CSV</span>
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleExportPDF}>
-          <IconFileTypePdf className="h-4 w-4 ms-2 text-red-600" />
+          <IconFileTypePdf className="ms-2 h-4 w-4 text-red-600" />
           <span>PDF (طباعة)</span>
         </DropdownMenuItem>
       </DropdownMenuContent>

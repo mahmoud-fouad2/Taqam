@@ -38,7 +38,7 @@ export async function GET() {
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     const settings = coerceTenantSettings(tenant?.settings);

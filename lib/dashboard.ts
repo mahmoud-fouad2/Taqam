@@ -26,7 +26,7 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
     todayAttendance,
     pendingLeaves,
     onLeaveToday,
-    newHiresThisMonth,
+    newHiresThisMonth
   ] = await Promise.all([
     prisma.employee.count({ where }),
     prisma.employee.count({ where: { ...where, status: "ACTIVE" } }),
@@ -35,8 +35,8 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
       where: {
         ...where,
         // AttendanceRecord.date is @db.Date — compare as a date-only value
-        date: todayUtc,
-      },
+        date: todayUtc
+      }
     }),
     prisma.leaveRequest.count({ where: { ...where, status: "PENDING" } }),
     prisma.leaveRequest.count({
@@ -44,15 +44,15 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
         ...where,
         status: "APPROVED",
         startDate: { lte: todayUtc },
-        endDate: { gte: todayUtc },
-      },
+        endDate: { gte: todayUtc }
+      }
     }),
     prisma.employee.count({
       where: {
         ...where,
-        hireDate: { gte: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)) },
-      },
-    }),
+        hireDate: { gte: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)) }
+      }
+    })
   ]);
 
   const attendanceRate =
@@ -66,7 +66,7 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
     attendanceRate,
     pendingLeaves,
     onLeaveToday,
-    newHiresThisMonth,
+    newHiresThisMonth
   };
 }
 
@@ -104,18 +104,18 @@ export async function getDashboardActivities(options: {
             id: true,
             firstName: true,
             lastName: true,
-            avatar: true,
-          },
+            avatar: true
+          }
         },
         leaveType: {
           select: {
             name: true,
-            nameAr: true,
-          },
-        },
+            nameAr: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
-      take: limit,
+      take: limit
     }),
     prisma.attendanceRecord.findMany({
       where,
@@ -125,18 +125,18 @@ export async function getDashboardActivities(options: {
             id: true,
             firstName: true,
             lastName: true,
-            avatar: true,
-          },
-        },
+            avatar: true
+          }
+        }
       },
       orderBy: { createdAt: "desc" },
-      take: limit,
+      take: limit
     }),
     prisma.announcement.findMany({
       where: { ...where, isActive: true },
       orderBy: { publishedAt: "desc" },
-      take: 5,
-    }),
+      take: 5
+    })
   ]);
 
   const activities: DashboardActivity[] = [];
@@ -149,7 +149,7 @@ export async function getDashboardActivities(options: {
       description: `${leave.employee.firstName} ${leave.employee.lastName} requested ${leave.totalDays} days leave`,
       status: leave.status,
       user: leave.employee,
-      createdAt: leave.createdAt,
+      createdAt: leave.createdAt
     });
   }
 
@@ -161,7 +161,7 @@ export async function getDashboardActivities(options: {
         title: "Check In",
         description: `${att.employee.firstName} ${att.employee.lastName} checked in`,
         user: att.employee,
-        createdAt: att.checkInTime,
+        createdAt: att.checkInTime
       });
     }
     if (att.checkOutTime) {
@@ -171,7 +171,7 @@ export async function getDashboardActivities(options: {
         title: "Check Out",
         description: `${att.employee.firstName} ${att.employee.lastName} checked out`,
         user: att.employee,
-        createdAt: att.checkOutTime,
+        createdAt: att.checkOutTime
       });
     }
   }
@@ -182,10 +182,9 @@ export async function getDashboardActivities(options: {
       type: "ANNOUNCEMENT",
       title: announcement.title,
       description:
-        announcement.content.substring(0, 100) +
-        (announcement.content.length > 100 ? "..." : ""),
+        announcement.content.substring(0, 100) + (announcement.content.length > 100 ? "..." : ""),
       priority: announcement.priority,
-      createdAt: announcement.publishedAt || announcement.createdAt,
+      createdAt: announcement.publishedAt || announcement.createdAt
     });
   }
 
@@ -240,12 +239,12 @@ export async function getDashboardCharts(options: {
   const attendanceData = await prisma.attendanceRecord.findMany({
     where: {
       ...where,
-      date: { gte: startDate },
+      date: { gte: startDate }
     },
     select: {
       date: true,
-      status: true,
-    },
+      status: true
+    }
   });
 
   const attendanceByDate: Record<string, { present: number; absent: number; late: number }> = {};
@@ -265,9 +264,9 @@ export async function getDashboardCharts(options: {
     where,
     include: {
       _count: {
-        select: { employees: true },
-      },
-    },
+        select: { employees: true }
+      }
+    }
   });
 
   const departments = (employeesByDepartment as any[])
@@ -275,7 +274,7 @@ export async function getDashboardCharts(options: {
     .map((dept) => ({
       name: dept.name,
       nameAr: dept.nameAr,
-      value: dept._count.employees,
+      value: dept._count.employees
     }));
 
   const leavesByType = await prisma.leaveRequest.groupBy({
@@ -283,15 +282,15 @@ export async function getDashboardCharts(options: {
     where: {
       ...where,
       status: "APPROVED",
-      startDate: { gte: startDate },
+      startDate: { gte: startDate }
     },
     _count: {
-      id: true,
-    },
+      id: true
+    }
   });
 
   const leaveTypes = await prisma.leaveType.findMany({
-    where: { id: { in: leavesByType.map((l) => l.leaveTypeId) } },
+    where: { id: { in: leavesByType.map((l) => l.leaveTypeId) } }
   });
 
   const leaves = leavesByType.map((item) => {
@@ -299,16 +298,16 @@ export async function getDashboardCharts(options: {
     return {
       name: leaveType?.name || "Unknown",
       nameAr: leaveType?.nameAr || "غير معروف",
-      value: item._count.id,
+      value: item._count.id
     };
   });
 
   return {
     attendance: Object.entries(attendanceByDate).map(([date, counts]) => ({
       date,
-      ...counts,
+      ...counts
     })),
     departments,
-    leaves,
+    leaves
   };
 }

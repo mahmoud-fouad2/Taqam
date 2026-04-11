@@ -15,7 +15,8 @@ function mapPlanFromDb(plan: unknown): Tenant["plan"] {
   if (v === "PROFESSIONAL" || v === "BUSINESS") return "business";
   if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
   const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter") return lower as Tenant["plan"];
+  if (lower === "enterprise" || lower === "business" || lower === "starter")
+    return lower as Tenant["plan"];
   return "starter";
 }
 
@@ -58,7 +59,7 @@ function mapTenant(t: any): Tenant {
     employeesCount: t._count?.employees ?? 0,
     createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
-    createdBy: t.createdBy ?? "",
+    createdBy: t.createdBy ?? ""
   };
 }
 
@@ -70,17 +71,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const tenant = await prisma.tenant.findUnique({
@@ -90,26 +85,20 @@ export async function GET(request: NextRequest, context: RouteContext) {
           select: {
             employees: true,
             users: true,
-            departments: true,
-          },
-        },
-      },
+            departments: true
+          }
+        }
+      }
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { success: false, error: "Tenant not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Tenant not found" }, { status: 404 });
     }
 
     return NextResponse.json({ success: true, data: mapTenant(tenant) });
   } catch (error) {
     console.error("Error fetching tenant:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to fetch tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to fetch tenant" }, { status: 500 });
   }
 }
 
@@ -119,29 +108,25 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const body = await request.json();
 
     const existing = await prisma.tenant.findUnique({
       where: { id },
-      select: { settings: true },
+      select: { settings: true }
     });
     const currentSettings = readSettings(existing);
 
     const incomingSettings =
-      body.settings && typeof body.settings === "object" ? (body.settings as Record<string, unknown>) : {};
+      body.settings && typeof body.settings === "object"
+        ? (body.settings as Record<string, unknown>)
+        : {};
 
     const mergedSettings: Record<string, unknown> = {
       ...currentSettings,
@@ -152,7 +137,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       ...(body.city !== undefined && { city: body.city }),
       ...(body.country !== undefined && { country: body.country }),
       ...(body.defaultLocale !== undefined && { defaultLocale: body.defaultLocale }),
-      ...(body.defaultTheme !== undefined && { defaultTheme: body.defaultTheme }),
+      ...(body.defaultTheme !== undefined && { defaultTheme: body.defaultTheme })
     };
 
     // Check slug uniqueness if changed
@@ -160,14 +145,11 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       const existing = await prisma.tenant.findFirst({
         where: {
           slug: body.slug,
-          NOT: { id },
-        },
+          NOT: { id }
+        }
       });
       if (existing) {
-        return NextResponse.json(
-          { success: false, error: "Slug already exists" },
-          { status: 400 }
-        );
+        return NextResponse.json({ success: false, error: "Slug already exists" }, { status: 400 });
       }
     }
 
@@ -186,25 +168,22 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         ...(body.planExpiresAt && { planExpiresAt: new Date(body.planExpiresAt) }),
         ...(body.maxEmployees !== undefined && { maxEmployees: body.maxEmployees }),
         ...(body.status && { status: body.status.toUpperCase() }),
-        settings: mergedSettings,
+        settings: mergedSettings
       },
       include: {
         _count: {
           select: {
             employees: true,
-            users: true,
-          },
-        },
-      },
+            users: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ success: true, data: mapTenant(tenant) });
   } catch (error) {
     console.error("Error updating tenant:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to update tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to update tenant" }, { status: 500 });
   }
 }
 
@@ -214,31 +193,22 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     // Soft delete by setting status to CANCELLED
     await prisma.tenant.update({
       where: { id },
-      data: { status: "CANCELLED" },
+      data: { status: "CANCELLED" }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting tenant:", error);
-    return NextResponse.json(
-      { success: false, error: "Failed to delete tenant" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "Failed to delete tenant" }, { status: 500 });
   }
 }

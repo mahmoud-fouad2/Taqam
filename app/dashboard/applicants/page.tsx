@@ -1,4 +1,5 @@
-import { ApplicantsManager } from "./applicants-manager";import { getText } from "@/lib/i18n/text";
+import { ApplicantsManager } from "./applicants-manager";
+import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export default async function ApplicantsPage() {

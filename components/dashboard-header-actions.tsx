@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { Bell, HelpCircle, LogOut, User, KeyRound, ChevronLeft, ChevronRight, Moon, Sun, Mail } from "lucide-react";
+import {
+  Bell,
+  HelpCircle,
+  LogOut,
+  User,
+  KeyRound,
+  ChevronLeft,
+  ChevronRight,
+  Moon,
+  Sun,
+  Mail
+} from "lucide-react";
 import { getSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { startLocaleTransition } from "@/components/locale-transition";
@@ -17,18 +28,14 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { isSuperAdminRole } from "@/lib/access-control";
 import { getText } from "@/lib/i18n/text";
 import { notificationsService } from "@/lib/api";
 import type { Notification } from "@/lib/types/self-service";
 
-export function DashboardHeaderActions({
-  locale,
-}: {
-  locale: "ar" | "en";
-}) {
+export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
   const t = getText(locale);
   const p = locale === "en" ? "/en" : "";
   const { theme, setTheme } = useTheme();
@@ -53,7 +60,11 @@ export function DashboardHeaderActions({
         // Set user name and email from session
         const user = session?.user as any;
         if (user) {
-          setUserName(user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || (locale === "ar" ? "مستخدم" : "User"));
+          setUserName(
+            user.name ||
+              `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
+              (locale === "ar" ? "مستخدم" : "User")
+          );
           setUserEmail(user.email || "");
         }
       }
@@ -137,7 +148,7 @@ export function DashboardHeaderActions({
   const { unreadCount, latest } = useMemo(() => {
     const withRead: Notification[] = notifications.map((n: Notification) => ({
       ...n,
-      isRead: n.isRead || readIds.has(n.id),
+      isRead: n.isRead || readIds.has(n.id)
     }));
 
     const unreadCount = withRead.filter((n: Notification) => !n.isRead).length;
@@ -154,10 +165,12 @@ export function DashboardHeaderActions({
 
     const path = window.location.pathname;
     const hasEnPrefix = path === "/en" || path.startsWith("/en/");
-    const stripped = hasEnPrefix ? (path.replace(/^\/en(?=\/|$)/, "") || "/") : path;
+    const stripped = hasEnPrefix ? path.replace(/^\/en(?=\/|$)/, "") || "/" : path;
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
 
-    startLocaleTransition(() => { window.location.href = `${target}${window.location.search}`; });
+    startLocaleTransition(() => {
+      window.location.href = `${target}${window.location.search}`;
+    });
   };
 
   const toggleTheme = () => {
@@ -168,8 +181,10 @@ export function DashboardHeaderActions({
     await signOut({ callbackUrl: "/login" });
   };
 
-  const actionIconBtnClass = "h-9 w-9 rounded-lg border border-border/70 bg-background/75 shadow-sm hover:bg-accent/80";
-  const dropdownSurfaceClass = "rounded-xl border border-border/70 bg-popover/95 shadow-xl backdrop-blur-xl";
+  const actionIconBtnClass =
+    "h-9 w-9 rounded-lg border border-border/70 bg-background/75 shadow-sm hover:bg-accent/80";
+  const dropdownSurfaceClass =
+    "rounded-xl border border-border/70 bg-popover/95 shadow-xl backdrop-blur-xl";
 
   return (
     <div className="flex items-center gap-2">
@@ -180,12 +195,19 @@ export function DashboardHeaderActions({
         size="icon"
         className={actionIconBtnClass}
         aria-label={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
-        onClick={toggleLocale}
-      >
-        <span dir="ltr" className="inline-flex h-5 w-[42px] shrink-0 items-center rounded-full bg-muted ring-1 ring-border/50 px-0.5">
-          <span className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "ar" ? "text-primary" : "text-muted-foreground/40"}`}>AR</span>
-          <span className="mx-0.5 h-3 w-px bg-border/60" />
-          <span className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "en" ? "text-primary" : "text-muted-foreground/40"}`}>EN</span>
+        onClick={toggleLocale}>
+        <span
+          dir="ltr"
+          className="bg-muted ring-border/50 inline-flex h-5 w-[42px] shrink-0 items-center rounded-full px-0.5 ring-1">
+          <span
+            className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "ar" ? "text-primary" : "text-muted-foreground/40"}`}>
+            AR
+          </span>
+          <span className="bg-border/60 mx-0.5 h-3 w-px" />
+          <span
+            className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "en" ? "text-primary" : "text-muted-foreground/40"}`}>
+            EN
+          </span>
         </span>
       </Button>
 
@@ -195,8 +217,7 @@ export function DashboardHeaderActions({
         size="icon"
         className={actionIconBtnClass}
         aria-label={locale === "ar" ? "تبديل المظهر" : "Toggle theme"}
-        onClick={toggleTheme}
-      >
+        onClick={toggleTheme}>
         {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
       </Button>
       {/* Help */}
@@ -214,7 +235,9 @@ export function DashboardHeaderActions({
             {isPlatformAdmin ? (
               <>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/super-admin`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "لوحة المنصة" : "Platform dashboard"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -224,7 +247,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin/tenants`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/super-admin/tenants`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "إدارة الشركات" : "Manage tenants"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -234,7 +259,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin/requests`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/super-admin/requests`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "طلبات الاشتراك" : "Subscription requests"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -244,7 +271,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin/pricing`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/super-admin/pricing`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الأسعار والباقات" : "Pricing & plans"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -254,7 +283,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/super-admin/settings`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/super-admin/settings`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "إعدادات المنصة" : "Platform settings"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -268,8 +299,7 @@ export function DashboardHeaderActions({
                     onSelect={(e: Event) => {
                       e.preventDefault();
                       exitTenantContext();
-                    }}
-                  >
+                    }}>
                     <ChevronLeft className="me-2 h-4 w-4" />
                     {locale === "ar" ? "مسح سياق الشركة" : "Clear tenant context"}
                   </DropdownMenuItem>
@@ -278,7 +308,9 @@ export function DashboardHeaderActions({
             ) : (
               <>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/help-center`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/help-center`}
+                    className="flex items-center justify-between">
                     <span>{t.common.helpCenter}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -288,7 +320,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/academy`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/academy`}
+                    className="flex items-center justify-between">
                     <span>{t.common.academy}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -298,7 +332,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/support`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/support`}
+                    className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الدعم الفني" : "Support"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -318,7 +354,9 @@ export function DashboardHeaderActions({
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/whats-new`} className="flex items-center justify-between">
+                  <Link
+                    href={`${p}/dashboard/whats-new`}
+                    className="flex items-center justify-between">
                     <span>{t.common.whatsNew}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -354,15 +392,16 @@ export function DashboardHeaderActions({
             <div className="flex items-center gap-3">
               <button
                 type="button"
-                className="text-xs text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground text-xs"
                 onClick={(e) => {
                   e.preventDefault();
                   markAllRead();
-                }}
-              >
+                }}>
                 {locale === "ar" ? "تحديد الكل كمقروء" : "Mark all read"}
               </button>
-              <Link href="/dashboard/notifications" className="text-xs text-muted-foreground hover:text-foreground">
+              <Link
+                href="/dashboard/notifications"
+                className="text-muted-foreground hover:text-foreground text-xs">
                 {t.common.viewAll}
               </Link>
             </div>
@@ -370,7 +409,7 @@ export function DashboardHeaderActions({
           <DropdownMenuSeparator />
           <div className="max-h-[320px] overflow-auto">
             {latest.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground p-6 text-center text-sm">
                 {locale === "ar" ? "لا توجد إشعارات" : "No notifications"}
               </div>
             ) : (
@@ -379,13 +418,12 @@ export function DashboardHeaderActions({
                   <Link
                     href="/dashboard/notifications"
                     className="flex flex-col gap-1 py-3"
-                    onClick={() => markRead(n.id)}
-                  >
+                    onClick={() => markRead(n.id)}>
                     <div className="flex items-center justify-between gap-2">
                       <span className="font-medium">{n.title}</span>
-                      {!n.isRead && <span className="h-2 w-2 rounded-full bg-primary" />}
+                      {!n.isRead && <span className="bg-primary h-2 w-2 rounded-full" />}
                     </div>
-                    <span className="line-clamp-2 text-xs text-muted-foreground">{n.message}</span>
+                    <span className="text-muted-foreground line-clamp-2 text-xs">{n.message}</span>
                   </Link>
                 </DropdownMenuItem>
               ))
@@ -397,12 +435,14 @@ export function DashboardHeaderActions({
       {/* User */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" className="h-9 gap-2 rounded-lg border border-border/70 bg-background/75 px-2 shadow-sm hover:bg-accent/80">
+          <Button
+            variant="ghost"
+            className="border-border/70 bg-background/75 hover:bg-accent/80 h-9 gap-2 rounded-lg border px-2 shadow-sm">
             <Avatar className="h-7 w-7">
               <AvatarImage src={avatarSrc} alt="User" />
               <AvatarFallback>U</AvatarFallback>
             </Avatar>
-            <span className="hidden md:inline text-sm font-medium">
+            <span className="hidden text-sm font-medium md:inline">
               {userName || (locale === "ar" ? "مستخدم" : "User")}
             </span>
           </Button>
@@ -415,8 +455,10 @@ export function DashboardHeaderActions({
                 <AvatarFallback className="rounded-lg">U</AvatarFallback>
               </Avatar>
               <div className="min-w-0">
-                <div className="truncate text-sm font-semibold">{userName || (locale === "ar" ? "مستخدم" : "User")}</div>
-                <div className="truncate text-xs text-muted-foreground">{userEmail || ""}</div>
+                <div className="truncate text-sm font-semibold">
+                  {userName || (locale === "ar" ? "مستخدم" : "User")}
+                </div>
+                <div className="text-muted-foreground truncate text-xs">{userEmail || ""}</div>
               </div>
             </div>
           </DropdownMenuLabel>
@@ -433,8 +475,7 @@ export function DashboardHeaderActions({
                 onSelect={(e: Event) => {
                   e.preventDefault();
                   exitTenantContext();
-                }}
-              >
+                }}>
                 <ChevronLeft className="me-2 h-4 w-4" />
                 {locale === "ar" ? "الرجوع للوحة السوبر أدمن" : "Back to Super Admin"}
               </DropdownMenuItem>
@@ -455,8 +496,7 @@ export function DashboardHeaderActions({
               onSelect={(e: Event) => {
                 e.preventDefault();
                 toggleTheme();
-              }}
-            >
+              }}>
               <span className="inline-flex items-center gap-2">
                 {theme === "dark" ? (
                   <Sun className="me-2 h-4 w-4" />
@@ -464,23 +504,33 @@ export function DashboardHeaderActions({
                   <Moon className="me-2 h-4 w-4" />
                 )}
                 {theme === "dark"
-                  ? locale === "ar" ? "الوضع النهاري" : "Light Mode"
-                  : locale === "ar" ? "الوضع الليلي" : "Dark Mode"
-                }
+                  ? locale === "ar"
+                    ? "الوضع النهاري"
+                    : "Light Mode"
+                  : locale === "ar"
+                    ? "الوضع الليلي"
+                    : "Dark Mode"}
               </span>
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={(e: Event) => {
                 e.preventDefault();
                 toggleLocale();
-              }}
-            >
+              }}>
               <span className="inline-flex items-center gap-2">
                 {/* Mini pill showing current locale */}
-                <span dir="ltr" className="inline-flex h-5 w-[42px] shrink-0 items-center rounded-full bg-muted ring-1 ring-border/50 px-0.5">
-                  <span className={`flex-1 text-center text-[9px] font-bold ${locale === "ar" ? "text-foreground" : "text-muted-foreground/40"}`}>AR</span>
-                  <span className="mx-0.5 h-3 w-px bg-border/60" />
-                  <span className={`flex-1 text-center text-[9px] font-bold ${locale === "en" ? "text-foreground" : "text-muted-foreground/40"}`}>EN</span>
+                <span
+                  dir="ltr"
+                  className="bg-muted ring-border/50 inline-flex h-5 w-[42px] shrink-0 items-center rounded-full px-0.5 ring-1">
+                  <span
+                    className={`flex-1 text-center text-[9px] font-bold ${locale === "ar" ? "text-foreground" : "text-muted-foreground/40"}`}>
+                    AR
+                  </span>
+                  <span className="bg-border/60 mx-0.5 h-3 w-px" />
+                  <span
+                    className={`flex-1 text-center text-[9px] font-bold ${locale === "en" ? "text-foreground" : "text-muted-foreground/40"}`}>
+                    EN
+                  </span>
                 </span>
                 {locale === "ar" ? "English" : "العربية"}
               </span>
@@ -491,8 +541,7 @@ export function DashboardHeaderActions({
             onSelect={(e: Event) => {
               e.preventDefault();
               logout();
-            }}
-          >
+            }}>
             <LogOut className="me-2 h-4 w-4" />
             {t.common.logout}
           </DropdownMenuItem>

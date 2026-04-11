@@ -15,24 +15,18 @@ const branchUpdateSchema = z.object({
   phone: z.string().optional().nullable(),
   email: z.string().email("البريد غير صالح").optional().nullable().or(z.literal("")),
   isHeadquarters: z.boolean().optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean().optional()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single branch
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -51,61 +45,46 @@ export async function GET(
             lastNameAr: true,
             employeeNumber: true,
             jobTitle: { select: { name: true, nameAr: true } },
-            avatar: true,
+            avatar: true
           },
-          take: 10,
+          take: 10
         },
         _count: {
           select: {
-            employees: { where: { status: "ACTIVE" } },
-          },
-        },
-      },
+            employees: { where: { status: "ACTIVE" } }
+          }
+        }
+      }
     });
 
     if (!branch) {
-      return NextResponse.json(
-        { error: "الفرع غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الفرع غير موجود" }, { status: 404 });
     }
 
     return NextResponse.json({
       ...branch,
       employeesCount: branch._count.employees,
-      _count: undefined,
+      _count: undefined
     });
   } catch (error) {
     console.error("Error fetching branch:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات الفرع" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات الفرع" }, { status: 500 });
   }
 }
 
 // PATCH - Update branch
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية تعديل الفرع" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية تعديل الفرع" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -114,14 +93,11 @@ export async function PATCH(
 
     // Check branch exists and belongs to tenant
     const existingBranch = await prisma.branch.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingBranch) {
-      return NextResponse.json(
-        { error: "الفرع غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الفرع غير موجود" }, { status: 404 });
     }
 
     // Validate
@@ -131,7 +107,7 @@ export async function PATCH(
     if (validatedData.isHeadquarters) {
       await prisma.branch.updateMany({
         where: { tenantId, isHeadquarters: true, id: { not: id } },
-        data: { isHeadquarters: false },
+        data: { isHeadquarters: false }
       });
     }
 
@@ -140,53 +116,41 @@ export async function PATCH(
       where: { id },
       data: {
         ...validatedData,
-        updatedAt: new Date(),
-      },
+        updatedAt: new Date()
+      }
     });
 
     return NextResponse.json({
       message: "تم تحديث الفرع بنجاح",
-      branch: updatedBranch,
+      branch: updatedBranch
     });
   } catch (error) {
     console.error("Error updating branch:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث الفرع" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث الفرع" }, { status: 500 });
   }
 }
 
 // DELETE - Delete branch
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف الفرع" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف الفرع" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -197,16 +161,13 @@ export async function DELETE(
       where: { id, tenantId },
       include: {
         _count: {
-          select: { employees: true },
-        },
-      },
+          select: { employees: true }
+        }
+      }
     });
 
     if (!branch) {
-      return NextResponse.json(
-        { error: "الفرع غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الفرع غير موجود" }, { status: 404 });
     }
 
     // Cannot delete if has employees
@@ -219,25 +180,19 @@ export async function DELETE(
 
     // Cannot delete headquarters
     if (branch.isHeadquarters) {
-      return NextResponse.json(
-        { error: "لا يمكن حذف المقر الرئيسي" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف المقر الرئيسي" }, { status: 400 });
     }
 
     // Delete branch
     await prisma.branch.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف الفرع بنجاح",
+      message: "تم حذف الفرع بنجاح"
     });
   } catch (error) {
     console.error("Error deleting branch:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف الفرع" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف الفرع" }, { status: 500 });
   }
 }

@@ -12,7 +12,7 @@ import {
   IconMinus,
   IconTarget,
   IconStarFilled,
-  IconLoader,
+  IconLoader
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,14 +33,10 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  defaultPerformanceRatings,
-  formatScore,
-  getRatingByScore,
-} from "@/lib/types/performance";
+import { defaultPerformanceRatings, formatScore, getRatingByScore } from "@/lib/types/performance";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -139,9 +135,7 @@ function buildCsv(rows: Array<Record<string, string | number>>) {
 
   for (const row of rows) {
     csvRows.push(
-      headers
-        .map((header) => `"${String(row[header] ?? "").replaceAll('"', '""')}"`)
-        .join(",")
+      headers.map((header) => `"${String(row[header] ?? "").replaceAll('"', '""')}"`).join(",")
     );
   }
 
@@ -205,13 +199,13 @@ export function PerformanceReportsManager() {
       const [cyclesRes, evaluationsRes, goalsRes] = await Promise.all([
         fetch("/api/performance/cycles", { cache: "no-store" }),
         fetch("/api/performance/evaluations", { cache: "no-store" }),
-        fetch("/api/performance/goals", { cache: "no-store" }),
+        fetch("/api/performance/goals", { cache: "no-store" })
       ]);
 
       const [cyclesData, evaluationsData, goalsData] = await Promise.all([
         cyclesRes.json(),
         evaluationsRes.json(),
-        goalsRes.json(),
+        goalsRes.json()
       ]);
 
       if (!cyclesRes.ok || !evaluationsRes.ok || !goalsRes.ok) {
@@ -239,17 +233,20 @@ export function PerformanceReportsManager() {
 
   const departmentOptions = React.useMemo(() => {
     return Array.from(
-      new Set([
-        ...evaluations.map((evaluation) => evaluation.department),
-        ...goals.map((goal) => goal.department),
-      ].filter(Boolean))
+      new Set(
+        [
+          ...evaluations.map((evaluation) => evaluation.department),
+          ...goals.map((goal) => goal.department)
+        ].filter(Boolean)
+      )
     ).sort((left, right) => left.localeCompare(right, "ar"));
   }, [evaluations, goals]);
 
   const filteredEvaluations = React.useMemo(() => {
     return evaluations.filter((evaluation) => {
       const matchesCycle = selectedCycle === "all" || evaluation.cycleId === selectedCycle;
-      const matchesDepartment = selectedDepartment === "all" || evaluation.department === selectedDepartment;
+      const matchesDepartment =
+        selectedDepartment === "all" || evaluation.department === selectedDepartment;
       const matchesPeriod = isWithinPeriod(evaluation.createdAt, selectedPeriod);
       return matchesCycle && matchesDepartment && matchesPeriod;
     });
@@ -257,14 +254,18 @@ export function PerformanceReportsManager() {
 
   const filteredGoals = React.useMemo(() => {
     return goals.filter((goal) => {
-      const matchesDepartment = selectedDepartment === "all" || goal.department === selectedDepartment;
+      const matchesDepartment =
+        selectedDepartment === "all" || goal.department === selectedDepartment;
       const matchesPeriod = isWithinPeriod(goal.dueDate || goal.createdAt, selectedPeriod);
       return matchesDepartment && matchesPeriod;
     });
   }, [goals, selectedDepartment, selectedPeriod]);
 
   const completedEvaluations = React.useMemo(
-    () => filteredEvaluations.filter((evaluation) => evaluation.status === "completed" && evaluation.overallScore !== undefined),
+    () =>
+      filteredEvaluations.filter(
+        (evaluation) => evaluation.status === "completed" && evaluation.overallScore !== undefined
+      ),
     [filteredEvaluations]
   );
 
@@ -278,7 +279,10 @@ export function PerformanceReportsManager() {
       return 0;
     }
 
-    return completedEvaluations.reduce((sum, evaluation) => sum + (evaluation.overallScore || 0), 0) / completedEvaluations.length;
+    return (
+      completedEvaluations.reduce((sum, evaluation) => sum + (evaluation.overallScore || 0), 0) /
+      completedEvaluations.length
+    );
   }, [completedEvaluations]);
 
   const goalsCompletionRate = React.useMemo(() => {
@@ -291,26 +295,36 @@ export function PerformanceReportsManager() {
 
   const departmentPerformance = React.useMemo<DepartmentReport[]>(() => {
     const departmentNames = Array.from(
-      new Set([
-        ...filteredEvaluations.map((evaluation) => evaluation.department),
-        ...filteredGoals.map((goal) => goal.department),
-      ].filter(Boolean))
+      new Set(
+        [
+          ...filteredEvaluations.map((evaluation) => evaluation.department),
+          ...filteredGoals.map((goal) => goal.department)
+        ].filter(Boolean)
+      )
     );
 
     return departmentNames
       .map((department) => {
-        const departmentEvaluations = completedEvaluations.filter((evaluation) => evaluation.department === department);
+        const departmentEvaluations = completedEvaluations.filter(
+          (evaluation) => evaluation.department === department
+        );
         const departmentGoals = filteredGoals.filter((goal) => goal.department === department);
-        const departmentCompletedGoals = departmentGoals.filter((goal) => goal.status === "completed");
+        const departmentCompletedGoals = departmentGoals.filter(
+          (goal) => goal.status === "completed"
+        );
         const employeeCount = new Set(
           filteredEvaluations
             .filter((evaluation) => evaluation.department === department)
             .map((evaluation) => evaluation.employeeNumber || evaluation.employeeName)
         ).size;
 
-        const departmentAvgScore = departmentEvaluations.length > 0
-          ? departmentEvaluations.reduce((sum, evaluation) => sum + (evaluation.overallScore || 0), 0) / departmentEvaluations.length
-          : 0;
+        const departmentAvgScore =
+          departmentEvaluations.length > 0
+            ? departmentEvaluations.reduce(
+                (sum, evaluation) => sum + (evaluation.overallScore || 0),
+                0
+              ) / departmentEvaluations.length
+            : 0;
 
         let trend: DepartmentReport["trend"] = "stable";
         if (departmentAvgScore > avgScore + 0.15) {
@@ -323,8 +337,11 @@ export function PerformanceReportsManager() {
           department,
           avgScore: departmentAvgScore,
           employees: employeeCount,
-          goalsCompleted: departmentGoals.length > 0 ? Math.round((departmentCompletedGoals.length / departmentGoals.length) * 100) : 0,
-          trend,
+          goalsCompleted:
+            departmentGoals.length > 0
+              ? Math.round((departmentCompletedGoals.length / departmentGoals.length) * 100)
+              : 0,
+          trend
         };
       })
       .sort((left, right) => right.avgScore - left.avgScore);
@@ -348,7 +365,10 @@ export function PerformanceReportsManager() {
       return {
         rating: rating.label,
         count,
-        percentage: completedEvaluations.length > 0 ? Math.round((count / completedEvaluations.length) * 100) : 0,
+        percentage:
+          completedEvaluations.length > 0
+            ? Math.round((count / completedEvaluations.length) * 100)
+            : 0
       };
     });
   }, [completedEvaluations]);
@@ -358,10 +378,11 @@ export function PerformanceReportsManager() {
       return 0;
     }
 
-    const variance = completedEvaluations.reduce((sum, evaluation) => {
-      const diff = (evaluation.overallScore || 0) - avgScore;
-      return sum + diff * diff;
-    }, 0) / completedEvaluations.length;
+    const variance =
+      completedEvaluations.reduce((sum, evaluation) => {
+        const diff = (evaluation.overallScore || 0) - avgScore;
+        return sum + diff * diff;
+      }, 0) / completedEvaluations.length;
 
     return Math.sqrt(variance);
   }, [completedEvaluations, avgScore]);
@@ -398,7 +419,7 @@ export function PerformanceReportsManager() {
         jobTitle: evaluation.jobTitle,
         cycleName: evaluation.cycleName || "",
         overallScore: evaluation.overallScore || 0,
-        rating: getRatingLabel(evaluation.overallScore || 0),
+        rating: getRatingLabel(evaluation.overallScore || 0)
       }))
     );
 
@@ -420,7 +441,7 @@ export function PerformanceReportsManager() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
       )}
@@ -431,7 +452,9 @@ export function PerformanceReportsManager() {
           <p className="text-muted-foreground">{t.perfReports.subtitle}</p>
         </div>
         <Button variant="outline" onClick={handleExport}>
-          <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
+          <IconDownload className="ms-2 h-4 w-4" />
+          {t.common.exportData}
+        </Button>
       </div>
 
       <div className="flex flex-wrap gap-4">
@@ -476,7 +499,7 @@ export function PerformanceReportsManager() {
 
       {loading ? (
         <div className="flex justify-center py-12">
-          <IconLoader className="h-8 w-8 animate-spin text-primary" />
+          <IconLoader className="text-primary h-8 w-8 animate-spin" />
         </div>
       ) : (
         <>
@@ -484,29 +507,35 @@ export function PerformanceReportsManager() {
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconUsers className="h-4 w-4" />{t.perfReports.completedEvaluations}</CardDescription>
+                  <IconUsers className="h-4 w-4" />
+                  {t.perfReports.completedEvaluations}
+                </CardDescription>
                 <CardTitle className="text-3xl">{completedEvaluations.length}</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-sm text-muted-foreground">{t.perfReports.outOf} {filteredEvaluations.length} {t.perfReports.evaluation}</p>
+                <p className="text-muted-foreground text-sm">
+                  {t.perfReports.outOf} {filteredEvaluations.length} {t.perfReports.evaluation}
+                </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconStarFilled className="h-4 w-4" />{t.perfReports.avgScore}</CardDescription>
+                  <IconStarFilled className="h-4 w-4" />
+                  {t.perfReports.avgScore}
+                </CardDescription>
                 <CardTitle className="text-3xl">{formatScore(avgScore)}</CardTitle>
               </CardHeader>
               <CardContent>
-                <Badge className={getRatingBadgeClass(avgScore)}>
-                  {getRatingLabel(avgScore)}
-                </Badge>
+                <Badge className={getRatingBadgeClass(avgScore)}>{getRatingLabel(avgScore)}</Badge>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="pb-2">
                 <CardDescription className="flex items-center gap-2">
-                  <IconTarget className="h-4 w-4" />{t.performanceGoals.completedGoals}</CardDescription>
+                  <IconTarget className="h-4 w-4" />
+                  {t.performanceGoals.completedGoals}
+                </CardDescription>
                 <CardTitle className="text-3xl">{Math.round(goalsCompletionRate)}%</CardTitle>
               </CardHeader>
               <CardContent>
@@ -524,11 +553,13 @@ export function PerformanceReportsManager() {
               <CardContent>
                 {bestDepartment ? (
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-100 text-green-700">{formatScore(bestDepartment.avgScore)}</Badge>
+                    <Badge className="bg-green-100 text-green-700">
+                      {formatScore(bestDepartment.avgScore)}
+                    </Badge>
                     {getTrendIcon(bestDepartment.trend)}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">{t.perfReports.insufficientData}</p>
+                  <p className="text-muted-foreground text-sm">{t.perfReports.insufficientData}</p>
                 )}
               </CardContent>
             </Card>
@@ -557,7 +588,9 @@ export function PerformanceReportsManager() {
                         <div key={item.rating} className="space-y-1">
                           <div className="flex items-center justify-between text-sm">
                             <span>{item.rating}</span>
-                            <span className="font-medium">{item.count} ({item.percentage}%)</span>
+                            <span className="font-medium">
+                              {item.count} ({item.percentage}%)
+                            </span>
                           </div>
                           <Progress value={item.percentage} className="h-2" />
                         </div>
@@ -576,9 +609,25 @@ export function PerformanceReportsManager() {
                   <CardContent>
                     <div className="space-y-4">
                       {[
-                        { label: t.perfReports.completedGoals, value: completedGoals.length, total: filteredGoals.length, color: "bg-green-500" },
-                        { label: t.common.inProgress, value: filteredGoals.filter((goal) => goal.status === "in-progress").length, total: filteredGoals.length, color: "bg-blue-500" },
-                        { label: t.perfReports.overdue, value: filteredGoals.filter((goal) => goal.status === "overdue").length, total: filteredGoals.length, color: "bg-red-500" },
+                        {
+                          label: t.perfReports.completedGoals,
+                          value: completedGoals.length,
+                          total: filteredGoals.length,
+                          color: "bg-green-500"
+                        },
+                        {
+                          label: t.common.inProgress,
+                          value: filteredGoals.filter((goal) => goal.status === "in-progress")
+                            .length,
+                          total: filteredGoals.length,
+                          color: "bg-blue-500"
+                        },
+                        {
+                          label: t.perfReports.overdue,
+                          value: filteredGoals.filter((goal) => goal.status === "overdue").length,
+                          total: filteredGoals.length,
+                          color: "bg-red-500"
+                        }
                       ].map((item) => (
                         <div key={item.label} className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
@@ -587,7 +636,7 @@ export function PerformanceReportsManager() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="font-medium">{item.value}</span>
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-muted-foreground text-sm">
                               ({item.total > 0 ? Math.round((item.value / item.total) * 100) : 0}%)
                             </span>
                           </div>
@@ -622,7 +671,9 @@ export function PerformanceReportsManager() {
                               <div className="flex items-center gap-2">
                                 <Avatar className="h-8 w-8">
                                   <AvatarImage src={evaluation.employeeAvatar} alt="" />
-                                  <AvatarFallback>{evaluation.employeeName.charAt(0)}</AvatarFallback>
+                                  <AvatarFallback>
+                                    {evaluation.employeeName.charAt(0)}
+                                  </AvatarFallback>
                                 </Avatar>
                                 <span>{evaluation.employeeName}</span>
                               </div>
@@ -630,7 +681,9 @@ export function PerformanceReportsManager() {
                             <TableCell>{evaluation.department}</TableCell>
                             <TableCell>{evaluation.cycleName || "-"}</TableCell>
                             <TableCell>
-                              <Badge variant="outline">{formatScore(evaluation.overallScore || 0)}</Badge>
+                              <Badge variant="outline">
+                                {formatScore(evaluation.overallScore || 0)}
+                              </Badge>
                             </TableCell>
                             <TableCell>
                               <Badge className={getRatingBadgeClass(evaluation.overallScore || 0)}>
@@ -673,7 +726,9 @@ export function PerformanceReportsManager() {
                               <Badge className={getRatingBadgeClass(department.avgScore)}>
                                 {formatScore(department.avgScore)}
                               </Badge>
-                              <span className="text-sm text-muted-foreground">{getRatingLabel(department.avgScore)}</span>
+                              <span className="text-muted-foreground text-sm">
+                                {getRatingLabel(department.avgScore)}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -700,9 +755,11 @@ export function PerformanceReportsManager() {
                 <CardContent>
                   <div className="space-y-4">
                     {topPerformers.map((performer, index) => (
-                      <div key={performer.id} className="flex items-center justify-between rounded-lg border p-4">
+                      <div
+                        key={performer.id}
+                        className="flex items-center justify-between rounded-lg border p-4">
                         <div className="flex items-center gap-4">
-                          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted font-bold">
+                          <div className="bg-muted flex h-8 w-8 items-center justify-center rounded-full font-bold">
                             {index + 1}
                           </div>
                           <Avatar className="h-10 w-10">
@@ -711,7 +768,9 @@ export function PerformanceReportsManager() {
                           </Avatar>
                           <div>
                             <p className="font-medium">{performer.employeeName}</p>
-                            <p className="text-sm text-muted-foreground">{performer.jobTitle} - {performer.department}</p>
+                            <p className="text-muted-foreground text-sm">
+                              {performer.jobTitle} - {performer.department}
+                            </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
@@ -719,11 +778,12 @@ export function PerformanceReportsManager() {
                             {[1, 2, 3, 4, 5].map((star) => (
                               <IconStarFilled
                                 key={star}
-                                className={`h-4 w-4 ${star <= Math.round((performer.overallScore || 0)) ? "text-yellow-500" : "text-gray-300"}`}
+                                className={`h-4 w-4 ${star <= Math.round(performer.overallScore || 0) ? "text-yellow-500" : "text-gray-300"}`}
                               />
                             ))}
                           </div>
-                          <Badge className={`px-3 text-lg ${getRatingBadgeClass(performer.overallScore || 0)}`}>
+                          <Badge
+                            className={`px-3 text-lg ${getRatingBadgeClass(performer.overallScore || 0)}`}>
                             {formatScore(performer.overallScore || 0)}
                           </Badge>
                         </div>
@@ -750,22 +810,31 @@ export function PerformanceReportsManager() {
                             evaluation.overallScore >= rating.minScore &&
                             evaluation.overallScore <= rating.maxScore
                         ).length;
-                        const percentage = completedEvaluations.length > 0 ? (count / completedEvaluations.length) * 100 : 0;
+                        const percentage =
+                          completedEvaluations.length > 0
+                            ? (count / completedEvaluations.length) * 100
+                            : 0;
 
                         return (
                           <div key={rating.label} className="space-y-2">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`h-4 w-4 rounded ${getRatingSwatchClass(rating.color)}`} />
+                                <div
+                                  className={`h-4 w-4 rounded ${getRatingSwatchClass(rating.color)}`}
+                                />
                                 <span className="font-medium">{rating.label}</span>
                               </div>
                               <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground">{count} {t.perfReports.employeeCount}</span>
+                                <span className="text-muted-foreground">
+                                  {count} {t.perfReports.employeeCount}
+                                </span>
                                 <Badge variant="outline">{Math.round(percentage)}%</Badge>
                               </div>
                             </div>
                             <Progress value={percentage} className="h-3" />
-                            <p className="text-xs text-muted-foreground">{t.perfReports.range} {rating.minScore} - {rating.maxScore}</p>
+                            <p className="text-muted-foreground text-xs">
+                              {t.perfReports.range} {rating.minScore} - {rating.maxScore}
+                            </p>
                           </div>
                         );
                       })}
@@ -779,36 +848,60 @@ export function PerformanceReportsManager() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.highestEval}</span>
                         <Badge className="bg-green-100 text-green-700">
-                          {formatScore(Math.max(...completedEvaluations.map((evaluation) => evaluation.overallScore || 0), 0))}
+                          {formatScore(
+                            Math.max(
+                              ...completedEvaluations.map(
+                                (evaluation) => evaluation.overallScore || 0
+                              ),
+                              0
+                            )
+                          )}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.lowestEval}</span>
                         <Badge className="bg-red-100 text-red-700">
-                          {formatScore(Math.min(...completedEvaluations.map((evaluation) => evaluation.overallScore || 0), completedEvaluations.length > 0 ? completedEvaluations[0].overallScore || 0 : 0))}
+                          {formatScore(
+                            Math.min(
+                              ...completedEvaluations.map(
+                                (evaluation) => evaluation.overallScore || 0
+                              ),
+                              completedEvaluations.length > 0
+                                ? completedEvaluations[0].overallScore || 0
+                                : 0
+                            )
+                          )}
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.average}</span>
                         <Badge className="bg-blue-100 text-blue-700">{formatScore(avgScore)}</Badge>
                       </div>
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.stdDeviation}</span>
                         <Badge variant="outline">{formatScore(scoreDeviation)}</Badge>
                       </div>
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.aboveAverage}</span>
                         <Badge className="bg-green-100 text-green-700">
-                          {completedEvaluations.filter((evaluation) => (evaluation.overallScore || 0) >= avgScore).length}
+                          {
+                            completedEvaluations.filter(
+                              (evaluation) => (evaluation.overallScore || 0) >= avgScore
+                            ).length
+                          }
                         </Badge>
                       </div>
-                      <div className="flex items-center justify-between rounded-lg bg-muted p-3">
+                      <div className="bg-muted flex items-center justify-between rounded-lg p-3">
                         <span>{t.perfReports.belowAverage}</span>
                         <Badge className="bg-orange-100 text-orange-700">
-                          {completedEvaluations.filter((evaluation) => (evaluation.overallScore || 0) < avgScore).length}
+                          {
+                            completedEvaluations.filter(
+                              (evaluation) => (evaluation.overallScore || 0) < avgScore
+                            ).length
+                          }
                         </Badge>
                       </div>
                     </div>

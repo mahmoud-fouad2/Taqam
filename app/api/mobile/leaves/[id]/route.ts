@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -17,7 +18,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
   try {
     const leave = await prisma.leaveRequest.findFirst({
-      where: { id, tenantId, employeeId },
+      where: { id, tenantId, employeeId }
     });
 
     if (!leave) {
@@ -27,14 +28,14 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     if (leave.status !== "PENDING") {
       return NextResponse.json(
         { error: "Only pending requests can be cancelled" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     await prisma.$transaction(async (tx) => {
       await tx.leaveRequest.update({
         where: { id },
-        data: { status: "CANCELLED" },
+        data: { status: "CANCELLED" }
       });
 
       // Decrement pending days from balance
@@ -43,17 +44,17 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
           tenantId,
           employeeId,
           leaveTypeId: leave.leaveTypeId,
-          year: leave.startDate.getFullYear(),
+          year: leave.startDate.getFullYear()
         },
         data: {
-          pending: { decrement: leave.totalDays },
-        },
+          pending: { decrement: leave.totalDays }
+        }
       });
     });
 
     return NextResponse.json({ data: { success: true } });
   } catch (error) {
-    console.error("Mobile leave cancel error:", error);
+    logger.error("Mobile leave cancel error", undefined, error);
     return NextResponse.json({ error: "Failed to cancel request" }, { status: 500 });
   }
 }

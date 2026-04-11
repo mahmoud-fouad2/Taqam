@@ -25,7 +25,7 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
   const locale = headerLocale === "en" || headerLocale === "ar" ? headerLocale : localeFromCookie;
   const title = locale === "ar" ? copy.titleAr : copy.titleEn;
   const description = locale === "ar" ? copy.descriptionAr : copy.descriptionEn;
-  const pageKeywords = locale === "ar" ? copy.keywordsAr ?? [] : copy.keywordsEn ?? [];
+  const pageKeywords = locale === "ar" ? (copy.keywordsAr ?? []) : (copy.keywordsEn ?? []);
   const section = locale === "ar" ? copy.sectionAr : copy.sectionEn;
   const noIndex = copy.noIndex === true;
 
@@ -44,8 +44,8 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       canonical: url,
       languages: {
         "ar-SA": urlAr,
-        "en-US": urlEn,
-      },
+        "en-US": urlEn
+      }
     },
     keywords: [
       "HR",
@@ -63,15 +63,18 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       "نظام HR سعودي",
       "HR software Saudi",
       "حضور وانصراف",
-      ...pageKeywords,
+      ...pageKeywords
     ],
     category: section ?? (locale === "ar" ? "منصة موارد بشرية سعودية" : "Saudi HR platform"),
-    classification: locale === "ar" ? "إدارة الموارد البشرية والرواتب والحضور" : "HR, payroll, and attendance software",
+    classification:
+      locale === "ar"
+        ? "إدارة الموارد البشرية والرواتب والحضور"
+        : "HR, payroll, and attendance software",
     referrer: "origin-when-cross-origin",
     formatDetection: {
       email: false,
       address: false,
-      telephone: false,
+      telephone: false
     },
     openGraph: {
       type: "website",
@@ -86,15 +89,15 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
           url: `${base}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: `${title} | Taqam`,
-        },
-      ],
+          alt: `${title} | Taqam`
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: [`${base}/twitter-image`],
+      images: [`${base}/twitter-image`]
     },
     robots: {
       index: !noIndex,
@@ -106,8 +109,8 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
         noimageindex: noIndex,
         "max-image-preview": noIndex ? "none" : "large",
         "max-snippet": noIndex ? 0 : -1,
-        "max-video-preview": noIndex ? 0 : -1,
-      },
+        "max-video-preview": noIndex ? 0 : -1
+      }
     },
     authors: [{ name: "Taqam" }],
     creator: "Taqam",
@@ -116,7 +119,7 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       "application-name": "Taqam",
       "apple-mobile-web-app-title": "Taqam",
       "theme-color": "#ffffff",
-      "color-scheme": "light dark",
-    },
+      "color-scheme": "light dark"
+    }
   };
 }

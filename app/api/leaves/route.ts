@@ -3,9 +3,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  parsePagination,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { notifyLeaveRequestSubmitted } from "@/lib/notifications/send";
 import { z } from "zod";
 
@@ -17,7 +22,7 @@ const createLeaveSchema = z.object({
   isHalfDay: z.boolean().optional(),
   reason: z.string().optional(),
   attachmentUrl: z.string().optional(),
-  delegateToId: z.string().optional(),
+  delegateToId: z.string().optional()
 });
 
 function isSuperAdmin(role: string | undefined) {
@@ -29,7 +34,9 @@ function mapLeaveRequest(r: any) {
 }
 
 function canManageLeaveRequests(role: string | undefined) {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+  return (
+    role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER"
+  );
 }
 
 function canCreateLeaveForOthers(role: string | undefined) {
@@ -38,15 +45,12 @@ function canCreateLeaveForOthers(role: string | undefined) {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const limit = parseInt(searchParams.get("limit") || "20");
+    const { page, limit, skip } = parsePagination(searchParams);
     const employeeId = searchParams.get("employeeId");
     const status = searchParams.get("status");
     const yearParam = searchParams.get("year");
@@ -54,11 +58,11 @@ export async function GET(request: NextRequest) {
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+      return errorResponse("Tenant required", 400);
     }
 
     const where: any = {};
@@ -67,29 +71,31 @@ export async function GET(request: NextRequest) {
 
     const requesterEmployee = await prisma.employee.findFirst({
       where: { tenantId, userId: session.user.id },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (session.user.role === "MANAGER") {
       if (!requesterEmployee) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
-      
-      const allowedFilters: any[] = [{ employeeId: requesterEmployee.id }, { employee: { managerId: requesterEmployee.id } }];
-      
+
+      const allowedFilters: any[] = [
+        { employeeId: requesterEmployee.id },
+        { employee: { managerId: requesterEmployee.id } }
+      ];
+
       if (employeeId) {
         where.employeeId = employeeId;
       }
-      
+
       where.OR = allowedFilters;
-      
     } else if (!canManageLeaveRequests(session.user.role)) {
       if (!requesterEmployee) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
 
       if (employeeId && employeeId !== requesterEmployee.id) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
 
       where.employeeId = requesterEmployee.id;
@@ -122,17 +128,17 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               department: {
-                select: { name: true },
-              },
-            },
+                select: { name: true }
+              }
+            }
           },
-          leaveType: true,
+          leaveType: true
         },
-        skip: (page - 1) * limit,
+        skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "desc" }
       }),
-      prisma.leaveRequest.count({ where }),
+      prisma.leaveRequest.count({ where })
     ]);
 
     return NextResponse.json({
@@ -141,54 +147,49 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
-      },
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
-    console.error("Error fetching leave requests:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leave requests" },
-      { status: 500 }
-    );
+    logApiError("Error fetching leave requests", error);
+    return errorResponse("Failed to fetch leave requests");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const tenantId = session.user.tenantId;
-    
+
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+      return errorResponse("Tenant required", 400);
     }
 
     const rawBody = await request.json();
     const parsed = createLeaveSchema.safeParse(rawBody);
     if (!parsed.success) {
-      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
+      return errorResponse("بيانات غير صالحة", 400, { details: parsed.error.flatten() });
     }
     const body = parsed.data;
 
     if (!canCreateLeaveForOthers(session.user.role)) {
       const requesterEmployee = await prisma.employee.findFirst({
         where: { tenantId, userId: session.user.id },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!requesterEmployee || requesterEmployee.id !== body.employeeId) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
     }
 
     const startDate = new Date(body.startDate);
     const endDate = new Date(body.endDate);
     if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
-      return NextResponse.json({ error: "Invalid dates" }, { status: 400 });
+      return errorResponse("Invalid dates", 400);
     }
 
     const isHalfDay = Boolean(body.isHalfDay);
@@ -212,7 +213,7 @@ export async function POST(request: NextRequest) {
           reason: body.reason,
           attachmentUrl: body.attachmentUrl,
           delegateToId: body.delegateToId,
-          status: "PENDING",
+          status: "PENDING"
         },
         include: {
           employee: {
@@ -224,18 +225,18 @@ export async function POST(request: NextRequest) {
               lastNameAr: true,
               manager: {
                 select: {
-                  userId: true,
-                },
-              },
-            },
+                  userId: true
+                }
+              }
+            }
           },
           leaveType: {
             select: {
               name: true,
-              nameAr: true,
-            },
-          },
-        },
+              nameAr: true
+            }
+          }
+        }
       });
 
       // Track pending in balance (create if missing)
@@ -244,19 +245,19 @@ export async function POST(request: NextRequest) {
           employeeId_leaveTypeId_year: {
             employeeId: created.employeeId,
             leaveTypeId: created.leaveTypeId,
-            year,
-          },
+            year
+          }
         },
         update: {
-          pending: { increment: totalDays },
+          pending: { increment: totalDays }
         },
         create: {
           tenantId,
           employeeId: created.employeeId,
           leaveTypeId: created.leaveTypeId,
           year,
-          pending: totalDays,
-        },
+          pending: totalDays
+        }
       });
 
       return created;
@@ -266,21 +267,17 @@ export async function POST(request: NextRequest) {
       await notifyLeaveRequestSubmitted({
         tenantId,
         managerUserId: leaveRequest.employee.manager.userId,
-        employeeName:
-          `${leaveRequest.employee.firstNameAr || leaveRequest.employee.firstName} ${leaveRequest.employee.lastNameAr || leaveRequest.employee.lastName}`,
+        employeeName: `${leaveRequest.employee.firstNameAr || leaveRequest.employee.firstName} ${leaveRequest.employee.lastNameAr || leaveRequest.employee.lastName}`,
         leaveType: leaveRequest.leaveType.nameAr || leaveRequest.leaveType.name,
         startDate: startDate.toISOString().split("T")[0] ?? "",
         endDate: endDate.toISOString().split("T")[0] ?? "",
-        requestId: leaveRequest.id,
+        requestId: leaveRequest.id
       });
     }
 
-    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) }, { status: 201 });
+    return dataResponse(mapLeaveRequest(leaveRequest), 201);
   } catch (error) {
-    console.error("Error creating leave request:", error);
-    return NextResponse.json(
-      { error: "Failed to create leave request" },
-      { status: 500 }
-    );
+    logApiError("Error creating leave request", error);
+    return errorResponse("Failed to create leave request");
   }
 }

@@ -13,16 +13,17 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     const url = new URL(request.url);
     const formatParam = (url.searchParams.get("format") || "csv").toLowerCase();
-    const format = (formatParam === "wps" || formatParam === "sarie" || formatParam === "csv")
-      ? formatParam
-      : "csv";
+    const format =
+      formatParam === "wps" || formatParam === "sarie" || formatParam === "csv"
+        ? formatParam
+        : "csv";
     const result = await listPayslipsForPeriod(tenantId, id);
     if (!result.period) {
       return NextResponse.json({ error: "Payroll period not found" }, { status: 404 });
     }
 
     const paymentDate = result.period.paymentDate
-      ? result.period.paymentDate.toISOString().split("T")[0] ?? ""
+      ? (result.period.paymentDate.toISOString().split("T")[0] ?? "")
       : "";
 
     const missingAccount = result.payslips.filter(
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
         {
           error: "Missing bank account numbers for some employees",
           details: {
-            employeeNumbers: missingAccount.map((p) => p.employeeNumber),
-          },
+            employeeNumbers: missingAccount.map((p) => p.employeeNumber)
+          }
         },
         { status: 400 }
       );
@@ -50,19 +51,26 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
               payslip.employeeName,
               payslip.accountNumber || "",
               payslip.netSalary,
-              paymentDate,
+              paymentDate
             ])
           )
         : format === "sarie"
           ? buildCsv(
-              ["beneficiaryName", "beneficiaryAccount", "amount", "currency", "paymentDate", "reference"],
+              [
+                "beneficiaryName",
+                "beneficiaryAccount",
+                "amount",
+                "currency",
+                "paymentDate",
+                "reference"
+              ],
               result.payslips.map((payslip) => [
                 payslip.employeeName,
                 payslip.accountNumber || "",
                 payslip.netSalary,
                 payslip.currency,
                 paymentDate,
-                result.period.name || result.period.id,
+                result.period.name || result.period.id
               ])
             )
           : buildCsv(
@@ -74,7 +82,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 "paymentMethod",
                 "netSalary",
                 "currency",
-                "paymentDate",
+                "paymentDate"
               ],
               result.payslips.map((payslip) => [
                 payslip.employeeNumber,
@@ -84,15 +92,15 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
                 payslip.paymentMethod,
                 payslip.netSalary,
                 payslip.currency,
-                paymentDate,
+                paymentDate
               ])
             );
 
     return new NextResponse(`\ufeff${csv}`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${sanitizeFilename(`bank-file-${result.period.name || result.period.id}-${format}`)}.csv"`,
-      },
+        "Content-Disposition": `attachment; filename="${sanitizeFilename(`bank-file-${result.period.name || result.period.id}-${format}`)}.csv"`
+      }
     });
   } catch (error) {
     console.error("Error generating bank file:", error);

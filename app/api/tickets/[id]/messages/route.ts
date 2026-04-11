@@ -5,7 +5,7 @@ import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const createMessageSchema = z.object({
   body: z.string().min(1).max(5000),
-  isInternal: z.boolean().optional().default(false),
+  isInternal: z.boolean().optional().default(false)
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +21,10 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     const body = await request.json();
     const parsed = createMessageSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const ticket = await prisma.supportTicket.findUnique({ where: { id } });
@@ -45,16 +48,16 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         ticketId: id,
         senderId: session.user.id,
         body: parsed.data.body,
-        isInternal: superAdmin ? parsed.data.isInternal : false,
+        isInternal: superAdmin ? parsed.data.isInternal : false
       },
       include: {
-        sender: { select: { id: true, firstName: true, lastName: true, email: true, role: true } },
-      },
+        sender: { select: { id: true, firstName: true, lastName: true, email: true, role: true } }
+      }
     });
 
     await prisma.supportTicket.update({
       where: { id },
-      data: { lastMessageAt: now },
+      data: { lastMessageAt: now }
     });
 
     return NextResponse.json({ data: message }, { status: 201 });

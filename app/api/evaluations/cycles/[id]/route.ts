@@ -15,24 +15,18 @@ const cycleUpdateSchema = z.object({
   status: z.enum(["DRAFT", "ACTIVE", "COMPLETED", "CANCELLED"]).optional(),
   templateId: z.string().optional().nullable(),
   targetDepartments: z.array(z.string()).optional(),
-  targetEmployees: z.array(z.string()).optional(),
+  targetEmployees: z.array(z.string()).optional()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single cycle with evaluations
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -53,8 +47,8 @@ export async function GET(
                 employeeNumber: true,
                 avatar: true,
                 department: { select: { name: true, nameAr: true } },
-                jobTitle: { select: { name: true, nameAr: true } },
-              },
+                jobTitle: { select: { name: true, nameAr: true } }
+              }
             },
             evaluator: {
               select: {
@@ -62,59 +56,44 @@ export async function GET(
                 firstName: true,
                 lastName: true,
                 firstNameAr: true,
-                lastNameAr: true,
-              },
-            },
-          },
+                lastNameAr: true
+              }
+            }
+          }
         },
         createdByUser: {
           select: {
             firstName: true,
-            lastName: true,
-          },
-        },
-      },
+            lastName: true
+          }
+        }
+      }
     });
 
     if (!cycle) {
-      return NextResponse.json(
-        { error: "دورة التقييم غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "دورة التقييم غير موجودة" }, { status: 404 });
     }
 
     return NextResponse.json(cycle);
   } catch (error) {
     console.error("Error fetching cycle:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات الدورة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات الدورة" }, { status: 500 });
   }
 }
 
 // PATCH - Update cycle
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية تعديل دورة التقييم" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية تعديل دورة التقييم" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -123,14 +102,11 @@ export async function PATCH(
 
     // Check cycle exists
     const existingCycle = await prisma.evaluationCycle.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingCycle) {
-      return NextResponse.json(
-        { error: "دورة التقييم غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "دورة التقييم غير موجودة" }, { status: 404 });
     }
 
     // Validate
@@ -151,52 +127,40 @@ export async function PATCH(
     // Update
     const updatedCycle = await prisma.evaluationCycle.update({
       where: { id },
-      data: updateData,
+      data: updateData
     });
 
     return NextResponse.json({
       message: "تم تحديث الدورة بنجاح",
-      cycle: updatedCycle,
+      cycle: updatedCycle
     });
   } catch (error) {
     console.error("Error updating cycle:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث الدورة" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث الدورة" }, { status: 500 });
   }
 }
 
 // DELETE - Delete cycle
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف دورة التقييم" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف دورة التقييم" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -206,15 +170,12 @@ export async function DELETE(
     const cycle = await prisma.evaluationCycle.findFirst({
       where: { id, tenantId },
       include: {
-        _count: { select: { evaluations: true } },
-      },
+        _count: { select: { evaluations: true } }
+      }
     });
 
     if (!cycle) {
-      return NextResponse.json(
-        { error: "دورة التقييم غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "دورة التقييم غير موجودة" }, { status: 404 });
     }
 
     // Cannot delete completed cycles with evaluations
@@ -227,17 +188,14 @@ export async function DELETE(
 
     // Delete cycle (cascades to evaluations)
     await prisma.evaluationCycle.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف الدورة بنجاح",
+      message: "تم حذف الدورة بنجاح"
     });
   } catch (error) {
     console.error("Error deleting cycle:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف الدورة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف الدورة" }, { status: 500 });
   }
 }

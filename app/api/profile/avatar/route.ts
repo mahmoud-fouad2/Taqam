@@ -4,18 +4,16 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { dataResponse, errorResponse, logApiError, requireSession } from "@/lib/api/route-helper";
 
 import prisma from "@/lib/db";
-import { authOptions } from "@/lib/auth";
 import { isR2Configured, uploadFile } from "@/lib/r2-storage";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const formData = await request.formData();
     const file = formData.get("file");
@@ -40,7 +38,7 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const tenantId = (session.user as any).tenantId || "platform";
+    const tenantId = session.user.tenantId || "platform";
 
     const result = await uploadFile(buffer, file.name, file.type, tenantId, "avatars");
     if (!result.success || !result.url) {
@@ -50,12 +48,12 @@ export async function POST(request: NextRequest) {
     const updated = await prisma.user.update({
       where: { id: session.user.id },
       data: { avatar: result.url },
-      select: { id: true, avatar: true, firstName: true, lastName: true, email: true },
+      select: { id: true, avatar: true, firstName: true, lastName: true, email: true }
     });
 
-    return NextResponse.json({ data: { url: updated.avatar, user: updated } });
+    return dataResponse({ url: updated.avatar, user: updated });
   } catch (error) {
-    console.error("Error uploading avatar:", error);
-    return NextResponse.json({ error: "Failed to upload avatar" }, { status: 500 });
+    logApiError("Error uploading avatar", error);
+    return errorResponse("Failed to upload avatar");
   }
 }

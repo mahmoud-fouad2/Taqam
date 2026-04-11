@@ -36,10 +36,10 @@ export async function GET(request: NextRequest) {
           id: period.id,
           startDate: toIsoDate(period.startDate),
           endDate: toIsoDate(period.endDate),
-          paymentDate: toIsoDate(period.paymentDate),
+          paymentDate: toIsoDate(period.paymentDate)
         },
-        payslips: result.payslips,
-      },
+        payslips: result.payslips
+      }
     });
   } catch (error) {
     console.error("Error loading payslips:", error);
@@ -53,9 +53,7 @@ export async function POST(request: NextRequest) {
     if (!auth.ok) return auth.response;
     const { tenantId } = auth;
 
-    const body = (await request.json().catch(() => null)) as
-      | { periodId?: string }
-      | null;
+    const body = (await request.json().catch(() => null)) as { periodId?: string } | null;
 
     const periodId = body?.periodId || "";
     if (!periodId) {
@@ -67,9 +65,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Payroll period not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: { updatedCount: result.updatedCount } });
+    return NextResponse.json({
+      data: {
+        updatedCount: result.updatedCount,
+        sent: result.sentCount ?? result.updatedCount,
+        failed: result.failedCount ?? 0
+      }
+    });
   } catch (error) {
     console.error("Error sending payslips:", error);
-    return NextResponse.json({ error: "Failed to send payslips" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to send payslips";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

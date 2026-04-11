@@ -22,7 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
   return generateMeta({
     title: locale === "ar" ? "تفاصيل التذكرة" : "Ticket details",
-    description: locale === "ar" ? "عرض تفاصيل تذكرة الدعم." : "View support ticket details.",
+    description: locale === "ar" ? "عرض تفاصيل تذكرة الدعم." : "View support ticket details."
   });
 }
 
@@ -52,9 +52,11 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
       assignedTo: { select: { id: true, firstName: true, lastName: true, email: true } },
       messages: {
         orderBy: { createdAt: "asc" },
-        include: { sender: { select: { id: true, firstName: true, lastName: true, email: true, role: true } } },
-      },
-    },
+        include: {
+          sender: { select: { id: true, firstName: true, lastName: true, email: true, role: true } }
+        }
+      }
+    }
   });
 
   if (!ticket) {
@@ -66,7 +68,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
             <Link href={`${p}/dashboard/support`}>{locale === "ar" ? t.common.back : "Back"}</Link>
           </Button>
         </div>
-        <p className="text-muted-foreground">{locale === "ar" ? "لم يتم العثور على التذكرة." : "Ticket was not found."}</p>
+        <p className="text-muted-foreground">
+          {locale === "ar" ? "لم يتم العثور على التذكرة." : "Ticket was not found."}
+        </p>
       </div>
     );
   }
@@ -76,13 +80,14 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
       <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0">
           <h1 className="truncate text-2xl font-bold">{ticket.subject}</h1>
-          <div className="mt-2 flex flex-wrap gap-2 text-sm text-muted-foreground">
+          <div className="text-muted-foreground mt-2 flex flex-wrap gap-2 text-sm">
             {ticket.category ? <span>{ticket.category}</span> : null}
             <Badge variant="outline">{ticket.priority}</Badge>
             <Badge variant="secondary">{ticket.status}</Badge>
             {isSuperAdmin(user.role) ? (
               <span>
-                {locale === "ar" ? t.common.company : "Tenant:"} {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
+                {locale === "ar" ? t.common.company : "Tenant:"}{" "}
+                {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
               </span>
             ) : null}
           </div>
@@ -97,7 +102,9 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">{locale === "ar" ? "المحادثة" : "Conversation"}</CardTitle>
+          <CardTitle className="text-base">
+            {locale === "ar" ? "المحادثة" : "Conversation"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <TicketThread
@@ -113,8 +120,8 @@ export default async function TicketDetailsPage({ params }: { params: Promise<{ 
                 firstName: m.sender.firstName,
                 lastName: m.sender.lastName,
                 email: m.sender.email,
-                role: m.sender.role,
-              },
+                role: m.sender.role
+              }
             }))}
             canAddInternalNote={isSuperAdmin(user.role)}
           />

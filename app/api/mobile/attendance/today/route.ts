@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 function getTodayDate() {
@@ -19,8 +20,8 @@ export async function GET(request: NextRequest) {
       where: {
         tenantId: payloadOrRes.tenantId,
         employeeId: payloadOrRes.employeeId,
-        date: today,
-      },
+        date: today
+      }
     });
 
     const status = !record?.checkInTime
@@ -38,11 +39,11 @@ export async function GET(request: NextRequest) {
         status,
         canCheckIn,
         canCheckOut,
-        record,
-      },
+        record
+      }
     });
   } catch (error) {
-    console.error("Mobile attendance today error:", error);
+    logger.error("Mobile attendance today error", undefined, error);
     return NextResponse.json({ error: "Failed to load today status" }, { status: 500 });
   }
 }

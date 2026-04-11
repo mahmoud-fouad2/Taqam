@@ -75,7 +75,7 @@ export function getMobileDeviceHeaders(): Record<string, string> {
     "x-device-id": deviceId,
     "x-device-platform": "capacitor-web",
     "x-device-name": "Taqam Mobile",
-    "x-app-version": process.env.NEXT_PUBLIC_APP_VERSION || "web",
+    "x-app-version": process.env.NEXT_PUBLIC_APP_VERSION || "web"
   };
 }
 
@@ -110,9 +110,9 @@ export async function mobileLogin(email: string, password: string): Promise<Mobi
     credentials: "include",
     headers: {
       "content-type": "application/json",
-      ...getMobileDeviceHeaders(),
+      ...getMobileDeviceHeaders()
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password })
   });
 
   const json = await res.json().catch(() => ({}));
@@ -131,15 +131,17 @@ export async function mobileLogin(email: string, password: string): Promise<Mobi
   return data;
 }
 
-async function refreshMobileToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+async function refreshMobileToken(
+  refreshToken: string
+): Promise<{ accessToken: string; refreshToken: string }> {
   const res = await fetch("/api/mobile/auth/refresh", {
     method: "POST",
     credentials: "include",
     headers: {
       "content-type": "application/json",
-      ...getMobileDeviceHeaders(),
+      ...getMobileDeviceHeaders()
     },
-    body: JSON.stringify(refreshToken ? { refreshToken } : {}),
+    body: JSON.stringify(refreshToken ? { refreshToken } : {})
   });
 
   const json = await res.json().catch(() => ({}));
@@ -169,8 +171,8 @@ export async function mobileAuthFetch<T>(
     headers: {
       ...(init?.headers || {}),
       authorization: `Bearer ${auth.accessToken}`,
-      ...getMobileDeviceHeaders(),
-    },
+      ...getMobileDeviceHeaders()
+    }
   });
 
   if (res.status === 401 && opts?.retry !== false) {
@@ -184,8 +186,8 @@ export async function mobileAuthFetch<T>(
       headers: {
         ...(init?.headers || {}),
         authorization: `Bearer ${rotated.accessToken}`,
-        ...getMobileDeviceHeaders(),
-      },
+        ...getMobileDeviceHeaders()
+      }
     });
 
     const json2 = await res2.json().catch(() => ({}));
@@ -210,7 +212,9 @@ export async function mobileLogoutAll() {
 }
 
 export async function mobileChallenge(): Promise<string> {
-  const res = await mobileAuthFetch<{ data: { nonce: string } }>("/api/mobile/auth/challenge", { method: "POST" });
+  const res = await mobileAuthFetch<{ data: { nonce: string } }>("/api/mobile/auth/challenge", {
+    method: "POST"
+  });
   const nonce = res?.data?.nonce;
   if (!nonce) throw new Error("فشل إنشاء التحدي");
   return nonce;

@@ -17,7 +17,7 @@ export async function GET(_request: NextRequest) {
     const grouped = await prisma.applicant.groupBy({
       by: ["status"],
       where: { tenantId: session.user.tenantId },
-      _count: { _all: true },
+      _count: { _all: true }
     });
 
     const counts = new Map<string, number>();
@@ -37,7 +37,7 @@ export async function GET(_request: NextRequest) {
       "accepted",
       "hired",
       "rejected",
-      "withdrawn",
+      "withdrawn"
     ] as const;
 
     const total = stages.reduce((sum, s) => sum + (counts.get(s) ?? 0), 0);
@@ -51,9 +51,6 @@ export async function GET(_request: NextRequest) {
     return NextResponse.json(pipeline);
   } catch (error) {
     console.error("Error fetching recruitment pipeline:", error);
-    return NextResponse.json(
-      { error: "فشل في جلب مسار التوظيف" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في جلب مسار التوظيف" }, { status: 500 });
   }
 }

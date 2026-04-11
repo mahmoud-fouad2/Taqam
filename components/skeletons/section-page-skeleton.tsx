@@ -4,7 +4,7 @@ import { TableSkeleton } from "@/components/skeletons/table-skeleton";
 export function SectionPageSkeleton({
   withSubtitle = true,
   tableColumns = 6,
-  tableRows = 6,
+  tableRows = 6
 }: {
   withSubtitle?: boolean;
   tableColumns?: number;

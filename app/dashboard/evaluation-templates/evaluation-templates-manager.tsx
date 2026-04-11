@@ -11,7 +11,7 @@ import {
   IconClipboardList,
   IconScale,
   IconStarFilled,
-  IconLoader,
+  IconLoader
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,7 +34,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -42,20 +42,20 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
+  AccordionTrigger
 } from "@/components/ui/accordion";
 import { evaluationTemplatesApi } from "@/lib/api/performance";
 import {
@@ -63,7 +63,7 @@ import {
   type EvaluationSection,
   type EvaluationCriterion,
   type RatingScale,
-  ratingScaleLabels,
+  ratingScaleLabels
 } from "@/lib/types/performance";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -92,20 +92,20 @@ const EMPTY_FORM: TemplateFormState = {
   ratingScale: "numeric_5",
   sections: [],
   isActive: true,
-  isDefault: false,
+  isDefault: false
 };
 
 const EMPTY_SECTION_FORM: SectionFormState = {
   name: "",
   description: "",
-  weight: 0,
+  weight: 0
 };
 
 const EMPTY_CRITERION_FORM: CriterionFormState = {
   name: "",
   description: "",
   weight: 0,
-  isRequired: true,
+  isRequired: true
 };
 
 const SUPPORTED_RATING_SCALES: RatingScale[] = ["numeric_5", "numeric_10"];
@@ -131,8 +131,11 @@ export function EvaluationTemplatesManager() {
   const [isEditing, setIsEditing] = React.useState(false);
   const [formData, setFormData] = React.useState<TemplateFormState>(EMPTY_FORM);
   const [sectionForm, setSectionForm] = React.useState<SectionFormState>(EMPTY_SECTION_FORM);
-  const [criterionTargetSectionId, setCriterionTargetSectionId] = React.useState<string | null>(null);
-  const [criterionForm, setCriterionForm] = React.useState<CriterionFormState>(EMPTY_CRITERION_FORM);
+  const [criterionTargetSectionId, setCriterionTargetSectionId] = React.useState<string | null>(
+    null
+  );
+  const [criterionForm, setCriterionForm] =
+    React.useState<CriterionFormState>(EMPTY_CRITERION_FORM);
   const [busyTemplateId, setBusyTemplateId] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -182,7 +185,13 @@ export function EvaluationTemplatesManager() {
   function openEditDialog(template: EvaluationTemplate) {
     setSelectedTemplate(template);
     setIsEditing(true);
-    setFormData({ ...template, sections: template.sections.map((section) => ({ ...section, criteria: [...section.criteria] })) });
+    setFormData({
+      ...template,
+      sections: template.sections.map((section) => ({
+        ...section,
+        criteria: [...section.criteria]
+      }))
+    });
     setSectionForm(EMPTY_SECTION_FORM);
     setCriterionTargetSectionId(null);
     setCriterionForm(EMPTY_CRITERION_FORM);
@@ -204,12 +213,12 @@ export function EvaluationTemplatesManager() {
       description: sectionForm.description.trim() || undefined,
       weight: sectionForm.weight,
       order: (formData.sections?.length || 0) + 1,
-      criteria: [],
+      criteria: []
     };
 
     setFormData((current) => ({
       ...current,
-      sections: [...(current.sections || []), newSection],
+      sections: [...(current.sections || []), newSection]
     }));
     setSectionForm(EMPTY_SECTION_FORM);
   }
@@ -217,7 +226,7 @@ export function EvaluationTemplatesManager() {
   function handleRemoveSection(sectionId: string) {
     setFormData((current) => ({
       ...current,
-      sections: (current.sections || []).filter((section) => section.id !== sectionId),
+      sections: (current.sections || []).filter((section) => section.id !== sectionId)
     }));
   }
 
@@ -232,7 +241,7 @@ export function EvaluationTemplatesManager() {
       description: criterionForm.description.trim() || undefined,
       weight: criterionForm.weight,
       order: 1,
-      isRequired: criterionForm.isRequired,
+      isRequired: criterionForm.isRequired
     };
 
     setFormData((current) => ({
@@ -241,10 +250,13 @@ export function EvaluationTemplatesManager() {
         section.id === sectionId
           ? {
               ...section,
-              criteria: [...section.criteria, { ...newCriterion, order: section.criteria.length + 1 }],
+              criteria: [
+                ...section.criteria,
+                { ...newCriterion, order: section.criteria.length + 1 }
+              ]
             }
           : section
-      ),
+      )
     }));
     setCriterionTargetSectionId(null);
     setCriterionForm(EMPTY_CRITERION_FORM);
@@ -257,10 +269,10 @@ export function EvaluationTemplatesManager() {
         section.id === sectionId
           ? {
               ...section,
-              criteria: section.criteria.filter((criterion) => criterion.id !== criterionId),
+              criteria: section.criteria.filter((criterion) => criterion.id !== criterionId)
             }
           : section
-      ),
+      )
     }));
   }
 
@@ -295,12 +307,13 @@ export function EvaluationTemplatesManager() {
         includesSelfReview: true,
         includesManagerReview: true,
         includes360Review: false,
-        requiresCalibration: true,
+        requiresCalibration: true
       } as Omit<EvaluationTemplate, "id" | "tenantId" | "createdAt" | "updatedAt">;
 
-      const response = isEditing && selectedTemplate
-        ? await evaluationTemplatesApi.update(selectedTemplate.id, payload)
-        : await evaluationTemplatesApi.create(payload);
+      const response =
+        isEditing && selectedTemplate
+          ? await evaluationTemplatesApi.update(selectedTemplate.id, payload)
+          : await evaluationTemplatesApi.create(payload);
 
       if (!response.success || !response.data) {
         toast.error(response.error || t.evalTemplates.saveFailed);
@@ -321,7 +334,10 @@ export function EvaluationTemplatesManager() {
   async function handleDuplicate(template: EvaluationTemplate) {
     setBusyTemplateId(template.id);
     try {
-      const response = await evaluationTemplatesApi.duplicate(template.id, `${template.name} (${t.evalTemplates.copy})`);
+      const response = await evaluationTemplatesApi.duplicate(
+        template.id,
+        `${template.name} (${t.evalTemplates.copy})`
+      );
       if (!response.success) {
         toast.error(response.error || t.evalTemplates.duplicateFailed);
         return;
@@ -330,7 +346,9 @@ export function EvaluationTemplatesManager() {
       toast.success(t.evalTemplates.duplicatedSuccess);
       await loadTemplates();
     } catch (duplicateError) {
-      toast.error(duplicateError instanceof Error ? duplicateError.message : t.evalTemplates.duplicateFailed);
+      toast.error(
+        duplicateError instanceof Error ? duplicateError.message : t.evalTemplates.duplicateFailed
+      );
     } finally {
       setBusyTemplateId(null);
     }
@@ -348,7 +366,9 @@ export function EvaluationTemplatesManager() {
       toast.success(t.evalTemplates.setDefaultSuccess);
       await loadTemplates();
     } catch (defaultError) {
-      toast.error(defaultError instanceof Error ? defaultError.message : t.evalTemplates.setDefaultFailed);
+      toast.error(
+        defaultError instanceof Error ? defaultError.message : t.evalTemplates.setDefaultFailed
+      );
     } finally {
       setBusyTemplateId(null);
     }
@@ -366,26 +386,36 @@ export function EvaluationTemplatesManager() {
       toast.success(t.evalTemplates.deletedSuccess);
       await loadTemplates();
     } catch (deleteError) {
-      toast.error(deleteError instanceof Error ? deleteError.message : t.evalTemplates.deleteFailed);
+      toast.error(
+        deleteError instanceof Error ? deleteError.message : t.evalTemplates.deleteFailed
+      );
     } finally {
       setBusyTemplateId(null);
     }
   }
 
-  const stats = React.useMemo(() => ({
-    total: templates.length,
-    active: templates.filter((template) => template.isActive).length,
-    defaults: templates.filter((template) => template.isDefault).length,
-    criteria: templates.reduce(
-      (sum, template) => sum + template.sections.reduce((sectionSum, section) => sectionSum + section.criteria.length, 0),
-      0
-    ),
-  }), [templates]);
+  const stats = React.useMemo(
+    () => ({
+      total: templates.length,
+      active: templates.filter((template) => template.isActive).length,
+      defaults: templates.filter((template) => template.isDefault).length,
+      criteria: templates.reduce(
+        (sum, template) =>
+          sum +
+          template.sections.reduce(
+            (sectionSum, section) => sectionSum + section.criteria.length,
+            0
+          ),
+        0
+      )
+    }),
+    [templates]
+  );
 
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
       )}
@@ -430,7 +460,7 @@ export function EvaluationTemplatesManager() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <IconLoader className="h-8 w-8 animate-spin text-primary" />
+          <IconLoader className="text-primary h-8 w-8 animate-spin" />
         </div>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -447,13 +477,19 @@ export function EvaluationTemplatesManager() {
                   </div>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label={t.common.options} disabled={busyTemplateId === template.id}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        aria-label={t.common.options}
+                        disabled={busyTemplateId === template.id}>
                         <IconDots className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => openEditDialog(template)}>
-                        <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
+                        <IconEdit className="ms-2 h-4 w-4" />
+                        {t.common.edit}
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => void handleDuplicate(template)}>
                         <IconCopy className="ms-2 h-4 w-4" />
                         {t.evalTemplates.pCopy}
@@ -465,23 +501,33 @@ export function EvaluationTemplatesManager() {
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem className="text-red-600" onClick={() => void handleDelete(template.id)} disabled={template.isDefault}>
-                        <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-red-600"
+                        onClick={() => void handleDelete(template.id)}
+                        disabled={template.isDefault}>
+                        <IconTrash className="ms-2 h-4 w-4" />
+                        {t.common.delete}
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                {template.description && <p className="text-sm text-muted-foreground">{template.description}</p>}
+                {template.description && (
+                  <p className="text-muted-foreground text-sm">{template.description}</p>
+                )}
 
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline" className="flex items-center gap-1">
                     {getScaleIcon(template.ratingScale)}
                     {ratingScaleLabels[template.ratingScale]}
                   </Badge>
-                  <Badge variant="outline">{template.sections.length} {t.evalTemplates.sectionsCount}</Badge>
                   <Badge variant="outline">
-                    {template.sections.reduce((sum, section) => sum + section.criteria.length, 0)} {t.evalTemplates.criterionCount}
+                    {template.sections.length} {t.evalTemplates.sectionsCount}
+                  </Badge>
+                  <Badge variant="outline">
+                    {template.sections.reduce((sum, section) => sum + section.criteria.length, 0)}{" "}
+                    {t.evalTemplates.criterionCount}
                   </Badge>
                 </div>
 
@@ -509,11 +555,12 @@ export function EvaluationTemplatesManager() {
           if (!open) {
             resetDialogState();
           }
-        }}
-      >
-        <DialogContent className="w-full max-h-[90vh] max-w-4xl overflow-y-auto">
+        }}>
+        <DialogContent className="max-h-[90vh] w-full max-w-4xl overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{isEditing ? t.evalTemplates.editTitle : t.evalTemplates.addTitle}</DialogTitle>
+            <DialogTitle>
+              {isEditing ? t.evalTemplates.editTitle : t.evalTemplates.addTitle}
+            </DialogTitle>
             <DialogDescription>{t.evalTemplates.addDesc}</DialogDescription>
           </DialogHeader>
 
@@ -523,16 +570,27 @@ export function EvaluationTemplatesManager() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.leaveTypes.nameArRequired}</Label>
-                  <Input value={formData.name || ""} onChange={(event) => updateForm("name", event.target.value)} />
+                  <Input
+                    value={formData.name || ""}
+                    onChange={(event) => updateForm("name", event.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>{t.leaveTypes.nameEnRequired}</Label>
-                  <Input value={formData.nameEn || ""} onChange={(event) => updateForm("nameEn", event.target.value)} dir="ltr" />
+                  <Input
+                    value={formData.nameEn || ""}
+                    onChange={(event) => updateForm("nameEn", event.target.value)}
+                    dir="ltr"
+                  />
                 </div>
               </div>
               <div className="space-y-2">
                 <Label>{t.common.description}</Label>
-                <Textarea value={formData.description || ""} onChange={(event) => updateForm("description", event.target.value)} rows={2} />
+                <Textarea
+                  value={formData.description || ""}
+                  onChange={(event) => updateForm("description", event.target.value)}
+                  rows={2}
+                />
               </div>
             </div>
 
@@ -541,7 +599,9 @@ export function EvaluationTemplatesManager() {
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.evalTemplates.ratingScale}</Label>
-                  <Select value={formData.ratingScale} onValueChange={(value: RatingScale) => updateForm("ratingScale", value)}>
+                  <Select
+                    value={formData.ratingScale}
+                    onValueChange={(value: RatingScale) => updateForm("ratingScale", value)}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -555,7 +615,10 @@ export function EvaluationTemplatesManager() {
                   </Select>
                 </div>
                 <div className="flex items-center gap-2 pt-8">
-                  <Switch checked={formData.isActive ?? true} onCheckedChange={(checked) => updateForm("isActive", checked)} />
+                  <Switch
+                    checked={formData.isActive ?? true}
+                    onCheckedChange={(checked) => updateForm("isActive", checked)}
+                  />
                   <Label>{t.evalTemplates.activeTemplate}</Label>
                 </div>
               </div>
@@ -564,17 +627,47 @@ export function EvaluationTemplatesManager() {
             <div className="space-y-4 border-t pt-4">
               <div className="flex items-center justify-between">
                 <h4 className="font-medium">{t.evalTemplates.evalSections}</h4>
-                <Badge variant={totalWeight === 100 ? "default" : "destructive"}>{t.evalTemplates.totalWeight} {totalWeight}%</Badge>
+                <Badge variant={totalWeight === 100 ? "default" : "destructive"}>
+                  {t.evalTemplates.totalWeight} {totalWeight}%
+                </Badge>
               </div>
 
               <div className="space-y-3 rounded-lg border p-4">
                 <p className="text-sm font-medium">{t.evalTemplates.addSection}</p>
                 <div className="grid gap-3 md:grid-cols-4">
-                  <Input placeholder={t.evalTemplates.sectionName} value={sectionForm.name} onChange={(event) => setSectionForm((current) => ({ ...current, name: event.target.value }))} />
-                  <Input placeholder={t.common.description} value={sectionForm.description} onChange={(event) => setSectionForm((current) => ({ ...current, description: event.target.value }))} />
-                  <Input type="number" placeholder={t.evalTemplates.weightPercent} value={sectionForm.weight || ""} onChange={(event) => setSectionForm((current) => ({ ...current, weight: Number(event.target.value) }))} min={1} max={100} />
-                  <Button onClick={handleAddSection} disabled={!sectionForm.name.trim() || sectionForm.weight <= 0}>
-                    <IconPlus className="ms-2 h-4 w-4" />{t.common.add}</Button>
+                  <Input
+                    placeholder={t.evalTemplates.sectionName}
+                    value={sectionForm.name}
+                    onChange={(event) =>
+                      setSectionForm((current) => ({ ...current, name: event.target.value }))
+                    }
+                  />
+                  <Input
+                    placeholder={t.common.description}
+                    value={sectionForm.description}
+                    onChange={(event) =>
+                      setSectionForm((current) => ({ ...current, description: event.target.value }))
+                    }
+                  />
+                  <Input
+                    type="number"
+                    placeholder={t.evalTemplates.weightPercent}
+                    value={sectionForm.weight || ""}
+                    onChange={(event) =>
+                      setSectionForm((current) => ({
+                        ...current,
+                        weight: Number(event.target.value)
+                      }))
+                    }
+                    min={1}
+                    max={100}
+                  />
+                  <Button
+                    onClick={handleAddSection}
+                    disabled={!sectionForm.name.trim() || sectionForm.weight <= 0}>
+                    <IconPlus className="ms-2 h-4 w-4" />
+                    {t.common.add}
+                  </Button>
                 </div>
               </div>
 
@@ -586,11 +679,18 @@ export function EvaluationTemplatesManager() {
                         <span className="font-medium">{section.name}</span>
                         <div className="flex items-center gap-2">
                           <Badge variant="outline">{section.weight}%</Badge>
-                          <Badge variant="secondary">{section.criteria.length} {t.evalTemplates.criterionCount}</Badge>
-                          <Button variant="ghost" size="icon" aria-label={t.evalTemplates.deleteSection} className="h-6 w-6" onClick={(event) => {
-                            event.stopPropagation();
-                            handleRemoveSection(section.id);
-                          }}>
+                          <Badge variant="secondary">
+                            {section.criteria.length} {t.evalTemplates.criterionCount}
+                          </Badge>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t.evalTemplates.deleteSection}
+                            className="h-6 w-6"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleRemoveSection(section.id);
+                            }}>
                             <IconTrash className="h-4 w-4 text-red-500" />
                           </Button>
                         </div>
@@ -598,37 +698,79 @@ export function EvaluationTemplatesManager() {
                     </AccordionTrigger>
                     <AccordionContent className="px-4 pb-4">
                       <div className="space-y-3">
-                        <div className="space-y-2 rounded-lg bg-muted p-3">
-                          <p className="text-sm">{t.evalTemplates.pAdd} {t.evalTemplates.criterionCount}</p>
+                        <div className="bg-muted space-y-2 rounded-lg p-3">
+                          <p className="text-sm">
+                            {t.evalTemplates.pAdd} {t.evalTemplates.criterionCount}
+                          </p>
                           <div className="grid gap-2 md:grid-cols-5">
                             <Input
                               placeholder={t.evalTemplates.criterionName}
-                              value={criterionTargetSectionId === section.id ? criterionForm.name : ""}
+                              value={
+                                criterionTargetSectionId === section.id ? criterionForm.name : ""
+                              }
                               onFocus={() => setCriterionTargetSectionId(section.id)}
                               onChange={(event) => {
                                 setCriterionTargetSectionId(section.id);
-                                setCriterionForm((current) => ({ ...current, name: event.target.value }));
+                                setCriterionForm((current) => ({
+                                  ...current,
+                                  name: event.target.value
+                                }));
                               }}
                             />
                             <Input
                               placeholder={t.common.description}
-                              value={criterionTargetSectionId === section.id ? criterionForm.description : ""}
+                              value={
+                                criterionTargetSectionId === section.id
+                                  ? criterionForm.description
+                                  : ""
+                              }
                               onFocus={() => setCriterionTargetSectionId(section.id)}
-                              onChange={(event) => setCriterionForm((current) => ({ ...current, description: event.target.value }))}
+                              onChange={(event) =>
+                                setCriterionForm((current) => ({
+                                  ...current,
+                                  description: event.target.value
+                                }))
+                              }
                             />
                             <Input
                               type="number"
                               placeholder={t.evalTemplates.weightPercent}
-                              value={criterionTargetSectionId === section.id ? criterionForm.weight || "" : ""}
+                              value={
+                                criterionTargetSectionId === section.id
+                                  ? criterionForm.weight || ""
+                                  : ""
+                              }
                               onFocus={() => setCriterionTargetSectionId(section.id)}
-                              onChange={(event) => setCriterionForm((current) => ({ ...current, weight: Number(event.target.value) }))}
+                              onChange={(event) =>
+                                setCriterionForm((current) => ({
+                                  ...current,
+                                  weight: Number(event.target.value)
+                                }))
+                              }
                               min={1}
                             />
                             <div className="flex items-center gap-2">
-                              <Switch checked={criterionForm.isRequired} onCheckedChange={(checked) => setCriterionForm((current) => ({ ...current, isRequired: checked }))} />
+                              <Switch
+                                checked={criterionForm.isRequired}
+                                onCheckedChange={(checked) =>
+                                  setCriterionForm((current) => ({
+                                    ...current,
+                                    isRequired: checked
+                                  }))
+                                }
+                              />
                               <span className="text-sm">{t.common.required}</span>
                             </div>
-                            <Button size="sm" onClick={() => handleAddCriterion(section.id)} disabled={criterionTargetSectionId !== section.id || !criterionForm.name.trim() || criterionForm.weight <= 0}>{t.common.add}</Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleAddCriterion(section.id)}
+                              disabled={
+                                criterionTargetSectionId !== section.id ||
+                                !criterionForm.name.trim() ||
+                                criterionForm.weight <= 0
+                              }>
+                              {t.common.add}
+                            </Button>
                           </div>
                         </div>
 
@@ -638,7 +780,9 @@ export function EvaluationTemplatesManager() {
                               <TableRow>
                                 <TableHead>{t.evalTemplates.criterionCol}</TableHead>
                                 <TableHead>{t.common.description}</TableHead>
-                                <TableHead className="w-[80px]">{t.evalTemplates.weightCol}</TableHead>
+                                <TableHead className="w-[80px]">
+                                  {t.evalTemplates.weightCol}
+                                </TableHead>
                                 <TableHead className="w-[80px]">{t.common.required}</TableHead>
                                 <TableHead className="w-[50px]"></TableHead>
                               </TableRow>
@@ -647,13 +791,28 @@ export function EvaluationTemplatesManager() {
                               {section.criteria.map((criterion) => (
                                 <TableRow key={criterion.id}>
                                   <TableCell className="font-medium">{criterion.name}</TableCell>
-                                  <TableCell className="text-muted-foreground">{criterion.description || "-"}</TableCell>
+                                  <TableCell className="text-muted-foreground">
+                                    {criterion.description || "-"}
+                                  </TableCell>
                                   <TableCell>
                                     <Badge variant="outline">{criterion.weight}%</Badge>
                                   </TableCell>
-                                  <TableCell>{criterion.isRequired ? <IconCheck className="h-4 w-4 text-green-600" /> : "-"}</TableCell>
                                   <TableCell>
-                                    <Button variant="ghost" size="icon" aria-label={t.evalTemplates.deleteCriterion} className="h-6 w-6" onClick={() => handleRemoveCriterion(section.id, criterion.id)}>
+                                    {criterion.isRequired ? (
+                                      <IconCheck className="h-4 w-4 text-green-600" />
+                                    ) : (
+                                      "-"
+                                    )}
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      aria-label={t.evalTemplates.deleteCriterion}
+                                      className="h-6 w-6"
+                                      onClick={() =>
+                                        handleRemoveCriterion(section.id, criterion.id)
+                                      }>
                                       <IconTrash className="h-4 w-4 text-red-500" />
                                     </Button>
                                   </TableCell>
@@ -671,7 +830,9 @@ export function EvaluationTemplatesManager() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
               <IconCheck className="ms-2 h-4 w-4" />
               {isEditing ? t.common.saveChanges : t.evalTemplates.addTemplateBtn}

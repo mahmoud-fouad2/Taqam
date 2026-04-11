@@ -11,7 +11,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -21,7 +21,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 
 import { employeesService } from "@/lib/api";
@@ -56,7 +56,7 @@ const TEMPLATE_HEADERS = [
   "currency",
   "status",
   "employmentType",
-  "dateOfBirth",
+  "dateOfBirth"
 ] as const;
 
 function downloadTemplate() {
@@ -77,7 +77,7 @@ function downloadTemplate() {
     currency: "SAR",
     status: "ACTIVE",
     employmentType: "FULL_TIME",
-    dateOfBirth: "1995-01-01",
+    dateOfBirth: "1995-01-01"
   };
 
   const escape = (v: unknown) => {
@@ -178,9 +178,13 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
       const apiErrors = res.data?.errors ?? [];
 
       if (apiErrors.length > 0) {
-        toast.warning(`${t.employeesImport.pPartiallyImported} ${imported} ${t.employeesImport.pRowsWithErrors}`);
+        toast.warning(
+          `${t.employeesImport.pPartiallyImported} ${imported} ${t.employeesImport.pRowsWithErrors}`
+        );
       } else {
-        toast.success(`${t.employeesImport.pImported} ${imported} ${t.employeesImport.pEmployeesSuccessfully}`);
+        toast.success(
+          `${t.employeesImport.pImported} ${imported} ${t.employeesImport.pEmployeesSuccessfully}`
+        );
       }
 
       setErrors(apiErrors);
@@ -214,7 +218,11 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
                 disabled={parsing || importing}
               />
             </div>
-            <Button type="button" variant="outline" onClick={downloadTemplate} disabled={parsing || importing}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={downloadTemplate}
+              disabled={parsing || importing}>
               <IconDownload className="ms-2 h-4 w-4" />
               {t.employeesImport.downloadCsvTemplate}
             </Button>
@@ -222,9 +230,11 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
 
           <div className="grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border p-3">
-              <div className="text-sm font-medium mb-2">{t.employeesImport.previewFirst20}</div>
+              <div className="mb-2 text-sm font-medium">{t.employeesImport.previewFirst20}</div>
               {preview.length === 0 ? (
-                <div className="text-sm text-muted-foreground">{t.employeesImport.selectCsvFile}</div>
+                <div className="text-muted-foreground text-sm">
+                  {t.employeesImport.selectCsvFile}
+                </div>
               ) : (
                 <ScrollArea className="h-64">
                   <Table>
@@ -254,12 +264,12 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
             </div>
 
             <div className="rounded-lg border p-3">
-              <div className="text-sm font-medium mb-2">{t.employeesImport.errorsTitle}</div>
+              <div className="mb-2 text-sm font-medium">{t.employeesImport.errorsTitle}</div>
               {errors.length === 0 ? (
-                <div className="text-sm text-muted-foreground">{t.employeesImport.noErrors}</div>
+                <div className="text-muted-foreground text-sm">{t.employeesImport.noErrors}</div>
               ) : (
                 <ScrollArea className="h-64">
-                  <ul className="text-sm space-y-1">
+                  <ul className="space-y-1 text-sm">
                     {errors.map((e, idx) => (
                       <li key={idx} className="text-destructive">
                         {e}
@@ -273,7 +283,13 @@ export function EmployeesImportDialog({ open, onOpenChange, onImported }: Props)
         </div>
 
         <DialogFooter className="gap-2">
-          <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={importing}>{t.common.close}</Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={importing}>
+            {t.common.close}
+          </Button>
           <Button type="button" onClick={startImport} disabled={!canImport || importing}>
             <IconUpload className="ms-2 h-4 w-4" />
             {importing ? t.employeesImport.importing : t.employeesImport.startImport}

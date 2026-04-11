@@ -44,18 +44,18 @@ export async function GET(request: NextRequest) {
             lastName: true,
             firstNameAr: true,
             lastNameAr: true,
-            department: { select: { name: true, nameAr: true } },
-          },
+            department: { select: { name: true, nameAr: true } }
+          }
         },
         manager: {
           select: {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -83,8 +83,8 @@ export async function GET(request: NextRequest) {
           ? `${g.manager.firstNameAr || g.manager.firstName} ${g.manager.lastNameAr || g.manager.lastName}`
           : undefined,
         notes: g.notes ?? undefined,
-        createdAt: g.createdAt.toISOString(),
-      })),
+        createdAt: g.createdAt.toISOString()
+      }))
     });
   } catch (error) {
     console.error("Error fetching goals:", error);
@@ -123,8 +123,8 @@ export async function POST(request: NextRequest) {
         dueDate: new Date(body.dueDate),
         progress: body.progress || 0,
         managerId: body.managerId || null,
-        notes: body.notes || null,
-      },
+        notes: body.notes || null
+      }
     });
 
     return NextResponse.json({ data: { id: goal.id } }, { status: 201 });

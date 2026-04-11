@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileAuthWithDevice } from "@/lib/mobile/auth";
 import { getMobileDeviceHeaders } from "@/lib/mobile/device";
 
 const schema = z.object({
-  token: z.string().min(1).max(500),
+  token: z.string().min(1).max(500)
 });
 
 export async function POST(request: NextRequest) {
@@ -25,13 +26,13 @@ export async function POST(request: NextRequest) {
       where: { userId: payloadOrRes.userId, deviceId },
       data: {
         pushToken: parsed.data.token,
-        pushTokenUpdatedAt: new Date(),
-      },
+        pushTokenUpdatedAt: new Date()
+      }
     });
 
     return NextResponse.json({ data: { ok: true } });
   } catch (error) {
-    console.error("Mobile push-token POST error:", error);
+    logger.error("Mobile push-token POST error", undefined, error);
     return NextResponse.json({ error: "Failed to update push token" }, { status: 500 });
   }
 }

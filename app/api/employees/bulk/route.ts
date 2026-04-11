@@ -6,7 +6,7 @@ import { createAuditLog, getRequestMetadata } from "@/lib/audit/logger";
 import {
   bulkEmployeesSchema,
   insertPreparedEmployees,
-  prepareEmployeesForInsert,
+  prepareEmployeesForInsert
 } from "@/lib/employees/bulk";
 
 export async function POST(request: NextRequest) {
@@ -37,10 +37,7 @@ export async function POST(request: NextRequest) {
       session.user.role === "SUPER_ADMIN" ? parsed.data.tenantId : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json(
-        { error: "Tenant required (tenantId)" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Tenant required (tenantId)" }, { status: 400 });
     }
 
     let prepared;
@@ -50,7 +47,10 @@ export async function POST(request: NextRequest) {
       if (e?.message?.includes("Duplicate employeeNumber")) {
         const duplicates = (e as any)?.duplicates as string[] | undefined;
         return NextResponse.json(
-          { error: "Duplicate employeeNumber in request", duplicates: (duplicates || []).slice(0, 20) },
+          {
+            error: "Duplicate employeeNumber in request",
+            duplicates: (duplicates || []).slice(0, 20)
+          },
           { status: 400 }
         );
       }
@@ -63,8 +63,8 @@ export async function POST(request: NextRequest) {
           dryRun: true,
           tenantId,
           total: prepared.length,
-          sample: prepared.slice(0, 5),
-        },
+          sample: prepared.slice(0, 5)
+        }
       });
     }
 
@@ -79,9 +79,15 @@ export async function POST(request: NextRequest) {
         userId: session.user.id,
         action: "EMPLOYEE_BULK_IMPORT",
         entity: "Employee",
-        newData: { atomic: true, total: prepared.length, success: 0, failed: prepared.length, message },
+        newData: {
+          atomic: true,
+          total: prepared.length,
+          success: 0,
+          failed: prepared.length,
+          message
+        },
         ipAddress,
-        userAgent,
+        userAgent
       });
 
       return NextResponse.json({ error: "Bulk insert failed (atomic)", message }, { status: 400 });
@@ -97,10 +103,10 @@ export async function POST(request: NextRequest) {
         total: summary.total,
         atomic: summary.atomic,
         success: summary.success,
-        failed: summary.failed,
+        failed: summary.failed
       },
       ipAddress,
-      userAgent,
+      userAgent
     });
 
     return NextResponse.json({ data: summary }, { status: 200 });

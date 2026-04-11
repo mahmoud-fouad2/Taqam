@@ -8,14 +8,14 @@ const listQuerySchema = z.object({
   limit: z.coerce.number().int().positive().max(100).default(20).catch(20),
   status: z.string().optional(),
   priority: z.string().optional(),
-  tenantId: z.string().optional(),
+  tenantId: z.string().optional()
 });
 
 const createSchema = z.object({
   subject: z.string().min(3).max(160),
   category: z.string().max(60).optional(),
   priority: z.enum(["LOW", "NORMAL", "HIGH", "URGENT"]).default("NORMAL"),
-  message: z.string().min(3).max(5000),
+  message: z.string().min(3).max(5000)
 });
 
 export async function GET(request: NextRequest) {
@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
       limit: searchParams.get("limit"),
       status: searchParams.get("status") ?? undefined,
       priority: searchParams.get("priority") ?? undefined,
-      tenantId: searchParams.get("tenantId") ?? undefined,
+      tenantId: searchParams.get("tenantId") ?? undefined
     });
 
     if (!parsed.success) {
@@ -61,18 +61,18 @@ export async function GET(request: NextRequest) {
         take: limit,
         include: {
           tenant: {
-            select: { id: true, slug: true, name: true, nameAr: true },
+            select: { id: true, slug: true, name: true, nameAr: true }
           },
           createdBy: {
-            select: { id: true, firstName: true, lastName: true, email: true },
+            select: { id: true, firstName: true, lastName: true, email: true }
           },
           assignedTo: {
-            select: { id: true, firstName: true, lastName: true, email: true },
+            select: { id: true, firstName: true, lastName: true, email: true }
           },
-          _count: { select: { messages: true } },
-        },
+          _count: { select: { messages: true } }
+        }
       }),
-      prisma.supportTicket.count({ where }),
+      prisma.supportTicket.count({ where })
     ]);
 
     return NextResponse.json({
@@ -80,8 +80,8 @@ export async function GET(request: NextRequest) {
         items,
         page,
         limit,
-        total,
-      },
+        total
+      }
     });
   } catch (error) {
     console.error("Error fetching tickets:", error);
@@ -101,12 +101,18 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const now = new Date();
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant tickets must be created within a tenant" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Tenant tickets must be created within a tenant" },
+        { status: 400 }
+      );
     }
 
     const created = await prisma.supportTicket.create({
@@ -122,15 +128,15 @@ export async function POST(request: NextRequest) {
           create: {
             senderId: session.user.id,
             body: parsed.data.message,
-            isInternal: false,
-          },
-        },
+            isInternal: false
+          }
+        }
       },
       include: {
         tenant: { select: { id: true, slug: true, name: true, nameAr: true } },
         createdBy: { select: { id: true, firstName: true, lastName: true, email: true } },
-        _count: { select: { messages: true } },
-      },
+        _count: { select: { messages: true } }
+      }
     });
 
     return NextResponse.json({ data: created }, { status: 201 });

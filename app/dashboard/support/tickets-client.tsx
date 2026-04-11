@@ -5,7 +5,13 @@ import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +46,7 @@ function statusLabel(locale: "ar" | "en", status: Ticket["status"], t: LocaleTex
     IN_PROGRESS: t.ideas.inProgress,
     WAITING_CUSTOMER: t.ideas.waitingCustomer,
     RESOLVED: t.common.resolved,
-    CLOSED: t.common.closed,
+    CLOSED: t.common.closed
   };
 
   const mapEn: Record<Ticket["status"], string> = {
@@ -48,7 +54,7 @@ function statusLabel(locale: "ar" | "en", status: Ticket["status"], t: LocaleTex
     IN_PROGRESS: "In progress",
     WAITING_CUSTOMER: "Waiting customer",
     RESOLVED: "Resolved",
-    CLOSED: "Closed",
+    CLOSED: "Closed"
   };
 
   return locale === "ar" ? mapAr[status] : mapEn[status];
@@ -59,20 +65,22 @@ function priorityLabel(locale: "ar" | "en", priority: Ticket["priority"], t: Loc
     LOW: t.common.low,
     NORMAL: t.common.normal,
     HIGH: t.common.high,
-    URGENT: t.common.urgent,
+    URGENT: t.common.urgent
   };
 
   const mapEn: Record<Ticket["priority"], string> = {
     LOW: "Low",
     NORMAL: "Normal",
     HIGH: "High",
-    URGENT: "Urgent",
+    URGENT: "Urgent"
   };
 
   return locale === "ar" ? mapAr[priority] : mapEn[priority];
 }
 
-function badgeVariantForStatus(status: Ticket["status"]): "default" | "secondary" | "destructive" | "outline" {
+function badgeVariantForStatus(
+  status: Ticket["status"]
+): "default" | "secondary" | "destructive" | "outline" {
   if (status === "OPEN") return "secondary";
   if (status === "IN_PROGRESS") return "default";
   if (status === "WAITING_CUSTOMER") return "outline";
@@ -83,7 +91,7 @@ function badgeVariantForStatus(status: Ticket["status"]): "default" | "secondary
 export function SupportTicketsClient({
   locale: _locale,
   isSuperAdmin,
-  tCommon,
+  tCommon
 }: {
   locale: "ar" | "en";
   isSuperAdmin: boolean;
@@ -138,8 +146,8 @@ export function SupportTicketsClient({
           subject,
           category: category || undefined,
           priority,
-          message,
-        }),
+          message
+        })
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error || "Failed");
@@ -183,30 +191,43 @@ export function SupportTicketsClient({
             </DialogTrigger>
             <DialogContent className="w-full sm:max-w-lg">
               <DialogHeader>
-                <DialogTitle>{locale === "ar" ? "تذكرة دعم جديدة" : "New support ticket"}</DialogTitle>
+                <DialogTitle>
+                  {locale === "ar" ? "تذكرة دعم جديدة" : "New support ticket"}
+                </DialogTitle>
               </DialogHeader>
 
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="subject">{locale === "ar" ? t.common.subject : "Subject"}</Label>
-                  <Input id="subject" value={subject} onChange={(e) => setSubject(e.target.value)} />
+                  <Input
+                    id="subject"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                  />
                 </div>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="category">{locale === "ar" ? t.common.category : "Category"}</Label>
-                    <Input id="category" value={category} onChange={(e) => setCategory(e.target.value)} />
+                    <Label htmlFor="category">
+                      {locale === "ar" ? t.common.category : "Category"}
+                    </Label>
+                    <Input
+                      id="category"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="priority">{locale === "ar" ? t.common.priority : "Priority"}</Label>
+                    <Label htmlFor="priority">
+                      {locale === "ar" ? t.common.priority : "Priority"}
+                    </Label>
                     <select
                       id="priority"
                       aria-label={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
                       title={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
-                      className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                       value={priority}
-                      onChange={(e) => setPriority(e.target.value as Ticket["priority"])}
-                    >
+                      onChange={(e) => setPriority(e.target.value as Ticket["priority"])}>
                       <option value="LOW">{priorityLabel(locale, "LOW", t)}</option>
                       <option value="NORMAL">{priorityLabel(locale, "NORMAL", t)}</option>
                       <option value="HIGH">{priorityLabel(locale, "HIGH", t)}</option>
@@ -217,7 +238,12 @@ export function SupportTicketsClient({
 
                 <div className="space-y-2">
                   <Label htmlFor="message">{locale === "ar" ? "الرسالة" : "Message"}</Label>
-                  <Textarea id="message" rows={6} value={message} onChange={(e) => setMessage(e.target.value)} />
+                  <Textarea
+                    id="message"
+                    rows={6}
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                  />
                 </div>
 
                 <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -225,15 +251,23 @@ export function SupportTicketsClient({
                     {locale === "ar" ? t.common.cancel : "Cancel"}
                   </Button>
                   <Button onClick={() => void submitNew()} disabled={submitting}>
-                    {submitting ? (locale === "ar" ? t.common.sending : "Submitting...") : locale === "ar" ? t.common.send : "Submit"}
+                    {submitting
+                      ? locale === "ar"
+                        ? t.common.sending
+                        : "Submitting..."
+                      : locale === "ar"
+                        ? t.common.send
+                        : "Submit"}
                   </Button>
                 </div>
               </div>
             </DialogContent>
           </Dialog>
         ) : (
-          <div className="text-sm text-muted-foreground">
-            {locale === "ar" ? "إنشاء التذاكر من لوحة الشركة فقط." : "Tickets are created from a company dashboard."}
+          <div className="text-muted-foreground text-sm">
+            {locale === "ar"
+              ? "إنشاء التذاكر من لوحة الشركة فقط."
+              : "Tickets are created from a company dashboard."}
           </div>
         )}
       </div>
@@ -246,35 +280,44 @@ export function SupportTicketsClient({
           {loading ? (
             <SupportTicketsSkeleton />
           ) : items.length === 0 ? (
-            <div className="py-10 text-center text-sm text-muted-foreground">{emptyText}</div>
+            <div className="text-muted-foreground py-10 text-center text-sm">{emptyText}</div>
           ) : (
             <div className="grid gap-3">
               {items.map((ticket) => (
                 <Link
                   key={ticket.id}
                   href={`${p}/dashboard/support/${ticket.id}`}
-                  className="rounded-lg border bg-background p-4 transition-colors hover:bg-muted/40"
-                >
+                  className="bg-background hover:bg-muted/40 rounded-lg border p-4 transition-colors">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <h3 className="truncate font-medium">{ticket.subject}</h3>
-                        <Badge variant={badgeVariantForStatus(ticket.status)}>{statusLabel(locale, ticket.status, t)}</Badge>
+                        <Badge variant={badgeVariantForStatus(ticket.status)}>
+                          {statusLabel(locale, ticket.status, t)}
+                        </Badge>
                         <Badge variant="outline">{priorityLabel(locale, ticket.priority, t)}</Badge>
                       </div>
-                      <div className="mt-1 flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground mt-1 flex flex-wrap gap-2 text-xs">
                         {ticket.category ? <span>{ticket.category}</span> : null}
                         {isSuperAdmin && ticket.tenant ? (
                           <span>
-                            {locale === "ar" ? t.common.company : "Tenant:"} {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
+                            {locale === "ar" ? t.common.company : "Tenant:"}{" "}
+                            {ticket.tenant.nameAr || ticket.tenant.name} ({ticket.tenant.slug})
                           </span>
                         ) : null}
-                        {ticket._count?.messages ? <span>{locale === "ar" ? t.ideas.messages : "Messages:"} {ticket._count.messages}</span> : null}
+                        {ticket._count?.messages ? (
+                          <span>
+                            {locale === "ar" ? t.ideas.messages : "Messages:"}{" "}
+                            {ticket._count.messages}
+                          </span>
+                        ) : null}
                       </div>
                     </div>
 
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(ticket.lastMessageAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}
+                    <div className="text-muted-foreground text-xs">
+                      {new Date(ticket.lastMessageAt).toLocaleString(
+                        locale === "ar" ? "ar-SA" : "en-US"
+                      )}
                     </div>
                   </div>
                 </Link>

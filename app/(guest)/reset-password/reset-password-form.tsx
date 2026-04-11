@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 
 export function ResetPasswordForm({
   locale,
-  token,
+  token
 }: {
   locale: "ar" | "en";
   token: string | null;
@@ -34,7 +34,9 @@ export function ResetPasswordForm({
     }
 
     if (newPassword.length < 8) {
-      setError(isAr ? "كلمة المرور يجب ألا تقل عن 8 أحرف" : "Password must be at least 8 characters");
+      setError(
+        isAr ? "كلمة المرور يجب ألا تقل عن 8 أحرف" : "Password must be at least 8 characters"
+      );
       return;
     }
 
@@ -48,14 +50,16 @@ export function ResetPasswordForm({
       const response = await fetch("/api/auth/reset-password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ token, newPassword })
       });
 
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
         throw new Error(
           data?.error ||
-            (isAr ? "تعذر إكمال العملية بهذا الرابط" : "Unable to complete the request with this link")
+            (isAr
+              ? "تعذر إكمال العملية بهذا الرابط"
+              : "Unable to complete the request with this link")
         );
       }
 
@@ -76,7 +80,7 @@ export function ResetPasswordForm({
 
   if (success) {
     return (
-      <div className="rounded-3xl border bg-card p-8 shadow-sm">
+      <div className="bg-card rounded-3xl border p-8 shadow-sm">
         <div className="mx-auto flex max-w-md flex-col items-center text-center">
           <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-green-500/10">
             <CheckCircle2 className="h-7 w-7 text-green-600" />
@@ -90,7 +94,7 @@ export function ResetPasswordForm({
                 ? "تم تحديث كلمة المرور"
                 : "Password updated"}
           </h2>
-          <p className="mt-3 text-sm leading-7 text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-sm leading-7">
             {mode === "tenant-admin-activation"
               ? isAr
                 ? "تم إنشاء كلمة المرور وتفعيل حساب مدير الشركة بنجاح. يمكنك تسجيل الدخول الآن."
@@ -111,11 +115,13 @@ export function ResetPasswordForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="rounded-3xl border bg-card p-8 shadow-sm">
-      <div className="mb-6 flex items-center gap-3 rounded-2xl bg-primary/5 px-4 py-3 text-sm text-muted-foreground">
-        <LockKeyhole className="h-4 w-4 text-primary" />
+    <form onSubmit={handleSubmit} className="bg-card rounded-3xl border p-8 shadow-sm">
+      <div className="bg-primary/5 text-muted-foreground mb-6 flex items-center gap-3 rounded-2xl px-4 py-3 text-sm">
+        <LockKeyhole className="text-primary h-4 w-4" />
         <span>
-          {isAr ? "استخدم كلمة مرور قوية وفريدة لهذا الحساب." : "Use a strong, unique password for this account."}
+          {isAr
+            ? "استخدم كلمة مرور قوية وفريدة لهذا الحساب."
+            : "Use a strong, unique password for this account."}
         </span>
       </div>
 
@@ -129,7 +135,7 @@ export function ResetPasswordForm({
             required
             value={newPassword}
             onChange={(event) => setNewPassword(event.target.value)}
-            className="h-11 rounded-xl bg-muted/40"
+            className="bg-muted/40 h-11 rounded-xl"
           />
         </div>
         <div className="space-y-2">
@@ -141,18 +147,23 @@ export function ResetPasswordForm({
             required
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
-            className="h-11 rounded-xl bg-muted/40"
+            className="bg-muted/40 h-11 rounded-xl"
           />
         </div>
       </div>
 
       {error ? (
-        <div className="mt-4 rounded-xl border border-destructive/25 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="border-destructive/25 bg-destructive/5 text-destructive mt-4 rounded-xl border px-4 py-3 text-sm">
           {error}
         </div>
       ) : null}
 
-      <Button type="submit" variant="brand" size="lg" className="mt-6 h-11 w-full gap-2" disabled={loading}>
+      <Button
+        type="submit"
+        variant="brand"
+        size="lg"
+        className="mt-6 h-11 w-full gap-2"
+        disabled={loading}>
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />

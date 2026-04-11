@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const t = getText(locale);
   return generateMeta({
     title: t.jobTitles.pageTitle,
-    description: t.jobTitles.pageDesc,
+    description: t.jobTitles.pageDesc
   });
 }
 
@@ -18,7 +18,7 @@ export default async function JobTitlesPage() {
   const t = getText(locale);
   return (
     <>
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">{t.jobTitles.title}</h1>
       </div>
       <JobTitlesManager />

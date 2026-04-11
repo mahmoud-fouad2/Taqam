@@ -27,7 +27,7 @@ function parseOptionalInt(value: unknown): number | null {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
@@ -47,23 +47,20 @@ export async function GET(request: NextRequest) {
 
     const leaveTypes = await prisma.leaveType.findMany({
       where,
-      orderBy: { name: "asc" },
+      orderBy: { name: "asc" }
     });
 
     return NextResponse.json({ data: leaveTypes });
   } catch (error) {
     console.error("Error fetching leave types:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leave types" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch leave types" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -74,7 +71,9 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as any;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? (typeof body.tenantId === "string" ? body.tenantId : requestedTenantId ?? session.user.tenantId)
+      ? typeof body.tenantId === "string"
+        ? body.tenantId
+        : (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
@@ -108,16 +107,13 @@ export async function POST(request: NextRequest) {
         minServiceMonths: parseOptionalInt(body.minServiceMonths) ?? 0,
         applicableGenders: Array.isArray(body.applicableGenders) ? body.applicableGenders : [],
         color: body.color || "#3B82F6",
-        isActive: body.isActive ?? true,
-      },
+        isActive: body.isActive ?? true
+      }
     });
 
     return NextResponse.json({ data: leaveType }, { status: 201 });
   } catch (error) {
     console.error("Error creating leave type:", error);
-    return NextResponse.json(
-      { error: "Failed to create leave type" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create leave type" }, { status: 500 });
   }
 }

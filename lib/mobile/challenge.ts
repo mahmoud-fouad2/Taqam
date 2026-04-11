@@ -27,8 +27,8 @@ export async function createChallenge(
       userId: input.userId,
       mobileDeviceId: input.mobileDeviceId,
       nonce,
-      expiresAt,
-    },
+      expiresAt
+    }
   });
 
   return { nonce, expiresAt };
@@ -39,7 +39,7 @@ export async function consumeChallenge(
   input: { nonce: string; userId: string; mobileDeviceId: string }
 ): Promise<boolean> {
   const challenge = await prisma.mobileChallenge.findUnique({
-    where: { nonce: input.nonce },
+    where: { nonce: input.nonce }
   });
 
   if (!challenge) return false;
@@ -50,7 +50,7 @@ export async function consumeChallenge(
 
   await prisma.mobileChallenge.update({
     where: { id: challenge.id },
-    data: { usedAt: new Date() },
+    data: { usedAt: new Date() }
   });
 
   return true;

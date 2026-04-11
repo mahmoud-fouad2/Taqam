@@ -22,26 +22,42 @@ export default async function DashboardNotFound() {
           : "The dashboard route you tried to open is missing or has moved to another module. Use these shortcuts to get back to the right operational surfaces."
       }
       eyebrow={isAr ? "خطأ مسار داخل لوحة التحكم" : "Dashboard route not found"}
-      primaryAction={{ href: `${p}/dashboard`, label: isAr ? t.common.goToDashboard2 : "Back to dashboard", variant: "brand" }}
+      primaryAction={{
+        href: `${p}/dashboard`,
+        label: isAr ? t.common.goToDashboard2 : "Back to dashboard",
+        variant: "brand"
+      }}
       quickLinks={[
         {
           href: `${p}/dashboard/help-center`,
           title: isAr ? "مركز المساعدة الداخلي" : "In-app help center",
-          description: isAr ? "اختصارات التشغيل الصحيحة والتمييز بين أسطح المنصة." : "Correct operational paths and distinctions between platform surfaces.",
+          description: isAr
+            ? "اختصارات التشغيل الصحيحة والتمييز بين أسطح المنصة."
+            : "Correct operational paths and distinctions between platform surfaces."
         },
         {
           href: `${p}/dashboard/support`,
           title: isAr ? t.helpCenter.support : "Support & tickets",
-          description: isAr ? "افتح أو تابع الحالات المرتبطة بالشركة أو المستخدمين." : "Open or track cases tied to the tenant or affected users.",
+          description: isAr
+            ? "افتح أو تابع الحالات المرتبطة بالشركة أو المستخدمين."
+            : "Open or track cases tied to the tenant or affected users."
         },
         {
           href: `${p}/dashboard/job-postings`,
           title: isAr ? "التوظيف والكارير بورتال" : "Recruitment & careers",
-          description: isAr ? "إدارة الوظائف الشاغرة وروابط البوابة العامة للشركة." : "Manage open roles and the tenant's public careers portal links.",
-        },
+          description: isAr
+            ? "إدارة الوظائف الشاغرة وروابط البوابة العامة للشركة."
+            : "Manage open roles and the tenant's public careers portal links."
+        }
       ]}
-      secondaryAction={{ href: `${p}/dashboard/help-center`, label: isAr ? t.helpCenter.title : "Help center", variant: "outline" }}
-      title={isAr ? "هذه الصفحة ليست ضمن المسار الحالي" : "This page is not in the current route tree"}
+      secondaryAction={{
+        href: `${p}/dashboard/help-center`,
+        label: isAr ? t.helpCenter.title : "Help center",
+        variant: "outline"
+      }}
+      title={
+        isAr ? "هذه الصفحة ليست ضمن المسار الحالي" : "This page is not in the current route tree"
+      }
     />
   );
 }

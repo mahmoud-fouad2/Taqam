@@ -18,7 +18,6 @@ export {
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: 'index',
 };
 
@@ -94,7 +93,6 @@ function ThemedNavigator() {
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
         </Stack>
       </AuthProvider>
     </NavThemeProvider>

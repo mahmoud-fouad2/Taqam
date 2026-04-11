@@ -1,9 +1,14 @@
-import { LoanStatus as PrismaLoanStatus, LoanType as PrismaLoanType, type Prisma } from "@prisma/client";
+import {
+  LoanStatus as PrismaLoanStatus,
+  LoanType as PrismaLoanType,
+  type Prisma
+} from "@prisma/client";
 
+import { ADMIN_ROLES } from "@/lib/access-control";
 import prisma from "@/lib/db";
 import type { Loan, LoanPayment } from "@/lib/types/payroll";
 
-export const LOAN_ADMIN_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"] as const;
+export const LOAN_ADMIN_ROLES = ADMIN_ROLES;
 
 type LoanRecord = {
   id: string;
@@ -138,11 +143,11 @@ export function mapLoan(record: LoanRecord): Loan {
     notes: record.notes ?? undefined,
     approvedBy: record.approvedBy
       ? `${record.approvedBy.firstName} ${record.approvedBy.lastName}`.trim()
-      : record.approvedById ?? undefined,
+      : (record.approvedById ?? undefined),
     approvedAt: record.approvedAt?.toISOString(),
     rejectedReason: record.rejectedReason ?? undefined,
     createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString()
   };
 }
 
@@ -158,7 +163,7 @@ export function mapLoanPayment(record: LoanPaymentRecord, installmentNumber: num
     paymentMethod: record.paymentMethod ?? undefined,
     reference: record.reference ?? undefined,
     createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString()
   };
 }
 
@@ -177,7 +182,7 @@ export async function resolveLoanEmployeeScope(input: {
 
     const employee = await prisma.employee.findFirst({
       where: { id: requestedEmployeeId, tenantId },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!employee) {
@@ -189,7 +194,7 @@ export async function resolveLoanEmployeeScope(input: {
 
   const employee = await prisma.employee.findFirst({
     where: { userId, tenantId },
-    select: { id: true },
+    select: { id: true }
   });
 
   if (!employee) {
@@ -214,19 +219,19 @@ export async function getScopedLoan(input: {
     where: { id: input.loanId, tenantId: input.tenantId },
     include: {
       approvedBy: {
-        select: { firstName: true, lastName: true },
+        select: { firstName: true, lastName: true }
       },
       employee: {
         select: {
-          userId: true,
-        },
+          userId: true
+        }
       },
       payments: input.includePayments
         ? {
-            orderBy: [{ paymentDate: "asc" }, { createdAt: "asc" }],
+            orderBy: [{ paymentDate: "asc" }, { createdAt: "asc" }]
           }
-        : false,
-    },
+        : false
+    }
   });
 
   if (!loan) {

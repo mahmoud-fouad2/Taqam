@@ -6,6 +6,8 @@ export function getSiteUrl(): string {
   return "https://taqam.net";
 }
 
-export function getMarketingLocaleFromCookie(cookieValue: string | undefined | null): MarketingLocale {
+export function getMarketingLocaleFromCookie(
+  cookieValue: string | undefined | null
+): MarketingLocale {
   return cookieValue === "en" ? "en" : "ar";
 }

@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         { firstName: { contains: search, mode: "insensitive" } },
         { lastName: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
-        { employeeNumber: { contains: search, mode: "insensitive" } },
+        { employeeNumber: { contains: search, mode: "insensitive" } }
       ];
     }
 
@@ -68,8 +68,8 @@ export async function GET(request: NextRequest) {
         currency: true,
         status: true,
         employmentType: true,
-        dateOfBirth: true,
-      },
+        dateOfBirth: true
+      }
     });
 
     const headers = [
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
       "currency",
       "status",
       "employmentType",
-      "dateOfBirth",
+      "dateOfBirth"
     ];
 
     const lines: string[] = [];
@@ -113,8 +113,10 @@ export async function GET(request: NextRequest) {
           e.currency ?? "",
           e.status ?? "",
           e.employmentType ?? "",
-          toYmd(e.dateOfBirth),
-        ].map(escapeCsv).join(",")
+          toYmd(e.dateOfBirth)
+        ]
+          .map(escapeCsv)
+          .join(",")
       );
     }
 
@@ -125,8 +127,8 @@ export async function GET(request: NextRequest) {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
         "Content-Disposition": `attachment; filename=employees_export_${new Date().toISOString().split("T")[0]}.csv`,
-        "Cache-Control": "no-store",
-      },
+        "Cache-Control": "no-store"
+      }
     });
   } catch (error) {
     console.error("Error exporting employees CSV:", error);

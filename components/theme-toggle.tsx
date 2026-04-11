@@ -6,7 +6,7 @@ import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 
 export function ThemeToggle({
-  variant = "outline",
+  variant = "outline"
 }: {
   variant?: "outline" | "ghost" | "default";
 }) {
@@ -25,8 +25,7 @@ export function ThemeToggle({
       size="icon"
       onClick={toggleTheme}
       aria-label="Toggle theme"
-      suppressHydrationWarning
-    >
+      suppressHydrationWarning>
       {/* Render placeholder until mounted to avoid hydration mismatch */}
       {mounted ? (
         resolvedTheme === "dark" ? (

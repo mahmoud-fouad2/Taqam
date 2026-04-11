@@ -6,7 +6,6 @@ import { getText } from "@/lib/i18n/text";
 import { Button } from "@/components/ui/button";
 import { ChangePasswordForm } from "./change-password-form";
 
-
 export default async function ChangePasswordPage() {
   const locale = await getAppLocale();
   const t = getText(locale);

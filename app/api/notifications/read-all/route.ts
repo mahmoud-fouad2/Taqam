@@ -3,33 +3,32 @@
  * PATCH /api/notifications/read-all
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  errorResponse,
+  logApiError,
+  nullDataResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
-export async function PATCH() {
+export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
 
     await prisma.notification.updateMany({
       where: { userId, ...(tenantId ? { tenantId } : {}), isRead: false },
-      data: { isRead: true, readAt: new Date() },
+      data: { isRead: true, readAt: new Date() }
     });
 
-    return NextResponse.json({ data: null });
+    return nullDataResponse();
   } catch (error) {
-    console.error("Error marking all notifications as read:", error);
-    return NextResponse.json(
-      { error: "Failed to mark all notifications as read" },
-      { status: 500 }
-    );
+    logApiError("Error marking all notifications as read", error);
+    return errorResponse("Failed to mark all notifications as read");
   }
 }

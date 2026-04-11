@@ -7,7 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -78,7 +84,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
       method: "PUT",
       headers: { "content-type": "application/json" },
       credentials: "include",
-      body: JSON.stringify({ userId: selectedUserId, ...payload }),
+      body: JSON.stringify({ userId: selectedUserId, ...payload })
     });
 
     const json = (await res.json()) as any;
@@ -145,15 +151,21 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserCog className="h-5 w-5" />{t.tenantAdmin.title}</CardTitle>
+          <UserCog className="h-5 w-5" />
+          {t.tenantAdmin.title}
+        </CardTitle>
         <CardDescription>{t.tenantAdmin.description}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {loading ? (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Loader2 className="h-4 w-4 animate-spin" />{t.common.loading}</div>
+          <div className="text-muted-foreground flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {t.common.loading}
+          </div>
         ) : admins.length === 0 ? (
-          <div className="rounded-lg border p-4 text-sm text-muted-foreground">{t.tenantAdmin.noAdmins}</div>
+          <div className="text-muted-foreground rounded-lg border p-4 text-sm">
+            {t.tenantAdmin.noAdmins}
+          </div>
         ) : (
           <div className="space-y-6">
             <div className="space-y-2">
@@ -170,15 +182,16 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                   ))}
                 </SelectContent>
               </Select>
-              <p className="text-xs text-muted-foreground">
-                {t.tenantAdmin.pRole} TENANT_ADMIN — {t.tenantAdmin.pStatus} {selectedAdmin?.status ?? "—"}
+              <p className="text-muted-foreground text-xs">
+                {t.tenantAdmin.pRole} TENANT_ADMIN — {t.tenantAdmin.pStatus}{" "}
+                {selectedAdmin?.status ?? "—"}
               </p>
             </div>
 
             <Separator />
 
             {error ? (
-              <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+              <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-3 text-sm">
                 {error}
               </div>
             ) : null}
@@ -191,7 +204,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
 
             <form onSubmit={onChangeEmail} className="space-y-3">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Shield className="text-muted-foreground h-4 w-4" />
                 <p className="font-medium">{t.tenantAdmin.changeEmail}</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -219,7 +232,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
 
             <form onSubmit={onResetPassword} className="space-y-3">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-muted-foreground" />
+                <Shield className="text-muted-foreground h-4 w-4" />
                 <p className="font-medium">{t.tenantAdmin.resetPassword}</p>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
@@ -252,7 +265,7 @@ export function TenantAdminCredentialsCard({ tenantId }: { tenantId: string }) {
                 {savingPassword ? <Loader2 className="me-2 h-4 w-4 animate-spin" /> : null}
                 {t.tenantAdmin.pSetPassword}
               </Button>
-              <p className="text-xs text-muted-foreground">{t.tenantAdmin.logoutWarning}</p>
+              <p className="text-muted-foreground text-xs">{t.tenantAdmin.logoutWarning}</p>
             </form>
           </div>
         )}

@@ -1,4 +1,4 @@
-import SettingsManager from './settings-manager';
+import SettingsManager from "./settings-manager";
 
 export default function AdvancedSettingsPage() {
   return <SettingsManager />;

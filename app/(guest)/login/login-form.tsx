@@ -36,7 +36,9 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail || !password) {
-      setError(locale === "ar" ? "يرجى إدخال البريد وكلمة المرور" : "Please enter email and password");
+      setError(
+        locale === "ar" ? "يرجى إدخال البريد وكلمة المرور" : "Please enter email and password"
+      );
       return;
     }
 
@@ -45,16 +47,20 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       const res = await signIn("credentials", {
         email: trimmedEmail,
         password,
-        redirect: false,
+        redirect: false
       });
 
       if (!res || res.error) {
-		const raw = res?.error;
-		if (raw === "CredentialsSignin") {
-			setError(locale === "ar" ? "البريد الإلكتروني أو كلمة المرور غير صحيحة" : "Invalid email or password");
-		} else {
-			setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
-		}
+        const raw = res?.error;
+        if (raw === "CredentialsSignin") {
+          setError(
+            locale === "ar"
+              ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+              : "Invalid email or password"
+          );
+        } else {
+          setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
+        }
         return;
       }
 
@@ -86,7 +92,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
           type="email"
           autoComplete="email"
           placeholder={labels.emailPlaceholder}
-          className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+          className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
           required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -100,8 +106,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
           </Label>
           <Link
             href={locale === "en" ? "/en/forgot-password" : "/forgot-password"}
-            className="text-xs text-muted-foreground hover:text-primary hover:underline"
-          >
+            className="text-muted-foreground hover:text-primary text-xs hover:underline">
             {locale === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
           </Link>
         </div>
@@ -112,7 +117,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder={labels.passwordPlaceholder}
-            className="h-11 rounded-xl bg-muted/50 pe-11 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl pe-11"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -121,16 +126,23 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
             type="button"
             tabIndex={-1}
             onClick={() => setShowPassword((v) => !v)}
-            className="absolute inset-y-0 end-0 flex items-center px-3 text-muted-foreground hover:text-foreground"
-            aria-label={showPassword ? (locale === "ar" ? "إخفاء كلمة المرور" : "Hide password") : (locale === "ar" ? "إظهار كلمة المرور" : "Show password")}
-          >
+            className="text-muted-foreground hover:text-foreground absolute inset-y-0 end-0 flex items-center px-3"
+            aria-label={
+              showPassword
+                ? locale === "ar"
+                  ? "إخفاء كلمة المرور"
+                  : "Hide password"
+                : locale === "ar"
+                  ? "إظهار كلمة المرور"
+                  : "Show password"
+            }>
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
       </div>
 
       {error ? (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border px-4 py-3 text-sm">
           {error}
         </div>
       ) : null}
@@ -139,8 +151,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         type="submit"
         variant="brand"
         className="h-11 w-full gap-2 rounded-xl focus-visible:ring-indigo-500"
-        disabled={isLoading}
-      >
+        disabled={isLoading}>
         {isLoading ? (
           <>
             <Loader2 className="h-4 w-4 animate-spin" />

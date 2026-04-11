@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -23,13 +23,10 @@ export async function GET(request: NextRequest) {
     const activities = await getDashboardActivities({ tenantId, limit });
 
     return NextResponse.json({
-      data: activities,
+      data: activities
     });
   } catch (error) {
     logger.error("Error fetching recent activities", undefined, error);
-    return NextResponse.json(
-      { error: "Failed to fetch activities" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch activities" }, { status: 500 });
   }
 }

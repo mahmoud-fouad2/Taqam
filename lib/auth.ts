@@ -13,14 +13,14 @@ import {
   isSuperAdminRole,
   type LegacyUserRole,
   type TenantDashboardRole,
-  type UserRole,
+  type UserRole
 } from "@/lib/access-control";
 import { isSuperAdminBootstrapEnabled } from "@/lib/security/bootstrap";
 import {
   getTenantAccessIssue,
   getTenantAccessMessage,
   getTenantIssueQueryValue,
-  validateTenantAccess,
+  validateTenantAccess
 } from "@/lib/tenant-access";
 import { redirect } from "next/navigation";
 
@@ -34,7 +34,7 @@ export const authOptions: NextAuthOptions = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" },
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
@@ -68,8 +68,8 @@ export const authOptions: NextAuthOptions = {
                 slug: true,
                 status: true,
                 plan: true,
-                planExpiresAt: true,
-              },
+                planExpiresAt: true
+              }
             },
             employee: {
               select: {
@@ -81,10 +81,10 @@ export const authOptions: NextAuthOptions = {
                 lastNameAr: true,
                 avatar: true,
                 departmentId: true,
-                jobTitleId: true,
-              },
-            },
-          },
+                jobTitleId: true
+              }
+            }
+          }
         });
 
         if (!user) {
@@ -110,8 +110,8 @@ export const authOptions: NextAuthOptions = {
                   role: "SUPER_ADMIN",
                   status: "ACTIVE",
                   permissions: [],
-                  lastLoginAt: new Date(),
-                },
+                  lastLoginAt: new Date()
+                }
               });
 
               await prisma.auditLog.create({
@@ -120,8 +120,8 @@ export const authOptions: NextAuthOptions = {
                   userId: created.id,
                   action: "BOOTSTRAP_CREATE_SUPER_ADMIN",
                   entity: "User",
-                  entityId: created.id,
-                },
+                  entityId: created.id
+                }
               });
 
               return {
@@ -135,6 +135,7 @@ export const authOptions: NextAuthOptions = {
                 tenantId: created.tenantId,
                 tenant: null,
                 employee: null,
+                passwordChangedAt: null
               };
             }
           }
@@ -167,17 +168,15 @@ export const authOptions: NextAuthOptions = {
               failedLoginAttempts: { increment: 1 },
               // Lock after 5 failed attempts for 30 minutes
               lockedUntil:
-                user.failedLoginAttempts >= 4
-                  ? new Date(Date.now() + 30 * 60 * 1000)
-                  : undefined,
-            },
+                user.failedLoginAttempts >= 4 ? new Date(Date.now() + 30 * 60 * 1000) : undefined
+            }
           });
-          
+
           logger.auth("login_failed", credentials.email, {
             reason: "invalid_credentials",
-            attempts: user.failedLoginAttempts,
+            attempts: user.failedLoginAttempts
           });
-          
+
           throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
         }
 
@@ -186,7 +185,7 @@ export const authOptions: NextAuthOptions = {
           if (tenantIssue) {
             logger.auth("login_failed", user.id, {
               reason: tenantIssue,
-              tenantId: user.tenantId,
+              tenantId: user.tenantId
             });
             throw new Error(getTenantAccessMessage(tenantIssue, "ar"));
           }
@@ -198,8 +197,8 @@ export const authOptions: NextAuthOptions = {
           data: {
             failedLoginAttempts: 0,
             lockedUntil: null,
-            lastLoginAt: new Date(),
-          },
+            lastLoginAt: new Date()
+          }
         });
 
         // Log successful login
@@ -209,13 +208,13 @@ export const authOptions: NextAuthOptions = {
             userId: user.id,
             action: "LOGIN",
             entity: "User",
-            entityId: user.id,
-          },
+            entityId: user.id
+          }
         });
 
         logger.auth("login", user.id, {
           tenantId: user.tenantId,
-          role: user.role,
+          role: user.role
         });
 
         return {
@@ -229,9 +228,10 @@ export const authOptions: NextAuthOptions = {
           tenantId: user.tenantId,
           tenant: user.tenant,
           employee: user.employee,
+          passwordChangedAt: user.passwordChangedAt?.toISOString() ?? null
         };
-      },
-    }),
+      }
+    })
   ],
 
   events: {
@@ -256,15 +256,15 @@ export const authOptions: NextAuthOptions = {
             userId,
             action: "LOGOUT",
             entity: "User",
-            entityId: userId,
-          },
+            entityId: userId
+          }
         });
 
         logger.auth("logout", userId, { tenantId });
       } catch (error) {
         logger.error("Logout audit log failed", undefined, error);
       }
-    },
+    }
   },
 
   callbacks: {
@@ -281,6 +281,35 @@ export const authOptions: NextAuthOptions = {
         token.tenantId = user.tenantId;
         token.tenant = user.tenant;
         token.employee = user.employee;
+
+        // Used to invalidate existing JWT sessions after password changes.
+        (token as any).passwordChangedAt = (user as any).passwordChangedAt ?? null;
+      }
+
+      // Validate token against current passwordChangedAt.
+      if (!user && typeof (token as any)?.id === "string") {
+        try {
+          const dbUser = await prisma.user.findUnique({
+            where: { id: (token as any).id },
+            select: { passwordChangedAt: true }
+          });
+
+          if (!dbUser) {
+            return null as any;
+          }
+
+          const dbPasswordChangedAt = dbUser.passwordChangedAt?.toISOString() ?? null;
+          const tokenPasswordChangedAt = (token as any).passwordChangedAt;
+
+          // Backward-compat for tokens issued before we started tracking passwordChangedAt.
+          if (tokenPasswordChangedAt === undefined) {
+            (token as any).passwordChangedAt = dbPasswordChangedAt;
+          } else if (tokenPasswordChangedAt !== dbPasswordChangedAt) {
+            return null as any;
+          }
+        } catch {
+          // If DB is temporarily unavailable, keep the session.
+        }
       }
 
       // Handle session update
@@ -303,30 +332,30 @@ export const authOptions: NextAuthOptions = {
           permissions: token.permissions as string[],
           tenantId: token.tenantId as string | null,
           tenant: token.tenant as SessionTenant | null,
-          employee: token.employee as SessionEmployee | null,
+          employee: token.employee as SessionEmployee | null
         };
       }
       return session;
-    },
+    }
   },
 
   pages: {
     signIn: "/login",
-    error: "/login",
+    error: "/login"
   },
 
   session: {
     strategy: "jwt",
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60 // 7 days
   },
 
   jwt: {
-    maxAge: 7 * 24 * 60 * 60, // 7 days
+    maxAge: 7 * 24 * 60 * 60 // 7 days
   },
 
   secret: process.env.NEXTAUTH_SECRET,
 
-  debug: process.env.NODE_ENV === "development",
+  debug: process.env.NODE_ENV === "development"
 };
 
 // ============================================
@@ -399,7 +428,7 @@ export async function requireAuth(): Promise<SessionUser> {
     redirect("/login");
   }
 
-   if (!isSuperAdminRole(user.role)) {
+  if (!isSuperAdminRole(user.role)) {
     const tenantAccess = await validateTenantAccess(user.tenantId);
     if (!tenantAccess.ok) {
       redirect(`/support?issue=${getTenantIssueQueryValue(tenantAccess.issue)}`);
@@ -508,8 +537,7 @@ export const authRoutes = {
   login: "/login",
   logout: "/api/auth/signout",
   dashboard: "/dashboard",
-  unauthorized: "/dashboard?error=unauthorized",
+  unauthorized: "/dashboard?error=unauthorized"
 };
 
 export default authOptions;
-

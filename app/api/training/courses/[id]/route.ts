@@ -27,10 +27,12 @@ const updateCourseSchema = z
         "compliance",
         "safety",
         "onboarding",
-        "other",
+        "other"
       ])
       .optional(),
-    type: z.enum(["in-person", "online", "hybrid", "self-paced", "workshop", "conference"]).optional(),
+    type: z
+      .enum(["in-person", "online", "hybrid", "self-paced", "workshop", "conference"])
+      .optional(),
     status: z.enum(["draft", "scheduled", "ongoing", "completed", "cancelled"]).optional(),
     duration: z.number().int().min(1).optional(),
     maxParticipants: z.number().int().positive().optional().nullable(),
@@ -46,7 +48,7 @@ const updateCourseSchema = z
     currency: z.string().trim().min(1).optional().nullable(),
     isMandatory: z.boolean().optional(),
     targetDepartments: z.array(z.string().trim()).optional(),
-    targetRoles: z.array(z.string().trim()).optional(),
+    targetRoles: z.array(z.string().trim()).optional()
   })
   .strict();
 
@@ -66,7 +68,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     const existing = await prisma.trainingCourse.findFirst({
       where: { id, tenantId },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!existing) {
@@ -98,7 +100,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const existing = await prisma.trainingCourse.findFirst({
       where: { id, tenantId },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!existing) {
@@ -127,9 +129,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           ? (input.category.toUpperCase().replace("-", "_") as any)
           : undefined,
         type: input.type ? (input.type.toUpperCase().replace("-", "_") as any) : undefined,
-        status: input.status
-          ? (input.status.toUpperCase().replace("-", "_") as any)
-          : undefined,
+        status: input.status ? (input.status.toUpperCase().replace("-", "_") as any) : undefined,
         durationHours: input.duration,
         maxParticipants: input.maxParticipants === undefined ? undefined : input.maxParticipants,
         startDate: input.startDate === undefined ? undefined : parseOptionalDate(input.startDate),
@@ -144,9 +144,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         currency: input.currency ?? undefined,
         isMandatory: input.isMandatory,
         targetDepartments: input.targetDepartments,
-        targetRoles: input.targetRoles,
+        targetRoles: input.targetRoles
       },
-      select: { id: true },
+      select: { id: true }
     });
 
     return NextResponse.json({ data: { id } });

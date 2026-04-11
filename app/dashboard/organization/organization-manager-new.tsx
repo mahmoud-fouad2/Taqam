@@ -14,22 +14,16 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Dialog,
@@ -37,7 +31,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -47,14 +41,21 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { IconPencil, IconPlus, IconTrash, IconBuilding, IconMapPin, IconRefresh } from "@tabler/icons-react";
+import {
+  IconPencil,
+  IconPlus,
+  IconTrash,
+  IconBuilding,
+  IconMapPin,
+  IconRefresh
+} from "@tabler/icons-react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -108,7 +109,7 @@ const companySchema = z.object({
   country: z.string().min(1, t.common.countryRequired),
   phone: z.string().optional(),
   email: z.string().email(t.organization.emailInvalid).optional().or(z.literal("")),
-  website: z.string().optional(),
+  website: z.string().optional()
 });
 
 const branchSchema = z.object({
@@ -121,7 +122,7 @@ const branchSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email(t.organization.emailInvalid).optional().or(z.literal("")),
   isHeadquarters: z.boolean().optional(),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean().optional()
 });
 
 type CompanyFormData = z.infer<typeof companySchema>;
@@ -143,7 +144,7 @@ export function OrganizationManager() {
   const [stats, setStats] = useState({
     branchesCount: 0,
     employeesCount: 0,
-    cities: [] as string[],
+    cities: [] as string[]
   });
 
   const companyForm = useForm<CompanyFormData>({
@@ -158,8 +159,8 @@ export function OrganizationManager() {
       country: "SA",
       phone: "",
       email: "",
-      website: "",
-    },
+      website: ""
+    }
   });
 
   const branchForm = useForm<BranchFormData>({
@@ -174,8 +175,8 @@ export function OrganizationManager() {
       phone: "",
       email: "",
       isHeadquarters: false,
-      isActive: true,
-    },
+      isActive: true
+    }
   });
 
   // Fetch organization data
@@ -184,7 +185,7 @@ export function OrganizationManager() {
       const res = await fetch("/api/organization");
       if (!res.ok) throw new Error("Failed to fetch organization");
       const data = await res.json();
-      
+
       if (data.profile) {
         setCompany(data.profile);
         companyForm.reset({
@@ -197,15 +198,15 @@ export function OrganizationManager() {
           country: data.profile.country || "SA",
           phone: data.profile.phone || "",
           email: data.profile.email || "",
-          website: data.profile.website || "",
+          website: data.profile.website || ""
         });
       }
-      
+
       if (data.stats) {
         setStats((prev) => ({
           ...prev,
           branchesCount: data.stats.branchesCount,
-          employeesCount: data.stats.employeesCount,
+          employeesCount: data.stats.employeesCount
         }));
       }
     } catch (error) {
@@ -220,12 +221,12 @@ export function OrganizationManager() {
       const res = await fetch("/api/organization/branches");
       if (!res.ok) throw new Error("Failed to fetch branches");
       const data = await res.json();
-      
+
       setBranches(data.branches || []);
       if (data.stats) {
         setStats((prev) => ({
           ...prev,
-          cities: data.stats.cities || [],
+          cities: data.stats.cities || []
         }));
       }
     } catch (error) {
@@ -251,7 +252,7 @@ export function OrganizationManager() {
       const res = await fetch("/api/organization", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
 
       if (!res.ok) {
@@ -284,7 +285,7 @@ export function OrganizationManager() {
       phone: "",
       email: "",
       isHeadquarters: false,
-      isActive: true,
+      isActive: true
     });
     setBranchDialogOpen(true);
   };
@@ -301,7 +302,7 @@ export function OrganizationManager() {
       phone: branch.phone || "",
       email: branch.email || "",
       isHeadquarters: branch.isHeadquarters,
-      isActive: branch.isActive,
+      isActive: branch.isActive
     });
     setBranchDialogOpen(true);
   };
@@ -309,14 +310,14 @@ export function OrganizationManager() {
   const onBranchSubmit = async (data: BranchFormData) => {
     setIsSaving(true);
     try {
-      const url = editingBranch 
+      const url = editingBranch
         ? `/api/organization/branches/${editingBranch.id}`
         : "/api/organization/branches";
-      
+
       const res = await fetch(url, {
         method: editingBranch ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
 
       if (!res.ok) {
@@ -343,11 +344,11 @@ export function OrganizationManager() {
 
   const confirmDeleteBranch = async () => {
     if (!branchToDelete) return;
-    
+
     setIsSaving(true);
     try {
       const res = await fetch(`/api/organization/branches/${branchToDelete.id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (!res.ok) {
@@ -378,7 +379,7 @@ export function OrganizationManager() {
             <Card key={i}>
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-16 mt-2" />
+                <Skeleton className="mt-2 h-8 w-16" />
               </CardHeader>
             </Card>
           ))}
@@ -433,8 +434,8 @@ export function OrganizationManager() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <IconBuilding className="size-6 text-primary" />
+                  <div className="bg-primary/10 flex size-12 items-center justify-center rounded-lg">
+                    <IconBuilding className="text-primary size-6" />
                   </div>
                   <div>
                     <CardTitle>{company?.nameAr || company?.name || t.common.company}</CardTitle>
@@ -455,12 +456,11 @@ export function OrganizationManager() {
                         country: company.country,
                         phone: company.phone || "",
                         email: company.email || "",
-                        website: company.website || "",
+                        website: company.website || ""
                       });
                     }
                     setIsEditingCompany(!isEditingCompany);
-                  }}
-                >
+                  }}>
                   {isEditingCompany ? t.common.cancel : t.common.edit}
                 </Button>
               </div>
@@ -581,7 +581,12 @@ export function OrganizationManager() {
                           <FormItem>
                             <FormLabel>{t.common.email}</FormLabel>
                             <FormControl>
-                              <Input placeholder="info@company.com" type="email" {...field} dir="ltr" />
+                              <Input
+                                placeholder="info@company.com"
+                                type="email"
+                                {...field}
+                                dir="ltr"
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -611,32 +616,38 @@ export function OrganizationManager() {
               ) : (
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.organization.commercialReg}</p>
+                    <p className="text-muted-foreground text-sm">{t.organization.commercialReg}</p>
                     <p className="font-medium">{company?.commercialRegister || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.organization.taxNumber}</p>
+                    <p className="text-muted-foreground text-sm">{t.organization.taxNumber}</p>
                     <p className="font-medium">{company?.taxNumber || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.common.title}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.title}</p>
                     <p className="font-medium">{company?.address || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.common.city}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.city}</p>
                     <p className="font-medium">{company?.city || "-"}</p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.common.phone}</p>
-                    <p className="font-medium" dir="ltr">{company?.phone || "-"}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.phone}</p>
+                    <p className="font-medium" dir="ltr">
+                      {company?.phone || "-"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.common.email}</p>
-                    <p className="font-medium" dir="ltr">{company?.email || "-"}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.email}</p>
+                    <p className="font-medium" dir="ltr">
+                      {company?.email || "-"}
+                    </p>
                   </div>
                   <div className="space-y-1">
-                    <p className="text-sm text-muted-foreground">{t.organization.website}</p>
-                    <p className="font-medium" dir="ltr">{company?.website || "-"}</p>
+                    <p className="text-muted-foreground text-sm">{t.organization.website}</p>
+                    <p className="font-medium" dir="ltr">
+                      {company?.website || "-"}
+                    </p>
                   </div>
                 </div>
               )}
@@ -650,8 +661,8 @@ export function OrganizationManager() {
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <IconMapPin className="size-5 text-primary" />
+                  <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
+                    <IconMapPin className="text-primary size-5" />
                   </div>
                   <div>
                     <CardTitle>{t.organization.branches}</CardTitle>
@@ -659,11 +670,15 @@ export function OrganizationManager() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchBranches()}>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    aria-label={t.common.refresh}
+                    onClick={() => fetchBranches()}>
                     <IconRefresh className="size-4" />
                   </Button>
                   <Button onClick={handleAddBranch}>
-                    <IconPlus className="size-4 ms-2" />
+                    <IconPlus className="ms-2 size-4" />
                     {t.organization.pAddBranch}
                   </Button>
                 </div>
@@ -671,8 +686,8 @@ export function OrganizationManager() {
             </CardHeader>
             <CardContent>
               {branches.length === 0 ? (
-                <div className="text-center py-12">
-                  <IconMapPin className="size-12 mx-auto text-muted-foreground/50 mb-4" />
+                <div className="py-12 text-center">
+                  <IconMapPin className="text-muted-foreground/50 mx-auto mb-4 size-12" />
                   <p className="text-muted-foreground">{t.organization.noBranches}</p>
                   <Button variant="outline" className="mt-4" onClick={handleAddBranch}>
                     {t.organization.pAddNewBranch}
@@ -697,12 +712,12 @@ export function OrganizationManager() {
                           <div>
                             <p className="font-medium">{branch.nameAr || branch.name}</p>
                             {branch.nameAr && (
-                              <p className="text-sm text-muted-foreground">{branch.name}</p>
+                              <p className="text-muted-foreground text-sm">{branch.name}</p>
                             )}
                           </div>
                         </TableCell>
                         <TableCell>
-                          <code className="text-sm bg-muted px-1.5 py-0.5 rounded">
+                          <code className="bg-muted rounded px-1.5 py-0.5 text-sm">
                             {branch.code || "-"}
                           </code>
                         </TableCell>
@@ -724,8 +739,7 @@ export function OrganizationManager() {
                               variant="ghost"
                               size="icon"
                               aria-label={t.common.edit}
-                              onClick={() => handleEditBranch(branch)}
-                            >
+                              onClick={() => handleEditBranch(branch)}>
                               <IconPencil className="size-4" />
                             </Button>
                             <Button
@@ -733,9 +747,8 @@ export function OrganizationManager() {
                               size="icon"
                               aria-label={t.common.delete}
                               onClick={() => handleDeleteBranch(branch)}
-                              disabled={branch.isHeadquarters || branch.employeesCount > 0}
-                            >
-                              <IconTrash className="size-4 text-destructive" />
+                              disabled={branch.isHeadquarters || branch.employeesCount > 0}>
+                              <IconTrash className="text-destructive size-4" />
                             </Button>
                           </div>
                         </TableCell>
@@ -757,9 +770,7 @@ export function OrganizationManager() {
               {editingBranch ? t.organization.editBranch : t.organization.addNewBranch}
             </DialogTitle>
             <DialogDescription>
-              {editingBranch 
-                ? t.organization.editBranch 
-                : t.organization.addBranchDesc}
+              {editingBranch ? t.organization.editBranch : t.organization.addBranchDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...branchForm}>
@@ -870,7 +881,7 @@ export function OrganizationManager() {
                   )}
                 />
               </div>
-              
+
               <div className="flex items-center gap-6">
                 <FormField
                   control={branchForm.control}
@@ -878,10 +889,7 @@ export function OrganizationManager() {
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <Label>{t.organization.hq}</Label>
                     </FormItem>
@@ -893,10 +901,7 @@ export function OrganizationManager() {
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <Label>{t.common.active}</Label>
                     </FormItem>
@@ -905,11 +910,9 @@ export function OrganizationManager() {
               </div>
 
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setBranchDialogOpen(false)}
-                >{t.common.cancel}</Button>
+                <Button type="button" variant="outline" onClick={() => setBranchDialogOpen(false)}>
+                  {t.common.cancel}
+                </Button>
                 <Button type="submit" disabled={isSaving}>
                   {isSaving ? t.common.saving : editingBranch ? t.common.update : t.common.add}
                 </Button>
@@ -925,15 +928,17 @@ export function OrganizationManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.organization.deleteBranch}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.organization.pAreYouSureYouWantToDeleteTheBr} &quot;{branchToDelete?.nameAr || branchToDelete?.name}&quot;?
-              <br />{t.common.cannotUndo}</AlertDialogDescription>
+              {t.organization.pAreYouSureYouWantToDeleteTheBr} &quot;
+              {branchToDelete?.nameAr || branchToDelete?.name}&quot;?
+              <br />
+              {t.common.cannotUndo}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteBranch}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {isSaving ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>

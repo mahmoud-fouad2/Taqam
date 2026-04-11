@@ -31,7 +31,7 @@ export function ChangePasswordForm({ locale: _locale }: { locale: "ar" | "en" })
         required: t.common.fillAllFields,
         mismatch: t.common.pPasswordsDoNotMatch,
         success: t.common.pPasswordChangedSuccessfully,
-        minLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل.",
+        minLength: "كلمة المرور يجب أن تكون 6 أحرف على الأقل."
       };
     }
 
@@ -45,7 +45,7 @@ export function ChangePasswordForm({ locale: _locale }: { locale: "ar" | "en" })
       required: "Please fill in all fields.",
       mismatch: "Passwords do not match.",
       success: "Password changed successfully.",
-      minLength: "Password must be at least 6 characters.",
+      minLength: "Password must be at least 6 characters."
     };
   }, [
     locale,
@@ -57,7 +57,7 @@ export function ChangePasswordForm({ locale: _locale }: { locale: "ar" | "en" })
     t.common.pPasswordsDoNotMatch,
     t.common.pUpdatePassword,
     t.common.save,
-    t.common.saving,
+    t.common.saving
   ]);
 
   const onSave = async () => {
@@ -83,8 +83,8 @@ export function ChangePasswordForm({ locale: _locale }: { locale: "ar" | "en" })
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           currentPassword: current,
-          newPassword: next,
-        }),
+          newPassword: next
+        })
       });
 
       const data = await res.json();

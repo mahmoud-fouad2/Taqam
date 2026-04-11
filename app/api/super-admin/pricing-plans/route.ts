@@ -27,11 +27,16 @@ async function ensureDefaultPricingPlans() {
         employeesLabel: "حتى 25 موظف",
         employeesLabelEn: "Up to 25 employees",
         featuresAr: ["إدارة الموظفين", "الحضور والانصراف", "الإجازات", "التقارير الأساسية"],
-        featuresEn: ["Employee management", "Time & attendance", "Leave management", "Basic reports"],
+        featuresEn: [
+          "Employee management",
+          "Time & attendance",
+          "Leave management",
+          "Basic reports"
+        ],
         planType: "BASIC",
         isPopular: false,
         isActive: true,
-        sortOrder: 1,
+        sortOrder: 1
       },
       {
         name: "Business",
@@ -48,7 +53,7 @@ async function ensureDefaultPricingPlans() {
         planType: "PROFESSIONAL",
         isPopular: true,
         isActive: true,
-        sortOrder: 2,
+        sortOrder: 2
       },
       {
         name: "Enterprise",
@@ -61,13 +66,18 @@ async function ensureDefaultPricingPlans() {
         employeesLabel: "غير محدود",
         employeesLabelEn: "Unlimited",
         featuresAr: ["كل مميزات الأعمال", "تكاملات مخصصة", "وصول API", "مدير حساب مخصص"],
-        featuresEn: ["Everything in Business", "Custom integrations", "API access", "Dedicated account manager"],
+        featuresEn: [
+          "Everything in Business",
+          "Custom integrations",
+          "API access",
+          "Dedicated account manager"
+        ],
         planType: "ENTERPRISE",
         isPopular: false,
         isActive: true,
-        sortOrder: 3,
-      },
-    ],
+        sortOrder: 3
+      }
+    ]
   });
 }
 
@@ -82,7 +92,7 @@ export async function GET() {
     await ensureDefaultPricingPlans();
 
     const plans = await prisma.pricingPlan.findMany({
-      orderBy: { sortOrder: "asc" },
+      orderBy: { sortOrder: "asc" }
     });
 
     return NextResponse.json({ data: plans });
@@ -104,7 +114,7 @@ export async function POST(req: NextRequest) {
 
     // Check slug uniqueness
     const existing = await prisma.pricingPlan.findUnique({
-      where: { slug: body.slug },
+      where: { slug: body.slug }
     });
 
     if (existing) {
@@ -127,8 +137,8 @@ export async function POST(req: NextRequest) {
         planType: body.planType || "TRIAL",
         isPopular: body.isPopular || false,
         isActive: body.isActive ?? true,
-        sortOrder: body.sortOrder || 0,
-      },
+        sortOrder: body.sortOrder || 0
+      }
     });
 
     return NextResponse.json({ data: plan }, { status: 201 });

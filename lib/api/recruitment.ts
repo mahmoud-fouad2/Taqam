@@ -13,7 +13,7 @@ import type {
   OnboardingStatus,
   OnboardingTemplate,
   RecruitmentPipeline,
-  RecruitmentStats,
+  RecruitmentStats
 } from "@/lib/types/recruitment";
 
 type ApiResult<T> = { success: boolean; data?: T; error?: string };
@@ -38,7 +38,7 @@ const jobFiltersToParams = (filters?: JobSearchFilters) =>
         postedBefore: filters.postedBefore,
         status: filters.status?.join(","),
         jobType: filters.jobType?.join(","),
-        experienceLevel: filters.experienceLevel?.join(","),
+        experienceLevel: filters.experienceLevel?.join(",")
       }
     : undefined;
 
@@ -52,7 +52,7 @@ const applicantFiltersToParams = (filters?: ApplicantSearchFilters) =>
         appliedAfter: filters.appliedAfter,
         appliedBefore: filters.appliedBefore,
         status: filters.status?.join(","),
-        source: filters.source?.join(","),
+        source: filters.source?.join(",")
       }
     : undefined;
 
@@ -65,7 +65,7 @@ const interviewFiltersToParams = (filters?: InterviewSearchFilters) =>
         scheduledAfter: filters.scheduledAfter,
         scheduledBefore: filters.scheduledBefore,
         type: filters.type?.join(","),
-        status: filters.status?.join(","),
+        status: filters.status?.join(",")
       }
     : undefined;
 
@@ -94,7 +94,10 @@ type ApiJobPosting = {
   postedAt?: string | null;
   expiresAt?: string | null;
   applicantsCount?: number | null;
-  createdBy?: { id?: string; name?: string | null; firstName?: string | null; lastName?: string | null } | string | null;
+  createdBy?:
+    | { id?: string; name?: string | null; firstName?: string | null; lastName?: string | null }
+    | string
+    | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -139,7 +142,12 @@ type ApiInterview = {
   meetingLink?: string | null;
   interviewerId?: string | null;
   interviewerName?: string | null;
-  interviewers?: Array<{ id: string; name: string; role?: string | null; avatar?: string | null }> | null;
+  interviewers?: Array<{
+    id: string;
+    name: string;
+    role?: string | null;
+    avatar?: string | null;
+  }> | null;
   feedback?: unknown;
   createdAt: string;
   updatedAt: string;
@@ -299,8 +307,14 @@ function normalizeInterviewStatus(value: string | null | undefined): Interview["
   }
 }
 
-function mapRecommendation(value: unknown): NonNullable<Interview["feedback"]>[number]["recommendation"] {
-  switch (String(value || "").trim().toLowerCase()) {
+function mapRecommendation(
+  value: unknown
+): NonNullable<Interview["feedback"]>[number]["recommendation"] {
+  switch (
+    String(value || "")
+      .trim()
+      .toLowerCase()
+  ) {
     case "strongly-recommend":
       return "strong-hire";
     case "recommend":
@@ -344,9 +358,15 @@ function mapInterviewFeedback(
         strengths: Array.isArray(record.strengths) ? record.strengths.map(String) : [],
         weaknesses: Array.isArray(record.weaknesses) ? record.weaknesses.map(String) : [],
         recommendation: mapRecommendation(record.recommendation),
-        comments: typeof record.comments === "string" ? record.comments : typeof record.notes === "string" ? record.notes : undefined,
-        submittedAt: typeof record.submittedAt === "string" ? record.submittedAt : new Date().toISOString(),
-      },
+        comments:
+          typeof record.comments === "string"
+            ? record.comments
+            : typeof record.notes === "string"
+              ? record.notes
+              : undefined,
+        submittedAt:
+          typeof record.submittedAt === "string" ? record.submittedAt : new Date().toISOString()
+      }
     ];
   });
 
@@ -357,7 +377,8 @@ function mapJobPostingFromApi(job: ApiJobPosting): JobPosting {
   const createdByName =
     typeof job.createdBy === "string"
       ? job.createdBy
-      : job.createdBy?.name || [job.createdBy?.firstName, job.createdBy?.lastName].filter(Boolean).join(" ");
+      : job.createdBy?.name ||
+        [job.createdBy?.firstName, job.createdBy?.lastName].filter(Boolean).join(" ");
 
   return {
     id: job.id,
@@ -367,7 +388,8 @@ function mapJobPostingFromApi(job: ApiJobPosting): JobPosting {
     requirements: splitMultiline(job.requirements),
     responsibilities: splitMultiline(job.responsibilities),
     departmentId: job.departmentId || job.department?.id || "",
-    departmentName: job.department?.nameAr || job.departmentName || job.department?.name || "غير محدد",
+    departmentName:
+      job.department?.nameAr || job.departmentName || job.department?.name || "غير محدد",
     jobTitleId: job.jobTitleId || job.jobTitle?.id || undefined,
     location: job.location ?? "غير محدد",
     jobType: normalizeJobType(job.jobType),
@@ -380,12 +402,13 @@ function mapJobPostingFromApi(job: ApiJobPosting): JobPosting {
     skills: [],
     benefits: splitMultiline(job.benefits),
     openPositions: Math.max(1, Number(job.positions ?? 1)),
-    filledPositions: normalizeJobStatus(job.status) === "filled" ? Math.max(1, Number(job.positions ?? 1)) : 0,
+    filledPositions:
+      normalizeJobStatus(job.status) === "filled" ? Math.max(1, Number(job.positions ?? 1)) : 0,
     applicationDeadline: job.expiresAt ?? undefined,
     postedDate: job.postedAt || job.createdAt,
     createdBy: createdByName || "",
     createdAt: job.createdAt,
-    updatedAt: job.updatedAt,
+    updatedAt: job.updatedAt
   };
 }
 
@@ -408,7 +431,7 @@ function mapApplicantFromApi(applicant: ApiApplicant): Applicant {
     notes: applicant.notes ?? undefined,
     skills: [],
     appliedAt: applicant.appliedAt || applicant.createdAt,
-    updatedAt: applicant.updatedAt,
+    updatedAt: applicant.updatedAt
   };
 }
 
@@ -446,21 +469,25 @@ function mapInterviewFromApi(interview: ApiInterview): Interview {
         id: item.id,
         name: item.name,
         role: item.role || "Interviewer",
-        avatar: item.avatar ?? undefined,
+        avatar: item.avatar ?? undefined
       })) ||
       (interview.interviewerId || interview.interviewerName
         ? [
             {
               id: interview.interviewerId || "unknown",
               name: interview.interviewerName || "غير محدد",
-              role: "Interviewer",
-            },
+              role: "Interviewer"
+            }
           ]
         : []),
-    feedback: mapInterviewFeedback(interview.feedback, interview.interviewerId, interview.interviewerName),
+    feedback: mapInterviewFeedback(
+      interview.feedback,
+      interview.interviewerId,
+      interview.interviewerName
+    ),
     notes: undefined,
     createdAt: interview.createdAt,
-    updatedAt: interview.updatedAt,
+    updatedAt: interview.updatedAt
   };
 }
 
@@ -471,7 +498,8 @@ function toJobPostingPayload(data: Partial<JobPosting>) {
   if (data.titleEn !== undefined) payload.titleAr = data.titleEn || null;
   if (data.description !== undefined) payload.description = data.description;
   if (data.requirements !== undefined) payload.requirements = joinMultiline(data.requirements);
-  if (data.responsibilities !== undefined) payload.responsibilities = joinMultiline(data.responsibilities);
+  if (data.responsibilities !== undefined)
+    payload.responsibilities = joinMultiline(data.responsibilities);
   if (data.benefits !== undefined) payload.benefits = joinMultiline(data.benefits);
   if (data.departmentId !== undefined) payload.departmentId = data.departmentId || null;
   if (data.jobTitleId !== undefined) payload.jobTitleId = data.jobTitleId || null;
@@ -522,12 +550,17 @@ export async function getJobPostings(filters?: JobSearchFilters): Promise<JobPos
 
 export async function getJobPosting(id: string): Promise<JobPosting | null> {
   if (!id) return null;
-  const res = await apiClient.get<ApiJobPosting>(`/recruitment/job-postings/${encodeURIComponent(id)}`);
+  const res = await apiClient.get<ApiJobPosting>(
+    `/recruitment/job-postings/${encodeURIComponent(id)}`
+  );
   return res.success && res.data ? mapJobPostingFromApi(res.data) : null;
 }
 
 export async function createJobPosting(data: Partial<JobPosting>): Promise<JobPosting> {
-  const res = await apiClient.post<{ id: string }>("/recruitment/job-postings", toJobPostingPayload(data));
+  const res = await apiClient.post<{ id: string }>(
+    "/recruitment/job-postings",
+    toJobPostingPayload(data)
+  );
   const created = mustData(res);
   const fullRecord = await getJobPosting(created.id);
   if (!fullRecord) {
@@ -563,11 +596,16 @@ export async function getApplicants(filters?: ApplicantSearchFilters): Promise<A
 
 export async function getApplicant(id: string): Promise<Applicant | null> {
   if (!id) return null;
-  const res = await apiClient.get<ApiApplicant>(`/recruitment/applicants/${encodeURIComponent(id)}`);
+  const res = await apiClient.get<ApiApplicant>(
+    `/recruitment/applicants/${encodeURIComponent(id)}`
+  );
   return res.success && res.data ? mapApplicantFromApi(res.data) : null;
 }
 
-export async function updateApplicantStatus(id: string, status: ApplicationStatus): Promise<Applicant> {
+export async function updateApplicantStatus(
+  id: string,
+  status: ApplicationStatus
+): Promise<Applicant> {
   const res = await apiClient.patch<ApiApplicant>(
     `/recruitment/applicants/${encodeURIComponent(id)}/status`,
     { status }
@@ -596,12 +634,17 @@ export async function getInterviews(filters?: InterviewSearchFilters): Promise<I
 
 export async function getInterview(id: string): Promise<Interview | null> {
   if (!id) return null;
-  const res = await apiClient.get<ApiInterview>(`/recruitment/interviews/${encodeURIComponent(id)}`);
+  const res = await apiClient.get<ApiInterview>(
+    `/recruitment/interviews/${encodeURIComponent(id)}`
+  );
   return res.success && res.data ? mapInterviewFromApi(res.data) : null;
 }
 
 export async function scheduleInterview(data: Partial<Interview>): Promise<Interview> {
-  const res = await apiClient.post<{ id: string }>("/recruitment/interviews", toInterviewPayload(data));
+  const res = await apiClient.post<{ id: string }>(
+    "/recruitment/interviews",
+    toInterviewPayload(data)
+  );
   const created = mustData(res);
   const fullRecord = await getInterview(created.id);
   if (!fullRecord) {
@@ -610,7 +653,10 @@ export async function scheduleInterview(data: Partial<Interview>): Promise<Inter
   return fullRecord;
 }
 
-export async function updateInterviewStatus(id: string, status: Interview["status"]): Promise<Interview> {
+export async function updateInterviewStatus(
+  id: string,
+  status: Interview["status"]
+): Promise<Interview> {
   const res = await apiClient.patch<ApiInterview>(
     `/recruitment/interviews/${encodeURIComponent(id)}/status`,
     { status }
@@ -640,8 +686,8 @@ export async function submitInterviewFeedback(
                 : payload?.recommendation === "strong-no-hire"
                   ? "strongly-not-recommend"
                   : "neutral",
-        notes: payload?.comments,
-      },
+        notes: payload?.comments
+      }
     }
   );
   return mapInterviewFromApi(mustData(res));
@@ -690,7 +736,9 @@ export async function updateOfferStatus(id: string, status: OfferStatus): Promis
 
 // ==================== الإلحاق ====================
 
-export async function getOnboardingProcesses(status?: OnboardingStatus[]): Promise<OnboardingProcess[]> {
+export async function getOnboardingProcesses(
+  status?: OnboardingStatus[]
+): Promise<OnboardingProcess[]> {
   const res = await apiClient.get<OnboardingProcess[]>(
     "/recruitment/onboarding-processes",
     status ? { params: { status: status.join(",") } } : undefined
@@ -712,7 +760,7 @@ export async function createOnboardingProcess(
 ): Promise<OnboardingProcess> {
   const res = await apiClient.post<OnboardingProcess>("/recruitment/onboarding-processes", {
     employeeId,
-    templateId,
+    templateId
   });
   return mustData(res);
 }

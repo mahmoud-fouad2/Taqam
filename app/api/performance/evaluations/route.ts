@@ -43,19 +43,19 @@ export async function GET(request: NextRequest) {
             lastNameAr: true,
             avatar: true,
             department: { select: { name: true, nameAr: true } },
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
         },
         evaluator: {
           select: {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
+            lastNameAr: true
+          }
         },
-        cycle: { select: { name: true, nameAr: true } },
-      },
+        cycle: { select: { name: true, nameAr: true } }
+      }
     });
 
     return NextResponse.json({
@@ -83,8 +83,8 @@ export async function GET(request: NextRequest) {
         employeeComments: e.employeeComments ?? undefined,
         submittedAt: e.submittedAt ? e.submittedAt.toISOString() : undefined,
         reviewedAt: e.reviewedAt ? e.reviewedAt.toISOString() : undefined,
-        createdAt: e.createdAt.toISOString(),
-      })),
+        createdAt: e.createdAt.toISOString()
+      }))
     });
   } catch (error) {
     console.error("Error fetching evaluations:", error);
@@ -113,8 +113,8 @@ export async function POST(request: NextRequest) {
         employeeId: body.employeeId,
         evaluatorId: body.evaluatorId || null,
         status: "NOT_STARTED",
-        scores: body.scores || [],
-      },
+        scores: body.scores || []
+      }
     });
 
     return NextResponse.json({ data: { id: evaluation.id } }, { status: 201 });

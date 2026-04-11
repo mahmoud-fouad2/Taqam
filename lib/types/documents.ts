@@ -3,42 +3,42 @@
  * نظام إدارة الوثائق والملفات
  */
 
-export type DocumentCategory = 
-  | "personal"      // وثائق شخصية (هوية، جواز)
-  | "employment"    // وثائق توظيف (عقد، خطاب تعيين)
-  | "education"     // شهادات تعليمية
-  | "medical"       // تقارير طبية
-  | "financial"     // وثائق مالية
-  | "legal"         // وثائق قانونية
-  | "other";        // أخرى
+export type DocumentCategory =
+  | "personal" // وثائق شخصية (هوية، جواز)
+  | "employment" // وثائق توظيف (عقد، خطاب تعيين)
+  | "education" // شهادات تعليمية
+  | "medical" // تقارير طبية
+  | "financial" // وثائق مالية
+  | "legal" // وثائق قانونية
+  | "other"; // أخرى
 
 export type DocumentStatus = "pending" | "approved" | "rejected" | "expired";
 
 export interface Document {
   id: string;
-  
+
   // File info
   fileName: string;
   originalName: string;
   mimeType: string;
   size: number; // bytes
   url: string; // Storage URL (local or R2)
-  
+
   // Metadata
   category: DocumentCategory;
   title: string;
   titleAr?: string;
   description?: string;
-  
+
   // Relation
   employeeId: string;
   tenantId: string;
-  
+
   // Status & Dates
   status: DocumentStatus;
   expiryDate?: string;
   issuedDate?: string;
-  
+
   // Audit
   uploadedBy: string;
   uploadedAt: string;
@@ -66,17 +66,18 @@ export const documentCategoryLabels: Record<DocumentCategory, { en: string; ar: 
   medical: { en: "Medical Records", ar: "تقارير طبية" },
   financial: { en: "Financial Documents", ar: "وثائق مالية" },
   legal: { en: "Legal Documents", ar: "وثائق قانونية" },
-  other: { en: "Other", ar: "أخرى" },
+  other: { en: "Other", ar: "أخرى" }
 };
 
-export const documentStatusLabels: Record<DocumentStatus, { en: string; ar: string; color: string }> = {
+export const documentStatusLabels: Record<
+  DocumentStatus,
+  { en: string; ar: string; color: string }
+> = {
   pending: { en: "Pending Review", ar: "قيد المراجعة", color: "bg-yellow-500" },
   approved: { en: "Approved", ar: "معتمد", color: "bg-green-500" },
   rejected: { en: "Rejected", ar: "مرفوض", color: "bg-red-500" },
-  expired: { en: "Expired", ar: "منتهي الصلاحية", color: "bg-gray-500" },
+  expired: { en: "Expired", ar: "منتهي الصلاحية", color: "bg-gray-500" }
 };
-
-
 
 // Helper functions
 export function formatFileSize(bytes: number): string {
@@ -99,5 +100,5 @@ export function isDocumentExpired(doc: Document): boolean {
 }
 
 export function getDocumentsForEmployee(employeeId: string, docs: Document[]): Document[] {
-  return docs.filter(d => d.employeeId === employeeId);
+  return docs.filter((d) => d.employeeId === employeeId);
 }

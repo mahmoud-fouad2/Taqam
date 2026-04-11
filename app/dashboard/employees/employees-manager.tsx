@@ -4,20 +4,21 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { toast } from "sonner";import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { IconPlus, IconRefresh } from "@tabler/icons-react";
 import { ExportButton } from "@/components/export-button";
 
-import type { Employee, Department, JobTitle, ContractType, EmployeeStatus } from "@/lib/types/core-hr";
+import type {
+  Employee,
+  Department,
+  JobTitle,
+  ContractType,
+  EmployeeStatus
+} from "@/lib/types/core-hr";
 import { departmentsService, employeesService, jobTitlesService } from "@/lib/api";
 
 import { EmployeeFormDialog } from "./_components/employee-form-dialog";
@@ -57,7 +58,7 @@ export function EmployeesManager() {
       else p.set(key, value);
       router.replace(`${pathname}?${p.toString()}`, { scroll: false });
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams]
   );
 
   const setSearchQuery = (v: string) => updateFilter("q", v);
@@ -72,13 +73,17 @@ export function EmployeesManager() {
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
 
   // Fetch data from API using React Query
-  const { data: employees = [], isLoading: isLoadingEmployees, refetch: refetchEmployees } = useQuery({
+  const {
+    data: employees = [],
+    isLoading: isLoadingEmployees,
+    refetch: refetchEmployees
+  } = useQuery({
     queryKey: ["employees"],
     queryFn: async () => {
       const res = await employeesService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch employees");
       return res.data || [];
-    },
+    }
   });
 
   const { data: departments = [], isLoading: isLoadingDepartments } = useQuery({
@@ -87,7 +92,7 @@ export function EmployeesManager() {
       const res = await departmentsService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch departments");
       return res.data || [];
-    },
+    }
   });
 
   const { data: jobTitles = [], isLoading: isLoadingJobTitles } = useQuery({
@@ -96,7 +101,7 @@ export function EmployeesManager() {
       const res = await jobTitlesService.getAll();
       if (!res.success) throw new Error(res.error || "Failed to fetch job titles");
       return res.data || [];
-    },
+    }
   });
 
   const loading = isLoadingEmployees || isLoadingDepartments || isLoadingJobTitles;
@@ -106,7 +111,7 @@ export function EmployeesManager() {
   };
 
   useEffect(() => {
-    const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 200);      
+    const t = setTimeout(() => setDebouncedSearchQuery(searchQuery), 200);
     return () => clearTimeout(t);
   }, [searchQuery]);
 
@@ -127,8 +132,8 @@ export function EmployeesManager() {
       hireDate: "",
       contractType: "full_time",
       basicSalary: "",
-      status: "active",
-    },
+      status: "active"
+    }
   });
 
   // Filter
@@ -184,7 +189,7 @@ export function EmployeesManager() {
       hireDate: new Date().toISOString().split("T")[0],
       contractType: "full_time",
       basicSalary: "",
-      status: "onboarding",
+      status: "onboarding"
     });
     setIsDialogOpen(true);
   };
@@ -207,7 +212,7 @@ export function EmployeesManager() {
       hireDate: emp.hireDate,
       contractType: emp.contractType,
       basicSalary: emp.basicSalary?.toString() || "",
-      status: emp.status,
+      status: emp.status
     });
     setIsDialogOpen(true);
   };
@@ -232,7 +237,7 @@ export function EmployeesManager() {
           hireDate: data.hireDate,
           contractType: data.contractType as ContractType,
           basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined,
-          status: (data.status as EmployeeStatus) || editingEmployee.status,
+          status: (data.status as EmployeeStatus) || editingEmployee.status
         });
         if (!res.success) throw new Error(res.error || "Failed to update employee");
         toast.success(t.employees.updatedSuccess);
@@ -252,7 +257,7 @@ export function EmployeesManager() {
           managerId: data.managerId || undefined,
           hireDate: data.hireDate,
           contractType: data.contractType as ContractType,
-          basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined,
+          basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined
         });
         if (!res.success) throw new Error(res.error || "Failed to create employee");
         toast.success(t.employees.addedSuccess);
@@ -280,11 +285,7 @@ export function EmployeesManager() {
         const wasTerminated = employeeToDelete.status === "terminated";
         const res = await employeesService.delete(employeeToDelete.id);
         if (!res.success) throw new Error(res.error || "Failed to delete employee");
-        toast.success(
-          wasTerminated
-            ? t.employees.deletedPermanently
-            : t.employees.terminated
-        );
+        toast.success(wasTerminated ? t.employees.deletedPermanently : t.employees.terminated);
         await fetchEmployees();
       } catch (error) {
         console.error("Error deleting employee:", error);
@@ -309,7 +310,7 @@ export function EmployeesManager() {
             <Card key={i}>
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-16 mt-2" />
+                <Skeleton className="mt-2 h-8 w-16" />
               </CardHeader>
             </Card>
           ))}
@@ -317,7 +318,7 @@ export function EmployeesManager() {
         <Card>
           <CardHeader>
             <Skeleton className="h-6 w-32" />
-            <Skeleton className="h-4 w-48 mt-2" />
+            <Skeleton className="mt-2 h-4 w-48" />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -350,17 +351,22 @@ export function EmployeesManager() {
               <CardDescription>{t.employees.subtitle}</CardDescription>
             </div>
             <div className="flex gap-2">
-              <ExportButton 
-                type="employees" 
-                filters={{ 
+              <ExportButton
+                type="employees"
+                filters={{
                   departmentId: filterDept !== "all" ? filterDept : "",
                   status: filterStatus !== "all" ? filterStatus : ""
-                }} 
+                }}
               />
               <Button variant="outline" onClick={() => setIsImportDialogOpen(true)}>
                 {t.employees.importCsv}
               </Button>
-              <Button variant="outline" size="icon" onClick={fetchEmployees} aria-label={t.common.refresh} title={t.common.refresh}>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchEmployees}
+                aria-label={t.common.refresh}
+                title={t.common.refresh}>
                 <IconRefresh className="h-4 w-4" />
               </Button>
               <Button onClick={handleAdd}>

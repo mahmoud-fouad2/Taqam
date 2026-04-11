@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
     const limitInfo = await checkRateLimit(request, {
       keyPrefix: "mobile:auth:challenge",
       limit,
-      windowMs: 5 * 60 * 1000,
+      windowMs: 5 * 60 * 1000
     });
 
     if (!limitInfo.allowed) {
@@ -24,11 +24,15 @@ export async function POST(request: NextRequest) {
 
     const payloadOrRes = await requireMobileEmployeeAuthWithDevice(request);
     if (payloadOrRes instanceof NextResponse)
-      return withRateLimitHeaders(payloadOrRes, { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt });
+      return withRateLimitHeaders(payloadOrRes, {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
 
     const device = await prisma.mobileDevice.findUnique({
       where: { userId_deviceId: { userId: payloadOrRes.userId, deviceId: payloadOrRes.deviceId } },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!device) {
@@ -40,13 +44,13 @@ export async function POST(request: NextRequest) {
 
     const challenge = await createChallenge(prisma, {
       userId: payloadOrRes.userId,
-      mobileDeviceId: device.id,
+      mobileDeviceId: device.id
     });
 
     return withRateLimitHeaders(NextResponse.json({ data: challenge }), {
       limit,
       remaining: limitInfo.remaining,
-      resetAt: limitInfo.resetAt,
+      resetAt: limitInfo.resetAt
     });
   } catch (error) {
     logger.error("Mobile challenge error", undefined, error);

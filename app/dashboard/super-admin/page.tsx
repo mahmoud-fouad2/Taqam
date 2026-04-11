@@ -23,9 +23,9 @@ export default async function SuperAdminPage() {
     // Keep the page non-disclosing and consistent with admin APIs.
     return (
       <div className="space-y-4">
-        <div className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm">
+        <div className="border-border/60 bg-card/80 rounded-2xl border p-5 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight">{t.superAdmin.pUnauthorized}</h1>
-          <p className="mt-1 text-muted-foreground">{t.superAdmin.onlyForAdmin}</p>
+          <p className="text-muted-foreground mt-1">{t.superAdmin.onlyForAdmin}</p>
         </div>
       </div>
     );
@@ -37,7 +37,7 @@ export default async function SuperAdminPage() {
     pendingRequestsCount,
     totalUsers,
     recentTenants,
-    pendingRequests,
+    pendingRequests
   ] = await Promise.all([
     prisma.tenant.count(),
     prisma.tenant.count({ where: { status: "ACTIVE" } }),
@@ -46,29 +46,29 @@ export default async function SuperAdminPage() {
     prisma.tenant.findMany({
       orderBy: { createdAt: "desc" },
       take: 3,
-      include: { _count: { select: { users: true } } },
+      include: { _count: { select: { users: true } } }
     }),
     prisma.tenantRequest.findMany({
       where: { status: "PENDING" },
       orderBy: { createdAt: "desc" },
-      take: 5,
-    }),
+      take: 5
+    })
   ]);
 
   const stats = {
     totalTenants,
     activeTenants,
     pendingRequests: pendingRequestsCount,
-    totalUsers,
+    totalUsers
   };
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+      <section className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/70 rounded-2xl border p-5 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-1">
             <h1 className="text-2xl font-semibold tracking-tight">{t.superAdmin.title}</h1>
-            <p className="text-sm text-muted-foreground">{t.superAdmin.subtitle}</p>
+            <p className="text-muted-foreground text-sm">{t.superAdmin.subtitle}</p>
           </div>
           <Button asChild className="min-w-36">
             <Link href="/dashboard/super-admin/tenants/new">
@@ -83,13 +83,13 @@ export default async function SuperAdminPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.superAdmin.totalTenants}</CardTitle>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <span className="bg-primary/10 text-primary inline-flex h-8 w-8 items-center justify-center rounded-md">
               <Building2 className="h-4 w-4" />
             </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalTenants}</div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {stats.activeTenants} {t.superAdmin.pActive}
             </p>
           </CardContent>
@@ -98,13 +98,13 @@ export default async function SuperAdminPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.superAdmin.totalUsers}</CardTitle>
-            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <span className="bg-primary/10 text-primary inline-flex h-8 w-8 items-center justify-center rounded-md">
               <Users className="h-4 w-4" />
             </span>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">{t.superAdmin.acrossAllTenants}</p>
+            <p className="text-muted-foreground text-xs">{t.superAdmin.acrossAllTenants}</p>
           </CardContent>
         </Card>
 
@@ -117,7 +117,7 @@ export default async function SuperAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.pendingRequests}</div>
-            <p className="text-xs text-muted-foreground">{t.superAdmin.awaitingReview}</p>
+            <p className="text-muted-foreground text-xs">{t.superAdmin.awaitingReview}</p>
           </CardContent>
         </Card>
 
@@ -130,7 +130,7 @@ export default async function SuperAdminPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+15%</div>
-            <p className="text-xs text-muted-foreground">{t.superAdmin.vsLastMonth}</p>
+            <p className="text-muted-foreground text-xs">{t.superAdmin.vsLastMonth}</p>
           </CardContent>
         </Card>
       </div>
@@ -149,23 +149,20 @@ export default async function SuperAdminPage() {
               {recentTenants.map((tenant) => (
                 <div
                   key={tenant.id}
-                  className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/25 p-3 transition-colors hover:bg-muted/40"
-                >
+                  className="border-border/60 bg-muted/25 hover:bg-muted/40 flex items-center justify-between rounded-xl border p-3 transition-colors">
                   <div className="space-y-1">
                     <Link
                       href={`/dashboard/super-admin/tenants/${tenant.id}`}
-                      className="font-medium hover:text-primary"
-                    >
+                      className="hover:text-primary font-medium">
                       {tenant.nameAr ?? tenant.name}
                     </Link>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       /t/{tenant.slug} • {tenant._count.users} {t.superAdmin.pUser}
                     </p>
                   </div>
                   <Badge
                     variant={tenant.status === "ACTIVE" ? "default" : "secondary"}
-                    className="gap-1"
-                  >
+                    className="gap-1">
                     {tenant.status === "ACTIVE" ? (
                       <>
                         <CheckCircle2 className="h-3 w-3" />
@@ -183,8 +180,7 @@ export default async function SuperAdminPage() {
             </div>
             <Link
               href="/dashboard/super-admin/tenants"
-              className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
-            >
+              className="text-primary mt-4 inline-flex text-sm font-medium hover:underline">
               {t.superAdmin.viewAllTenants}
             </Link>
           </CardContent>
@@ -204,13 +200,10 @@ export default async function SuperAdminPage() {
                 {pendingRequests.map((request) => (
                   <div
                     key={request.id}
-                    className="flex items-center justify-between rounded-xl border border-border/60 bg-muted/25 p-3 transition-colors hover:bg-muted/40"
-                  >
+                    className="border-border/60 bg-muted/25 hover:bg-muted/40 flex items-center justify-between rounded-xl border p-3 transition-colors">
                     <div className="space-y-1">
                       <p className="font-medium">{request.companyNameAr ?? request.companyName}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {request.contactEmail}
-                      </p>
+                      <p className="text-muted-foreground text-sm">{request.contactEmail}</p>
                     </div>
                     <Button asChild size="sm" className="h-8">
                       <Link href={`/dashboard/super-admin/requests/${request.id}`}>
@@ -221,15 +214,14 @@ export default async function SuperAdminPage() {
                 ))}
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
+              <div className="text-muted-foreground flex flex-col items-center justify-center py-8 text-center">
                 <CheckCircle2 className="mb-2 h-8 w-8" />
                 <p>{t.superAdmin.noPendingRequests}</p>
               </div>
             )}
             <Link
               href="/dashboard/super-admin/requests"
-              className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
-            >
+              className="text-primary mt-4 inline-flex text-sm font-medium hover:underline">
               {t.superAdmin.viewAllRequests}
             </Link>
           </CardContent>
@@ -246,25 +238,45 @@ export default async function SuperAdminPage() {
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-            <Link href="/help-center" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+            <Link
+              href="/help-center"
+              className="group border-border/60 bg-background/70 hover:border-primary/40 hover:bg-primary/[0.06] rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5">
               <p className="font-medium">{t.superAdmin.helpCenter}</p>
-              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.helpCenterDesc}</p>
+              <p className="text-muted-foreground group-hover:text-foreground/80 mt-1 text-sm transition-colors">
+                {t.superAdmin.helpCenterDesc}
+              </p>
             </Link>
-            <Link href="/careers" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+            <Link
+              href="/careers"
+              className="group border-border/60 bg-background/70 hover:border-primary/40 hover:bg-primary/[0.06] rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5">
               <p className="font-medium">{t.superAdmin.careersPortal}</p>
-              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.careersPortalDesc}</p>
+              <p className="text-muted-foreground group-hover:text-foreground/80 mt-1 text-sm transition-colors">
+                {t.superAdmin.careersPortalDesc}
+              </p>
             </Link>
-            <Link href="/pricing" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+            <Link
+              href="/pricing"
+              className="group border-border/60 bg-background/70 hover:border-primary/40 hover:bg-primary/[0.06] rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5">
               <p className="font-medium">{t.superAdmin.pricing}</p>
-              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.pricingDesc}</p>
+              <p className="text-muted-foreground group-hover:text-foreground/80 mt-1 text-sm transition-colors">
+                {t.superAdmin.pricingDesc}
+              </p>
             </Link>
-            <Link href="/dashboard/support" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+            <Link
+              href="/dashboard/support"
+              className="group border-border/60 bg-background/70 hover:border-primary/40 hover:bg-primary/[0.06] rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5">
               <p className="font-medium">{t.superAdmin.supportTickets}</p>
-              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.supportTicketsDesc}</p>
+              <p className="text-muted-foreground group-hover:text-foreground/80 mt-1 text-sm transition-colors">
+                {t.superAdmin.supportTicketsDesc}
+              </p>
             </Link>
-            <Link href="/dashboard/help-center" className="group rounded-xl border border-border/60 bg-background/70 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/40 hover:bg-primary/[0.06]">
+            <Link
+              href="/dashboard/help-center"
+              className="group border-border/60 bg-background/70 hover:border-primary/40 hover:bg-primary/[0.06] rounded-xl border p-4 shadow-sm transition-all hover:-translate-y-0.5">
               <p className="font-medium">{t.superAdmin.internalHelp}</p>
-              <p className="mt-1 text-sm text-muted-foreground transition-colors group-hover:text-foreground/80">{t.superAdmin.internalHelpDesc}</p>
+              <p className="text-muted-foreground group-hover:text-foreground/80 mt-1 text-sm transition-colors">
+                {t.superAdmin.internalHelpDesc}
+              </p>
             </Link>
           </div>
         </CardContent>

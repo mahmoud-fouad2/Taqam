@@ -42,7 +42,6 @@ Last updated: 2026-04-07
 ### Mobile App
 
 - التطبيق الرسمي الوحيد الجاري دعمه: `apps/mobile/`
-- التطبيق `mobile-app/` محفوظ كمرجع legacy فقط، وليس مسار التطوير أو التحقق الرسمي.
 
 ## Directory Truth Table
 
@@ -59,7 +58,6 @@ Last updated: 2026-04-07
 
 ### Historical / Reference Only
 
-- `mobile-app/`
 - `docs/archive/`
 - `docs/reports/`
 
@@ -256,7 +254,7 @@ pnpm --dir apps/mobile android:aab:release
 - تفعيل release signing النهائي لتطبيق Android
 - اختبار الجهاز الحقيقي بعد التوقيع النهائي
 - تنظيف إضافي للتقارير التاريخية غير المستخدمة إذا تقرر تقليل الأرشيف لاحقًا
-- معالجة تحذير Sentry المستقبلي بنقل أي بقايا `sentry.client.config.ts` بالكامل عند وقت مناسب
+- حسم `sslmode` في قيم البيئة الإنتاجية بشكل صريح وفق مزود قاعدة البيانات
 
 ## Recommended Starting Point For Future Work
 

@@ -7,7 +7,7 @@ describe("calculateGosi", () => {
     const result = calculateGosi({
       basicSalary: 8000,
       housingAllowance: 2000,
-      isSaudi: true,
+      isSaudi: true
     });
 
     expect(result.employeeContribution).toBe(975);
@@ -21,7 +21,7 @@ describe("calculateGosi", () => {
     const result = calculateGosi({
       basicSalary: 8000,
       housingAllowance: 2000,
-      isSaudi: false,
+      isSaudi: false
     });
 
     expect(result.employeeContribution).toBe(0);
@@ -39,7 +39,7 @@ describe("calculatePayrollDeductions", () => {
       isSaudi: true,
       absenceDays: 1,
       lateDays: 2,
-      workingDays: 30,
+      workingDays: 30
     });
 
     expect(result.grossSalary).toBe(8100);

@@ -3,9 +3,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  notFoundResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { notifyLeaveStatusChanged } from "@/lib/notifications/send";
 
 function isSuperAdmin(role: string | undefined) {
@@ -17,7 +22,9 @@ function mapLeaveRequest(r: any) {
 }
 
 function canManageLeaveRequests(role: string | undefined) {
-  return role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER";
+  return (
+    role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER"
+  );
 }
 
 async function canManagerAccessEmployee(params: {
@@ -27,7 +34,7 @@ async function canManagerAccessEmployee(params: {
 }) {
   const requesterEmployee = await prisma.employee.findFirst({
     where: { tenantId: params.tenantId, userId: params.managerUserId },
-    select: { id: true },
+    select: { id: true }
   });
 
   return Boolean(requesterEmployee && params.targetEmployeeManagerId === requesterEmployee.id);
@@ -40,40 +47,38 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const tenantId = session.user.tenantId;
     if (!tenantId && !isSuperAdmin(session.user.role)) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+      return errorResponse("Tenant required", 400);
     }
 
     const leaveRequest = await prisma.leaveRequest.findFirst({
       where: {
         id,
-        ...(tenantId ? { tenantId } : {}),
+        ...(tenantId ? { tenantId } : {})
       },
       include: {
         employee: {
           include: {
             user: {
               select: {
-                id: true,
-              },
+                id: true
+              }
             },
             department: true,
-            jobTitle: true,
-          },
+            jobTitle: true
+          }
         },
-        leaveType: true,
-      },
+        leaveType: true
+      }
     });
 
     if (!leaveRequest) {
-      return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
+      return notFoundResponse("Leave request not found");
     }
 
     const role = session.user.role;
@@ -85,46 +90,41 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         (await canManagerAccessEmployee({
           tenantId: leaveRequest.tenantId,
           managerUserId: session.user.id,
-          targetEmployeeManagerId: leaveRequest.employee.managerId ?? null,
+          targetEmployeeManagerId: leaveRequest.employee.managerId ?? null
         }));
 
       if (!canAccess) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
     } else if (!canManageLeaveRequests(role) && !isSelf) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return errorResponse("Access denied", 403);
     }
 
-    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
+    return dataResponse(mapLeaveRequest(leaveRequest));
   } catch (error) {
-    console.error("Error fetching leave request:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch leave request" },
-      { status: 500 }
-    );
+    logApiError("Error fetching leave request", error);
+    return errorResponse("Failed to fetch leave request");
   }
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const body = await request.json();
 
     const tenantId = session.user.tenantId;
     if (!tenantId && !isSuperAdmin(session.user.role)) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+      return errorResponse("Tenant required", 400);
     }
 
     const existing = await prisma.leaveRequest.findFirst({
       where: {
         id,
-        ...(tenantId ? { tenantId } : {}),
+        ...(tenantId ? { tenantId } : {})
       },
       include: {
         employee: {
@@ -134,20 +134,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
+            lastNameAr: true
+          }
         },
         leaveType: {
           select: {
             name: true,
-            nameAr: true,
-          },
-        },
-      },
+            nameAr: true
+          }
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
+      return notFoundResponse("Leave request not found");
     }
 
     const canManage = canManageLeaveRequests(session.user.role);
@@ -159,18 +159,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const action = actionRaw.toLowerCase();
     if (action === "approve" || action === "reject") {
       if (!canManage) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
 
       if (role === "MANAGER") {
         const canAccess = await canManagerAccessEmployee({
           tenantId: existing.tenantId,
           managerUserId: session.user.id,
-          targetEmployeeManagerId: existing.employee.managerId ?? null,
+          targetEmployeeManagerId: existing.employee.managerId ?? null
         });
 
         if (!canAccess) {
-          return NextResponse.json({ error: "Access denied" }, { status: 403 });
+          return errorResponse("Access denied", 403);
         }
       }
 
@@ -184,8 +184,8 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
             status: action === "approve" ? "APPROVED" : "REJECTED",
             approvedById: session.user.id,
             approvedAt: new Date(),
-            rejectionReason: action === "reject" ? body.rejectionReason : null,
-          },
+            rejectionReason: action === "reject" ? body.rejectionReason : null
+          }
         });
 
         // If approved, move days from pending -> used
@@ -195,20 +195,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
               employeeId_leaveTypeId_year: {
                 employeeId: existing.employeeId,
                 leaveTypeId: existing.leaveTypeId,
-                year,
-              },
+                year
+              }
             },
             update: {
               used: { increment: totalDays },
-              pending: { decrement: totalDays },
+              pending: { decrement: totalDays }
             },
             create: {
               tenantId: existing.tenantId,
               employeeId: existing.employeeId,
               leaveTypeId: existing.leaveTypeId,
               year,
-              used: totalDays,
-            },
+              used: totalDays
+            }
           });
         }
 
@@ -222,20 +222,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           status: action === "approve" ? "approved" : "rejected",
           leaveType: existing.leaveType.nameAr || existing.leaveType.name,
           rejectionReason: action === "reject" ? body.rejectionReason : undefined,
-          requestId: leaveRequest.id,
+          requestId: leaveRequest.id
         });
       }
 
-      return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
+      return dataResponse(mapLeaveRequest(leaveRequest));
     }
 
     if (!canManage && !isSelf) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return errorResponse("Access denied", 403);
     }
 
     // Managers should not edit other employees' leave requests.
     if (role === "MANAGER" && !isSelf) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      return errorResponse("Access denied", 403);
     }
 
     // Regular update
@@ -245,43 +245,38 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         startDate: body.startDate ? new Date(body.startDate) : undefined,
         endDate: body.endDate ? new Date(body.endDate) : undefined,
         reason: body.reason,
-        attachmentUrl: body.attachmentUrl,
-      },
+        attachmentUrl: body.attachmentUrl
+      }
     });
 
-    return NextResponse.json({ data: mapLeaveRequest(leaveRequest) });
+    return dataResponse(mapLeaveRequest(leaveRequest));
   } catch (error) {
-    console.error("Error updating leave request:", error);
-    return NextResponse.json(
-      { error: "Failed to update leave request" },
-      { status: 500 }
-    );
+    logApiError("Error updating leave request", error);
+    return errorResponse("Failed to update leave request");
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const tenantId = session.user.tenantId;
     if (!tenantId && !isSuperAdmin(session.user.role)) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
+      return errorResponse("Tenant required", 400);
     }
 
     const existing = await prisma.leaveRequest.findFirst({
       where: {
         id,
-        ...(tenantId ? { tenantId } : {}),
-      },
+        ...(tenantId ? { tenantId } : {})
+      }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Leave request not found" }, { status: 404 });
+      return notFoundResponse("Leave request not found");
     }
 
     const role = session.user.role;
@@ -290,19 +285,16 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     if (!canManageLeaveRequests(role) || role === "MANAGER") {
       const requesterEmployee = await prisma.employee.findFirst({
         where: { tenantId: existing.tenantId, userId: session.user.id },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!requesterEmployee || requesterEmployee.id !== existing.employeeId) {
-        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+        return errorResponse("Access denied", 403);
       }
     }
 
     if (existing.status !== "PENDING") {
-      return NextResponse.json(
-        { error: "Can only cancel pending requests" },
-        { status: 400 }
-      );
+      return errorResponse("Can only cancel pending requests", 400);
     }
 
     const year = existing.startDate.getFullYear();
@@ -311,7 +303,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     await prisma.$transaction(async (tx) => {
       await tx.leaveRequest.update({
         where: { id },
-        data: { status: "CANCELLED" },
+        data: { status: "CANCELLED" }
       });
 
       // Remove pending from balance
@@ -319,20 +311,17 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
         where: {
           employeeId: existing.employeeId,
           leaveTypeId: existing.leaveTypeId,
-          year,
+          year
         },
         data: {
-          pending: { decrement: totalDays },
-        },
+          pending: { decrement: totalDays }
+        }
       });
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting leave request:", error);
-    return NextResponse.json(
-      { error: "Failed to cancel leave request" },
-      { status: 500 }
-    );
+    logApiError("Error deleting leave request", error);
+    return errorResponse("Failed to cancel leave request");
   }
 }

@@ -16,12 +16,12 @@ const env = {
   ...process.env,
   ...(isWindows && !forceTurbopack && !process.env.NEXT_DISABLE_STANDALONE_OUTPUT
     ? { NEXT_DISABLE_STANDALONE_OUTPUT: "true" }
-    : {}),
+    : {})
 };
 
 const child = spawn(process.execPath, args, {
   stdio: "inherit",
-  env,
+  env
 });
 
 child.on("error", (error) => {

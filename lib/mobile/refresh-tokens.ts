@@ -63,14 +63,14 @@ export async function upsertMobileDevice(
       platform: input.platform,
       name: input.name,
       appVersion: input.appVersion,
-      lastSeenAt: new Date(),
+      lastSeenAt: new Date()
     },
     update: {
       platform: input.platform,
       name: input.name,
       appVersion: input.appVersion,
-      lastSeenAt: new Date(),
-    },
+      lastSeenAt: new Date()
+    }
   });
 }
 
@@ -94,9 +94,9 @@ export async function mintRefreshToken(
       tokenHash,
       expiresAt,
       userAgent: input.userAgent,
-      ipAddress: input.ipAddress,
+      ipAddress: input.ipAddress
     },
-    select: { id: true },
+    select: { id: true }
   });
 
   return { refreshToken, refreshTokenRecordId: record.id, expiresAt };
@@ -118,7 +118,7 @@ export async function rotateRefreshToken(
 
   const existing = await prisma.mobileRefreshToken.findUnique({
     where: { tokenHash },
-    include: { device: true },
+    include: { device: true }
   });
 
   if (!existing) return { ok: false, reason: "invalid" };
@@ -130,15 +130,15 @@ export async function rotateRefreshToken(
     userId: existing.userId,
     mobileDeviceId: existing.mobileDeviceId,
     userAgent: input.userAgent,
-    ipAddress: input.ipAddress,
+    ipAddress: input.ipAddress
   });
 
   await prisma.mobileRefreshToken.update({
     where: { id: existing.id },
     data: {
       revokedAt: new Date(),
-      replacedById: next.refreshTokenRecordId,
-    },
+      replacedById: next.refreshTokenRecordId
+    }
   });
 
   return {
@@ -146,7 +146,7 @@ export async function rotateRefreshToken(
     userId: existing.userId,
     mobileDeviceId: existing.mobileDeviceId,
     refreshToken: next.refreshToken,
-    expiresAt: next.expiresAt,
+    expiresAt: next.expiresAt
   };
 }
 
@@ -158,7 +158,7 @@ export async function revokeRefreshToken(
 
   const existing = await prisma.mobileRefreshToken.findUnique({
     where: { tokenHash },
-    include: { device: true },
+    include: { device: true }
   });
 
   if (!existing) return false;
@@ -168,16 +168,19 @@ export async function revokeRefreshToken(
 
   await prisma.mobileRefreshToken.update({
     where: { id: existing.id },
-    data: { revokedAt: new Date() },
+    data: { revokedAt: new Date() }
   });
 
   return true;
 }
 
-export async function revokeAllRefreshTokensForUser(prisma: MobileAuthDb, userId: string): Promise<number> {
+export async function revokeAllRefreshTokensForUser(
+  prisma: MobileAuthDb,
+  userId: string
+): Promise<number> {
   const res = await prisma.mobileRefreshToken.updateMany({
     where: { userId, revokedAt: null },
-    data: { revokedAt: new Date() },
+    data: { revokedAt: new Date() }
   });
   return res.count;
 }

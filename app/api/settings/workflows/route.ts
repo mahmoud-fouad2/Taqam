@@ -33,10 +33,11 @@ export async function GET() {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
-    const settingsObj = (tenant?.settings && typeof tenant.settings === "object") ? (tenant.settings as any) : {};
+    const settingsObj =
+      tenant?.settings && typeof tenant.settings === "object" ? (tenant.settings as any) : {};
     const workflows = (settingsObj?.approvalWorkflows ?? []) as ApprovalWorkflow[];
 
     return NextResponse.json({ data: Array.isArray(workflows) ? workflows : [] });

@@ -14,7 +14,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -22,14 +22,14 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -37,15 +37,9 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -54,7 +48,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { IconPlus, IconPencil, IconTrash, IconSearch } from "@tabler/icons-react";
@@ -74,7 +68,7 @@ const jobTitleSchema = z.object({
   description: z.string().optional(),
   level: z.string().optional(),
   minSalary: z.string().optional(),
-  maxSalary: z.string().optional(),
+  maxSalary: z.string().optional()
 });
 
 type JobTitleFormData = z.infer<typeof jobTitleSchema>;
@@ -92,7 +86,7 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 8,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
+    updatedAt: "2026-01-01T10:00:00Z"
   },
   {
     id: "job-2",
@@ -105,7 +99,7 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 4,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
+    updatedAt: "2026-01-01T10:00:00Z"
   },
   {
     id: "job-3",
@@ -118,7 +112,7 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 3,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
+    updatedAt: "2026-01-01T10:00:00Z"
   },
   {
     id: "job-4",
@@ -131,7 +125,7 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 4,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
+    updatedAt: "2026-01-01T10:00:00Z"
   },
   {
     id: "job-5",
@@ -144,7 +138,7 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 5,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
+    updatedAt: "2026-01-01T10:00:00Z"
   },
   {
     id: "job-6",
@@ -157,8 +151,8 @@ const initialJobTitles: JobTitle[] = [
     employeesCount: 12,
     tenantId: "tenant-1",
     createdAt: "2026-01-01T10:00:00Z",
-    updatedAt: "2026-01-01T10:00:00Z",
-  },
+    updatedAt: "2026-01-01T10:00:00Z"
+  }
 ];
 
 const levels = [
@@ -167,7 +161,7 @@ const levels = [
   { value: "3", label: t.jobTitles.senior },
   { value: "4", label: t.jobTitles.managerLevel },
   { value: "5", label: t.jobTitles.director },
-  { value: "6", label: t.jobTitles.executive },
+  { value: "6", label: t.jobTitles.executive }
 ];
 
 export function JobTitlesManager() {
@@ -189,8 +183,8 @@ export function JobTitlesManager() {
       description: "",
       level: "",
       minSalary: "",
-      maxSalary: "",
-    },
+      maxSalary: ""
+    }
   });
 
   // Filter
@@ -213,7 +207,7 @@ export function JobTitlesManager() {
       description: "",
       level: "",
       minSalary: "",
-      maxSalary: "",
+      maxSalary: ""
     });
     setIsDialogOpen(true);
   };
@@ -228,7 +222,7 @@ export function JobTitlesManager() {
       description: job.description || "",
       level: job.level?.toString() || "",
       minSalary: job.minSalary?.toString() || "",
-      maxSalary: job.maxSalary?.toString() || "",
+      maxSalary: job.maxSalary?.toString() || ""
     });
     setIsDialogOpen(true);
   };
@@ -248,7 +242,7 @@ export function JobTitlesManager() {
                 level: data.level ? parseInt(data.level) : undefined,
                 minSalary: data.minSalary ? parseFloat(data.minSalary) : undefined,
                 maxSalary: data.maxSalary ? parseFloat(data.maxSalary) : undefined,
-                updatedAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
               }
             : j
         )
@@ -273,7 +267,7 @@ export function JobTitlesManager() {
           employeesCount: 0,
           tenantId: "tenant-1",
           createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
 
         return [...prev, newJob];
@@ -343,8 +337,8 @@ export function JobTitlesManager() {
         <CardContent>
           {/* Search */}
           <div className="mb-4 flex items-center gap-2">
-            <div className="relative flex-1 max-w-sm">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="relative max-w-sm flex-1">
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.common.searchDots}
                 value={searchQuery}
@@ -355,7 +349,7 @@ export function JobTitlesManager() {
           </div>
 
           {/* Table */}
-          <div className="rounded-md border overflow-x-auto">
+          <div className="overflow-x-auto rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -364,13 +358,13 @@ export function JobTitlesManager() {
                   <TableHead className="text-start">{t.jobTitles.level}</TableHead>
                   <TableHead className="text-start">{t.jobTitles.salaryRange}</TableHead>
                   <TableHead className="text-start">{t.common.employees}</TableHead>
-                  <TableHead className="text-start w-[100px]">{t.common.actions}</TableHead>
+                  <TableHead className="w-[100px] text-start">{t.common.actions}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredJobTitles.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={6} className="text-muted-foreground py-8 text-center">
                       {t.jobTitles.pNoJobTitlesFound}
                     </TableCell>
                   </TableRow>
@@ -381,7 +375,7 @@ export function JobTitlesManager() {
                         <div>
                           <div className="font-medium">{job.nameAr || job.name}</div>
                           {job.nameAr && (
-                            <div className="text-sm text-muted-foreground">{job.name}</div>
+                            <div className="text-muted-foreground text-sm">{job.name}</div>
                           )}
                         </div>
                       </TableCell>
@@ -394,7 +388,8 @@ export function JobTitlesManager() {
                       <TableCell>
                         {job.minSalary || job.maxSalary ? (
                           <span className="text-sm">
-                            {job.minSalary?.toLocaleString(numLocale)} - {job.maxSalary?.toLocaleString(numLocale)} {t.jobTitles.sar}
+                            {job.minSalary?.toLocaleString(numLocale)} -{" "}
+                            {job.maxSalary?.toLocaleString(numLocale)} {t.jobTitles.sar}
                           </span>
                         ) : (
                           "-"
@@ -409,8 +404,7 @@ export function JobTitlesManager() {
                             variant="ghost"
                             size="icon"
                             aria-label={t.common.edit}
-                            onClick={() => handleEdit(job)}
-                          >
+                            onClick={() => handleEdit(job)}>
                             <IconPencil className="h-4 w-4" />
                           </Button>
                           <Button
@@ -418,8 +412,7 @@ export function JobTitlesManager() {
                             size="icon"
                             aria-label={t.common.delete}
                             onClick={() => handleDeleteClick(job)}
-                            disabled={job.employeesCount > 0}
-                          >
+                            disabled={job.employeesCount > 0}>
                             <IconTrash className="h-4 w-4" />
                           </Button>
                         </div>
@@ -441,9 +434,7 @@ export function JobTitlesManager() {
               {editingJobTitle ? t.jobTitles.editJobTitle : t.jobTitles.addJobTitle}
             </DialogTitle>
             <DialogDescription>
-              {editingJobTitle
-                ? t.jobTitles.editDesc
-                : t.jobTitles.addDesc}
+              {editingJobTitle ? t.jobTitles.editDesc : t.jobTitles.addDesc}
             </DialogDescription>
           </DialogHeader>
           <Form {...form}>
@@ -474,7 +465,7 @@ export function JobTitlesManager() {
                   </FormItem>
                 )}
               />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="code"
@@ -513,7 +504,7 @@ export function JobTitlesManager() {
                   )}
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="minSalary"
@@ -559,11 +550,9 @@ export function JobTitlesManager() {
                 )}
               />
               <DialogFooter>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsDialogOpen(false)}
-                >{t.common.cancel}</Button>
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                  {t.common.cancel}
+                </Button>
                 <Button type="submit">
                   {editingJobTitle ? t.common.saveChanges : t.common.add}
                 </Button>
@@ -579,12 +568,17 @@ export function JobTitlesManager() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.common.areYouSure}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.jobTitles.pTheJobTitleWillBePermanentlyDe} &quot;{jobTitleToDelete?.nameAr || jobTitleToDelete?.name}&quot; {t.jobTitles.pPermanently}
+              {t.jobTitles.pTheJobTitleWillBePermanentlyDe} &quot;
+              {jobTitleToDelete?.nameAr || jobTitleToDelete?.name}&quot; {t.jobTitles.pPermanently}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-destructive text-destructive-foreground">{t.common.delete}</AlertDialogAction>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground">
+              {t.common.delete}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

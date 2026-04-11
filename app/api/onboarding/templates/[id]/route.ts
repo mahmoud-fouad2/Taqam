@@ -11,39 +11,41 @@ const templateUpdateSchema = z.object({
   departmentId: z.string().optional().nullable(),
   jobTitleId: z.string().optional().nullable(),
   durationDays: z.number().min(1).optional(),
-  tasks: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    description: z.string().optional(),
-    category: z.string().optional(),
-    dayOffset: z.number().default(0),
-    assigneeType: z.enum(["HR", "MANAGER", "IT", "EMPLOYEE", "BUDDY"]).optional(),
-  })).optional(),
-  documents: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    type: z.string().optional(),
-    isRequired: z.boolean().default(false),
-    dayOffset: z.number().default(0),
-  })).optional(),
-  isActive: z.boolean().optional(),
+  tasks: z
+    .array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        dayOffset: z.number().default(0),
+        assigneeType: z.enum(["HR", "MANAGER", "IT", "EMPLOYEE", "BUDDY"]).optional()
+      })
+    )
+    .optional(),
+  documents: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.string().optional(),
+        isRequired: z.boolean().default(false),
+        dayOffset: z.number().default(0)
+      })
+    )
+    .optional(),
+  isActive: z.boolean().optional()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single template
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -54,49 +56,34 @@ export async function GET(
       include: {
         department: { select: { id: true, name: true, nameAr: true } },
         jobTitle: { select: { id: true, name: true, nameAr: true } },
-        _count: { select: { processes: true } },
-      },
+        _count: { select: { processes: true } }
+      }
     });
 
     if (!template) {
-      return NextResponse.json(
-        { error: "القالب غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "القالب غير موجود" }, { status: 404 });
     }
 
     return NextResponse.json(template);
   } catch (error) {
     console.error("Error fetching template:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات القالب" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات القالب" }, { status: 500 });
   }
 }
 
 // PATCH - Update template
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية تعديل القوالب" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية تعديل القوالب" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -105,14 +92,11 @@ export async function PATCH(
 
     // Check template exists
     const existingTemplate = await prisma.onboardingTemplate.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingTemplate) {
-      return NextResponse.json(
-        { error: "القالب غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "القالب غير موجود" }, { status: 404 });
     }
 
     // Validate
@@ -123,57 +107,45 @@ export async function PATCH(
       where: { id },
       data: {
         ...validatedData,
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       include: {
         department: { select: { name: true, nameAr: true } },
-        jobTitle: { select: { name: true, nameAr: true } },
-      },
+        jobTitle: { select: { name: true, nameAr: true } }
+      }
     });
 
     return NextResponse.json({
       message: "تم تحديث القالب بنجاح",
-      template: updatedTemplate,
+      template: updatedTemplate
     });
   } catch (error) {
     console.error("Error updating template:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث القالب" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث القالب" }, { status: 500 });
   }
 }
 
 // DELETE - Delete template
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف القوالب" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف القوالب" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -182,14 +154,11 @@ export async function DELETE(
     // Check template exists
     const template = await prisma.onboardingTemplate.findFirst({
       where: { id, tenantId },
-      include: { _count: { select: { processes: true } } },
+      include: { _count: { select: { processes: true } } }
     });
 
     if (!template) {
-      return NextResponse.json(
-        { error: "القالب غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "القالب غير موجود" }, { status: 404 });
     }
 
     // Check if template is in use
@@ -202,17 +171,14 @@ export async function DELETE(
 
     // Delete template
     await prisma.onboardingTemplate.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف القالب بنجاح",
+      message: "تم حذف القالب بنجاح"
     });
   } catch (error) {
     console.error("Error deleting template:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف القالب" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف القالب" }, { status: 500 });
   }
 }

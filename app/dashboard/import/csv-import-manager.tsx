@@ -8,16 +8,10 @@ import {
   IconAlertTriangle,
   IconCheck,
   IconX,
-  IconFileSpreadsheet,
+  IconFileSpreadsheet
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -25,7 +19,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -33,7 +27,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -46,21 +40,111 @@ const t = getText("ar");
 
 // CSV Template columns
 const employeeCSVColumns = [
-  { key: "employeeNumber", label: t.csvImport.employeeNumber, labelEn: "Employee Number", required: true, example: "EMP001" },
-  { key: "firstNameAr", label: t.csvImport.firstNameAr, labelEn: "First Name (AR)", required: true, example: "أحمد" },
-  { key: "lastNameAr", label: t.csvImport.lastNameAr, labelEn: "Last Name (AR)", required: true, example: t.common.namePlaceholder },
-  { key: "firstNameEn", label: t.csvImport.firstNameEn, labelEn: "First Name (EN)", required: false, example: "Ahmed" },
-  { key: "lastNameEn", label: t.csvImport.lastNameEn, labelEn: "Last Name (EN)", required: false, example: "Mohammed" },
-  { key: "email", label: t.common.email, labelEn: "Email", required: true, example: "ahmed@company.com" },
-  { key: "phone", label: t.common.phone, labelEn: "Phone", required: false, example: "+966501234567" },
-  { key: "nationalId", label: t.csvImport.nationalId, labelEn: "National ID", required: true, example: "1234567890" },
-  { key: "dateOfBirth", label: t.csvImport.dateOfBirth, labelEn: "Date of Birth", required: false, example: "1990-01-15" },
-  { key: "gender", label: t.csvImport.gender, labelEn: "Gender", required: true, example: "male / female" },
-  { key: "hireDate", label: t.common.hireDate, labelEn: "Hire Date", required: true, example: "2024-01-01" },
-  { key: "departmentCode", label: t.csvImport.departmentCode, labelEn: "Department Code", required: true, example: "IT" },
-  { key: "jobTitleCode", label: t.csvImport.jobTitleCode, labelEn: "Job Title Code", required: true, example: "DEV" },
-  { key: "branchCode", label: t.csvImport.branchCode, labelEn: "Branch Code", required: false, example: "RYD" },
-  { key: "basicSalary", label: t.common.basicSalary, labelEn: "Basic Salary", required: true, example: "10000" },
+  {
+    key: "employeeNumber",
+    label: t.csvImport.employeeNumber,
+    labelEn: "Employee Number",
+    required: true,
+    example: "EMP001"
+  },
+  {
+    key: "firstNameAr",
+    label: t.csvImport.firstNameAr,
+    labelEn: "First Name (AR)",
+    required: true,
+    example: "أحمد"
+  },
+  {
+    key: "lastNameAr",
+    label: t.csvImport.lastNameAr,
+    labelEn: "Last Name (AR)",
+    required: true,
+    example: t.common.namePlaceholder
+  },
+  {
+    key: "firstNameEn",
+    label: t.csvImport.firstNameEn,
+    labelEn: "First Name (EN)",
+    required: false,
+    example: "Ahmed"
+  },
+  {
+    key: "lastNameEn",
+    label: t.csvImport.lastNameEn,
+    labelEn: "Last Name (EN)",
+    required: false,
+    example: "Mohammed"
+  },
+  {
+    key: "email",
+    label: t.common.email,
+    labelEn: "Email",
+    required: true,
+    example: "ahmed@company.com"
+  },
+  {
+    key: "phone",
+    label: t.common.phone,
+    labelEn: "Phone",
+    required: false,
+    example: "+966501234567"
+  },
+  {
+    key: "nationalId",
+    label: t.csvImport.nationalId,
+    labelEn: "National ID",
+    required: true,
+    example: "1234567890"
+  },
+  {
+    key: "dateOfBirth",
+    label: t.csvImport.dateOfBirth,
+    labelEn: "Date of Birth",
+    required: false,
+    example: "1990-01-15"
+  },
+  {
+    key: "gender",
+    label: t.csvImport.gender,
+    labelEn: "Gender",
+    required: true,
+    example: "male / female"
+  },
+  {
+    key: "hireDate",
+    label: t.common.hireDate,
+    labelEn: "Hire Date",
+    required: true,
+    example: "2024-01-01"
+  },
+  {
+    key: "departmentCode",
+    label: t.csvImport.departmentCode,
+    labelEn: "Department Code",
+    required: true,
+    example: "IT"
+  },
+  {
+    key: "jobTitleCode",
+    label: t.csvImport.jobTitleCode,
+    labelEn: "Job Title Code",
+    required: true,
+    example: "DEV"
+  },
+  {
+    key: "branchCode",
+    label: t.csvImport.branchCode,
+    labelEn: "Branch Code",
+    required: false,
+    example: "RYD"
+  },
+  {
+    key: "basicSalary",
+    label: t.common.basicSalary,
+    labelEn: "Basic Salary",
+    required: true,
+    example: "10000"
+  }
 ];
 
 interface ImportRow {
@@ -79,7 +163,9 @@ function normalizeCsvValue(value: string | undefined) {
 }
 
 function normalizeCsvEnum(value: string | undefined) {
-  return normalizeCsvValue(value)?.toUpperCase().replace(/[-\s]+/g, "_");
+  return normalizeCsvValue(value)
+    ?.toUpperCase()
+    .replace(/[-\s]+/g, "_");
 }
 
 function buildEmployeeImportPayload(row: ImportRow) {
@@ -103,7 +189,7 @@ function buildEmployeeImportPayload(row: ImportRow) {
     departmentCode: normalizeCsvValue(row.data.departmentCode),
     jobTitleCode: normalizeCsvValue(row.data.jobTitleCode),
     branchCode: normalizeCsvValue(row.data.branchCode),
-    baseSalary: salary ? Number(salary) : undefined,
+    baseSalary: salary ? Number(salary) : undefined
   };
 }
 
@@ -114,9 +200,14 @@ export function CSVImportManager() {
   const [isImportOpen, setIsImportOpen] = React.useState(false);
   const [importFile, setImportFile] = React.useState<File | null>(null);
   const [importProgress, setImportProgress] = React.useState(0);
-  const [importStatus, setImportStatus] = React.useState<"idle" | "validating" | "importing" | "complete" | "imported" | "error">("idle");
+  const [importStatus, setImportStatus] = React.useState<
+    "idle" | "validating" | "importing" | "complete" | "imported" | "error"
+  >("idle");
   const [parsedRows, setParsedRows] = React.useState<ImportRow[]>([]);
-  const [importSummary, setImportSummary] = React.useState<{ succeeded: number; failed: number } | null>(null);
+  const [importSummary, setImportSummary] = React.useState<{
+    succeeded: number;
+    failed: number;
+  } | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   // Generate CSV template
@@ -124,7 +215,7 @@ export function CSVImportManager() {
     const headers = employeeCSVColumns.map((col) => col.key).join(",");
     const exampleRow = employeeCSVColumns.map((col) => col.example).join(",");
     const csvContent = `${headers}\n${exampleRow}`;
-    
+
     const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -154,7 +245,7 @@ export function CSVImportManager() {
 
     const text = await importFile.text();
     const lines = text.split("\n").filter((line) => line.trim());
-    
+
     if (lines.length < 2) {
       setImportStatus("error");
       return;
@@ -188,7 +279,9 @@ export function CSVImportManager() {
       // Validate dates
       ["dateOfBirth", "hireDate"].forEach((dateField) => {
         if (data[dateField] && isNaN(Date.parse(data[dateField]))) {
-          errors.push(dateField === "dateOfBirth" ? t.csvImport.invalidBirthDate : t.csvImport.invalidHireDate);
+          errors.push(
+            dateField === "dateOfBirth" ? t.csvImport.invalidBirthDate : t.csvImport.invalidHireDate
+          );
         }
       });
 
@@ -209,7 +302,7 @@ export function CSVImportManager() {
         errors,
         warnings,
         importState: "pending",
-        importMessage: null,
+        importMessage: null
       });
 
       setImportProgress(Math.round((i / (lines.length - 1)) * 100));
@@ -230,7 +323,7 @@ export function CSVImportManager() {
     const nextRows = parsedRows.map((row) => ({
       ...row,
       importState: row.status === "error" ? row.importState : "pending",
-      importMessage: row.status === "error" ? row.importMessage : null,
+      importMessage: row.status === "error" ? row.importMessage : null
     }));
 
     let succeeded = 0;
@@ -244,9 +337,9 @@ export function CSVImportManager() {
         const response = await fetch("/api/employees", {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify(buildEmployeeImportPayload(row)),
+          body: JSON.stringify(buildEmployeeImportPayload(row))
         });
 
         const payload = await response.json().catch(() => null);
@@ -257,7 +350,7 @@ export function CSVImportManager() {
         nextRows[rowIndex] = {
           ...nextRows[rowIndex],
           importState: "success",
-          importMessage: t.csvImport.success,
+          importMessage: t.csvImport.success
         };
         succeeded += 1;
       } catch (error) {
@@ -268,7 +361,7 @@ export function CSVImportManager() {
           importMessage: message,
           errors: nextRows[rowIndex].errors.includes(message)
             ? nextRows[rowIndex].errors
-            : [...nextRows[rowIndex].errors, message],
+            : [...nextRows[rowIndex].errors, message]
         };
         failed += 1;
       }
@@ -290,7 +383,7 @@ export function CSVImportManager() {
     errors: parsedRows.filter((r) => r.status === "error").length,
     ready: parsedRows.filter((r) => r.status !== "error").length,
     imported: parsedRows.filter((r) => r.importState === "success").length,
-    importFailures: parsedRows.filter((r) => r.importState === "error").length,
+    importFailures: parsedRows.filter((r) => r.importState === "error").length
   };
 
   const resetImport = () => {
@@ -311,31 +404,41 @@ export function CSVImportManager() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <IconDownload className="h-5 w-5" />{t.csvImport.downloadTemplate}</CardTitle>
+              <IconDownload className="h-5 w-5" />
+              {t.csvImport.downloadTemplate}
+            </CardTitle>
             <CardDescription>{t.csvImport.templateDesc}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button onClick={downloadTemplate} variant="outline" className="w-full">
-              <IconFileSpreadsheet className="ms-2 h-4 w-4" />{t.csvImport.downloadBtn}</Button>
+              <IconFileSpreadsheet className="ms-2 h-4 w-4" />
+              {t.csvImport.downloadBtn}
+            </Button>
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <IconUpload className="h-5 w-5" />{t.csvImport.title}</CardTitle>
+              <IconUpload className="h-5 w-5" />
+              {t.csvImport.title}
+            </CardTitle>
             <CardDescription>{t.csvImport.uploadDesc}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Dialog open={isImportOpen} onOpenChange={(open) => {
-              setIsImportOpen(open);
-              if (!open) resetImport();
-            }}>
+            <Dialog
+              open={isImportOpen}
+              onOpenChange={(open) => {
+                setIsImportOpen(open);
+                if (!open) resetImport();
+              }}>
               <DialogTrigger asChild>
                 <Button className="w-full">
-                  <IconUpload className="ms-2 h-4 w-4" />{t.csvImport.importBtn}</Button>
+                  <IconUpload className="ms-2 h-4 w-4" />
+                  {t.csvImport.importBtn}
+                </Button>
               </DialogTrigger>
-              <DialogContent className="w-full sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+              <DialogContent className="max-h-[80vh] w-full overflow-y-auto sm:max-w-[700px]">
                 <DialogHeader>
                   <DialogTitle>{t.csvImport.importTitle}</DialogTitle>
                   <DialogDescription>{t.csvImport.importDescription}</DialogDescription>
@@ -345,7 +448,8 @@ export function CSVImportManager() {
                   <TabsList className="grid w-full grid-cols-2">
                     <TabsTrigger value="upload">{t.csvImport.uploadTab}</TabsTrigger>
                     <TabsTrigger value="preview" disabled={parsedRows.length === 0}>
-                      {t.csvImport.pPreview}{stats.total})
+                      {t.csvImport.pPreview}
+                      {stats.total})
                     </TabsTrigger>
                   </TabsList>
 
@@ -361,24 +465,25 @@ export function CSVImportManager() {
                     />
                     <button
                       type="button"
-                      className="w-full border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      onClick={() => fileInputRef.current?.click()}
-                    >
+                      className="hover:border-primary focus-visible:ring-ring w-full cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
+                      onClick={() => fileInputRef.current?.click()}>
                       {importFile ? (
                         <div className="flex items-center justify-center gap-2">
                           <IconFileSpreadsheet className="h-8 w-8 text-green-500" />
                           <div>
                             <p className="font-medium">{importFile.name}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                               {(importFile.size / 1024).toFixed(1)} KB
                             </p>
                           </div>
                         </div>
                       ) : (
                         <>
-                          <IconUpload className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+                          <IconUpload className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
                           <p className="text-lg font-medium">{t.csvImport.dragDropText}</p>
-                          <p className="text-sm text-muted-foreground">{t.csvImport.clickToSelect}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {t.csvImport.clickToSelect}
+                          </p>
                         </>
                       )}
                     </button>
@@ -401,20 +506,20 @@ export function CSVImportManager() {
                     {/* Validation Results */}
                     {importStatus === "complete" && parsedRows.length > 0 && (
                       <div className="space-y-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-center">
-                          <div className="p-2 bg-muted rounded">
+                        <div className="grid grid-cols-1 gap-2 text-center sm:grid-cols-2 md:grid-cols-4">
+                          <div className="bg-muted rounded p-2">
                             <p className="text-2xl font-bold">{stats.total}</p>
-                            <p className="text-xs text-muted-foreground">{t.csvImport.total}</p>
+                            <p className="text-muted-foreground text-xs">{t.csvImport.total}</p>
                           </div>
-                          <div className="p-2 bg-green-50 rounded">
+                          <div className="rounded bg-green-50 p-2">
                             <p className="text-2xl font-bold text-green-600">{stats.valid}</p>
                             <p className="text-xs text-green-600">{t.common.correct}</p>
                           </div>
-                          <div className="p-2 bg-yellow-50 rounded">
+                          <div className="rounded bg-yellow-50 p-2">
                             <p className="text-2xl font-bold text-yellow-600">{stats.warnings}</p>
                             <p className="text-xs text-yellow-600">{t.csvImport.warnings}</p>
                           </div>
-                          <div className="p-2 bg-red-50 rounded">
+                          <div className="rounded bg-red-50 p-2">
                             <p className="text-2xl font-bold text-red-600">{stats.errors}</p>
                             <p className="text-xs text-red-600">{t.csvImport.errors}</p>
                           </div>
@@ -440,10 +545,13 @@ export function CSVImportManager() {
                           <IconCheck className="h-4 w-4" />
                         )}
                         <AlertTitle>
-                          {importSummary.failed > 0 ? t.csvImport.completedWithErrors : t.csvImport.success}
+                          {importSummary.failed > 0
+                            ? t.csvImport.completedWithErrors
+                            : t.csvImport.success}
                         </AlertTitle>
                         <AlertDescription>
-                          {t.csvImport.importSuccess} {importSummary.succeeded} {t.csvImport.rowSucceeded} {importSummary.failed} {t.csvImport.rowFailed}
+                          {t.csvImport.importSuccess} {importSummary.succeeded}{" "}
+                          {t.csvImport.rowSucceeded} {importSummary.failed} {t.csvImport.rowFailed}
                         </AlertDescription>
                       </Alert>
                     )}
@@ -469,27 +577,31 @@ export function CSVImportManager() {
                               <TableCell>
                                 {row.importState === "success" ? (
                                   <Badge variant="default" className="bg-emerald-600">
-                                    <IconCheck className="h-3 w-3 ms-1" />
+                                    <IconCheck className="ms-1 h-3 w-3" />
                                     {t.csvImport.pImportSuccessful}
                                   </Badge>
                                 ) : row.importState === "error" && importStatus === "imported" ? (
                                   <Badge variant="destructive">
-                                    <IconX className="h-3 w-3 ms-1" />
+                                    <IconX className="ms-1 h-3 w-3" />
                                     {t.csvImport.pImportFailed}
                                   </Badge>
                                 ) : row.status === "valid" ? (
                                   <Badge variant="default" className="bg-green-500">
-                                    <IconCheck className="h-3 w-3 ms-1" />{t.common.correct}</Badge>
+                                    <IconCheck className="ms-1 h-3 w-3" />
+                                    {t.common.correct}
+                                  </Badge>
                                 ) : null}
                                 {row.importState !== "success" && row.status === "warning" && (
-                                  <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-                                    <IconAlertTriangle className="h-3 w-3 ms-1" />
+                                  <Badge
+                                    variant="secondary"
+                                    className="bg-yellow-100 text-yellow-700">
+                                    <IconAlertTriangle className="ms-1 h-3 w-3" />
                                     {t.csvImport.pWarning}
                                   </Badge>
                                 )}
                                 {row.importState !== "success" && row.status === "error" && (
                                   <Badge variant="destructive">
-                                    <IconX className="h-3 w-3 ms-1" />
+                                    <IconX className="ms-1 h-3 w-3" />
                                     {t.csvImport.pError}
                                   </Badge>
                                 )}
@@ -500,10 +612,8 @@ export function CSVImportManager() {
                               <TableCell>
                                 {row.data.firstNameAr} {row.data.lastNameAr}
                               </TableCell>
-                              <TableCell className="text-sm">
-                                {row.data.email || "-"}
-                              </TableCell>
-                              <TableCell className="text-xs max-w-[200px]">
+                              <TableCell className="text-sm">{row.data.email || "-"}</TableCell>
+                              <TableCell className="max-w-[200px] text-xs">
                                 {row.errors.length > 0 && (
                                   <p className="text-red-600">{row.errors.join(", ")}</p>
                                 )}
@@ -523,11 +633,11 @@ export function CSVImportManager() {
                 </Tabs>
 
                 <DialogFooter className="gap-2">
-                  <Button variant="outline" onClick={() => setIsImportOpen(false)}>{t.common.cancel}</Button>
+                  <Button variant="outline" onClick={() => setIsImportOpen(false)}>
+                    {t.common.cancel}
+                  </Button>
                   {importStatus === "idle" && importFile && (
-                    <Button onClick={validateCSV}>
-                      {t.csvImport.pDataValidation}
-                    </Button>
+                    <Button onClick={validateCSV}>{t.csvImport.pDataValidation}</Button>
                   )}
                   {importStatus === "complete" && stats.ready > 0 && (
                     <Button onClick={performImport}>
@@ -545,9 +655,7 @@ export function CSVImportManager() {
       <Card>
         <CardHeader>
           <CardTitle>{t.csvImport.csvFieldGuide}</CardTitle>
-          <CardDescription>
-            قائمة بجميع الحقول المطلوبة والاختيارية لملف CSV
-          </CardDescription>
+          <CardDescription>قائمة بجميع الحقول المطلوبة والاختيارية لملف CSV</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -573,7 +681,7 @@ export function CSVImportManager() {
                       <Badge variant="outline">{t.common.optional}</Badge>
                     )}
                   </TableCell>
-                  <TableCell className="font-mono text-sm text-muted-foreground">
+                  <TableCell className="text-muted-foreground font-mono text-sm">
                     {col.example}
                   </TableCell>
                 </TableRow>

@@ -6,18 +6,27 @@ import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 
+const REGISTER_RATE_LIMIT = {
+  limit: 10,
+  windowMs: 15 * 60 * 1000,
+  keyPrefix: "web:auth:register"
+} as const;
+
+const REGISTER_EMAIL_RATE_LIMIT = {
+  limit: 4,
+  windowMs: 60 * 60 * 1000,
+  keyPrefix: "web:auth:register:email"
+} as const;
+
 const registerSchema = z.object({
   name: z.string().min(2).max(200),
   email: z.string().email().max(320),
   password: z.string().min(8).max(200),
-  companyName: z.string().min(2).max(200).optional(),
+  companyName: z.string().min(2).max(200).optional()
 });
 
 function splitName(name: string): { firstName: string; lastName: string } {
-  const parts = name
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const parts = name.trim().split(/\s+/).filter(Boolean);
 
   if (parts.length === 0) return { firstName: "", lastName: "" };
   if (parts.length === 1) return { firstName: parts[0]!, lastName: "" };
@@ -25,31 +34,52 @@ function splitName(name: string): { firstName: string; lastName: string } {
 }
 
 export async function POST(req: NextRequest) {
+  const limitInfo = await checkRateLimit(req, REGISTER_RATE_LIMIT);
+
+  if (!limitInfo.allowed) {
+    return withRateLimitHeaders(
+      NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+      {
+        limit: REGISTER_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
+  }
+
   try {
-    const limit = 10;
-    const limitInfo = await checkRateLimit(req, {
-      keyPrefix: "web:auth:register",
-      limit,
-      windowMs: 15 * 60 * 1000,
-    });
-
-    if (!limitInfo.allowed) {
-      return withRateLimitHeaders(
-        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
-      );
-    }
-
     const json = await req.json();
     const parsed = registerSchema.safeParse(json);
     if (!parsed.success) {
       return withRateLimitHeaders(
-        NextResponse.json({ error: "Invalid input", details: parsed.error.flatten() }, { status: 400 }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
+        NextResponse.json(
+          { error: "Invalid input", details: parsed.error.flatten() },
+          { status: 400 }
+        ),
+        {
+          limit: REGISTER_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
       );
     }
 
     const email = parsed.data.email.toLowerCase();
+    const emailLimitInfo = await checkRateLimit(req, {
+      ...REGISTER_EMAIL_RATE_LIMIT,
+      identifier: email
+    });
+
+    if (!emailLimitInfo.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        {
+          limit: REGISTER_EMAIL_RATE_LIMIT.limit,
+          remaining: emailLimitInfo.remaining,
+          resetAt: emailLimitInfo.resetAt
+        }
+      );
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const existing = await tx.user.findUnique({ where: { email }, select: { id: true } });
@@ -59,15 +89,15 @@ export async function POST(req: NextRequest) {
 
       const { firstName, lastName } = splitName(parsed.data.name);
       const passwordHash = await hash(parsed.data.password, 12);
-      
+
       const newTenant = await tx.tenant.create({
         data: {
           name: parsed.data.companyName || `${firstName}'s Company`,
           slug: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, "")}-${Date.now().toString(36)}`,
           domain: `${firstName.toLowerCase().replace(/[^a-z0-9]/g, "")}-${Date.now().toString(36)}`,
-          status: "ACTIVE",
+          status: "ACTIVE"
         },
-        select: { id: true },
+        select: { id: true }
       });
 
       const user = await tx.user.create({
@@ -79,9 +109,9 @@ export async function POST(req: NextRequest) {
           role: "TENANT_ADMIN",
           status: "ACTIVE",
           permissions: [],
-          tenantId: newTenant.id,
+          tenantId: newTenant.id
         },
-        select: { id: true, email: true },
+        select: { id: true, email: true }
       });
 
       // Automatically create an employee profile for the admin so they can use the app properly
@@ -93,8 +123,8 @@ export async function POST(req: NextRequest) {
           firstName: firstName,
           lastName: lastName,
           email: email,
-          hireDate: new Date(),
-        },
+          hireDate: new Date()
+        }
       });
 
       await tx.auditLog.create({
@@ -103,8 +133,8 @@ export async function POST(req: NextRequest) {
           userId: user.id,
           action: "REGISTER",
           entity: "User",
-          entityId: user.id,
-        },
+          entityId: user.id
+        }
       });
 
       return { ok: true as const, user };
@@ -113,17 +143,28 @@ export async function POST(req: NextRequest) {
     if (!result.ok) {
       return withRateLimitHeaders(
         NextResponse.json({ error: result.error }, { status: result.status }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
+        {
+          limit: REGISTER_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
       );
     }
 
-    return withRateLimitHeaders(NextResponse.json({ ok: true, user: result.user }, { status: 201 }), {
-      limit,
-      remaining: limitInfo.remaining,
-      resetAt: limitInfo.resetAt,
-    });
+    return withRateLimitHeaders(
+      NextResponse.json({ ok: true, user: result.user }, { status: 201 }),
+      {
+        limit: REGISTER_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
   } catch (error) {
     logger.error("Register error", undefined, error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return withRateLimitHeaders(NextResponse.json({ error: "Server error" }, { status: 500 }), {
+      limit: REGISTER_RATE_LIMIT.limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   }
 }

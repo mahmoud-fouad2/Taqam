@@ -17,9 +17,27 @@ export const marketingNav: MarketingNavItem[] = [
     labelAr: "المساعدة",
     labelEn: "Help",
     children: [
-      { href: "/help-center", labelAr: "مركز المساعدة", labelEn: "Help Center", descAr: "أدلة الاستخدام والإعداد السريع", descEn: "Usage guides and quick setup" },
-      { href: "/faq", labelAr: "الأسئلة الشائعة", labelEn: "FAQ", descAr: "إجابات على الأسئلة الأكثر شيوعًا", descEn: "Answers to common questions" },
-      { href: "/support", labelAr: "تواصل معنا", labelEn: "Contact Support", descAr: "أرسل لنا رسالة مباشرة", descEn: "Send us a direct message" },
-    ],
-  },
+      {
+        href: "/help-center",
+        labelAr: "مركز المساعدة",
+        labelEn: "Help Center",
+        descAr: "أدلة الاستخدام والإعداد السريع",
+        descEn: "Usage guides and quick setup"
+      },
+      {
+        href: "/faq",
+        labelAr: "الأسئلة الشائعة",
+        labelEn: "FAQ",
+        descAr: "إجابات على الأسئلة الأكثر شيوعًا",
+        descEn: "Answers to common questions"
+      },
+      {
+        href: "/support",
+        labelAr: "تواصل معنا",
+        labelEn: "Contact Support",
+        descAr: "أرسل لنا رسالة مباشرة",
+        descEn: "Send us a direct message"
+      }
+    ]
+  }
 ];

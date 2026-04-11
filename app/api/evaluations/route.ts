@@ -9,33 +9,35 @@ const evaluationSchema = z.object({
   cycleId: z.string().min(1, "دورة التقييم مطلوبة"),
   employeeId: z.string().min(1, "الموظف مطلوب"),
   evaluatorId: z.string().optional().nullable(),
-  scores: z.array(z.object({
-    criteriaId: z.string(),
-    criteriaName: z.string(),
-    score: z.number().min(0).max(5),
-    weight: z.number().optional(),
-    comment: z.string().optional(),
-  })).optional().default([]),
+  scores: z
+    .array(
+      z.object({
+        criteriaId: z.string(),
+        criteriaName: z.string(),
+        score: z.number().min(0).max(5),
+        weight: z.number().optional(),
+        comment: z.string().optional()
+      })
+    )
+    .optional()
+    .default([]),
   strengths: z.string().optional().nullable(),
   areasForImprovement: z.string().optional().nullable(),
-  comments: z.string().optional().nullable(),
+  comments: z.string().optional().nullable()
 });
 
 // GET - Get all evaluations
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     const { searchParams } = new URL(request.url);
-    
+
     const cycleId = searchParams.get("cycleId");
     const employeeId = searchParams.get("employeeId");
     const status = searchParams.get("status");
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = { tenantId };
-    
+
     if (cycleId) where.cycleId = cycleId;
     if (employeeId) where.employeeId = employeeId;
     if (status) where.status = status;
@@ -62,8 +64,8 @@ export async function GET(request: NextRequest) {
               nameAr: true,
               startDate: true,
               endDate: true,
-              status: true,
-            },
+              status: true
+            }
           },
           employee: {
             select: {
@@ -75,8 +77,8 @@ export async function GET(request: NextRequest) {
               employeeNumber: true,
               avatar: true,
               department: { select: { name: true, nameAr: true } },
-              jobTitle: { select: { name: true, nameAr: true } },
-            },
+              jobTitle: { select: { name: true, nameAr: true } }
+            }
           },
           evaluator: {
             select: {
@@ -84,15 +86,15 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               firstNameAr: true,
-              lastNameAr: true,
-            },
-          },
+              lastNameAr: true
+            }
+          }
         },
         orderBy: { createdAt: "desc" },
         skip,
-        take: limit,
+        take: limit
       }),
-      prisma.employeeEvaluation.count({ where }),
+      prisma.employeeEvaluation.count({ where })
     ]);
 
     // Stats
@@ -100,11 +102,11 @@ export async function GET(request: NextRequest) {
       prisma.employeeEvaluation.groupBy({
         by: ["status"],
         where: { tenantId },
-        _count: { _all: true },
+        _count: { _all: true }
       }),
       prisma.employeeEvaluation.count({
-        where: { tenantId, employeeAcknowledgedAt: { not: null } },
-      }),
+        where: { tenantId, employeeAcknowledgedAt: { not: null } }
+      })
     ]);
 
     return NextResponse.json({
@@ -117,15 +119,12 @@ export async function GET(request: NextRequest) {
         notStarted: stats.find((s) => s.status === "NOT_STARTED")?._count._all ?? 0,
         inProgress: stats.find((s) => s.status === "IN_PROGRESS")?._count._all ?? 0,
         completed: stats.find((s) => s.status === "COMPLETED")?._count._all ?? 0,
-        acknowledged: acknowledgedCount,
-      },
+        acknowledged: acknowledgedCount
+      }
     });
   } catch (error) {
     console.error("Error fetching evaluations:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب التقييمات" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب التقييمات" }, { status: 500 });
   }
 }
 
@@ -133,30 +132,24 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     const body = await request.json();
-    
+
     // Validate
     const validatedData = evaluationSchema.parse(body);
 
     // Verify cycle exists and is active
     const cycle = await prisma.evaluationCycle.findFirst({
-      where: { id: validatedData.cycleId, tenantId },
+      where: { id: validatedData.cycleId, tenantId }
     });
 
     if (!cycle) {
-      return NextResponse.json(
-        { error: "دورة التقييم غير موجودة" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "دورة التقييم غير موجودة" }, { status: 400 });
     }
 
     if (cycle.status !== "ACTIVE" && cycle.status !== "DRAFT") {
@@ -168,14 +161,11 @@ export async function POST(request: NextRequest) {
 
     // Verify employee belongs to tenant
     const employee = await prisma.employee.findFirst({
-      where: { id: validatedData.employeeId, tenantId },
+      where: { id: validatedData.employeeId, tenantId }
     });
 
     if (!employee) {
-      return NextResponse.json(
-        { error: "الموظف غير موجود" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "الموظف غير موجود" }, { status: 400 });
     }
 
     // Check if evaluation already exists for this cycle/employee
@@ -183,8 +173,8 @@ export async function POST(request: NextRequest) {
       where: {
         tenantId,
         cycleId: validatedData.cycleId,
-        employeeId: validatedData.employeeId,
-      },
+        employeeId: validatedData.employeeId
+      }
     });
 
     if (existing) {
@@ -205,7 +195,7 @@ export async function POST(request: NextRequest) {
         strengths: validatedData.strengths,
         areasForImprovement: validatedData.areasForImprovement,
         comments: validatedData.comments,
-        status: "NOT_STARTED",
+        status: "NOT_STARTED"
       },
       include: {
         employee: {
@@ -214,29 +204,29 @@ export async function POST(request: NextRequest) {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
-    return NextResponse.json({
-      message: "تم إنشاء التقييم بنجاح",
-      evaluation,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: "تم إنشاء التقييم بنجاح",
+        evaluation
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating evaluation:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في إنشاء التقييم" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في إنشاء التقييم" }, { status: 500 });
   }
 }

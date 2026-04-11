@@ -11,7 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
   return generateMeta({
     title: locale === "ar" ? "الدعم الفني" : "Support",
-    description: locale === "ar" ? "تذاكر الدعم الفني ومتابعة الحلول." : "Support tickets and issue tracking.",
+    description:
+      locale === "ar" ? "تذاكر الدعم الفني ومتابعة الحلول." : "Support tickets and issue tracking."
   });
 }
 

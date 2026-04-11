@@ -6,7 +6,7 @@ import { csvRowsToObjects, parseCsv } from "@/lib/csv/parse";
 import {
   employeeBulkInputSchema,
   insertPreparedEmployees,
-  prepareEmployeesForInsert,
+  prepareEmployeesForInsert
 } from "@/lib/employees/bulk";
 
 function parseDateFlexible(value: string | undefined): Date | undefined {
@@ -79,7 +79,10 @@ export async function POST(request: NextRequest) {
     const objects = csvRowsToObjects(rows);
 
     if (objects.length === 0) {
-      return NextResponse.json({ data: { imported: 0, errors: ["CSV is empty"] } }, { status: 200 });
+      return NextResponse.json(
+        { data: { imported: 0, errors: ["CSV is empty"] } },
+        { status: 200 }
+      );
     }
 
     const errors: string[] = [];
@@ -99,15 +102,18 @@ export async function POST(request: NextRequest) {
         employeeNumber: (obj.employeenumber || obj.employee_number || "").trim() || undefined,
         firstName: (obj.firstname || obj.first_name || "").trim(),
         lastName: (obj.lastname || obj.last_name || "").trim(),
-        firstNameAr: (obj.firstnamear || obj.first_name_ar || obj.firstname_ar || "").trim() || undefined,
-        lastNameAr: (obj.lastnamear || obj.last_name_ar || obj.lastname_ar || "").trim() || undefined,
+        firstNameAr:
+          (obj.firstnamear || obj.first_name_ar || obj.firstname_ar || "").trim() || undefined,
+        lastNameAr:
+          (obj.lastnamear || obj.last_name_ar || obj.lastname_ar || "").trim() || undefined,
         email: (obj.email || "").trim(),
         phone: (obj.phone || "").trim() || undefined,
         nationalId: (obj.nationalid || obj.national_id || "").trim() || undefined,
 
         hireDate: hireDate ?? new Date(""),
         departmentId: (obj.departmentid || obj.department_id || "").trim() || undefined,
-        jobTitleId: (obj.jobtitleid || obj.job_title_id || obj.jobtitle_id || "").trim() || undefined,
+        jobTitleId:
+          (obj.jobtitleid || obj.job_title_id || obj.jobtitle_id || "").trim() || undefined,
         managerId: (obj.managerid || obj.manager_id || "").trim() || undefined,
 
         baseSalary: toOptionalNumber(obj.basesalary || obj.base_salary) ?? undefined,
@@ -118,7 +124,7 @@ export async function POST(request: NextRequest) {
         dateOfBirth,
         gender: (obj.gender || "").trim() || undefined,
         maritalStatus: (obj.maritalstatus || obj.marital_status || "").trim() || undefined,
-        nationality: (obj.nationality || "").trim() || undefined,
+        nationality: (obj.nationality || "").trim() || undefined
       };
 
       if (!hireDate) {
@@ -144,7 +150,7 @@ export async function POST(request: NextRequest) {
         entity: "Employee",
         newData: { imported: 0, failed: errors.length, source: "CSV" },
         ipAddress,
-        userAgent,
+        userAgent
       });
 
       return NextResponse.json({ data: { imported: 0, errors } }, { status: 200 });
@@ -156,7 +162,9 @@ export async function POST(request: NextRequest) {
     } catch (e: any) {
       if (e?.message?.includes("Duplicate employeeNumber")) {
         const duplicates = (e as any)?.duplicates as string[] | undefined;
-        errors.push(`Duplicate employeeNumber in request: ${(duplicates || []).slice(0, 20).join(", ")}`);
+        errors.push(
+          `Duplicate employeeNumber in request: ${(duplicates || []).slice(0, 20).join(", ")}`
+        );
         return NextResponse.json({ data: { imported: 0, errors } }, { status: 200 });
       }
       throw e;
@@ -177,15 +185,15 @@ export async function POST(request: NextRequest) {
       entity: "Employee",
       newData: { imported: summary.success, failed: summary.failed, source: "CSV" },
       ipAddress,
-      userAgent,
+      userAgent
     });
 
     return NextResponse.json(
       {
         data: {
           imported: summary.success,
-          errors,
-        },
+          errors
+        }
       },
       { status: 200 }
     );

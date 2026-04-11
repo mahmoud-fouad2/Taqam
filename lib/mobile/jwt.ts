@@ -33,7 +33,10 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(fallback);
 }
 
-export async function issueMobileAccessToken(payload: MobileTokenPayload, opts?: { ttlSeconds?: number }) {
+export async function issueMobileAccessToken(
+  payload: MobileTokenPayload,
+  opts?: { ttlSeconds?: number }
+) {
   const ttlSeconds = opts?.ttlSeconds ?? 60 * 60 * 8; // 8 hours
   const now = Math.floor(Date.now() / 1000);
 
@@ -42,7 +45,7 @@ export async function issueMobileAccessToken(payload: MobileTokenPayload, opts?:
     tenantId: payload.tenantId,
     role: payload.role,
     employeeId: payload.employeeId,
-    deviceId: payload.deviceId,
+    deviceId: payload.deviceId
   })
     .setProtectedHeader({ alg: "HS256", typ: "JWT" })
     .setIssuedAt(now)
@@ -52,7 +55,7 @@ export async function issueMobileAccessToken(payload: MobileTokenPayload, opts?:
 
 export async function verifyMobileAccessToken(token: string): Promise<MobileTokenPayload> {
   const { payload } = await jwtVerify(token, getSecret(), {
-    algorithms: ["HS256"],
+    algorithms: ["HS256"]
   });
 
   const userId = typeof payload.userId === "string" ? payload.userId : null;

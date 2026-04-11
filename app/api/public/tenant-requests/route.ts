@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
+import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 
@@ -12,8 +13,14 @@ const requestSchema = z.object({
   contactEmail: z.string().email(),
   contactPhone: z.string().optional().or(z.literal("")),
   employeesCount: z.string().min(1),
-  message: z.string().max(2000).optional().or(z.literal("")),
+  message: z.string().max(2000).optional().or(z.literal(""))
 });
+
+const EMAIL_RATE_LIMIT = {
+  limit: 3,
+  windowMs: 30 * 60 * 1000,
+  keyPrefix: "public:tenant_requests:contact_email"
+} as const;
 
 async function verifyRecaptcha(token: string) {
   const secret = process.env.RECAPTCHA_SECRET_KEY;
@@ -29,7 +36,7 @@ async function verifyRecaptcha(token: string) {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
-    cache: "no-store",
+    cache: "no-store"
   });
 
   const data = (await res.json()) as {
@@ -59,7 +66,7 @@ export async function POST(req: NextRequest) {
     const limitInfo = await checkRateLimit(req, {
       keyPrefix: "public:tenant_requests",
       limit,
-      windowMs: 15 * 60 * 1000,
+      windowMs: 15 * 60 * 1000
     });
 
     if (!limitInfo.allowed) {
@@ -83,12 +90,29 @@ export async function POST(req: NextRequest) {
 
     const input = parsed.data;
 
+    const emailRate = await checkRateLimit(req, {
+      ...EMAIL_RATE_LIMIT,
+      identifier: input.contactEmail.toLowerCase()
+    });
+
+    if (!emailRate.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        {
+          limit: EMAIL_RATE_LIMIT.limit,
+          remaining: emailRate.remaining,
+          resetAt: emailRate.resetAt
+        }
+      );
+    }
+
     const captcha = await verifyRecaptcha(input.captchaToken);
     if (!captcha.ok) {
-      return withRateLimitHeaders(
-        NextResponse.json({ error: captcha.error }, { status: 400 }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
-      );
+      return withRateLimitHeaders(NextResponse.json({ error: captcha.error }, { status: 400 }), {
+        limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     await prisma.tenantRequest.create({
@@ -99,16 +123,17 @@ export async function POST(req: NextRequest) {
         contactName: input.contactName,
         contactEmail: input.contactEmail,
         contactPhone: input.contactPhone || null,
-        message: input.message || null,
-      },
+        message: input.message || null
+      }
     });
 
     return withRateLimitHeaders(NextResponse.json({ ok: true }), {
       limit,
       remaining: limitInfo.remaining,
-      resetAt: limitInfo.resetAt,
+      resetAt: limitInfo.resetAt
     });
   } catch (e) {
+    logger.error("Public tenant request error", undefined, e);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

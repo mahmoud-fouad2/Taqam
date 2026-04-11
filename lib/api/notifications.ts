@@ -35,7 +35,7 @@ export const notificationsService = {
    */
   async getAll(filters?: NotificationFilters): Promise<ApiResponse<NotificationListResponse>> {
     return apiClient.get<NotificationListResponse>("/notifications", {
-      params: filters as Record<string, string | number | boolean>,
+      params: filters as Record<string, string | number | boolean>
     });
   },
 
@@ -95,7 +95,7 @@ export const notificationsService = {
     preferences: Partial<NotificationPreferences>
   ): Promise<ApiResponse<NotificationPreferences>> {
     return apiClient.put<NotificationPreferences>("/notifications/preferences", preferences);
-  },
+  }
 };
 
 export default notificationsService;

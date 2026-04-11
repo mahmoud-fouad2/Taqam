@@ -7,7 +7,7 @@ import {
   mapDbJobTypeToPublic,
   mapPublicJobTypeToDb,
   PUBLIC_JOB_TYPE_OPTIONS,
-  type PublicJobTypeValue,
+  type PublicJobTypeValue
 } from "@/lib/recruitment/public-meta";
 
 type PublicTenantEmailSource = {
@@ -154,14 +154,19 @@ function pickStringFromSettings(settings: Prisma.JsonValue | null | undefined, k
 }
 
 function getTenantPublicEmail(tenant: PublicTenantEmailSource) {
-  return tenant.organizationProfile?.email?.trim() || pickStringFromSettings(tenant.settings, ["contactEmail", "companyEmail"]);
+  return (
+    tenant.organizationProfile?.email?.trim() ||
+    pickStringFromSettings(tenant.settings, ["contactEmail", "companyEmail"])
+  );
 }
 
-function buildActivePublicJobsWhere(filters: PublicJobPostingFilters = {}): Prisma.JobPostingWhereInput {
+function buildActivePublicJobsWhere(
+  filters: PublicJobPostingFilters = {}
+): Prisma.JobPostingWhereInput {
   const now = new Date();
   const tenantWhere: Prisma.TenantWhereInput = {
     status: "ACTIVE",
-    ...(filters.tenantSlug ? { slug: filters.tenantSlug } : {}),
+    ...(filters.tenantSlug ? { slug: filters.tenantSlug } : {})
   };
   const andFilters: Prisma.JobPostingWhereInput[] = [];
   const jobType = mapPublicJobTypeToDb(filters.jobType);
@@ -169,7 +174,7 @@ function buildActivePublicJobsWhere(filters: PublicJobPostingFilters = {}): Pris
   const where: Prisma.JobPostingWhereInput = {
     status: JobPostingStatus.ACTIVE,
     tenant: tenantWhere,
-    OR: [{ expiresAt: null }, { expiresAt: { gte: now } }],
+    OR: [{ expiresAt: null }, { expiresAt: { gte: now } }]
   };
 
   if (filters.query) {
@@ -182,8 +187,8 @@ function buildActivePublicJobsWhere(filters: PublicJobPostingFilters = {}): Pris
         { tenant: { name: { contains: filters.query, mode: "insensitive" } } },
         { tenant: { nameAr: { contains: filters.query, mode: "insensitive" } } },
         { department: { name: { contains: filters.query, mode: "insensitive" } } },
-        { department: { nameAr: { contains: filters.query, mode: "insensitive" } } },
-      ],
+        { department: { nameAr: { contains: filters.query, mode: "insensitive" } } }
+      ]
     });
   }
 
@@ -191,20 +196,20 @@ function buildActivePublicJobsWhere(filters: PublicJobPostingFilters = {}): Pris
     andFilters.push({
       location: {
         contains: filters.location,
-        mode: "insensitive",
-      },
+        mode: "insensitive"
+      }
     });
   }
 
   if (filters.departmentId) {
     andFilters.push({
-      departmentId: filters.departmentId,
+      departmentId: filters.departmentId
     });
   }
 
   if (jobType) {
     andFilters.push({
-      jobType,
+      jobType
     });
   }
 
@@ -241,7 +246,7 @@ function mapPublicJobPosting(job: PublicJobPostingRecord): PublicJobPosting {
     salaryCurrency: job.salaryCurrency,
     postedAt: job.postedAt?.toISOString() ?? null,
     expiresAt: job.expiresAt?.toISOString() ?? null,
-    applicantsCount: job._count.applicants,
+    applicantsCount: job._count.applicants
   };
 }
 
@@ -256,23 +261,23 @@ const publicJobInclude = {
       settings: true,
       organizationProfile: {
         select: {
-          email: true,
-        },
-      },
-    },
+          email: true
+        }
+      }
+    }
   },
   department: {
     select: {
       id: true,
       name: true,
-      nameAr: true,
-    },
+      nameAr: true
+    }
   },
   _count: {
     select: {
-      applicants: true,
-    },
-  },
+      applicants: true
+    }
+  }
 } satisfies Prisma.JobPostingInclude;
 
 export async function listPublicJobPostings(filters: PublicJobPostingFilters = {}) {
@@ -282,13 +287,15 @@ export async function listPublicJobPostings(filters: PublicJobPostingFilters = {
     where: buildActivePublicJobsWhere(filters),
     include: publicJobInclude,
     orderBy: [{ postedAt: "desc" }, { createdAt: "desc" }],
-    take: limit,
+    take: limit
   });
 
   return jobs.map(mapPublicJobPosting);
 }
 
-export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, "tenantSlug"> = {}): Promise<PublicJobFiltersCatalog> {
+export async function listPublicJobFilters(
+  scope: Pick<PublicJobPostingFilters, "tenantSlug"> = {}
+): Promise<PublicJobFiltersCatalog> {
   const where = buildActivePublicJobsWhere({ tenantSlug: scope.tenantSlug });
 
   try {
@@ -298,56 +305,56 @@ export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, 
       where: {
         ...where,
         location: {
-          not: null,
-        },
+          not: null
+        }
       },
       select: {
-        location: true,
+        location: true
       },
       distinct: ["location"],
       orderBy: {
-        location: "asc",
-      },
+        location: "asc"
+      }
     });
 
     const jobTypeRows = await prisma.jobPosting.findMany({
       where,
       select: {
-        jobType: true,
+        jobType: true
       },
       distinct: ["jobType"],
       orderBy: {
-        jobType: "asc",
-      },
+        jobType: "asc"
+      }
     });
 
     const departments = await prisma.department.findMany({
       where: {
         jobPostings: {
-          some: where,
-        },
+          some: where
+        }
       },
       select: {
         id: true,
         name: true,
-        nameAr: true,
+        nameAr: true
       },
       orderBy: {
-        name: "asc",
-      },
+        name: "asc"
+      }
     });
 
-    const locations = Array.from(new Set(locationRows.map((row) => row.location?.trim()).filter(Boolean) as string[])).sort((left, right) =>
-      left.localeCompare(right, "ar")
-    );
-    const jobTypes = PUBLIC_JOB_TYPE_OPTIONS.filter((option) => jobTypeRows.some((row) => row.jobType === option.dbValue)).map(
-      (option) => option.value
-    );
+    const locations = Array.from(
+      new Set(locationRows.map((row) => row.location?.trim()).filter(Boolean) as string[])
+    ).sort((left, right) => left.localeCompare(right, "ar"));
+    const jobTypes = PUBLIC_JOB_TYPE_OPTIONS.filter((option) =>
+      jobTypeRows.some((row) => row.jobType === option.dbValue)
+    ).map((option) => option.value);
 
     return {
       locations,
       departments,
-      jobTypes,
+      jobTypes
     };
   } catch (error) {
     console.error("[public jobs] failed to build filters catalog", error);
@@ -355,7 +362,7 @@ export async function listPublicJobFilters(scope: Pick<PublicJobPostingFilters, 
     return {
       locations: [],
       departments: [],
-      jobTypes: [],
+      jobTypes: []
     };
   }
 }
@@ -364,19 +371,21 @@ export async function getPublicJobPostingById(id: string, tenantSlug?: string) {
   const job = await prisma.jobPosting.findFirst({
     where: {
       id,
-      ...buildActivePublicJobsWhere({ tenantSlug }),
+      ...buildActivePublicJobsWhere({ tenantSlug })
     },
-    include: publicJobInclude,
+    include: publicJobInclude
   });
 
   return job ? mapPublicJobPosting(job) : null;
 }
 
-export async function getPublicCareersTenantBySlug(slug: string): Promise<PublicCareersTenant | null> {
+export async function getPublicCareersTenantBySlug(
+  slug: string
+): Promise<PublicCareersTenant | null> {
   const tenant = await prisma.tenant.findFirst({
     where: {
       slug,
-      status: "ACTIVE",
+      status: "ACTIVE"
     },
     select: {
       id: true,
@@ -387,10 +396,10 @@ export async function getPublicCareersTenantBySlug(slug: string): Promise<Public
       settings: true,
       organizationProfile: {
         select: {
-          email: true,
-        },
-      },
-    },
+          email: true
+        }
+      }
+    }
   });
 
   if (!tenant) {
@@ -403,7 +412,7 @@ export async function getPublicCareersTenantBySlug(slug: string): Promise<Public
     name: tenant.name,
     nameAr: tenant.nameAr,
     logo: tenant.logo,
-    email: getTenantPublicEmail(tenant),
+    email: getTenantPublicEmail(tenant)
   };
 }
 
@@ -413,12 +422,12 @@ async function getTenantRecruitmentRecipients(tenantId: string, fallbackEmail: s
       tenantId,
       status: UserStatus.ACTIVE,
       role: {
-        in: [UserRole.TENANT_ADMIN, UserRole.HR_MANAGER],
-      },
+        in: [UserRole.TENANT_ADMIN, UserRole.HR_MANAGER]
+      }
     },
     select: {
-      email: true,
-    },
+      email: true
+    }
   });
 
   const recipients = new Set(users.map((user) => user.email.trim().toLowerCase()).filter(Boolean));
@@ -439,7 +448,7 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
   const job = await prisma.jobPosting.findFirst({
     where: {
       id: input.jobPostingId,
-      ...buildActivePublicJobsWhere({ tenantSlug: input.tenantSlug }),
+      ...buildActivePublicJobsWhere({ tenantSlug: input.tenantSlug })
     },
     include: {
       tenant: {
@@ -451,12 +460,12 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
           settings: true,
           organizationProfile: {
             select: {
-              email: true,
-            },
-          },
-        },
-      },
-    },
+              email: true
+            }
+          }
+        }
+      }
+    }
   });
 
   if (!job) {
@@ -468,16 +477,20 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       jobPostingId: job.id,
       email: {
         equals: normalizedEmail,
-        mode: "insensitive",
-      },
+        mode: "insensitive"
+      }
     },
     select: {
-      id: true,
-    },
+      id: true
+    }
   });
 
   if (existing) {
-    return { ok: false as const, code: 409, error: "تم استلام طلب سابق لهذا البريد على نفس الوظيفة" };
+    return {
+      ok: false as const,
+      code: 409,
+      error: "تم استلام طلب سابق لهذا البريد على نفس الوظيفة"
+    };
   }
 
   const applicant = await prisma.applicant.create({
@@ -490,8 +503,8 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       phone: input.phone?.trim() || null,
       resumeUrl: input.resumeUrl.trim(),
       coverLetter: input.coverLetter?.trim() || null,
-      source: "career-portal",
-    },
+      source: "career-portal"
+    }
   });
 
   const portalBase = getAppBaseUrl();
@@ -501,7 +514,10 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
   const jobTitle = job.titleAr || job.title;
   const applicantName = `${input.firstName.trim()} ${input.lastName.trim()}`.trim();
 
-  const recipientEmails = await getTenantRecruitmentRecipients(job.tenantId, getTenantPublicEmail(job.tenant));
+  const recipientEmails = await getTenantRecruitmentRecipients(
+    job.tenantId,
+    getTenantPublicEmail(job.tenant)
+  );
 
   await Promise.allSettled([
     sendEmail({
@@ -509,16 +525,16 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       subject: `تم استلام طلبك على وظيفة ${jobTitle}`,
       text: `مرحبًا ${applicantName},\n\nتم استلام طلبك على وظيفة ${jobTitle} لدى ${companyName}.\nيمكنك مراجعة إعلان الوظيفة من هنا: ${publicJobUrl}\nبوابة الشركة: ${tenantPortalUrl}`,
       html: `<div dir="rtl" style="font-family:Segoe UI,Tahoma,sans-serif;line-height:1.8;color:#0f172a"><h2 style="margin:0 0 12px">تم استلام طلبك</h2><p>مرحبًا ${applicantName}،</p><p>تم استلام طلبك على وظيفة <strong>${jobTitle}</strong> لدى <strong>${companyName}</strong>.</p><p><a href="${publicJobUrl}">مراجعة إعلان الوظيفة</a></p><p><a href="${tenantPortalUrl}">بوابة وظائف الشركة</a></p></div>`,
-      replyTo: recipientEmails[0] ?? process.env.NEXT_PUBLIC_SUPPORT_EMAIL,
+      replyTo: recipientEmails[0] ?? process.env.NEXT_PUBLIC_SUPPORT_EMAIL
     }),
     recipientEmails.length > 0
       ? sendEmail({
           to: recipientEmails,
           subject: `متقدم جديد على ${jobTitle}`,
           text: `وصل متقدم جديد على وظيفة ${jobTitle}.\nالاسم: ${applicantName}\nالبريد: ${normalizedEmail}\nالهاتف: ${input.phone?.trim() || "غير متوفر"}\nالسيرة الذاتية: ${input.resumeUrl.trim()}\nإعلان الوظيفة: ${publicJobUrl}`,
-          html: `<div dir="rtl" style="font-family:Segoe UI,Tahoma,sans-serif;line-height:1.8;color:#0f172a"><h2 style="margin:0 0 12px">متقدم جديد</h2><p>وصل متقدم جديد على وظيفة <strong>${jobTitle}</strong>.</p><ul><li>الاسم: ${applicantName}</li><li>البريد: ${normalizedEmail}</li><li>الهاتف: ${input.phone?.trim() || "غير متوفر"}</li><li><a href="${input.resumeUrl.trim()}">رابط السيرة الذاتية</a></li></ul><p><a href="${publicJobUrl}">عرض الوظيفة العامة</a></p></div>`,
+          html: `<div dir="rtl" style="font-family:Segoe UI,Tahoma,sans-serif;line-height:1.8;color:#0f172a"><h2 style="margin:0 0 12px">متقدم جديد</h2><p>وصل متقدم جديد على وظيفة <strong>${jobTitle}</strong>.</p><ul><li>الاسم: ${applicantName}</li><li>البريد: ${normalizedEmail}</li><li>الهاتف: ${input.phone?.trim() || "غير متوفر"}</li><li><a href="${input.resumeUrl.trim()}">رابط السيرة الذاتية</a></li></ul><p><a href="${publicJobUrl}">عرض الوظيفة العامة</a></p></div>`
         })
-      : Promise.resolve({ sent: false as const, skipped: true as const }),
+      : Promise.resolve({ sent: false as const, skipped: true as const })
   ]);
 
   return {
@@ -528,7 +544,7 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       id: job.id,
       title: jobTitle,
       tenantSlug: job.tenant.slug,
-      tenantName: companyName,
-    },
+      tenantName: companyName
+    }
   };
 }

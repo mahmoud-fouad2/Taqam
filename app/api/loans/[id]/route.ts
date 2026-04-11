@@ -13,14 +13,16 @@ interface RouteContext {
 }
 
 const loanUpdateSchema = z.object({
-  status: z.enum(["PENDING", "APPROVED", "ACTIVE", "COMPLETED", "REJECTED", "CANCELLED"]).optional(),
+  status: z
+    .enum(["PENDING", "APPROVED", "ACTIVE", "COMPLETED", "REJECTED", "CANCELLED"])
+    .optional(),
   amount: z.number().positive().optional(),
   installments: z.number().int().positive().optional(),
   interestRate: z.number().min(0).max(100).optional(),
   startDate: z.string().optional().nullable(),
   reason: z.string().optional(),
   notes: z.string().optional(),
-  rejectedReason: z.string().optional(),
+  rejectedReason: z.string().optional()
 });
 
 export async function GET(request: NextRequest, context: RouteContext) {
@@ -46,19 +48,19 @@ export async function GET(request: NextRequest, context: RouteContext) {
             id: true,
             employeeNumber: true,
             user: {
-              select: { firstName: true, lastName: true, email: true, avatar: true },
+              select: { firstName: true, lastName: true, email: true, avatar: true }
             },
             department: { select: { name: true, nameAr: true } },
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
         },
         approvedBy: {
-          select: { firstName: true, lastName: true },
+          select: { firstName: true, lastName: true }
         },
         payments: {
-          orderBy: { paymentDate: "desc" },
-        },
-      },
+          orderBy: { paymentDate: "desc" }
+        }
+      }
     });
 
     if (!loan) {
@@ -69,7 +71,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
     if (!ALLOWED_ROLES.has(session.user.role)) {
       const employee = await prisma.employee.findFirst({
         where: { userId: session.user.id, tenantId },
-        select: { id: true },
+        select: { id: true }
       });
       if (!employee || employee.id !== loan.employeeId) {
         return NextResponse.json({ error: "Access denied" }, { status: 403 });
@@ -86,9 +88,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
         interestRate: Number(loan.interestRate),
         payments: loan.payments.map((p) => ({
           ...p,
-          amount: Number(p.amount),
-        })),
-      },
+          amount: Number(p.amount)
+        }))
+      }
     });
   } catch (error) {
     logger.error("Error fetching loan", undefined, error);
@@ -116,7 +118,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     const existingLoan = await prisma.loan.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingLoan) {
@@ -129,12 +131,12 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Calculate new installment amount if amount or installments changed
     let installmentAmount = Number(existingLoan.installmentAmount);
     let remainingAmount = Number(existingLoan.remainingAmount);
-    
+
     if (validated.amount || validated.installments) {
       const newAmount = validated.amount || Number(existingLoan.amount);
       const newInstallments = validated.installments || existingLoan.installments;
       installmentAmount = newAmount / newInstallments;
-      
+
       // Recalculate remaining based on paid installments
       const paidAmount = existingLoan.paidInstallments * Number(existingLoan.installmentAmount);
       remainingAmount = newAmount - paidAmount;
@@ -144,22 +146,26 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const updateData: any = {
       ...(validated.amount && { amount: new Prisma.Decimal(validated.amount) }),
       ...(validated.installments && { installments: validated.installments }),
-      ...(validated.interestRate !== undefined && { interestRate: new Prisma.Decimal(validated.interestRate) }),
-      ...(validated.startDate !== undefined && { startDate: validated.startDate ? new Date(validated.startDate) : null }),
+      ...(validated.interestRate !== undefined && {
+        interestRate: new Prisma.Decimal(validated.interestRate)
+      }),
+      ...(validated.startDate !== undefined && {
+        startDate: validated.startDate ? new Date(validated.startDate) : null
+      }),
       ...(validated.reason !== undefined && { reason: validated.reason }),
       ...(validated.notes !== undefined && { notes: validated.notes }),
       installmentAmount: new Prisma.Decimal(installmentAmount),
-      remainingAmount: new Prisma.Decimal(remainingAmount),
+      remainingAmount: new Prisma.Decimal(remainingAmount)
     };
 
     if (validated.status) {
       updateData.status = validated.status;
-      
+
       if (validated.status === "APPROVED" || validated.status === "ACTIVE") {
         updateData.approvedById = session.user.id;
         updateData.approvedAt = new Date();
       }
-      
+
       if (validated.status === "REJECTED") {
         updateData.rejectedReason = validated.rejectedReason || "تم الرفض";
       }
@@ -174,11 +180,11 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
             id: true,
             employeeNumber: true,
             user: {
-              select: { firstName: true, lastName: true, email: true },
-            },
-          },
-        },
-      },
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        }
+      }
     });
 
     logger.info("Loan updated", { loanId: id, tenantId, status: validated.status });
@@ -190,8 +196,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         amount: Number(loan.amount),
         installmentAmount: Number(loan.installmentAmount),
         remainingAmount: Number(loan.remainingAmount),
-        interestRate: Number(loan.interestRate),
-      },
+        interestRate: Number(loan.interestRate)
+      }
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -222,7 +228,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     const existingLoan = await prisma.loan.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingLoan) {
@@ -231,14 +237,11 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     // Don't allow deleting active loans with payments
     if (existingLoan.status === "ACTIVE" && existingLoan.paidInstallments > 0) {
-      return NextResponse.json(
-        { error: "لا يمكن حذف قرض نشط تم سداد أقساط منه" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف قرض نشط تم سداد أقساط منه" }, { status: 400 });
     }
 
     await prisma.loan.delete({
-      where: { id },
+      where: { id }
     });
 
     logger.info("Loan deleted", { loanId: id, tenantId });

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 export async function GET(request: NextRequest) {
@@ -22,15 +23,15 @@ export async function GET(request: NextRequest) {
           requiresAttachment: true,
           defaultDays: true,
           maxDays: true,
-          color: true,
+          color: true
         },
-        orderBy: { name: "asc" },
+        orderBy: { name: "asc" }
       }),
       prisma.leaveBalance.findMany({
         where: {
           tenantId: payloadOrRes.tenantId,
           employeeId: payloadOrRes.employeeId,
-          year: currentYear,
+          year: currentYear
         },
         select: {
           leaveTypeId: true,
@@ -38,9 +39,9 @@ export async function GET(request: NextRequest) {
           used: true,
           pending: true,
           carriedOver: true,
-          adjustment: true,
-        },
-      }),
+          adjustment: true
+        }
+      })
     ]);
 
     const balanceMap = new Map(balances.map((b) => [b.leaveTypeId, b]));
@@ -60,13 +61,13 @@ export async function GET(request: NextRequest) {
             entitled,
             used,
             pending,
-            remaining: Math.max(0, entitled - used - pending + carried + adj),
-          },
+            remaining: Math.max(0, entitled - used - pending + carried + adj)
+          }
         };
-      }),
+      })
     });
   } catch (error) {
-    console.error("Mobile leave types GET error:", error);
+    logger.error("Mobile leave types GET error", undefined, error);
     return NextResponse.json({ error: "Failed to fetch leave types" }, { status: 500 });
   }
 }

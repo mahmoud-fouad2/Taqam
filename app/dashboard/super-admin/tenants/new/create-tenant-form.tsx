@@ -21,7 +21,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -41,16 +41,16 @@ const createTenantSchema = z.object({
   email: z.string().email("Invalid email"),
   phone: z.string().optional(),
   commercialRegister: z.string().optional(),
-  
+
   // Settings
   plan: z.enum(["starter", "business", "enterprise"]),
   defaultLocale: z.enum(["ar", "en"]),
   defaultTheme: z.enum(["shadcn", "mantine"]),
-  
+
   // Company Admin
   adminName: z.string().min(2, "Admin name is required"),
   adminEmail: z.string().email("Invalid admin email"),
-  sendInvite: z.boolean().default(true),
+  sendInvite: z.boolean().default(true)
 });
 
 type CreateTenantInput = z.infer<typeof createTenantSchema>;
@@ -66,15 +66,15 @@ export function CreateTenantForm() {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    formState: { errors }
   } = useForm<CreateTenantInput>({
     resolver: zodResolver(createTenantSchema),
     defaultValues: {
       plan: "business",
       defaultLocale: "ar",
       defaultTheme: "shadcn",
-      sendInvite: true,
-    },
+      sendInvite: true
+    }
   });
 
   // Auto-generate slug from English name
@@ -117,12 +117,12 @@ export function CreateTenantForm() {
             commercialRegister: data.commercialRegister,
             adminName: data.adminName,
             adminEmail: data.adminEmail,
-            sendInvite: data.sendInvite,
-          },
-        }),
+            sendInvite: data.sendInvite
+          }
+        })
       });
 
-      const json = await res.json().catch(() => ({} as any));
+      const json = await res.json().catch(() => ({}) as any);
 
       if (!res.ok || json?.success === false) {
         const msg = json?.error || json?.message || t.tenant.createFailed;
@@ -144,21 +144,17 @@ export function CreateTenantForm() {
       {/* Section 1: Company Info */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <Building2 className="h-5 w-5" />{t.organization.companySection}</div>
-        
+          <Building2 className="h-5 w-5" />
+          {t.organization.companySection}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="nameAr">{t.tenant.nameArLabel}</Label>
-            <Input
-              id="nameAr"
-              placeholder={t.tenant.companyNameExample}
-              {...register("nameAr")}
-            />
-            {errors.nameAr && (
-              <p className="text-sm text-destructive">{errors.nameAr.message}</p>
-            )}
+            <Input id="nameAr" placeholder={t.tenant.companyNameExample} {...register("nameAr")} />
+            {errors.nameAr && <p className="text-destructive text-sm">{errors.nameAr.message}</p>}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="name">{t.tenant.nameEnLabel}</Label>
             <Input
@@ -167,9 +163,7 @@ export function CreateTenantForm() {
               {...register("name")}
               onChange={handleNameChange}
             />
-            {errors.name && (
-              <p className="text-sm text-destructive">{errors.name.message}</p>
-            )}
+            {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
           </div>
         </div>
 
@@ -183,14 +177,14 @@ export function CreateTenantForm() {
                 className="flex-1"
                 {...register("slug")}
               />
-              <span className="text-sm text-muted-foreground">/t/</span>
+              <span className="text-muted-foreground text-sm">/t/</span>
             </div>
-            <p className="text-xs text-muted-foreground">{t.tenant.pCompanyUrlWillBe} /t/{slugPreview || "company"}</p>
-            {errors.slug && (
-              <p className="text-sm text-destructive">{errors.slug.message}</p>
-            )}
+            <p className="text-muted-foreground text-xs">
+              {t.tenant.pCompanyUrlWillBe} /t/{slugPreview || "company"}
+            </p>
+            {errors.slug && <p className="text-destructive text-sm">{errors.slug.message}</p>}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="commercialRegister">{t.organization.commercialReg}</Label>
             <Input
@@ -204,24 +198,13 @@ export function CreateTenantForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="email">{t.tenant.emailLabel}</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="info@company.sa"
-              {...register("email")}
-            />
-            {errors.email && (
-              <p className="text-sm text-destructive">{errors.email.message}</p>
-            )}
+            <Input id="email" type="email" placeholder="info@company.sa" {...register("email")} />
+            {errors.email && <p className="text-destructive text-sm">{errors.email.message}</p>}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="phone">{t.common.phone}</Label>
-            <Input
-              id="phone"
-              placeholder="+966501234567"
-              {...register("phone")}
-            />
+            <Input id="phone" placeholder="+966501234567" {...register("phone")} />
           </div>
         </div>
       </div>
@@ -231,15 +214,16 @@ export function CreateTenantForm() {
       {/* Section 2: Settings */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <Settings className="h-5 w-5" />{t.tenant.defaultSettings}</div>
-        
+          <Settings className="h-5 w-5" />
+          {t.tenant.defaultSettings}
+        </div>
+
         <div className="grid gap-4 sm:grid-cols-3">
           <div className="space-y-2">
             <Label>{t.tenant.planLabel}</Label>
             <Select
               defaultValue="business"
-              onValueChange={(value) => setValue("plan", value as any)}
-            >
+              onValueChange={(value) => setValue("plan", value as any)}>
               <SelectTrigger>
                 <SelectValue placeholder={t.tenant.planPlaceholder} />
               </SelectTrigger>
@@ -250,13 +234,12 @@ export function CreateTenantForm() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label>{t.tenant.languageLabel}</Label>
             <Select
               defaultValue="ar"
-              onValueChange={(value) => setValue("defaultLocale", value as any)}
-            >
+              onValueChange={(value) => setValue("defaultLocale", value as any)}>
               <SelectTrigger>
                 <SelectValue placeholder={t.tenant.languagePlaceholder} />
               </SelectTrigger>
@@ -266,13 +249,12 @@ export function CreateTenantForm() {
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label>{t.tenant.themeLabel}</Label>
             <Select
               defaultValue="shadcn"
-              onValueChange={(value) => setValue("defaultTheme", value as any)}
-            >
+              onValueChange={(value) => setValue("defaultTheme", value as any)}>
               <SelectTrigger>
                 <SelectValue placeholder={t.tenant.themePlaceholder} />
               </SelectTrigger>
@@ -290,9 +272,11 @@ export function CreateTenantForm() {
       {/* Section 3: Company Admin */}
       <div className="space-y-4">
         <div className="flex items-center gap-2 text-lg font-semibold">
-          <User className="h-5 w-5" />{t.tenant.adminLabel}</div>
-        <p className="text-sm text-muted-foreground">{t.tenant.adminDescription}</p>
-        
+          <User className="h-5 w-5" />
+          {t.tenant.adminLabel}
+        </div>
+        <p className="text-muted-foreground text-sm">{t.tenant.adminDescription}</p>
+
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="adminName">{t.tenant.adminNameLabel}</Label>
@@ -302,10 +286,10 @@ export function CreateTenantForm() {
               {...register("adminName")}
             />
             {errors.adminName && (
-              <p className="text-sm text-destructive">{errors.adminName.message}</p>
+              <p className="text-destructive text-sm">{errors.adminName.message}</p>
             )}
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="adminEmail">{t.tenant.adminEmailLabel}</Label>
             <Input
@@ -315,7 +299,7 @@ export function CreateTenantForm() {
               {...register("adminEmail")}
             />
             {errors.adminEmail && (
-              <p className="text-sm text-destructive">{errors.adminEmail.message}</p>
+              <p className="text-destructive text-sm">{errors.adminEmail.message}</p>
             )}
           </div>
         </div>
@@ -326,7 +310,9 @@ export function CreateTenantForm() {
             defaultChecked
             onCheckedChange={(checked) => setValue("sendInvite", !!checked)}
           />
-          <Label htmlFor="sendInvite" className="text-sm font-normal">{t.tenant.sendInviteCheckbox}</Label>
+          <Label htmlFor="sendInvite" className="text-sm font-normal">
+            {t.tenant.sendInviteCheckbox}
+          </Label>
         </div>
       </div>
 
@@ -334,11 +320,9 @@ export function CreateTenantForm() {
 
       {/* Actions */}
       <div className="flex justify-end gap-4">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => router.back()}
-        >{t.common.cancel}</Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          {t.common.cancel}
+        </Button>
         <Button type="submit" disabled={isLoading}>
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           {t.tenant.pCreateCompany}

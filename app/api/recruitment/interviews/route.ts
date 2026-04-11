@@ -47,7 +47,7 @@ const interviewCreateSchema = z
     duration: z.number().int().positive().optional().default(60),
     location: z.string().optional().nullable(),
     meetingLink: z.string().url().optional().nullable(),
-    interviewerId: z.string().optional().nullable(),
+    interviewerId: z.string().optional().nullable()
   })
   .strict();
 
@@ -55,18 +55,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -103,15 +97,15 @@ export async function GET(request: NextRequest) {
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
+            email: true
+          }
         },
         jobPosting: {
           select: {
             id: true,
             title: true,
-            titleAr: true,
-          },
+            titleAr: true
+          }
         },
         interviewer: {
           select: {
@@ -119,11 +113,11 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
+            lastNameAr: true
+          }
+        }
       },
-      orderBy: { scheduledAt: "desc" },
+      orderBy: { scheduledAt: "desc" }
     });
 
     const result = interviews.map((i) => ({
@@ -146,7 +140,7 @@ export async function GET(request: NextRequest) {
       feedback: i.feedback,
       rating: i.rating,
       createdAt: i.createdAt.toISOString(),
-      updatedAt: i.updatedAt.toISOString(),
+      updatedAt: i.updatedAt.toISOString()
     }));
 
     return NextResponse.json({ success: true, data: result });
@@ -163,18 +157,12 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const parsedBody = interviewCreateSchema.safeParse(await request.json());
@@ -213,8 +201,8 @@ export async function POST(request: NextRequest) {
         duration: body.duration,
         location: body.location,
         meetingLink: body.meetingLink,
-        interviewerId: body.interviewerId,
-      },
+        interviewerId: body.interviewerId
+      }
     });
 
     return NextResponse.json({
@@ -224,8 +212,8 @@ export async function POST(request: NextRequest) {
         type: mapType(interview.type),
         status: mapStatus(interview.status),
         scheduledAt: interview.scheduledAt.toISOString(),
-        createdAt: interview.createdAt.toISOString(),
-      },
+        createdAt: interview.createdAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error creating interview:", error);

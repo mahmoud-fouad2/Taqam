@@ -27,7 +27,7 @@ function getCookie(name: string): string | undefined {
 export function LocaleToggle({
   className,
   // variant kept for backward compat but ignored — pill style is always used
-  variant: _variant,
+  variant: _variant
 }: {
   className?: string;
   variant?: string;
@@ -45,11 +45,13 @@ export function LocaleToggle({
     setLocale(next);
 
     const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
-    const stripped = hasEnPrefix ? (pathname.replace(/^\/en(?=\/|$)/, "") || "/") : pathname;
+    const stripped = hasEnPrefix ? pathname.replace(/^\/en(?=\/|$)/, "") || "/" : pathname;
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
 
     // Hard navigation → forces full server re-render with new locale cookie
-    startLocaleTransition(() => { window.location.href = target; });
+    startLocaleTransition(() => {
+      window.location.href = target;
+    });
   };
 
   return (
@@ -61,38 +63,35 @@ export function LocaleToggle({
       className={cn(
         // Container — fixed LTR so AR is always on left, EN on right
         "relative inline-flex h-8 w-[72px] shrink-0 cursor-pointer items-center rounded-full",
-        "bg-muted ring-1 ring-border/60 p-1",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        className,
-      )}
-    >
+        "bg-muted ring-border/60 p-1 ring-1",
+        "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        className
+      )}>
       {/* Sliding pill indicator */}
       <span
         aria-hidden="true"
         className={cn(
-          "absolute left-1 top-1 h-6 w-8 rounded-full bg-background shadow-sm ring-1 ring-border/40",
+          "bg-background ring-border/40 absolute top-1 left-1 h-6 w-8 rounded-full shadow-sm ring-1",
           "transition-transform duration-200 ease-in-out",
-          locale === "ar" ? "translate-x-0" : "translate-x-8",
+          locale === "ar" ? "translate-x-0" : "translate-x-8"
         )}
       />
       {/* AR label */}
       <span
         className={cn(
-          "relative z-10 flex-1 select-none text-center text-[11px] font-bold tracking-wider",
+          "relative z-10 flex-1 text-center text-[11px] font-bold tracking-wider select-none",
           "transition-colors duration-200",
-          locale === "ar" ? "text-foreground" : "text-muted-foreground/50",
-        )}
-      >
+          locale === "ar" ? "text-foreground" : "text-muted-foreground/50"
+        )}>
         AR
       </span>
       {/* EN label */}
       <span
         className={cn(
-          "relative z-10 flex-1 select-none text-center text-[11px] font-bold tracking-wider",
+          "relative z-10 flex-1 text-center text-[11px] font-bold tracking-wider select-none",
           "transition-colors duration-200",
-          locale === "en" ? "text-foreground" : "text-muted-foreground/50",
-        )}
-      >
+          locale === "en" ? "text-foreground" : "text-muted-foreground/50"
+        )}>
         EN
       </span>
     </button>

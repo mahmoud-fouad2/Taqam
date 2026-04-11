@@ -21,7 +21,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const body = await request.json();
 
     const existing = await prisma.performanceGoal.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existing) {
@@ -35,8 +35,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         progress: body.progress !== undefined ? body.progress : undefined,
         currentValue: body.currentValue !== undefined ? body.currentValue : undefined,
         completedAt: body.status === "completed" && !existing.completedAt ? new Date() : undefined,
-        notes: body.notes !== undefined ? body.notes : undefined,
-      },
+        notes: body.notes !== undefined ? body.notes : undefined
+      }
     });
 
     return NextResponse.json({ data: { id: updated.id } });
@@ -61,7 +61,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     const existing = await prisma.performanceGoal.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existing) {

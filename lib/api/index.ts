@@ -11,7 +11,6 @@ export { jobTitlesService } from "./job-titles";
 export { attendanceService } from "./attendance";
 export { documentsService } from "./documents";
 export { tenantsService } from "./tenants";
-export { payrollService } from "./payroll";
 export { leavesApi } from "./leaves";
 export { performanceApi } from "./performance";
 export { notificationsService } from "./notifications";

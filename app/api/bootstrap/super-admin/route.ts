@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
+import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import {
   hasValidSuperAdminBootstrapToken,
-  isSuperAdminBootstrapEnabled,
+  isSuperAdminBootstrapEnabled
 } from "@/lib/security/bootstrap";
 
 /**
@@ -12,15 +14,32 @@ import {
  * Only works if environment variables are set.
  */
 export async function POST(request: NextRequest) {
+  const limit = 5;
+  const limitInfo = await checkRateLimit(request, {
+    keyPrefix: "bootstrap:super-admin",
+    limit,
+    windowMs: 15 * 60 * 1000
+  });
+
+  const withHeaders = (response: NextResponse) =>
+    withRateLimitHeaders(response, {
+      limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
+
+  if (!limitInfo.allowed) {
+    return withHeaders(NextResponse.json({ error: "Too many requests" }, { status: 429 }));
+  }
+
   try {
     if (!isSuperAdminBootstrapEnabled()) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return withHeaders(NextResponse.json({ error: "Not found" }, { status: 404 }));
     }
 
     if (!hasValidSuperAdminBootstrapToken(request.headers)) {
-      return NextResponse.json(
-        { error: "A valid bootstrap token is required" },
-        { status: 403 }
+      return withHeaders(
+        NextResponse.json({ error: "A valid bootstrap token is required" }, { status: 403 })
       );
     }
 
@@ -29,9 +48,8 @@ export async function POST(request: NextRequest) {
     const envPassword = process.env.SUPER_ADMIN_PASSWORD;
 
     if (!envEmail || !envPassword) {
-      return NextResponse.json(
-        { error: "Environment variables not configured" },
-        { status: 400 }
+      return withHeaders(
+        NextResponse.json({ error: "Environment variables not configured" }, { status: 400 })
       );
     }
 
@@ -41,7 +59,7 @@ export async function POST(request: NextRequest) {
     // Check if super admin exists
     const existing = await prisma.user.findUnique({
       where: { email },
-      select: { id: true, email: true, role: true },
+      select: { id: true, email: true, role: true }
     });
 
     let user;
@@ -54,9 +72,9 @@ export async function POST(request: NextRequest) {
           role: "SUPER_ADMIN",
           status: "ACTIVE",
           failedLoginAttempts: 0,
-          lockedUntil: null,
+          lockedUntil: null
         },
-        select: { id: true, email: true, role: true, status: true },
+        select: { id: true, email: true, role: true, status: true }
       });
     } else {
       // Create new super admin
@@ -68,27 +86,28 @@ export async function POST(request: NextRequest) {
           lastName: "Admin",
           role: "SUPER_ADMIN",
           status: "ACTIVE",
-          permissions: [],
+          permissions: []
         },
-        select: { id: true, email: true, role: true, status: true },
+        select: { id: true, email: true, role: true, status: true }
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: existing ? "Super admin updated" : "Super admin created",
-      user: {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        status: user.status,
-      },
-    });
+    return withHeaders(
+      NextResponse.json({
+        success: true,
+        message: existing ? "Super admin updated" : "Super admin created",
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          status: user.status
+        }
+      })
+    );
   } catch (error) {
-    console.error("Bootstrap super admin error:", error);
-    return NextResponse.json(
-      { error: "Failed to bootstrap super admin" },
-      { status: 500 }
+    logger.error("Bootstrap super admin error", undefined, error);
+    return withHeaders(
+      NextResponse.json({ error: "Failed to bootstrap super admin" }, { status: 500 })
     );
   }
 }

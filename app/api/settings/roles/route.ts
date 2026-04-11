@@ -15,10 +15,18 @@ type RoleDto = {
 };
 
 const ROLE_LABELS: Record<string, { ar: string; en: string; descriptionAr: string }> = {
-  TENANT_ADMIN: { ar: "مدير النظام", en: "Tenant Administrator", descriptionAr: "صلاحيات كاملة على النظام" },
-  HR_MANAGER: { ar: "مدير الموارد البشرية", en: "HR Manager", descriptionAr: "إدارة شؤون الموظفين والموافقات" },
+  TENANT_ADMIN: {
+    ar: "مدير النظام",
+    en: "Tenant Administrator",
+    descriptionAr: "صلاحيات كاملة على النظام"
+  },
+  HR_MANAGER: {
+    ar: "مدير الموارد البشرية",
+    en: "HR Manager",
+    descriptionAr: "إدارة شؤون الموظفين والموافقات"
+  },
   MANAGER: { ar: "مدير", en: "Manager", descriptionAr: "إدارة الفريق والموافقات" },
-  EMPLOYEE: { ar: "موظف", en: "Employee", descriptionAr: "الخدمة الذاتية الأساسية" },
+  EMPLOYEE: { ar: "موظف", en: "Employee", descriptionAr: "الخدمة الذاتية الأساسية" }
 };
 
 export async function GET() {
@@ -38,8 +46,8 @@ export async function GET() {
       prisma.user.groupBy({
         by: ["role"],
         where: { tenantId },
-        _count: { _all: true },
-      }),
+        _count: { _all: true }
+      })
     ]);
 
     const counts = new Map<string, number>();
@@ -57,7 +65,7 @@ export async function GET() {
       permissions: [],
       isSystem: true,
       usersCount: counts.get(roleKey) ?? 0,
-      createdAt,
+      createdAt
     }));
 
     return NextResponse.json({ data: roles });

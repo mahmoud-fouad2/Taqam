@@ -8,17 +8,14 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 // ==================== PATCH - Update Interview Status ====================
 const schema = z.object({
-  status: z.enum(["scheduled", "completed", "cancelled", "no-show"]),
+  status: z.enum(["scheduled", "completed", "cancelled", "no-show"])
 });
 
 function mapStatusToDb(status: string) {
   return status.toUpperCase().replace(/-/g, "_");
 }
 
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -27,7 +24,7 @@ export async function PATCH(
 
     const { id } = await context.params;
     const body = await request.json();
-    
+
     const { status } = schema.parse(body);
 
     // Check if interview exists
@@ -36,23 +33,20 @@ export async function PATCH(
         id,
         applicant: {
           jobPosting: {
-            tenantId: session.user.tenantId,
-          },
-        },
-      },
+            tenantId: session.user.tenantId
+          }
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "المقابلة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "المقابلة غير موجودة" }, { status: 404 });
     }
 
     const updated = await prisma.interview.update({
       where: { id },
-      data: { 
-        status: mapStatusToDb(status) as any,
+      data: {
+        status: mapStatusToDb(status) as any
       },
       include: {
         applicant: true,
@@ -62,23 +56,23 @@ export async function PATCH(
             firstNameAr: true,
             lastNameAr: true,
             firstName: true,
-            lastName: true,
-          },
+            lastName: true
+          }
         },
         jobPosting: {
           include: {
             department: true,
-            jobTitle: true,
-          },
-        },
-      },
+            jobTitle: true
+          }
+        }
+      }
     });
 
     // Map back to kebab-case
     const mappedInterview = {
       ...updated,
       type: updated.type.toLowerCase().replace(/_/g, "-"),
-      status: updated.status.toLowerCase().replace(/_/g, "-"),
+      status: updated.status.toLowerCase().replace(/_/g, "-")
     };
 
     return NextResponse.json(mappedInterview);
@@ -90,9 +84,6 @@ export async function PATCH(
       );
     }
     console.error("Error updating interview status:", error);
-    return NextResponse.json(
-      { error: "فشل في تحديث حالة المقابلة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في تحديث حالة المقابلة" }, { status: 500 });
   }
 }

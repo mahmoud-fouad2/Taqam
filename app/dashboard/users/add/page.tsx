@@ -16,22 +16,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
+  FormDescription
 } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowRight, IconArrowLeft, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
 import { getText } from "@/lib/i18n/text";
@@ -44,9 +38,9 @@ function createUserSchema(t: ReturnType<typeof getText>) {
     email: z.string().email(t.common.emailInvalid),
     password: z.string().min(6, t.common.passwordMinLength),
     role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"], {
-      required_error: "الدور مطلوب",
+      required_error: "الدور مطلوب"
     }),
-    phone: z.string().optional(),
+    phone: z.string().optional()
   });
 }
 
@@ -70,8 +64,8 @@ export default function AddUserPage() {
       email: "",
       password: "",
       role: "EMPLOYEE",
-      phone: "",
-    },
+      phone: ""
+    }
   });
 
   const onSubmit = async (data: UserFormData) => {
@@ -80,7 +74,7 @@ export default function AddUserPage() {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
 
       const json = await res.json();
@@ -103,7 +97,7 @@ export default function AddUserPage() {
     { value: "EMPLOYEE", label: isRtl ? t.common.employee : "Employee" },
     { value: "HR_MANAGER", label: isRtl ? t.common.hrManager : "HR Manager" },
     { value: "MANAGER", label: isRtl ? t.common.manager : "Manager" },
-    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" },
+    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" }
   ];
 
   return (
@@ -128,8 +122,8 @@ export default function AddUserPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <IconUser className="size-5 text-primary" />
+            <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
+              <IconUser className="text-primary size-5" />
             </div>
             <div>
               <CardTitle>{isRtl ? t.common.details : "User Details"}</CardTitle>
@@ -142,7 +136,7 @@ export default function AddUserPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -163,7 +157,10 @@ export default function AddUserPage() {
                     <FormItem>
                       <FormLabel>{isRtl ? t.common.lastName : "Last Name *"}</FormLabel>
                       <FormControl>
-                        <Input placeholder={isRtl ? t.common.namePlaceholder : "Mohammed"} {...field} />
+                        <Input
+                          placeholder={isRtl ? t.common.namePlaceholder : "Mohammed"}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -171,7 +168,7 @@ export default function AddUserPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="email"
@@ -200,7 +197,7 @@ export default function AddUserPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="password"
@@ -208,7 +205,12 @@ export default function AddUserPage() {
                     <FormItem>
                       <FormLabel>{isRtl ? "كلمة المرور *" : "Password *"}</FormLabel>
                       <FormControl>
-                        <Input type="password" autoComplete="new-password" placeholder="••••••••" {...field} />
+                        <Input
+                          type="password"
+                          autoComplete="new-password"
+                          placeholder="••••••••"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         {isRtl ? "6 أحرف على الأقل" : "At least 6 characters"}
@@ -250,8 +252,8 @@ export default function AddUserPage() {
                       ? t.common.saving
                       : "Saving..."
                     : isRtl
-                    ? "إضافة المستخدم"
-                    : "Add User"}
+                      ? "إضافة المستخدم"
+                      : "Add User"}
                 </Button>
                 <Button type="button" variant="outline" asChild>
                   <Link href="/dashboard/users">{isRtl ? t.common.cancel : "Cancel"}</Link>

@@ -3,7 +3,11 @@ import { z } from "zod";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import type { RequestStatus, SelfServiceRequest, SelfServiceRequestType } from "@/lib/types/self-service";
+import type {
+  RequestStatus,
+  SelfServiceRequest,
+  SelfServiceRequestType
+} from "@/lib/types/self-service";
 
 function employeeDisplayName(employee: {
   firstName: string;
@@ -68,7 +72,7 @@ const createSchema = z
     title: z.string().trim().min(3).max(160),
     description: z.string().trim().min(3).max(5000),
     category: z.string().trim().max(60).optional(),
-    priority: z.enum(["low", "medium", "high"]).optional(),
+    priority: z.enum(["low", "medium", "high"]).optional()
   })
   .strict();
 
@@ -93,41 +97,43 @@ export async function GET(_request: NextRequest) {
         firstName: true,
         lastName: true,
         firstNameAr: true,
-        lastNameAr: true,
-      },
+        lastNameAr: true
+      }
     });
 
     const employeeId = employee?.id;
-    const employeeName = employee ? employeeDisplayName(employee) : `${session.user.firstName} ${session.user.lastName}`.trim();
+    const employeeName = employee
+      ? employeeDisplayName(employee)
+      : `${session.user.firstName} ${session.user.lastName}`.trim();
 
     const [leaveRequests, attendanceRequests, enrollments, tickets] = await Promise.all([
       employeeId
         ? prisma.leaveRequest.findMany({
             where: { tenantId, employeeId },
             orderBy: { createdAt: "desc" },
-            include: { leaveType: { select: { name: true, nameAr: true } } },
+            include: { leaveType: { select: { name: true, nameAr: true } } }
           })
         : Promise.resolve([]),
       employeeId
         ? prisma.attendanceRequest.findMany({
             where: { tenantId, employeeId },
-            orderBy: { createdAt: "desc" },
+            orderBy: { createdAt: "desc" }
           })
         : Promise.resolve([]),
       employeeId
         ? prisma.trainingEnrollment.findMany({
             where: { tenantId, employeeId },
             orderBy: { createdAt: "desc" },
-            include: { course: { select: { title: true } } },
+            include: { course: { select: { title: true } } }
           })
         : Promise.resolve([]),
       prisma.supportTicket.findMany({
         where: { tenantId, createdById: userId },
         orderBy: { lastMessageAt: "desc" },
         include: {
-          _count: { select: { messages: true } },
-        },
-      }),
+          _count: { select: { messages: true } }
+        }
+      })
     ]);
 
     const items: SelfServiceRequest[] = [];
@@ -150,7 +156,7 @@ export async function GET(_request: NextRequest) {
         createdAt: lr.createdAt.toISOString(),
         updatedAt: lr.updatedAt.toISOString(),
         resolvedAt: lr.approvedAt ? lr.approvedAt.toISOString() : undefined,
-        metadata: { source: "leave", sourceId: lr.id },
+        metadata: { source: "leave", sourceId: lr.id }
       });
     }
 
@@ -187,7 +193,7 @@ export async function GET(_request: NextRequest) {
         createdAt: ar.createdAt.toISOString(),
         updatedAt: ar.updatedAt.toISOString(),
         resolvedAt: ar.approvedAt ? ar.approvedAt.toISOString() : undefined,
-        metadata: { source: "attendance", sourceId: ar.id },
+        metadata: { source: "attendance", sourceId: ar.id }
       });
     }
 
@@ -205,13 +211,17 @@ export async function GET(_request: NextRequest) {
         createdAt: e.createdAt.toISOString(),
         updatedAt: e.updatedAt.toISOString(),
         resolvedAt: e.approvedAt ? e.approvedAt.toISOString() : undefined,
-        metadata: { source: "training", sourceId: e.id },
+        metadata: { source: "training", sourceId: e.id }
       });
     }
 
     for (const t of tickets) {
       const priority: "low" | "medium" | "high" =
-        String(t.priority) === "LOW" ? "low" : String(t.priority) === "URGENT" || String(t.priority) === "HIGH" ? "high" : "medium";
+        String(t.priority) === "LOW"
+          ? "low"
+          : String(t.priority) === "URGENT" || String(t.priority) === "HIGH"
+            ? "high"
+            : "medium";
 
       items.push({
         id: `ticket:${t.id}`,
@@ -225,8 +235,11 @@ export async function GET(_request: NextRequest) {
         approvers: [],
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
-        resolvedAt: String(t.status) === "RESOLVED" || String(t.status) === "CLOSED" ? t.updatedAt.toISOString() : undefined,
-        metadata: { source: "ticket", sourceId: t.id, messageCount: (t as any)._count?.messages },
+        resolvedAt:
+          String(t.status) === "RESOLVED" || String(t.status) === "CLOSED"
+            ? t.updatedAt.toISOString()
+            : undefined,
+        metadata: { source: "ticket", sourceId: t.id, messageCount: (t as any)._count?.messages }
       });
     }
 
@@ -254,7 +267,10 @@ export async function POST(request: NextRequest) {
     const raw = await request.json();
     const parsed = createSchema.safeParse(raw);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const now = new Date();
@@ -267,20 +283,24 @@ export async function POST(request: NextRequest) {
         subject: parsed.data.title,
         category: parsed.data.category,
         priority:
-          parsed.data.priority === "low" ? "LOW" : parsed.data.priority === "high" ? "HIGH" : "NORMAL",
+          parsed.data.priority === "low"
+            ? "LOW"
+            : parsed.data.priority === "high"
+              ? "HIGH"
+              : "NORMAL",
         status,
         lastMessageAt: now,
         messages: {
           create: {
             senderId: session.user.id,
             body: parsed.data.description,
-            isInternal: false,
-          },
-        },
+            isInternal: false
+          }
+        }
       },
       include: {
-        _count: { select: { messages: true } },
-      },
+        _count: { select: { messages: true } }
+      }
     });
 
     const employee = await prisma.employee.findFirst({
@@ -290,11 +310,13 @@ export async function POST(request: NextRequest) {
         firstName: true,
         lastName: true,
         firstNameAr: true,
-        lastNameAr: true,
-      },
+        lastNameAr: true
+      }
     });
 
-    const employeeName = employee ? employeeDisplayName(employee) : `${session.user.firstName} ${session.user.lastName}`.trim();
+    const employeeName = employee
+      ? employeeDisplayName(employee)
+      : `${session.user.firstName} ${session.user.lastName}`.trim();
 
     const responseItem: SelfServiceRequest = {
       id: `ticket:${created.id}`,
@@ -309,7 +331,11 @@ export async function POST(request: NextRequest) {
       createdAt: created.createdAt.toISOString(),
       updatedAt: created.updatedAt.toISOString(),
       resolvedAt: undefined,
-      metadata: { source: "ticket", sourceId: created.id, messageCount: (created as any)._count?.messages },
+      metadata: {
+        source: "ticket",
+        sourceId: created.id,
+        messageCount: (created as any)._count?.messages
+      }
     };
 
     return NextResponse.json({ data: responseItem }, { status: 201 });

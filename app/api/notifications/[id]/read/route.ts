@@ -4,17 +4,23 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  errorResponse,
+  logApiError,
+  notFoundResponse,
+  nullDataResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
-export async function PATCH(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function PATCH(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(_request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
@@ -22,24 +28,21 @@ export async function PATCH(_request: NextRequest, { params }: { params: Promise
 
     const existing = await prisma.notification.findFirst({
       where: { id, userId, ...(tenantId ? { tenantId } : {}) },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return notFoundResponse();
     }
 
     await prisma.notification.update({
       where: { id },
-      data: { isRead: true, readAt: new Date() },
+      data: { isRead: true, readAt: new Date() }
     });
 
-    return NextResponse.json({ data: null });
+    return nullDataResponse();
   } catch (error) {
-    console.error("Error marking notification as read:", error);
-    return NextResponse.json(
-      { error: "Failed to mark notification as read" },
-      { status: 500 }
-    );
+    logApiError("Error marking notification as read", error);
+    return errorResponse("Failed to mark notification as read");
   }
 }

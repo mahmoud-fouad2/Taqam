@@ -1,9 +1,10 @@
 import { Prisma } from "@prisma/client";
 
+import { ADMIN_ROLES } from "@/lib/access-control";
 import prisma from "@/lib/db";
 import type { EmployeeSalary, EmployeeSalaryComponent } from "@/lib/types/payroll";
 
-export const COMPENSATION_ADMIN_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"] as const;
+export const COMPENSATION_ADMIN_ROLES = ADMIN_ROLES;
 
 type SalaryRecordRow = {
   id: string;
@@ -129,8 +130,8 @@ export function parseSalaryComponents(value: unknown): EmployeeSalaryComponent[]
         name: component.name,
         nameAr: component.nameAr,
         amount,
-        isFixed: component.isFixed !== false,
-      },
+        isFixed: component.isFixed !== false
+      }
     ];
   });
 }
@@ -152,11 +153,13 @@ export function mapSalaryRecord(record: SalaryRecordRow): EmployeeSalary {
     currency: record.currency,
     notes: record.notes ?? undefined,
     createdAt: record.createdAt.toISOString(),
-    updatedAt: record.updatedAt.toISOString(),
+    updatedAt: record.updatedAt.toISOString()
   };
 }
 
-export function buildFallbackSalaryRecord(employee: CompensationFallbackEmployee): EmployeeSalary | null {
+export function buildFallbackSalaryRecord(
+  employee: CompensationFallbackEmployee
+): EmployeeSalary | null {
   if (employee.baseSalary == null) {
     return null;
   }
@@ -171,7 +174,7 @@ export function buildFallbackSalaryRecord(employee: CompensationFallbackEmployee
     paymentMethod: "bank_transfer",
     currency: employee.currency,
     createdAt: employee.createdAt.toISOString(),
-    updatedAt: employee.updatedAt.toISOString(),
+    updatedAt: employee.updatedAt.toISOString()
   };
 }
 
@@ -187,7 +190,7 @@ export function extractCurrentCompensation(source: CompensationSource) {
     iban: record?.iban ?? undefined,
     swiftCode: record?.swiftCode ?? undefined,
     paymentMethod: normalizePaymentMethod(record?.paymentMethod),
-    currency: record?.currency || source.currency || "SAR",
+    currency: record?.currency || source.currency || "SAR"
   };
 }
 
@@ -207,8 +210,8 @@ export async function resolveCompensationEmployeeAccess(input: {
       currency: true,
       hireDate: true,
       createdAt: true,
-      updatedAt: true,
-    },
+      updatedAt: true
+    }
   });
 
   if (!employee) {
@@ -235,7 +238,7 @@ export async function getEmployeeCurrentSalary(input: {
 
   const current = await prisma.employeeSalaryRecord.findFirst({
     where: { tenantId: input.tenantId, employeeId: input.employeeId },
-    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }]
   });
 
   if (!current) {
@@ -263,7 +266,7 @@ export async function listEmployeeSalaryHistory(input: {
 
   const history = await prisma.employeeSalaryRecord.findMany({
     where: { tenantId: input.tenantId, employeeId: input.employeeId },
-    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }]
   });
 
   if (history.length === 0) {
@@ -295,8 +298,8 @@ export async function saveEmployeeSalary(input: {
     select: {
       id: true,
       baseSalary: true,
-      currency: true,
-    },
+      currency: true
+    }
   });
 
   if (!employee) {
@@ -306,7 +309,7 @@ export async function saveEmployeeSalary(input: {
   if (input.structureId) {
     const structure = await prisma.salaryStructure.findFirst({
       where: { id: input.structureId, tenantId: input.tenantId },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!structure) {
@@ -326,7 +329,7 @@ export async function saveEmployeeSalary(input: {
 
   const latest = await prisma.employeeSalaryRecord.findFirst({
     where: { tenantId: input.tenantId, employeeId: input.employeeId },
-    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }]
   });
 
   if (
@@ -336,9 +339,10 @@ export async function saveEmployeeSalary(input: {
   ) {
     return {
       error: {
-        message: "Backdated salary records are not supported until full compensation timeline tooling is added",
-        status: 400 as const,
-      },
+        message:
+          "Backdated salary records are not supported until full compensation timeline tooling is added",
+        status: 400 as const
+      }
     };
   }
 
@@ -355,33 +359,37 @@ export async function saveEmployeeSalary(input: {
       swiftCode: input.swiftCode || null,
       paymentMethod: input.paymentMethod || "bank_transfer",
       currency: input.currency || employee.currency || "SAR",
-      notes: input.notes || null,
+      notes: input.notes || null
     };
 
     if (latest && toIsoDate(latest.effectiveDate) === toIsoDate(effectiveDate)) {
       const updated = await tx.employeeSalaryRecord.update({
         where: { id: latest.id },
-        data: payload,
+        data: payload
       });
 
       await tx.employee.update({
         where: { id: input.employeeId },
         data: {
           baseSalary: new Prisma.Decimal(input.basicSalary),
-          currency: payload.currency,
-        },
+          currency: payload.currency
+        }
       });
 
       return updated;
     }
 
-    if (latest && latest.endDate == null && toIsoDate(effectiveDate) > toIsoDate(latest.effectiveDate)) {
+    if (
+      latest &&
+      latest.endDate == null &&
+      toIsoDate(effectiveDate) > toIsoDate(latest.effectiveDate)
+    ) {
       const previousEndDate = new Date(effectiveDate);
       previousEndDate.setUTCDate(previousEndDate.getUTCDate() - 1);
 
       await tx.employeeSalaryRecord.update({
         where: { id: latest.id },
-        data: { endDate: previousEndDate },
+        data: { endDate: previousEndDate }
       });
     }
 
@@ -389,16 +397,16 @@ export async function saveEmployeeSalary(input: {
       data: {
         tenantId: input.tenantId,
         employeeId: input.employeeId,
-        ...payload,
-      },
+        ...payload
+      }
     });
 
     await tx.employee.update({
       where: { id: input.employeeId },
       data: {
         baseSalary: new Prisma.Decimal(input.basicSalary),
-        currency: payload.currency,
-      },
+        currency: payload.currency
+      }
     });
 
     return created;

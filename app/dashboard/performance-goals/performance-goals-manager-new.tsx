@@ -11,7 +11,7 @@ import {
   IconDots,
   IconProgress,
   IconFlag,
-  IconRefresh,
+  IconRefresh
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -33,7 +33,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -44,7 +44,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -52,14 +52,14 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -110,14 +110,14 @@ const statusLabels: Record<string, string> = {
   PENDING: t.common.pending,
   IN_PROGRESS: t.common.inProgress,
   COMPLETED: t.common.completed,
-  CANCELLED: t.performanceGoals.cancelled,
+  CANCELLED: t.performanceGoals.cancelled
 };
 
 const priorityLabels: Record<string, string> = {
   LOW: t.common.low,
   MEDIUM: t.common.medium,
   HIGH: t.common.high,
-  CRITICAL: t.common.critical,
+  CRITICAL: t.common.critical
 };
 
 const statusColors: Record<string, string> = {
@@ -125,14 +125,14 @@ const statusColors: Record<string, string> = {
   PENDING: "bg-yellow-100 text-yellow-800",
   IN_PROGRESS: "bg-blue-100 text-blue-800",
   COMPLETED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
+  CANCELLED: "bg-red-100 text-red-800"
 };
 
 const priorityColors: Record<string, string> = {
   LOW: "bg-gray-100 text-gray-700",
   MEDIUM: "bg-blue-100 text-blue-700",
   HIGH: "bg-orange-100 text-orange-700",
-  CRITICAL: "bg-red-100 text-red-700",
+  CRITICAL: "bg-red-100 text-red-700"
 };
 
 export function PerformanceGoalsManagerNew() {
@@ -154,7 +154,7 @@ export function PerformanceGoalsManagerNew() {
     pending: 0,
     inProgress: 0,
     completed: 0,
-    cancelled: 0,
+    cancelled: 0
   });
 
   type GoalPriority = "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
@@ -186,7 +186,7 @@ export function PerformanceGoalsManagerNew() {
     startDate: new Date().toISOString().split("T")[0],
     dueDate: "",
     managerId: "",
-    notes: "",
+    notes: ""
   });
 
   // Fetch goals
@@ -195,11 +195,11 @@ export function PerformanceGoalsManagerNew() {
       const params = new URLSearchParams();
       if (filterStatus !== "all") params.append("status", filterStatus);
       if (filterPriority !== "all") params.append("priority", filterPriority);
-      
+
       const res = await fetch(`/api/performance-goals?${params}`);
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
-      
+
       setGoals(data.goals || []);
       if (data.stats) setStats(data.stats);
     } catch (error) {
@@ -244,7 +244,7 @@ export function PerformanceGoalsManagerNew() {
       startDate: new Date().toISOString().split("T")[0],
       dueDate: "",
       managerId: "",
-      notes: "",
+      notes: ""
     });
   };
 
@@ -269,7 +269,7 @@ export function PerformanceGoalsManagerNew() {
       startDate: goal.startDate.split("T")[0],
       dueDate: goal.dueDate.split("T")[0],
       managerId: goal.manager?.id || "",
-      notes: goal.notes || "",
+      notes: goal.notes || ""
     });
     setIsEditDialogOpen(true);
   };
@@ -289,17 +289,15 @@ export function PerformanceGoalsManagerNew() {
 
     setIsSaving(true);
     try {
-      const url = isEdit 
-        ? `/api/performance-goals/${selectedGoal?.id}`
-        : "/api/performance-goals";
-      
+      const url = isEdit ? `/api/performance-goals/${selectedGoal?.id}` : "/api/performance-goals";
+
       const res = await fetch(url, {
         method: isEdit ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
-          managerId: formData.managerId || null,
-        }),
+          managerId: formData.managerId || null
+        })
       });
 
       if (!res.ok) {
@@ -323,11 +321,11 @@ export function PerformanceGoalsManagerNew() {
   // Confirm delete
   const confirmDelete = async () => {
     if (!selectedGoal) return;
-    
+
     setIsSaving(true);
     try {
       const res = await fetch(`/api/performance-goals/${selectedGoal.id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (!res.ok) {
@@ -353,11 +351,11 @@ export function PerformanceGoalsManagerNew() {
       const res = await fetch(`/api/performance-goals/${goalId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status })
       });
 
       if (!res.ok) throw new Error("Failed to update status");
-      
+
       await fetchGoals();
       toast.success(t.performanceGoals.statusUpdatedSuccess);
     } catch (error) {
@@ -372,11 +370,11 @@ export function PerformanceGoalsManagerNew() {
       const res = await fetch(`/api/performance-goals/${goalId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ progress }),
+        body: JSON.stringify({ progress })
       });
 
       if (!res.ok) throw new Error("Failed to update progress");
-      
+
       await fetchGoals();
       toast.success(t.performanceGoals.progressUpdatedSuccess);
     } catch (error) {
@@ -387,7 +385,7 @@ export function PerformanceGoalsManagerNew() {
 
   // Get employee name
   const getEmployeeName = (emp: Employee) => {
-    return emp.firstNameAr && emp.lastNameAr 
+    return emp.firstNameAr && emp.lastNameAr
       ? `${emp.firstNameAr} ${emp.lastNameAr}`
       : `${emp.firstName} ${emp.lastName}`;
   };
@@ -401,7 +399,7 @@ export function PerformanceGoalsManagerNew() {
             <Card key={i}>
               <CardHeader className="pb-2">
                 <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-8 w-16 mt-2" />
+                <Skeleton className="mt-2 h-8 w-16" />
               </CardHeader>
             </Card>
           ))}
@@ -427,11 +425,17 @@ export function PerformanceGoalsManagerNew() {
           <p className="text-muted-foreground">{t.performanceGoals.subtitle}</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchGoals()}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t.common.refresh}
+            onClick={() => fetchGoals()}>
             <IconRefresh className="size-4" />
           </Button>
           <Button onClick={handleAdd}>
-            <IconPlus className="size-4 ms-2" />{t.performanceGoals.addGoal}</Button>
+            <IconPlus className="ms-2 size-4" />
+            {t.performanceGoals.addGoal}
+          </Button>
         </div>
       </div>
 
@@ -508,8 +512,8 @@ export function PerformanceGoalsManagerNew() {
         </CardHeader>
         <CardContent>
           {goals.length === 0 ? (
-            <div className="text-center py-12">
-              <IconTarget className="size-12 mx-auto text-muted-foreground/50 mb-4" />
+            <div className="py-12 text-center">
+              <IconTarget className="text-muted-foreground/50 mx-auto mb-4 size-12" />
               <p className="text-muted-foreground">{t.developmentPlans.noGoals}</p>
               <Button variant="outline" className="mt-4" onClick={handleAdd}>
                 {t.performanceGoals.pAddNewGoal}
@@ -541,9 +545,11 @@ export function PerformanceGoalsManagerNew() {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium text-sm">{getEmployeeName(goal.employee)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {goal.employee.department?.nameAr || goal.employee.department?.name || "-"}
+                          <p className="text-sm font-medium">{getEmployeeName(goal.employee)}</p>
+                          <p className="text-muted-foreground text-xs">
+                            {goal.employee.department?.nameAr ||
+                              goal.employee.department?.name ||
+                              "-"}
                           </p>
                         </div>
                       </div>
@@ -551,14 +557,14 @@ export function PerformanceGoalsManagerNew() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{goal.titleAr || goal.title}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">
+                        <p className="text-muted-foreground line-clamp-1 text-xs">
                           {goal.description}
                         </p>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="w-24">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="mb-1 flex items-center gap-2">
                           <Progress value={goal.progress} className="h-2 flex-1" />
                           <span className="text-xs font-medium">{goal.progress}%</span>
                         </div>
@@ -588,32 +594,36 @@ export function PerformanceGoalsManagerNew() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => handleEdit(goal)}>
-                            <IconEdit className="size-4 ms-2" />{t.common.edit}</DropdownMenuItem>
+                            <IconEdit className="ms-2 size-4" />
+                            {t.common.edit}
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleStatusChange(goal.id, "IN_PROGRESS")}
-                            disabled={goal.status === "IN_PROGRESS"}
-                          >
-                            <IconProgress className="size-4 ms-2" />{t.common.startExecution}</DropdownMenuItem>
-                          <DropdownMenuItem 
+                            disabled={goal.status === "IN_PROGRESS"}>
+                            <IconProgress className="ms-2 size-4" />
+                            {t.common.startExecution}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={() => handleStatusChange(goal.id, "COMPLETED")}
-                            disabled={goal.status === "COMPLETED"}
-                          >
-                            <IconCheck className="size-4 ms-2" />
+                            disabled={goal.status === "COMPLETED"}>
+                            <IconCheck className="ms-2 size-4" />
                             {t.performanceGoals.pComplete}
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleStatusChange(goal.id, "CANCELLED")}
-                            disabled={goal.status === "CANCELLED" || goal.status === "COMPLETED"}
-                          >
-                            <IconX className="size-4 ms-2" />{t.common.cancel}</DropdownMenuItem>
+                            disabled={goal.status === "CANCELLED" || goal.status === "COMPLETED"}>
+                            <IconX className="ms-2 size-4" />
+                            {t.common.cancel}
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             onClick={() => handleDelete(goal)}
                             className="text-destructive"
-                            disabled={goal.status === "COMPLETED"}
-                          >
-                            <IconTrash className="size-4 ms-2" />{t.common.delete}</DropdownMenuItem>
+                            disabled={goal.status === "COMPLETED"}>
+                            <IconTrash className="ms-2 size-4" />
+                            {t.common.delete}
+                          </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </TableCell>
@@ -626,16 +636,15 @@ export function PerformanceGoalsManagerNew() {
       </Card>
 
       {/* Add/Edit Dialog */}
-      <Dialog 
-        open={isAddDialogOpen || isEditDialogOpen} 
+      <Dialog
+        open={isAddDialogOpen || isEditDialogOpen}
         onOpenChange={(open) => {
           if (!open) {
             setIsAddDialogOpen(false);
             setIsEditDialogOpen(false);
             resetForm();
           }
-        }}
-      >
+        }}>
         <DialogContent className="w-full sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
@@ -645,16 +654,15 @@ export function PerformanceGoalsManagerNew() {
               {isEditDialogOpen ? t.performanceGoals.editGoalData : t.performanceGoals.addGoalDesc}
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="grid gap-4 py-4 max-h-[60vh] overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+          <div className="grid max-h-[60vh] gap-4 overflow-y-auto py-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.common.selectEmployee}</Label>
-                <Select 
-                  value={formData.employeeId} 
+                <Select
+                  value={formData.employeeId}
                   onValueChange={(value) => setFormData({ ...formData, employeeId: value })}
-                  disabled={isEditDialogOpen}
-                >
+                  disabled={isEditDialogOpen}>
                   <SelectTrigger>
                     <SelectValue placeholder={t.common.selectEmployee} />
                   </SelectTrigger>
@@ -669,10 +677,9 @@ export function PerformanceGoalsManagerNew() {
               </div>
               <div className="space-y-2">
                 <Label>{t.performanceGoals.responsibleManager}</Label>
-                <Select 
-                  value={formData.managerId} 
-                  onValueChange={(value) => setFormData({ ...formData, managerId: value })}
-                >
+                <Select
+                  value={formData.managerId}
+                  onValueChange={(value) => setFormData({ ...formData, managerId: value })}>
                   <SelectTrigger>
                     <SelectValue placeholder={t.performanceGoals.chooseManager} />
                   </SelectTrigger>
@@ -688,7 +695,7 @@ export function PerformanceGoalsManagerNew() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.performanceGoals.goalTitleEn}</Label>
                 <Input
@@ -717,13 +724,12 @@ export function PerformanceGoalsManagerNew() {
               />
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
               <div className="space-y-2">
                 <Label>{t.performanceGoals.category}</Label>
-                <Select 
-                  value={formData.category} 
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                >
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -737,10 +743,9 @@ export function PerformanceGoalsManagerNew() {
               </div>
               <div className="space-y-2">
                 <Label>{t.common.priority}</Label>
-                <Select 
-                  value={formData.priority} 
-                  onValueChange={(value: any) => setFormData({ ...formData, priority: value })}
-                >
+                <Select
+                  value={formData.priority}
+                  onValueChange={(value: any) => setFormData({ ...formData, priority: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -754,25 +759,30 @@ export function PerformanceGoalsManagerNew() {
               </div>
               <div className="space-y-2">
                 <Label>{t.performanceGoals.unit}</Label>
-                <Select 
-                  value={formData.unit} 
-                  onValueChange={(value) => setFormData({ ...formData, unit: value })}
-                >
+                <Select
+                  value={formData.unit}
+                  onValueChange={(value) => setFormData({ ...formData, unit: value })}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="%">{t.performanceGoals.percentUnit}</SelectItem>
-                    <SelectItem value={t.performanceGoals.number}>{t.performanceGoals.countUnit}</SelectItem>
-                    <SelectItem value={t.performanceGoals.riyal}>{t.performanceGoals.pSar}</SelectItem>
+                    <SelectItem value={t.performanceGoals.number}>
+                      {t.performanceGoals.countUnit}
+                    </SelectItem>
+                    <SelectItem value={t.performanceGoals.riyal}>
+                      {t.performanceGoals.pSar}
+                    </SelectItem>
                     <SelectItem value={t.common.hour}>{t.common.hour}</SelectItem>
-                    <SelectItem value={t.performanceGoals.project}>{t.performanceGoals.pProject}</SelectItem>
+                    <SelectItem value={t.performanceGoals.project}>
+                      {t.performanceGoals.pProject}
+                    </SelectItem>
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.performanceGoals.targetValue}</Label>
                 <Input
@@ -791,7 +801,7 @@ export function PerformanceGoalsManagerNew() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>{t.common.startDate}</Label>
                 <Input
@@ -820,8 +830,9 @@ export function PerformanceGoalsManagerNew() {
                 setIsAddDialogOpen(false);
                 setIsEditDialogOpen(false);
                 resetForm();
-              }}
-            >{t.common.cancel}</Button>
+              }}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={() => handleSubmit(isEditDialogOpen)} disabled={isSaving}>
               {isSaving ? t.common.saving : isEditDialogOpen ? t.common.update : t.common.add}
             </Button>
@@ -835,15 +846,17 @@ export function PerformanceGoalsManagerNew() {
           <AlertDialogHeader>
             <AlertDialogTitle>{t.performanceGoals.deleteGoal}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.performanceGoals.pAreYouSureYouWantToDeleteTheGo} &quot;{selectedGoal?.titleAr || selectedGoal?.title}&quot;?
-              <br />{t.common.cannotUndo}</AlertDialogDescription>
+              {t.performanceGoals.pAreYouSureYouWantToDeleteTheGo} &quot;
+              {selectedGoal?.titleAr || selectedGoal?.title}&quot;?
+              <br />
+              {t.common.cannotUndo}
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
               {isSaving ? t.common.deleting : t.common.delete}
             </AlertDialogAction>
           </AlertDialogFooter>

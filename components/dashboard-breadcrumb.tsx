@@ -9,7 +9,7 @@ import {
   BreadcrumbLink,
   BreadcrumbList,
   BreadcrumbPage,
-  BreadcrumbSeparator,
+  BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
@@ -61,7 +61,7 @@ const SEGMENT_LABELS: Record<string, { ar: string; en: string }> = {
   tenants: { ar: "الشركات", en: "Tenants" },
   pricing: { ar: "الأسعار والباقات", en: "Pricing & Plans" },
   new: { ar: "إضافة جديد", en: "New" },
-  edit: { ar: "تعديل", en: "Edit" },
+  edit: { ar: "تعديل", en: "Edit" }
 };
 
 function label(segment: string, locale: "ar" | "en"): string {
@@ -90,7 +90,7 @@ export function DashboardBreadcrumb() {
     const isUuidOrId = /^[0-9a-f-]{8,}$|^\d+$/.test(seg);
     crumbs.push({
       label: isUuidOrId ? "..." : label(seg, locale),
-      href: accumulated,
+      href: accumulated
     });
   }
 
@@ -98,7 +98,7 @@ export function DashboardBreadcrumb() {
 
   return (
     <Breadcrumb className="hidden sm:block">
-      <BreadcrumbList className="max-w-full flex-nowrap overflow-hidden rounded-lg border border-border/70 bg-background/70 px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm">
+      <BreadcrumbList className="border-border/70 bg-background/70 max-w-full flex-nowrap overflow-hidden rounded-lg border px-2.5 py-1 text-xs shadow-sm backdrop-blur-sm">
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1;
           return (
@@ -107,8 +107,12 @@ export function DashboardBreadcrumb() {
                 <BreadcrumbPage className="truncate font-medium">{crumb.label}</BreadcrumbPage>
               ) : (
                 <>
-                  <BreadcrumbLink asChild className="truncate text-muted-foreground/90 hover:text-foreground">
-                    <Link href={crumb.href} className="truncate">{crumb.label}</Link>
+                  <BreadcrumbLink
+                    asChild
+                    className="text-muted-foreground/90 hover:text-foreground truncate">
+                    <Link href={crumb.href} className="truncate">
+                      {crumb.label}
+                    </Link>
                   </BreadcrumbLink>
                   <BreadcrumbSeparator>
                     <SepIcon className="h-3.5 w-3.5" />

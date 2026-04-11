@@ -6,7 +6,7 @@ import { z } from "zod";
 import {
   notifyTrainingEnrollmentApproved,
   notifyTrainingEnrollmentRejected,
-  notifyTrainingCompleted,
+  notifyTrainingCompleted
 } from "@/lib/notifications/send";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -22,12 +22,12 @@ const patchSchema = z
         "in-progress",
         "completed",
         "failed",
-        "withdrawn",
+        "withdrawn"
       ])
       .optional(),
     progress: z.number().int().min(0).max(100).optional(),
     score: z.number().min(0).max(100).optional().nullable(),
-    feedback: z.string().trim().optional().nullable(),
+    feedback: z.string().trim().optional().nullable()
   })
   .strict();
 
@@ -51,8 +51,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         id: true,
         status: true,
         employee: { select: { userId: true } },
-        course: { select: { title: true } },
-      },
+        course: { select: { title: true } }
+      }
     });
 
     if (!existing) {
@@ -73,16 +73,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const updated = await prisma.trainingEnrollment.update({
       where: { id },
       data: {
-        status: input.status
-          ? (input.status.toUpperCase().replace("-", "_") as any)
-          : undefined,
+        status: input.status ? (input.status.toUpperCase().replace("-", "_") as any) : undefined,
         progress: input.progress,
         score: input.score === undefined ? undefined : input.score,
         feedback: input.feedback === undefined ? undefined : input.feedback,
         approvedAt: input.status === "approved" ? new Date() : undefined,
-        completedAt: input.status === "completed" ? new Date() : undefined,
+        completedAt: input.status === "completed" ? new Date() : undefined
       },
-      select: { id: true, status: true, progress: true, score: true, feedback: true },
+      select: { id: true, status: true, progress: true, score: true, feedback: true }
     });
 
     const responseData = {
@@ -91,8 +89,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         status: updated.status,
         progress: updated.progress,
         score: updated.score ? Number(updated.score.toString()) : null,
-        feedback: updated.feedback,
-      },
+        feedback: updated.feedback
+      }
     };
 
     // Fire notifications (non-blocking)
@@ -101,17 +99,27 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       const courseTitle = existing.course.title;
       const notifyMap: Record<string, () => void> = {
         approved: () =>
-          notifyTrainingEnrollmentApproved({ tenantId, employeeUserId, courseTitle, enrollmentId: id }).catch(console.error),
+          notifyTrainingEnrollmentApproved({
+            tenantId,
+            employeeUserId,
+            courseTitle,
+            enrollmentId: id
+          }).catch(console.error),
         rejected: () =>
-          notifyTrainingEnrollmentRejected({ tenantId, employeeUserId, courseTitle, enrollmentId: id }).catch(console.error),
+          notifyTrainingEnrollmentRejected({
+            tenantId,
+            employeeUserId,
+            courseTitle,
+            enrollmentId: id
+          }).catch(console.error),
         completed: () =>
           notifyTrainingCompleted({
             tenantId,
             employeeUserId,
             courseTitle,
             score: input.score ?? undefined,
-            enrollmentId: id,
-          }).catch(console.error),
+            enrollmentId: id
+          }).catch(console.error)
       };
       notifyMap[input.status]?.();
     }

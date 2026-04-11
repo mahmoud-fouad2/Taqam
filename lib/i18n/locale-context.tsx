@@ -8,7 +8,7 @@ const LocaleContext = React.createContext<AppLocale>("ar");
 
 export function AppLocaleProvider({
   locale,
-  children,
+  children
 }: {
   locale: AppLocale;
   children: React.ReactNode;

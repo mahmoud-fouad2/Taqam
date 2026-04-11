@@ -14,21 +14,21 @@ const isProduction = process.env.NODE_ENV === "production";
 // Pino logger configuration
 const pinoLogger = pino({
   level: process.env.LOG_LEVEL || (isDevelopment ? "debug" : "info"),
-  
+
   ...(!isProduction && {
     transport: {
       target: "pino-pretty",
       options: {
         colorize: true,
         ignore: "pid,hostname",
-        translateTime: "SYS:standard",
-      },
-    },
+        translateTime: "SYS:standard"
+      }
+    }
   }),
 
   base: {
     env: process.env.NODE_ENV,
-    service: "taqam-hr-platform",
+    service: "taqam-hr-platform"
   },
 
   redact: {
@@ -39,12 +39,12 @@ const pinoLogger = pino({
       "accessToken",
       "refreshToken",
       "*.password",
-      "*.token",
+      "*.token"
     ],
-    censor: "[REDACTED]",
+    censor: "[REDACTED]"
   },
 
-  timestamp: () => `,"time":"${new Date().toISOString()}"`,
+  timestamp: () => `,"time":"${new Date().toISOString()}"`
 });
 
 function toError(value: unknown): Error | null {
@@ -59,32 +59,32 @@ export const logger = {
 
   warn(message: string, meta?: LogMeta) {
     pinoLogger.warn(meta || {}, message);
-    
+
     // Send warnings to Sentry in production
     if (isProduction && meta) {
       Sentry.captureMessage(message, {
         level: "warning",
-        extra: meta,
+        extra: meta
       });
     }
   },
 
   error(message: string, meta?: LogMeta, err?: unknown) {
     const error = toError(err) ?? (meta ? toError((meta as any).error) : null);
-    
+
     pinoLogger.error({ err: error, ...meta }, message);
 
     // Send to Sentry
     if (error) {
       Sentry.captureException(error, {
         contexts: {
-          custom: meta || {},
-        },
+          custom: meta || {}
+        }
       });
     } else {
       Sentry.captureMessage(message, {
         level: "error",
-        extra: meta,
+        extra: meta
       });
     }
   },
@@ -94,29 +94,21 @@ export const logger = {
   },
 
   // API Request logging
-  apiRequest(req: {
-    method: string;
-    url: string;
-    userId?: string;
-    tenantId?: string;
-  }) {
+  apiRequest(req: { method: string; url: string; userId?: string; tenantId?: string }) {
     pinoLogger.info(
       {
         type: "api_request",
         method: req.method,
         url: req.url,
         userId: req.userId,
-        tenantId: req.tenantId,
+        tenantId: req.tenantId
       },
       `${req.method} ${req.url}`
     );
   },
 
   // API Response logging
-  apiResponse(
-    req: { method: string; url: string },
-    res: { statusCode: number; duration: number }
-  ) {
+  apiResponse(req: { method: string; url: string }, res: { statusCode: number; duration: number }) {
     const level = res.statusCode >= 500 ? "error" : res.statusCode >= 400 ? "warn" : "info";
     pinoLogger[level](
       {
@@ -124,7 +116,7 @@ export const logger = {
         method: req.method,
         url: req.url,
         statusCode: res.statusCode,
-        duration: res.duration,
+        duration: res.duration
       },
       `${req.method} ${req.url} - ${res.statusCode} (${res.duration}ms)`
     );
@@ -141,7 +133,7 @@ export const logger = {
         type: "auth",
         action,
         userId,
-        ...meta,
+        ...meta
       },
       `Auth: ${action} for user ${userId}`
     );
@@ -156,7 +148,7 @@ export const logger = {
       {
         type: "security",
         event,
-        ...meta,
+        ...meta
       },
       `Security event: ${event}`
     );
@@ -164,7 +156,7 @@ export const logger = {
     // Always send security events to Sentry
     Sentry.captureMessage(`Security: ${event}`, {
       level: "warning",
-      extra: meta,
+      extra: meta
     });
   },
 
@@ -176,7 +168,7 @@ export const logger = {
         type: "performance",
         operation,
         duration,
-        ...meta,
+        ...meta
       },
       `${operation} took ${duration}ms`
     );
@@ -190,11 +182,11 @@ export const logger = {
         action,
         entity,
         entityId,
-        ...meta,
+        ...meta
       },
       `${action} ${entity} ${entityId}`
     );
-  },
+  }
 };
 
 // Timer utility
@@ -205,7 +197,7 @@ export function createTimer() {
     log: (operation: string, meta?: LogMeta) => {
       const duration = Date.now() - start;
       logger.performance(operation, duration, meta);
-    },
+    }
   };
 }
 

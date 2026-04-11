@@ -7,7 +7,7 @@ import {
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
-  EmptyTitle,
+  EmptyTitle
 } from "@/components/ui/empty";
 import { cn } from "@/lib/utils";
 
@@ -17,7 +17,7 @@ export function TableEmptyState({
   icon,
   actionLabel,
   onAction,
-  className,
+  className
 }: {
   title: string;
   description?: string;
@@ -29,9 +29,7 @@ export function TableEmptyState({
   return (
     <Empty className={cn("border-0 p-4 md:p-6", className)}>
       <EmptyHeader>
-        {icon ? (
-          <EmptyMedia variant="icon">{icon}</EmptyMedia>
-        ) : null}
+        {icon ? <EmptyMedia variant="icon">{icon}</EmptyMedia> : null}
         <EmptyTitle>{title}</EmptyTitle>
         {description ? <EmptyDescription>{description}</EmptyDescription> : null}
       </EmptyHeader>

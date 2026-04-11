@@ -12,25 +12,19 @@ import {
   IconPhone,
   IconUsers,
   IconCheck,
-  IconX,
+  IconX
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
@@ -38,7 +32,7 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -46,21 +40,21 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
@@ -76,14 +70,14 @@ import {
   interviewTypeLabels,
   interviewStatusLabels,
   interviewStatusColors,
-  recommendationLabels,
+  recommendationLabels
 } from "@/lib/types/recruitment";
 import {
   getApplicants,
   getInterviews,
   scheduleInterview,
   submitInterviewFeedback,
-  updateInterviewStatus,
+  updateInterviewStatus
 } from "@/lib/api/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -117,7 +111,7 @@ const INITIAL_SCHEDULE_FORM: ScheduleFormState = {
   duration: "60",
   location: "",
   meetingLink: "",
-  interviewerId: "",
+  interviewerId: ""
 };
 
 const INITIAL_FEEDBACK_FORM: FeedbackFormState = {
@@ -125,7 +119,7 @@ const INITIAL_FEEDBACK_FORM: FeedbackFormState = {
   strengths: "",
   weaknesses: "",
   recommendation: "hire",
-  comments: "",
+  comments: ""
 };
 
 function splitLines(value: string): string[] {
@@ -188,26 +182,27 @@ export function InterviewsManager() {
         interview.applicantName.toLowerCase().includes(searchQuery.toLowerCase()) ||
         interview.jobTitle.toLowerCase().includes(searchQuery.toLowerCase());
 
-      const matchesStatus =
-        statusFilter === "all" || interview.status === statusFilter;
+      const matchesStatus = statusFilter === "all" || interview.status === statusFilter;
 
-      const matchesType =
-        typeFilter === "all" || interview.type === typeFilter;
+      const matchesType = typeFilter === "all" || interview.type === typeFilter;
 
       return matchesSearch && matchesStatus && matchesType;
     });
   }, [interviews, searchQuery, statusFilter, typeFilter]);
 
-  const stats = React.useMemo(() => ({
-    total: interviews.length,
-    scheduled: interviews.filter((i) => i.status === "scheduled").length,
-    completed: interviews.filter((i) => i.status === "completed").length,
-    today: interviews.filter((i) => {
-      const today = new Date();
-      const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-      return i.scheduledDate === todayKey;
-    }).length,
-  }), [interviews]);
+  const stats = React.useMemo(
+    () => ({
+      total: interviews.length,
+      scheduled: interviews.filter((i) => i.status === "scheduled").length,
+      completed: interviews.filter((i) => i.status === "completed").length,
+      today: interviews.filter((i) => {
+        const today = new Date();
+        const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+        return i.scheduledDate === todayKey;
+      }).length
+    }),
+    [interviews]
+  );
 
   const handleScheduleSubmit = async () => {
     if (!selectedApplicant || !scheduleForm.scheduledDate || !scheduleForm.scheduledTime) {
@@ -233,10 +228,10 @@ export function InterviewsManager() {
               {
                 id: interviewer.id,
                 name: `${interviewer.firstName} ${interviewer.lastName}`.trim(),
-                role: interviewer.jobTitleId ? interviewer.jobTitleId : "Interviewer",
-              },
+                role: interviewer.jobTitleId ? interviewer.jobTitleId : "Interviewer"
+              }
             ]
-          : [],
+          : []
       });
 
       setInterviews((current) => [created, ...current]);
@@ -271,7 +266,7 @@ export function InterviewsManager() {
       strengths: existingFeedback?.strengths?.join("\n") ?? "",
       weaknesses: existingFeedback?.weaknesses?.join("\n") ?? "",
       recommendation: existingFeedback?.recommendation ?? INITIAL_FEEDBACK_FORM.recommendation,
-      comments: existingFeedback?.comments ?? "",
+      comments: existingFeedback?.comments ?? ""
     });
   };
 
@@ -294,8 +289,8 @@ export function InterviewsManager() {
           weaknesses: splitLines(feedbackForm.weaknesses),
           recommendation: feedbackForm.recommendation,
           comments: feedbackForm.comments || undefined,
-          submittedAt: new Date().toISOString(),
-        },
+          submittedAt: new Date().toISOString()
+        }
       ]);
 
       setInterviews((current) => current.map((item) => (item.id === updated.id ? updated : item)));
@@ -333,11 +328,11 @@ export function InterviewsManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.interviews.totalInterviews}</CardTitle>
-            <IconCalendar className="h-4 w-4 text-muted-foreground" />
+            <IconCalendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.interviews.interview}</p>
+            <p className="text-muted-foreground text-xs">{t.interviews.interview}</p>
           </CardContent>
         </Card>
 
@@ -348,7 +343,7 @@ export function InterviewsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">{stats.today}</div>
-            <p className="text-xs text-muted-foreground">{t.interviews.scheduledToday}</p>
+            <p className="text-muted-foreground text-xs">{t.interviews.scheduledToday}</p>
           </CardContent>
         </Card>
 
@@ -359,7 +354,7 @@ export function InterviewsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.scheduled}</div>
-            <p className="text-xs text-muted-foreground">{t.interviews.awaitingSchedule}</p>
+            <p className="text-muted-foreground text-xs">{t.interviews.awaitingSchedule}</p>
           </CardContent>
         </Card>
 
@@ -370,7 +365,7 @@ export function InterviewsManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">{t.interviews.completedInterview}</p>
+            <p className="text-muted-foreground text-xs">{t.interviews.completedInterview}</p>
           </CardContent>
         </Card>
       </div>
@@ -390,20 +385,19 @@ export function InterviewsManager() {
                   {t.interviews.scheduleInterview}
                 </Button>
               </SheetTrigger>
-              <SheetContent className="sm:max-w-lg overflow-y-auto">
+              <SheetContent className="overflow-y-auto sm:max-w-lg">
                 <SheetHeader>
                   <SheetTitle>{t.interviews.newInterview}</SheetTitle>
-                  <SheetDescription>
-                    {t.interviews.enterInterviewDetails}
-                  </SheetDescription>
+                  <SheetDescription>{t.interviews.enterInterviewDetails}</SheetDescription>
                 </SheetHeader>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
                     <Label htmlFor="applicant">{t.interviews.applicant}</Label>
                     <Select
                       value={scheduleForm.applicantId}
-                      onValueChange={(value) => setScheduleForm((current) => ({ ...current, applicantId: value }))}
-                    >
+                      onValueChange={(value) =>
+                        setScheduleForm((current) => ({ ...current, applicantId: value }))
+                      }>
                       <SelectTrigger>
                         <SelectValue placeholder={t.interviews.chooseApplicant} />
                       </SelectTrigger>
@@ -420,8 +414,9 @@ export function InterviewsManager() {
                     <Label htmlFor="type">{t.interviews.interviewType}</Label>
                     <Select
                       value={scheduleForm.type}
-                      onValueChange={(value: InterviewType) => setScheduleForm((current) => ({ ...current, type: value }))}
-                    >
+                      onValueChange={(value: InterviewType) =>
+                        setScheduleForm((current) => ({ ...current, type: value }))
+                      }>
                       <SelectTrigger>
                         <SelectValue placeholder={t.common.selectType} />
                       </SelectTrigger>
@@ -434,7 +429,7 @@ export function InterviewsManager() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div className="grid gap-2">
                       <Label htmlFor="date">{t.common.date}</Label>
                       <Input
@@ -442,7 +437,10 @@ export function InterviewsManager() {
                         type="date"
                         value={scheduleForm.scheduledDate}
                         onChange={(event) =>
-                          setScheduleForm((current) => ({ ...current, scheduledDate: event.target.value }))
+                          setScheduleForm((current) => ({
+                            ...current,
+                            scheduledDate: event.target.value
+                          }))
                         }
                       />
                     </div>
@@ -453,7 +451,10 @@ export function InterviewsManager() {
                         type="time"
                         value={scheduleForm.scheduledTime}
                         onChange={(event) =>
-                          setScheduleForm((current) => ({ ...current, scheduledTime: event.target.value }))
+                          setScheduleForm((current) => ({
+                            ...current,
+                            scheduledTime: event.target.value
+                          }))
                         }
                       />
                     </div>
@@ -462,8 +463,9 @@ export function InterviewsManager() {
                     <Label htmlFor="duration">{t.interviews.duration}</Label>
                     <Select
                       value={scheduleForm.duration}
-                      onValueChange={(value) => setScheduleForm((current) => ({ ...current, duration: value }))}
-                    >
+                      onValueChange={(value) =>
+                        setScheduleForm((current) => ({ ...current, duration: value }))
+                      }>
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -495,7 +497,10 @@ export function InterviewsManager() {
                       dir="ltr"
                       value={scheduleForm.meetingLink}
                       onChange={(event) =>
-                        setScheduleForm((current) => ({ ...current, meetingLink: event.target.value }))
+                        setScheduleForm((current) => ({
+                          ...current,
+                          meetingLink: event.target.value
+                        }))
                       }
                     />
                   </div>
@@ -503,8 +508,9 @@ export function InterviewsManager() {
                     <Label htmlFor="interviewers">{t.interviews.interviewers}</Label>
                     <Select
                       value={scheduleForm.interviewerId}
-                      onValueChange={(value) => setScheduleForm((current) => ({ ...current, interviewerId: value }))}
-                    >
+                      onValueChange={(value) =>
+                        setScheduleForm((current) => ({ ...current, interviewerId: value }))
+                      }>
                       <SelectTrigger>
                         <SelectValue placeholder={t.interviews.chooseInterviewers} />
                       </SelectTrigger>
@@ -518,11 +524,17 @@ export function InterviewsManager() {
                     </Select>
                   </div>
                   {selectedApplicant && (
-                    <div className="rounded-lg border bg-muted/40 p-3 text-sm text-muted-foreground">
-                      {t.interviews.linkedToJob} <span className="font-medium text-foreground">{selectedApplicant.jobTitle}</span>
+                    <div className="bg-muted/40 text-muted-foreground rounded-lg border p-3 text-sm">
+                      {t.interviews.linkedToJob}{" "}
+                      <span className="text-foreground font-medium">
+                        {selectedApplicant.jobTitle}
+                      </span>
                     </div>
                   )}
-                  <Button className="mt-4" onClick={handleScheduleSubmit} disabled={isSubmittingSchedule}>
+                  <Button
+                    className="mt-4"
+                    onClick={handleScheduleSubmit}
+                    disabled={isSubmittingSchedule}>
                     {t.interviews.scheduleBtn}
                   </Button>
                 </div>
@@ -532,9 +544,9 @@ export function InterviewsManager() {
         </CardHeader>
         <CardContent>
           {/* {t.interviews.searchFilter} */}
-          <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.common.searchDots}
                 value={searchQuery}
@@ -588,13 +600,13 @@ export function InterviewsManager() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={7} className="text-muted-foreground py-8 text-center">
                       {t.interviews.loading}
                     </TableCell>
                   </TableRow>
                 ) : filteredInterviews.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8">
+                    <TableCell colSpan={7} className="py-8 text-center">
                       <p className="text-muted-foreground">{t.interviews.noInterviews}</p>
                     </TableCell>
                   </TableRow>
@@ -605,7 +617,10 @@ export function InterviewsManager() {
                         <div className="flex items-center gap-3">
                           <Avatar className="h-8 w-8">
                             <AvatarFallback>
-                              {interview.applicantName.split(" ").map(n => n[0]).join("")}
+                              {interview.applicantName
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
                             </AvatarFallback>
                           </Avatar>
                           <span className="font-medium">{interview.applicantName}</span>
@@ -621,8 +636,9 @@ export function InterviewsManager() {
                       <TableCell>
                         <div>
                           <p>{new Date(interview.scheduledDate).toLocaleDateString("ar-SA")}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {interview.scheduledTime} ({interview.duration} {t.interviews.minuteUnit})
+                          <p className="text-muted-foreground text-xs">
+                            {interview.scheduledTime} ({interview.duration}{" "}
+                            {t.interviews.minuteUnit})
                           </p>
                         </div>
                       </TableCell>
@@ -630,7 +646,9 @@ export function InterviewsManager() {
                         {interview.interviewers.length > 0 ? (
                           <div className="flex -space-x-2 space-x-reverse">
                             {interview.interviewers.slice(0, 3).map((interviewer) => (
-                              <Avatar key={interviewer.id} className="h-7 w-7 border-2 border-background">
+                              <Avatar
+                                key={interviewer.id}
+                                className="border-background h-7 w-7 border-2">
                                 <AvatarImage src={interviewer.avatar} alt="" />
                                 <AvatarFallback className="text-xs">
                                   {interviewer.name
@@ -653,7 +671,10 @@ export function InterviewsManager() {
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" disabled={statusUpdatingId === interview.id}>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              disabled={statusUpdatingId === interview.id}>
                               •••
                             </Button>
                           </DropdownMenuTrigger>
@@ -664,11 +685,13 @@ export function InterviewsManager() {
                                   <IconCheck className="ms-2 h-4 w-4" />
                                   {t.interviews.recordEvaluation}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusChange(interview.id, "completed")}>
+                                <DropdownMenuItem
+                                  onClick={() => handleStatusChange(interview.id, "completed")}>
                                   <IconClock className="ms-2 h-4 w-4" />
                                   {t.interviews.endWithoutEval}
                                 </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleStatusChange(interview.id, "no-show")}>
+                                <DropdownMenuItem
+                                  onClick={() => handleStatusChange(interview.id, "no-show")}>
                                   <IconX className="ms-2 h-4 w-4" />
                                   {t.interviews.noShow}
                                 </DropdownMenuItem>
@@ -677,15 +700,16 @@ export function InterviewsManager() {
                             {interview.status === "completed" && (
                               <DropdownMenuItem onClick={() => openFeedbackDialog(interview)}>
                                 <IconCheck className="ms-2 h-4 w-4" />
-                                {interview.feedback?.length ? t.interviews.editEval : t.interviews.addEval}
+                                {interview.feedback?.length
+                                  ? t.interviews.editEval
+                                  : t.interviews.addEval}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => handleStatusChange(interview.id, "cancelled")}
-                              disabled={interview.status === "cancelled"}
-                            >
+                              disabled={interview.status === "cancelled"}>
                               <IconX className="ms-2 h-4 w-4" />
                               {t.interviews.cancelInterview}
                             </DropdownMenuItem>
@@ -701,7 +725,9 @@ export function InterviewsManager() {
         </CardContent>
       </Card>
 
-      <Dialog open={Boolean(feedbackInterview)} onOpenChange={(open) => !open && setFeedbackInterview(null)}>
+      <Dialog
+        open={Boolean(feedbackInterview)}
+        onOpenChange={(open) => !open && setFeedbackInterview(null)}>
         <DialogContent className="w-full sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>{t.interviews.evaluationTitle}</DialogTitle>
@@ -725,7 +751,7 @@ export function InterviewsManager() {
                 onChange={(event) =>
                   setFeedbackForm((current) => ({
                     ...current,
-                    rating: Number(event.target.value || current.rating),
+                    rating: Number(event.target.value || current.rating)
                   }))
                 }
               />
@@ -737,8 +763,7 @@ export function InterviewsManager() {
                 value={feedbackForm.recommendation}
                 onValueChange={(value: InterviewFeedback["recommendation"]) =>
                   setFeedbackForm((current) => ({ ...current, recommendation: value }))
-                }
-              >
+                }>
                 <SelectTrigger id="recommendation">
                   <SelectValue />
                 </SelectTrigger>
@@ -793,7 +818,9 @@ export function InterviewsManager() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setFeedbackInterview(null)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setFeedbackInterview(null)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={handleFeedbackSubmit} disabled={isSubmittingFeedback}>
               {t.interviews.saveEvaluation}
             </Button>

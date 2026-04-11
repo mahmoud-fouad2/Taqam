@@ -10,7 +10,7 @@ export async function GET() {
     info: {
       title: "Taqam API",
       version: "0.1.0",
-      description: "Incremental OpenAPI spec for Taqam.",
+      description: "Incremental OpenAPI spec for Taqam."
     },
     tags: [{ name: "Audit" }, { name: "Employees" }],
     paths: {
@@ -24,7 +24,7 @@ export async function GET() {
             {
               name: "pageSize",
               in: "query",
-              schema: { type: "integer", minimum: 1, maximum: 200 },
+              schema: { type: "integer", minimum: 1, maximum: 200 }
             },
             { name: "userId", in: "query", schema: { type: "string" } },
             { name: "entity", in: "query", schema: { type: "string" } },
@@ -33,18 +33,18 @@ export async function GET() {
               name: "action",
               in: "query",
               schema: { type: "string" },
-              description: "AuditAction string",
+              description: "AuditAction string"
             },
             {
               name: "startDate",
               in: "query",
-              schema: { type: "string", format: "date-time" },
+              schema: { type: "string", format: "date-time" }
             },
             {
               name: "endDate",
               in: "query",
-              schema: { type: "string", format: "date-time" },
-            },
+              schema: { type: "string", format: "date-time" }
+            }
           ],
           responses: {
             "200": {
@@ -61,18 +61,18 @@ export async function GET() {
                           page: { type: "integer" },
                           pageSize: { type: "integer" },
                           total: { type: "integer" },
-                          totalPages: { type: "integer" },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+                          totalPages: { type: "integer" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
             },
             "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
+            "403": { description: "Forbidden" }
+          }
+        }
       },
       "/api/audit-logs/stats": {
         get: {
@@ -84,14 +84,14 @@ export async function GET() {
               description: "Stats",
               content: {
                 "application/json": {
-                  schema: { type: "object" },
-                },
-              },
+                  schema: { type: "object" }
+                }
+              }
             },
             "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
+            "403": { description: "Forbidden" }
+          }
+        }
       },
       "/api/employees/bulk": {
         post: {
@@ -109,20 +109,20 @@ export async function GET() {
                     tenantId: { type: "string", description: "Required for SUPER_ADMIN" },
                     dryRun: { type: "boolean", default: false },
                     atomic: { type: "boolean", default: false },
-                    employees: { type: "array", items: { type: "object" } },
+                    employees: { type: "array", items: { type: "object" } }
                   },
-                  required: ["employees"],
-                },
-              },
-            },
+                  required: ["employees"]
+                }
+              }
+            }
           },
           responses: {
             "200": { description: "Result summary" },
             "400": { description: "Invalid payload / atomic failure" },
             "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
+            "403": { description: "Forbidden" }
+          }
+        }
       },
       "/api/employees/import": {
         post: {
@@ -138,44 +138,45 @@ export async function GET() {
                   type: "object",
                   properties: {
                     file: { type: "string", format: "binary" },
-                    tenantId: { type: "string", description: "Required for SUPER_ADMIN" },
+                    tenantId: { type: "string", description: "Required for SUPER_ADMIN" }
                   },
-                  required: ["file"],
-                },
-              },
-            },
+                  required: ["file"]
+                }
+              }
+            }
           },
           responses: {
             "200": { description: "Import result" },
             "400": { description: "Missing/invalid file or tenant" },
             "401": { description: "Unauthorized" },
-            "403": { description: "Forbidden" },
-          },
-        },
+            "403": { description: "Forbidden" }
+          }
+        }
       },
       "/api/employees/export": {
         get: {
           tags: ["Employees"],
           summary: "Export employees to CSV",
-          description: "Returns a CSV file of employees for the current tenant (supports basic filters).",
+          description:
+            "Returns a CSV file of employees for the current tenant (supports basic filters).",
           parameters: [
             { name: "departmentId", in: "query", schema: { type: "string" } },
             { name: "status", in: "query", schema: { type: "string" } },
-            { name: "search", in: "query", schema: { type: "string" } },
+            { name: "search", in: "query", schema: { type: "string" } }
           ],
           responses: {
             "200": { description: "CSV file" },
             "401": { description: "Unauthorized" },
-            "400": { description: "Tenant required" },
-          },
-        },
-      },
-    },
+            "400": { description: "Tenant required" }
+          }
+        }
+      }
+    }
   } as const;
 
   return NextResponse.json(spec, {
     headers: {
-      "Cache-Control": "no-store",
-    },
+      "Cache-Control": "no-store"
+    }
   });
 }

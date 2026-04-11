@@ -67,7 +67,7 @@ const jobPostingCreateSchema = z
     salaryMax: z.union([z.string(), z.number()]).optional().nullable(),
     salaryCurrency: z.string().min(1).optional().default("SAR"),
     postedAt: z.string().refine(isValidDate, "Invalid postedAt").optional().nullable(),
-    expiresAt: z.string().refine(isValidDate, "Invalid expiresAt").optional().nullable(),
+    expiresAt: z.string().refine(isValidDate, "Invalid expiresAt").optional().nullable()
   })
   .strict();
 
@@ -75,18 +75,12 @@ export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const { searchParams } = new URL(request.url);
@@ -119,16 +113,16 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
-          },
+            lastName: true
+          }
         },
         _count: {
           select: {
-            applicants: true,
-          },
-        },
+            applicants: true
+          }
+        }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     });
 
     const result = jobPostings.map((jp) => ({
@@ -156,11 +150,11 @@ export async function GET(request: NextRequest) {
       expiresAt: jp.expiresAt?.toISOString(),
       createdBy: {
         id: jp.createdBy.id,
-        name: `${jp.createdBy.firstName} ${jp.createdBy.lastName}`,
+        name: `${jp.createdBy.firstName} ${jp.createdBy.lastName}`
       },
       applicantsCount: jp._count.applicants,
       createdAt: jp.createdAt.toISOString(),
-      updatedAt: jp.updatedAt.toISOString(),
+      updatedAt: jp.updatedAt.toISOString()
     }));
 
     return NextResponse.json({ success: true, data: result });
@@ -177,18 +171,12 @@ export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     if (!tenantId) {
-      return NextResponse.json(
-        { success: false, error: "No tenant" },
-        { status: 400 }
-      );
+      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
     const parsedBody = jobPostingCreateSchema.safeParse(await request.json());
@@ -201,16 +189,28 @@ export async function POST(request: NextRequest) {
 
     const body = parsedBody.data;
 
-    const status = body.status ? parseJobPostingStatus(body.status) ?? JobPostingStatus.DRAFT : JobPostingStatus.DRAFT;
-    if (body.status && status === JobPostingStatus.DRAFT && !body.status.toUpperCase().includes("DRAFT")) {
+    const status = body.status
+      ? (parseJobPostingStatus(body.status) ?? JobPostingStatus.DRAFT)
+      : JobPostingStatus.DRAFT;
+    if (
+      body.status &&
+      status === JobPostingStatus.DRAFT &&
+      !body.status.toUpperCase().includes("DRAFT")
+    ) {
       return NextResponse.json(
         { success: false, error: `Invalid status: ${body.status}` },
         { status: 400 }
       );
     }
 
-    const jobType = body.jobType ? parseJobType(body.jobType) ?? JobType.FULL_TIME : JobType.FULL_TIME;
-    if (body.jobType && jobType === JobType.FULL_TIME && !body.jobType.toUpperCase().includes("FULL_TIME")) {
+    const jobType = body.jobType
+      ? (parseJobType(body.jobType) ?? JobType.FULL_TIME)
+      : JobType.FULL_TIME;
+    if (
+      body.jobType &&
+      jobType === JobType.FULL_TIME &&
+      !body.jobType.toUpperCase().includes("FULL_TIME")
+    ) {
       return NextResponse.json(
         { success: false, error: `Invalid jobType: ${body.jobType}` },
         { status: 400 }
@@ -218,9 +218,13 @@ export async function POST(request: NextRequest) {
     }
 
     const experienceLevel = body.experienceLevel
-      ? parseExperienceLevel(body.experienceLevel) ?? ExperienceLevel.MID
+      ? (parseExperienceLevel(body.experienceLevel) ?? ExperienceLevel.MID)
       : ExperienceLevel.MID;
-    if (body.experienceLevel && experienceLevel === ExperienceLevel.MID && !body.experienceLevel.toUpperCase().includes("MID")) {
+    if (
+      body.experienceLevel &&
+      experienceLevel === ExperienceLevel.MID &&
+      !body.experienceLevel.toUpperCase().includes("MID")
+    ) {
       return NextResponse.json(
         { success: false, error: `Invalid experienceLevel: ${body.experienceLevel}` },
         { status: 400 }
@@ -248,7 +252,7 @@ export async function POST(request: NextRequest) {
         salaryCurrency: body.salaryCurrency,
         postedAt: body.postedAt ? new Date(body.postedAt) : null,
         expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
-        createdById: session.user.id,
+        createdById: session.user.id
       },
       include: {
         department: true,
@@ -257,10 +261,10 @@ export async function POST(request: NextRequest) {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
-          },
-        },
-      },
+            lastName: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -269,8 +273,8 @@ export async function POST(request: NextRequest) {
         id: jobPosting.id,
         title: jobPosting.title,
         status: mapStatus(jobPosting.status),
-        createdAt: jobPosting.createdAt.toISOString(),
-      },
+        createdAt: jobPosting.createdAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error creating job posting:", error);

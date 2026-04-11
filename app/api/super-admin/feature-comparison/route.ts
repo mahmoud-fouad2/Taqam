@@ -23,7 +23,7 @@ async function ensureDefaultFeatureComparison() {
         inBusiness: true,
         inEnterprise: true,
         sortOrder: 1,
-        isActive: true,
+        isActive: true
       },
       {
         featureAr: "الحضور والانصراف",
@@ -32,7 +32,7 @@ async function ensureDefaultFeatureComparison() {
         inBusiness: true,
         inEnterprise: true,
         sortOrder: 2,
-        isActive: true,
+        isActive: true
       },
       {
         featureAr: "الإجازات",
@@ -41,7 +41,7 @@ async function ensureDefaultFeatureComparison() {
         inBusiness: true,
         inEnterprise: true,
         sortOrder: 3,
-        isActive: true,
+        isActive: true
       },
       {
         featureAr: "الرواتب",
@@ -50,7 +50,7 @@ async function ensureDefaultFeatureComparison() {
         inBusiness: true,
         inEnterprise: true,
         sortOrder: 4,
-        isActive: true,
+        isActive: true
       },
       {
         featureAr: "تكاملات مخصصة",
@@ -59,9 +59,9 @@ async function ensureDefaultFeatureComparison() {
         inBusiness: false,
         inEnterprise: true,
         sortOrder: 5,
-        isActive: true,
-      },
-    ],
+        isActive: true
+      }
+    ]
   });
 }
 
@@ -77,7 +77,7 @@ export async function GET() {
 
     const features = await prisma.planFeatureComparison.findMany({
       where: { isActive: true },
-      orderBy: { sortOrder: "asc" },
+      orderBy: { sortOrder: "asc" }
     });
 
     return NextResponse.json({ data: features });
@@ -105,8 +105,8 @@ export async function POST(req: NextRequest) {
         inBusiness: body.inBusiness || false,
         inEnterprise: body.inEnterprise || false,
         sortOrder: body.sortOrder || 0,
-        isActive: body.isActive ?? true,
-      },
+        isActive: body.isActive ?? true
+      }
     });
 
     return NextResponse.json({ data: feature }, { status: 201 });

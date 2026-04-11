@@ -11,7 +11,7 @@ const createPaymentSchema = z.object({
   paymentDate: z.string().optional(),
   paymentMethod: z.string().optional(),
   reference: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       loanId: id,
       userId: session.user.id,
       role: session.user.role,
-      includePayments: true,
+      includePayments: true
     });
 
     if (!("loan" in result)) {
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     }
 
     return NextResponse.json({
-      data: result.loan.payments.map((payment, index) => mapLoanPayment(payment, index + 1)),
+      data: result.loan.payments.map((payment, index) => mapLoanPayment(payment, index + 1))
     });
   } catch (error) {
     console.error("Error fetching payroll loan payments:", error);
@@ -62,8 +62,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         id: true,
         status: true,
         paidInstallments: true,
-        remainingAmount: true,
-      },
+        remainingAmount: true
+      }
     });
 
     if (!existing) {
@@ -71,22 +71,29 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     }
 
     if (["REJECTED", "CANCELLED", "COMPLETED"].includes(existing.status)) {
-      return NextResponse.json({ error: "Loan cannot accept payments in its current state" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Loan cannot accept payments in its current state" },
+        { status: 400 }
+      );
     }
 
     const remainingAmount = Number(existing.remainingAmount);
     if (validated.amount > remainingAmount) {
-      return NextResponse.json({ error: "Payment amount exceeds remaining balance" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Payment amount exceeds remaining balance" },
+        { status: 400 }
+      );
     }
 
     const paymentDate = validated.paymentDate ? new Date(validated.paymentDate) : new Date();
     const nextInstallmentNumber = existing.paidInstallments + 1;
     const nextRemainingAmount = Math.max(0, remainingAmount - validated.amount);
-    const nextStatus = nextRemainingAmount === 0
-      ? "COMPLETED"
-      : existing.status === "APPROVED"
-        ? "ACTIVE"
-        : existing.status;
+    const nextStatus =
+      nextRemainingAmount === 0
+        ? "COMPLETED"
+        : existing.status === "APPROVED"
+          ? "ACTIVE"
+          : existing.status;
 
     const payment = await prisma.$transaction(async (tx) => {
       const created = await tx.loanPayment.create({
@@ -96,8 +103,8 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           paymentDate,
           paymentMethod: validated.paymentMethod,
           reference: validated.reference,
-          notes: validated.notes,
-        },
+          notes: validated.notes
+        }
       });
 
       await tx.loan.update({
@@ -106,17 +113,23 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
           paidInstallments: nextInstallmentNumber,
           remainingAmount: new Prisma.Decimal(nextRemainingAmount),
           status: nextStatus,
-          ...(nextStatus === "COMPLETED" ? { endDate: paymentDate } : {}),
-        },
+          ...(nextStatus === "COMPLETED" ? { endDate: paymentDate } : {})
+        }
       });
 
       return created;
     });
 
-    return NextResponse.json({ data: mapLoanPayment(payment, nextInstallmentNumber) }, { status: 201 });
+    return NextResponse.json(
+      { data: mapLoanPayment(payment, nextInstallmentNumber) },
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors[0]?.message || "Invalid payload" }, { status: 400 });
+      return NextResponse.json(
+        { error: error.errors[0]?.message || "Invalid payload" },
+        { status: 400 }
+      );
     }
 
     console.error("Error recording payroll loan payment:", error);

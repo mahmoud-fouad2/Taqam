@@ -3,7 +3,7 @@ import MobileBottomNav from "@/components/mobile/mobile-bottom-nav";
 
 export const metadata: Metadata = {
   title: "Taqam",
-  description: "Taqam HR Mobile",
+  description: "Taqam HR Mobile"
 };
 
 export const viewport: Viewport = {
@@ -11,13 +11,13 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#f8fafc",
+  themeColor: "#f8fafc"
 };
 
 export default function MobileLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-dvh bg-[#f8fafc]">
-      <main className="mx-auto w-full max-w-[430px] px-5 pb-24 pt-[max(env(safe-area-inset-top),12px)]">
+      <main className="mx-auto w-full max-w-[430px] px-5 pt-[max(env(safe-area-inset-top),12px)] pb-24">
         {children}
       </main>
       <MobileBottomNav />

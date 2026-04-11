@@ -24,8 +24,7 @@ export function HeroVideo({ src }: { src: string }) {
         loop
         muted
         playsInline
-        preload="auto"
-      >
+        preload="auto">
         <source src={src} type="video/mp4" />
       </video>
 
@@ -33,8 +32,7 @@ export function HeroVideo({ src }: { src: string }) {
         aria-label={muted ? "تفعيل الصوت" : "كتم الصوت"}
         onClick={toggleMute}
         type="button"
-        className="absolute bottom-3 end-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
-      >
+        className="absolute end-3 bottom-3 flex h-8 w-8 items-center justify-center rounded-full border border-white/20 bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/65 focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none">
         {muted ? <VolumeX className="h-3.5 w-3.5" /> : <Volume2 className="h-3.5 w-3.5" />}
       </button>
     </div>

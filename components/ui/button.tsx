@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot as SlotPrimitive } from "radix-ui"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot as SlotPrimitive } from "radix-ui";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-200 motion-reduce:transition-none disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive cursor-pointer",
@@ -22,7 +22,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/70 active:bg-secondary/60",
         ghost:
           "hover:bg-accent hover:text-accent-foreground active:bg-accent/80 dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80",
+        link: "text-primary underline-offset-4 hover:underline hover:text-primary/80"
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
@@ -30,15 +30,15 @@ const buttonVariants = cva(
         lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
         icon: "size-9",
         "icon-sm": "size-8",
-        "icon-lg": "size-10",
-      },
+        "icon-lg": "size-10"
+      }
     },
     defaultVariants: {
       variant: "default",
-      size: "default",
-    },
+      size: "default"
+    }
   }
-)
+);
 
 function Button({
   className,
@@ -48,11 +48,11 @@ function Button({
   ...props
 }: React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
-    asChild?: boolean
+    asChild?: boolean;
   }) {
-  const Comp = asChild ? SlotPrimitive.Slot : "button"
-  const ariaLabel = (props as any)["aria-label"] ?? props.title
-  const type = asChild ? undefined : (props.type ?? "button")
+  const Comp = asChild ? SlotPrimitive.Slot : "button";
+  const ariaLabel = (props as any)["aria-label"] ?? props.title;
+  const type = asChild ? undefined : (props.type ?? "button");
 
   return (
     <Comp
@@ -64,7 +64,7 @@ function Button({
       type={type as any}
       {...props}
     />
-  )
+  );
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

@@ -7,22 +7,33 @@ import { logger } from "@/lib/logger";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { createActionToken } from "@/lib/security/action-tokens";
 
+const FORGOT_PASSWORD_RATE_LIMIT = {
+  limit: 8,
+  windowMs: 15 * 60 * 1000,
+  keyPrefix: "public:forgot_password"
+} as const;
+
+const FORGOT_PASSWORD_EMAIL_RATE_LIMIT = {
+  limit: 4,
+  windowMs: 60 * 60 * 1000,
+  keyPrefix: "public:forgot_password:email"
+} as const;
+
 const schema = z.object({
-  email: z.string().email(),
+  email: z.string().email()
 });
 
 export async function POST(request: NextRequest) {
-  const limit = 8;
-  const limitInfo = await checkRateLimit(request, {
-    keyPrefix: "public:forgot_password",
-    limit,
-    windowMs: 15 * 60 * 1000,
-  });
+  const limitInfo = await checkRateLimit(request, FORGOT_PASSWORD_RATE_LIMIT);
 
   if (!limitInfo.allowed) {
     return withRateLimitHeaders(
       NextResponse.json({ error: "Too many requests" }, { status: 429 }),
-      { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
+      {
+        limit: FORGOT_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
     );
   }
 
@@ -31,13 +42,30 @@ export async function POST(request: NextRequest) {
     const parsed = schema.safeParse(json);
 
     if (!parsed.success) {
-      return withRateLimitHeaders(
-        NextResponse.json({ error: "Invalid input" }, { status: 400 }),
-        { limit, remaining: limitInfo.remaining, resetAt: limitInfo.resetAt }
-      );
+      return withRateLimitHeaders(NextResponse.json({ error: "Invalid input" }, { status: 400 }), {
+        limit: FORGOT_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
     }
 
     const email = parsed.data.email.toLowerCase();
+    const emailLimitInfo = await checkRateLimit(request, {
+      ...FORGOT_PASSWORD_EMAIL_RATE_LIMIT,
+      identifier: email
+    });
+
+    if (!emailLimitInfo.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        {
+          limit: FORGOT_PASSWORD_EMAIL_RATE_LIMIT.limit,
+          remaining: emailLimitInfo.remaining,
+          resetAt: emailLimitInfo.resetAt
+        }
+      );
+    }
+
     const user = await prisma.user.findUnique({
       where: { email },
       select: {
@@ -46,19 +74,20 @@ export async function POST(request: NextRequest) {
         firstName: true,
         status: true,
         tenantId: true,
-        passwordChangedAt: true,
-      },
+        passwordChangedAt: true
+      }
     });
 
     if (user && user.status !== "INACTIVE" && user.status !== "SUSPENDED") {
-      const tokenType = user.status === "PENDING_VERIFICATION" ? "tenant-admin-activation" : "password-reset";
+      const tokenType =
+        user.status === "PENDING_VERIFICATION" ? "tenant-admin-activation" : "password-reset";
       const token = await createActionToken(
         {
           type: tokenType,
           userId: user.id,
           email: user.email,
           tenantId: user.tenantId,
-          passwordChangedAt: user.passwordChangedAt?.toISOString() ?? null,
+          passwordChangedAt: user.passwordChangedAt?.toISOString() ?? null
         },
         tokenType === "tenant-admin-activation" ? "72h" : "2h"
       );
@@ -94,23 +123,27 @@ export async function POST(request: NextRequest) {
             <p>أو استخدم هذا الرابط مباشرة:</p>
             <p><a href="${actionUrl}">${actionUrl}</a></p>
           </div>
-        `,
+        `
       });
 
       logger.security("password_reset", {
         userId: user.id,
         email: user.email,
-        mode: tokenType,
+        mode: tokenType
       });
     }
 
     return withRateLimitHeaders(NextResponse.json({ success: true }), {
-      limit,
+      limit: FORGOT_PASSWORD_RATE_LIMIT.limit,
       remaining: limitInfo.remaining,
-      resetAt: limitInfo.resetAt,
+      resetAt: limitInfo.resetAt
     });
   } catch (error) {
     logger.error("Forgot password failed", undefined, error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    return withRateLimitHeaders(NextResponse.json({ error: "Server error" }, { status: 500 }), {
+      limit: FORGOT_PASSWORD_RATE_LIMIT.limit,
+      remaining: limitInfo.remaining,
+      resetAt: limitInfo.resetAt
+    });
   }
 }

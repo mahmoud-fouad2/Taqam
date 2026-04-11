@@ -13,7 +13,7 @@ import {
   Mail,
   RefreshCw,
   Shield,
-  WifiOff,
+  WifiOff
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -22,7 +22,7 @@ import {
   clearMobileAuth,
   loadMobileAuth,
   mobileAuthFetch,
-  mobileLogoutAll,
+  mobileLogoutAll
 } from "@/lib/mobile/web-client";
 import { getInitials } from "@/components/mobile/mobile-utils";
 import { ProfileSkeleton } from "@/components/mobile/mobile-skeletons";
@@ -84,7 +84,7 @@ export default function MobileSettingsPage() {
       form.append("file", file);
       const res = await mobileAuthFetch<{ data: { url: string } }>("/api/mobile/me/avatar", {
         method: "POST",
-        body: form,
+        body: form
       });
       if (res.data?.url) {
         setProfile((p) => (p ? { ...p, avatar: res.data.url } : p));
@@ -138,8 +138,7 @@ export default function MobileSettingsPage() {
             onClick={() => router.back()}
             aria-label="الرجوع"
             title="الرجوع"
-            className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90"
-          >
+            className="flex size-9 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-slate-100 transition-transform active:scale-90">
             <ChevronRight className="size-5 text-slate-400" />
           </button>
           <h1 className="text-lg font-bold text-slate-800">الملف الشخصي</h1>
@@ -150,9 +149,9 @@ export default function MobileSettingsPage() {
       <AnimatedCard>
         <div className="flex flex-col items-center rounded-3xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="relative">
-            <Avatar className="size-24 ring-4 ring-primary/10">
+            <Avatar className="ring-primary/10 size-24 ring-4">
               <AvatarImage src={profile?.avatar || ""} alt="" />
-              <AvatarFallback className="bg-primary/10 text-2xl font-bold text-primary">
+              <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
                 {initials}
               </AvatarFallback>
             </Avatar>
@@ -162,9 +161,12 @@ export default function MobileSettingsPage() {
               disabled={avatarBusy}
               aria-label="تغيير الصورة الشخصية"
               title="تغيير الصورة الشخصية"
-              className="absolute -bottom-1 -left-1 flex size-8 items-center justify-center rounded-full bg-primary text-white shadow-md shadow-primary/30 transition active:scale-90"
-            >
-              {avatarBusy ? <Loader2 className="size-3.5 animate-spin" /> : <Camera className="size-3.5" />}
+              className="bg-primary shadow-primary/30 absolute -bottom-1 -left-1 flex size-8 items-center justify-center rounded-full text-white shadow-md transition active:scale-90">
+              {avatarBusy ? (
+                <Loader2 className="size-3.5 animate-spin" />
+              ) : (
+                <Camera className="size-3.5" />
+              )}
             </button>
             <input
               ref={fileRef}
@@ -184,10 +186,26 @@ export default function MobileSettingsPage() {
       {/* Info rows */}
       <AnimatedItem>
         <div className="space-y-2">
-          <InfoRow icon={<Building2 className="size-[18px] text-slate-400" />} label="الشركة" value={companyName} />
-          <InfoRow icon={<Hash className="size-[18px] text-slate-400" />} label="الرقم الوظيفي" value={profile?.employee?.employeeNumber || "—"} />
-          <InfoRow icon={<Shield className="size-[18px] text-slate-400" />} label="الدور" value={profile?.role || "—"} />
-          <InfoRow icon={<Mail className="size-[18px] text-slate-400" />} label="البريد" value={profile?.email || "—"} />
+          <InfoRow
+            icon={<Building2 className="size-[18px] text-slate-400" />}
+            label="الشركة"
+            value={companyName}
+          />
+          <InfoRow
+            icon={<Hash className="size-[18px] text-slate-400" />}
+            label="الرقم الوظيفي"
+            value={profile?.employee?.employeeNumber || "—"}
+          />
+          <InfoRow
+            icon={<Shield className="size-[18px] text-slate-400" />}
+            label="الدور"
+            value={profile?.role || "—"}
+          />
+          <InfoRow
+            icon={<Mail className="size-[18px] text-slate-400" />}
+            label="البريد"
+            value={profile?.email || "—"}
+          />
         </div>
       </AnimatedItem>
 
@@ -195,10 +213,9 @@ export default function MobileSettingsPage() {
       <AnimatedItem>
         <Button
           variant="outline"
-          className="h-12 w-full gap-2 rounded-2xl border-red-100 text-[14px] font-semibold text-red-500 transition-transform active:scale-[0.98] hover:bg-red-50 hover:text-red-600"
+          className="h-12 w-full gap-2 rounded-2xl border-red-100 text-[14px] font-semibold text-red-500 transition-transform hover:bg-red-50 hover:text-red-600 active:scale-[0.98]"
           disabled={logoutBusy}
-          onClick={handleLogout}
-        >
+          onClick={handleLogout}>
           {logoutBusy ? <Loader2 className="size-4 animate-spin" /> : <LogOut className="size-4" />}
           تسجيل الخروج
         </Button>

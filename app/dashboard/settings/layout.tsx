@@ -13,15 +13,11 @@ export async function generateMetadata(): Promise<Metadata> {
     description:
       locale === "ar"
         ? t.common.pManageYourAccountSettingsAndEm
-        : "Manage your account settings and email preferences.",
+        : "Manage your account settings and email preferences."
   });
 }
 
-export default async function SettingsLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
   const locale = await getAppLocale();
 
   const p = locale === "en" ? "/en" : "";
@@ -29,50 +25,50 @@ export default async function SettingsLayout({
   const sidebarNavItems = [
     {
       title: locale === "ar" ? "الملف الشخصي" : "Profile",
-      href: `${p}/dashboard/settings`,
+      href: `${p}/dashboard/settings`
     },
     {
       title: locale === "ar" ? "إعدادات الحضور والموقع" : "Attendance & Location",
-      href: `${p}/dashboard/settings/attendance`,
+      href: `${p}/dashboard/settings/attendance`
     },
     {
       title: locale === "ar" ? "إعدادات عامة" : "General",
-      href: `${p}/dashboard/settings-advanced`,
+      href: `${p}/dashboard/settings-advanced`
     },
     {
       title: locale === "ar" ? "الأمان" : "Security",
-      href: `${p}/dashboard/settings-advanced?section=security`,
+      href: `${p}/dashboard/settings-advanced?section=security`
     },
     {
       title: locale === "ar" ? "الإشعارات" : "Notifications",
-      href: `${p}/dashboard/settings-advanced?section=notifications`,
+      href: `${p}/dashboard/settings-advanced?section=notifications`
     },
     {
       title: locale === "ar" ? "التكاملات" : "Integrations",
-      href: `${p}/dashboard/settings-advanced?section=integrations`,
+      href: `${p}/dashboard/settings-advanced?section=integrations`
     },
     {
       title: locale === "ar" ? "الأدوار والصلاحيات" : "Roles & Permissions",
-      href: `${p}/dashboard/settings-advanced?section=roles`,
+      href: `${p}/dashboard/settings-advanced?section=roles`
     },
     {
       title: locale === "ar" ? "أنواع الإجازات" : "Leave Types",
-      href: `${p}/dashboard/settings-advanced?section=leaves`,
+      href: `${p}/dashboard/settings-advanced?section=leaves`
     },
     {
       title: locale === "ar" ? "سير العمل" : "Workflows",
-      href: `${p}/dashboard/settings-advanced?section=workflows`,
+      href: `${p}/dashboard/settings-advanced?section=workflows`
     },
     {
       title: locale === "ar" ? "النسخ الاحتياطي" : "Backup",
-      href: `${p}/dashboard/settings-advanced?section=backup`,
-    },
+      href: `${p}/dashboard/settings-advanced?section=backup`
+    }
   ];
 
   return (
     <>
-      <div className="space-y-1 mb-4">
-        <h2 className="text-2xl font-bold tracking-tight text-start">
+      <div className="mb-4 space-y-1">
+        <h2 className="text-start text-2xl font-bold tracking-tight">
           {locale === "ar" ? "إعدادات النظام" : "Settings"}
         </h2>
         <p className="text-muted-foreground">
@@ -81,16 +77,14 @@ export default async function SettingsLayout({
             : "Manage your account settings and email preferences."}
         </p>
       </div>
-      <div
-        className="flex flex-col gap-6 lg:flex-row lg:items-start rtl:lg:flex-row-reverse"
-      >
-        <aside className="lg:w-64 lg:shrink-0 lg:sticky lg:top-20">
-          <div className="rounded-lg border bg-card p-2 shadow-sm">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start rtl:lg:flex-row-reverse">
+        <aside className="lg:sticky lg:top-20 lg:w-64 lg:shrink-0">
+          <div className="bg-card rounded-lg border p-2 shadow-sm">
             <SidebarNav items={sidebarNavItems} />
           </div>
         </aside>
         <div className="flex-1">
-          <div className="rounded-lg border bg-card p-6 shadow-sm">{children}</div>
+          <div className="bg-card rounded-lg border p-6 shadow-sm">{children}</div>
         </div>
       </div>
     </>

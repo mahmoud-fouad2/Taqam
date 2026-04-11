@@ -27,7 +27,9 @@ export default async function JobPostingsPage() {
             <Link href={`${p}/careers`}>{t.jobPostings.pCombinedJobPortal}</Link>
           </Button>
           <Button asChild variant="brand">
-            <a href={companyPortalHref} rel="noreferrer" target="_blank">{t.jobPostings.pCompanyPublicPortal}</a>
+            <a href={companyPortalHref} rel="noreferrer" target="_blank">
+              {t.jobPostings.pCompanyPublicPortal}
+            </a>
           </Button>
         </div>
       </div>

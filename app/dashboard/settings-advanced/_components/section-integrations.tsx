@@ -1,18 +1,18 @@
 "use client";
 
-import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from 'react';
-import { AlertCircle, CheckCircle2, Link, RefreshCw, ShieldAlert } from 'lucide-react';
+import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { AlertCircle, CheckCircle2, Link, RefreshCw, ShieldAlert } from "lucide-react";
 
-import type { SystemSettings } from '@/lib/types/settings';
-import type { RuntimeIntegrationReport } from '@/lib/runtime-integrations';
+import type { SystemSettings } from "@/lib/types/settings";
+import type { RuntimeIntegrationReport } from "@/lib/runtime-integrations";
 
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -20,7 +20,7 @@ const t = getText("ar");
 
 export function IntegrationsSection({
   settings,
-  setSettings,
+  setSettings
 }: {
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
@@ -36,7 +36,7 @@ export function IntegrationsSection({
     setRuntimeError(null);
 
     try {
-      const res = await fetch('/api/settings/integrations/status', { cache: 'no-store' });
+      const res = await fetch("/api/settings/integrations/status", { cache: "no-store" });
       const json = await res.json().catch(() => null);
 
       if (!res.ok) {
@@ -64,11 +64,18 @@ export function IntegrationsSection({
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <ShieldAlert className="h-5 w-5" />{t.integrations.runtime}</CardTitle>
+              <ShieldAlert className="h-5 w-5" />
+              {t.integrations.runtime}
+            </CardTitle>
             <CardDescription>{t.integrations.runtimeDesc}</CardDescription>
           </div>
-          <Button variant="outline" onClick={() => void loadRuntimeStatus()} disabled={runtimeLoading}>
-            <RefreshCw className="h-4 w-4 ms-2" />{t.common.update}</Button>
+          <Button
+            variant="outline"
+            onClick={() => void loadRuntimeStatus()}
+            disabled={runtimeLoading}>
+            <RefreshCw className="ms-2 h-4 w-4" />
+            {t.common.update}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
@@ -84,43 +91,57 @@ export function IntegrationsSection({
           ) : null}
 
           {runtimeLoading ? (
-            <div className="text-sm text-muted-foreground">{t.integrations.checking}</div>
+            <div className="text-muted-foreground text-sm">{t.integrations.checking}</div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2">
               {runtimeItems.map((item) => {
-                const isConfigured = item.mode === 'configured';
-                const isPartial = item.mode === 'partial';
+                const isConfigured = item.mode === "configured";
+                const isPartial = item.mode === "partial";
                 const Icon = isConfigured ? CheckCircle2 : isPartial ? AlertCircle : ShieldAlert;
 
                 return (
-                  <div key={item.id} className="rounded-xl border p-4 space-y-3">
+                  <div key={item.id} className="space-y-3 rounded-xl border p-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3">
                         <div
                           className={`rounded-lg p-2 ${
-                            isConfigured ? 'bg-emerald-100 text-emerald-700' : isPartial ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
-                          }`}
-                        >
+                            isConfigured
+                              ? "bg-emerald-100 text-emerald-700"
+                              : isPartial
+                                ? "bg-amber-100 text-amber-700"
+                                : "bg-red-100 text-red-700"
+                          }`}>
                           <Icon className="h-4 w-4" />
                         </div>
                         <div>
                           <div className="font-medium">{item.name}</div>
-                          <div className="text-sm text-muted-foreground">
+                          <div className="text-muted-foreground text-sm">
                             {item.features.join(t.integrations.featureSeparator)}
                           </div>
                         </div>
                       </div>
-                      <Badge variant={isConfigured ? 'default' : isPartial ? 'secondary' : 'destructive'}>
-                        {isConfigured ? t.integrations.complete : isPartial ? t.integrations.partial : t.integrations.notConfigured}
+                      <Badge
+                        variant={
+                          isConfigured ? "default" : isPartial ? "secondary" : "destructive"
+                        }>
+                        {isConfigured
+                          ? t.integrations.complete
+                          : isPartial
+                            ? t.integrations.partial
+                            : t.integrations.notConfigured}
                       </Badge>
                     </div>
 
                     {item.missing.length > 0 ? (
-                      <div className="rounded-lg bg-muted/50 p-3 text-xs text-muted-foreground">
-                        <div className="mb-2 font-medium text-foreground">{t.integrations.missingVariables}</div>
+                      <div className="bg-muted/50 text-muted-foreground rounded-lg p-3 text-xs">
+                        <div className="text-foreground mb-2 font-medium">
+                          {t.integrations.missingVariables}
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {item.missing.map((entry) => (
-                            <span key={entry} className="rounded-md bg-background px-2 py-1 font-mono text-[11px]">
+                            <span
+                              key={entry}
+                              className="bg-background rounded-md px-2 py-1 font-mono text-[11px]">
                               {entry}
                             </span>
                           ))}
@@ -138,56 +159,66 @@ export function IntegrationsSection({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Link className="h-5 w-5" />{t.integrations.title}</CardTitle>
+            <Link className="h-5 w-5" />
+            {t.integrations.title}
+          </CardTitle>
           <CardDescription>{t.integrations.description}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {[
             {
-              key: 'gosi',
+              key: "gosi",
               name: t.integrations.gosi,
-              field: 'subscriberNumber',
-              fieldLabel: t.integrations.subscriberNo,
+              field: "subscriberNumber",
+              fieldLabel: t.integrations.subscriberNo
             },
             {
-              key: 'mol',
+              key: "mol",
               name: t.integrations.mol,
-              field: 'establishmentNumber',
-              fieldLabel: t.integrations.establishmentNo,
+              field: "establishmentNumber",
+              fieldLabel: t.integrations.establishmentNo
             },
-            { key: 'muqeem', name: t.integrations.muqeem, field: 'username', fieldLabel: t.integrations.username },
             {
-              key: 'mudad',
-              name: t.integrations.mudad,
-              field: 'organizationId',
-              fieldLabel: t.integrations.orgNo,
+              key: "muqeem",
+              name: t.integrations.muqeem,
+              field: "username",
+              fieldLabel: t.integrations.username
             },
+            {
+              key: "mudad",
+              name: t.integrations.mudad,
+              field: "organizationId",
+              fieldLabel: t.integrations.orgNo
+            }
           ].map((integration) => (
-            <div key={integration.key} className="border rounded-lg p-4">
-              <div className="flex items-center justify-between mb-4">
+            <div key={integration.key} className="rounded-lg border p-4">
+              <div className="mb-4 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div
-                    className={`h-10 w-10 rounded-lg flex items-center justify-center ${
-                      settings.integrations[integration.key as keyof typeof settings.integrations] &&
+                    className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                      settings.integrations[
+                        integration.key as keyof typeof settings.integrations
+                      ] &&
                       (
                         settings.integrations[
                           integration.key as keyof typeof settings.integrations
                         ] as { enabled: boolean }
                       ).enabled
-                        ? 'bg-green-100'
-                        : 'bg-gray-100'
-                    }`}
-                  >
+                        ? "bg-green-100"
+                        : "bg-gray-100"
+                    }`}>
                     <Link
                       className={`h-5 w-5 ${
-                        settings.integrations[integration.key as keyof typeof settings.integrations] &&
+                        settings.integrations[
+                          integration.key as keyof typeof settings.integrations
+                        ] &&
                         (
                           settings.integrations[
                             integration.key as keyof typeof settings.integrations
                           ] as { enabled: boolean }
                         ).enabled
-                          ? 'text-green-600'
-                          : 'text-gray-600'
+                          ? "text-green-600"
+                          : "text-gray-600"
                       }`}
                     />
                   </div>
@@ -195,17 +226,20 @@ export function IntegrationsSection({
                     <h4 className="font-semibold">{integration.name}</h4>
                     <Badge
                       variant={
-                        settings.integrations[integration.key as keyof typeof settings.integrations] &&
+                        settings.integrations[
+                          integration.key as keyof typeof settings.integrations
+                        ] &&
                         (
                           settings.integrations[
                             integration.key as keyof typeof settings.integrations
                           ] as { enabled: boolean }
                         ).enabled
-                          ? 'default'
-                          : 'secondary'
-                      }
-                    >
-                      {settings.integrations[integration.key as keyof typeof settings.integrations] &&
+                          ? "default"
+                          : "secondary"
+                      }>
+                      {settings.integrations[
+                        integration.key as keyof typeof settings.integrations
+                      ] &&
                       (
                         settings.integrations[
                           integration.key as keyof typeof settings.integrations
@@ -234,26 +268,28 @@ export function IntegrationsSection({
                       ...settings,
                       integrations: {
                         ...settings.integrations,
-                        [key]: { ...current, enabled: checked },
-                      },
+                        [key]: { ...current, enabled: checked }
+                      }
                     });
                   }}
                 />
               </div>
               {settings.integrations[integration.key as keyof typeof settings.integrations] &&
                 (
-                  settings.integrations[
-                    integration.key as keyof typeof settings.integrations
-                  ] as { enabled: boolean }
+                  settings.integrations[integration.key as keyof typeof settings.integrations] as {
+                    enabled: boolean;
+                  }
                 ).enabled && (
-                  <div className="grid gap-4 md:grid-cols-2 pt-4 border-t">
+                  <div className="grid gap-4 border-t pt-4 md:grid-cols-2">
                     <div className="space-y-2">
                       <Label>{integration.fieldLabel}</Label>
                       <Input placeholder={`${t.common.enterField} ${integration.fieldLabel}`} />
                     </div>
                     <div className="flex items-end gap-2">
                       <Button variant="outline">
-                        <RefreshCw className="h-4 w-4 ms-2" />{t.common.syncNow}</Button>
+                        <RefreshCw className="ms-2 h-4 w-4" />
+                        {t.common.syncNow}
+                      </Button>
                     </div>
                   </div>
                 )}

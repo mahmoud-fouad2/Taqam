@@ -7,13 +7,7 @@ import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,7 +17,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -37,7 +31,7 @@ import {
   IconBriefcase,
   IconBuilding,
   IconId,
-  IconClock,
+  IconClock
 } from "@tabler/icons-react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -103,7 +97,7 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
     return date.toLocaleDateString(isRtl ? "ar-SA" : "en-US", {
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
   };
 
@@ -116,7 +110,7 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
       month: "short",
       day: "numeric",
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -124,7 +118,7 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
     setIsDeleting(true);
     try {
       const res = await fetch(`/api/users/${user.id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (!res.ok) {
@@ -173,22 +167,20 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
         <div className="flex gap-2">
           <Button variant="outline" asChild>
             <Link href={`/dashboard/users/${user.id}/edit`}>
-              <IconPencil className="h-4 w-4 me-2" />
+              <IconPencil className="me-2 h-4 w-4" />
               {isRtl ? t.common.edit : "Edit"}
             </Link>
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive">
-                <IconTrash className="h-4 w-4 me-2" />
+                <IconTrash className="me-2 h-4 w-4" />
                 {isRtl ? t.common.delete : "Delete"}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>
-                  {isRtl ? t.common.areYouSure : "Are you sure?"}
-                </AlertDialogTitle>
+                <AlertDialogTitle>{isRtl ? t.common.areYouSure : "Are you sure?"}</AlertDialogTitle>
                 <AlertDialogDescription>
                   {isRtl
                     ? `سيتم حذف المستخدم "${fullName}" نهائياً. لا يمكن التراجع عن هذا الإجراء.`
@@ -200,15 +192,14 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
                 <AlertDialogAction
                   onClick={handleDelete}
                   disabled={isDeleting}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
                   {isDeleting
                     ? isRtl
                       ? t.common.deleting
                       : "Deleting..."
                     : isRtl
-                    ? t.common.delete
-                    : "Delete"}
+                      ? t.common.delete
+                      : "Delete"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
@@ -221,13 +212,13 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
         <Card className="md:col-span-1">
           <CardContent className="pt-6">
             <div className="flex flex-col items-center text-center">
-              <Avatar className="h-24 w-24 mb-4">
+              <Avatar className="mb-4 h-24 w-24">
                 <AvatarImage src={user.avatar || undefined} alt={fullName} />
                 <AvatarFallback className="text-2xl">{initials}</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-semibold">{fullName}</h2>
               <p className="text-muted-foreground">{user.email}</p>
-              <div className="flex gap-2 mt-4">
+              <div className="mt-4 flex gap-2">
                 <Badge className={statusVariant(user.status)}>{statusLabel(user.status)}</Badge>
                 <Badge variant="outline">{roleLabel(user.role)}</Badge>
               </div>
@@ -246,11 +237,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                  <IconMail className="size-5 text-muted-foreground" />
+                <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                  <IconMail className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {isRtl ? t.common.email : "Email"}
                   </p>
                   <p className="font-medium">{user.email}</p>
@@ -258,11 +249,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                  <IconPhone className="size-5 text-muted-foreground" />
+                <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                  <IconPhone className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {isRtl ? t.common.phone : "Phone"}
                   </p>
                   <p className="font-medium">{user.phone || "-"}</p>
@@ -270,11 +261,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                  <IconCalendar className="size-5 text-muted-foreground" />
+                <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                  <IconCalendar className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {isRtl ? "تاريخ الإنشاء" : "Created At"}
                   </p>
                   <p className="font-medium">{formatDate(user.createdAt)}</p>
@@ -282,11 +273,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                  <IconClock className="size-5 text-muted-foreground" />
+                <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                  <IconClock className="text-muted-foreground size-5" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-muted-foreground text-sm">
                     {isRtl ? "آخر تسجيل دخول" : "Last Login"}
                   </p>
                   <p className="font-medium">{formatDateTime(user.lastLoginAt)}</p>
@@ -308,11 +299,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
             <CardContent>
               <div className="grid gap-4 md:grid-cols-4">
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                    <IconId className="size-5 text-muted-foreground" />
+                  <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                    <IconId className="text-muted-foreground size-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {isRtl ? t.employees.employeeNumber : "Employee Number"}
                     </p>
                     <p className="font-medium">{user.employee.employeeNumber || "-"}</p>
@@ -320,11 +311,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                    <IconBuilding className="size-5 text-muted-foreground" />
+                  <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                    <IconBuilding className="text-muted-foreground size-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {isRtl ? t.common.department : "Department"}
                     </p>
                     <p className="font-medium">
@@ -336,11 +327,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                    <IconBriefcase className="size-5 text-muted-foreground" />
+                  <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                    <IconBriefcase className="text-muted-foreground size-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {isRtl ? t.common.jobTitle : "Job Title"}
                     </p>
                     <p className="font-medium">
@@ -352,11 +343,11 @@ export default function UserDetailsClient({ user, locale: _locale }: Props) {
                 </div>
 
                 <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-lg bg-muted flex items-center justify-center">
-                    <IconCalendar className="size-5 text-muted-foreground" />
+                  <div className="bg-muted flex size-10 items-center justify-center rounded-lg">
+                    <IconCalendar className="text-muted-foreground size-5" />
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-muted-foreground text-sm">
                       {isRtl ? t.common.hireDate : "Hire Date"}
                     </p>
                     <p className="font-medium">{formatDate(user.employee.hireDate)}</p>

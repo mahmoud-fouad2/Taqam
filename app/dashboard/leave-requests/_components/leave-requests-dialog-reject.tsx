@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +23,7 @@ export function LeaveRequestsRejectDialog({
   onOpenChange,
   rejectionReason,
   onRejectionReasonChange,
-  onReject,
+  onReject
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,9 +54,13 @@ export function LeaveRequestsRejectDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common.cancel}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t.common.cancel}
+          </Button>
           <Button onClick={onReject} variant="destructive" disabled={!rejectionReason}>
-            <IconX className="ms-2 h-4 w-4" />{t.applicants.rejectApplication}</Button>
+            <IconX className="ms-2 h-4 w-4" />
+            {t.applicants.rejectApplication}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

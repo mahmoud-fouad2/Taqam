@@ -33,28 +33,31 @@ type CategoryKey = "FEATURE_REQUEST" | "BUG_REPORT" | "PRODUCT_FEEDBACK";
 
 const CATEGORY_ORDER: CategoryKey[] = ["FEATURE_REQUEST", "BUG_REPORT", "PRODUCT_FEEDBACK"];
 
-const categoryMeta: Record<CategoryKey, { icon: typeof Lightbulb; ar: string; en: string; arDesc: string; enDesc: string }> = {
+const categoryMeta: Record<
+  CategoryKey,
+  { icon: typeof Lightbulb; ar: string; en: string; arDesc: string; enDesc: string }
+> = {
   FEATURE_REQUEST: {
     icon: Lightbulb,
     ar: "ميزة جديدة",
     en: "Feature request",
     arDesc: "طلب ميزة جديدة أو تحسين واضح في سير العمل.",
-    enDesc: "Request a new capability or a clearer workflow improvement.",
+    enDesc: "Request a new capability or a clearer workflow improvement."
   },
   BUG_REPORT: {
     icon: Bug,
     ar: "بلاغ مشكلة",
     en: "Bug report",
     arDesc: "مشكلة فعلية مع خطوات إعادة الإنتاج والأثر المتوقع.",
-    enDesc: "A real defect with reproduction steps and expected behavior.",
+    enDesc: "A real defect with reproduction steps and expected behavior."
   },
   PRODUCT_FEEDBACK: {
     icon: Megaphone,
     ar: "ملاحظة على المنتج",
     en: "Product feedback",
     arDesc: "ملاحظات على التجربة أو نقاط احتكاك في الاستخدام اليومي.",
-    enDesc: "Feedback on UX quality or friction in daily usage.",
-  },
+    enDesc: "Feedback on UX quality or friction in daily usage."
+  }
 };
 
 function statusLabel(locale: "ar" | "en", status: Ticket["status"]) {
@@ -63,7 +66,7 @@ function statusLabel(locale: "ar" | "en", status: Ticket["status"]) {
     IN_PROGRESS: t.ideas.inProgress,
     WAITING_CUSTOMER: t.ideas.waitingCustomer,
     RESOLVED: t.common.resolved,
-    CLOSED: t.common.closed,
+    CLOSED: t.common.closed
   };
 
   const mapEn: Record<Ticket["status"], string> = {
@@ -71,7 +74,7 @@ function statusLabel(locale: "ar" | "en", status: Ticket["status"]) {
     IN_PROGRESS: "In progress",
     WAITING_CUSTOMER: "Waiting customer",
     RESOLVED: "Resolved",
-    CLOSED: "Closed",
+    CLOSED: "Closed"
   };
 
   return locale === "ar" ? mapAr[status] : mapEn[status];
@@ -82,20 +85,22 @@ function priorityLabel(locale: "ar" | "en", priority: Ticket["priority"]) {
     LOW: t.common.low,
     NORMAL: t.common.normal,
     HIGH: t.common.high,
-    URGENT: t.common.urgent,
+    URGENT: t.common.urgent
   };
 
   const mapEn: Record<Ticket["priority"], string> = {
     LOW: "Low",
     NORMAL: "Normal",
     HIGH: "High",
-    URGENT: "Urgent",
+    URGENT: "Urgent"
   };
 
   return locale === "ar" ? mapAr[priority] : mapEn[priority];
 }
 
-function badgeVariantForStatus(status: Ticket["status"]): "default" | "secondary" | "destructive" | "outline" {
+function badgeVariantForStatus(
+  status: Ticket["status"]
+): "default" | "secondary" | "destructive" | "outline" {
   if (status === "OPEN") return "secondary";
   if (status === "IN_PROGRESS") return "default";
   if (status === "WAITING_CUSTOMER") return "outline";
@@ -103,7 +108,13 @@ function badgeVariantForStatus(status: Ticket["status"]): "default" | "secondary
   return "outline";
 }
 
-export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar" | "en"; isSuperAdmin: boolean }) {
+export function IdeasWorkspace({
+  locale: _locale,
+  isSuperAdmin
+}: {
+  locale: "ar" | "en";
+  isSuperAdmin: boolean;
+}) {
   const locale = useClientLocale();
   const t = getText(locale);
   const prefix = locale === "en" ? "/en" : "";
@@ -126,12 +137,20 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
       const json = await res.json().catch(() => null);
 
       if (!res.ok) {
-        throw new Error(json?.error || (locale === "ar" ? t.ideas.loadFailed : "Failed to load ideas"));
+        throw new Error(
+          json?.error || (locale === "ar" ? t.ideas.loadFailed : "Failed to load ideas")
+        );
       }
 
       setItems(Array.isArray(json?.data?.items) ? json.data.items : []);
     } catch (error) {
-      setLoadError(error instanceof Error ? error.message : locale === "ar" ? t.ideas.loadFailed : "Failed to load ideas");
+      setLoadError(
+        error instanceof Error
+          ? error.message
+          : locale === "ar"
+            ? t.ideas.loadFailed
+            : "Failed to load ideas"
+      );
       setItems([]);
     } finally {
       setLoading(false);
@@ -151,7 +170,9 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
       total: relevantItems.length,
       open: relevantItems.filter((item) => item.status === "OPEN").length,
       inProgress: relevantItems.filter((item) => item.status === "IN_PROGRESS").length,
-      resolved: relevantItems.filter((item) => item.status === "RESOLVED" || item.status === "CLOSED").length,
+      resolved: relevantItems.filter(
+        (item) => item.status === "RESOLVED" || item.status === "CLOSED"
+      ).length
     };
   }, [relevantItems]);
 
@@ -173,13 +194,15 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
           subject: subject.trim(),
           category,
           priority,
-          message: message.trim(),
-        }),
+          message: message.trim()
+        })
       });
 
       const json = await res.json().catch(() => null);
       if (!res.ok) {
-        throw new Error(json?.error || (locale === "ar" ? t.ideas.submitFailed : "Failed to submit idea"));
+        throw new Error(
+          json?.error || (locale === "ar" ? t.ideas.submitFailed : "Failed to submit idea")
+        );
       }
 
       toast.success(locale === "ar" ? t.ideas.submitSuccess : "Idea submitted successfully");
@@ -189,7 +212,13 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
       setMessage("");
       await load();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : locale === "ar" ? t.ideas.submitFailed : "Failed to submit idea");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : locale === "ar"
+            ? t.ideas.submitFailed
+            : "Failed to submit idea"
+      );
     } finally {
       setSubmitting(false);
     }
@@ -212,13 +241,17 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? t.ideas.inProgress : "In progress"}</CardDescription>
+            <CardDescription>
+              {locale === "ar" ? t.ideas.inProgress : "In progress"}
+            </CardDescription>
             <CardTitle className="text-3xl">{stats.inProgress}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "مغلقة أو محلولة" : "Resolved or closed"}</CardDescription>
+            <CardDescription>
+              {locale === "ar" ? "مغلقة أو محلولة" : "Resolved or closed"}
+            </CardDescription>
             <CardTitle className="text-3xl">{stats.resolved}</CardTitle>
           </CardHeader>
         </Card>
@@ -256,18 +289,19 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
                     key={key}
                     type="button"
                     className={`rounded-xl border p-3 text-start transition ${
-                      category === key ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"
+                      category === key
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/40"
                     }`}
                     onClick={() => setCategory(key)}
-                    disabled={!canSubmit}
-                  >
+                    disabled={!canSubmit}>
                     <div className="flex items-start gap-3">
-                      <div className="rounded-lg bg-muted p-2">
+                      <div className="bg-muted rounded-lg p-2">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="font-medium">{locale === "ar" ? meta.ar : meta.en}</div>
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-muted-foreground text-sm">
                           {locale === "ar" ? meta.arDesc : meta.enDesc}
                         </div>
                       </div>
@@ -283,22 +317,27 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
                 id="idea-subject"
                 value={subject}
                 onChange={(event) => setSubject(event.target.value)}
-                placeholder={locale === "ar" ? t.ideas.subjectExample : "Example: multi-step approval for expenses"}
+                placeholder={
+                  locale === "ar"
+                    ? t.ideas.subjectExample
+                    : "Example: multi-step approval for expenses"
+                }
                 disabled={!canSubmit || submitting}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idea-priority">{locale === "ar" ? t.common.priority : "Priority"}</Label>
+              <Label htmlFor="idea-priority">
+                {locale === "ar" ? t.common.priority : "Priority"}
+              </Label>
               <select
                 id="idea-priority"
                 aria-label={locale === "ar" ? t.ideas.priority : "Idea priority"}
                 title={locale === "ar" ? t.ideas.priority : "Idea priority"}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
                 value={priority}
                 onChange={(event) => setPriority(event.target.value as Ticket["priority"])}
-                disabled={!canSubmit || submitting}
-              >
+                disabled={!canSubmit || submitting}>
                 <option value="LOW">{priorityLabel(locale, "LOW")}</option>
                 <option value="NORMAL">{priorityLabel(locale, "NORMAL")}</option>
                 <option value="HIGH">{priorityLabel(locale, "HIGH")}</option>
@@ -307,7 +346,9 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="idea-message">{locale === "ar" ? t.common.description : "Description"}</Label>
+              <Label htmlFor="idea-message">
+                {locale === "ar" ? t.common.description : "Description"}
+              </Label>
               <Textarea
                 id="idea-message"
                 rows={8}
@@ -325,7 +366,13 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button onClick={() => void handleSubmit()} disabled={!canSubmit || submitting}>
                 <Send className="me-2 h-4 w-4" />
-                {submitting ? (locale === "ar" ? t.common.sending : "Submitting...") : locale === "ar" ? t.common.send : "Submit"}
+                {submitting
+                  ? locale === "ar"
+                    ? t.common.sending
+                    : "Submitting..."
+                  : locale === "ar"
+                    ? t.common.send
+                    : "Submit"}
               </Button>
               <Button variant="outline" asChild>
                 <Link href={`${prefix}/dashboard/support`}>
@@ -340,7 +387,9 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
         <Card>
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <CardTitle>{locale === "ar" ? "آخر المقترحات والبلاغات" : "Recent ideas and reports"}</CardTitle>
+              <CardTitle>
+                {locale === "ar" ? "آخر المقترحات والبلاغات" : "Recent ideas and reports"}
+              </CardTitle>
               <CardDescription>
                 {locale === "ar"
                   ? "المدخلات هنا مرتبطة بنفس نظام التذاكر، لذلك الحالة والردود تتحدث في مكان واحد."
@@ -355,17 +404,19 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
           <CardContent className="space-y-4">
             {loadError ? (
               <Alert variant="destructive">
-                <AlertTitle>{locale === "ar" ? "تعذر تحميل البيانات" : "Failed to load data"}</AlertTitle>
+                <AlertTitle>
+                  {locale === "ar" ? "تعذر تحميل البيانات" : "Failed to load data"}
+                </AlertTitle>
                 <AlertDescription>{loadError}</AlertDescription>
               </Alert>
             ) : null}
 
             {loading ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground py-10 text-center text-sm">
                 {locale === "ar" ? "جاري تحميل المقترحات..." : "Loading ideas..."}
               </div>
             ) : relevantItems.length === 0 ? (
-              <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
                 {locale === "ar"
                   ? "لا توجد مقترحات أو بلاغات مصنفة بعد. أول إرسال من هذه الصفحة سيظهر هنا مباشرة."
                   : "There are no categorized ideas or bug reports yet. The first submission from this page will appear here immediately."}
@@ -379,33 +430,38 @@ export function IdeasWorkspace({ locale: _locale, isSuperAdmin }: { locale: "ar"
                     <Link
                       key={item.id}
                       href={`${prefix}/dashboard/support/${item.id}`}
-                      className="rounded-xl border p-4 transition hover:bg-muted/40"
-                    >
+                      className="hover:bg-muted/40 rounded-xl border p-4 transition">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div className="space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <h3 className="font-medium">{item.subject}</h3>
-                            <Badge variant={badgeVariantForStatus(item.status)}>{statusLabel(locale, item.status)}</Badge>
+                            <Badge variant={badgeVariantForStatus(item.status)}>
+                              {statusLabel(locale, item.status)}
+                            </Badge>
                             <Badge variant="outline">{priorityLabel(locale, item.priority)}</Badge>
                             <Badge variant="outline">{locale === "ar" ? meta.ar : meta.en}</Badge>
                           </div>
-                          <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                          <div className="text-muted-foreground flex flex-wrap gap-3 text-xs">
                             <span>
-                              {new Date(item.lastMessageAt).toLocaleString(locale === "ar" ? "ar-SA" : "en-US")}
+                              {new Date(item.lastMessageAt).toLocaleString(
+                                locale === "ar" ? "ar-SA" : "en-US"
+                              )}
                             </span>
                             {item._count?.messages ? (
                               <span>
-                                {locale === "ar" ? t.ideas.messages : "Messages:"} {item._count.messages}
+                                {locale === "ar" ? t.ideas.messages : "Messages:"}{" "}
+                                {item._count.messages}
                               </span>
                             ) : null}
                             {isSuperAdmin && item.tenant ? (
                               <span>
-                                {locale === "ar" ? t.common.company : "Tenant:"} {item.tenant.nameAr || item.tenant.name}
+                                {locale === "ar" ? t.common.company : "Tenant:"}{" "}
+                                {item.tenant.nameAr || item.tenant.name}
                               </span>
                             ) : null}
                           </div>
                         </div>
-                        <ArrowUpRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                        <ArrowUpRight className="text-muted-foreground h-4 w-4 shrink-0" />
                       </div>
                     </Link>
                   );

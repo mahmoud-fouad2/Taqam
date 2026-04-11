@@ -30,15 +30,16 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
     const { tenantId } = auth;
     const { id } = await params;
 
-    const body = (await request.json().catch(() => null)) as
-      | { earnings?: PayslipEarning[]; deductions?: PayslipDeduction[] }
-      | null;
+    const body = (await request.json().catch(() => null)) as {
+      earnings?: PayslipEarning[];
+      deductions?: PayslipDeduction[];
+    } | null;
 
     const updated = await updatePayslipAdjustments({
       tenantId,
       payslipId: id,
       earnings: body?.earnings,
-      deductions: body?.deductions,
+      deductions: body?.deductions
     });
 
     if (!updated) {

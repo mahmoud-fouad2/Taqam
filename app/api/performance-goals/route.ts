@@ -23,24 +23,21 @@ const goalSchema = z.object({
   startDate: z.string().or(z.date()),
   dueDate: z.string().or(z.date()),
   managerId: z.string().optional().nullable(),
-  notes: z.string().optional().nullable(),
+  notes: z.string().optional().nullable()
 });
 
 // GET - Get all goals
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     const { searchParams } = new URL(request.url);
-    
+
     // Filters
     const employeeId = searchParams.get("employeeId");
     const status = searchParams.get("status");
@@ -53,28 +50,28 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = { tenantId };
-    
+
     if (employeeId) {
       where.employeeId = employeeId;
     }
-    
+
     if (status) {
       where.status = status === "PENDING" ? "ACTIVE" : status;
     }
-    
+
     if (priority) {
       where.priority = priority;
     }
-    
+
     if (category) {
       where.category = category;
     }
-    
+
     if (search) {
       where.OR = [
         { title: { contains: search, mode: "insensitive" } },
         { titleAr: { contains: search, mode: "insensitive" } },
-        { description: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } }
       ];
     }
 
@@ -92,8 +89,8 @@ export async function GET(request: NextRequest) {
               lastNameAr: true,
               employeeNumber: true,
               avatar: true,
-              department: { select: { name: true, nameAr: true } },
-            },
+              department: { select: { name: true, nameAr: true } }
+            }
           },
           manager: {
             select: {
@@ -101,25 +98,22 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               firstNameAr: true,
-              lastNameAr: true,
-            },
-          },
+              lastNameAr: true
+            }
+          }
         },
-        orderBy: [
-          { priority: "desc" },
-          { dueDate: "asc" },
-        ],
+        orderBy: [{ priority: "desc" }, { dueDate: "asc" }],
         skip,
-        take: limit,
+        take: limit
       }),
-      prisma.performanceGoal.count({ where }),
+      prisma.performanceGoal.count({ where })
     ]);
 
     // Stats
     const stats = await prisma.performanceGoal.groupBy({
       by: ["status"],
       where: { tenantId },
-      _count: { _all: true },
+      _count: { _all: true }
     });
 
     const statusCounts = {
@@ -130,7 +124,7 @@ export async function GET(request: NextRequest) {
       inProgress: stats.find((s) => s.status === "IN_PROGRESS")?._count._all ?? 0,
       completed: stats.find((s) => s.status === "COMPLETED")?._count._all ?? 0,
       cancelled: stats.find((s) => s.status === "CANCELLED")?._count._all ?? 0,
-      overdue: stats.find((s) => s.status === "OVERDUE")?._count._all ?? 0,
+      overdue: stats.find((s) => s.status === "OVERDUE")?._count._all ?? 0
     };
 
     return NextResponse.json({
@@ -139,14 +133,11 @@ export async function GET(request: NextRequest) {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-      stats: statusCounts,
+      stats: statusCounts
     });
   } catch (error) {
     console.error("Error fetching goals:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب الأهداف" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب الأهداف" }, { status: 500 });
   }
 }
 
@@ -154,47 +145,36 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
     const body = await request.json();
-    
+
     // Validate
     const validatedData = goalSchema.parse(body);
 
     const statusToPersist: GoalStatus =
-      validatedData.status === "PENDING"
-        ? "ACTIVE"
-        : (validatedData.status ?? "DRAFT");
+      validatedData.status === "PENDING" ? "ACTIVE" : (validatedData.status ?? "DRAFT");
 
     // Verify employee belongs to tenant
     const employee = await prisma.employee.findFirst({
-      where: { id: validatedData.employeeId, tenantId },
+      where: { id: validatedData.employeeId, tenantId }
     });
 
     if (!employee) {
-      return NextResponse.json(
-        { error: "الموظف غير موجود" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "الموظف غير موجود" }, { status: 400 });
     }
 
     // If manager specified, verify they belong to tenant
     if (validatedData.managerId) {
       const manager = await prisma.employee.findFirst({
-        where: { id: validatedData.managerId, tenantId },
+        where: { id: validatedData.managerId, tenantId }
       });
       if (!manager) {
-        return NextResponse.json(
-          { error: "المدير المحدد غير موجود" },
-          { status: 400 }
-        );
+        return NextResponse.json({ error: "المدير المحدد غير موجود" }, { status: 400 });
       }
     }
 
@@ -216,7 +196,7 @@ export async function POST(request: NextRequest) {
         dueDate: new Date(validatedData.dueDate),
         managerId: validatedData.managerId,
         notes: validatedData.notes,
-        progress: 0,
+        progress: 0
       },
       include: {
         employee: {
@@ -225,29 +205,29 @@ export async function POST(request: NextRequest) {
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
-    return NextResponse.json({
-      message: "تم إضافة الهدف بنجاح",
-      goal,
-    }, { status: 201 });
+    return NextResponse.json(
+      {
+        message: "تم إضافة الهدف بنجاح",
+        goal
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating goal:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في إضافة الهدف" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في إضافة الهدف" }, { status: 500 });
   }
 }

@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,7 +23,7 @@ export function LeaveRequestsApproveDialog({
   onOpenChange,
   approvalComment,
   onApprovalCommentChange,
-  onApprove,
+  onApprove
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -54,9 +54,13 @@ export function LeaveRequestsApproveDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common.cancel}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t.common.cancel}
+          </Button>
           <Button onClick={onApprove} className="bg-green-600 hover:bg-green-700">
-            <IconCheck className="ms-2 h-4 w-4" />{t.common.accept}</Button>
+            <IconCheck className="ms-2 h-4 w-4" />
+            {t.common.accept}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

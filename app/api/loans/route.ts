@@ -11,13 +11,20 @@ const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
 
 const loanCreateSchema = z.object({
   employeeId: z.string().min(1, "الموظف مطلوب"),
-  type: z.enum(["SALARY_ADVANCE", "PERSONAL_LOAN", "EMERGENCY_LOAN", "HOUSING_LOAN", "CAR_LOAN", "OTHER"]),
+  type: z.enum([
+    "SALARY_ADVANCE",
+    "PERSONAL_LOAN",
+    "EMERGENCY_LOAN",
+    "HOUSING_LOAN",
+    "CAR_LOAN",
+    "OTHER"
+  ]),
   amount: z.number().positive("المبلغ يجب أن يكون موجب"),
   installments: z.number().int().positive("عدد الأقساط يجب أن يكون موجب"),
   interestRate: z.number().min(0).max(100).optional().default(0),
   startDate: z.string().optional(),
   reason: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export async function GET(request: NextRequest) {
@@ -40,12 +47,12 @@ export async function GET(request: NextRequest) {
     const pageSize = Math.min(Math.max(parseInt(searchParams.get("pageSize") || "20"), 1), 100);
 
     const where: any = { tenantId };
-    
+
     // Non-admin users can only see their own loans
     if (!ALLOWED_ROLES.has(session.user.role)) {
       const employee = await prisma.employee.findFirst({
         where: { userId: session.user.id, tenantId },
-        select: { id: true },
+        select: { id: true }
       });
       if (!employee) {
         return NextResponse.json({ error: "Employee not found" }, { status: 404 });
@@ -76,19 +83,19 @@ export async function GET(request: NextRequest) {
                   firstName: true,
                   lastName: true,
                   email: true,
-                  avatar: true,
-                },
-              },
-            },
+                  avatar: true
+                }
+              }
+            }
           },
           approvedBy: {
             select: {
               firstName: true,
-              lastName: true,
-            },
-          },
-        },
-      }),
+              lastName: true
+            }
+          }
+        }
+      })
     ]);
 
     // Calculate stats
@@ -96,7 +103,7 @@ export async function GET(request: NextRequest) {
       by: ["status"],
       where: { tenantId },
       _count: { id: true },
-      _sum: { remainingAmount: true },
+      _sum: { remainingAmount: true }
     });
 
     const statsMap = {
@@ -104,7 +111,7 @@ export async function GET(request: NextRequest) {
       pending: 0,
       active: 0,
       completed: 0,
-      totalActiveAmount: 0,
+      totalActiveAmount: 0
     };
 
     for (const s of stats) {
@@ -125,16 +132,16 @@ export async function GET(request: NextRequest) {
           amount: Number(loan.amount),
           installmentAmount: Number(loan.installmentAmount),
           remainingAmount: Number(loan.remainingAmount),
-          interestRate: Number(loan.interestRate),
+          interestRate: Number(loan.interestRate)
         })),
-        stats: statsMap,
+        stats: statsMap
       },
       meta: {
         page,
         pageSize,
         total,
-        totalPages: Math.ceil(total / pageSize),
-      },
+        totalPages: Math.ceil(total / pageSize)
+      }
     });
   } catch (error) {
     logger.error("Error fetching loans", undefined, error);
@@ -161,18 +168,21 @@ export async function POST(request: NextRequest) {
       tenantId,
       userId: session.user.id,
       role: session.user.role,
-      requestedEmployeeId: body?.employeeId,
+      requestedEmployeeId: body?.employeeId
     });
 
     if (!("employeeId" in employeeScope)) {
-      return NextResponse.json({ error: employeeScope.error.message }, { status: employeeScope.error.status });
+      return NextResponse.json(
+        { error: employeeScope.error.message },
+        { status: employeeScope.error.status }
+      );
     }
 
     const validated = loanCreateSchema.parse(body);
 
     // Check if employee exists in tenant
     const employee = await prisma.employee.findFirst({
-      where: { id: employeeScope.employeeId || validated.employeeId, tenantId },
+      where: { id: employeeScope.employeeId || validated.employeeId, tenantId }
     });
 
     if (!employee) {
@@ -195,7 +205,7 @@ export async function POST(request: NextRequest) {
         interestRate: new Prisma.Decimal(validated.interestRate || 0),
         startDate: validated.startDate ? new Date(validated.startDate) : null,
         reason: validated.reason,
-        notes: validated.notes,
+        notes: validated.notes
       },
       include: {
         employee: {
@@ -203,25 +213,32 @@ export async function POST(request: NextRequest) {
             id: true,
             employeeNumber: true,
             user: {
-              select: { firstName: true, lastName: true, email: true },
-            },
-          },
-        },
-      },
+              select: { firstName: true, lastName: true, email: true }
+            }
+          }
+        }
+      }
     });
 
-    logger.info("Loan created", { loanId: loan.id, tenantId, employeeId: employeeScope.employeeId || validated.employeeId });
+    logger.info("Loan created", {
+      loanId: loan.id,
+      tenantId,
+      employeeId: employeeScope.employeeId || validated.employeeId
+    });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        ...loan,
-        amount: Number(loan.amount),
-        installmentAmount: Number(loan.installmentAmount),
-        remainingAmount: Number(loan.remainingAmount),
-        interestRate: Number(loan.interestRate),
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          ...loan,
+          amount: Number(loan.amount),
+          installmentAmount: Number(loan.installmentAmount),
+          remainingAmount: Number(loan.remainingAmount),
+          interestRate: Number(loan.interestRate)
+        }
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json({ error: error.errors[0].message }, { status: 400 });

@@ -19,14 +19,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Loader2, Plus, Pencil, Trash2, Star, DollarSign } from "lucide-react";
@@ -38,7 +38,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -77,7 +77,7 @@ const DEFAULT_PLAN: Partial<PricingPlan> = {
   planType: "BASIC",
   isPopular: false,
   isActive: true,
-  sortOrder: 0,
+  sortOrder: 0
 };
 
 export function PricingPlansManager() {
@@ -88,7 +88,7 @@ export function PricingPlansManager() {
       { value: "TRIAL", label: t.pricingPlans.trial },
       { value: "BASIC", label: t.common.basic },
       { value: "PROFESSIONAL", label: t.pricingPlans.professional },
-      { value: "ENTERPRISE", label: t.common.institutions },
+      { value: "ENTERPRISE", label: t.common.institutions }
     ],
     [t.common.basic, t.common.institutions, t.pricingPlans.professional, t.pricingPlans.trial]
   );
@@ -106,11 +106,13 @@ export function PricingPlansManager() {
       const res = await fetch("/api/super-admin/pricing-plans");
       const json = await res.json();
       if (json.data) {
-        setPlans(json.data.map((p: any) => ({
-          ...p,
-          priceMonthly: p.priceMonthly ? parseFloat(p.priceMonthly) : null,
-          priceYearly: p.priceYearly ? parseFloat(p.priceYearly) : null,
-        })));
+        setPlans(
+          json.data.map((p: any) => ({
+            ...p,
+            priceMonthly: p.priceMonthly ? parseFloat(p.priceMonthly) : null,
+            priceYearly: p.priceYearly ? parseFloat(p.priceYearly) : null
+          }))
+        );
       }
     } catch (err) {
       console.error(err);
@@ -126,7 +128,7 @@ export function PricingPlansManager() {
 
   async function handleSave() {
     if (!editingPlan) return;
-    
+
     if (!editingPlan.name || !editingPlan.nameAr || !editingPlan.slug) {
       toast.error(t.common.fillRequired);
       return;
@@ -138,11 +140,11 @@ export function PricingPlansManager() {
       const url = isUpdate
         ? `/api/super-admin/pricing-plans/${editingPlan.id}`
         : "/api/super-admin/pricing-plans";
-      
+
       const res = await fetch(url, {
         method: isUpdate ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingPlan),
+        body: JSON.stringify(editingPlan)
       });
 
       if (res.ok) {
@@ -168,7 +170,7 @@ export function PricingPlansManager() {
     setPlanToDelete(null);
     try {
       const res = await fetch(`/api/super-admin/pricing-plans/${id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (res.ok) {
@@ -195,7 +197,7 @@ export function PricingPlansManager() {
     setEditingPlan({
       ...editingPlan,
       featuresAr: [...(editingPlan.featuresAr || []), newFeatureAr.trim()],
-      featuresEn: [...(editingPlan.featuresEn || []), newFeatureEn.trim()],
+      featuresEn: [...(editingPlan.featuresEn || []), newFeatureEn.trim()]
     });
     setNewFeatureAr("");
     setNewFeatureEn("");
@@ -206,14 +208,14 @@ export function PricingPlansManager() {
     setEditingPlan({
       ...editingPlan,
       featuresAr: (editingPlan.featuresAr || []).filter((_, i) => i !== index),
-      featuresEn: (editingPlan.featuresEn || []).filter((_, i) => i !== index),
+      featuresEn: (editingPlan.featuresEn || []).filter((_, i) => i !== index)
     });
   }
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        <Loader2 className="text-muted-foreground h-8 w-8 animate-spin" />
       </div>
     );
   }
@@ -221,12 +223,14 @@ export function PricingPlansManager() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-muted-foreground">
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-sm">
           {plans.length} {t.pricingPlans.packagesCount}
         </p>
         <Button onClick={() => openEditDialog()}>
-          <Plus className="mr-2 h-4 w-4" />{t.pricingPlans.newPlan}</Button>
+          <Plus className="mr-2 h-4 w-4" />
+          {t.pricingPlans.newPlan}
+        </Button>
       </div>
 
       {/* Plans Grid */}
@@ -238,7 +242,7 @@ export function PricingPlansManager() {
                 <div>
                   <CardTitle className="flex items-center gap-2">
                     {plan.nameAr}
-                    {plan.isPopular && <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />}
+                    {plan.isPopular && <Star className="h-4 w-4 fill-yellow-500 text-yellow-500" />}
                   </CardTitle>
                   <CardDescription>{plan.name}</CardDescription>
                 </div>
@@ -247,17 +251,15 @@ export function PricingPlansManager() {
                     variant="ghost"
                     size="icon"
                     aria-label={t.common.edit}
-                    onClick={() => openEditDialog(plan)}
-                  >
+                    onClick={() => openEditDialog(plan)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="ghost"
                     size="icon"
                     aria-label={t.common.delete}
-                    onClick={() => setPlanToDelete(plan)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
+                    onClick={() => setPlanToDelete(plan)}>
+                    <Trash2 className="text-destructive h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -269,14 +271,13 @@ export function PricingPlansManager() {
                 </span>
                 {plan.priceMonthly != null && (
                   <span className="text-muted-foreground">
-                    {plan.currency}{t.pricingPlans.perMonth}
+                    {plan.currency}
+                    {t.pricingPlans.perMonth}
                   </span>
                 )}
               </div>
 
-              <p className="text-sm text-muted-foreground">
-                {plan.employeesLabel || "—"}
-              </p>
+              <p className="text-muted-foreground text-sm">{plan.employeesLabel || "—"}</p>
 
               <div className="flex flex-wrap gap-2">
                 <Badge variant={plan.isActive ? "default" : "secondary"}>
@@ -290,12 +291,14 @@ export function PricingPlansManager() {
               <Separator />
 
               <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground">
+                <p className="text-muted-foreground text-xs font-medium">
                   {t.pricingPlans.features} ({plan.featuresAr?.length || 0})
                 </p>
-                <ul className="text-sm space-y-1">
+                <ul className="space-y-1 text-sm">
                   {(plan.featuresAr || []).slice(0, 3).map((f, i) => (
-                    <li key={i} className="truncate">✓ {f}</li>
+                    <li key={i} className="truncate">
+                      ✓ {f}
+                    </li>
                   ))}
                   {(plan.featuresAr?.length || 0) > 3 && (
                     <li className="text-muted-foreground">
@@ -309,8 +312,8 @@ export function PricingPlansManager() {
         ))}
 
         {plans.length === 0 && (
-          <div className="col-span-full text-center py-12 text-muted-foreground">
-            <DollarSign className="mx-auto h-12 w-12 mb-4 opacity-50" />
+          <div className="text-muted-foreground col-span-full py-12 text-center">
+            <DollarSign className="mx-auto mb-4 h-12 w-12 opacity-50" />
             <p>{t.pricingPlans.noPlans}</p>
             <p className="text-sm">{t.pricingPlans.createFirstPlan}</p>
           </div>
@@ -319,7 +322,7 @@ export function PricingPlansManager() {
 
       {/* Edit Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-full max-w-2xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {editingPlan?.id ? t.pricingPlans.editPlan : t.pricingPlans.newPlan}
@@ -335,9 +338,7 @@ export function PricingPlansManager() {
                   <Label>{t.pricingPlans.nameEnLabel}</Label>
                   <Input
                     value={editingPlan.name || ""}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, name: e.target.value })
-                    }
+                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
                     placeholder="Starter"
                   />
                 </div>
@@ -345,9 +346,7 @@ export function PricingPlansManager() {
                   <Label>{t.pricingPlans.nameAr}</Label>
                   <Input
                     value={editingPlan.nameAr || ""}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, nameAr: e.target.value })
-                    }
+                    onChange={(e) => setEditingPlan({ ...editingPlan, nameAr: e.target.value })}
                     placeholder={t.pricingPlans.nameArPlaceholder}
                   />
                 </div>
@@ -356,7 +355,10 @@ export function PricingPlansManager() {
                   <Input
                     value={editingPlan.slug || ""}
                     onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, slug: e.target.value.toLowerCase().replace(/\s+/g, "-") })
+                      setEditingPlan({
+                        ...editingPlan,
+                        slug: e.target.value.toLowerCase().replace(/\s+/g, "-")
+                      })
                     }
                     placeholder="starter"
                   />
@@ -373,7 +375,7 @@ export function PricingPlansManager() {
                     onChange={(e) =>
                       setEditingPlan({
                         ...editingPlan,
-                        priceMonthly: e.target.value ? parseFloat(e.target.value) : null,
+                        priceMonthly: e.target.value ? parseFloat(e.target.value) : null
                       })
                     }
                     placeholder={t.pricingPlans.leaveEmptyForContact}
@@ -387,7 +389,7 @@ export function PricingPlansManager() {
                     onChange={(e) =>
                       setEditingPlan({
                         ...editingPlan,
-                        priceYearly: e.target.value ? parseFloat(e.target.value) : null,
+                        priceYearly: e.target.value ? parseFloat(e.target.value) : null
                       })
                     }
                   />
@@ -396,10 +398,7 @@ export function PricingPlansManager() {
                   <Label>{t.salaryStructures.currency}</Label>
                   <Select
                     value={editingPlan.currency || "SAR"}
-                    onValueChange={(value) =>
-                      setEditingPlan({ ...editingPlan, currency: value })
-                    }
-                  >
+                    onValueChange={(value) => setEditingPlan({ ...editingPlan, currency: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -422,7 +421,7 @@ export function PricingPlansManager() {
                     onChange={(e) =>
                       setEditingPlan({
                         ...editingPlan,
-                        maxEmployees: e.target.value ? parseInt(e.target.value) : null,
+                        maxEmployees: e.target.value ? parseInt(e.target.value) : null
                       })
                     }
                     placeholder={t.pricingPlans.unlimitedHint}
@@ -456,10 +455,7 @@ export function PricingPlansManager() {
                   <Label>{t.pricingPlans.planType}</Label>
                   <Select
                     value={editingPlan.planType || "BASIC"}
-                    onValueChange={(value) =>
-                      setEditingPlan({ ...editingPlan, planType: value })
-                    }
-                  >
+                    onValueChange={(value) => setEditingPlan({ ...editingPlan, planType: value })}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -480,7 +476,7 @@ export function PricingPlansManager() {
                     onChange={(e) =>
                       setEditingPlan({
                         ...editingPlan,
-                        sortOrder: parseInt(e.target.value) || 0,
+                        sortOrder: parseInt(e.target.value) || 0
                       })
                     }
                   />
@@ -533,18 +529,15 @@ export function PricingPlansManager() {
                 </div>
 
                 {/* Features List */}
-                <div className="space-y-2 max-h-40 overflow-y-auto">
+                <div className="max-h-40 space-y-2 overflow-y-auto">
                   {(editingPlan.featuresAr || []).map((f, i) => (
                     <div
                       key={i}
-                      className="flex items-center justify-between gap-2 p-2 bg-muted/50 rounded"
-                    >
+                      className="bg-muted/50 flex items-center justify-between gap-2 rounded p-2">
                       <div className="flex-1 text-sm">
                         <span>{f}</span>
                         <span className="text-muted-foreground mx-2">|</span>
-                        <span className="text-muted-foreground">
-                          {editingPlan.featuresEn?.[i]}
-                        </span>
+                        <span className="text-muted-foreground">{editingPlan.featuresEn?.[i]}</span>
                       </div>
                       <Button
                         type="button"
@@ -552,8 +545,7 @@ export function PricingPlansManager() {
                         size="icon"
                         aria-label={t.common.delete}
                         className="h-6 w-6"
-                        onClick={() => removeFeature(i)}
-                      >
+                        onClick={() => removeFeature(i)}>
                         <Trash2 className="h-3 w-3" />
                       </Button>
                     </div>
@@ -564,11 +556,15 @@ export function PricingPlansManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={handleSave} disabled={saving}>
               {saving ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{t.common.saving}</>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {t.common.saving}
+                </>
               ) : (
                 t.common.save
               )}
@@ -578,20 +574,24 @@ export function PricingPlansManager() {
       </Dialog>
 
       {/* Delete Confirmation */}
-      <AlertDialog open={planToDelete !== null} onOpenChange={(open) => !open && setPlanToDelete(null)}>
+      <AlertDialog
+        open={planToDelete !== null}
+        onOpenChange={(open) => !open && setPlanToDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.pricingPlans.deletePlan}</AlertDialogTitle>
             <AlertDialogDescription>
-              {t.pricingPlans.pAreYouSureYouWantToDelete} &quot;{planToDelete?.nameAr}&quot;? {t.pricingPlans.deleteConfirmMsg}
+              {t.pricingPlans.pAreYouSureYouWantToDelete} &quot;{planToDelete?.nameAr}&quot;?{" "}
+              {t.pricingPlans.deleteConfirmMsg}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => void confirmDelete()}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >{t.common.delete}</AlertDialogAction>
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t.common.delete}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

@@ -3,18 +3,15 @@
  * GET /api/notifications/unread-count
  */
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { dataResponse, errorResponse, logApiError, requireSession } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
@@ -23,16 +20,13 @@ export async function GET() {
       where: {
         userId,
         ...(tenantId ? { tenantId } : {}),
-        isRead: false,
-      },
+        isRead: false
+      }
     });
 
-    return NextResponse.json({ data: { count } });
+    return dataResponse({ count });
   } catch (error) {
-    console.error("Error fetching unread count:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch unread count" },
-      { status: 500 }
-    );
+    logApiError("Error fetching unread count", error);
+    return errorResponse("Failed to fetch unread count");
   }
 }

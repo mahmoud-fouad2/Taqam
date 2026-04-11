@@ -10,7 +10,9 @@ export default async function TrainingCoursesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t.trainingCourses.pTrainingCourses}</h1>
-          <p className="text-muted-foreground">{t.trainingCourses.pManageTrainingAndDevelopmentPr}</p>
+          <p className="text-muted-foreground">
+            {t.trainingCourses.pManageTrainingAndDevelopmentPr}
+          </p>
         </div>
       </div>
       <TrainingCoursesManager />

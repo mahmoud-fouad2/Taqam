@@ -21,7 +21,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { t } from "@/lib/i18n/messages";
 
@@ -35,12 +35,15 @@ function createRequestSchema(isAr: boolean) {
     contactPhone: z
       .string()
       .optional()
-      .refine((v) => !v || phoneRegex.test(v), isAr ? "رقم الهاتف غير صحيح" : "Invalid phone number"),
+      .refine(
+        (v) => !v || phoneRegex.test(v),
+        isAr ? "رقم الهاتف غير صحيح" : "Invalid phone number"
+      ),
     employeesCount: z.string().min(1, isAr ? "اختر عدد الموظفين" : "Select employee count"),
     message: z
       .string()
       .optional()
-      .refine((v) => !v || v.length <= 2000, isAr ? "الرسالة طويلة جدًا" : "Message is too long"),
+      .refine((v) => !v || v.length <= 2000, isAr ? "الرسالة طويلة جدًا" : "Message is too long")
   });
 }
 
@@ -67,7 +70,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
     register,
     handleSubmit,
     setValue,
-    formState: { errors },
+    formState: { errors }
   } = useForm<RequestInput>({
     resolver: zodResolver(requestSchema),
     defaultValues: {
@@ -77,8 +80,8 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
       contactEmail: "",
       contactPhone: "",
       employeesCount: "",
-      message: "",
-    },
+      message: ""
+    }
   });
 
   const onSubmit = async (data: RequestInput) => {
@@ -102,8 +105,8 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
-          captchaToken,
-        }),
+          captchaToken
+        })
       });
 
       const json = await res.json().catch(() => ({}));
@@ -113,7 +116,9 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
 
       setIsSuccess(true);
     } catch (e) {
-      setSubmitError(e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request");
+      setSubmitError(
+        e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -122,18 +127,18 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
   if (isSuccess) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-          <CheckCircle2 className="h-8 w-8 text-primary" />
+        <div className="bg-primary/10 mb-4 flex h-16 w-16 items-center justify-center rounded-full">
+          <CheckCircle2 className="text-primary h-8 w-8" />
         </div>
         <h3 className="mb-2 text-xl font-semibold">
           {isAr ? "تم استلام طلبك بنجاح!" : "Request received successfully!"}
         </h3>
-        <p className="mb-6 text-muted-foreground">
+        <p className="text-muted-foreground mb-6">
           {isAr
             ? "شكرًا لاهتمامك بمنصة طاقم. سيتواصل معك فريقنا خلال 24 ساعة."
             : "Thanks for your interest in Taqam. Our team will contact you within 24 hours."}
         </p>
-        <Button variant="brandOutline" onClick={() => router.push(prefix || "/") }>
+        <Button variant="brandOutline" onClick={() => router.push(prefix || "/")}>
           {isAr ? "العودة للرئيسية" : "Back to home"}
         </Button>
       </div>
@@ -145,25 +150,29 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
       {/* Company Info */}
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-1.5">
-          <Label htmlFor="companyName">{isAr ? "اسم الشركة (بالإنجليزية) *" : "Company name (English) *"}</Label>
+          <Label htmlFor="companyName">
+            {isAr ? "اسم الشركة (بالإنجليزية) *" : "Company name (English) *"}
+          </Label>
           <Input
             id="companyName"
             placeholder={isAr ? "Company Name" : "Company Name"}
             autoComplete="organization"
-            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
             {...register("companyName")}
           />
           {errors.companyName && (
-            <p className="text-sm text-destructive">{errors.companyName.message}</p>
+            <p className="text-destructive text-sm">{errors.companyName.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-1.5">
-          <Label htmlFor="companyNameAr">{isAr ? "اسم الشركة (بالعربية)" : "Company name (Arabic)"}</Label>
+          <Label htmlFor="companyNameAr">
+            {isAr ? "اسم الشركة (بالعربية)" : "Company name (Arabic)"}
+          </Label>
           <Input
             id="companyNameAr"
             placeholder={isAr ? "اسم الشركة" : "اسم الشركة"}
-            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
             {...register("companyNameAr")}
           />
         </div>
@@ -177,14 +186,14 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
             id="contactName"
             placeholder={isAr ? "أحمد محمد" : "John Smith"}
             autoComplete="name"
-            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
             {...register("contactName")}
           />
           {errors.contactName && (
-            <p className="text-sm text-destructive">{errors.contactName.message}</p>
+            <p className="text-destructive text-sm">{errors.contactName.message}</p>
           )}
         </div>
-        
+
         <div className="space-y-1.5">
           <Label htmlFor="contactEmail">{isAr ? "البريد الإلكتروني *" : "Email *"}</Label>
           <Input
@@ -192,11 +201,11 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
             type="email"
             placeholder="email@company.sa"
             autoComplete="email"
-            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
             {...register("contactEmail")}
           />
           {errors.contactEmail && (
-            <p className="text-sm text-destructive">{errors.contactEmail.message}</p>
+            <p className="text-destructive text-sm">{errors.contactEmail.message}</p>
           )}
         </div>
       </div>
@@ -208,26 +217,31 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
             id="contactPhone"
             placeholder="+966501234567"
             autoComplete="tel"
-            className="h-11 rounded-xl bg-muted/50 focus-visible:bg-background"
+            className="bg-muted/50 focus-visible:bg-background h-11 rounded-xl"
             {...register("contactPhone")}
           />
         </div>
-        
+
         <div className="space-y-1.5">
           <Label>{isAr ? "عدد الموظفين *" : "Employee count *"}</Label>
-          <Select onValueChange={(value) => setValue("employeesCount", value, { shouldDirty: true, shouldValidate: true })}>
-            <SelectTrigger className="h-11 rounded-xl bg-muted/50 focus:bg-background">
+          <Select
+            onValueChange={(value) =>
+              setValue("employeesCount", value, { shouldDirty: true, shouldValidate: true })
+            }>
+            <SelectTrigger className="bg-muted/50 focus:bg-background h-11 rounded-xl">
               <SelectValue placeholder={isAr ? "اختر" : "Select"} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="1-10">{isAr ? "1 - 10 موظفين" : "1 - 10 employees"}</SelectItem>
               <SelectItem value="11-50">{isAr ? "11 - 50 موظف" : "11 - 50 employees"}</SelectItem>
-              <SelectItem value="51-200">{isAr ? "51 - 200 موظف" : "51 - 200 employees"}</SelectItem>
+              <SelectItem value="51-200">
+                {isAr ? "51 - 200 موظف" : "51 - 200 employees"}
+              </SelectItem>
               <SelectItem value="200+">{isAr ? "أكثر من 200 موظف" : "200+ employees"}</SelectItem>
             </SelectContent>
           </Select>
           {errors.employeesCount && (
-            <p className="text-sm text-destructive">{errors.employeesCount.message}</p>
+            <p className="text-destructive text-sm">{errors.employeesCount.message}</p>
           )}
         </div>
       </div>
@@ -239,12 +253,12 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
           id="message"
           placeholder={isAr ? "أخبرنا المزيد عن احتياجاتك..." : "Tell us about your needs..."}
           rows={4}
-          className="min-h-28 rounded-2xl bg-muted/50 focus-visible:bg-background"
+          className="bg-muted/50 focus-visible:bg-background min-h-28 rounded-2xl"
           {...register("message")}
         />
       </div>
 
-      <div className="space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
+      <div className="border-border/60 bg-muted/20 space-y-2 rounded-2xl border p-4">
         <Label>{isAr ? "التحقق" : "Verification"}</Label>
         {siteKey ? (
           <div className="flex justify-center sm:justify-start">
@@ -256,12 +270,12 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
             />
           </div>
         ) : (
-          <p className="text-sm text-destructive">{t(locale, "captcha.missingConfig")}</p>
+          <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
         )}
       </div>
 
       {submitError ? (
-        <div className="rounded-xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm">
           {submitError}
         </div>
       ) : null}
@@ -272,7 +286,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         {isLoading ? t(locale, "form.submitting") : t(locale, "form.submit")}
       </Button>
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-muted-foreground text-center text-xs">
         {t(locale, "form.agreePrefix")}
         <a href={`${prefix}/privacy`} className="text-primary hover:underline">
           {t(locale, "form.privacyPolicy")}

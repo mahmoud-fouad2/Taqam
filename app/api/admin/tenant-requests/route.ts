@@ -16,11 +16,11 @@ export async function GET(req: Request) {
   const items = await prisma.tenantRequest.findMany({
     where: status
       ? {
-          status: status.toUpperCase() as any,
+          status: status.toUpperCase() as any
         }
       : undefined,
     orderBy: { createdAt: "desc" },
-    take: 200,
+    take: 200
   });
 
   // Shape the response to match the UI table expectation (SubscriptionRequest).
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
     employeesCount: r.employeeCount,
     status: r.status === "PENDING" ? "pending" : r.status === "APPROVED" ? "approved" : "rejected",
     createdAt: r.createdAt,
-    message: r.message,
+    message: r.message
   }));
 
   return NextResponse.json({ data });

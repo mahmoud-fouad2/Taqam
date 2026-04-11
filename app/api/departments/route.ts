@@ -20,7 +20,7 @@ function canManageDepartments(role: string | undefined) {
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const requestedTenantId = searchParams.get("tenantId")?.trim() || undefined;
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId ?? undefined
-      : session.user.tenantId ?? undefined;
+      ? (requestedTenantId ?? session.user.tenantId ?? undefined)
+      : (session.user.tenantId ?? undefined);
 
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
@@ -42,39 +42,36 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             name: true,
-            nameAr: true,
-          },
+            nameAr: true
+          }
         },
         children: {
           select: {
             id: true,
             name: true,
-            nameAr: true,
-          },
+            nameAr: true
+          }
         },
         _count: {
           select: {
-            employees: true,
-          },
-        },
+            employees: true
+          }
+        }
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: "asc" }
     });
 
     return NextResponse.json({ data: departments });
   } catch (error) {
     console.error("Error fetching departments:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch departments" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch departments" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -92,7 +89,7 @@ export async function POST(request: NextRequest) {
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant required" }, { status: 400 });
     }
-    
+
     // Clean parentId - convert "none" or empty string to null
     const parentId = body.parentId === "none" || body.parentId === "" ? null : body.parentId;
 
@@ -100,9 +97,9 @@ export async function POST(request: NextRequest) {
       const parent = await prisma.department.findFirst({
         where: {
           id: parentId,
-          tenantId,
+          tenantId
         },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!parent) {
@@ -114,9 +111,9 @@ export async function POST(request: NextRequest) {
       const manager = await prisma.employee.findFirst({
         where: {
           id: body.managerId,
-          tenantId,
+          tenantId
         },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!manager) {
@@ -133,24 +130,21 @@ export async function POST(request: NextRequest) {
         description: body.description,
         parentId: parentId,
         managerId: body.managerId,
-        isActive: true,
+        isActive: true
       },
       include: {
         parent: {
           select: {
             id: true,
-            name: true,
-          },
-        },
-      },
+            name: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({ data: department }, { status: 201 });
   } catch (error) {
     console.error("Error creating department:", error);
-    return NextResponse.json(
-      { error: "Failed to create department" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create department" }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import AnalyticsManager from './analytics-manager';
+import AnalyticsManager from "./analytics-manager";
 
 export default function AnalyticsPage() {
   return <AnalyticsManager />;

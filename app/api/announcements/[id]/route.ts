@@ -15,13 +15,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const announcement = await prisma.announcement.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!announcement) {
@@ -35,10 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: announcement });
   } catch (error) {
     console.error("Error fetching announcement:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch announcement" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch announcement" }, { status: 500 });
   }
 }
 
@@ -46,13 +43,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingAnnouncement = await prisma.announcement.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingAnnouncement) {
@@ -75,21 +72,18 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       targetAll: body.targetAll,
       targetDeptIds: body.targetDeptIds,
       expiresAt: body.expiresAt ? new Date(body.expiresAt) : undefined,
-      isActive: body.isActive,
+      isActive: body.isActive
     };
 
     const announcement = await prisma.announcement.update({
       where: { id },
-      data: updateData,
+      data: updateData
     });
 
     return NextResponse.json({ data: announcement });
   } catch (error) {
     console.error("Error updating announcement:", error);
-    return NextResponse.json(
-      { error: "Failed to update announcement" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update announcement" }, { status: 500 });
   }
 }
 
@@ -97,13 +91,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingAnnouncement = await prisma.announcement.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingAnnouncement) {
@@ -115,15 +109,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await prisma.announcement.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ message: "Announcement deleted successfully" });
   } catch (error) {
     console.error("Error deleting announcement:", error);
-    return NextResponse.json(
-      { error: "Failed to delete announcement" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete announcement" }, { status: 500 });
   }
 }

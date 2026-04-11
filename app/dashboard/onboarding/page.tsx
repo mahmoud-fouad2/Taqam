@@ -1,4 +1,5 @@
-import { OnboardingManagerNew } from "./onboarding-manager-new";import { getText } from "@/lib/i18n/text";
+import { OnboardingManagerNew } from "./onboarding-manager-new";
+import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export default async function OnboardingPage() {

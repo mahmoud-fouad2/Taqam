@@ -13,7 +13,11 @@ import prisma from "@/lib/db";
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const limit = 5;
-    const rl = await checkRateLimit(_request, { keyPrefix: "api:payroll:process", limit, windowMs: 60 * 1000 });
+    const rl = await checkRateLimit(_request, {
+      keyPrefix: "api:payroll:process",
+      limit,
+      windowMs: 60 * 1000
+    });
     if (!rl.allowed) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 }),
@@ -45,16 +49,13 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         totalDeductions: summary.totalDeductions,
         totalNet: summary.totalNet,
         processedById: userId,
-        processedAt: new Date(),
-      },
+        processedAt: new Date()
+      }
     });
 
     return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
     console.error("Error processing payroll period:", error);
-    return NextResponse.json(
-      { error: "Failed to process payroll period" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to process payroll period" }, { status: 500 });
   }
 }

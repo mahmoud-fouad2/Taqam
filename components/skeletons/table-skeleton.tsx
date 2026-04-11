@@ -12,13 +12,13 @@ const gridColsClass: Record<number, string> = {
   9: "grid-cols-9",
   10: "grid-cols-10",
   11: "grid-cols-11",
-  12: "grid-cols-12",
+  12: "grid-cols-12"
 };
 
 export function TableSkeleton({
   rows = 6,
   columns = 6,
-  showHeader = true,
+  showHeader = true
 }: {
   rows?: number;
   columns?: number;
@@ -29,7 +29,7 @@ export function TableSkeleton({
   return (
     <div className="w-full overflow-hidden rounded-lg border">
       {showHeader ? (
-        <div className="border-b bg-muted/30 px-4 py-3">
+        <div className="bg-muted/30 border-b px-4 py-3">
           <Skeleton className="h-4 w-40" />
         </div>
       ) : null}

@@ -26,8 +26,8 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       where: { id, tenantId },
       include: {
         department: { select: { id: true, name: true } },
-        jobTitle: { select: { id: true, name: true } },
-      },
+        jobTitle: { select: { id: true, name: true } }
+      }
     });
 
     if (!t) {
@@ -50,11 +50,14 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
         duration: t.durationDays,
         createdBy: t.createdById,
         createdAt: t.createdAt.toISOString(),
-        updatedAt: t.updatedAt.toISOString(),
-      },
+        updatedAt: t.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error fetching onboarding template:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch onboarding template" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch onboarding template" },
+      { status: 500 }
+    );
   }
 }

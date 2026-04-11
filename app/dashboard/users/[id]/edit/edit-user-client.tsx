@@ -15,22 +15,16 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { IconArrowRight, IconArrowLeft, IconUser } from "@tabler/icons-react";
 import Link from "next/link";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -44,7 +38,7 @@ const userSchema = z.object({
   email: z.string().email(t.common.emailInvalid),
   role: z.enum(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]),
   status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED", "PENDING_VERIFICATION"]),
-  phone: z.string().optional(),
+  phone: z.string().optional()
 });
 
 type UserFormData = z.infer<typeof userSchema>;
@@ -80,8 +74,8 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
       email: user.email,
       role: user.role as any,
       status: user.status as any,
-      phone: user.phone || "",
-    },
+      phone: user.phone || ""
+    }
   });
 
   const onSubmit = async (data: UserFormData) => {
@@ -90,7 +84,7 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
       const res = await fetch(`/api/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(data)
       });
 
       const json = await res.json();
@@ -113,14 +107,17 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
     { value: "EMPLOYEE", label: isRtl ? t.common.employee : "Employee" },
     { value: "HR_MANAGER", label: isRtl ? t.common.hrManager : "HR Manager" },
     { value: "MANAGER", label: isRtl ? t.common.manager : "Manager" },
-    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" },
+    { value: "TENANT_ADMIN", label: isRtl ? t.common.companyAdmin : "Tenant Admin" }
   ];
 
   const statusOptions = [
     { value: "ACTIVE", label: isRtl ? t.common.active : "Active" },
     { value: "INACTIVE", label: isRtl ? t.common.inactive : "Inactive" },
     { value: "SUSPENDED", label: isRtl ? t.common.suspended : "Suspended" },
-    { value: "PENDING_VERIFICATION", label: isRtl ? t.common.pendingActivation : "Pending Verification" },
+    {
+      value: "PENDING_VERIFICATION",
+      label: isRtl ? t.common.pendingActivation : "Pending Verification"
+    }
   ];
 
   return (
@@ -136,17 +133,15 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
           <h1 className="text-2xl font-bold tracking-tight">
             {isRtl ? "تعديل المستخدم" : "Edit User"}
           </h1>
-          <p className="text-muted-foreground">
-            {`${user.firstName} ${user.lastName}`.trim()}
-          </p>
+          <p className="text-muted-foreground">{`${user.firstName} ${user.lastName}`.trim()}</p>
         </div>
       </div>
 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-3">
-            <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <IconUser className="size-5 text-primary" />
+            <div className="bg-primary/10 flex size-10 items-center justify-center rounded-lg">
+              <IconUser className="text-primary size-5" />
             </div>
             <div>
               <CardTitle>{isRtl ? t.common.details : "User Details"}</CardTitle>
@@ -159,7 +154,7 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="firstName"
@@ -188,7 +183,7 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="email"
@@ -217,7 +212,7 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
                 />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="role"
@@ -275,11 +270,13 @@ export default function EditUserClient({ user, locale: _locale }: Props) {
                       ? t.common.saving
                       : "Saving..."
                     : isRtl
-                    ? t.common.saveChanges
-                    : "Save Changes"}
+                      ? t.common.saveChanges
+                      : "Save Changes"}
                 </Button>
                 <Button type="button" variant="outline" asChild>
-                  <Link href={`/dashboard/users/${user.id}`}>{isRtl ? t.common.cancel : "Cancel"}</Link>
+                  <Link href={`/dashboard/users/${user.id}`}>
+                    {isRtl ? t.common.cancel : "Cancel"}
+                  </Link>
                 </Button>
               </div>
             </form>

@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
-
 export default async function HelpCenterPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
@@ -30,14 +29,14 @@ export default async function HelpCenterPage() {
           <CardHeader>
             <CardTitle>{locale === "ar" ? "الموارد العامة" : "Public resources"}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <Link className="block text-primary hover:underline" href={`${p}/help-center`}>
+          <CardContent className="text-muted-foreground space-y-2 text-sm">
+            <Link className="text-primary block hover:underline" href={`${p}/help-center`}>
               {locale === "ar" ? "مركز المساعدة العام" : "Public help center"}
             </Link>
-            <Link className="block text-primary hover:underline" href={`${p}/pricing`}>
+            <Link className="text-primary block hover:underline" href={`${p}/pricing`}>
               {locale === "ar" ? "الأسعار والباقات" : "Pricing and plans"}
             </Link>
-            <Link className="block text-primary hover:underline" href={`${p}/request-demo`}>
+            <Link className="text-primary block hover:underline" href={`${p}/request-demo`}>
               {locale === "ar" ? "طلب عرض تجريبي" : "Request a demo"}
             </Link>
           </CardContent>
@@ -46,14 +45,14 @@ export default async function HelpCenterPage() {
           <CardHeader>
             <CardTitle>{locale === "ar" ? "لوحة الشركة" : "Tenant workspace"}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm text-muted-foreground">
-            <Link className="block text-primary hover:underline" href={`${p}/dashboard/employees`}>
+          <CardContent className="text-muted-foreground space-y-2 text-sm">
+            <Link className="text-primary block hover:underline" href={`${p}/dashboard/employees`}>
               {locale === "ar" ? "إدارة الموظفين" : "Employees"}
             </Link>
-            <Link className="block text-primary hover:underline" href={`${p}/dashboard/attendance`}>
+            <Link className="text-primary block hover:underline" href={`${p}/dashboard/attendance`}>
               {locale === "ar" ? "الحضور والانصراف" : "Attendance"}
             </Link>
-            <Link className="block text-primary hover:underline" href={`${p}/dashboard/payroll`}>
+            <Link className="text-primary block hover:underline" href={`${p}/dashboard/payroll`}>
               {locale === "ar" ? "الرواتب" : "Payroll"}
             </Link>
           </CardContent>
@@ -62,14 +61,16 @@ export default async function HelpCenterPage() {
           <CardHeader>
             <CardTitle>{locale === "ar" ? t.helpCenter.support : "Support and tickets"}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-sm text-muted-foreground">
+          <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p>
               {locale === "ar"
                 ? "لو المشكلة تشغيلية داخل الحساب، ارفع تذكرة من لوحة الدعم لتبقى الحالة مرتبطة بالشركة والمستخدم المتأثر."
                 : "If the issue is operational inside the account, open a ticket so the case stays linked to the affected company and user."}
             </p>
             <Button asChild size="sm">
-              <Link href={`${p}/dashboard/support`}>{locale === "ar" ? "فتح / متابعة التذاكر" : "Open / track tickets"}</Link>
+              <Link href={`${p}/dashboard/support`}>
+                {locale === "ar" ? "فتح / متابعة التذاكر" : "Open / track tickets"}
+              </Link>
             </Button>
           </CardContent>
         </Card>
@@ -95,10 +96,14 @@ export default async function HelpCenterPage() {
             </Link>
             {isSuperAdmin ? (
               <>
-                <Link className="text-primary hover:underline" href={`${p}/dashboard/super-admin/tenants`}>
+                <Link
+                  className="text-primary hover:underline"
+                  href={`${p}/dashboard/super-admin/tenants`}>
                   {locale === "ar" ? "لوحة السوبر أدمن: الشركات" : "Super Admin: Tenants"}
                 </Link>
-                <Link className="text-primary hover:underline" href={`${p}/dashboard/super-admin/pricing`}>
+                <Link
+                  className="text-primary hover:underline"
+                  href={`${p}/dashboard/super-admin/pricing`}>
                   {locale === "ar" ? "لوحة السوبر أدمن: الأسعار والباقات" : "Super Admin: Pricing"}
                 </Link>
               </>
@@ -109,11 +114,17 @@ export default async function HelpCenterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{locale === "ar" ? "تمييز مهم بين الأسطح" : "Important surface distinction"}</CardTitle>
+          <CardTitle>
+            {locale === "ar" ? "تمييز مهم بين الأسطح" : "Important surface distinction"}
+          </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3 text-sm text-muted-foreground">
+        <CardContent className="text-muted-foreground space-y-3 text-sm">
           <div>
-            <p className="font-medium text-foreground">{locale === "ar" ? "ما الفرق بين الموظفين والمستخدمين؟" : "What's the difference between Employees and Users?"}</p>
+            <p className="text-foreground font-medium">
+              {locale === "ar"
+                ? "ما الفرق بين الموظفين والمستخدمين؟"
+                : "What's the difference between Employees and Users?"}
+            </p>
             <p>
               {locale === "ar"
                 ? "الموظف = ملف موارد بشرية داخل الشركة. المستخدم = حساب تسجيل دخول وصلاحيات. ممكن يكون عندك موظف بدون حساب دخول، أو مستخدم بدون ملف موظف (مثل السوبر أدمن)."
@@ -121,7 +132,11 @@ export default async function HelpCenterPage() {
             </p>
           </div>
           <div>
-            <p className="font-medium text-foreground">{locale === "ar" ? "متى أستخدم السوبر أدمن ومتى أستخدم لوحة الشركة؟" : "When do I use super-admin vs tenant dashboard?"}</p>
+            <p className="text-foreground font-medium">
+              {locale === "ar"
+                ? "متى أستخدم السوبر أدمن ومتى أستخدم لوحة الشركة؟"
+                : "When do I use super-admin vs tenant dashboard?"}
+            </p>
             <p>
               {locale === "ar"
                 ? "السوبر أدمن لإدارة المنصة والشركات والباقات. لوحة الشركة لإدارة الموظفين والحضور والرواتب داخل شركة محددة."

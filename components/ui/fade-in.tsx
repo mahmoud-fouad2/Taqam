@@ -18,35 +18,34 @@ export function FadeIn({
   direction = "up",
   className = "",
   duration = 0.7,
-  once = true,
+  once = true
 }: FadeInProps) {
   const directions = {
     up: { y: 40, x: 0 },
     down: { y: -40, x: 0 },
     left: { x: 40, y: 0 },
     right: { x: -40, y: 0 },
-    none: { x: 0, y: 0 },
+    none: { x: 0, y: 0 }
   };
 
   return (
     <motion.div
       initial={{
         opacity: 0,
-        ...directions[direction],
+        ...directions[direction]
       }}
       whileInView={{
         opacity: 1,
         x: 0,
-        y: 0,
+        y: 0
       }}
       viewport={{ once, margin: "-50px" }}
       transition={{
         duration,
         delay,
-        ease: [0.21, 0.47, 0.32, 0.98],
+        ease: [0.21, 0.47, 0.32, 0.98]
       }}
-      className={className}
-    >
+      className={className}>
       {children}
     </motion.div>
   );
@@ -57,7 +56,7 @@ export function StaggerContainer({
   className = "",
   delayChildren = 0.1,
   staggerChildren = 0.1,
-  once = true,
+  once = true
 }: {
   children: ReactNode;
   className?: string;
@@ -75,12 +74,11 @@ export function StaggerContainer({
         visible: {
           transition: {
             staggerChildren,
-            delayChildren,
-          },
-        },
+            delayChildren
+          }
+        }
       }}
-      className={className}
-    >
+      className={className}>
       {children}
     </motion.div>
   );
@@ -90,7 +88,7 @@ export function StaggerItem({
   children,
   className = "",
   direction = "up",
-  distance = 40,
+  distance = 40
 }: {
   children: ReactNode;
   className?: string;
@@ -102,7 +100,7 @@ export function StaggerItem({
     down: { y: -distance, x: 0 },
     left: { x: distance, y: 0 },
     right: { x: -distance, y: 0 },
-    none: { x: 0, y: 0 },
+    none: { x: 0, y: 0 }
   };
 
   return (
@@ -113,11 +111,10 @@ export function StaggerItem({
           opacity: 1,
           x: 0,
           y: 0,
-          transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] },
-        },
+          transition: { duration: 0.7, ease: [0.21, 0.47, 0.32, 0.98] }
+        }
       }}
-      className={className}
-    >
+      className={className}>
       {children}
     </motion.div>
   );

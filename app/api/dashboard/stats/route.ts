@@ -11,7 +11,7 @@ import { logger } from "@/lib/logger";
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -21,14 +21,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: {
-        ...stats,
-      },
+        ...stats
+      }
     });
   } catch (error) {
     logger.error("Error fetching dashboard stats", undefined, error);
-    return NextResponse.json(
-      { error: "Failed to fetch stats" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch stats" }, { status: 500 });
   }
 }

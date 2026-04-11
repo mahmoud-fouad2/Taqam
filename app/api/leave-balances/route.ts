@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     const yearParam = nonEmpty(searchParams.get("year"));
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
@@ -71,12 +71,12 @@ export async function GET(request: NextRequest) {
             firstName: true,
             lastName: true,
             departmentId: true,
-            department: { select: { name: true } },
-          },
+            department: { select: { name: true } }
+          }
         },
-        leaveType: true,
+        leaveType: true
       },
-      orderBy: [{ employee: { firstName: "asc" } }, { leaveType: { name: "asc" } }],
+      orderBy: [{ employee: { firstName: "asc" } }, { leaveType: { name: "asc" } }]
     });
 
     return NextResponse.json({ data: items });

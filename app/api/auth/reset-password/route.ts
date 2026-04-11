@@ -1,22 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
+import { createHash } from "crypto";
 import { z } from "zod";
 
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { verifyActionToken } from "@/lib/security/action-tokens";
+import { revokeAllRefreshTokensForUser } from "@/lib/mobile/refresh-tokens";
+
+const RESET_PASSWORD_RATE_LIMIT = {
+  limit: 10,
+  windowMs: 15 * 60 * 1000,
+  keyPrefix: "public:reset_password"
+} as const;
+
+const RESET_PASSWORD_TOKEN_RATE_LIMIT = {
+  limit: 5,
+  windowMs: 30 * 60 * 1000,
+  keyPrefix: "public:reset_password:token"
+} as const;
 
 const schema = z.object({
   token: z.string().min(1),
-  newPassword: z.string().min(8).max(200),
+  newPassword: z.string().min(8).max(200)
 });
 
 export async function POST(request: NextRequest) {
+  const limitInfo = await checkRateLimit(request, RESET_PASSWORD_RATE_LIMIT);
+
+  if (!limitInfo.allowed) {
+    return withRateLimitHeaders(
+      NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+      {
+        limit: RESET_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
+  }
+
   try {
     const json = await request.json();
     const parsed = schema.safeParse(json);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+      return withRateLimitHeaders(NextResponse.json({ error: "Invalid input" }, { status: 400 }), {
+        limit: RESET_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      });
+    }
+
+    const tokenLimitInfo = await checkRateLimit(request, {
+      ...RESET_PASSWORD_TOKEN_RATE_LIMIT,
+      identifier: createHash("sha256").update(parsed.data.token).digest("hex")
+    });
+
+    if (!tokenLimitInfo.allowed) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Too many requests" }, { status: 429 }),
+        {
+          limit: RESET_PASSWORD_TOKEN_RATE_LIMIT.limit,
+          remaining: tokenLimitInfo.remaining,
+          resetAt: tokenLimitInfo.resetAt
+        }
+      );
     }
 
     const payload = await verifyActionToken(parsed.data.token);
@@ -28,21 +76,42 @@ export async function POST(request: NextRequest) {
         tenantId: true,
         status: true,
         emailVerified: true,
-        passwordChangedAt: true,
-      },
+        passwordChangedAt: true
+      }
     });
 
     if (!user || user.email.toLowerCase() !== payload.email.toLowerCase()) {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Invalid or expired token" }, { status: 400 }),
+        {
+          limit: RESET_PASSWORD_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
+      );
     }
 
     const currentPasswordChangedAt = user.passwordChangedAt?.toISOString() ?? null;
     if (currentPasswordChangedAt !== (payload.passwordChangedAt ?? null)) {
-      return NextResponse.json({ error: "This link is no longer valid" }, { status: 400 });
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "This link is no longer valid" }, { status: 400 }),
+        {
+          limit: RESET_PASSWORD_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
+      );
     }
 
     if (user.status === "SUSPENDED" || user.status === "INACTIVE") {
-      return NextResponse.json({ error: "This account is not available" }, { status: 403 });
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "This account is not available" }, { status: 403 }),
+        {
+          limit: RESET_PASSWORD_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
+      );
     }
 
     const hashedPassword = await hash(parsed.data.newPassword, 12);
@@ -54,8 +123,8 @@ export async function POST(request: NextRequest) {
         status: "ACTIVE",
         emailVerified: user.emailVerified ?? new Date(),
         failedLoginAttempts: 0,
-        lockedUntil: null,
-      },
+        lockedUntil: null
+      }
     });
 
     await prisma.auditLog.create({
@@ -64,16 +133,32 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         action: payload.type === "tenant-admin-activation" ? "ACCOUNT_ACTIVATED" : "PASSWORD_RESET",
         entity: "User",
-        entityId: user.id,
-      },
+        entityId: user.id
+      }
     });
 
-    return NextResponse.json({
-      success: true,
-      mode: payload.type,
-    });
+    await revokeAllRefreshTokensForUser(prisma as any, user.id);
+
+    return withRateLimitHeaders(
+      NextResponse.json({
+        success: true,
+        mode: payload.type
+      }),
+      {
+        limit: RESET_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
   } catch (error) {
     logger.error("Reset password failed", undefined, error);
-    return NextResponse.json({ error: "Invalid or expired token" }, { status: 400 });
+    return withRateLimitHeaders(
+      NextResponse.json({ error: "Invalid or expired token" }, { status: 400 }),
+      {
+        limit: RESET_PASSWORD_RATE_LIMIT.limit,
+        remaining: limitInfo.remaining,
+        resetAt: limitInfo.resetAt
+      }
+    );
   }
 }

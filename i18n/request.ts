@@ -19,11 +19,11 @@ export async function getLocale(): Promise<Locale> {
 
   const cookieStore = await cookies();
   const localeCookie = cookieStore.get("taqam_locale")?.value;
-  
+
   if (localeCookie && locales.includes(localeCookie as Locale)) {
     return localeCookie as Locale;
   }
-  
+
   return defaultLocale;
 }
 
@@ -38,6 +38,6 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`./messages/${locale}.json`)).default,
+    messages: (await import(`./messages/${locale}.json`)).default
   };
 });

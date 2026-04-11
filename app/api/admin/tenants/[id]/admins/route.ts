@@ -38,14 +38,17 @@ export async function GET(_request: NextRequest, context: RouteContext) {
         firstName: true,
         lastName: true,
         status: true,
-        createdAt: true,
-      },
+        createdAt: true
+      }
     });
 
     return NextResponse.json({ success: true, data: admins });
   } catch (error) {
     console.error("Error fetching tenant admins:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch tenant admins" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch tenant admins" },
+      { status: 500 }
+    );
   }
 }
 
@@ -73,38 +76,54 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "userId مطلوب" }, { status: 400 });
     }
 
-    const newEmailRaw = body.newEmail !== undefined ? String(body.newEmail).trim().toLowerCase() : undefined;
+    const newEmailRaw =
+      body.newEmail !== undefined ? String(body.newEmail).trim().toLowerCase() : undefined;
     const newPasswordRaw = body.newPassword !== undefined ? String(body.newPassword) : undefined;
 
     if (!newEmailRaw && !newPasswordRaw) {
-      return NextResponse.json({ success: false, error: "يجب إرسال newEmail أو newPassword" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "يجب إرسال newEmail أو newPassword" },
+        { status: 400 }
+      );
     }
 
     if (newEmailRaw && !isValidEmail(newEmailRaw)) {
-      return NextResponse.json({ success: false, error: "بريد إلكتروني غير صالح" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "بريد إلكتروني غير صالح" },
+        { status: 400 }
+      );
     }
 
     if (newPasswordRaw && newPasswordRaw.length < 6) {
-      return NextResponse.json({ success: false, error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" },
+        { status: 400 }
+      );
     }
 
     const admin = await prisma.user.findFirst({
       where: { id: userId, tenantId, role: "TENANT_ADMIN" },
-      select: { id: true, email: true },
+      select: { id: true, email: true }
     });
 
     if (!admin) {
-      return NextResponse.json({ success: false, error: "TENANT_ADMIN غير موجود لهذه الشركة" }, { status: 404 });
+      return NextResponse.json(
+        { success: false, error: "TENANT_ADMIN غير موجود لهذه الشركة" },
+        { status: 404 }
+      );
     }
 
     if (newEmailRaw) {
       const existing = await prisma.user.findFirst({
         where: { email: newEmailRaw },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (existing && existing.id !== admin.id) {
-        return NextResponse.json({ success: false, error: "البريد الإلكتروني مستخدم بالفعل" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: "البريد الإلكتروني مستخدم بالفعل" },
+          { status: 400 }
+        );
       }
     }
 
@@ -127,12 +146,15 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     await prisma.user.updateMany({
       where: { id: admin.id },
-      data,
+      data
     });
 
     return NextResponse.json({ success: true, message: "تم تحديث بيانات مدير الشركة" });
   } catch (error) {
     console.error("Error updating tenant admin:", error);
-    return NextResponse.json({ success: false, error: "Failed to update tenant admin" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update tenant admin" },
+      { status: 500 }
+    );
   }
 }

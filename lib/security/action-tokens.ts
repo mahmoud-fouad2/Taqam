@@ -51,6 +51,6 @@ export async function verifyActionToken(token: string): Promise<ActionTokenPaylo
     email,
     tenantId: typeof payload.tenantId === "string" ? payload.tenantId : null,
     passwordChangedAt:
-      typeof payload.passwordChangedAt === "string" ? payload.passwordChangedAt : null,
+      typeof payload.passwordChangedAt === "string" ? payload.passwordChangedAt : null
   };
 }

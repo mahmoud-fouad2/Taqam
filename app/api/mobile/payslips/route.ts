@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 import { listPayslipsForEmployee } from "@/lib/payroll/payslips";
 
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
 
     const payslips = await listPayslipsForEmployee(tenantId, employeeId, {
       year: isNaN(year) ? undefined : year,
-      status,
+      status
     });
 
     // Return a mobile-friendly projection
@@ -39,14 +40,11 @@ export async function GET(request: NextRequest) {
         currency: p.currency,
         status: p.status,
         workingDays: p.workingDays,
-        actualWorkDays: p.actualWorkDays,
-      })),
+        actualWorkDays: p.actualWorkDays
+      }))
     });
   } catch (error) {
-    console.error("Mobile payslips GET error:", error);
-    return NextResponse.json(
-      { error: "Failed to load payslips" },
-      { status: 500 }
-    );
+    logger.error("Mobile payslips GET error", undefined, error);
+    return NextResponse.json({ error: "Failed to load payslips" }, { status: 500 });
   }
 }

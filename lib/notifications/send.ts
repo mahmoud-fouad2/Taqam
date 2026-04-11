@@ -48,17 +48,15 @@ export async function sendNotification(input: SendNotificationInput): Promise<vo
       message: input.message,
       link: input.link ?? null,
       metadata: (input.metadata ?? Prisma.JsonNull) as Prisma.InputJsonValue,
-      isRead: false,
-    },
+      isRead: false
+    }
   });
 }
 
 /**
  * Send notifications to multiple users at once
  */
-export async function sendBulkNotification(
-  inputs: SendNotificationInput[]
-): Promise<void> {
+export async function sendBulkNotification(inputs: SendNotificationInput[]): Promise<void> {
   if (inputs.length === 0) return;
 
   await prisma.notification.createMany({
@@ -70,8 +68,8 @@ export async function sendBulkNotification(
       message: input.message,
       link: input.link ?? null,
       metadata: input.metadata ? (input.metadata as Prisma.InputJsonValue) : Prisma.JsonNull,
-      isRead: false,
-    })),
+      isRead: false
+    }))
   });
 }
 
@@ -86,12 +84,12 @@ export async function markNotificationsRead(
     where: {
       userId,
       isRead: false,
-      ...(notificationIds ? { id: { in: notificationIds } } : {}),
+      ...(notificationIds ? { id: { in: notificationIds } } : {})
     },
     data: {
       isRead: true,
-      readAt: new Date(),
-    },
+      readAt: new Date()
+    }
   });
 }
 
@@ -115,7 +113,7 @@ export async function notifyLeaveRequestSubmitted(params: {
     title: "طلب إجازة جديد",
     message: `${params.employeeName} طلب إجازة ${params.leaveType} من ${params.startDate} إلى ${params.endDate}`,
     link: `/dashboard/leave-requests?id=${params.requestId}`,
-    metadata: { requestId: params.requestId },
+    metadata: { requestId: params.requestId }
   });
 }
 
@@ -137,7 +135,7 @@ export async function notifyLeaveStatusChanged(params: {
       ? `تمت الموافقة على طلب إجازة ${params.leaveType} الخاص بك`
       : `تم رفض طلب إجازة ${params.leaveType} الخاص بك${params.rejectionReason ? `: ${params.rejectionReason}` : ""}`,
     link: `/dashboard/my-requests?id=${params.requestId}`,
-    metadata: { requestId: params.requestId },
+    metadata: { requestId: params.requestId }
   });
 }
 
@@ -153,8 +151,8 @@ export async function notifyPayslipReady(params: {
     type: "payslip-ready",
     title: "قسيمة الراتب جاهزة",
     message: `قسيمة راتب ${params.periodName} متاحة الآن`,
-    link: `/dashboard/payslips/${params.payslipId}`,
-    metadata: { payslipId: params.payslipId },
+    link: "/dashboard/payslips",
+    metadata: { payslipId: params.payslipId }
   });
 }
 
@@ -177,7 +175,7 @@ export async function notifyLoanApproved(params: {
     title: "تمت الموافقة على طلب القرض",
     message: `تمت الموافقة على قرضك بمبلغ ${params.amount.toLocaleString("ar")} ${currency}`,
     link: `/dashboard/loans`,
-    metadata: { loanId: params.loanId },
+    metadata: { loanId: params.loanId }
   });
 }
 
@@ -192,11 +190,9 @@ export async function notifyLoanRejected(params: {
     userId: params.employeeUserId,
     type: "loan-rejected",
     title: "تم رفض طلب القرض",
-    message: params.reason
-      ? `تم رفض طلب قرضك: ${params.reason}`
-      : "تم رفض طلب قرضك",
+    message: params.reason ? `تم رفض طلب قرضك: ${params.reason}` : "تم رفض طلب قرضك",
     link: `/dashboard/loans`,
-    metadata: { loanId: params.loanId },
+    metadata: { loanId: params.loanId }
   });
 }
 
@@ -217,7 +213,7 @@ export async function notifyTrainingEnrollmentApproved(params: {
     title: "تم قبولك في الدورة التدريبية",
     message: `تمت الموافقة على تسجيلك في "${params.courseTitle}"`,
     link: `/dashboard/training-enrollments`,
-    metadata: { enrollmentId: params.enrollmentId },
+    metadata: { enrollmentId: params.enrollmentId }
   });
 }
 
@@ -234,7 +230,7 @@ export async function notifyTrainingEnrollmentRejected(params: {
     title: "لم يتم قبول طلب التسجيل",
     message: `تم رفض تسجيلك في "${params.courseTitle}"`,
     link: `/dashboard/training-enrollments`,
-    metadata: { enrollmentId: params.enrollmentId },
+    metadata: { enrollmentId: params.enrollmentId }
   });
 }
 
@@ -253,7 +249,7 @@ export async function notifyTrainingCompleted(params: {
     title: "أتممت دورة تدريبية",
     message: `تهانينا! أتممت دورة "${params.courseTitle}"${scoreText}`,
     link: `/dashboard/training-enrollments`,
-    metadata: { enrollmentId: params.enrollmentId },
+    metadata: { enrollmentId: params.enrollmentId }
   });
 }
 
@@ -274,7 +270,7 @@ export async function notifyOnboardingTaskAssigned(params: {
     title: "مهمة إلحاق جديدة",
     message: `لديك مهمة جديدة: "${params.taskTitle}"`,
     link: `/dashboard/onboarding`,
-    metadata: { processId: params.processId },
+    metadata: { processId: params.processId }
   });
 }
 
@@ -296,7 +292,7 @@ export async function notifyNewAnnouncement(params: {
       title: "إعلان جديد",
       message: params.announcementTitle,
       link: `/dashboard`,
-      metadata: { announcementId: params.announcementId },
+      metadata: { announcementId: params.announcementId }
     }))
   );
 }
@@ -322,7 +318,6 @@ export async function notifyAttendanceRequestResult(params: {
       ? `تمت الموافقة على طلب ${params.requestType} الخاص بك`
       : `تم رفض طلب ${params.requestType} الخاص بك${params.rejectionReason ? `: ${params.rejectionReason}` : ""}`,
     link: `/dashboard/my-requests`,
-    metadata: {},
+    metadata: {}
   });
 }
-

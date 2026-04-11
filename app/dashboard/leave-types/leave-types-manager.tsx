@@ -16,7 +16,7 @@ import {
   IconBook,
   IconAlertTriangle,
   IconCalendarTime,
-  IconDots,
+  IconDots
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +38,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -46,13 +46,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -61,7 +61,7 @@ import {
   AccrualType,
   leaveCategoryLabels,
   accrualTypeLabels,
-  leaveTypeColors,
+  leaveTypeColors
 } from "@/lib/types/leave";
 import { toast } from "sonner";
 import { leavesApi } from "@/lib/api";
@@ -82,7 +82,9 @@ function mapApplicableGendersToRestriction(value: unknown): LeaveType["genderRes
   return "all";
 }
 
-function mapRestrictionToApplicableGenders(value: LeaveType["genderRestriction"] | undefined): Array<"MALE" | "FEMALE"> {
+function mapRestrictionToApplicableGenders(
+  value: LeaveType["genderRestriction"] | undefined
+): Array<"MALE" | "FEMALE"> {
   if (value === "male") return ["MALE"];
   if (value === "female") return ["FEMALE"];
   return [];
@@ -108,7 +110,8 @@ function mapLeaveTypeFromApi(t: any): LeaveType {
   const defaultDays = t.defaultDays != null ? Number(t.defaultDays) : 0;
   const carryOverDays = t.carryOverDays != null ? Number(t.carryOverDays) : 0;
 
-  const annualMax = Number.isFinite(maxDays as any) && maxDays != null ? maxDays : defaultDays || 30;
+  const annualMax =
+    Number.isFinite(maxDays as any) && maxDays != null ? maxDays : defaultDays || 30;
   const accrualType: AccrualType = defaultDays > 0 ? "yearly" : "none";
 
   return {
@@ -140,7 +143,7 @@ function mapLeaveTypeFromApi(t: any): LeaveType {
     isActive: Boolean(t.isActive),
     isDefault: false,
     createdAt: toIso(t.createdAt),
-    updatedAt: toIso(t.updatedAt),
+    updatedAt: toIso(t.updatedAt)
   };
 }
 
@@ -157,7 +160,7 @@ const categoryIcons: Record<LeaveCategory, React.ReactNode> = {
   study: <IconBook className="h-5 w-5" />,
   emergency: <IconAlertTriangle className="h-5 w-5" />,
   compensatory: <IconCalendarTime className="h-5 w-5" />,
-  other: <IconDots className="h-5 w-5" />,
+  other: <IconDots className="h-5 w-5" />
 };
 
 export function LeaveTypesManager() {
@@ -171,7 +174,11 @@ export function LeaveTypesManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [formErrors, setFormErrors] = useState<{ name?: string; nameEn?: string; maxDaysPerYear?: string }>({});
+  const [formErrors, setFormErrors] = useState<{
+    name?: string;
+    nameEn?: string;
+    maxDaysPerYear?: string;
+  }>({});
 
   const validateForm = (): boolean => {
     const errors: typeof formErrors = {};
@@ -204,7 +211,7 @@ export function LeaveTypesManager() {
     maxCarryOverDays: 15,
     minServiceMonths: 0,
     genderRestriction: "all",
-    isActive: true,
+    isActive: true
   });
 
   const resetForm = () => {
@@ -229,7 +236,7 @@ export function LeaveTypesManager() {
       maxCarryOverDays: 15,
       minServiceMonths: 0,
       genderRestriction: "all",
-      isActive: true,
+      isActive: true
     });
   };
 
@@ -279,7 +286,7 @@ export function LeaveTypesManager() {
         minServiceMonths: Number(formData.minServiceMonths ?? 0),
         applicableGenders: mapRestrictionToApplicableGenders(formData.genderRestriction),
         color: formData.color,
-        isActive: Boolean(formData.isActive),
+        isActive: Boolean(formData.isActive)
       });
 
       if (!res.success) {
@@ -321,7 +328,7 @@ export function LeaveTypesManager() {
         minServiceMonths: Number(formData.minServiceMonths ?? 0),
         applicableGenders: mapRestrictionToApplicableGenders(formData.genderRestriction),
         color: formData.color,
-        isActive: Boolean(formData.isActive),
+        isActive: Boolean(formData.isActive)
       });
 
       if (!res.success) {
@@ -376,7 +383,7 @@ export function LeaveTypesManager() {
         minServiceMonths: Number(type.minServiceMonths ?? 0),
         applicableGenders: mapRestrictionToApplicableGenders(type.genderRestriction),
         color: type.color,
-        isActive: !type.isActive,
+        isActive: !type.isActive
       });
       if (!res.success) {
         throw new Error(res.error || t.leaveTypes.statusUpdateFailed);
@@ -395,18 +402,19 @@ export function LeaveTypesManager() {
     setIsEditDialogOpen(true);
   };
 
-  const filteredTypes = activeTab === "all"
-    ? leaveTypes
-    : activeTab === "active"
-    ? leaveTypes.filter((t) => t.isActive)
-    : leaveTypes.filter((t) => !t.isActive);
+  const filteredTypes =
+    activeTab === "all"
+      ? leaveTypes
+      : activeTab === "active"
+        ? leaveTypes.filter((t) => t.isActive)
+        : leaveTypes.filter((t) => !t.isActive);
 
   // Stats
   const stats = {
     total: leaveTypes.length,
     active: leaveTypes.filter((t) => t.isActive).length,
     paid: leaveTypes.filter((t) => t.isPaid).length,
-    withAccrual: leaveTypes.filter((t) => t.accrualType !== "none").length,
+    withAccrual: leaveTypes.filter((t) => t.accrualType !== "none").length
   };
 
   return (
@@ -456,7 +464,9 @@ export function LeaveTypesManager() {
         <CardHeader>
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             <TabsList>
-              <TabsTrigger value="all">{t.leaveTypes.all} ({leaveTypes.length})</TabsTrigger>
+              <TabsTrigger value="all">
+                {t.leaveTypes.all} ({leaveTypes.length})
+              </TabsTrigger>
               <TabsTrigger value="active">
                 {t.leaveTypes.activeTab} ({leaveTypes.filter((lt) => lt.isActive).length})
               </TabsTrigger>
@@ -474,111 +484,122 @@ export function LeaveTypesManager() {
           )}
 
           {isLoading ? (
-            <div className="py-10 text-center text-muted-foreground">{t.common.loading}</div>
+            <div className="text-muted-foreground py-10 text-center">{t.common.loading}</div>
           ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{t.common.type}</TableHead>
-                <TableHead>{t.common.category}</TableHead>
-                <TableHead>{t.leaveTypes.allowedDays}</TableHead>
-                <TableHead>{t.leaveTypes.accrual}</TableHead>
-                <TableHead>{t.leaveTypes.salary}</TableHead>
-                <TableHead>{t.common.status}</TableHead>
-                <TableHead className="w-[100px]">{t.common.actions}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredTypes.length === 0 && (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell colSpan={7} className="py-10 text-center text-sm text-muted-foreground">
-                    {t.leaveTypes.pNoMatchingLeaveTypesFound}
-                  </TableCell>
+                  <TableHead>{t.common.type}</TableHead>
+                  <TableHead>{t.common.category}</TableHead>
+                  <TableHead>{t.leaveTypes.allowedDays}</TableHead>
+                  <TableHead>{t.leaveTypes.accrual}</TableHead>
+                  <TableHead>{t.leaveTypes.salary}</TableHead>
+                  <TableHead>{t.common.status}</TableHead>
+                  <TableHead className="w-[100px]">{t.common.actions}</TableHead>
                 </TableRow>
-              )}
-              {filteredTypes.map((type) => (
-                <TableRow key={type.id}>
-                  <TableCell>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          "flex h-10 w-10 items-center justify-center rounded-lg text-white",
-                          getLeaveTheme(type.color).bg
-                        )}
-                      >
-                        {categoryIcons[type.category]}
+              </TableHeader>
+              <TableBody>
+                {filteredTypes.length === 0 && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={7}
+                      className="text-muted-foreground py-10 text-center text-sm">
+                      {t.leaveTypes.pNoMatchingLeaveTypesFound}
+                    </TableCell>
+                  </TableRow>
+                )}
+                {filteredTypes.map((type) => (
+                  <TableRow key={type.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={cn(
+                            "flex h-10 w-10 items-center justify-center rounded-lg text-white",
+                            getLeaveTheme(type.color).bg
+                          )}>
+                          {categoryIcons[type.category]}
+                        </div>
+                        <div>
+                          <div className="font-medium">{type.name}</div>
+                          <div className="text-muted-foreground text-sm">{type.nameEn}</div>
+                        </div>
                       </div>
-                      <div>
-                        <div className="font-medium">{type.name}</div>
-                        <div className="text-sm text-muted-foreground">{type.nameEn}</div>
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">{leaveCategoryLabels[type.category]}</Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        <div>
+                          {type.maxDaysPerYear} {t.leaveTypes.daysPerYear}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {type.minDaysPerRequest}-{type.maxDaysPerRequest}{" "}
+                          {t.leaveTypes.daysPerRequest}
+                        </div>
                       </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{leaveCategoryLabels[type.category]}</Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      <div>{type.maxDaysPerYear} {t.leaveTypes.daysPerYear}</div>
-                      <div className="text-muted-foreground">
-                        {type.minDaysPerRequest}-{type.maxDaysPerRequest} {t.leaveTypes.daysPerRequest}
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="text-sm">
-                      {type.accrualType === "none" ? (
-                        <span className="text-muted-foreground">{t.leaveTypes.noAccrual}</span>
-                      ) : (
-                        <>
-                          <div>{type.accrualRate} {t.leaveTypes.pDay}/{accrualTypeLabels[type.accrualType]}</div>
-                          {type.carryOverAllowed && (
-                            <div className="text-muted-foreground">
-                              {t.leaveTypes.pCarryOver} {type.maxCarryOverDays} {t.leaveTypes.pDay}
+                    </TableCell>
+                    <TableCell>
+                      <div className="text-sm">
+                        {type.accrualType === "none" ? (
+                          <span className="text-muted-foreground">{t.leaveTypes.noAccrual}</span>
+                        ) : (
+                          <>
+                            <div>
+                              {type.accrualRate} {t.leaveTypes.pDay}/
+                              {accrualTypeLabels[type.accrualType]}
                             </div>
-                          )}
-                        </>
+                            {type.carryOverAllowed && (
+                              <div className="text-muted-foreground">
+                                {t.leaveTypes.pCarryOver} {type.maxCarryOverDays}{" "}
+                                {t.leaveTypes.pDay}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {type.isPaid ? (
+                        <Badge className="bg-green-100 text-green-800">
+                          {type.salaryPercentage}%
+                        </Badge>
+                      ) : (
+                        <Badge variant="secondary">{t.leaveTypes.unpaid}</Badge>
                       )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    {type.isPaid ? (
-                      <Badge className="bg-green-100 text-green-800">
-                        {type.salaryPercentage}%
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary">{t.leaveTypes.unpaid}</Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
-                    <Switch
-                      checked={type.isActive}
-                      onCheckedChange={() => handleToggleActive(type.id)}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" aria-label={t.common.options}>
-                          <IconDots className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => openEditDialog(type)}>
-                          <IconEdit className="ms-2 h-4 w-4" />{t.common.edit}</DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => handleDelete(type.id)}
-                          disabled={type.isDefault}
-                        >
-                          <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                    <TableCell>
+                      <Switch
+                        checked={type.isActive}
+                        onCheckedChange={() => handleToggleActive(type.id)}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" aria-label={t.common.options}>
+                            <IconDots className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => openEditDialog(type)}>
+                            <IconEdit className="ms-2 h-4 w-4" />
+                            {t.common.edit}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            className="text-red-600"
+                            onClick={() => handleDelete(type.id)}
+                            disabled={type.isDefault}>
+                            <IconTrash className="ms-2 h-4 w-4" />
+                            {t.common.delete}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
@@ -593,17 +614,14 @@ export function LeaveTypesManager() {
             setSelectedType(null);
             resetForm();
           }
-        }}
-      >
-        <DialogContent className="w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+        }}>
+        <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {isEditDialogOpen ? t.leaveTypes.editType : t.leaveTypes.addNewType}
             </DialogTitle>
             <DialogDescription>
-              {isEditDialogOpen
-                ? t.leaveTypes.editSettings
-                : t.leaveTypes.createNewType}
+              {isEditDialogOpen ? t.leaveTypes.editSettings : t.leaveTypes.createNewType}
             </DialogDescription>
           </DialogHeader>
 
@@ -623,9 +641,7 @@ export function LeaveTypesManager() {
                     placeholder={t.leaveTypes.annualLeaveExample}
                     className={formErrors.name ? "border-destructive" : ""}
                   />
-                  {formErrors.name && (
-                    <p className="text-xs text-destructive">{formErrors.name}</p>
-                  )}
+                  {formErrors.name && <p className="text-destructive text-xs">{formErrors.name}</p>}
                 </div>
                 <div className="space-y-2">
                   <Label>{t.leaveTypes.nameEnRequired}</Label>
@@ -640,7 +656,7 @@ export function LeaveTypesManager() {
                     className={formErrors.nameEn ? "border-destructive" : ""}
                   />
                   {formErrors.nameEn && (
-                    <p className="text-xs text-destructive">{formErrors.nameEn}</p>
+                    <p className="text-destructive text-xs">{formErrors.nameEn}</p>
                   )}
                 </div>
               </div>
@@ -654,10 +670,9 @@ export function LeaveTypesManager() {
                       setFormData({
                         ...formData,
                         category: value,
-                        color: leaveTypeColors[value],
+                        color: leaveTypeColors[value]
                       });
-                    }}
-                  >
+                    }}>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -719,13 +734,14 @@ export function LeaveTypesManager() {
                     value={formData.maxDaysPerYear}
                     onChange={(e) => {
                       setFormData({ ...formData, maxDaysPerYear: Number(e.target.value) });
-                      if (formErrors.maxDaysPerYear) setFormErrors((p) => ({ ...p, maxDaysPerYear: undefined }));
+                      if (formErrors.maxDaysPerYear)
+                        setFormErrors((p) => ({ ...p, maxDaysPerYear: undefined }));
                     }}
                     min={1}
                     className={formErrors.maxDaysPerYear ? "border-destructive" : ""}
                   />
                   {formErrors.maxDaysPerYear && (
-                    <p className="text-xs text-destructive">{formErrors.maxDaysPerYear}</p>
+                    <p className="text-destructive text-xs">{formErrors.maxDaysPerYear}</p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -763,8 +779,7 @@ export function LeaveTypesManager() {
                     value={formData.accrualType}
                     onValueChange={(value: AccrualType) =>
                       setFormData({ ...formData, accrualType: value })
-                    }
-                  >
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -815,7 +830,7 @@ export function LeaveTypesManager() {
                       className="w-20"
                       min={0}
                     />
-                    <span className="text-sm text-muted-foreground">{t.attendance.day}</span>
+                    <span className="text-muted-foreground text-sm">{t.attendance.day}</span>
                   </div>
                 )}
               </div>
@@ -832,7 +847,7 @@ export function LeaveTypesManager() {
                       setFormData({
                         ...formData,
                         isPaid: checked,
-                        salaryPercentage: checked ? 100 : 0,
+                        salaryPercentage: checked ? 100 : 0
                       })
                     }
                   />
@@ -851,7 +866,7 @@ export function LeaveTypesManager() {
                       min={0}
                       max={100}
                     />
-                    <span className="text-sm text-muted-foreground">%</span>
+                    <span className="text-muted-foreground text-sm">%</span>
                   </div>
                 )}
               </div>
@@ -878,8 +893,7 @@ export function LeaveTypesManager() {
                     value={formData.genderRestriction}
                     onValueChange={(value: "all" | "male" | "female") =>
                       setFormData({ ...formData, genderRestriction: value })
-                    }
-                  >
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -914,9 +928,7 @@ export function LeaveTypesManager() {
                 <div className="flex items-center gap-2">
                   <Switch
                     checked={formData.isActive}
-                    onCheckedChange={(checked) =>
-                      setFormData({ ...formData, isActive: checked })
-                    }
+                    onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
                   />
                   <Label>{t.leaveTypes.activeType}</Label>
                 </div>
@@ -932,9 +944,10 @@ export function LeaveTypesManager() {
                 setIsEditDialogOpen(false);
                 setSelectedType(null);
                 resetForm();
-              }}
-            >
-              <IconX className="ms-2 h-4 w-4" />{t.common.cancel}</Button>
+              }}>
+              <IconX className="ms-2 h-4 w-4" />
+              {t.common.cancel}
+            </Button>
             <Button onClick={isEditDialogOpen ? handleEdit : handleAdd} disabled={isSaving}>
               <IconCheck className="ms-2 h-4 w-4" />
               {isEditDialogOpen ? t.common.saveChanges : t.common.add}

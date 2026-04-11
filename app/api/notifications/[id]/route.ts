@@ -4,18 +4,22 @@
  * DELETE /api/notifications/:id
  */
 
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
+
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  notFoundResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(_request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
@@ -25,7 +29,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       where: {
         id,
         userId,
-        ...(tenantId ? { tenantId } : {}),
+        ...(tenantId ? { tenantId } : {})
       },
       select: {
         id: true,
@@ -34,36 +38,32 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
         message: true,
         link: true,
         isRead: true,
-        createdAt: true,
-      },
+        createdAt: true
+      }
     });
 
     if (!notification) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return notFoundResponse();
     }
 
-    return NextResponse.json({
-      data: {
-        ...notification,
-        createdAt: notification.createdAt.toISOString(),
-      },
+    return dataResponse({
+      ...notification,
+      createdAt: notification.createdAt.toISOString()
     });
   } catch (error) {
-    console.error("Error fetching notification:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch notification" },
-      { status: 500 }
-    );
+    logApiError("Error fetching notification", error);
+    return errorResponse("Failed to fetch notification");
   }
 }
 
-export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  _request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(_request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
@@ -71,21 +71,18 @@ export async function DELETE(_request: NextRequest, { params }: { params: Promis
 
     const existing = await prisma.notification.findFirst({
       where: { id, userId, ...(tenantId ? { tenantId } : {}) },
-      select: { id: true },
+      select: { id: true }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+      return notFoundResponse();
     }
 
     await prisma.notification.delete({ where: { id } });
 
-    return NextResponse.json({ data: null });
+    return dataResponse(null);
   } catch (error) {
-    console.error("Error deleting notification:", error);
-    return NextResponse.json(
-      { error: "Failed to delete notification" },
-      { status: 500 }
-    );
+    logApiError("Error deleting notification", error);
+    return errorResponse("Failed to delete notification");
   }
 }

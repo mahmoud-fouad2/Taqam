@@ -13,18 +13,12 @@ import {
   IconCurrencyRiyal,
   IconClock,
   IconReceipt,
-  IconRefresh,
+  IconRefresh
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ExportButton } from "@/components/export-button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +26,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -42,14 +36,14 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -57,7 +51,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -113,7 +107,7 @@ const typeLabels: Record<string, { ar: string; en: string }> = {
   EMERGENCY_LOAN: { ar: t.loans.emergencyLoan, en: "Emergency Loan" },
   HOUSING_LOAN: { ar: t.loans.housingLoan, en: "Housing Loan" },
   CAR_LOAN: { ar: t.loans.carLoan, en: "Car Loan" },
-  OTHER: { ar: t.common.other, en: "Other" },
+  OTHER: { ar: t.common.other, en: "Other" }
 };
 
 const statusLabels: Record<string, { ar: string; en: string }> = {
@@ -122,14 +116,14 @@ const statusLabels: Record<string, { ar: string; en: string }> = {
   ACTIVE: { ar: t.common.active, en: "Active" },
   COMPLETED: { ar: t.common.completed, en: "Completed" },
   REJECTED: { ar: t.common.rejected, en: "Rejected" },
-  CANCELLED: { ar: t.common.cancelled, en: "Cancelled" },
+  CANCELLED: { ar: t.common.cancelled, en: "Cancelled" }
 };
 
 const formatCurrency = (amount: number) => {
   return new Intl.NumberFormat("ar-SA", {
     style: "currency",
     currency: "SAR",
-    minimumFractionDigits: 0,
+    minimumFractionDigits: 0
   }).format(amount);
 };
 
@@ -143,7 +137,7 @@ export function LoansManager() {
     pending: 0,
     active: 0,
     completed: 0,
-    totalActiveAmount: 0,
+    totalActiveAmount: 0
   });
   const [isLoading, setIsLoading] = React.useState(true);
   const [statusFilter, setStatusFilter] = React.useState<string>("all");
@@ -195,8 +189,8 @@ export function LoansManager() {
               firstName: e.user?.firstName || e.firstName || "",
               lastName: e.user?.lastName || e.lastName || "",
               email: e.user?.email || e.email || "",
-              avatar: e.user?.avatar || e.avatar || null,
-            },
+              avatar: e.user?.avatar || e.avatar || null
+            }
           }))
         );
       }
@@ -234,7 +228,7 @@ export function LoansManager() {
         amount: parseFloat(formAmount),
         installments: parseInt(formInstallments),
         startDate: formStartDate || undefined,
-        reason: formReason || undefined,
+        reason: formReason || undefined
       };
 
       const url = editingLoan ? `/api/loans/${editingLoan.id}` : "/api/loans";
@@ -243,7 +237,7 @@ export function LoansManager() {
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       });
 
       const json = await res.json();
@@ -268,7 +262,7 @@ export function LoansManager() {
       const res = await fetch(`/api/loans/${loanId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (!res.ok) {
@@ -287,7 +281,7 @@ export function LoansManager() {
 
     try {
       const res = await fetch(`/api/loans/${loanToDelete.id}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (!res.ok) {
@@ -327,7 +321,7 @@ export function LoansManager() {
       ACTIVE: "bg-green-100 text-green-800",
       COMPLETED: "bg-gray-100 text-gray-800",
       REJECTED: "bg-red-100 text-red-800",
-      CANCELLED: "bg-gray-100 text-gray-800",
+      CANCELLED: "bg-gray-100 text-gray-800"
     };
     return <Badge className={variants[status] || ""}>{label}</Badge>;
   };
@@ -363,7 +357,7 @@ export function LoansManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.loans.totalLoans}</CardTitle>
-            <IconReceipt className="h-4 w-4 text-muted-foreground" />
+            <IconReceipt className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -390,7 +384,7 @@ export function LoansManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.loans.remainingAmounts}</CardTitle>
-            <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
+            <IconCurrencyRiyal className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold">{formatCurrency(stats.totalActiveAmount)}</div>
@@ -403,7 +397,7 @@ export function LoansManager() {
         <div className="flex items-center gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
             <SelectTrigger className="w-[180px]">
-              <IconFilter className="h-4 w-4 me-2" />
+              <IconFilter className="me-2 h-4 w-4" />
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
@@ -415,11 +409,15 @@ export function LoansManager() {
               ))}
             </SelectContent>
           </Select>
-          <ExportButton 
-            type="loans" 
-            filters={{ status: statusFilter !== "all" ? statusFilter : "" }} 
+          <ExportButton
+            type="loans"
+            filters={{ status: statusFilter !== "all" ? statusFilter : "" }}
           />
-          <Button variant="outline" size="icon" aria-label={t.common.refresh} onClick={() => fetchLoans()}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t.common.refresh}
+            onClick={() => fetchLoans()}>
             <IconRefresh className="h-4 w-4" />
           </Button>
         </div>
@@ -429,11 +427,12 @@ export function LoansManager() {
           onOpenChange={(open) => {
             setIsFormOpen(open);
             if (!open) resetForm();
-          }}
-        >
+          }}>
           <DialogTrigger asChild>
             <Button>
-              <IconPlus className="h-4 w-4 me-2" />{t.loans.newLoanRequest}</Button>
+              <IconPlus className="me-2 h-4 w-4" />
+              {t.loans.newLoanRequest}
+            </Button>
           </DialogTrigger>
           <DialogContent className="w-full sm:max-w-[500px]">
             <DialogHeader>
@@ -473,7 +472,7 @@ export function LoansManager() {
                 </Select>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.loans.amountSar}</Label>
                   <Input
@@ -495,8 +494,8 @@ export function LoansManager() {
               </div>
 
               {formAmount && formInstallments && parseInt(formInstallments) > 0 && (
-                <div className="p-3 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">{t.loans.monthlyInstallment}</p>
+                <div className="bg-muted rounded-lg p-3">
+                  <p className="text-muted-foreground text-sm">{t.loans.monthlyInstallment}</p>
                   <p className="text-lg font-bold">
                     {formatCurrency(parseFloat(formAmount) / parseInt(formInstallments))}
                   </p>
@@ -523,9 +522,15 @@ export function LoansManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsFormOpen(false)}>{t.common.cancel}</Button>
+              <Button variant="outline" onClick={() => setIsFormOpen(false)}>
+                {t.common.cancel}
+              </Button>
               <Button onClick={handleSubmit} disabled={isSubmitting}>
-                {isSubmitting ? t.common.saving : editingLoan ? t.common.saveChanges : t.loans.submitRequest}
+                {isSubmitting
+                  ? t.common.saving
+                  : editingLoan
+                    ? t.common.saveChanges
+                    : t.loans.submitRequest}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -550,7 +555,7 @@ export function LoansManager() {
             <TableBody>
               {loans.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                  <TableCell colSpan={7} className="text-muted-foreground py-12 text-center">
                     {t.loans.pNoLoansFound}
                   </TableCell>
                 </TableRow>
@@ -568,7 +573,7 @@ export function LoansManager() {
                         </Avatar>
                         <div>
                           <div className="font-medium">{getEmployeeName(loan.employee)}</div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-muted-foreground text-xs">
                             {loan.employee.employeeNumber}
                           </div>
                         </div>
@@ -591,8 +596,7 @@ export function LoansManager() {
                               aria-label={t.common.approve}
                               className="h-8 w-8 text-green-600"
                               onClick={() => handleStatusChange(loan.id, "ACTIVE")}
-                              title={t.common.approve}
-                            >
+                              title={t.common.approve}>
                               <IconCheck className="h-4 w-4" />
                             </Button>
                             <Button
@@ -601,8 +605,7 @@ export function LoansManager() {
                               aria-label={t.common.reject}
                               className="h-8 w-8 text-red-600"
                               onClick={() => handleStatusChange(loan.id, "REJECTED")}
-                              title={t.common.reject}
-                            >
+                              title={t.common.reject}>
                               <IconX className="h-4 w-4" />
                             </Button>
                           </>
@@ -613,21 +616,19 @@ export function LoansManager() {
                           aria-label={t.common.edit}
                           className="h-8 w-8"
                           onClick={() => openEditForm(loan)}
-                          disabled={loan.status === "COMPLETED"}
-                        >
+                          disabled={loan.status === "COMPLETED"}>
                           <IconEdit className="h-4 w-4" />
                         </Button>
                         <Button
                           variant="ghost"
                           size="icon"
                           aria-label={t.common.delete}
-                          className="h-8 w-8 text-destructive"
+                          className="text-destructive h-8 w-8"
                           onClick={() => {
                             setLoanToDelete(loan);
                             setDeleteDialogOpen(true);
                           }}
-                          disabled={loan.status === "ACTIVE" && loan.paidInstallments > 0}
-                        >
+                          disabled={loan.status === "ACTIVE" && loan.paidInstallments > 0}>
                           <IconTrash className="h-4 w-4" />
                         </Button>
                       </div>
@@ -653,8 +654,9 @@ export function LoansManager() {
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >{t.common.delete}</AlertDialogAction>
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              {t.common.delete}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

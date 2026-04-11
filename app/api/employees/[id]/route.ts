@@ -6,9 +6,15 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  dataResponse,
+  errorResponse,
+  forbiddenResponse,
+  logApiError,
+  notFoundResponse,
+  requireTenantOrSuperAdminSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 const EMPLOYEE_VIEW_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
 const EMPLOYEE_MANAGE_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
@@ -33,7 +39,7 @@ function buildSelfEmployeeUpdate(body: Record<string, any>) {
     nationality: body.nationality,
     maritalStatus: body.maritalStatus,
     address: body.address ?? undefined,
-    emergencyContact: body.emergencyContact ?? undefined,
+    emergencyContact: body.emergencyContact ?? undefined
   };
 }
 
@@ -44,11 +50,9 @@ interface RouteParams {
 export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) return auth.response;
+    const { session, tenantId, isSuperAdmin } = auth;
 
     const employee = await prisma.employee.findFirst({
       where: { id, deletedAt: null },
@@ -59,56 +63,50 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
           select: {
             id: true,
             firstName: true,
-            lastName: true,
-          },
+            lastName: true
+          }
         },
         shift: true,
         salaryRecords: {
           orderBy: [{ effectiveDate: "desc" }, { createdAt: "desc" }],
-          take: 1,
+          take: 1
         },
         user: {
           select: {
             id: true,
             email: true,
             role: true,
-            status: true,
-          },
-        },
-      },
+            status: true
+          }
+        }
+      }
     });
 
     if (!employee) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+      return notFoundResponse("Employee not found");
     }
 
-    // Check tenant access
-    if (session.user.tenantId && employee.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!isSuperAdmin && employee.tenantId !== tenantId) {
+      return errorResponse("Unauthorized", 403);
     }
 
     if (!canViewEmployee(session.user.role) && employee.user?.id !== session.user.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
-    return NextResponse.json({ data: employee });
+    return dataResponse(employee);
   } catch (error) {
-    console.error("Error fetching employee:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch employee" },
-      { status: 500 }
-    );
+    logApiError("Error fetching employee", error);
+    return errorResponse("Failed to fetch employee");
   }
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) return auth.response;
+    const { session, tenantId, isSuperAdmin } = auth;
 
     const body = await request.json();
 
@@ -118,23 +116,23 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       select: {
         id: true,
         tenantId: true,
-        userId: true,
-      },
+        userId: true
+      }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+      return notFoundResponse("Employee not found");
     }
 
-    if (session.user.tenantId && existing.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!isSuperAdmin && existing.tenantId !== tenantId) {
+      return errorResponse("Unauthorized", 403);
     }
 
     const isPrivilegedManager = canManageEmployee(session.user.role);
     const isSelf = existing.userId === session.user.id;
 
     if (!isPrivilegedManager && !isSelf) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const data = isPrivilegedManager
@@ -159,7 +157,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           status: body.status,
           shiftId: body.shiftId,
           workLocation: body.workLocation,
-          baseSalary: body.baseSalary,
+          baseSalary: body.baseSalary
         }
       : buildSelfEmployeeUpdate(body);
 
@@ -168,48 +166,43 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       data,
       include: {
         department: true,
-        jobTitle: true,
-      },
+        jobTitle: true
+      }
     });
 
-    return NextResponse.json({ data: employee });
+    return dataResponse(employee);
   } catch (error) {
-    console.error("Error updating employee:", error);
-    return NextResponse.json(
-      { error: "Failed to update employee" },
-      { status: 500 }
-    );
+    logApiError("Error updating employee", error);
+    return errorResponse("Failed to update employee");
   }
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireTenantOrSuperAdminSession(request);
+    if (!auth.ok) return auth.response;
+    const { session, tenantId, isSuperAdmin } = auth;
 
     const existing = await prisma.employee.findUnique({
       where: { id },
       select: {
         id: true,
         tenantId: true,
-        status: true,
-      },
+        status: true
+      }
     });
 
     if (!existing) {
-      return NextResponse.json({ error: "Employee not found" }, { status: 404 });
+      return notFoundResponse("Employee not found");
     }
 
-    if (session.user.tenantId && existing.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    if (!isSuperAdmin && existing.tenantId !== tenantId) {
+      return errorResponse("Unauthorized", 403);
     }
 
     if (!canManageEmployee(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     // Two-step delete:
@@ -224,16 +217,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       where: { id },
       data: {
         status: "TERMINATED",
-        terminationDate: new Date(),
-      },
+        terminationDate: new Date()
+      }
     });
 
     return NextResponse.json({ success: true, mode: "soft" });
   } catch (error) {
-    console.error("Error deleting employee:", error);
-    return NextResponse.json(
-      { error: "Failed to delete employee" },
-      { status: 500 }
-    );
+    logApiError("Error deleting employee", error);
+    return errorResponse("Failed to delete employee");
   }
 }

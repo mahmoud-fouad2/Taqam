@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 import { isR2Configured, uploadFile } from "@/lib/r2-storage";
 
@@ -39,12 +40,12 @@ export async function POST(request: NextRequest) {
     await prisma.user.update({
       where: { id: payloadOrRes.userId },
       data: { avatar: result.url },
-      select: { id: true },
+      select: { id: true }
     });
 
     return NextResponse.json({ data: { url: result.url } });
   } catch (error) {
-    console.error("Mobile avatar upload error:", error);
+    logger.error("Mobile avatar upload error", undefined, error);
     return NextResponse.json({ error: "Failed to upload avatar" }, { status: 500 });
   }
 }

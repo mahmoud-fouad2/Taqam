@@ -15,7 +15,7 @@ export const employeeSchema = z.object({
   hireDate: z.string().min(1, "تاريخ التعيين مطلوب"),
   contractType: z.string().min(1, "نوع العقد مطلوب"),
   basicSalary: z.string().optional(),
-  status: z.string().optional(),
+  status: z.string().optional()
 });
 
 export type EmployeeFormData = z.infer<typeof employeeSchema>;

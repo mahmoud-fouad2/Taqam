@@ -9,7 +9,7 @@ import {
   IconPlus,
   IconMinus,
   IconAdjustments,
-  IconCalendar,
+  IconCalendar
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,7 +30,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -38,15 +38,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Progress } from "@/components/ui/progress";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import {
-  getBalancePercentage,
-} from "@/lib/types/leave";
+import { getBalancePercentage } from "@/lib/types/leave";
 import { useEmployees } from "@/hooks/use-employees";
 import { leavesApi } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -107,107 +105,121 @@ export function LeaveBalancesManager() {
   const [adjustmentData, setAdjustmentData] = useState({
     type: "add" as "add" | "subtract",
     days: 0,
-    reason: "",
+    reason: ""
   });
 
-  const loadData = useCallback(async (year: number) => {
-    setIsLoading(true);
-    setLoadError(null);
+  const loadData = useCallback(
+    async (year: number) => {
+      setIsLoading(true);
+      setLoadError(null);
 
-    try {
-      const [balancesRes, typesRes] = await Promise.all([
-        leavesApi.balances.getAll({ year }),
-        leavesApi.types.getAll(),
-      ]);
+      try {
+        const [balancesRes, typesRes] = await Promise.all([
+          leavesApi.balances.getAll({ year }),
+          leavesApi.types.getAll()
+        ]);
 
-      if (!balancesRes.success) {
-        throw new Error(balancesRes.error || t.leaveBalances.loadBalancesFailed);
+        if (!balancesRes.success) {
+          throw new Error(balancesRes.error || t.leaveBalances.loadBalancesFailed);
+        }
+        if (!typesRes.success) {
+          throw new Error(typesRes.error || t.leaveTypes.loadFailed);
+        }
+
+        const mappedTypes: ApiLeaveType[] = Array.isArray(typesRes.data)
+          ? (typesRes.data as any[]).map((t: any) => ({
+              id: String(t.id),
+              name: String(t.name ?? ""),
+              code: String(t.code ?? ""),
+              color: t.color ?? null,
+              isActive: Boolean(t.isActive)
+            }))
+          : [];
+        setLeaveTypes(mappedTypes);
+
+        const mappedBalances: UiLeaveBalance[] = Array.isArray(balancesRes.data)
+          ? (balancesRes.data as any[]).map((b: any) => {
+              const entitled = toNumber(b.entitled);
+              const carriedOver = toNumber(b.carriedOver);
+              const adjustment = toNumber(b.adjustment);
+              const used = toNumber(b.used);
+              const pending = toNumber(b.pending);
+              const entitledWithAdjust = entitled + adjustment;
+              const remaining = entitledWithAdjust + carriedOver - used - pending;
+
+              const employeeName = b?.employee
+                ? `${String(b.employee.firstName ?? "")} ${String(b.employee.lastName ?? "")}`.trim()
+                : "";
+
+              return {
+                id: String(b.id),
+                employeeId: String(b.employeeId ?? ""),
+                employeeName,
+                employeeNumber: String(b.employee?.employeeNumber ?? ""),
+                departmentId: String(b.employee?.departmentId ?? ""),
+                departmentName: String(b.employee?.department?.name ?? ""),
+                leaveTypeId: String(b.leaveTypeId ?? ""),
+                leaveTypeName: String(b.leaveType?.name ?? ""),
+                leaveTypeColor: b.leaveType?.color ?? null,
+                year: Number(b.year ?? year),
+                entitled: entitledWithAdjust,
+                carriedOver,
+                taken: used,
+                pending,
+                remaining,
+                createdAt: b.createdAt ? new Date(b.createdAt).toISOString() : undefined,
+                updatedAt: b.updatedAt ? new Date(b.updatedAt).toISOString() : undefined
+              };
+            })
+          : [];
+        setBalances(mappedBalances);
+      } catch (err) {
+        setLoadError(err instanceof Error ? err.message : t.common.loadFailed);
+      } finally {
+        setIsLoading(false);
       }
-      if (!typesRes.success) {
-        throw new Error(typesRes.error || t.leaveTypes.loadFailed);
-      }
-
-      const mappedTypes: ApiLeaveType[] = Array.isArray(typesRes.data)
-        ? (typesRes.data as any[]).map((t: any) => ({
-            id: String(t.id),
-            name: String(t.name ?? ""),
-            code: String(t.code ?? ""),
-            color: t.color ?? null,
-            isActive: Boolean(t.isActive),
-          }))
-        : [];
-      setLeaveTypes(mappedTypes);
-
-      const mappedBalances: UiLeaveBalance[] = Array.isArray(balancesRes.data)
-        ? (balancesRes.data as any[]).map((b: any) => {
-            const entitled = toNumber(b.entitled);
-            const carriedOver = toNumber(b.carriedOver);
-            const adjustment = toNumber(b.adjustment);
-            const used = toNumber(b.used);
-            const pending = toNumber(b.pending);
-            const entitledWithAdjust = entitled + adjustment;
-            const remaining = entitledWithAdjust + carriedOver - used - pending;
-
-            const employeeName = b?.employee
-              ? `${String(b.employee.firstName ?? "")} ${String(b.employee.lastName ?? "")}`.trim()
-              : "";
-
-            return {
-              id: String(b.id),
-              employeeId: String(b.employeeId ?? ""),
-              employeeName,
-              employeeNumber: String(b.employee?.employeeNumber ?? ""),
-              departmentId: String(b.employee?.departmentId ?? ""),
-              departmentName: String(b.employee?.department?.name ?? ""),
-              leaveTypeId: String(b.leaveTypeId ?? ""),
-              leaveTypeName: String(b.leaveType?.name ?? ""),
-              leaveTypeColor: b.leaveType?.color ?? null,
-              year: Number(b.year ?? year),
-              entitled: entitledWithAdjust,
-              carriedOver,
-              taken: used,
-              pending,
-              remaining,
-              createdAt: b.createdAt ? new Date(b.createdAt).toISOString() : undefined,
-              updatedAt: b.updatedAt ? new Date(b.updatedAt).toISOString() : undefined,
-            };
-          })
-        : [];
-      setBalances(mappedBalances);
-    } catch (err) {
-      setLoadError(err instanceof Error ? err.message : t.common.loadFailed);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t.common.loadFailed, t.leaveBalances.loadBalancesFailed, t.leaveTypes.loadFailed]);
+    },
+    [t.common.loadFailed, t.leaveBalances.loadBalancesFailed, t.leaveTypes.loadFailed]
+  );
 
   useEffect(() => {
     void loadData(selectedYear);
   }, [selectedYear, loadData]);
 
   // Group balances by employee
-  const employeeBalances = balances.reduce((acc, balance) => {
-    if (!acc[balance.employeeId]) {
-      acc[balance.employeeId] = {
-        employeeId: balance.employeeId,
-        employeeName: balance.employeeName,
-        employeeNumber: balance.employeeNumber,
-        departmentId: balance.departmentId,
-        departmentName: balance.departmentName,
-        balances: [],
-      };
-    }
-    acc[balance.employeeId].balances.push(balance);
-    return acc;
-  }, {} as Record<string, { employeeId: string; employeeName: string; employeeNumber: string; departmentId: string; departmentName: string; balances: UiLeaveBalance[] }>);
+  const employeeBalances = balances.reduce(
+    (acc, balance) => {
+      if (!acc[balance.employeeId]) {
+        acc[balance.employeeId] = {
+          employeeId: balance.employeeId,
+          employeeName: balance.employeeName,
+          employeeNumber: balance.employeeNumber,
+          departmentId: balance.departmentId,
+          departmentName: balance.departmentName,
+          balances: []
+        };
+      }
+      acc[balance.employeeId].balances.push(balance);
+      return acc;
+    },
+    {} as Record<
+      string,
+      {
+        employeeId: string;
+        employeeName: string;
+        employeeNumber: string;
+        departmentId: string;
+        departmentName: string;
+        balances: UiLeaveBalance[];
+      }
+    >
+  );
 
   // Filter employees
   const filteredEmployees = Object.values(employeeBalances).filter((emp) => {
     const matchesSearch =
-      emp.employeeName.includes(searchQuery) ||
-      emp.employeeNumber.includes(searchQuery);
-    const matchesDepartment =
-      filterDepartment === "all" || emp.departmentId === filterDepartment;
+      emp.employeeName.includes(searchQuery) || emp.employeeNumber.includes(searchQuery);
+    const matchesDepartment = filterDepartment === "all" || emp.departmentId === filterDepartment;
     return matchesSearch && matchesDepartment;
   });
 
@@ -237,7 +249,7 @@ export function LeaveBalancesManager() {
       const res = await leavesApi.balances.adjustBalance(selectedBalance.id, {
         adjustmentType: adjustmentData.type === "add" ? "add" : "subtract",
         days: adjustmentData.days,
-        reason: adjustmentData.reason,
+        reason: adjustmentData.reason
       });
 
       if (!res.success) {
@@ -270,7 +282,7 @@ export function LeaveBalancesManager() {
         ...type,
         totalEntitled,
         totalTaken,
-        usageRate: totalEntitled > 0 ? Math.round((totalTaken / totalEntitled) * 100) : 0,
+        usageRate: totalEntitled > 0 ? Math.round((totalTaken / totalEntitled) * 100) : 0
       };
     });
   }, [leaveTypes, balances]);
@@ -284,10 +296,7 @@ export function LeaveBalancesManager() {
           <p className="text-muted-foreground">{t.leaveBalances.description}</p>
         </div>
         <div className="flex gap-2">
-          <Select
-            value={selectedYear.toString()}
-            onValueChange={(v) => setSelectedYear(Number(v))}
-          >
+          <Select value={selectedYear.toString()} onValueChange={(v) => setSelectedYear(Number(v))}>
             <SelectTrigger className="w-[120px]">
               <SelectValue />
             </SelectTrigger>
@@ -298,7 +307,9 @@ export function LeaveBalancesManager() {
             </SelectContent>
           </Select>
           <Button variant="outline">
-            <IconDownload className="ms-2 h-4 w-4" />{t.common.exportData}</Button>
+            <IconDownload className="ms-2 h-4 w-4" />
+            {t.common.exportData}
+          </Button>
         </div>
       </div>
 
@@ -310,7 +321,7 @@ export function LeaveBalancesManager() {
             <CardTitle className="text-3xl">{totals.totalEntitled}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{t.leaveBalances.allEmployees}</p>
+            <p className="text-muted-foreground text-sm">{t.leaveBalances.allEmployees}</p>
           </CardContent>
         </Card>
         <Card>
@@ -319,10 +330,7 @@ export function LeaveBalancesManager() {
             <CardTitle className="text-3xl text-orange-600">{totals.totalTaken}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Progress
-              value={(totals.totalTaken / totals.totalEntitled) * 100}
-              className="h-2"
-            />
+            <Progress value={(totals.totalTaken / totals.totalEntitled) * 100} className="h-2" />
           </CardContent>
         </Card>
         <Card>
@@ -331,7 +339,7 @@ export function LeaveBalancesManager() {
             <CardTitle className="text-3xl text-yellow-600">{totals.totalPending}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{t.leaveBalances.pendingDays}</p>
+            <p className="text-muted-foreground text-sm">{t.leaveBalances.pendingDays}</p>
           </CardContent>
         </Card>
         <Card>
@@ -340,7 +348,7 @@ export function LeaveBalancesManager() {
             <CardTitle className="text-3xl text-green-600">{totals.totalRemaining}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">{t.leaveBalances.available}</p>
+            <p className="text-muted-foreground text-sm">{t.leaveBalances.available}</p>
           </CardContent>
         </Card>
       </div>
@@ -356,11 +364,8 @@ export function LeaveBalancesManager() {
             {leaveTypeStats.slice(0, 4).map((type) => {
               const theme = getLeaveTheme(type.color);
               return (
-                <div
-                  key={type.id}
-                  className={cn("rounded-lg border p-4", theme.border)}
-                >
-                  <div className="flex items-center gap-2 mb-3">
+                <div key={type.id} className={cn("rounded-lg border p-4", theme.border)}>
+                  <div className="mb-3 flex items-center gap-2">
                     <div className={cn("h-3 w-3 rounded-full", theme.dot)} />
                     <span className="font-medium">{type.name}</span>
                   </div>
@@ -390,7 +395,7 @@ export function LeaveBalancesManager() {
             <CardTitle>{t.leaveBalances.employeeBalances}</CardTitle>
             <div className="flex gap-2">
               <div className="relative">
-                <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder={t.employees.searchPlaceholder}
                   value={searchQuery}
@@ -426,8 +431,10 @@ export function LeaveBalancesManager() {
             </div>
           )}
           {(isLoading || isEmployeesLoading) && (
-            <div className="mb-4 flex items-center gap-3 text-sm text-muted-foreground">
-              <Progress value={35} className="h-2 w-40" />{t.common.loading}</div>
+            <div className="text-muted-foreground mb-4 flex items-center gap-3 text-sm">
+              <Progress value={35} className="h-2 w-40" />
+              {t.common.loading}
+            </div>
           )}
           <Table>
             <TableHeader>
@@ -446,29 +453,25 @@ export function LeaveBalancesManager() {
             <TableBody>
               {filteredEmployees.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={9} className="py-8 text-center">
                     <p className="text-muted-foreground">{t.common.noData}</p>
                   </TableCell>
                 </TableRow>
               ) : (
                 filteredEmployees.flatMap((emp) =>
                   emp.balances
-                    .filter(
-                      (b) => filterLeaveType === "all" || b.leaveTypeId === filterLeaveType
-                    )
+                    .filter((b) => filterLeaveType === "all" || b.leaveTypeId === filterLeaveType)
                     .map((balance, index) => (
                       <TableRow key={balance.id}>
                         {index === 0 ? (
                           <TableCell rowSpan={emp.balances.length}>
                             <div className="flex items-center gap-3">
                               <Avatar className="h-9 w-9">
-                                <AvatarFallback>
-                                  {emp.employeeName.slice(0, 2)}
-                                </AvatarFallback>
+                                <AvatarFallback>{emp.employeeName.slice(0, 2)}</AvatarFallback>
                               </Avatar>
                               <div>
                                 <div className="font-medium">{emp.employeeName}</div>
-                                <div className="text-sm text-muted-foreground">
+                                <div className="text-muted-foreground text-sm">
                                   {emp.departmentName}
                                 </div>
                               </div>
@@ -517,7 +520,7 @@ export function LeaveBalancesManager() {
                               value={getBalancePercentage(balance as any)}
                               className="h-2 w-16"
                             />
-                            <span className="text-sm text-muted-foreground">
+                            <span className="text-muted-foreground text-sm">
                               {getBalancePercentage(balance as any)}%
                             </span>
                           </div>
@@ -526,8 +529,7 @@ export function LeaveBalancesManager() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => openAdjustDialog(balance)}
-                          >
+                            onClick={() => openAdjustDialog(balance)}>
                             <IconAdjustments className="h-4 w-4" />
                           </Button>
                         </TableCell>
@@ -546,31 +548,27 @@ export function LeaveBalancesManager() {
           <DialogHeader>
             <DialogTitle>{t.leaveBalances.editBalance}</DialogTitle>
             <DialogDescription>
-              {t.leaveBalances.pAdjustBalance} {selectedBalance?.leaveTypeName} {t.leaveBalances.pForEmployee}{" "}
-              {selectedBalance?.employeeName}
+              {t.leaveBalances.pAdjustBalance} {selectedBalance?.leaveTypeName}{" "}
+              {t.leaveBalances.pForEmployee} {selectedBalance?.employeeName}
             </DialogDescription>
           </DialogHeader>
 
           {selectedBalance && (
             <div className="space-y-4 py-4">
               {/* Current Balance Info */}
-              <div className="rounded-lg bg-muted p-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-center">
+              <div className="bg-muted rounded-lg p-4">
+                <div className="grid grid-cols-1 gap-4 text-center sm:grid-cols-2 md:grid-cols-3">
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.common.due}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.due}</p>
                     <p className="text-xl font-bold">{selectedBalance.entitled}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.common.taken}</p>
-                    <p className="text-xl font-bold text-orange-600">
-                      {selectedBalance.taken}
-                    </p>
+                    <p className="text-muted-foreground text-sm">{t.common.taken}</p>
+                    <p className="text-xl font-bold text-orange-600">{selectedBalance.taken}</p>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.leaveBalances.remaining}</p>
-                    <p className="text-xl font-bold text-green-600">
-                      {selectedBalance.remaining}
-                    </p>
+                    <p className="text-muted-foreground text-sm">{t.leaveBalances.remaining}</p>
+                    <p className="text-xl font-bold text-green-600">{selectedBalance.remaining}</p>
                   </div>
                 </div>
               </div>
@@ -581,20 +579,14 @@ export function LeaveBalancesManager() {
                   <Button
                     variant={adjustmentData.type === "add" ? "default" : "outline"}
                     className="flex-1"
-                    onClick={() =>
-                      setAdjustmentData({ ...adjustmentData, type: "add" })
-                    }
-                  >
+                    onClick={() => setAdjustmentData({ ...adjustmentData, type: "add" })}>
                     <IconPlus className="ms-2 h-4 w-4" />
                     {t.leaveBalances.pAddDays}
                   </Button>
                   <Button
                     variant={adjustmentData.type === "subtract" ? "default" : "outline"}
                     className="flex-1"
-                    onClick={() =>
-                      setAdjustmentData({ ...adjustmentData, type: "subtract" })
-                    }
-                  >
+                    onClick={() => setAdjustmentData({ ...adjustmentData, type: "subtract" })}>
                     <IconMinus className="ms-2 h-4 w-4" />
                     {t.leaveBalances.pDeductDays}
                   </Button>
@@ -609,7 +601,7 @@ export function LeaveBalancesManager() {
                   onChange={(e) =>
                     setAdjustmentData({
                       ...adjustmentData,
-                      days: Number(e.target.value),
+                      days: Number(e.target.value)
                     })
                   }
                   min={1}
@@ -621,9 +613,7 @@ export function LeaveBalancesManager() {
                 <Label>{t.leaveBalances.adjustReason}</Label>
                 <Textarea
                   value={adjustmentData.reason}
-                  onChange={(e) =>
-                    setAdjustmentData({ ...adjustmentData, reason: e.target.value })
-                  }
+                  onChange={(e) => setAdjustmentData({ ...adjustmentData, reason: e.target.value })}
                   placeholder={t.leaveBalances.adjustReasonPlaceholder}
                   rows={3}
                 />
@@ -632,7 +622,9 @@ export function LeaveBalancesManager() {
               {/* Preview */}
               {adjustmentData.days > 0 && (
                 <div className="rounded-lg border border-dashed p-4">
-                  <p className="text-sm text-muted-foreground mb-2">{t.leaveBalances.adjustPreview}</p>
+                  <p className="text-muted-foreground mb-2 text-sm">
+                    {t.leaveBalances.adjustPreview}
+                  </p>
                   <div className="flex items-center justify-between">
                     <span>{t.leaveBalances.newBalance}</span>
                     <Badge
@@ -641,8 +633,7 @@ export function LeaveBalancesManager() {
                         adjustmentData.type === "add"
                           ? "bg-green-50 text-green-700"
                           : "bg-red-50 text-red-700"
-                      }
-                    >
+                      }>
                       {adjustmentData.type === "add"
                         ? selectedBalance.remaining + adjustmentData.days
                         : selectedBalance.remaining - adjustmentData.days}{" "}
@@ -655,11 +646,12 @@ export function LeaveBalancesManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setIsAdjustDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
             <Button
               onClick={handleAdjust}
-              disabled={adjustmentData.days <= 0 || !adjustmentData.reason}
-            >
+              disabled={adjustmentData.days <= 0 || !adjustmentData.reason}>
               {t.leaveBalances.pSaveAdjustment}
             </Button>
           </DialogFooter>

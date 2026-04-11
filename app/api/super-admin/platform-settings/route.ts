@@ -20,7 +20,7 @@ export async function GET() {
 
     // Get or create default settings
     let settings = await prisma.platformSettings.findFirst();
-    
+
     if (!settings) {
       settings = await prisma.platformSettings.create({
         data: {
@@ -29,8 +29,8 @@ export async function GET() {
           supportEmail: "support@taqam.net",
           trialDays: 14,
           trialMaxEmployees: 10,
-          primaryColor: "#0284c7",
-        },
+          primaryColor: "#0284c7"
+        }
       });
     }
 
@@ -50,15 +50,15 @@ export async function PUT(req: NextRequest) {
     }
 
     const body = await req.json();
-    
+
     // Get existing or create
     let settings = await prisma.platformSettings.findFirst();
-    
+
     if (!settings) {
       settings = await prisma.platformSettings.create({
         data: {
-          ...body,
-        },
+          ...body
+        }
       });
     } else {
       settings = await prisma.platformSettings.update({
@@ -79,8 +79,8 @@ export async function PUT(req: NextRequest) {
           termsUrl: body.termsUrl,
           privacyUrl: body.privacyUrl,
           maintenanceMode: body.maintenanceMode,
-          maintenanceMsg: body.maintenanceMsg,
-        },
+          maintenanceMsg: body.maintenanceMsg
+        }
       });
     }
 

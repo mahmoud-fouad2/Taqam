@@ -20,7 +20,7 @@ const marketingPages: EntrySpec[] = [
   { path: "/support", changeFrequency: "monthly", priority: 0.6 },
   { path: "/request-demo", changeFrequency: "monthly", priority: 0.6 },
   { path: "/privacy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/terms", changeFrequency: "yearly", priority: 0.3 },
+  { path: "/terms", changeFrequency: "yearly", priority: 0.3 }
 ];
 
 function normalizePath(pathname: string): string {
@@ -49,7 +49,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${base}${localizedPath(locale, page.path)}`,
         lastModified,
         changeFrequency: page.changeFrequency,
-        priority: page.priority,
+        priority: page.priority
       });
     }
   }
@@ -59,20 +59,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     where: {
       status: "ACTIVE",
       tenant: {
-        status: "ACTIVE",
+        status: "ACTIVE"
       },
-      OR: [{ expiresAt: null }, { expiresAt: { gte: now } }],
+      OR: [{ expiresAt: null }, { expiresAt: { gte: now } }]
     },
     select: {
       id: true,
       updatedAt: true,
       tenant: {
         select: {
-          slug: true,
-        },
-      },
+          slug: true
+        }
+      }
     },
-    orderBy: [{ updatedAt: "desc" }],
+    orderBy: [{ updatedAt: "desc" }]
   });
 
   const tenantSlugs = Array.from(new Set(publicJobs.map((job) => job.tenant.slug)));
@@ -83,7 +83,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${base}${localizedPath(locale, `/t/${slug}/careers`)}`,
         lastModified,
         changeFrequency: "daily",
-        priority: 0.7,
+        priority: 0.7
       });
     }
 
@@ -92,7 +92,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         url: `${base}${localizedPath(locale, `/careers/${job.id}`)}`,
         lastModified: job.updatedAt,
         changeFrequency: "daily",
-        priority: 0.7,
+        priority: 0.7
       });
     }
   }

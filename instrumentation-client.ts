@@ -12,8 +12,8 @@ Sentry.init({
   integrations: [
     Sentry.replayIntegration({
       maskAllText: true,
-      blockAllMedia: true,
-    }),
+      blockAllMedia: true
+    })
   ],
   environment: process.env.NODE_ENV || "development",
   ignoreErrors: [
@@ -25,7 +25,7 @@ Sentry.init({
     "Failed to fetch",
     "Load failed",
     "AbortError",
-    "The operation was aborted",
+    "The operation was aborted"
   ],
   beforeSend(event) {
     if (event.request) {
@@ -39,12 +39,12 @@ Sentry.init({
 
     if (event.user) {
       event.user = {
-        id: event.user.id,
+        id: event.user.id
       };
     }
 
     return event;
-  },
+  }
 });
 
 export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

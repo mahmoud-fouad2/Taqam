@@ -29,8 +29,8 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
         totalDeductions: summary.totalDeductions,
         totalNet: summary.totalNet,
         processedById: session.user.id,
-        processedAt: existing.processedAt ?? new Date(),
-      },
+        processedAt: existing.processedAt ?? new Date()
+      }
     });
 
     return NextResponse.json({ data: mapPayrollPeriod(updated) });

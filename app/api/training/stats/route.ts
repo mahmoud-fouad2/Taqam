@@ -27,18 +27,18 @@ export async function GET() {
       await prisma.$transaction([
         prisma.trainingCourse.count({ where: { tenantId } }),
         prisma.trainingCourse.count({
-          where: { tenantId, status: { in: ["SCHEDULED", "ONGOING"] } },
+          where: { tenantId, status: { in: ["SCHEDULED", "ONGOING"] } }
         }),
         prisma.trainingEnrollment.count({ where: { tenantId } }),
         prisma.trainingEnrollment.count({ where: { tenantId, status: "COMPLETED" } }),
-        prisma.tenant.findUnique({ where: { id: tenantId }, select: { settings: true } }),
+        prisma.tenant.findUnique({ where: { id: tenantId }, select: { settings: true } })
       ]);
 
     const completedEnrollments = await prisma.trainingEnrollment.findMany({
       where: { tenantId, status: "COMPLETED" },
       select: {
-        course: { select: { durationHours: true, cost: true } },
-      },
+        course: { select: { durationHours: true, cost: true } }
+      }
     });
 
     const totalHoursCompleted = completedEnrollments.reduce(
@@ -65,8 +65,8 @@ export async function GET() {
         totalHoursCompleted,
         certificationRate,
         budgetUsed,
-        budgetTotal,
-      },
+        budgetTotal
+      }
     });
   } catch (error) {
     console.error("Error fetching training stats:", error);

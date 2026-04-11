@@ -8,13 +8,10 @@ type RouteContext = { params: Promise<{ id: string }> };
 
 // ==================== PATCH - Update Applicant Rating ====================
 const schema = z.object({
-  rating: z.number().min(1).max(5),
+  rating: z.number().min(1).max(5)
 });
 
-export async function PATCH(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -23,7 +20,7 @@ export async function PATCH(
 
     const { id } = await context.params;
     const body = await request.json();
-    
+
     const { rating } = schema.parse(body);
 
     // Check if applicant exists
@@ -31,16 +28,13 @@ export async function PATCH(
       where: {
         id,
         jobPosting: {
-          tenantId: session.user.tenantId,
-        },
-      },
+          tenantId: session.user.tenantId
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "المتقدم غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "المتقدم غير موجود" }, { status: 404 });
     }
 
     const updated = await prisma.applicant.update({
@@ -50,16 +44,16 @@ export async function PATCH(
         jobPosting: {
           include: {
             department: true,
-            jobTitle: true,
-          },
-        },
-      },
+            jobTitle: true
+          }
+        }
+      }
     });
 
     // Map back to kebab-case
     const mappedApplicant = {
       ...updated,
-      status: updated.status.toLowerCase().replace(/_/g, "-"),
+      status: updated.status.toLowerCase().replace(/_/g, "-")
     };
 
     return NextResponse.json(mappedApplicant);
@@ -71,9 +65,6 @@ export async function PATCH(
       );
     }
     console.error("Error updating applicant rating:", error);
-    return NextResponse.json(
-      { error: "فشل في تحديث تقييم المتقدم" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في تحديث تقييم المتقدم" }, { status: 500 });
   }
 }

@@ -8,23 +8,23 @@ import {
   PutObjectCommand,
   GetObjectCommand,
   DeleteObjectCommand,
-  ListObjectsV2Command,
+  ListObjectsV2Command
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import { getStorageRuntimeStatus } from "@/lib/runtime-integrations";
 
 // R2 Client Configuration
-const R2_ENDPOINT = process.env.R2_ENDPOINT || 
-  `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
+const R2_ENDPOINT =
+  process.env.R2_ENDPOINT || `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
 
 const R2 = new S3Client({
   region: "auto",
   endpoint: R2_ENDPOINT,
   credentials: {
     accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || "",
-  },
+    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || ""
+  }
 });
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "";
@@ -51,18 +51,12 @@ export interface FileMetadata {
 /**
  * Generate a unique file key with folder structure
  */
-function generateFileKey(
-  tenantId: string,
-  category: string,
-  fileName: string
-): string {
+function generateFileKey(tenantId: string, category: string, fileName: string): string {
   const timestamp = Date.now();
   const random = Math.random().toString(36).substring(2, 8);
   const ext = fileName.split(".").pop() || "";
-  const safeName = fileName
-    .replace(/[^a-zA-Z0-9.-]/g, "_")
-    .substring(0, 50);
-  
+  const safeName = fileName.replace(/[^a-zA-Z0-9.-]/g, "_").substring(0, 50);
+
   return `${tenantId}/${category}/${timestamp}-${random}-${safeName}`;
 }
 
@@ -88,8 +82,8 @@ export async function uploadFile(
         originalName: fileName,
         tenantId,
         category,
-        uploadedAt: new Date().toISOString(),
-      },
+        uploadedAt: new Date().toISOString()
+      }
     });
 
     await R2.send(command);
@@ -100,13 +94,13 @@ export async function uploadFile(
     return {
       success: true,
       key,
-      url,
+      url
     };
   } catch (error) {
     console.error("R2 Upload Error:", error);
     return {
       success: false,
-      error: error instanceof Error ? error.message : "فشل رفع الملف",
+      error: error instanceof Error ? error.message : "فشل رفع الملف"
     };
   }
 }
@@ -121,7 +115,7 @@ export async function getSignedDownloadUrl(
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: key,
+      Key: key
     });
 
     const url = await getSignedUrl(R2, command, { expiresIn });
@@ -144,7 +138,7 @@ export async function getSignedUploadUrl(
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key,
-      ContentType: contentType,
+      ContentType: contentType
     });
 
     const url = await getSignedUrl(R2, command, { expiresIn });
@@ -162,7 +156,7 @@ export async function deleteFile(key: string): Promise<boolean> {
   try {
     const command = new DeleteObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: key,
+      Key: key
     });
 
     await R2.send(command);
@@ -176,15 +170,12 @@ export async function deleteFile(key: string): Promise<boolean> {
 /**
  * List files in a folder
  */
-export async function listFiles(
-  prefix: string,
-  maxKeys: number = 100
-): Promise<FileMetadata[]> {
+export async function listFiles(prefix: string, maxKeys: number = 100): Promise<FileMetadata[]> {
   try {
     const command = new ListObjectsV2Command({
       Bucket: BUCKET_NAME,
       Prefix: prefix,
-      MaxKeys: maxKeys,
+      MaxKeys: maxKeys
     });
 
     const response = await R2.send(command);
@@ -192,7 +183,7 @@ export async function listFiles(
     return (response.Contents || []).map((obj) => ({
       key: obj.Key || "",
       size: obj.Size || 0,
-      lastModified: obj.LastModified || new Date(),
+      lastModified: obj.LastModified || new Date()
     }));
   } catch (error) {
     console.error("R2 List Error:", error);
@@ -207,19 +198,19 @@ export async function getFile(key: string): Promise<Buffer | null> {
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: key,
+      Key: key
     });
 
     const response = await R2.send(command);
-    
+
     if (!response.Body) return null;
-    
+
     // Convert stream to buffer
     const chunks: Uint8Array[] = [];
     for await (const chunk of response.Body as AsyncIterable<Uint8Array>) {
       chunks.push(chunk);
     }
-    
+
     return Buffer.concat(chunks);
   } catch (error) {
     console.error("R2 Get Error:", error);
@@ -245,7 +236,7 @@ export function isAllowedFileType(
     "image/png",
     "image/webp",
     "application/msword",
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
   ]
 ): boolean {
   return allowedTypes.includes(mimeType);
@@ -254,10 +245,7 @@ export function isAllowedFileType(
 /**
  * Validate file size (in bytes)
  */
-export function isAllowedFileSize(
-  size: number,
-  maxSizeMB: number = 10
-): boolean {
+export function isAllowedFileSize(size: number, maxSizeMB: number = 10): boolean {
   return size <= maxSizeMB * 1024 * 1024;
 }
 
@@ -272,7 +260,7 @@ export const r2Storage = {
   isAllowedFileType,
   isAllowedFileSize,
   isR2Configured,
-  generateFileKey,
+  generateFileKey
 };
 
 export default r2Storage;

@@ -15,8 +15,8 @@ const fadeUp = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.1, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const },
-  }),
+    transition: { delay: i * 0.1, duration: 0.45, ease: [0.25, 0.46, 0.45, 0.94] as const }
+  })
 };
 
 export default function MobileLoginPage() {
@@ -26,7 +26,10 @@ export default function MobileLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
-  const canSubmit = useMemo(() => email.trim().length > 3 && password.length > 0, [email, password]);
+  const canSubmit = useMemo(
+    () => email.trim().length > 3 && password.length > 0,
+    [email, password]
+  );
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -59,9 +62,8 @@ export default function MobileLoginPage() {
         custom={0}
         initial="hidden"
         animate="visible"
-        variants={fadeUp}
-      >
-        <div className="flex size-[72px] items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-primary/80 shadow-lg shadow-primary/25">
+        variants={fadeUp}>
+        <div className="from-primary to-primary/80 shadow-primary/25 flex size-[72px] items-center justify-center rounded-3xl bg-gradient-to-br shadow-lg">
           <Fingerprint className="size-9 text-white" />
         </div>
         <div className="text-center">
@@ -76,13 +78,14 @@ export default function MobileLoginPage() {
         custom={1}
         initial="hidden"
         animate="visible"
-        variants={fadeUp}
-      >
+        variants={fadeUp}>
         <h2 className="mb-6 text-center text-lg font-semibold text-slate-800">تسجيل الدخول</h2>
 
         <form onSubmit={onSubmit} className="space-y-5">
           <div className="space-y-1.5">
-            <Label htmlFor="email" className="text-[13px] font-medium text-slate-600">البريد الإلكتروني</Label>
+            <Label htmlFor="email" className="text-[13px] font-medium text-slate-600">
+              البريد الإلكتروني
+            </Label>
             <Input
               id="email"
               type="email"
@@ -93,12 +96,14 @@ export default function MobileLoginPage() {
               placeholder="name@company.com"
               disabled={busy}
               dir="ltr"
-              className="h-12 rounded-xl border-slate-200 bg-slate-50/50 text-base placeholder:text-slate-300 focus:border-primary focus:bg-white focus:ring-primary/20"
+              className="focus:border-primary focus:ring-primary/20 h-12 rounded-xl border-slate-200 bg-slate-50/50 text-base placeholder:text-slate-300 focus:bg-white"
             />
           </div>
 
           <div className="space-y-1.5">
-            <Label htmlFor="password" className="text-[13px] font-medium text-slate-600">كلمة المرور</Label>
+            <Label htmlFor="password" className="text-[13px] font-medium text-slate-600">
+              كلمة المرور
+            </Label>
             <Input
               id="password"
               type="password"
@@ -108,7 +113,7 @@ export default function MobileLoginPage() {
               placeholder="••••••••"
               disabled={busy}
               dir="ltr"
-              className="h-12 rounded-xl border-slate-200 bg-slate-50/50 text-base placeholder:text-slate-300 focus:border-primary focus:bg-white focus:ring-primary/20"
+              className="focus:border-primary focus:ring-primary/20 h-12 rounded-xl border-slate-200 bg-slate-50/50 text-base placeholder:text-slate-300 focus:bg-white"
             />
           </div>
 
@@ -116,17 +121,15 @@ export default function MobileLoginPage() {
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
-              className="overflow-hidden rounded-xl bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-600"
-            >
+              className="overflow-hidden rounded-xl bg-red-50 px-4 py-3 text-[13px] leading-relaxed text-red-600">
               {error}
             </motion.div>
           )}
 
           <Button
-            className="h-12 w-full rounded-xl text-[15px] font-semibold shadow-sm shadow-primary/20 transition-transform active:scale-[0.98]"
+            className="shadow-primary/20 h-12 w-full rounded-xl text-[15px] font-semibold shadow-sm transition-transform active:scale-[0.98]"
             disabled={!canSubmit || busy}
-            type="submit"
-          >
+            type="submit">
             {busy ? (
               <span className="flex items-center gap-2">
                 <Loader2 className="size-5 animate-spin" />
@@ -144,8 +147,7 @@ export default function MobileLoginPage() {
         custom={2}
         initial="hidden"
         animate="visible"
-        variants={fadeUp}
-      >
+        variants={fadeUp}>
         Taqam © {new Date().getFullYear()}
       </motion.p>
     </div>

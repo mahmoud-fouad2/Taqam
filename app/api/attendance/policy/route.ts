@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import {
+  errorResponse,
+  forbiddenResponse,
+  logApiError,
+  requireSession
+} from "@/lib/api/route-helper";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -16,29 +20,28 @@ const upsertSchema = z.object({
   tenantId: z.string().optional(),
   enforceGeofence: z.boolean().optional(),
   allowCheckInWithoutLocation: z.boolean().optional(),
-  maxAccuracyMeters: z.coerce.number().int().min(5).max(1000).optional(),
+  maxAccuracyMeters: z.coerce.number().int().min(5).max(1000).optional()
 });
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const { searchParams } = new URL(request.url);
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
+      return errorResponse("Tenant context required", 400);
     }
 
     const policy = await prisma.tenantAttendancePolicy.findUnique({
-      where: { tenantId },
+      where: { tenantId }
     });
 
     return NextResponse.json({
@@ -46,51 +49,44 @@ export async function GET(request: NextRequest) {
         tenantId,
         enforceGeofence: false,
         allowCheckInWithoutLocation: true,
-        maxAccuracyMeters: 50,
+        maxAccuracyMeters: 50
       },
-      exists: Boolean(policy),
+      exists: Boolean(policy)
     });
   } catch (error) {
-    console.error("Error fetching attendance policy:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch attendance policy" },
-      { status: 500 }
-    );
+    logApiError("Error fetching attendance policy", error);
+    return errorResponse("Failed to fetch attendance policy");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     if (!canManageAttendanceSettings(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const body = await request.json();
     const parsed = upsertSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid payload", issues: parsed.error.issues },
-        { status: 400 }
-      );
+      return errorResponse("Invalid payload", 400, { issues: parsed.error.issues });
     }
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? parsed.data.tenantId ?? session.user.tenantId
+      ? (parsed.data.tenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
+      return errorResponse("Tenant context required", 400);
     }
 
     const data = {
       enforceGeofence: parsed.data.enforceGeofence,
       allowCheckInWithoutLocation: parsed.data.allowCheckInWithoutLocation,
-      maxAccuracyMeters: parsed.data.maxAccuracyMeters,
+      maxAccuracyMeters: parsed.data.maxAccuracyMeters
     };
 
     const policy = await prisma.tenantAttendancePolicy.upsert({
@@ -99,19 +95,14 @@ export async function POST(request: NextRequest) {
         tenantId,
         enforceGeofence: data.enforceGeofence ?? false,
         allowCheckInWithoutLocation: data.allowCheckInWithoutLocation ?? true,
-        maxAccuracyMeters: data.maxAccuracyMeters ?? 50,
+        maxAccuracyMeters: data.maxAccuracyMeters ?? 50
       },
-      update: Object.fromEntries(
-        Object.entries(data).filter(([, v]) => typeof v !== "undefined")
-      ),
+      update: Object.fromEntries(Object.entries(data).filter(([, v]) => typeof v !== "undefined"))
     });
 
     return NextResponse.json({ data: policy }, { status: 200 });
   } catch (error) {
-    console.error("Error updating attendance policy:", error);
-    return NextResponse.json(
-      { error: "Failed to update attendance policy" },
-      { status: 500 }
-    );
+    logApiError("Error updating attendance policy", error);
+    return errorResponse("Failed to update attendance policy");
   }
 }

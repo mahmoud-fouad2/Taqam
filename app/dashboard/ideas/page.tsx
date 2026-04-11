@@ -4,7 +4,6 @@ import { getPageContext } from "@/lib/guards";
 
 import { IdeasWorkspace } from "./ideas-workspace";
 
-
 export default async function IdeasPage() {
   const locale = await getAppLocale();
   const t = getText(locale);

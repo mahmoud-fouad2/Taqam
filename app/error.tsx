@@ -8,7 +8,7 @@ import { ErrorScreen } from "@/components/error-screen";
 
 export default function AppError({
   error,
-  reset,
+  reset
 }: {
   error: Error & { digest?: string };
   reset: () => void;

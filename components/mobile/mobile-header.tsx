@@ -24,14 +24,13 @@ export default function MobileHeader({ dateText, avatarUrl, initials }: Props) {
         <button
           type="button"
           className="relative flex size-10 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-slate-100"
-          aria-label="Notifications"
-        >
+          aria-label="Notifications">
           <Bell className="size-[18px] text-slate-400" />
         </button>
         <Link href="/m/settings">
-          <Avatar className="size-10 ring-2 ring-primary/15">
+          <Avatar className="ring-primary/15 size-10 ring-2">
             <AvatarImage src={avatarUrl || ""} alt="" />
-            <AvatarFallback className="bg-primary/10 text-[13px] font-bold text-primary">
+            <AvatarFallback className="bg-primary/10 text-primary text-[13px] font-bold">
               {initials || "U"}
             </AvatarFallback>
           </Avatar>

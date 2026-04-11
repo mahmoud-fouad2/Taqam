@@ -4,17 +4,14 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { dataResponse, errorResponse, logApiError, requireSession } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const tenantId = session.user.tenantId ?? null;
@@ -39,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (startDate || endDate) {
       where.createdAt = {
         ...(startDate ? { gte: new Date(startDate) } : {}),
-        ...(endDate ? { lte: new Date(endDate) } : {}),
+        ...(endDate ? { lte: new Date(endDate) } : {})
       };
     }
 
@@ -56,30 +53,27 @@ export async function GET(request: NextRequest) {
           message: true,
           link: true,
           isRead: true,
-          createdAt: true,
-        },
+          createdAt: true
+        }
       }),
       prisma.notification.count({ where }),
-      prisma.notification.count({ where: { userId, ...(tenantId ? { tenantId } : {}), isRead: false } }),
+      prisma.notification.count({
+        where: { userId, ...(tenantId ? { tenantId } : {}), isRead: false }
+      })
     ]);
 
-    return NextResponse.json({
-      data: {
-        notifications: notifications.map((n) => ({
-          ...n,
-          createdAt: n.createdAt.toISOString(),
-        })),
-        total,
-        unreadCount,
-        page,
-        pageSize,
-      },
+    return dataResponse({
+      notifications: notifications.map((n) => ({
+        ...n,
+        createdAt: n.createdAt.toISOString()
+      })),
+      total,
+      unreadCount,
+      page,
+      pageSize
     });
   } catch (error) {
-    console.error("Error fetching notifications:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch notifications" },
-      { status: 500 }
-    );
+    logApiError("Error fetching notifications", error);
+    return errorResponse("Failed to fetch notifications");
   }
 }

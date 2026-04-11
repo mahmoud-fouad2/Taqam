@@ -13,7 +13,7 @@ export function LogoMark({
   className,
   frameClassName,
   imageClassName,
-  alt = "Taqam",
+  alt = "Taqam"
 }: LogoMarkProps) {
   return (
     <span className={cn("inline-flex shrink-0", className)}>
@@ -21,8 +21,7 @@ export function LogoMark({
         className={cn(
           "inline-flex items-center justify-center overflow-hidden rounded-xl bg-transparent p-0",
           frameClassName
-        )}
-      >
+        )}>
         <Image
           src="/logo-tight.jpeg"
           alt={alt}

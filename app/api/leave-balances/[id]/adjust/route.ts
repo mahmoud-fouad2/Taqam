@@ -51,8 +51,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const existing = await prisma.leaveBalance.findFirst({
       where: {
         id,
-        ...(tenantId ? { tenantId } : {}),
-      },
+        ...(tenantId ? { tenantId } : {})
+      }
     });
 
     if (!existing) {
@@ -62,8 +62,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const updated = await prisma.leaveBalance.update({
       where: { id },
       data: {
-        adjustment: { increment: delta },
-      },
+        adjustment: { increment: delta }
+      }
     });
 
     return NextResponse.json({ data: updated });

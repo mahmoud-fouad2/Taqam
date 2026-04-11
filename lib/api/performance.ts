@@ -1,4 +1,4 @@
-import { apiClient, ApiResponse } from './client';
+import { apiClient, ApiResponse } from "./client";
 import type {
   EvaluationTemplate,
   EvaluationCycle,
@@ -9,8 +9,8 @@ import type {
   GoalStats,
   EvaluationFilters,
   GoalFilters,
-  EvaluationReview,
-} from '../types/performance';
+  EvaluationReview
+} from "../types/performance";
 
 // =====================
 // Evaluation Templates API
@@ -18,7 +18,9 @@ import type {
 
 export const evaluationTemplatesApi = {
   async getAll(): Promise<ApiResponse<EvaluationTemplate[]>> {
-    const response = await apiClient.get<{ templates?: ApiEvaluationTemplate[] }>('/evaluations/templates');
+    const response = await apiClient.get<{ templates?: ApiEvaluationTemplate[] }>(
+      "/evaluations/templates"
+    );
     if (!response.success) {
       return { success: false, error: response.error };
     }
@@ -27,7 +29,7 @@ export const evaluationTemplatesApi = {
       success: true,
       data: Array.isArray(response.data?.templates)
         ? response.data.templates.map(mapEvaluationTemplate)
-        : [],
+        : []
     };
   },
 
@@ -42,7 +44,7 @@ export const evaluationTemplatesApi = {
 
     return {
       success: true,
-      data: mapEvaluationTemplate(response.data),
+      data: mapEvaluationTemplate(response.data)
     };
   },
 
@@ -50,29 +52,32 @@ export const evaluationTemplatesApi = {
    * إنشاء نموذج جديد
    */
   async create(
-    data: Omit<EvaluationTemplate, 'id' | 'tenantId' | 'createdAt' | 'updatedAt'>
+    data: Omit<EvaluationTemplate, "id" | "tenantId" | "createdAt" | "updatedAt">
   ): Promise<ApiResponse<EvaluationTemplate>> {
     const response = await apiClient.post<{ template?: ApiEvaluationTemplate }>(
-      '/evaluations/templates',
+      "/evaluations/templates",
       buildEvaluationTemplatePayload(data)
     );
 
     const rawTemplate = response.data?.template;
     if (!response.success || !rawTemplate) {
-      return { success: false, error: response.error || 'فشل إنشاء نموذج التقييم' };
+      return { success: false, error: response.error || "فشل إنشاء نموذج التقييم" };
     }
 
     return {
       success: true,
       data: mapEvaluationTemplate(rawTemplate),
-      message: response.message,
+      message: response.message
     };
   },
 
   /**
    * تحديث نموذج
    */
-  async update(id: string, data: Partial<EvaluationTemplate>): Promise<ApiResponse<EvaluationTemplate>> {
+  async update(
+    id: string,
+    data: Partial<EvaluationTemplate>
+  ): Promise<ApiResponse<EvaluationTemplate>> {
     const response = await apiClient.patch<{ template?: ApiEvaluationTemplate }>(
       `/evaluations/templates/${id}`,
       buildEvaluationTemplatePayload(data)
@@ -80,13 +85,13 @@ export const evaluationTemplatesApi = {
 
     const rawTemplate = response.data?.template;
     if (!response.success || !rawTemplate) {
-      return { success: false, error: response.error || 'فشل تحديث نموذج التقييم' };
+      return { success: false, error: response.error || "فشل تحديث نموذج التقييم" };
     }
 
     return {
       success: true,
       data: mapEvaluationTemplate(rawTemplate),
-      message: response.message,
+      message: response.message
     };
   },
 
@@ -101,21 +106,21 @@ export const evaluationTemplatesApi = {
   async duplicate(id: string, name: string): Promise<ApiResponse<EvaluationTemplate>> {
     const current = await evaluationTemplatesApi.getById(id);
     if (!current.success || !current.data) {
-      return { success: false, error: current.error || 'القالب غير موجود' };
+      return { success: false, error: current.error || "القالب غير موجود" };
     }
 
     return evaluationTemplatesApi.create({
       ...current.data,
       name,
       nameEn: current.data.nameEn ? `${current.data.nameEn} Copy` : name,
-      isDefault: false,
+      isDefault: false
     });
   },
 
   /**
    * تعيين كافتراضي
    */
-  setDefault: (id: string) => evaluationTemplatesApi.update(id, { isDefault: true }),
+  setDefault: (id: string) => evaluationTemplatesApi.update(id, { isDefault: true })
 };
 
 type ApiEvaluationTemplateCriterion = {
@@ -148,54 +153,54 @@ type ApiEvaluationTemplate = {
   updatedAt: string;
 };
 
-function mapRatingScale(value: number | null | undefined): EvaluationTemplate['ratingScale'] {
+function mapRatingScale(value: number | null | undefined): EvaluationTemplate["ratingScale"] {
   if (value && value > 5) {
-    return 'numeric_10';
+    return "numeric_10";
   }
 
-  return 'numeric_5';
+  return "numeric_5";
 }
 
-function mapRatingScaleToApi(value: EvaluationTemplate['ratingScale'] | undefined): number {
+function mapRatingScaleToApi(value: EvaluationTemplate["ratingScale"] | undefined): number {
   switch (value) {
-    case 'numeric_10':
+    case "numeric_10":
       return 10;
-    case 'percentage':
+    case "percentage":
       return 10;
-    case 'descriptive':
+    case "descriptive":
       return 5;
-    case 'numeric_5':
+    case "numeric_5":
     default:
       return 5;
   }
 }
 
-function getDefaultRatingLabels(value: EvaluationTemplate['ratingScale'] | undefined): string[] {
-  if (value === 'numeric_10') {
-    return ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
+function getDefaultRatingLabels(value: EvaluationTemplate["ratingScale"] | undefined): string[] {
+  if (value === "numeric_10") {
+    return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
   }
 
-  return ['ضعيف', 'مقبول', 'جيد', 'جيد جداً', 'ممتاز'];
+  return ["ضعيف", "مقبول", "جيد", "جيد جداً", "ممتاز"];
 }
 
 function mapEvaluationTemplate(raw: ApiEvaluationTemplate): EvaluationTemplate {
   const sections = Array.isArray(raw.criteria)
     ? raw.criteria.map((section, sectionIndex) => ({
         id: section.id || `section-${sectionIndex + 1}`,
-        name: section.nameAr || section.name || 'قسم بدون عنوان',
+        name: section.nameAr || section.name || "قسم بدون عنوان",
         description: section.description || undefined,
         weight: Number(section.weight ?? 0),
         order: sectionIndex + 1,
         criteria: Array.isArray(section.items)
           ? section.items.map((criterion, criterionIndex) => ({
               id: criterion.id || `criterion-${criterionIndex + 1}`,
-              name: criterion.nameAr || criterion.name || 'معيار بدون عنوان',
+              name: criterion.nameAr || criterion.name || "معيار بدون عنوان",
               description: criterion.description || undefined,
               weight: Number(criterion.weight ?? 0),
               order: criterionIndex + 1,
-              isRequired: true,
+              isRequired: true
             }))
-          : [],
+          : []
       }))
     : [];
 
@@ -215,7 +220,7 @@ function mapEvaluationTemplate(raw: ApiEvaluationTemplate): EvaluationTemplate {
     isActive: raw.isActive,
     isDefault: raw.isDefault,
     createdAt: raw.createdAt,
-    updatedAt: raw.updatedAt,
+    updatedAt: raw.updatedAt
   };
 }
 
@@ -256,8 +261,8 @@ function buildEvaluationTemplatePayload(data: Partial<EvaluationTemplate>) {
         name: criterion.name,
         nameAr: criterion.name,
         weight: criterion.weight,
-        description: criterion.description,
-      })),
+        description: criterion.description
+      }))
     }));
   }
 
@@ -272,22 +277,25 @@ export const evaluationCyclesApi = {
   /**
    * الحصول على جميع دورات التقييم
    */
-  getAll: (year?: number) => 
-    apiClient.get<EvaluationCycle[]>('/evaluation-cycles', {
-      params: year ? { year } : undefined,
+  getAll: (year?: number) =>
+    apiClient.get<EvaluationCycle[]>("/evaluation-cycles", {
+      params: year ? { year } : undefined
     }),
 
   /**
    * الحصول على دورة بالمعرف
    */
-  getById: (id: string) => 
-    apiClient.get<EvaluationCycle>(`/evaluation-cycles/${id}`),
+  getById: (id: string) => apiClient.get<EvaluationCycle>(`/evaluation-cycles/${id}`),
 
   /**
    * إنشاء دورة جديدة
    */
-  create: (data: Omit<EvaluationCycle, 'id' | 'tenantId' | 'totalEmployees' | 'completedCount' | 'createdAt' | 'updatedAt'>) =>
-    apiClient.post<EvaluationCycle>('/evaluation-cycles', data),
+  create: (
+    data: Omit<
+      EvaluationCycle,
+      "id" | "tenantId" | "totalEmployees" | "completedCount" | "createdAt" | "updatedAt"
+    >
+  ) => apiClient.post<EvaluationCycle>("/evaluation-cycles", data),
 
   /**
    * تحديث دورة
@@ -298,14 +306,12 @@ export const evaluationCyclesApi = {
   /**
    * حذف دورة
    */
-  delete: (id: string) =>
-    apiClient.delete<void>(`/evaluation-cycles/${id}`),
+  delete: (id: string) => apiClient.delete<void>(`/evaluation-cycles/${id}`),
 
   /**
    * بدء دورة التقييم
    */
-  start: (id: string) =>
-    apiClient.patch<EvaluationCycle>(`/evaluation-cycles/${id}/start`, {}),
+  start: (id: string) => apiClient.patch<EvaluationCycle>(`/evaluation-cycles/${id}/start`, {}),
 
   /**
    * إنهاء دورة التقييم
@@ -316,14 +322,12 @@ export const evaluationCyclesApi = {
   /**
    * أرشفة دورة
    */
-  archive: (id: string) =>
-    apiClient.patch<EvaluationCycle>(`/evaluation-cycles/${id}/archive`, {}),
+  archive: (id: string) => apiClient.patch<EvaluationCycle>(`/evaluation-cycles/${id}/archive`, {}),
 
   /**
    * الحصول على إحصائيات الدورة
    */
-  getStats: (id: string) =>
-    apiClient.get<EvaluationStats>(`/evaluation-cycles/${id}/stats`),
+  getStats: (id: string) => apiClient.get<EvaluationStats>(`/evaluation-cycles/${id}/stats`)
 };
 
 // =====================
@@ -334,16 +338,15 @@ export const employeeEvaluationsApi = {
   /**
    * الحصول على جميع تقييمات الموظفين
    */
-  getAll: (filters?: EvaluationFilters) => 
-    apiClient.get<EmployeeEvaluation[]>('/employee-evaluations', {
-      params: filters as Record<string, string | number> | undefined,
+  getAll: (filters?: EvaluationFilters) =>
+    apiClient.get<EmployeeEvaluation[]>("/employee-evaluations", {
+      params: filters as Record<string, string | number> | undefined
     }),
 
   /**
    * الحصول على تقييم بالمعرف
    */
-  getById: (id: string) => 
-    apiClient.get<EmployeeEvaluation>(`/employee-evaluations/${id}`),
+  getById: (id: string) => apiClient.get<EmployeeEvaluation>(`/employee-evaluations/${id}`),
 
   /**
    * الحصول على تقييمات موظف
@@ -372,13 +375,15 @@ export const employeeEvaluationsApi = {
   /**
    * تقديم تقييم المدير
    */
-  submitManagerReview: (id: string, review: EvaluationReview & { 
-    strengths?: string; 
-    improvements?: string; 
-    developmentPlan?: string;
-    managerComments?: string;
-  }) =>
-    apiClient.patch<EmployeeEvaluation>(`/employee-evaluations/${id}/manager-review`, review),
+  submitManagerReview: (
+    id: string,
+    review: EvaluationReview & {
+      strengths?: string;
+      improvements?: string;
+      developmentPlan?: string;
+      managerComments?: string;
+    }
+  ) => apiClient.patch<EmployeeEvaluation>(`/employee-evaluations/${id}/manager-review`, review),
 
   /**
    * إتمام المعايرة
@@ -390,13 +395,15 @@ export const employeeEvaluationsApi = {
    * تأكيد اطلاع الموظف
    */
   acknowledge: (id: string, employeeComments?: string) =>
-    apiClient.patch<EmployeeEvaluation>(`/employee-evaluations/${id}/acknowledge`, { employeeComments }),
+    apiClient.patch<EmployeeEvaluation>(`/employee-evaluations/${id}/acknowledge`, {
+      employeeComments
+    }),
 
   /**
    * تصدير التقييمات
    */
-  export: (cycleId: string, format: 'csv' | 'xlsx' | 'pdf') =>
-    apiClient.get<Blob>(`/employee-evaluations/export/${cycleId}`, { params: { format } }),
+  export: (cycleId: string, format: "csv" | "xlsx" | "pdf") =>
+    apiClient.get<Blob>(`/employee-evaluations/export/${cycleId}`, { params: { format } })
 };
 
 // =====================
@@ -407,16 +414,15 @@ export const performanceGoalsApi = {
   /**
    * الحصول على جميع الأهداف
    */
-  getAll: (filters?: GoalFilters) => 
-    apiClient.get<PerformanceGoal[]>('/performance-goals', {
-      params: filters as Record<string, string | number> | undefined,
+  getAll: (filters?: GoalFilters) =>
+    apiClient.get<PerformanceGoal[]>("/performance-goals", {
+      params: filters as Record<string, string | number> | undefined
     }),
 
   /**
    * الحصول على هدف بالمعرف
    */
-  getById: (id: string) => 
-    apiClient.get<PerformanceGoal>(`/performance-goals/${id}`),
+  getById: (id: string) => apiClient.get<PerformanceGoal>(`/performance-goals/${id}`),
 
   /**
    * الحصول على أهداف موظف
@@ -433,8 +439,9 @@ export const performanceGoalsApi = {
   /**
    * إنشاء هدف جديد
    */
-  create: (data: Omit<PerformanceGoal, 'id' | 'tenantId' | 'progress' | 'createdAt' | 'updatedAt'>) =>
-    apiClient.post<PerformanceGoal>('/performance-goals', data),
+  create: (
+    data: Omit<PerformanceGoal, "id" | "tenantId" | "progress" | "createdAt" | "updatedAt">
+  ) => apiClient.post<PerformanceGoal>("/performance-goals", data),
 
   /**
    * تحديث هدف
@@ -445,8 +452,7 @@ export const performanceGoalsApi = {
   /**
    * حذف هدف
    */
-  delete: (id: string) =>
-    apiClient.delete<void>(`/performance-goals/${id}`),
+  delete: (id: string) => apiClient.delete<void>(`/performance-goals/${id}`),
 
   /**
    * تحديث التقدم
@@ -469,22 +475,31 @@ export const performanceGoalsApi = {
   /**
    * إضافة معلم
    */
-  addMilestone: (goalId: string, milestone: { title: string; dueDate: string; targetValue?: number }) =>
-    apiClient.post<PerformanceGoal>(`/performance-goals/${goalId}/milestones`, milestone),
+  addMilestone: (
+    goalId: string,
+    milestone: { title: string; dueDate: string; targetValue?: number }
+  ) => apiClient.post<PerformanceGoal>(`/performance-goals/${goalId}/milestones`, milestone),
 
   /**
    * تحديث معلم
    */
-  updateMilestone: (goalId: string, milestoneId: string, data: { actualValue?: number; isCompleted?: boolean }) =>
-    apiClient.patch<PerformanceGoal>(`/performance-goals/${goalId}/milestones/${milestoneId}`, data),
+  updateMilestone: (
+    goalId: string,
+    milestoneId: string,
+    data: { actualValue?: number; isCompleted?: boolean }
+  ) =>
+    apiClient.patch<PerformanceGoal>(
+      `/performance-goals/${goalId}/milestones/${milestoneId}`,
+      data
+    ),
 
   /**
    * الحصول على إحصائيات الأهداف
    */
   getStats: (params?: { employeeId?: string; departmentId?: string; year?: number }) =>
-    apiClient.get<GoalStats>('/performance-goals/stats', { 
-      params: params as Record<string, string | number> | undefined 
-    }),
+    apiClient.get<GoalStats>("/performance-goals/stats", {
+      params: params as Record<string, string | number> | undefined
+    })
 };
 
 // =====================
@@ -495,14 +510,13 @@ export const performanceRatingsApi = {
   /**
    * الحصول على جميع التقديرات
    */
-  getAll: () => 
-    apiClient.get<PerformanceRating[]>('/performance-ratings'),
+  getAll: () => apiClient.get<PerformanceRating[]>("/performance-ratings"),
 
   /**
    * تحديث التقديرات
    */
   update: (ratings: PerformanceRating[]) =>
-    apiClient.put<PerformanceRating[]>('/performance-ratings', { ratings }),
+    apiClient.put<PerformanceRating[]>("/performance-ratings", { ratings })
 };
 
 // تصدير مجمع
@@ -511,5 +525,5 @@ export const performanceApi = {
   cycles: evaluationCyclesApi,
   evaluations: employeeEvaluationsApi,
   goals: performanceGoalsApi,
-  ratings: performanceRatingsApi,
+  ratings: performanceRatingsApi
 };

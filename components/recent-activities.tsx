@@ -13,7 +13,7 @@ function formatDateTime(locale: AppLocale, date: Date) {
     month: "short",
     day: "2-digit",
     hour: "2-digit",
-    minute: "2-digit",
+    minute: "2-digit"
   }).format(date);
 }
 
@@ -25,14 +25,29 @@ function initials(firstName?: string, lastName?: string) {
 }
 
 const STATUS_LABELS: Record<string, { ar: string; en: string; className: string }> = {
-  APPROVED: { ar: "موافق", en: "Approved", className: "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400" },
-  PENDING:  { ar: "قيد الانتظار", en: "Pending", className: "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400" },
-  REJECTED: { ar: "مرفوض", en: "Rejected", className: "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400" },
+  APPROVED: {
+    ar: "موافق",
+    en: "Approved",
+    className:
+      "border-green-200 bg-green-50 text-green-700 dark:border-green-800 dark:bg-green-950/30 dark:text-green-400"
+  },
+  PENDING: {
+    ar: "قيد الانتظار",
+    en: "Pending",
+    className:
+      "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-400"
+  },
+  REJECTED: {
+    ar: "مرفوض",
+    en: "Rejected",
+    className:
+      "border-red-200 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/30 dark:text-red-400"
+  }
 };
 
 export function RecentActivities({
   locale,
-  activities,
+  activities
 }: {
   locale: AppLocale;
   activities: DashboardActivity[];
@@ -75,9 +90,13 @@ export function RecentActivities({
                     {activity.status && STATUS_LABELS[activity.status] ? (
                       <Badge
                         variant="outline"
-                        className={cn("shrink-0 text-xs", STATUS_LABELS[activity.status].className)}
-                      >
-                        {locale === "ar" ? STATUS_LABELS[activity.status].ar : STATUS_LABELS[activity.status].en}
+                        className={cn(
+                          "shrink-0 text-xs",
+                          STATUS_LABELS[activity.status].className
+                        )}>
+                        {locale === "ar"
+                          ? STATUS_LABELS[activity.status].ar
+                          : STATUS_LABELS[activity.status].en}
                       </Badge>
                     ) : null}
                   </div>

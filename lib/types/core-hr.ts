@@ -12,7 +12,7 @@ export type ContractType = "full_time" | "part_time" | "contract" | "intern";
 export interface Employee {
   id: string;
   employeeNumber: string; // الرقم الوظيفي
-  
+
   // Personal Info
   firstName: string;
   firstNameAr?: string;
@@ -25,7 +25,7 @@ export interface Employee {
   dateOfBirth?: string;
   gender?: Gender;
   maritalStatus?: MaritalStatus;
-  
+
   // Employment Info
   departmentId: string;
   jobTitleId: string;
@@ -34,16 +34,16 @@ export interface Employee {
   hireDate: string;
   contractType: ContractType;
   probationEndDate?: string;
-  
+
   // Status
   status: EmployeeStatus;
   terminationDate?: string;
   terminationReason?: string;
-  
+
   // Salary (basic info, full payroll in Phase 5)
   basicSalary?: number;
   currency?: string;
-  
+
   // Metadata
   tenantId: string;
   createdAt: string;
@@ -78,7 +78,7 @@ export interface Department {
   parentId?: string; // للأقسام الفرعية
   managerId?: string; // مدير القسم (employee id)
   employeesCount: number;
-  
+
   // Metadata
   tenantId: string;
   createdAt: string;
@@ -105,7 +105,7 @@ export interface JobTitle {
   minSalary?: number;
   maxSalary?: number;
   employeesCount: number;
-  
+
   // Metadata
   tenantId: string;
   createdAt: string;
@@ -135,7 +135,7 @@ export interface Branch {
   email?: string;
   isHeadquarters: boolean;
   employeesCount: number;
-  
+
   // Metadata
   tenantId: string;
   createdAt: string;
@@ -146,13 +146,13 @@ export interface Branch {
 export interface OrganizationProfile {
   id: string;
   tenantId: string;
-  
+
   // Basic Info
   name: string;
   nameAr?: string;
   commercialRegister?: string;
   taxNumber?: string;
-  
+
   // Contact
   address?: string;
   city?: string;
@@ -160,16 +160,19 @@ export interface OrganizationProfile {
   phone?: string;
   email?: string;
   website?: string;
-  
+
   // Logo
   logoUrl?: string;
-  
+
   // Metadata
   updatedAt: string;
 }
 
 // Helper to get display name (Arabic if available, else English)
-export function getDisplayName(item: { name: string; nameAr?: string }, locale: "ar" | "en" = "ar"): string {
+export function getDisplayName(
+  item: { name: string; nameAr?: string },
+  locale: "ar" | "en" = "ar"
+): string {
   if (locale === "ar" && item.nameAr) return item.nameAr;
   return item.name;
 }
@@ -190,9 +193,9 @@ export function getLevelLabel(level?: number): string {
     3: "Senior",
     4: "Manager",
     5: "Director",
-    6: "Executive",
+    6: "Executive"
   };
-  return level ? levels[level] ?? "Unknown" : "Not Set";
+  return level ? (levels[level] ?? "Unknown") : "Not Set";
 }
 
 export function getLevelLabelAr(level?: number): string {
@@ -202,7 +205,7 @@ export function getLevelLabelAr(level?: number): string {
     3: "أول",
     4: "مدير",
     5: "مدير تنفيذي",
-    6: "قيادي",
+    6: "قيادي"
   };
-  return level ? levels[level] ?? "غير معروف" : "غير محدد";
+  return level ? (levels[level] ?? "غير معروف") : "غير محدد";
 }

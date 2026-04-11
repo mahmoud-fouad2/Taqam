@@ -3,7 +3,7 @@
  * Matches web design-tokens.ts for brand consistency.
  */
 
-export const palette = {
+const palette = {
   blue50: "#eff6ff",
   blue100: "#dbeafe",
   blue200: "#bfdbfe",

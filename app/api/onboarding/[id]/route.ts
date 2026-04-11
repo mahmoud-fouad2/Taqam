@@ -9,43 +9,45 @@ const processUpdateSchema = z.object({
   // Prisma enum `OnboardingStatus` has DELAYED (not CANCELLED).
   // We still accept CANCELLED as a backwards-compatible alias for DELAYED.
   status: z.enum(["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "DELAYED", "CANCELLED"]).optional(),
-  tasks: z.array(z.object({
-    id: z.string(),
-    title: z.string(),
-    description: z.string().optional(),
-    category: z.string().optional(),
-    dueDate: z.string().optional(),
-    assigneeId: z.string().optional(),
-    isCompleted: z.boolean().default(false),
-    completedAt: z.string().optional().nullable(),
-  })).optional(),
-  documents: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    type: z.string().optional(),
-    isRequired: z.boolean().default(false),
-    isSubmitted: z.boolean().default(false),
-    submittedAt: z.string().optional().nullable(),
-    fileUrl: z.string().optional(),
-  })).optional(),
-  progress: z.number().min(0).max(100).optional(),
+  tasks: z
+    .array(
+      z.object({
+        id: z.string(),
+        title: z.string(),
+        description: z.string().optional(),
+        category: z.string().optional(),
+        dueDate: z.string().optional(),
+        assigneeId: z.string().optional(),
+        isCompleted: z.boolean().default(false),
+        completedAt: z.string().optional().nullable()
+      })
+    )
+    .optional(),
+  documents: z
+    .array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        type: z.string().optional(),
+        isRequired: z.boolean().default(false),
+        isSubmitted: z.boolean().default(false),
+        submittedAt: z.string().optional().nullable(),
+        fileUrl: z.string().optional()
+      })
+    )
+    .optional(),
+  progress: z.number().min(0).max(100).optional()
 });
 
 type Params = Promise<{ id: string }>;
 
 // GET - Get single process
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function GET(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -74,58 +76,46 @@ export async function GET(
                 lastName: true,
                 firstNameAr: true,
                 lastNameAr: true,
-                email: true,
-              },
-            },
-          },
+                email: true
+              }
+            }
+          }
         },
         template: {
           select: {
             id: true,
             name: true,
             description: true,
-            durationDays: true,
-          },
+            durationDays: true
+          }
         },
         createdBy: {
           select: {
             firstName: true,
-            lastName: true,
-          },
-        },
-      },
+            lastName: true
+          }
+        }
+      }
     });
 
     if (!process) {
-      return NextResponse.json(
-        { error: "برنامج التأهيل غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "برنامج التأهيل غير موجود" }, { status: 404 });
     }
 
     return NextResponse.json(process);
   } catch (error) {
     console.error("Error fetching process:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في جلب بيانات البرنامج" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في جلب بيانات البرنامج" }, { status: 500 });
   }
 }
 
 // PATCH - Update process
-export async function PATCH(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     const { id } = await params;
@@ -134,14 +124,11 @@ export async function PATCH(
 
     // Check process exists
     const existingProcess = await prisma.onboardingProcess.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingProcess) {
-      return NextResponse.json(
-        { error: "برنامج التأهيل غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "برنامج التأهيل غير موجود" }, { status: 404 });
     }
 
     // Validate
@@ -175,7 +162,7 @@ export async function PATCH(
         ...validatedData,
         status,
         progress,
-        updatedAt: new Date(),
+        updatedAt: new Date()
       },
       include: {
         employee: {
@@ -184,55 +171,43 @@ export async function PATCH(
             firstName: true,
             lastName: true,
             firstNameAr: true,
-            lastNameAr: true,
-          },
-        },
-      },
+            lastNameAr: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
       message: "تم تحديث برنامج التأهيل بنجاح",
-      process: updatedProcess,
+      process: updatedProcess
     });
   } catch (error) {
     console.error("Error updating process:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "بيانات غير صالحة", details: error.errors },
         { status: 400 }
       );
     }
-    
-    return NextResponse.json(
-      { error: "حدث خطأ في تحديث البرنامج" },
-      { status: 500 }
-    );
+
+    return NextResponse.json({ error: "حدث خطأ في تحديث البرنامج" }, { status: 500 });
   }
 }
 
 // DELETE - Delete process
-export async function DELETE(
-  request: NextRequest,
-  { params }: { params: Params }
-) {
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user?.tenantId) {
-      return NextResponse.json(
-        { error: "غير مصرح" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
     }
 
     // Check permissions
     const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
     if (!allowedRoles.includes(session.user.role || "")) {
-      return NextResponse.json(
-        { error: "لا تملك صلاحية حذف برنامج التأهيل" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "لا تملك صلاحية حذف برنامج التأهيل" }, { status: 403 });
     }
 
     const { id } = await params;
@@ -240,29 +215,23 @@ export async function DELETE(
 
     // Check process exists
     const process = await prisma.onboardingProcess.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!process) {
-      return NextResponse.json(
-        { error: "برنامج التأهيل غير موجود" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "برنامج التأهيل غير موجود" }, { status: 404 });
     }
 
     // Delete process
     await prisma.onboardingProcess.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({
-      message: "تم حذف برنامج التأهيل بنجاح",
+      message: "تم حذف برنامج التأهيل بنجاح"
     });
   } catch (error) {
     console.error("Error deleting process:", error);
-    return NextResponse.json(
-      { error: "حدث خطأ في حذف البرنامج" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "حدث خطأ في حذف البرنامج" }, { status: 500 });
   }
 }

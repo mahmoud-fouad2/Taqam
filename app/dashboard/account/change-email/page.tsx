@@ -12,7 +12,9 @@ export default async function ChangeEmailPage() {
   return (
     <div className="mx-auto w-full max-w-lg space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{locale === "ar" ? "تغيير البريد الإلكتروني" : "Change email"}</h1>
+        <h1 className="text-2xl font-bold">
+          {locale === "ar" ? "تغيير البريد الإلكتروني" : "Change email"}
+        </h1>
         <p className="text-muted-foreground">
           {locale === "ar"
             ? "قم بتحديث بريدك الإلكتروني المرتبط بالحساب. ستحتاج كلمة المرور الحالية للتأكيد."

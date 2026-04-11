@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { spawnSync } from "node:child_process";
@@ -48,12 +48,34 @@ function parseEnvFile(filePath) {
   return vars;
 }
 
+function escapeWindowsArg(value) {
+  if (value.length === 0) {
+    return '""';
+  }
+
+  if (!/[\s"]/u.test(value)) {
+    return value;
+  }
+
+  return `"${value.replace(/(\\*)"/g, "$1$1\\\"").replace(/(\\+)$/g, "$1$1")}"`;
+}
+
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, {
+  const isWindowsBatch = process.platform === "win32" && /\.(bat|cmd)$/i.test(command);
+  const executable = isWindowsBatch ? process.env.ComSpec ?? "cmd.exe" : command;
+  const commandArgs = isWindowsBatch
+    ? ["/d", "/s", "/c", [escapeWindowsArg(command), ...args.map(escapeWindowsArg)].join(" ")]
+    : args;
+
+  const result = spawnSync(executable, commandArgs, {
     cwd: options.cwd ?? projectRoot,
     env: options.env ?? process.env,
     stdio: "inherit",
   });
+
+  if (result.error) {
+    throw result.error;
+  }
 
   if (result.status !== 0) {
     process.exit(result.status ?? 1);
@@ -218,6 +240,7 @@ function publishApk() {
     throw new Error(`Release APK not found at ${releaseApkPath}`);
   }
 
+  mkdirSync(path.dirname(publicApkPath), { recursive: true });
   copyFileSync(releaseApkPath, publicApkPath);
   console.log(`Published release APK to ${publicApkPath}`);
 }

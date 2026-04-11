@@ -1,6 +1,7 @@
 # 🎯 خطوات تشغيل النظام - الحل النهائي
 
 ## المشكلة
+
 - ❌ Render Free Tier: لا يوجد Shell access
 - ❌ تسجيل الدخول يفشل: "البريد الإلكتروني أو كلمة المرور غير صحيحة"
 - ❌ Super Admin غير موجود في قاعدة البيانات
@@ -22,6 +23,7 @@ git push origin main
 بعد اكتمال Deploy:
 
 **PowerShell:**
+
 ```powershell
 $bootstrapToken = $env:SUPER_ADMIN_BOOTSTRAP_TOKEN
 $response = Invoke-RestMethod `
@@ -34,12 +36,14 @@ Write-Host "Role: $($response.user.role)"
 ```
 
 **curl:**
+
 ```bash
 curl -X POST https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin \
   -H "x-bootstrap-token: $SUPER_ADMIN_BOOTSTRAP_TOKEN"
 ```
 
 **النتيجة المتوقعة:**
+
 ```json
 {
   "success": true,
@@ -82,6 +86,7 @@ git push
 #### 1. في Render Dashboard → Environment
 
 أضف/عدّل:
+
 ```env
 ENABLE_SUPER_ADMIN_BOOTSTRAP=true
 SUPER_ADMIN_BOOTSTRAP_TOKEN=replace-with-a-long-random-secret
@@ -98,11 +103,13 @@ SUPER_ADMIN_FORCE=1
 #### 3. تحقق من Logs
 
 ابحث عن:
+
 ```
 [ensure-super-admin] Created super admin: your-admin@example.com
 ```
 
 أو:
+
 ```
 [ensure-super-admin] Updated super admin password: your-admin@example.com
 ```
@@ -138,19 +145,19 @@ function Invoke-ApiCall {
         [hashtable]$Headers = @{},
         [object]$Body = $null
     )
-    
+
     $uri = "$BASE_URL$Endpoint"
     $params = @{
         Uri = $uri
         Method = $Method
         Headers = $Headers
     }
-    
+
     if ($Body) {
         $params.Body = ($Body | ConvertTo-Json -Depth 10)
         $params.ContentType = "application/json"
     }
-    
+
     try {
         return Invoke-RestMethod @params
     } catch {
@@ -431,6 +438,7 @@ Write-Host "🎉 All systems operational!" -ForegroundColor Green
 ```
 
 ثم شغّله:
+
 ```powershell
 .\run-e2e-test.ps1
 ```
@@ -442,6 +450,7 @@ Write-Host "🎉 All systems operational!" -ForegroundColor Green
 ### ما يجب فعله الآن:
 
 1. ✅ **Push الكود:**
+
    ```bash
    git push origin main
    ```
@@ -449,16 +458,19 @@ Write-Host "🎉 All systems operational!" -ForegroundColor Green
 2. ⏳ **انتظر Render Deploy** (2-3 دقائق)
 
 3. ⚡ **استدعِ Bootstrap:**
+
    ```powershell
-  Invoke-RestMethod -Uri "https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin" -Method POST -Headers @{ "x-bootstrap-token" = $env:SUPER_ADMIN_BOOTSTRAP_TOKEN }
+   Invoke-RestMethod -Uri "https://YOUR-RENDER-DOMAIN/api/bootstrap/super-admin" -Method POST -Headers @{ "x-bootstrap-token" = $env:SUPER_ADMIN_BOOTSTRAP_TOKEN }
    ```
 
 4. 🔐 **سجّل دخول:**
-  https://YOUR-RENDER-DOMAIN/login
-  - قيمة `SUPER_ADMIN_EMAIL`
-  - قيمة `SUPER_ADMIN_PASSWORD`
+   https://YOUR-RENDER-DOMAIN/login
+
+- قيمة `SUPER_ADMIN_EMAIL`
+- قيمة `SUPER_ADMIN_PASSWORD`
 
 5. 🧪 **شغّل E2E Test:**
+
    ```powershell
    .\run-e2e-test.ps1
    ```
@@ -475,6 +487,7 @@ Write-Host "🎉 All systems operational!" -ForegroundColor Green
 ## 🎯 النتيجة النهائية
 
 بعد هذه الخطوات:
+
 - ✅ Super Admin موجود
 - ✅ تسجيل الدخول يعمل
 - ✅ نظام كامل مختبَر E2E

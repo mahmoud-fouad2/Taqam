@@ -7,7 +7,10 @@ export function escapeCsvValue(value: string | number | null | undefined): strin
   return normalized;
 }
 
-export function buildCsv(headers: string[], rows: Array<Array<string | number | null | undefined>>): string {
+export function buildCsv(
+  headers: string[],
+  rows: Array<Array<string | number | null | undefined>>
+): string {
   return [headers, ...rows].map((row) => row.map(escapeCsvValue).join(",")).join("\n");
 }
 
@@ -43,7 +46,8 @@ export function buildPayslipHtmlDocument(input: {
   totalDeductions: string;
   netSalary: string;
 }) {
-  const { title, employeeName, employeeNumber, department, jobTitle, periodLabel, paymentDate } = input;
+  const { title, employeeName, employeeNumber, department, jobTitle, periodLabel, paymentDate } =
+    input;
 
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">

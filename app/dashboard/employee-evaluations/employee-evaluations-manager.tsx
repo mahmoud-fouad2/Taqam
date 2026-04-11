@@ -8,7 +8,7 @@ import {
   IconClipboardCheck,
   IconUser,
   IconUsers,
-  IconSearch,
+  IconSearch
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -20,7 +20,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -39,13 +39,13 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -57,7 +57,7 @@ import {
   employeeEvaluationStatusColors,
   formatScore,
   getRatingByScore,
-  defaultPerformanceRatings,
+  defaultPerformanceRatings
 } from "@/lib/types/performance";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -137,7 +137,7 @@ const INITIAL_REVIEW_FORM: ReviewFormState = {
   score: 3,
   comments: "",
   strengths: "",
-  improvements: "",
+  improvements: ""
 };
 
 const REVIEWER_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"];
@@ -161,18 +161,23 @@ function formatDateTime(value?: string | null) {
     month: "2-digit",
     day: "2-digit",
     hour: "2-digit",
-    minute: "2-digit",
+    minute: "2-digit"
   });
 }
 
-function getPersonName(person?: {
-  firstName?: string | null;
-  lastName?: string | null;
-  firstNameAr?: string | null;
-  lastNameAr?: string | null;
-} | null) {
+function getPersonName(
+  person?: {
+    firstName?: string | null;
+    lastName?: string | null;
+    firstNameAr?: string | null;
+    lastNameAr?: string | null;
+  } | null
+) {
   if (!person) return "-";
-  return `${person.firstNameAr || person.firstName || ""} ${person.lastNameAr || person.lastName || ""}`.trim() || "-";
+  return (
+    `${person.firstNameAr || person.firstName || ""} ${person.lastNameAr || person.lastName || ""}`.trim() ||
+    "-"
+  );
 }
 
 function mapEvaluationStatus(item: RawEvaluation): EmployeeEvaluationStatus {
@@ -183,12 +188,7 @@ function mapEvaluationStatus(item: RawEvaluation): EmployeeEvaluationStatus {
 }
 
 function mapManagerReview(item: RawEvaluation): EvaluationReview | undefined {
-  if (
-    item.overallScore == null &&
-    !item.comments &&
-    !item.strengths &&
-    !item.areasForImprovement
-  ) {
+  if (item.overallScore == null && !item.comments && !item.strengths && !item.areasForImprovement) {
     return undefined;
   }
 
@@ -200,7 +200,7 @@ function mapManagerReview(item: RawEvaluation): EvaluationReview | undefined {
     comments: item.comments ?? undefined,
     strengths: splitMultiline(item.strengths),
     improvements: splitMultiline(item.areasForImprovement),
-    submittedAt: item.reviewedAt || item.submittedAt || item.updatedAt,
+    submittedAt: item.reviewedAt || item.submittedAt || item.updatedAt
   };
 }
 
@@ -238,7 +238,7 @@ function mapEvaluation(item: RawEvaluation): EmployeeEvaluation {
     acknowledgedDate: item.employeeAcknowledgedAt || undefined,
     completedDate: item.reviewedAt || undefined,
     createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
+    updatedAt: item.updatedAt
   };
 }
 
@@ -268,7 +268,7 @@ export function EmployeeEvaluationsManager() {
       const [profileRes, evaluationsRes, cyclesRes] = await Promise.all([
         fetch("/api/profile", { cache: "no-store" }),
         fetch("/api/evaluations", { cache: "no-store" }),
-        fetch("/api/performance/cycles", { cache: "no-store" }),
+        fetch("/api/performance/cycles", { cache: "no-store" })
       ]);
 
       const profileJson = (await profileRes.json()) as ProfileResponse;
@@ -290,10 +290,17 @@ export function EmployeeEvaluationsManager() {
       );
       setCurrentUserRole(typeof profileJson.data?.role === "string" ? profileJson.data.role : null);
 
-      setEvaluations(Array.isArray(evaluationsJson.evaluations) ? evaluationsJson.evaluations.map(mapEvaluation) : []);
+      setEvaluations(
+        Array.isArray(evaluationsJson.evaluations)
+          ? evaluationsJson.evaluations.map(mapEvaluation)
+          : []
+      );
       setCycles(
         Array.isArray(cyclesJson.data)
-          ? cyclesJson.data.map((cycle) => ({ id: cycle.id, name: cycle.name || cycle.nameEn || "-" }))
+          ? cyclesJson.data.map((cycle) => ({
+              id: cycle.id,
+              name: cycle.name || cycle.nameEn || "-"
+            }))
           : []
       );
     } catch (error) {
@@ -311,12 +318,15 @@ export function EmployeeEvaluationsManager() {
 
   const sourceEvaluations = useMemo(() => {
     if (activeTab === "mine") {
-      return currentUserId ? evaluations.filter((evaluation) => evaluation.employeeId === currentUserId) : [];
+      return currentUserId
+        ? evaluations.filter((evaluation) => evaluation.employeeId === currentUserId)
+        : [];
     }
 
     if (activeTab === "assigned") {
       return evaluations.filter(
-        (evaluation) => canReviewAll || (currentUserId != null && evaluation.managerId === currentUserId)
+        (evaluation) =>
+          canReviewAll || (currentUserId != null && evaluation.managerId === currentUserId)
       );
     }
 
@@ -342,21 +352,29 @@ export function EmployeeEvaluationsManager() {
     const scored = evaluations.filter((evaluation) => evaluation.finalScore != null);
     const avgScore =
       scored.length > 0
-        ? scored.reduce((sum, evaluation) => sum + Number(evaluation.finalScore || 0), 0) / scored.length
+        ? scored.reduce((sum, evaluation) => sum + Number(evaluation.finalScore || 0), 0) /
+          scored.length
         : 0;
 
     return {
       total: evaluations.length,
-      inReview: evaluations.filter((evaluation) => evaluation.status === "pending_manager_review").length,
-      pendingAcknowledgment: evaluations.filter((evaluation) => evaluation.status === "pending_acknowledgment").length,
+      inReview: evaluations.filter((evaluation) => evaluation.status === "pending_manager_review")
+        .length,
+      pendingAcknowledgment: evaluations.filter(
+        (evaluation) => evaluation.status === "pending_acknowledgment"
+      ).length,
       completed: evaluations.filter((evaluation) => evaluation.status === "completed").length,
-      avgScore,
+      avgScore
     };
   }, [evaluations]);
 
   const canReviewEvaluation = useCallback(
     (evaluation: EmployeeEvaluation) => {
-      if (evaluation.status === "completed" || evaluation.status === "pending_acknowledgment" || evaluation.status === "cancelled") {
+      if (
+        evaluation.status === "completed" ||
+        evaluation.status === "pending_acknowledgment" ||
+        evaluation.status === "cancelled"
+      ) {
         return false;
       }
 
@@ -367,7 +385,11 @@ export function EmployeeEvaluationsManager() {
 
   const canAcknowledgeEvaluation = useCallback(
     (evaluation: EmployeeEvaluation) => {
-      return currentUserId != null && evaluation.employeeId === currentUserId && evaluation.status === "pending_acknowledgment";
+      return (
+        currentUserId != null &&
+        evaluation.employeeId === currentUserId &&
+        evaluation.status === "pending_acknowledgment"
+      );
     },
     [currentUserId]
   );
@@ -383,7 +405,8 @@ export function EmployeeEvaluationsManager() {
       score: evaluation.finalScore ?? evaluation.managerReview?.score ?? INITIAL_REVIEW_FORM.score,
       comments: evaluation.managerComments ?? evaluation.managerReview?.comments ?? "",
       strengths: evaluation.strengths ?? evaluation.managerReview?.strengths?.join("\n") ?? "",
-      improvements: evaluation.improvements ?? evaluation.managerReview?.improvements?.join("\n") ?? "",
+      improvements:
+        evaluation.improvements ?? evaluation.managerReview?.improvements?.join("\n") ?? ""
     });
     setIsReviewDialogOpen(true);
   };
@@ -401,8 +424,8 @@ export function EmployeeEvaluationsManager() {
           comments: reviewForm.comments || null,
           strengths: reviewForm.strengths || null,
           areasForImprovement: reviewForm.improvements || null,
-          status: "COMPLETED",
-        }),
+          status: "COMPLETED"
+        })
       });
 
       const json = await response.json();
@@ -428,7 +451,7 @@ export function EmployeeEvaluationsManager() {
       const response = await fetch(`/api/evaluations/${evaluationId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: "ACKNOWLEDGED" }),
+        body: JSON.stringify({ status: "ACKNOWLEDGED" })
       });
       const json = await response.json();
       if (!response.ok) {
@@ -461,7 +484,9 @@ export function EmployeeEvaluationsManager() {
           <h2 className="text-2xl font-bold">{t.evaluations.title}</h2>
           <p className="text-muted-foreground">{t.evaluations.subtitle}</p>
         </div>
-        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading || isSaving}>{t.common.refresh}</Button>
+        <Button variant="outline" onClick={() => void loadData()} disabled={isLoading || isSaving}>
+          {t.common.refresh}
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-5">
@@ -499,7 +524,7 @@ export function EmployeeEvaluationsManager() {
 
       <div className="flex flex-wrap gap-4">
         <div className="relative max-w-sm flex-1">
-          <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder={t.evaluations.searchPlaceholder}
             className="ps-9"
@@ -522,7 +547,9 @@ export function EmployeeEvaluationsManager() {
           </SelectContent>
         </Select>
 
-        <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as EmployeeEvaluationStatus | "all")}>
+        <Select
+          value={filterStatus}
+          onValueChange={(value) => setFilterStatus(value as EmployeeEvaluationStatus | "all")}>
           <SelectTrigger className="w-[220px]">
             <SelectValue placeholder={t.common.status} />
           </SelectTrigger>
@@ -537,7 +564,9 @@ export function EmployeeEvaluationsManager() {
         </Select>
       </div>
 
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "all" | "mine" | "assigned")}>
+      <Tabs
+        value={activeTab}
+        onValueChange={(value) => setActiveTab(value as "all" | "mine" | "assigned")}>
         <TabsList>
           <TabsTrigger value="all">{t.common.all}</TabsTrigger>
           <TabsTrigger value="mine">{t.evaluations.myEvaluations}</TabsTrigger>
@@ -588,11 +617,13 @@ export function EmployeeEvaluationsManager() {
       </Tabs>
 
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="w-full max-h-[90vh] max-w-3xl overflow-y-auto">
+        <DialogContent className="max-h-[90vh] w-full max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{t.evaluations.evalDetails}</DialogTitle>
             <DialogDescription>
-              {selectedEvaluation ? `${t.evaluations.pViewEvaluation} ${selectedEvaluation.employeeName}` : ""}
+              {selectedEvaluation
+                ? `${t.evaluations.pViewEvaluation} ${selectedEvaluation.employeeName}`
+                : ""}
             </DialogDescription>
           </DialogHeader>
 
@@ -610,7 +641,8 @@ export function EmployeeEvaluationsManager() {
                   <p className="text-muted-foreground">
                     {selectedEvaluation.jobTitle} - {selectedEvaluation.departmentName}
                   </p>
-                  <Badge className={`mt-2 ${employeeEvaluationStatusColors[selectedEvaluation.status]}`}>
+                  <Badge
+                    className={`mt-2 ${employeeEvaluationStatusColors[selectedEvaluation.status]}`}>
                     {employeeEvaluationStatusLabels[selectedEvaluation.status]}
                   </Badge>
                 </div>
@@ -623,17 +655,18 @@ export function EmployeeEvaluationsManager() {
                 <CardContent>
                   <div className="grid gap-4 md:grid-cols-3">
                     <div>
-                      <p className="text-sm text-muted-foreground">{t.trainingCourses.course}</p>
+                      <p className="text-muted-foreground text-sm">{t.trainingCourses.course}</p>
                       <p className="font-medium">{selectedEvaluation.cycleName}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">{t.leaveRequests.period}</p>
+                      <p className="text-muted-foreground text-sm">{t.leaveRequests.period}</p>
                       <p className="font-medium">
-                        {formatDate(selectedEvaluation.periodStart)} - {formatDate(selectedEvaluation.periodEnd)}
+                        {formatDate(selectedEvaluation.periodStart)} -{" "}
+                        {formatDate(selectedEvaluation.periodEnd)}
                       </p>
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground">{t.evaluations.reviewer}</p>
+                      <p className="text-muted-foreground text-sm">{t.evaluations.reviewer}</p>
                       <p className="font-medium">{selectedEvaluation.managerName || "-"}</p>
                     </div>
                   </div>
@@ -643,7 +676,7 @@ export function EmployeeEvaluationsManager() {
               <div className="grid gap-4 md:grid-cols-2">
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <IconClipboardCheck className="h-4 w-4" />
                       {t.evaluations.pPerformanceReview}
                     </CardTitle>
@@ -651,50 +684,60 @@ export function EmployeeEvaluationsManager() {
                   <CardContent>
                     {selectedEvaluation.managerReview ? (
                       <div className="space-y-3">
-                        <div className="rounded-lg bg-muted p-4 text-center">
+                        <div className="bg-muted rounded-lg p-4 text-center">
                           <p className="text-3xl font-bold text-green-600">
                             {formatScore(selectedEvaluation.managerReview.score)}
                           </p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {getRatingLabel(selectedEvaluation.managerReview.score)}
                           </p>
                         </div>
                         {selectedEvaluation.managerReview.comments && (
                           <div>
-                            <p className="mb-1 text-sm text-muted-foreground">{t.evaluations.notes}</p>
+                            <p className="text-muted-foreground mb-1 text-sm">
+                              {t.evaluations.notes}
+                            </p>
                             <p className="text-sm">{selectedEvaluation.managerReview.comments}</p>
                           </div>
                         )}
-                        {selectedEvaluation.managerReview.strengths && selectedEvaluation.managerReview.strengths.length > 0 && (
-                          <div>
-                            <p className="mb-1 text-sm text-muted-foreground">{t.common.notes}</p>
-                            <ul className="list-inside list-disc text-sm">
-                              {selectedEvaluation.managerReview.strengths.map((item, index) => (
-                                <li key={`${item}-${index}`}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
-                        {selectedEvaluation.managerReview.improvements && selectedEvaluation.managerReview.improvements.length > 0 && (
-                          <div>
-                            <p className="mb-1 text-sm text-muted-foreground">{t.evaluations.improvementAreas}</p>
-                            <ul className="list-inside list-disc text-sm">
-                              {selectedEvaluation.managerReview.improvements.map((item, index) => (
-                                <li key={`${item}-${index}`}>{item}</li>
-                              ))}
-                            </ul>
-                          </div>
-                        )}
+                        {selectedEvaluation.managerReview.strengths &&
+                          selectedEvaluation.managerReview.strengths.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-1 text-sm">{t.common.notes}</p>
+                              <ul className="list-inside list-disc text-sm">
+                                {selectedEvaluation.managerReview.strengths.map((item, index) => (
+                                  <li key={`${item}-${index}`}>{item}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        {selectedEvaluation.managerReview.improvements &&
+                          selectedEvaluation.managerReview.improvements.length > 0 && (
+                            <div>
+                              <p className="text-muted-foreground mb-1 text-sm">
+                                {t.evaluations.improvementAreas}
+                              </p>
+                              <ul className="list-inside list-disc text-sm">
+                                {selectedEvaluation.managerReview.improvements.map(
+                                  (item, index) => (
+                                    <li key={`${item}-${index}`}>{item}</li>
+                                  )
+                                )}
+                              </ul>
+                            </div>
+                          )}
                       </div>
                     ) : (
-                      <p className="py-4 text-center text-muted-foreground">{t.evaluations.noReviewEntered}</p>
+                      <p className="text-muted-foreground py-4 text-center">
+                        {t.evaluations.noReviewEntered}
+                      </p>
                     )}
                   </CardContent>
                 </Card>
 
                 <Card>
                   <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-base">
                       <IconUser className="h-4 w-4" />
                       {t.evaluations.pEmployeeComments}
                     </CardTitle>
@@ -703,7 +746,9 @@ export function EmployeeEvaluationsManager() {
                     {selectedEvaluation.employeeComments ? (
                       <p className="text-sm leading-6">{selectedEvaluation.employeeComments}</p>
                     ) : (
-                      <p className="py-4 text-center text-muted-foreground">{t.evaluations.noEmployeeComments}</p>
+                      <p className="text-muted-foreground py-4 text-center">
+                        {t.evaluations.noEmployeeComments}
+                      </p>
                     )}
                   </CardContent>
                 </Card>
@@ -713,15 +758,18 @@ export function EmployeeEvaluationsManager() {
                 <Card className="bg-gradient-to-r from-blue-50 to-purple-50">
                   <CardContent className="pt-6">
                     <div className="text-center">
-                      <p className="mb-2 text-sm text-muted-foreground">{t.evaluations.finalScore}</p>
-                      <p className="mb-2 text-5xl font-bold">{formatScore(selectedEvaluation.finalScore)}</p>
+                      <p className="text-muted-foreground mb-2 text-sm">
+                        {t.evaluations.finalScore}
+                      </p>
+                      <p className="mb-2 text-5xl font-bold">
+                        {formatScore(selectedEvaluation.finalScore)}
+                      </p>
                       <Badge
                         className="px-4 py-1 text-lg"
                         style={{
                           backgroundColor: `${getRatingColor(selectedEvaluation.finalScore)}20`,
-                          color: getRatingColor(selectedEvaluation.finalScore),
-                        }}
-                      >
+                          color: getRatingColor(selectedEvaluation.finalScore)
+                        }}>
                         {getRatingLabel(selectedEvaluation.finalScore)}
                       </Badge>
                     </div>
@@ -732,7 +780,9 @@ export function EmployeeEvaluationsManager() {
           )}
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>{t.common.close}</Button>
+            <Button variant="outline" onClick={() => setIsViewDialogOpen(false)}>
+              {t.common.close}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -742,20 +792,26 @@ export function EmployeeEvaluationsManager() {
           <DialogHeader>
             <DialogTitle>{t.evaluations.reviewRating}</DialogTitle>
             <DialogDescription>
-              {selectedEvaluation ? `${t.evaluations.pEnterReview} ${selectedEvaluation.employeeName} - ${selectedEvaluation.cycleName}` : ""}
+              {selectedEvaluation
+                ? `${t.evaluations.pEnterReview} ${selectedEvaluation.employeeName} - ${selectedEvaluation.cycleName}`
+                : ""}
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-6 py-4">
             <div className="space-y-4">
               <Label>{t.evaluations.finalGrade}</Label>
-              <div className="rounded-lg bg-muted p-6 text-center">
-                <p className="mb-2 text-5xl font-bold text-blue-600">{formatScore(reviewForm.score)}</p>
+              <div className="bg-muted rounded-lg p-6 text-center">
+                <p className="mb-2 text-5xl font-bold text-blue-600">
+                  {formatScore(reviewForm.score)}
+                </p>
                 <p className="text-muted-foreground">{getRatingLabel(reviewForm.score)}</p>
               </div>
               <Slider
                 value={[reviewForm.score]}
-                onValueChange={([value]) => setReviewForm((current) => ({ ...current, score: value }))}
+                onValueChange={([value]) =>
+                  setReviewForm((current) => ({ ...current, score: value }))
+                }
                 max={5}
                 min={1}
                 step={0.1}
@@ -768,7 +824,9 @@ export function EmployeeEvaluationsManager() {
               <Textarea
                 rows={3}
                 value={reviewForm.comments}
-                onChange={(event) => setReviewForm((current) => ({ ...current, comments: event.target.value }))}
+                onChange={(event) =>
+                  setReviewForm((current) => ({ ...current, comments: event.target.value }))
+                }
                 placeholder={t.evaluations.reviewSummary}
               />
             </div>
@@ -779,7 +837,9 @@ export function EmployeeEvaluationsManager() {
                 <Textarea
                   rows={4}
                   value={reviewForm.strengths}
-                  onChange={(event) => setReviewForm((current) => ({ ...current, strengths: event.target.value }))}
+                  onChange={(event) =>
+                    setReviewForm((current) => ({ ...current, strengths: event.target.value }))
+                  }
                   placeholder={t.common.linePerPoint}
                 />
               </div>
@@ -788,7 +848,9 @@ export function EmployeeEvaluationsManager() {
                 <Textarea
                   rows={4}
                   value={reviewForm.improvements}
-                  onChange={(event) => setReviewForm((current) => ({ ...current, improvements: event.target.value }))}
+                  onChange={(event) =>
+                    setReviewForm((current) => ({ ...current, improvements: event.target.value }))
+                  }
                   placeholder={t.common.linePerPoint}
                 />
               </div>
@@ -802,8 +864,9 @@ export function EmployeeEvaluationsManager() {
                 setIsReviewDialogOpen(false);
                 setSelectedEvaluation(null);
                 setReviewForm(INITIAL_REVIEW_FORM);
-              }}
-            >{t.common.cancel}</Button>
+              }}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={handleSubmitReview} disabled={isSaving}>
               {t.evaluations.pSaveReview}
             </Button>
@@ -835,109 +898,112 @@ function EvaluationsTable({
   canReviewEvaluation,
   canAcknowledgeEvaluation,
   getRatingLabel,
-  getRatingColor,
+  getRatingColor
 }: EvaluationsTableProps) {
   return (
     <Card>
       <div className="overflow-x-auto">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>{t.common.employee}</TableHead>
-            <TableHead>{t.common.department}</TableHead>
-            <TableHead>{t.evaluations.evaluationCycle}</TableHead>
-            <TableHead>{t.common.status}</TableHead>
-            <TableHead>{t.evaluations.result}</TableHead>
-            <TableHead>{t.myRequests.lastUpdated}</TableHead>
-            <TableHead className="w-[100px]">{t.common.actions}</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {isLoading ? (
+        <Table>
+          <TableHeader>
             <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                {t.evaluations.pLoadingEvaluations}
-              </TableCell>
+              <TableHead>{t.common.employee}</TableHead>
+              <TableHead>{t.common.department}</TableHead>
+              <TableHead>{t.evaluations.evaluationCycle}</TableHead>
+              <TableHead>{t.common.status}</TableHead>
+              <TableHead>{t.evaluations.result}</TableHead>
+              <TableHead>{t.myRequests.lastUpdated}</TableHead>
+              <TableHead className="w-[100px]">{t.common.actions}</TableHead>
             </TableRow>
-          ) : evaluations.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={7} className="py-8 text-center text-muted-foreground">
-                {t.evaluations.pNoEvaluationsMatchTheCurrentFi}
-              </TableCell>
-            </TableRow>
-          ) : (
-            evaluations.map((evaluation) => (
-              <TableRow key={evaluation.id}>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={evaluation.employeeAvatar} alt="" />
-                      <AvatarFallback>{evaluation.employeeName.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium">{evaluation.employeeName}</div>
-                      <div className="text-xs text-muted-foreground">{evaluation.jobTitle}</div>
-                    </div>
-                  </div>
-                </TableCell>
-                <TableCell>{evaluation.departmentName}</TableCell>
-                <TableCell>{evaluation.cycleName}</TableCell>
-                <TableCell>
-                  <Badge className={employeeEvaluationStatusColors[evaluation.status]}>
-                    {employeeEvaluationStatusLabels[evaluation.status]}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {evaluation.finalScore != null ? (
-                    <div className="flex items-center gap-2">
-                      <Badge
-                        style={{
-                          backgroundColor: `${getRatingColor(evaluation.finalScore)}20`,
-                          color: getRatingColor(evaluation.finalScore),
-                        }}
-                      >
-                        {formatScore(evaluation.finalScore)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">{getRatingLabel(evaluation.finalScore)}</span>
-                    </div>
-                  ) : (
-                    <span className="text-muted-foreground">-</span>
-                  )}
-                </TableCell>
-                <TableCell className="text-sm text-muted-foreground">
-                  {formatDateTime(evaluation.updatedAt)}
-                </TableCell>
-                <TableCell>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" aria-label={t.common.options}>
-                        <IconDots className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => onView(evaluation)}>
-                        <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
-                      {canReviewEvaluation(evaluation) && (
-                        <DropdownMenuItem onClick={() => onReview(evaluation)}>
-                          <IconClipboardCheck className="ms-2 h-4 w-4" />
-                          {t.evaluations.pReviewEvaluation}
-                        </DropdownMenuItem>
-                      )}
-                      {canAcknowledgeEvaluation(evaluation) && (
-                        <DropdownMenuItem onClick={() => onAcknowledge(evaluation.id)}>
-                          <IconCheck className="ms-2 h-4 w-4" />
-                          {t.evaluations.pConfirmAcknowledgment}
-                        </DropdownMenuItem>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+          </TableHeader>
+          <TableBody>
+            {isLoading ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-muted-foreground py-8 text-center">
+                  {t.evaluations.pLoadingEvaluations}
                 </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+            ) : evaluations.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={7} className="text-muted-foreground py-8 text-center">
+                  {t.evaluations.pNoEvaluationsMatchTheCurrentFi}
+                </TableCell>
+              </TableRow>
+            ) : (
+              evaluations.map((evaluation) => (
+                <TableRow key={evaluation.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={evaluation.employeeAvatar} alt="" />
+                        <AvatarFallback>{evaluation.employeeName.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">{evaluation.employeeName}</div>
+                        <div className="text-muted-foreground text-xs">{evaluation.jobTitle}</div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{evaluation.departmentName}</TableCell>
+                  <TableCell>{evaluation.cycleName}</TableCell>
+                  <TableCell>
+                    <Badge className={employeeEvaluationStatusColors[evaluation.status]}>
+                      {employeeEvaluationStatusLabels[evaluation.status]}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {evaluation.finalScore != null ? (
+                      <div className="flex items-center gap-2">
+                        <Badge
+                          style={{
+                            backgroundColor: `${getRatingColor(evaluation.finalScore)}20`,
+                            color: getRatingColor(evaluation.finalScore)
+                          }}>
+                          {formatScore(evaluation.finalScore)}
+                        </Badge>
+                        <span className="text-muted-foreground text-xs">
+                          {getRatingLabel(evaluation.finalScore)}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {formatDateTime(evaluation.updatedAt)}
+                  </TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" aria-label={t.common.options}>
+                          <IconDots className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => onView(evaluation)}>
+                          <IconEye className="ms-2 h-4 w-4" />
+                          {t.common.viewDetails}
+                        </DropdownMenuItem>
+                        {canReviewEvaluation(evaluation) && (
+                          <DropdownMenuItem onClick={() => onReview(evaluation)}>
+                            <IconClipboardCheck className="ms-2 h-4 w-4" />
+                            {t.evaluations.pReviewEvaluation}
+                          </DropdownMenuItem>
+                        )}
+                        {canAcknowledgeEvaluation(evaluation) && (
+                          <DropdownMenuItem onClick={() => onAcknowledge(evaluation.id)}>
+                            <IconCheck className="ms-2 h-4 w-4" />
+                            {t.evaluations.pConfirmAcknowledgment}
+                          </DropdownMenuItem>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </Card>
   );
 }

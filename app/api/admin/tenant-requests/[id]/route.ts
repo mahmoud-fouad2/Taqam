@@ -31,7 +31,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
             ? "approved"
             : "rejected",
       createdAt: item.createdAt,
-      message: item.message,
-    },
+      message: item.message
+    }
   });
 }

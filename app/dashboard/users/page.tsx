@@ -11,15 +11,11 @@ import { PlusCircledIcon } from "@radix-ui/react-icons";
 import UsersDataTable from "./data-table";
 import { Card, CardContent } from "@/components/ui/card";
 
-
-export async function generateMetadata(): Promise<Metadata>{
+export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
   return generateMeta({
     title: locale === "ar" ? "المستخدمون" : "Users",
-    description:
-      locale === "ar"
-        ? "قائمة المستخدمين وإدارتهم."
-        : "Users list and management.",
+    description: locale === "ar" ? "قائمة المستخدمين وإدارتهم." : "Users list and management."
   });
 }
 
@@ -39,8 +35,8 @@ export default async function Page() {
       role: true,
       status: true,
       email: true,
-      lastLoginAt: true,
-    },
+      lastLoginAt: true
+    }
   });
 
   const tableData = users.map((u) => ({
@@ -50,13 +46,15 @@ export default async function Page() {
     role: u.role,
     status: u.status,
     email: u.email,
-    lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null,
+    lastLoginAt: u.lastLoginAt ? u.lastLoginAt.toISOString() : null
   }));
 
   return (
     <>
-      <div className="flex items-center justify-between ">
-        <h1 className="text-2xl font-bold tracking-tight">{locale === "ar" ? "المستخدمون" : "Users"}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold tracking-tight">
+          {locale === "ar" ? "المستخدمون" : "Users"}
+        </h1>
         <Button asChild>
           <Link href="/dashboard/users/add">
             <PlusCircledIcon className="me-2" /> {locale === "ar" ? "إضافة مستخدم" : "Add user"}

@@ -8,6 +8,6 @@ export function register() {
   Sentry.init({
     dsn,
     enabled: Boolean(dsn),
-    tracesSampleRate: 0.1,
+    tracesSampleRate: 0.1
   });
 }

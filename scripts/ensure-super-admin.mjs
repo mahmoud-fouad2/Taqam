@@ -2,6 +2,28 @@ import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { hash } from "bcryptjs";
 
+const LEGACY_SSL_MODES = new Set(["prefer", "require", "verify-ca"]);
+
+function normalizePostgresConnectionString(connectionString) {
+  try {
+    const parsed = new URL(connectionString);
+    const sslMode = parsed.searchParams.get("sslmode")?.toLowerCase();
+
+    if (!sslMode || !LEGACY_SSL_MODES.has(sslMode)) {
+      return connectionString;
+    }
+
+    if (parsed.searchParams.get("uselibpqcompat") === "true") {
+      return connectionString;
+    }
+
+    parsed.searchParams.set("sslmode", "verify-full");
+    return parsed.toString();
+  } catch {
+    return connectionString;
+  }
+}
+
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   console.error("[ensure-super-admin] Missing DATABASE_URL");
@@ -11,7 +33,9 @@ if (!connectionString) {
 const superAdminEmailRaw = process.env.SUPER_ADMIN_EMAIL;
 const superAdminPassword = process.env.SUPER_ADMIN_PASSWORD;
 const force = process.env.SUPER_ADMIN_FORCE === "1" || process.env.SUPER_ADMIN_FORCE === "true";
-const bootstrapEnabled = process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "1" || process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
+const bootstrapEnabled =
+  process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "1" ||
+  process.env.ENABLE_SUPER_ADMIN_BOOTSTRAP === "true";
 
 if (!bootstrapEnabled) {
   console.log("[ensure-super-admin] ENABLE_SUPER_ADMIN_BOOTSTRAP is not enabled; skipping.");
@@ -27,7 +51,9 @@ if (!superAdminEmailRaw || !superAdminPassword) {
 
 const superAdminEmail = superAdminEmailRaw.toLowerCase();
 
-const adapter = new PrismaPg({ connectionString });
+const adapter = new PrismaPg({
+  connectionString: normalizePostgresConnectionString(connectionString)
+});
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
@@ -35,7 +61,9 @@ async function main() {
 
   const existing = await prisma.user.findUnique({ where: { email: superAdminEmail } });
   if (usersCount > 0 && !force) {
-    console.log(`[ensure-super-admin] Users already exist (${usersCount}); set SUPER_ADMIN_FORCE=1 to reset/create super admin.`);
+    console.log(
+      `[ensure-super-admin] Users already exist (${usersCount}); set SUPER_ADMIN_FORCE=1 to reset/create super admin.`
+    );
     return;
   }
 
@@ -52,9 +80,9 @@ async function main() {
       data: {
         password: passwordHash,
         role: "SUPER_ADMIN",
-        status: "ACTIVE",
+        status: "ACTIVE"
       },
-      select: { id: true, email: true },
+      select: { id: true, email: true }
     });
     console.log(`[ensure-super-admin] Updated super admin password: ${updated.email}`);
     return;
@@ -69,9 +97,9 @@ async function main() {
       role: "SUPER_ADMIN",
       status: "ACTIVE",
       permissions: [],
-      lastLoginAt: null,
+      lastLoginAt: null
     },
-    select: { id: true, email: true },
+    select: { id: true, email: true }
   });
 
   console.log(`[ensure-super-admin] Created super admin: ${created.email}`);

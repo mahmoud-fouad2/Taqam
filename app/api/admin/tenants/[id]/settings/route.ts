@@ -16,17 +16,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const tenant = await prisma.tenant.findUnique({
@@ -34,15 +28,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
       select: {
         settings: true,
         maxEmployees: true,
-        plan: true,
-      },
+        plan: true
+      }
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { success: false, error: "Tenant not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Tenant not found" }, { status: 404 });
     }
 
     const settings = (tenant.settings as Record<string, unknown>) ?? {};
@@ -50,16 +41,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json({
       success: true,
       data: {
-        allowedModules: settings.allowedModules ?? [
-          "employees",
-          "attendance",
-          "leaves",
-          "payroll",
-        ],
+        allowedModules: settings.allowedModules ?? ["employees", "attendance", "leaves", "payroll"],
         maxEmployees: tenant.maxEmployees ?? 10,
         maxUsers: settings.maxUsers ?? 5,
-        features: settings.features ?? {},
-      },
+        features: settings.features ?? {}
+      }
     });
   } catch (error) {
     console.error("Error fetching tenant settings:", error);
@@ -76,31 +62,22 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const body = await request.json();
 
     const tenant = await prisma.tenant.findUnique({
       where: { id },
-      select: { settings: true, maxEmployees: true },
+      select: { settings: true, maxEmployees: true }
     });
 
     if (!tenant) {
-      return NextResponse.json(
-        { success: false, error: "Tenant not found" },
-        { status: 404 }
-      );
+      return NextResponse.json({ success: false, error: "Tenant not found" }, { status: 404 });
     }
 
     const currentSettings = (tenant.settings as Record<string, unknown>) ?? {};
@@ -113,9 +90,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           ...currentSettings,
           ...(body.allowedModules !== undefined && { allowedModules: body.allowedModules }),
           ...(body.maxUsers !== undefined && { maxUsers: body.maxUsers }),
-          ...(body.features !== undefined && { features: body.features }),
-        },
-      },
+          ...(body.features !== undefined && { features: body.features })
+        }
+      }
     });
 
     const newSettings = (updatedTenant.settings as Record<string, unknown>) ?? {};
@@ -126,8 +103,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         allowedModules: newSettings.allowedModules ?? [],
         maxEmployees: updatedTenant.maxEmployees ?? 10,
         maxUsers: newSettings.maxUsers ?? 5,
-        features: newSettings.features ?? {},
-      },
+        features: newSettings.features ?? {}
+      }
     });
   } catch (error) {
     console.error("Error updating tenant settings:", error);

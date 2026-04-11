@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             id: true,
             firstName: true,
             lastName: true,
-            employeeNumber: true,
-          },
-        },
-      },
+            employeeNumber: true
+          }
+        }
+      }
     });
 
     if (!shift) {
@@ -46,10 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: shift });
   } catch (error) {
     console.error("Error fetching shift:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch shift" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch shift" }, { status: 500 });
   }
 }
 
@@ -57,13 +54,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingShift = await prisma.shift.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingShift) {
@@ -94,17 +91,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         overtimeMultiplier: body.overtimeMultiplier,
         color: body.color,
         isDefault: body.isDefault,
-        isActive: body.isActive,
-      },
+        isActive: body.isActive
+      }
     });
 
     return NextResponse.json({ data: shift });
   } catch (error) {
     console.error("Error updating shift:", error);
-    return NextResponse.json(
-      { error: "Failed to update shift" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update shift" }, { status: 500 });
   }
 }
 
@@ -112,13 +106,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingShift = await prisma.shift.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingShift) {
@@ -132,15 +126,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Soft delete by deactivating
     await prisma.shift.update({
       where: { id },
-      data: { isActive: false },
+      data: { isActive: false }
     });
 
     return NextResponse.json({ message: "Shift deleted successfully" });
   } catch (error) {
     console.error("Error deleting shift:", error);
-    return NextResponse.json(
-      { error: "Failed to delete shift" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete shift" }, { status: 500 });
   }
 }

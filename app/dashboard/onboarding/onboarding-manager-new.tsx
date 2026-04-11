@@ -16,26 +16,20 @@ import {
   IconTrash,
   IconEdit,
   IconLoader,
-  IconTemplate,
+  IconTemplate
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
@@ -43,14 +37,14 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
+  SheetTrigger
 } from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Dialog,
@@ -58,7 +52,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -68,14 +62,9 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialogTitle
 } from "@/components/ui/alert-dialog";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -193,14 +182,14 @@ const statusLabels: Record<string, string> = {
   NOT_STARTED: t.common.notStarted,
   IN_PROGRESS: t.common.inProgress,
   COMPLETED: t.common.completed,
-  CANCELLED: t.common.cancelled,
+  CANCELLED: t.common.cancelled
 };
 
 const statusColors: Record<string, string> = {
   NOT_STARTED: "bg-gray-100 text-gray-800",
   IN_PROGRESS: "bg-blue-100 text-blue-800",
   COMPLETED: "bg-green-100 text-green-800",
-  CANCELLED: "bg-red-100 text-red-800",
+  CANCELLED: "bg-red-100 text-red-800"
 };
 
 const taskCategoryLabels: Record<string, string> = {
@@ -209,7 +198,7 @@ const taskCategoryLabels: Record<string, string> = {
   training: t.onboarding.training,
   introduction: t.onboarding.introduction,
   equipment: t.onboarding.equipment,
-  other: t.common.other,
+  other: t.common.other
 };
 
 export function OnboardingManagerNew() {
@@ -223,7 +212,7 @@ export function OnboardingManagerNew() {
     notStarted: 0,
     inProgress: 0,
     completed: 0,
-    cancelled: 0,
+    cancelled: 0
   });
   const [loading, setLoading] = React.useState(true);
   const [searchQuery, setSearchQuery] = React.useState("");
@@ -241,7 +230,7 @@ export function OnboardingManagerNew() {
     employeeId: "",
     templateId: "",
     startDate: new Date().toISOString().split("T")[0],
-    notes: "",
+    notes: ""
   });
 
   // Form state for new template
@@ -251,7 +240,7 @@ export function OnboardingManagerNew() {
     durationDays: 30,
     tasks: [] as any[],
     documents: [] as any[],
-    isActive: true,
+    isActive: true
   });
 
   // Fetch data
@@ -264,7 +253,7 @@ export function OnboardingManagerNew() {
       const [processesRes, templatesRes, employeesRes] = await Promise.all([
         fetch(`/api/onboarding?${params.toString()}`),
         fetch("/api/onboarding/templates?isActive=true"),
-        fetch("/api/employees?limit=100"),
+        fetch("/api/employees?limit=100")
       ]);
 
       if (processesRes.ok) {
@@ -319,7 +308,7 @@ export function OnboardingManagerNew() {
       const res = await fetch("/api/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newProcess),
+        body: JSON.stringify(newProcess)
       });
 
       if (res.ok) {
@@ -329,7 +318,7 @@ export function OnboardingManagerNew() {
           employeeId: "",
           templateId: "",
           startDate: new Date().toISOString().split("T")[0],
-          notes: "",
+          notes: ""
         });
         fetchData();
       } else {
@@ -358,7 +347,7 @@ export function OnboardingManagerNew() {
       const res = await fetch(`/api/onboarding/${processId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ tasks: updatedTasks }),
+        body: JSON.stringify({ tasks: updatedTasks })
       });
 
       if (res.ok) {
@@ -383,7 +372,7 @@ export function OnboardingManagerNew() {
       const res = await fetch(`/api/onboarding/${processId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
 
       if (res.ok) {
@@ -403,7 +392,7 @@ export function OnboardingManagerNew() {
 
     try {
       const res = await fetch(`/api/onboarding/${deleteProcessId}`, {
-        method: "DELETE",
+        method: "DELETE"
       });
 
       if (res.ok) {
@@ -431,7 +420,7 @@ export function OnboardingManagerNew() {
       const res = await fetch("/api/onboarding/templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newTemplate),
+        body: JSON.stringify(newTemplate)
       });
 
       if (res.ok) {
@@ -443,7 +432,7 @@ export function OnboardingManagerNew() {
           durationDays: 30,
           tasks: [],
           documents: [],
-          isActive: true,
+          isActive: true
         });
         fetchData();
       } else {
@@ -462,14 +451,17 @@ export function OnboardingManagerNew() {
   };
 
   const getInitials = (name: string) => {
-    return name.split(" ").map((n) => n[0]).join("");
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("");
   };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex min-h-[400px] items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <IconLoader className="h-8 w-8 animate-spin text-primary" />
+          <IconLoader className="text-primary h-8 w-8 animate-spin" />
           <p className="text-muted-foreground">{t.onboarding.loadingData}</p>
         </div>
       </div>
@@ -483,11 +475,11 @@ export function OnboardingManagerNew() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.onboarding.totalProcesses}</CardTitle>
-            <IconUsers className="h-4 w-4 text-muted-foreground" />
+            <IconUsers className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
-            <p className="text-xs text-muted-foreground">{t.onboarding.inProcess}</p>
+            <p className="text-muted-foreground text-xs">{t.onboarding.inProcess}</p>
           </CardContent>
         </Card>
 
@@ -498,7 +490,7 @@ export function OnboardingManagerNew() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.inProgress}</div>
-            <p className="text-xs text-muted-foreground">{t.onboarding.undergoing}</p>
+            <p className="text-muted-foreground text-xs">{t.onboarding.undergoing}</p>
           </CardContent>
         </Card>
 
@@ -509,7 +501,7 @@ export function OnboardingManagerNew() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
-            <p className="text-xs text-muted-foreground">{t.onboarding.completedOnboarding}</p>
+            <p className="text-muted-foreground text-xs">{t.onboarding.completedOnboarding}</p>
           </CardContent>
         </Card>
 
@@ -520,7 +512,7 @@ export function OnboardingManagerNew() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-600">{stats.notStarted}</div>
-            <p className="text-xs text-muted-foreground">{t.onboarding.awaitingStart}</p>
+            <p className="text-muted-foreground text-xs">{t.onboarding.awaitingStart}</p>
           </CardContent>
         </Card>
       </div>
@@ -529,11 +521,11 @@ export function OnboardingManagerNew() {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList>
           <TabsTrigger value="processes">
-            <IconClipboardList className="h-4 w-4 ms-2" />
+            <IconClipboardList className="ms-2 h-4 w-4" />
             {t.onboarding.operations}
           </TabsTrigger>
           <TabsTrigger value="templates">
-            <IconTemplate className="h-4 w-4 ms-2" />
+            <IconTemplate className="ms-2 h-4 w-4" />
             {t.onboarding.templates}
           </TabsTrigger>
         </TabsList>
@@ -560,9 +552,9 @@ export function OnboardingManagerNew() {
             </CardHeader>
             <CardContent>
               {/* {t.onboarding.searchFilter} */}
-              <div className="flex flex-col gap-4 mb-6 sm:flex-row">
+              <div className="mb-6 flex flex-col gap-4 sm:flex-row">
                 <div className="relative flex-1">
-                  <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                   <Input
                     placeholder={t.onboarding.searchEmployee}
                     value={searchQuery}
@@ -603,7 +595,7 @@ export function OnboardingManagerNew() {
                   <TableBody>
                     {filteredProcesses.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-8">
+                        <TableCell colSpan={7} className="py-8 text-center">
                           <p className="text-muted-foreground">{t.onboarding.noProcesses}</p>
                         </TableCell>
                       </TableRow>
@@ -618,22 +610,28 @@ export function OnboardingManagerNew() {
                                   {getInitials(getEmployeeName(process.employee))}
                                 </AvatarFallback>
                               </Avatar>
-                              <span className="font-medium">{getEmployeeName(process.employee)}</span>
+                              <span className="font-medium">
+                                {getEmployeeName(process.employee)}
+                              </span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            {process.employee.jobTitle?.nameAr || process.employee.jobTitle?.name || "-"}
+                            {process.employee.jobTitle?.nameAr ||
+                              process.employee.jobTitle?.name ||
+                              "-"}
                           </TableCell>
                           <TableCell>
-                            {process.employee.department?.nameAr || process.employee.department?.name || "-"}
+                            {process.employee.department?.nameAr ||
+                              process.employee.department?.name ||
+                              "-"}
                           </TableCell>
                           <TableCell>
                             {new Date(process.startDate).toLocaleDateString("ar-SA")}
                           </TableCell>
                           <TableCell>
-                            <div className="flex items-center gap-2 w-32">
+                            <div className="flex w-32 items-center gap-2">
                               <Progress value={process.progress} className="h-2" />
-                              <span className="text-xs text-muted-foreground w-8">
+                              <span className="text-muted-foreground w-8 text-xs">
                                 {process.progress}%
                               </span>
                             </div>
@@ -651,16 +649,14 @@ export function OnboardingManagerNew() {
                                 onClick={() => {
                                   setSelectedProcess(process);
                                   setIsViewSheetOpen(true);
-                                }}
-                              >
+                                }}>
                                 <IconClipboardList className="h-4 w-4" />
                               </Button>
                               <Button
                                 variant="ghost"
                                 size="sm"
                                 className="text-destructive hover:text-destructive"
-                                onClick={() => setDeleteProcessId(process.id)}
-                              >
+                                onClick={() => setDeleteProcessId(process.id)}>
                                 <IconTrash className="h-4 w-4" />
                               </Button>
                             </div>
@@ -691,14 +687,13 @@ export function OnboardingManagerNew() {
             </CardHeader>
             <CardContent>
               {templates.length === 0 ? (
-                <div className="text-center py-8">
-                  <IconTemplate className="h-12 w-12 mx-auto text-muted-foreground mb-3" />
+                <div className="py-8 text-center">
+                  <IconTemplate className="text-muted-foreground mx-auto mb-3 h-12 w-12" />
                   <p className="text-muted-foreground">{t.onboarding.noTemplates}</p>
                   <Button
                     variant="link"
                     className="mt-2"
-                    onClick={() => setIsTemplateDialogOpen(true)}
-                  >
+                    onClick={() => setIsTemplateDialogOpen(true)}>
                     {t.onboarding.pCreate} {t.onboarding.newTemplate}
                   </Button>
                 </div>
@@ -720,16 +715,20 @@ export function OnboardingManagerNew() {
                         )}
                       </CardHeader>
                       <CardContent>
-                        <div className="flex items-center justify-between text-sm text-muted-foreground">
-                          <span>{template.durationDays} {t.onboarding.dayUnit}</span>
-                          <span>{template._count?.processes || 0} {t.onboarding.usageCount}</span>
+                        <div className="text-muted-foreground flex items-center justify-between text-sm">
+                          <span>
+                            {template.durationDays} {t.onboarding.dayUnit}
+                          </span>
+                          <span>
+                            {template._count?.processes || 0} {t.onboarding.usageCount}
+                          </span>
                         </div>
-                        <div className="flex gap-2 mt-3">
-                          <span className="text-xs text-muted-foreground">
+                        <div className="mt-3 flex gap-2">
+                          <span className="text-muted-foreground text-xs">
                             {template.tasks?.length || 0} {t.onboarding.taskCount}
                           </span>
-                          <span className="text-xs text-muted-foreground">•</span>
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">•</span>
+                          <span className="text-muted-foreground text-xs">
                             {template.documents?.length || 0} {t.onboarding.docCount}
                           </span>
                         </div>
@@ -755,8 +754,7 @@ export function OnboardingManagerNew() {
               <Label>{t.onboarding.newEmployee}</Label>
               <Select
                 value={newProcess.employeeId}
-                onValueChange={(value) => setNewProcess({ ...newProcess, employeeId: value })}
-              >
+                onValueChange={(value) => setNewProcess({ ...newProcess, employeeId: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.common.selectEmployee} />
                 </SelectTrigger>
@@ -774,8 +772,7 @@ export function OnboardingManagerNew() {
               <Label>{t.onboarding.templateSelect}</Label>
               <Select
                 value={newProcess.templateId}
-                onValueChange={(value) => setNewProcess({ ...newProcess, templateId: value })}
-              >
+                onValueChange={(value) => setNewProcess({ ...newProcess, templateId: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.onboarding.chooseTemplate} />
                 </SelectTrigger>
@@ -806,11 +803,15 @@ export function OnboardingManagerNew() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={handleCreateProcess} disabled={submitting}>
               {submitting ? (
                 <>
-                  <IconLoader className="h-4 w-4 animate-spin ms-2" />{t.common.creating}</>
+                  <IconLoader className="ms-2 h-4 w-4 animate-spin" />
+                  {t.common.creating}
+                </>
               ) : (
                 t.onboarding.startOnboarding
               )}
@@ -848,17 +849,23 @@ export function OnboardingManagerNew() {
               <Input
                 type="number"
                 value={newTemplate.durationDays}
-                onChange={(e) => setNewTemplate({ ...newTemplate, durationDays: parseInt(e.target.value) || 30 })}
+                onChange={(e) =>
+                  setNewTemplate({ ...newTemplate, durationDays: parseInt(e.target.value) || 30 })
+                }
                 min={1}
               />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => setIsTemplateDialogOpen(false)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={handleCreateTemplate} disabled={submitting}>
               {submitting ? (
                 <>
-                  <IconLoader className="h-4 w-4 animate-spin ms-2" />{t.common.creating}</>
+                  <IconLoader className="ms-2 h-4 w-4 animate-spin" />
+                  {t.common.creating}
+                </>
               ) : (
                 t.onboarding.createTemplate
               )}
@@ -869,11 +876,12 @@ export function OnboardingManagerNew() {
 
       {/* {t.onboarding.taskSheet} */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-xl overflow-y-auto">
+        <SheetContent className="overflow-y-auto sm:max-w-xl">
           <SheetHeader>
             <SheetTitle>{t.onboarding.tasks}</SheetTitle>
             <SheetDescription>
-              {t.onboarding.taskSheet} {selectedProcess ? getEmployeeName(selectedProcess.employee) : ""}
+              {t.onboarding.taskSheet}{" "}
+              {selectedProcess ? getEmployeeName(selectedProcess.employee) : ""}
             </SheetDescription>
           </SheetHeader>
           {selectedProcess && (
@@ -888,18 +896,20 @@ export function OnboardingManagerNew() {
                 </Avatar>
                 <div>
                   <h3 className="font-semibold">{getEmployeeName(selectedProcess.employee)}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedProcess.employee.jobTitle?.nameAr || selectedProcess.employee.jobTitle?.name}
+                  <p className="text-muted-foreground text-sm">
+                    {selectedProcess.employee.jobTitle?.nameAr ||
+                      selectedProcess.employee.jobTitle?.name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedProcess.employee.department?.nameAr || selectedProcess.employee.department?.name}
+                  <p className="text-muted-foreground text-xs">
+                    {selectedProcess.employee.department?.nameAr ||
+                      selectedProcess.employee.department?.name}
                   </p>
                 </div>
               </div>
 
               {/* {t.onboarding.progress} */}
               <div>
-                <div className="flex justify-between text-sm mb-2">
+                <div className="mb-2 flex justify-between text-sm">
                   <span>{t.onboarding.totalProgress}</span>
                   <span>{selectedProcess.progress}%</span>
                 </div>
@@ -911,8 +921,7 @@ export function OnboardingManagerNew() {
                 <Label>{t.common.status}</Label>
                 <Select
                   value={selectedProcess.status}
-                  onValueChange={(value) => handleStatusChange(selectedProcess.id, value)}
-                >
+                  onValueChange={(value) => handleStatusChange(selectedProcess.id, value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -929,7 +938,7 @@ export function OnboardingManagerNew() {
               {/* {t.onboarding.manager} */}
               {selectedProcess.employee.manager && (
                 <div className="bg-muted/50 rounded-lg p-3">
-                  <p className="text-sm font-medium mb-1">{t.onboarding.directManager}</p>
+                  <p className="mb-1 text-sm font-medium">{t.onboarding.directManager}</p>
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarFallback>
@@ -940,10 +949,14 @@ export function OnboardingManagerNew() {
                     </Avatar>
                     <div>
                       <p className="text-sm">
-                        {selectedProcess.employee.manager.firstNameAr || selectedProcess.employee.manager.firstName}{" "}
-                        {selectedProcess.employee.manager.lastNameAr || selectedProcess.employee.manager.lastName}
+                        {selectedProcess.employee.manager.firstNameAr ||
+                          selectedProcess.employee.manager.firstName}{" "}
+                        {selectedProcess.employee.manager.lastNameAr ||
+                          selectedProcess.employee.manager.lastName}
                       </p>
-                      <p className="text-xs text-muted-foreground">{selectedProcess.employee.manager.email}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {selectedProcess.employee.manager.email}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -953,16 +966,13 @@ export function OnboardingManagerNew() {
 
               {/* {t.onboarding.taskList} */}
               <div>
-                <h4 className="font-semibold mb-3">{t.onboarding.taskList}</h4>
+                <h4 className="mb-3 font-semibold">{t.onboarding.taskList}</h4>
                 {selectedProcess.tasks.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">{t.onboarding.noTasks}</p>
+                  <p className="text-muted-foreground py-4 text-center">{t.onboarding.noTasks}</p>
                 ) : (
                   <div className="space-y-3">
                     {selectedProcess.tasks.map((task) => (
-                      <div
-                        key={task.id}
-                        className="flex items-start gap-3 p-3 rounded-lg border"
-                      >
+                      <div key={task.id} className="flex items-start gap-3 rounded-lg border p-3">
                         <Checkbox
                           checked={task.isCompleted}
                           onCheckedChange={(checked) =>
@@ -970,25 +980,28 @@ export function OnboardingManagerNew() {
                           }
                         />
                         <div className="flex-1">
-                          <p className={`font-medium ${task.isCompleted ? "line-through text-muted-foreground" : ""}`}>
+                          <p
+                            className={`font-medium ${task.isCompleted ? "text-muted-foreground line-through" : ""}`}>
                             {task.title}
                           </p>
                           {task.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                            <p className="text-muted-foreground mt-1 text-sm">{task.description}</p>
                           )}
-                          <div className="flex gap-2 mt-1">
+                          <div className="mt-1 flex gap-2">
                             {task.category && (
                               <Badge variant="outline" className="text-xs">
                                 {taskCategoryLabels[task.category] || task.category}
                               </Badge>
                             )}
-                            <Badge className={`text-xs ${task.isCompleted ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
+                            <Badge
+                              className={`text-xs ${task.isCompleted ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}`}>
                               {task.isCompleted ? t.common.completed : t.common.pending}
                             </Badge>
                           </div>
                           {task.dueDate && (
-                            <p className="text-xs text-muted-foreground mt-1">
-                              {t.onboarding.dueDate} {new Date(task.dueDate).toLocaleDateString("ar-SA")}
+                            <p className="text-muted-foreground mt-1 text-xs">
+                              {t.onboarding.dueDate}{" "}
+                              {new Date(task.dueDate).toLocaleDateString("ar-SA")}
                             </p>
                           )}
                         </div>
@@ -1003,15 +1016,14 @@ export function OnboardingManagerNew() {
                 <>
                   <Separator />
                   <div>
-                    <h4 className="font-semibold mb-3">{t.onboarding.requiredDocuments}</h4>
+                    <h4 className="mb-3 font-semibold">{t.onboarding.requiredDocuments}</h4>
                     <div className="space-y-2">
                       {selectedProcess.documents.map((doc) => (
                         <div
                           key={doc.id}
-                          className="flex items-center justify-between p-3 rounded-lg border"
-                        >
+                          className="flex items-center justify-between rounded-lg border p-3">
                           <div className="flex items-center gap-2">
-                            <IconFileText className="h-4 w-4 text-muted-foreground" />
+                            <IconFileText className="text-muted-foreground h-4 w-4" />
                             <span>{doc.name}</span>
                             {doc.isRequired && (
                               <Badge variant="destructive" className="text-xs">
@@ -1019,7 +1031,12 @@ export function OnboardingManagerNew() {
                               </Badge>
                             )}
                           </div>
-                          <Badge className={doc.isSubmitted ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                          <Badge
+                            className={
+                              doc.isSubmitted
+                                ? "bg-green-100 text-green-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }>
                             {doc.isSubmitted ? t.onboarding.attached : t.onboarding.awaitingAttach}
                           </Badge>
                         </div>
@@ -1038,13 +1055,15 @@ export function OnboardingManagerNew() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>{t.common.confirmDeleteTitle}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {t.onboarding.deleteConfirm}
-            </AlertDialogDescription>
+            <AlertDialogDescription>{t.onboarding.deleteConfirm}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteProcess} className="bg-destructive hover:bg-destructive/90">{t.common.delete}</AlertDialogAction>
+            <AlertDialogAction
+              onClick={handleDeleteProcess}
+              className="bg-destructive hover:bg-destructive/90">
+              {t.common.delete}
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

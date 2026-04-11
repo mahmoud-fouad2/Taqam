@@ -13,7 +13,10 @@ function mapStatus(status: string): string {
   return status.toLowerCase().replace(/_/g, "-");
 }
 
-export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string; taskId: string }> }) {
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ id: string; taskId: string }> }
+) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -37,7 +40,9 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    const tasks: any[] = Array.isArray(process.tasks) ? (process.tasks as any[]) : (process.tasks as any)?.tasks ?? [];
+    const tasks: any[] = Array.isArray(process.tasks)
+      ? (process.tasks as any[])
+      : ((process.tasks as any)?.tasks ?? []);
     const idx = tasks.findIndex((t) => String(t.id) === String(taskId));
     if (idx === -1) {
       return NextResponse.json({ success: false, error: "Task not found" }, { status: 404 });
@@ -46,7 +51,8 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
     tasks[idx] = {
       ...tasks[idx],
       status: body.status,
-      completedDate: body.status === "completed" ? new Date().toISOString() : tasks[idx]?.completedDate,
+      completedDate:
+        body.status === "completed" ? new Date().toISOString() : tasks[idx]?.completedDate
     };
 
     const total = tasks.length || 0;
@@ -65,7 +71,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       data: {
         tasks,
         progress,
-        status,
+        status
       },
       include: {
         employee: {
@@ -74,10 +80,10 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
             firstName: true,
             lastName: true,
             department: { select: { name: true } },
-            jobTitle: { select: { name: true } },
-          },
-        },
-      },
+            jobTitle: { select: { name: true } }
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -95,11 +101,14 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
         tasks: (updated.tasks as any) ?? [],
         documents: (updated.documents as any) ?? [],
         createdAt: updated.createdAt.toISOString(),
-        updatedAt: updated.updatedAt.toISOString(),
-      },
+        updatedAt: updated.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error updating onboarding task:", error);
-    return NextResponse.json({ success: false, error: "Failed to update onboarding task" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to update onboarding task" },
+      { status: 500 }
+    );
   }
 }

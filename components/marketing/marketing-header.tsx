@@ -24,7 +24,7 @@ export function MarketingHeader() {
   const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
 
   const isEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
-  const strippedPath = isEnPrefix ? (pathname.replace(/^\/en(?=\/|$)/, "") || "/") : pathname;
+  const strippedPath = isEnPrefix ? pathname.replace(/^\/en(?=\/|$)/, "") || "/" : pathname;
 
   React.useEffect(() => {
     setLocale(getLocaleFromCookie());
@@ -34,7 +34,7 @@ export function MarketingHeader() {
     locale === "en" ? (href === "/" ? "/en" : `/en${href}`) : href;
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur">
+    <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2">
           <LogoMark frameClassName="rounded-lg p-0 dark:ring-white/10" imageClassName="h-9" />
@@ -42,7 +42,8 @@ export function MarketingHeader() {
 
         <nav className="hidden items-center gap-1 md:flex">
           {marketingNav.map((item) => {
-            const active = strippedPath === item.href ||
+            const active =
+              strippedPath === item.href ||
               (item.children?.some((c) => strippedPath === c.href) ?? false);
 
             if (item.children) {
@@ -51,40 +52,37 @@ export function MarketingHeader() {
                   key={item.href}
                   className="relative"
                   onMouseEnter={() => setOpenDropdown(item.href)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
+                  onMouseLeave={() => setOpenDropdown(null)}>
                   <button
                     className={cn(
-                      "flex items-center gap-1 rounded-md px-3 py-2 text-sm text-muted-foreground transition hover:text-foreground",
-                      active && "bg-muted text-foreground",
-                    )}
-                  >
+                      "text-muted-foreground hover:text-foreground flex items-center gap-1 rounded-md px-3 py-2 text-sm transition",
+                      active && "bg-muted text-foreground"
+                    )}>
                     {locale === "ar" ? item.labelAr : item.labelEn}
                     <ChevronDown
                       className={cn(
                         "h-3.5 w-3.5 transition-transform",
-                        openDropdown === item.href && "rotate-180",
+                        openDropdown === item.href && "rotate-180"
                       )}
                     />
                   </button>
 
                   {openDropdown === item.href && (
-                    <div className="absolute start-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl border bg-popover shadow-lg">
+                    <div className="bg-popover absolute start-0 top-full z-50 mt-1 w-64 overflow-hidden rounded-xl border shadow-lg">
                       {item.children.map((child) => (
                         <Link
                           key={child.href}
                           href={localeHref(child.href)}
                           className={cn(
-                            "flex flex-col gap-0.5 px-4 py-3 text-sm transition hover:bg-accent",
-                            strippedPath === child.href && "bg-accent",
+                            "hover:bg-accent flex flex-col gap-0.5 px-4 py-3 text-sm transition",
+                            strippedPath === child.href && "bg-accent"
                           )}
-                          onClick={() => setOpenDropdown(null)}
-                        >
-                          <span className="font-medium leading-none">
+                          onClick={() => setOpenDropdown(null)}>
+                          <span className="leading-none font-medium">
                             {locale === "ar" ? child.labelAr : child.labelEn}
                           </span>
                           {(child.descAr ?? child.descEn) && (
-                            <span className="text-xs text-muted-foreground">
+                            <span className="text-muted-foreground text-xs">
                               {locale === "ar" ? child.descAr : child.descEn}
                             </span>
                           )}
@@ -101,10 +99,9 @@ export function MarketingHeader() {
                 key={item.href}
                 href={localeHref(item.href)}
                 className={cn(
-                  "rounded-md px-3 py-2 text-sm text-muted-foreground hover:text-foreground",
-                  active && "bg-muted text-foreground",
-                )}
-              >
+                  "text-muted-foreground hover:text-foreground rounded-md px-3 py-2 text-sm",
+                  active && "bg-muted text-foreground"
+                )}>
                 {locale === "ar" ? item.labelAr : item.labelEn}
               </Link>
             );
@@ -120,7 +117,9 @@ export function MarketingHeader() {
             </Button>
           </Link>
           <Link href={localeHref("/request-demo")} className="hidden sm:block">
-            <Button variant="brand" size="sm">{locale === "ar" ? "طلب عرض" : "Request demo"}</Button>
+            <Button variant="brand" size="sm">
+              {locale === "ar" ? "طلب عرض" : "Request demo"}
+            </Button>
           </Link>
         </div>
       </div>

@@ -4,7 +4,7 @@ import {
   getEmailRuntimeStatus,
   getRecaptchaRuntimeStatus,
   getRedisRuntimeStatus,
-  getStorageRuntimeStatus,
+  getStorageRuntimeStatus
 } from "@/lib/runtime-integrations";
 
 const originalEnv = { ...process.env };

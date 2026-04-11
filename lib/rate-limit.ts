@@ -1,6 +1,8 @@
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Rate Limiting Utility
  *
@@ -13,7 +15,10 @@ type RateLimitOptions = {
   limit: number;
   windowMs: number;
   keyPrefix: string;
+  identifier?: string;
 };
+
+type RateLimitMode = "memory" | "distributed";
 
 type Bucket = {
   resetAt: number;
@@ -83,7 +88,7 @@ function getDistributedLimiter(options: RateLimitOptions) {
     limiter: Ratelimit.fixedWindow(options.limit, windowToDuration(options.windowMs)),
     prefix: options.keyPrefix,
     analytics: false,
-    ephemeralCache,
+    ephemeralCache
   });
 
   limiterCache.set(cacheKey, limiter);
@@ -96,7 +101,27 @@ function warnAboutRateLimitFallback(error: unknown) {
   }
 
   warnedAboutRateLimitFallback = true;
-  console.warn("[rate-limit] Falling back to in-memory limiter", error);
+  logger.warn("[rate-limit] Falling back to in-memory limiter", {
+    error: error instanceof Error ? error.message : String(error)
+  });
+}
+
+function resolveIdentifier(req: Request, options: RateLimitOptions) {
+  return options.identifier?.trim() || getClientIp(req);
+}
+
+function logRateLimitExceeded(identifier: string, options: RateLimitOptions, mode: RateLimitMode) {
+  if (process.env.NODE_ENV === "test") {
+    return;
+  }
+
+  logger.security("rate_limit_exceeded", {
+    keyPrefix: options.keyPrefix,
+    identifier,
+    mode,
+    limit: options.limit,
+    windowMs: options.windowMs
+  });
 }
 
 export function getClientIp(req: Request): string {
@@ -113,13 +138,19 @@ export function getClientIp(req: Request): string {
   return "unknown";
 }
 
-function checkRateLimitInMemory(req: Request, options: RateLimitOptions): {
+function checkRateLimitInMemory(
+  req: Request,
+  options: RateLimitOptions
+): {
   allowed: boolean;
   remaining: number;
   resetAt: number;
+  identifier: string;
+  limit: number;
+  mode: RateLimitMode;
 } {
-  const ip = getClientIp(req);
-  const key = `${options.keyPrefix}:${ip}`;
+  const identifier = resolveIdentifier(req, options);
+  const key = `${options.keyPrefix}:${identifier}`;
 
   const t = now();
   const existing = buckets.get(key);
@@ -127,24 +158,52 @@ function checkRateLimitInMemory(req: Request, options: RateLimitOptions): {
   if (!existing || existing.resetAt <= t) {
     const resetAt = t + options.windowMs;
     buckets.set(key, { resetAt, count: 1 });
-    return { allowed: true, remaining: Math.max(0, options.limit - 1), resetAt };
+    return {
+      allowed: true,
+      remaining: Math.max(0, options.limit - 1),
+      resetAt,
+      identifier,
+      limit: options.limit,
+      mode: "memory"
+    };
   }
 
   if (existing.count >= options.limit) {
-    return { allowed: false, remaining: 0, resetAt: existing.resetAt };
+    logRateLimitExceeded(identifier, options, "memory");
+    return {
+      allowed: false,
+      remaining: 0,
+      resetAt: existing.resetAt,
+      identifier,
+      limit: options.limit,
+      mode: "memory"
+    };
   }
 
   existing.count += 1;
   buckets.set(key, existing);
-  return { allowed: true, remaining: Math.max(0, options.limit - existing.count), resetAt: existing.resetAt };
+  return {
+    allowed: true,
+    remaining: Math.max(0, options.limit - existing.count),
+    resetAt: existing.resetAt,
+    identifier,
+    limit: options.limit,
+    mode: "memory"
+  };
 }
 
-export async function checkRateLimit(req: Request, options: RateLimitOptions): Promise<{
+export async function checkRateLimit(
+  req: Request,
+  options: RateLimitOptions
+): Promise<{
   allowed: boolean;
   remaining: number;
   resetAt: number;
+  identifier: string;
+  limit: number;
+  mode: RateLimitMode;
 }> {
-  const identifier = getClientIp(req);
+  const identifier = resolveIdentifier(req, options);
   const distributedLimiter = getDistributedLimiter(options);
 
   if (!distributedLimiter) {
@@ -153,10 +212,17 @@ export async function checkRateLimit(req: Request, options: RateLimitOptions): P
 
   try {
     const result = await distributedLimiter.limit(identifier);
+    if (!result.success) {
+      logRateLimitExceeded(identifier, options, "distributed");
+    }
+
     return {
       allowed: result.success,
       remaining: result.remaining,
       resetAt: result.reset,
+      identifier,
+      limit: options.limit,
+      mode: "distributed"
     };
   } catch (error) {
     warnAboutRateLimitFallback(error);
@@ -171,5 +237,11 @@ export function withRateLimitHeaders<T extends Response>(
   res.headers.set("X-RateLimit-Limit", String(info.limit));
   res.headers.set("X-RateLimit-Remaining", String(info.remaining));
   res.headers.set("X-RateLimit-Reset", String(Math.floor(info.resetAt / 1000)));
+
+  const retryAfterSeconds = Math.max(0, Math.ceil((info.resetAt - Date.now()) / 1000));
+  if (retryAfterSeconds > 0) {
+    res.headers.set("Retry-After", String(retryAfterSeconds));
+  }
+
   return res;
 }

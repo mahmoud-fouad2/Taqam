@@ -7,7 +7,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { EmploymentType, Gender } from "@prisma/client";
 import prisma from "@/lib/db";
-import { requireTenantSession, requireRole, parsePagination } from "@/lib/api/route-helper";
+import {
+  dataResponse,
+  errorResponse,
+  forbiddenResponse,
+  logApiError,
+  parsePagination,
+  requireRole,
+  requireTenantSession,
+  validationErrorResponse
+} from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { z } from "zod";
 
@@ -17,7 +26,7 @@ const createEmployeeRequiredSchema = z.object({
   firstName: z.string().min(1),
   lastName: z.string().min(1),
   email: z.string().email(),
-  hireDate: z.string().min(1),
+  hireDate: z.string().min(1)
 });
 
 function normalizeOptionalString(value: unknown) {
@@ -48,7 +57,7 @@ export async function GET(request: NextRequest) {
     const { tenantId, session } = auth;
 
     if (!EMPLOYEE_LIST_ROLES.has(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const { searchParams } = new URL(request.url);
@@ -59,9 +68,9 @@ export async function GET(request: NextRequest) {
 
     // Build where clause
     const where: any = {
-      deletedAt: null,
+      deletedAt: null
     };
-    
+
     if (tenantId) {
       where.tenantId = tenantId;
     }
@@ -71,7 +80,7 @@ export async function GET(request: NextRequest) {
         { firstName: { contains: search, mode: "insensitive" } },
         { lastName: { contains: search, mode: "insensitive" } },
         { email: { contains: search, mode: "insensitive" } },
-        { employeeNumber: { contains: search, mode: "insensitive" } },
+        { employeeNumber: { contains: search, mode: "insensitive" } }
       ];
     }
 
@@ -93,15 +102,15 @@ export async function GET(request: NextRequest) {
             select: {
               id: true,
               firstName: true,
-              lastName: true,
-            },
-          },
+              lastName: true
+            }
+          }
         },
         skip,
         take: limit,
-        orderBy: { createdAt: "desc" },
+        orderBy: { createdAt: "desc" }
       }),
-      prisma.employee.count({ where }),
+      prisma.employee.count({ where })
     ]);
 
     return NextResponse.json({
@@ -110,22 +119,23 @@ export async function GET(request: NextRequest) {
         page,
         limit,
         total,
-        totalPages: Math.ceil(total / limit),
-      },
+        totalPages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
-    console.error("Error fetching employees:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch employees" },
-      { status: 500 }
-    );
+    logApiError("Error fetching employees", error);
+    return errorResponse("Failed to fetch employees");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const limit = 120;
-    const rl = await checkRateLimit(request, { keyPrefix: "api:employees:create", limit, windowMs: 60 * 1000 });
+    const rl = await checkRateLimit(request, {
+      keyPrefix: "api:employees:create",
+      limit,
+      windowMs: 60 * 1000
+    });
     if (!rl.allowed) {
       return withRateLimitHeaders(
         NextResponse.json({ error: "Too many requests" }, { status: 429 }),
@@ -140,11 +150,11 @@ export async function POST(request: NextRequest) {
     // ── Plan Limit Enforcement ──────────────────────────────────────
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { maxEmployees: true, plan: true },
+      select: { maxEmployees: true, plan: true }
     });
     if (tenant) {
       const currentCount = await prisma.employee.count({
-        where: { tenantId, status: { not: "TERMINATED" } },
+        where: { tenantId, status: { not: "TERMINATED" } }
       });
       if (currentCount >= tenant.maxEmployees) {
         return NextResponse.json(
@@ -152,7 +162,7 @@ export async function POST(request: NextRequest) {
             error: `لقد وصلت إلى الحد الأقصى للموظفين في باقتك (${tenant.maxEmployees} موظف). يرجى الترقية إلى باقة أعلى.`,
             code: "PLAN_LIMIT_EXCEEDED",
             limit: tenant.maxEmployees,
-            current: currentCount,
+            current: currentCount
           },
           { status: 403 }
         );
@@ -160,11 +170,10 @@ export async function POST(request: NextRequest) {
     }
     // ────────────────────────────────────────────────────────────────
 
-
     const rawBody = await request.json();
     const empValidation = createEmployeeRequiredSchema.safeParse(rawBody);
     if (!empValidation.success) {
-      return NextResponse.json({ error: "بيانات غير صالحة", details: empValidation.error.flatten() }, { status: 400 });
+      return validationErrorResponse(empValidation.error.flatten(), "بيانات غير صالحة");
     }
     const body = rawBody;
 
@@ -181,11 +190,12 @@ export async function POST(request: NextRequest) {
 
     const gender = normalizeEnumValue(body.gender, Object.values(Gender));
     if (body.gender && !gender) {
-      return NextResponse.json({ error: "Invalid gender value" }, { status: 400 });
+      return errorResponse("Invalid gender value", 400);
     }
 
     const employmentType =
-      normalizeEnumValue(body.employmentType, Object.values(EmploymentType)) ?? EmploymentType.FULL_TIME;
+      normalizeEnumValue(body.employmentType, Object.values(EmploymentType)) ??
+      EmploymentType.FULL_TIME;
 
     const baseSalaryValue = body.baseSalary;
     const normalizedBaseSalary =
@@ -194,24 +204,24 @@ export async function POST(request: NextRequest) {
         : Number(baseSalaryValue);
 
     if (normalizedBaseSalary !== undefined && Number.isNaN(normalizedBaseSalary)) {
-      return NextResponse.json({ error: "Invalid baseSalary value" }, { status: 400 });
+      return errorResponse("Invalid baseSalary value", 400);
     }
 
     if (userId) {
       const user = await prisma.user.findFirst({
         where: { id: userId, tenantId },
-        select: { id: true },
+        select: { id: true }
       });
       if (!user) {
-        return NextResponse.json({ error: "Invalid userId" }, { status: 400 });
+        return errorResponse("Invalid userId", 400);
       }
 
       const alreadyLinked = await prisma.employee.findUnique({
         where: { userId },
-        select: { id: true },
+        select: { id: true }
       });
       if (alreadyLinked) {
-        return NextResponse.json({ error: "User is already linked to an employee" }, { status: 400 });
+        return errorResponse("User is already linked to an employee", 400);
       }
     }
 
@@ -219,33 +229,33 @@ export async function POST(request: NextRequest) {
       !departmentId && departmentCode
         ? prisma.department.findFirst({
             where: { tenantId, code: departmentCode, isActive: true },
-            select: { id: true },
+            select: { id: true }
           })
         : Promise.resolve(null),
       !jobTitleId && jobTitleCode
         ? prisma.jobTitle.findFirst({
             where: { tenantId, code: jobTitleCode, isActive: true },
-            select: { id: true },
+            select: { id: true }
           })
         : Promise.resolve(null),
       !branchId && branchCode
         ? prisma.branch.findFirst({
             where: { tenantId, code: branchCode, isActive: true },
-            select: { id: true },
+            select: { id: true }
           })
-        : Promise.resolve(null),
+        : Promise.resolve(null)
     ]);
 
     if (!departmentId && departmentCode && !department) {
-      return NextResponse.json({ error: `Unknown department code: ${departmentCode}` }, { status: 400 });
+      return errorResponse(`Unknown department code: ${departmentCode}`, 400);
     }
 
     if (!jobTitleId && jobTitleCode && !jobTitle) {
-      return NextResponse.json({ error: `Unknown job title code: ${jobTitleCode}` }, { status: 400 });
+      return errorResponse(`Unknown job title code: ${jobTitleCode}`, 400);
     }
 
     if (!branchId && branchCode && !branch) {
-      return NextResponse.json({ error: `Unknown branch code: ${branchCode}` }, { status: 400 });
+      return errorResponse(`Unknown branch code: ${branchCode}`, 400);
     }
 
     // Generate employee number
@@ -266,7 +276,7 @@ export async function POST(request: NextRequest) {
       const rows = await prisma.employee.findMany({
         where: { tenantId },
         select: { employeeNumber: true },
-        take: 2000,
+        take: 2000
       });
 
       let max = 0;
@@ -291,32 +301,32 @@ export async function POST(request: NextRequest) {
             tenantId,
             userId: userId ?? undefined,
             employeeNumber: candidate,
-        firstName: body.firstName,
-        lastName: body.lastName,
-        firstNameAr: body.firstNameAr,
-        lastNameAr: body.lastNameAr,
-        email: body.email,
-        phone: body.phone,
-        nationalId: body.nationalId,
-        dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
-        gender,
-        nationality: body.nationality,
-        maritalStatus: body.maritalStatus,
-        departmentId: departmentId ?? department?.id,
-        jobTitleId: jobTitleId ?? jobTitle?.id,
-        managerId,
-        hireDate: new Date(body.hireDate),
-        employmentType,
-        status: "ACTIVE",
-        shiftId,
-        workLocation: body.workLocation,
-        baseSalary: normalizedBaseSalary,
-        branchId: branchId ?? branch?.id,
+            firstName: body.firstName,
+            lastName: body.lastName,
+            firstNameAr: body.firstNameAr,
+            lastNameAr: body.lastNameAr,
+            email: body.email,
+            phone: body.phone,
+            nationalId: body.nationalId,
+            dateOfBirth: body.dateOfBirth ? new Date(body.dateOfBirth) : null,
+            gender,
+            nationality: body.nationality,
+            maritalStatus: body.maritalStatus,
+            departmentId: departmentId ?? department?.id,
+            jobTitleId: jobTitleId ?? jobTitle?.id,
+            managerId,
+            hireDate: new Date(body.hireDate),
+            employmentType,
+            status: "ACTIVE",
+            shiftId,
+            workLocation: body.workLocation,
+            baseSalary: normalizedBaseSalary,
+            branchId: branchId ?? branch?.id
           },
           include: {
             department: true,
-            jobTitle: true,
-          },
+            jobTitle: true
+          }
         });
         break;
       } catch (e: any) {
@@ -327,15 +337,12 @@ export async function POST(request: NextRequest) {
     }
 
     if (!employee) {
-      return NextResponse.json({ error: "Failed to allocate employee number" }, { status: 500 });
+      return errorResponse("Failed to allocate employee number");
     }
 
-    return NextResponse.json({ data: employee }, { status: 201 });
+    return dataResponse(employee, 201);
   } catch (error) {
-    console.error("Error creating employee:", error);
-    return NextResponse.json(
-      { error: "Failed to create employee" },
-      { status: 500 }
-    );
+    logApiError("Error creating employee", error);
+    return errorResponse("Failed to create employee");
   }
 }

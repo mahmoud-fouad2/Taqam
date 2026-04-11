@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       tenantId,
       id,
       status: "APPROVED",
-      note: body?.notes,
+      note: body?.notes
     });
 
     if (!updated) {

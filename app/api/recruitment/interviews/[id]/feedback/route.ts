@@ -12,15 +12,18 @@ const schema = z.object({
     rating: z.number().min(1).max(5),
     strengths: z.array(z.string()),
     weaknesses: z.array(z.string()),
-    recommendation: z.enum(["strongly-recommend", "recommend", "neutral", "not-recommend", "strongly-not-recommend"]),
-    notes: z.string().optional(),
-  }),
+    recommendation: z.enum([
+      "strongly-recommend",
+      "recommend",
+      "neutral",
+      "not-recommend",
+      "strongly-not-recommend"
+    ]),
+    notes: z.string().optional()
+  })
 });
 
-export async function POST(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function POST(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -29,7 +32,7 @@ export async function POST(
 
     const { id } = await context.params;
     const body = await request.json();
-    
+
     const { feedback } = schema.parse(body);
 
     // Check if interview exists
@@ -38,25 +41,22 @@ export async function POST(
         id,
         applicant: {
           jobPosting: {
-            tenantId: session.user.tenantId,
-          },
-        },
-      },
+            tenantId: session.user.tenantId
+          }
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "المقابلة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "المقابلة غير موجودة" }, { status: 404 });
     }
 
     // Update interview with feedback and mark as completed
     const updated = await prisma.interview.update({
       where: { id },
-      data: { 
+      data: {
         feedback: feedback as unknown as Record<string, unknown>,
-        status: "COMPLETED",
+        status: "COMPLETED"
       },
       include: {
         applicant: true,
@@ -66,23 +66,23 @@ export async function POST(
             firstNameAr: true,
             lastNameAr: true,
             firstName: true,
-            lastName: true,
-          },
+            lastName: true
+          }
         },
         jobPosting: {
           include: {
             department: true,
-            jobTitle: true,
-          },
-        },
-      },
+            jobTitle: true
+          }
+        }
+      }
     });
 
     // Map back to kebab-case
     const mappedInterview = {
       ...updated,
       type: updated.type.toLowerCase().replace(/_/g, "-"),
-      status: updated.status.toLowerCase().replace(/_/g, "-"),
+      status: updated.status.toLowerCase().replace(/_/g, "-")
     };
 
     return NextResponse.json(mappedInterview);
@@ -94,9 +94,6 @@ export async function POST(
       );
     }
     console.error("Error submitting interview feedback:", error);
-    return NextResponse.json(
-      { error: "فشل في حفظ تقييم المقابلة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في حفظ تقييم المقابلة" }, { status: 500 });
   }
 }

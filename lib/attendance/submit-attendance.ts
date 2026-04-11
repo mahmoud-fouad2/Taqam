@@ -27,7 +27,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
 
   const employee = await prisma.employee.findFirst({
     where: { id: input.employeeId, tenantId: input.tenantId },
-    select: { id: true, shiftId: true },
+    select: { id: true, shiftId: true }
   });
 
   if (!employee) {
@@ -35,7 +35,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
   }
 
   const policy = await prisma.tenantAttendancePolicy.findUnique({
-    where: { tenantId: input.tenantId },
+    where: { tenantId: input.tenantId }
   });
 
   const hasLocation = typeof input.latitude === "number" && typeof input.longitude === "number";
@@ -54,7 +54,7 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
 
       const locations = await prisma.tenantWorkLocation.findMany({
         where: { tenantId: input.tenantId, isActive: true },
-        select: { id: true, lat: true, lng: true, radiusMeters: true },
+        select: { id: true, lat: true, lng: true, radiusMeters: true }
       });
 
       if (locations.length === 0) {
@@ -83,8 +83,8 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
     where: {
       tenantId: input.tenantId,
       employeeId: input.employeeId,
-      date: today,
-    },
+      date: today
+    }
   });
 
   const source: CheckSource = input.source || "WEB";
@@ -105,8 +105,8 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
           checkInAddress: input.address,
           checkInLocationId: matchedLocationId,
           status: "PRESENT",
-          ...(record.shiftId ? {} : employee.shiftId ? { shiftId: employee.shiftId } : {}),
-        },
+          ...(record.shiftId ? {} : employee.shiftId ? { shiftId: employee.shiftId } : {})
+        }
       });
     } else {
       record = await prisma.attendanceRecord.create({
@@ -121,8 +121,8 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
           checkInLng: input.longitude,
           checkInAddress: input.address,
           checkInLocationId: matchedLocationId,
-          status: "PRESENT",
-        },
+          status: "PRESENT"
+        }
       });
     }
   } else {
@@ -146,8 +146,8 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
         checkOutLng: input.longitude,
         checkOutAddress: input.address,
         checkOutLocationId: matchedLocationId,
-        totalWorkMinutes: totalMinutes,
-      },
+        totalWorkMinutes: totalMinutes
+      }
     });
   }
 

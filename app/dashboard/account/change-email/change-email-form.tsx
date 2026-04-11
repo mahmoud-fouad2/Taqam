@@ -27,7 +27,7 @@ export function ChangeEmailForm({ locale: _locale }: { locale: "ar" | "en" }) {
         save: t.common.save,
         saving: t.common.saving,
         required: t.common.fillAllFields,
-        success: t.common.pEmailChangedSuccessfully,
+        success: t.common.pEmailChangedSuccessfully
       };
     }
 
@@ -38,7 +38,7 @@ export function ChangeEmailForm({ locale: _locale }: { locale: "ar" | "en" }) {
       save: "Save",
       saving: "Saving...",
       required: "Please fill in all fields.",
-      success: "Email changed successfully.",
+      success: "Email changed successfully."
     };
   }, [
     locale,
@@ -48,7 +48,7 @@ export function ChangeEmailForm({ locale: _locale }: { locale: "ar" | "en" }) {
     t.common.pNewEmail,
     t.common.pUpdateEmail,
     t.common.save,
-    t.common.saving,
+    t.common.saving
   ]);
 
   const onSave = async () => {
@@ -64,8 +64,8 @@ export function ChangeEmailForm({ locale: _locale }: { locale: "ar" | "en" }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           currentPassword,
-          newEmail,
-        }),
+          newEmail
+        })
       });
 
       const data = await res.json();

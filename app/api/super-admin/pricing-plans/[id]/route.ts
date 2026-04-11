@@ -12,10 +12,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 // GET single plan
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "SUPER_ADMIN") {
@@ -24,7 +21,7 @@ export async function GET(
 
     const { id } = await params;
     const plan = await prisma.pricingPlan.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!plan) {
@@ -39,10 +36,7 @@ export async function GET(
 }
 
 // PUT update plan
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "SUPER_ADMIN") {
@@ -54,7 +48,7 @@ export async function PUT(
 
     // Check if plan exists
     const existing = await prisma.pricingPlan.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existing) {
@@ -64,7 +58,7 @@ export async function PUT(
     // Check slug uniqueness if changed
     if (body.slug && body.slug !== existing.slug) {
       const slugExists = await prisma.pricingPlan.findUnique({
-        where: { slug: body.slug },
+        where: { slug: body.slug }
       });
       if (slugExists) {
         return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
@@ -88,8 +82,8 @@ export async function PUT(
         planType: body.planType,
         isPopular: body.isPopular,
         isActive: body.isActive,
-        sortOrder: body.sortOrder,
-      },
+        sortOrder: body.sortOrder
+      }
     });
 
     return NextResponse.json({ data: plan });
@@ -100,10 +94,7 @@ export async function PUT(
 }
 
 // DELETE plan
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "SUPER_ADMIN") {
@@ -113,7 +104,7 @@ export async function DELETE(
     const { id } = await params;
 
     await prisma.pricingPlan.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ message: "Plan deleted successfully" });

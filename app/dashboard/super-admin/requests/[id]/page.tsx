@@ -22,7 +22,7 @@ function mapStatus(
 }
 
 export default async function SuperAdminRequestDetailsPage({
-  params,
+  params
 }: {
   params: Promise<{ id: string }>;
 }) {
@@ -43,16 +43,19 @@ export default async function SuperAdminRequestDetailsPage({
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+      <section className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/70 rounded-2xl border p-5 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">{t.superAdmin.pSubscriptionRequestDetails}</h1>
-            <p className="text-sm text-muted-foreground">{t.superAdmin.pReviewCompanyDataAndContactInf}</p>
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {t.superAdmin.pSubscriptionRequestDetails}
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              {t.superAdmin.pReviewCompanyDataAndContactInf}
+            </p>
           </div>
           <Link
             href="/dashboard/super-admin/requests"
-            className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted"
-          >
+            className="border-border/60 bg-background text-foreground hover:bg-muted inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors">
             {t.superAdmin.pBackToRequests}
           </Link>
         </div>
@@ -70,25 +73,25 @@ export default async function SuperAdminRequestDetailsPage({
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <div className="text-sm font-medium">{t.superAdmin.pContactName}</div>
-              <div className="text-sm text-muted-foreground">{item.contactName}</div>
+              <div className="text-muted-foreground text-sm">{item.contactName}</div>
             </div>
             <div>
               <div className="text-sm font-medium">{t.common.email}</div>
-              <div className="text-sm text-muted-foreground">{item.contactEmail}</div>
+              <div className="text-muted-foreground text-sm">{item.contactEmail}</div>
             </div>
             <div>
               <div className="text-sm font-medium">{t.common.phone}</div>
-              <div className="text-sm text-muted-foreground">{item.contactPhone ?? "—"}</div>
+              <div className="text-muted-foreground text-sm">{item.contactPhone ?? "—"}</div>
             </div>
             <div>
               <div className="text-sm font-medium">{t.common.employees}</div>
-              <div className="text-sm text-muted-foreground">{item.employeeCount ?? "—"}</div>
+              <div className="text-muted-foreground text-sm">{item.employeeCount ?? "—"}</div>
             </div>
           </div>
 
           <div>
             <div className="text-sm font-medium">{t.superAdmin.pMessage}</div>
-            <div className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">
+            <div className="text-muted-foreground mt-1 text-sm whitespace-pre-wrap">
               {item.message ?? "—"}
             </div>
           </div>

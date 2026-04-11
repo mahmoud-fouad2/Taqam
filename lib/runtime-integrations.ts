@@ -47,7 +47,7 @@ function createStatus(
     configured,
     mode: resolveMode(configured, hasAnyInput),
     missing,
-    features,
+    features
   };
 }
 
@@ -73,7 +73,7 @@ export function getStorageRuntimeStatus() {
     "R2_ACCESS_KEY_ID",
     "R2_SECRET_ACCESS_KEY",
     "R2_BUCKET_NAME",
-    "R2_PUBLIC_URL",
+    "R2_PUBLIC_URL"
   ].some(hasEnv);
   const missing: string[] = [];
 
@@ -97,27 +97,46 @@ export function getStorageRuntimeStatus() {
     missing.push("R2_PUBLIC_URL");
   }
 
-  return createStatus("storage", "Cloudflare R2", missing, hasAnyInput, ["avatars", "documents", "career resumes"]);
+  return createStatus("storage", "Cloudflare R2", missing, hasAnyInput, [
+    "avatars",
+    "documents",
+    "career resumes"
+  ]);
 }
 
 export function getEmailRuntimeStatus() {
-  if (hasEnv("SMTP_URL")) {
-    return createStatus("email", "SMTP email", [], true, ["password reset", "tenant activation", "payslip delivery"]);
+  const hasSenderAddress =
+    hasEnv("SMTP_FROM") || hasEnv("MAIL_FROM_FALLBACK") || hasEnv("SMTP_USER");
+
+  if (hasEnv("SMTP_URL") && hasSenderAddress) {
+    return createStatus("email", "SMTP email", [], true, [
+      "password reset",
+      "tenant activation",
+      "payslip delivery"
+    ]);
   }
 
-  const hasAnyInput = ["SMTP_HOST", "SMTP_PORT", "SMTP_FROM", "SMTP_USER", "SMTP_PASSWORD"].some(hasEnv);
+  const hasAnyInput = [
+    "SMTP_URL",
+    "SMTP_HOST",
+    "SMTP_PORT",
+    "SMTP_FROM",
+    "MAIL_FROM_FALLBACK",
+    "SMTP_USER",
+    "SMTP_PASSWORD"
+  ].some(hasEnv);
   const missing: string[] = [];
 
-  if (!hasEnv("SMTP_HOST")) {
+  if (!hasEnv("SMTP_URL") && !hasEnv("SMTP_HOST")) {
     missing.push("SMTP_HOST");
   }
 
-  if (!hasEnv("SMTP_PORT")) {
+  if (!hasEnv("SMTP_URL") && !hasEnv("SMTP_PORT")) {
     missing.push("SMTP_PORT");
   }
 
-  if (!hasEnv("SMTP_FROM")) {
-    missing.push("SMTP_FROM");
+  if (!hasSenderAddress) {
+    missing.push("SMTP_FROM or MAIL_FROM_FALLBACK or SMTP_USER");
   }
 
   if (hasEnv("SMTP_USER") && !hasEnv("SMTP_PASSWORD")) {
@@ -128,7 +147,11 @@ export function getEmailRuntimeStatus() {
     missing.push("SMTP_USER");
   }
 
-  return createStatus("email", "SMTP email", missing, hasAnyInput, ["password reset", "tenant activation", "payslip delivery"]);
+  return createStatus("email", "SMTP email", missing, hasAnyInput, [
+    "password reset",
+    "tenant activation",
+    "payslip delivery"
+  ]);
 }
 
 export function getRedisRuntimeStatus() {
@@ -143,7 +166,10 @@ export function getRedisRuntimeStatus() {
     missing.push("UPSTASH_REDIS_REST_TOKEN");
   }
 
-  return createStatus("redis", "Upstash Redis", missing, hasAnyInput, ["rate limiting", "burst protection"]);
+  return createStatus("redis", "Upstash Redis", missing, hasAnyInput, [
+    "rate limiting",
+    "burst protection"
+  ]);
 }
 
 export function getRuntimeIntegrationReport(): RuntimeIntegrationReport {
@@ -151,7 +177,7 @@ export function getRuntimeIntegrationReport(): RuntimeIntegrationReport {
     getRecaptchaRuntimeStatus(),
     getStorageRuntimeStatus(),
     getEmailRuntimeStatus(),
-    getRedisRuntimeStatus(),
+    getRedisRuntimeStatus()
   ];
 
   return {
@@ -160,7 +186,7 @@ export function getRuntimeIntegrationReport(): RuntimeIntegrationReport {
       total: items.length,
       configured: items.filter((item) => item.mode === "configured").length,
       partial: items.filter((item) => item.mode === "partial").length,
-      missing: items.filter((item) => item.mode === "missing").length,
-    },
+      missing: items.filter((item) => item.mode === "missing").length
+    }
   };
 }

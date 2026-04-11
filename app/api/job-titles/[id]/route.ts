@@ -15,7 +15,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -28,10 +28,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             id: true,
             firstName: true,
             lastName: true,
-            employeeNumber: true,
-          },
-        },
-      },
+            employeeNumber: true
+          }
+        }
+      }
     });
 
     if (!jobTitle) {
@@ -45,10 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: jobTitle });
   } catch (error) {
     console.error("Error fetching job title:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch job title" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch job title" }, { status: 500 });
   }
 }
 
@@ -56,13 +53,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingJobTitle = await prisma.jobTitle.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingJobTitle) {
@@ -85,17 +82,14 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         minSalary: body.minSalary,
         maxSalary: body.maxSalary,
         level: body.level,
-        isActive: body.isActive,
-      },
+        isActive: body.isActive
+      }
     });
 
     return NextResponse.json({ data: jobTitle });
   } catch (error) {
     console.error("Error updating job title:", error);
-    return NextResponse.json(
-      { error: "Failed to update job title" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update job title" }, { status: 500 });
   }
 }
 
@@ -103,13 +97,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const existingJobTitle = await prisma.jobTitle.findUnique({
-      where: { id },
+      where: { id }
     });
 
     if (!existingJobTitle) {
@@ -123,15 +117,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     // Soft delete
     await prisma.jobTitle.update({
       where: { id },
-      data: { isActive: false },
+      data: { isActive: false }
     });
 
     return NextResponse.json({ message: "Job title deleted successfully" });
   } catch (error) {
     console.error("Error deleting job title:", error);
-    return NextResponse.json(
-      { error: "Failed to delete job title" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete job title" }, { status: 500 });
   }
 }

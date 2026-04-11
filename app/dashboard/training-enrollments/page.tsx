@@ -10,7 +10,9 @@ export default async function TrainingEnrollmentsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t.academy.enrollments}</h1>
-          <p className="text-muted-foreground">{t.trainingEnrollments.pTrackEmployeeCourseEnrollments}</p>
+          <p className="text-muted-foreground">
+            {t.trainingEnrollments.pTrackEmployeeCourseEnrollments}
+          </p>
         </div>
       </div>
       <TrainingEnrollmentsManager />

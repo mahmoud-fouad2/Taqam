@@ -40,7 +40,7 @@ export async function GET() {
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     const settings = coerceTenantSettings(tenant?.settings);
@@ -67,10 +67,7 @@ export async function POST(request: NextRequest) {
 
     const body = (await request.json().catch(() => null)) as Partial<ReportDefinition> | null;
     if (!body?.name || !body.category || !body.format) {
-      return NextResponse.json(
-        { error: "name, category, format are required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "name, category, format are required" }, { status: 400 });
     }
 
     const nowIso = new Date().toISOString();
@@ -90,12 +87,12 @@ export async function POST(request: NextRequest) {
       isScheduled: false,
       lastRun: undefined,
       createdBy: session.user.id,
-      createdAt: nowIso,
+      createdAt: nowIso
     };
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     const settings = coerceTenantSettings(tenant?.settings);
@@ -105,13 +102,13 @@ export async function POST(request: NextRequest) {
       ...settings,
       reports: {
         ...(settings.reports || {}),
-        definitions: [definition, ...existing],
-      },
+        definitions: [definition, ...existing]
+      }
     };
 
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: { settings: nextSettings as unknown as Prisma.InputJsonValue },
+      data: { settings: nextSettings as unknown as Prisma.InputJsonValue }
     });
 
     return NextResponse.json({ data: definition }, { status: 201 });

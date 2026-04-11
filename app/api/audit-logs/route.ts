@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
         : undefined,
       endDate: searchParams.get("endDate") ? new Date(searchParams.get("endDate")!) : undefined,
       page: searchParams.get("page") ? parseInt(searchParams.get("page")!) : 1,
-      pageSize: searchParams.get("pageSize") ? parseInt(searchParams.get("pageSize")!) : 50,
+      pageSize: searchParams.get("pageSize") ? parseInt(searchParams.get("pageSize")!) : 50
     };
 
     if (!isSuperAdminRole(session.user.role)) {
@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       data: result.logs,
-      pagination: result.pagination,
+      pagination: result.pagination
     });
   } catch (error) {
     console.error("Error fetching audit logs:", error);

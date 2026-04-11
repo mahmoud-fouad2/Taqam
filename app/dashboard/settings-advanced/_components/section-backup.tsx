@@ -1,22 +1,22 @@
 "use client";
 
-import type { Dispatch, SetStateAction } from 'react';
-import { Database } from 'lucide-react';
+import type { Dispatch, SetStateAction } from "react";
+import { Database } from "lucide-react";
 
-import type { SystemSettings } from '@/lib/types/settings';
+import type { SystemSettings } from "@/lib/types/settings";
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+  SelectValue
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -24,7 +24,7 @@ const t = getText("ar");
 
 export function BackupSection({
   settings,
-  setSettings,
+  setSettings
 }: {
   settings: SystemSettings;
   setSettings: Dispatch<SetStateAction<SystemSettings>>;
@@ -38,20 +38,24 @@ export function BackupSection({
           <Database className="h-5 w-5" />
           {t.backup.title}
         </CardTitle>
-        <CardDescription>{t.backup.pSettings} {t.backup.title} {t.backup.pAutomatic}</CardDescription>
+        <CardDescription>
+          {t.backup.pSettings} {t.backup.title} {t.backup.pAutomatic}
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="flex items-center justify-between py-2">
           <div>
             <Label>{t.backup.autoBackup}</Label>
-            <p className="text-sm text-muted-foreground">{t.backup.pEnable} {t.backup.title} {t.backup.pPeriodic}</p>
+            <p className="text-muted-foreground text-sm">
+              {t.backup.pEnable} {t.backup.title} {t.backup.pPeriodic}
+            </p>
           </div>
           <Switch
             checked={settings.backup.autoBackup}
             onCheckedChange={(checked) =>
               setSettings({
                 ...settings,
-                backup: { ...settings.backup, autoBackup: checked },
+                backup: { ...settings.backup, autoBackup: checked }
               })
             }
           />
@@ -64,13 +68,12 @@ export function BackupSection({
                 <Label>{t.backup.pFrequency}</Label>
                 <Select
                   value={settings.backup.frequency}
-                  onValueChange={(value: 'daily' | 'weekly' | 'monthly') =>
+                  onValueChange={(value: "daily" | "weekly" | "monthly") =>
                     setSettings({
                       ...settings,
-                      backup: { ...settings.backup, frequency: value },
+                      backup: { ...settings.backup, frequency: value }
                     })
-                  }
-                >
+                  }>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -91,8 +94,8 @@ export function BackupSection({
                       ...settings,
                       backup: {
                         ...settings.backup,
-                        retentionDays: parseInt(e.target.value),
-                      },
+                        retentionDays: parseInt(e.target.value)
+                      }
                     })
                   }
                 />
@@ -102,14 +105,14 @@ export function BackupSection({
             <div className="flex items-center justify-between py-2">
               <div>
                 <Label>{t.backup.includeAttachments}</Label>
-                <p className="text-sm text-muted-foreground">{t.backup.includeAttachmentsDesc}</p>
+                <p className="text-muted-foreground text-sm">{t.backup.includeAttachmentsDesc}</p>
               </div>
               <Switch
                 checked={settings.backup.includeAttachments}
                 onCheckedChange={(checked) =>
                   setSettings({
                     ...settings,
-                    backup: { ...settings.backup, includeAttachments: checked },
+                    backup: { ...settings.backup, includeAttachments: checked }
                   })
                 }
               />
@@ -118,19 +121,19 @@ export function BackupSection({
             <div className="bg-muted rounded-lg p-4">
               <div className="grid gap-4 md:grid-cols-2">
                 <div>
-                  <p className="text-sm text-muted-foreground">{t.backup.lastBackup}</p>
+                  <p className="text-muted-foreground text-sm">{t.backup.lastBackup}</p>
                   <p className="font-medium">
                     {settings.backup.lastBackup
-                      ? new Date(settings.backup.lastBackup).toLocaleString('ar-SA')
+                      ? new Date(settings.backup.lastBackup).toLocaleString("ar-SA")
                       : t.backup.notYet}
                   </p>
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">{t.backup.nextBackup}</p>
+                  <p className="text-muted-foreground text-sm">{t.backup.nextBackup}</p>
                   <p className="font-medium">
                     {settings.backup.nextBackup
-                      ? new Date(settings.backup.nextBackup).toLocaleString('ar-SA')
-                      : '-'}
+                      ? new Date(settings.backup.nextBackup).toLocaleString("ar-SA")
+                      : "-"}
                   </p>
                 </div>
               </div>
@@ -139,7 +142,7 @@ export function BackupSection({
         )}
 
         <Button variant="outline">
-          <Database className="h-4 w-4 ms-2" />
+          <Database className="ms-2 h-4 w-4" />
           {t.backup.backupNow}
         </Button>
       </CardContent>

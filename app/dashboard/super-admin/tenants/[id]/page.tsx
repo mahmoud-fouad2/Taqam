@@ -8,11 +8,11 @@
 import Link from "next/link";
 import * as React from "react";
 import { useParams } from "next/navigation";
-import { 
-  ArrowRight, 
-  Building2, 
-  Settings, 
-  Users, 
+import {
+  ArrowRight,
+  Building2,
+  Settings,
+  Users,
   Calendar,
   Mail,
   Phone,
@@ -42,13 +42,13 @@ function getStatusMeta(status: string, t: LocaleText) {
     pending: { label: t.common.pending, variant: "secondary" },
     suspended: { label: t.common.suspended, variant: "destructive" },
     cancelled: { label: t.common.cancelled, variant: "outline" },
-    deleted: { label: t.common.deleted, variant: "outline" },
+    deleted: { label: t.common.deleted, variant: "outline" }
   };
 
   return (
     statusConfig[status as TenantStatus] ?? {
       label: status,
-      variant: "outline" as const,
+      variant: "outline" as const
     }
   );
 }
@@ -88,7 +88,7 @@ const rolePriority: Record<string, number> = {
   HR_MANAGER: 1,
   MANAGER: 2,
   EMPLOYEE: 3,
-  SUPER_ADMIN: 4,
+  SUPER_ADMIN: 4
 };
 
 function getUserStatusMeta(status: string, t: LocaleText) {
@@ -96,7 +96,7 @@ function getUserStatusMeta(status: string, t: LocaleText) {
     ACTIVE: { label: t.common.active, variant: "default" },
     INACTIVE: { label: t.common.inactive, variant: "secondary" },
     SUSPENDED: { label: t.common.suspended, variant: "destructive" },
-    PENDING_VERIFICATION: { label: t.common.pendingActivation, variant: "outline" },
+    PENDING_VERIFICATION: { label: t.common.pendingActivation, variant: "outline" }
   };
 
   return userStatusConfig[status] ?? { label: status, variant: "outline" as const };
@@ -113,7 +113,7 @@ function getRoleLabel(role: string, t: LocaleText) {
     TENANT_ADMIN: t.common.companyAdmin,
     HR_MANAGER: t.common.hrManager,
     MANAGER: t.common.manager,
-    EMPLOYEE: t.common.employee,
+    EMPLOYEE: t.common.employee
   };
 
   return roleLabels[role] ?? role;
@@ -140,7 +140,7 @@ function formatAuditAction(action: string, t: LocaleText) {
     DATA_IMPORT: t.audit.dataImport,
     DATA_EXPORT: t.common.exportData,
     SETTINGS_UPDATE: t.audit.settingsUpdate,
-    PAYROLL_PROCESS: t.audit.payrollProcess,
+    PAYROLL_PROCESS: t.audit.payrollProcess
   };
 
   return auditActionLabels[action] ?? action.replaceAll("_", " ");
@@ -155,7 +155,7 @@ function formatAuditEntity(entity: string, t: LocaleText) {
     PayrollPeriod: t.audit.entityPayrollPeriod,
     MobileSession: t.audit.entityMobileSession,
     MobileRefreshToken: t.audit.entityMobileSession,
-    Settings: t.common.options,
+    Settings: t.common.options
   };
 
   return auditEntityLabels[entity] ?? entity;
@@ -198,8 +198,8 @@ export default function TenantDetailsPage() {
           tenantsService.getById(id),
           apiClient.get<TenantUser[]>(`/admin/tenants/${id}/users`),
           apiClient.get<TenantAuditLog[]>("/audit-logs", {
-            params: { tenantId: id, pageSize: 20 },
-          }),
+            params: { tenantId: id, pageSize: 20 }
+          })
         ]);
 
         if (!mounted) return;
@@ -247,22 +247,28 @@ export default function TenantDetailsPage() {
     id,
     t.organization.fetchCompanyError,
     t.tenant.pFailedToLoadChangeLog,
-    t.tenant.pFailedToLoadUsers,
+    t.tenant.pFailedToLoadUsers
   ]);
 
   if (!id || isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-border/60 bg-card/80 py-10 text-muted-foreground shadow-sm">{t.tenant.loading}</div>
+      <div className="border-border/60 bg-card/80 text-muted-foreground flex items-center justify-center rounded-2xl border py-10 shadow-sm">
+        {t.tenant.loading}
+      </div>
     );
   }
 
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
-        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
+        <Link
+          href="/dashboard/super-admin/tenants"
+          className="border-border/60 bg-background text-foreground hover:bg-muted inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors">
+          {t.tenant.backToList}
+        </Link>
       </div>
     );
   }
@@ -271,7 +277,11 @@ export default function TenantDetailsPage() {
     return (
       <div className="space-y-4">
         <p className="text-muted-foreground">{t.tenant.notFound}</p>
-        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
+        <Link
+          href="/dashboard/super-admin/tenants"
+          className="border-border/60 bg-background text-foreground hover:bg-muted inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors">
+          {t.tenant.backToList}
+        </Link>
       </div>
     );
   }
@@ -281,50 +291,52 @@ export default function TenantDetailsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
+      <section className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/70 rounded-2xl border p-5 shadow-sm backdrop-blur">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="space-y-1">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/dashboard/super-admin/tenants" className="font-medium hover:text-primary">{t.common.companies}</Link>
-            <ArrowRight className="h-4 w-4 rotate-180" />
-            <span>{tenant.nameAr}</span>
-          </div>
-          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
-            <Building2 className="h-6 w-6" />
-            {tenant.nameAr}
-            {(() => {
-              const meta = getStatusMeta(String((tenant as any)?.status ?? "unknown"), t);
-              return (
-                <Badge variant={meta?.variant ?? "outline"} className="ms-2">
-                  {meta?.label ?? "—"}
-                </Badge>
-              );
-            })()}
-          </h1>
-          <p className="text-sm text-muted-foreground">{tenant.name}</p>
+            <div className="text-muted-foreground flex items-center gap-2 text-sm">
+              <Link
+                href="/dashboard/super-admin/tenants"
+                className="hover:text-primary font-medium">
+                {t.common.companies}
+              </Link>
+              <ArrowRight className="h-4 w-4 rotate-180" />
+              <span>{tenant.nameAr}</span>
+            </div>
+            <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+              <Building2 className="h-6 w-6" />
+              {tenant.nameAr}
+              {(() => {
+                const meta = getStatusMeta(String((tenant as any)?.status ?? "unknown"), t);
+                return (
+                  <Badge variant={meta?.variant ?? "outline"} className="ms-2">
+                    {meta?.label ?? "—"}
+                  </Badge>
+                );
+              })()}
+            </h1>
+            <p className="text-muted-foreground text-sm">{tenant.name}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-          <Button variant="outline" asChild>
-            <Link href={`/dashboard/super-admin/tenants/${id}/settings`}>
-              <Settings className="me-2 h-4 w-4" />{t.common.settings}</Link>
-          </Button>
-          <Button variant="outline" asChild>
-            <a
-              href={buildTenantUrl(tenant.slug, "/dashboard")}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ExternalLink className="me-2 h-4 w-4" />{t.common.open}</a>
-          </Button>
-          <Button variant="outline" asChild>
-            <a
-              href={buildTenantUrl(tenant.slug, "/careers")}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <ExternalLink className="me-2 h-4 w-4" />{t.tenant.careersPortal}</a>
-          </Button>
-        </div>
+            <Button variant="outline" asChild>
+              <Link href={`/dashboard/super-admin/tenants/${id}/settings`}>
+                <Settings className="me-2 h-4 w-4" />
+                {t.common.settings}
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={buildTenantUrl(tenant.slug, "/dashboard")} target="_blank" rel="noreferrer">
+                <ExternalLink className="me-2 h-4 w-4" />
+                {t.common.open}
+              </a>
+            </Button>
+            <Button variant="outline" asChild>
+              <a href={buildTenantUrl(tenant.slug, "/careers")} target="_blank" rel="noreferrer">
+                <ExternalLink className="me-2 h-4 w-4" />
+                {t.tenant.careersPortal}
+              </a>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -332,7 +344,7 @@ export default function TenantDetailsPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.users}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tenant.usersCount}</div>
@@ -341,7 +353,7 @@ export default function TenantDetailsPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.employees}</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+            <Users className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{tenant.employeesCount}</div>
@@ -350,7 +362,7 @@ export default function TenantDetailsPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.type}</CardTitle>
-            <Building2 className="h-4 w-4 text-muted-foreground" />
+            <Building2 className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">{tenant.plan}</div>
@@ -359,7 +371,7 @@ export default function TenantDetailsPage() {
         <Card className="border-border/60 bg-card/85 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.createdAt}</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
+            <Calendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -385,48 +397,52 @@ export default function TenantDetailsPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <Globe className="text-muted-foreground h-4 w-4" />
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.tenant.dashboardLink}</p>
+                    <p className="text-muted-foreground text-sm">{t.tenant.dashboardLink}</p>
                     <p className="font-medium">
-                      <code className="rounded bg-muted px-2 py-1">
+                      <code className="bg-muted rounded px-2 py-1">
                         {buildTenantUrl(tenant.slug, "/dashboard")}
                       </code>
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
+                  <Globe className="text-muted-foreground h-4 w-4" />
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.tenant.careersLink}</p>
+                    <p className="text-muted-foreground text-sm">{t.tenant.careersLink}</p>
                     <p className="font-medium">
-                      <code className="rounded bg-muted px-2 py-1">
+                      <code className="bg-muted rounded px-2 py-1">
                         {buildTenantUrl(tenant.slug, "/careers")}
                       </code>
                     </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-muted-foreground" />
+                  <Mail className="text-muted-foreground h-4 w-4" />
                   <div>
-                    <p className="text-sm text-muted-foreground">{t.common.email}</p>
-                    <p className="font-medium" dir="ltr">{tenant.email || "-"}</p>
+                    <p className="text-muted-foreground text-sm">{t.common.email}</p>
+                    <p className="font-medium" dir="ltr">
+                      {tenant.email || "-"}
+                    </p>
                   </div>
                 </div>
                 {tenant.phone && (
                   <div className="flex items-center gap-3">
-                    <Phone className="h-4 w-4 text-muted-foreground" />
+                    <Phone className="text-muted-foreground h-4 w-4" />
                     <div>
-                      <p className="text-sm text-muted-foreground">{t.common.phone}</p>
+                      <p className="text-muted-foreground text-sm">{t.common.phone}</p>
                       <p className="font-medium">{tenant.phone}</p>
                     </div>
                   </div>
                 )}
                 {tenant.commercialRegister && (
                   <div className="flex items-center gap-3">
-                    <Building2 className="h-4 w-4 text-muted-foreground" />
+                    <Building2 className="text-muted-foreground h-4 w-4" />
                     <div>
-                      <p className="text-sm text-muted-foreground">{t.organization.commercialReg}</p>
+                      <p className="text-muted-foreground text-sm">
+                        {t.organization.commercialReg}
+                      </p>
                       <p className="font-medium">{tenant.commercialRegister}</p>
                     </div>
                   </div>
@@ -475,11 +491,15 @@ export default function TenantDetailsPage() {
                 <CardTitle className="text-destructive">{t.tenant.suspended}</CardTitle>
                 <CardDescription>
                   {t.tenant.pThisCompanyWasSuspendedOn}{" "}
-                  {new Date(tenant.suspendedAt!).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")}
+                  {new Date(tenant.suspendedAt!).toLocaleDateString(
+                    locale === "ar" ? "ar-SA" : "en-US"
+                  )}
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <p><strong>{t.common.reason}</strong> {tenant.suspendedReason}</p>
+                <p>
+                  <strong>{t.common.reason}</strong> {tenant.suspendedReason}
+                </p>
               </CardContent>
             </Card>
           )}
@@ -494,27 +514,29 @@ export default function TenantDetailsPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-3 md:grid-cols-3">
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">{t.superAdmin.totalUsers}</p>
+                  <p className="text-muted-foreground text-sm">{t.superAdmin.totalUsers}</p>
                   <p className="mt-2 text-2xl font-bold">{tenant.usersCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">{t.tenant.activeAccounts}</p>
+                  <p className="text-muted-foreground text-sm">{t.tenant.activeAccounts}</p>
                   <p className="mt-2 text-2xl font-bold">{activeUsersCount}</p>
                 </div>
                 <div className="rounded-lg border p-4">
-                  <p className="text-sm text-muted-foreground">{t.tenant.admins}</p>
+                  <p className="text-muted-foreground text-sm">{t.tenant.admins}</p>
                   <p className="mt-2 text-2xl font-bold">{adminUsersCount}</p>
                 </div>
               </div>
 
               {usersError && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm">
                   {usersError}
                 </div>
               )}
 
               {!usersError && tenantUsers.length === 0 && (
-                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">{t.tenant.noUsers}</div>
+                <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center">
+                  {t.tenant.noUsers}
+                </div>
               )}
 
               {tenantUsers.length > 0 && (
@@ -522,23 +544,29 @@ export default function TenantDetailsPage() {
                   {tenantUsers.map((user) => {
                     const meta = getUserStatusMeta(user.status, t);
                     return (
-                      <div key={user.id} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
+                      <div
+                        key={user.id}
+                        className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-center md:justify-between">
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-medium">{getUserDisplayName(user)}</p>
                             <Badge variant="outline">{getRoleLabel(user.role, t)}</Badge>
                             <Badge variant={meta.variant}>{meta.label}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground" dir="ltr">{user.email}</p>
+                          <p className="text-muted-foreground text-sm" dir="ltr">
+                            {user.email}
+                          </p>
                           {user.employee?.employeeNumber && (
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {t.tenant.pEmployeeNumber} {user.employee.employeeNumber}
                             </p>
                           )}
                         </div>
 
-                        <div className="space-y-1 text-sm text-muted-foreground md:text-end">
-                          <p>{t.tenant.pAccountAdded} {formatDateTime(user.createdAt, locale)}</p>
+                        <div className="text-muted-foreground space-y-1 text-sm md:text-end">
+                          <p>
+                            {t.tenant.pAccountAdded} {formatDateTime(user.createdAt, locale)}
+                          </p>
                           <p>
                             {user.lastLoginAt
                               ? `${t.tenant.pLastLogin} ${formatDateTime(user.lastLoginAt, locale)}`
@@ -565,38 +593,44 @@ export default function TenantDetailsPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               {auditError && (
-                <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+                <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4 text-sm">
                   {auditError}
                 </div>
               )}
 
               {!auditError && auditLogs.length === 0 && (
-                <div className="rounded-lg border border-dashed p-8 text-center text-muted-foreground">{t.audit.noEvents}</div>
+                <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center">
+                  {t.audit.noEvents}
+                </div>
               )}
 
               {auditLogs.length > 0 && (
                 <div className="space-y-3">
                   {auditLogs.map((entry) => (
-                    <div key={entry.id} className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-start md:justify-between">
+                    <div
+                      key={entry.id}
+                      className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-start md:justify-between">
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                          <History className="h-4 w-4 text-primary" />
+                        <div className="bg-primary/10 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+                          <History className="text-primary h-4 w-4" />
                         </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
                             <p className="font-medium">{formatAuditAction(entry.action, t)}</p>
                             <Badge variant="outline">{formatAuditEntity(entry.entity, t)}</Badge>
                           </div>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="text-muted-foreground text-sm">
                             {entry.user?.name || entry.user?.email
                               ? `${t.tenant.pBy} ${entry.user?.name || entry.user?.email}`
                               : t.tenant.pNoLinkedUser}
-                            {entry.entityId ? ` • ${t.tenant.pId} ${formatCompactId(entry.entityId)}` : ""}
+                            {entry.entityId
+                              ? ` • ${t.tenant.pId} ${formatCompactId(entry.entityId)}`
+                              : ""}
                           </p>
                         </div>
                       </div>
 
-                      <span className="text-sm text-muted-foreground md:text-end">
+                      <span className="text-muted-foreground text-sm md:text-end">
                         {formatDateTime(entry.createdAt, locale)}
                       </span>
                     </div>

@@ -12,23 +12,17 @@ import {
   IconChevronLeft,
   IconAlertCircle,
   IconCheck,
-  IconX,
+  IconX
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -36,7 +30,7 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { TableSkeleton } from "@/components/skeletons/table-skeleton";
 import { TableEmptyRow } from "@/components/empty-states/table-empty-row";
@@ -47,7 +41,7 @@ import {
   attendanceStatusLabels,
   formatTime,
   formatMinutesToHours,
-  getStatusColor,
+  getStatusColor
 } from "@/lib/types/attendance";
 import { attendanceService } from "@/lib/api";
 import { useEmployees } from "@/hooks/use-employees";
@@ -84,7 +78,7 @@ export function AttendanceManager() {
       else p.set(key, value);
       router.replace(`${pathname}?${p.toString()}`, { scroll: false });
     },
-    [router, pathname, searchParams],
+    [router, pathname, searchParams]
   );
 
   const setStatusFilter = (v: AttendanceStatus | "all") => updateFilter("status", v);
@@ -129,7 +123,7 @@ export function AttendanceManager() {
     try {
       const [recordsRes, shiftsRes] = await Promise.all([
         attendanceService.getRecords({ startDate, endDate }),
-        attendanceService.getShifts(),
+        attendanceService.getShifts()
       ]);
 
       if (recordsRes.success && recordsRes.data) {
@@ -159,7 +153,7 @@ export function AttendanceManager() {
 
   // Current month navigation
   const currentMonth = selectedDate.toLocaleString("ar-SA", { month: "long", year: "numeric" });
-  
+
   // Get days in month
   const daysInMonth = new Date(
     selectedDate.getFullYear(),
@@ -199,11 +193,13 @@ export function AttendanceManager() {
     late: monthRecords.filter((r) => r.status === "late").length,
     absent: monthRecords.filter((r) => r.status === "absent").length,
     totalLateMinutes: monthRecords.reduce((sum, r) => sum + (r.lateMinutes || 0), 0),
-    avgWorkHours: Math.round(
-      monthRecords.reduce((sum, r) => sum + (r.totalWorkMinutes || 0), 0) /
-        Math.max(1, monthRecords.filter((r) => r.totalWorkMinutes).length) /
-        60 * 10
-    ) / 10,
+    avgWorkHours:
+      Math.round(
+        (monthRecords.reduce((sum, r) => sum + (r.totalWorkMinutes || 0), 0) /
+          Math.max(1, monthRecords.filter((r) => r.totalWorkMinutes).length) /
+          60) *
+          10
+      ) / 10
   };
 
   // Get employee name
@@ -222,7 +218,7 @@ export function AttendanceManager() {
     if (!dateTime) return "-";
     return new Date(dateTime).toLocaleTimeString("ar-SA", {
       hour: "2-digit",
-      minute: "2-digit",
+      minute: "2-digit"
     });
   };
 
@@ -234,12 +230,9 @@ export function AttendanceManager() {
         variant="outline"
         className={`border-${colorClass} text-${colorClass}`}
         style={{
-          borderColor: getStatusColor(status).replace("bg-", ""),
-        }}
-      >
-        <span
-          className={`w-2 h-2 rounded-full me-1.5 ${getStatusColor(status)}`}
-        />
+          borderColor: getStatusColor(status).replace("bg-", "")
+        }}>
+        <span className={`me-1.5 h-2 w-2 rounded-full ${getStatusColor(status)}`} />
         {attendanceStatusLabels[status].ar}
       </Badge>
     );
@@ -256,7 +249,9 @@ export function AttendanceManager() {
     }
 
     const today = new Date().toISOString().split("T")[0];
-    const existingRecord = records.find((r) => r.date === today && r.employeeId === currentEmployeeId);
+    const existingRecord = records.find(
+      (r) => r.date === today && r.employeeId === currentEmployeeId
+    );
 
     const getLocation = async (): Promise<{ lat: number; lng: number } | undefined> => {
       if (typeof navigator === "undefined" || !navigator.geolocation) return undefined;
@@ -292,7 +287,7 @@ export function AttendanceManager() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
       )}
@@ -302,8 +297,8 @@ export function AttendanceManager() {
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-primary/10">
-                <IconClock className="h-8 w-8 text-primary" />
+              <div className="bg-primary/10 rounded-full p-3">
+                <IconClock className="text-primary h-8 w-8" />
               </div>
               <div>
                 <h3 className="text-lg font-semibold">
@@ -311,7 +306,7 @@ export function AttendanceManager() {
                     weekday: "long",
                     year: "numeric",
                     month: "long",
-                    day: "numeric",
+                    day: "numeric"
                   })}
                 </h3>
                 <p className="text-muted-foreground">
@@ -327,8 +322,7 @@ export function AttendanceManager() {
               size="lg"
               onClick={handleQuickCheckIn}
               variant={todayRecord?.checkOutTime ? "outline" : "default"}
-              disabled={!!todayRecord?.checkOutTime}
-            >
+              disabled={!!todayRecord?.checkOutTime}>
               {!todayRecord?.checkInTime ? (
                 <>
                   <IconLogin className="ms-2 h-5 w-5" />
@@ -355,11 +349,11 @@ export function AttendanceManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.shifts.workingDays}</CardTitle>
-            <IconCalendar className="h-4 w-4 text-muted-foreground" />
+            <IconCalendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalWorkDays}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.thisMonthLabel}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.thisMonthLabel}</p>
           </CardContent>
         </Card>
         <Card>
@@ -369,7 +363,7 @@ export function AttendanceManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">{stats.present}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -379,7 +373,7 @@ export function AttendanceManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600">{stats.late}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -389,7 +383,7 @@ export function AttendanceManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">{stats.absent}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.day}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
         <Card>
@@ -399,7 +393,7 @@ export function AttendanceManager() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-blue-600">{stats.avgWorkHours}</div>
-            <p className="text-xs text-muted-foreground">{t.attendance.hourPerDay}</p>
+            <p className="text-muted-foreground text-xs">{t.attendance.hourPerDay}</p>
           </CardContent>
         </Card>
       </div>
@@ -407,39 +401,43 @@ export function AttendanceManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="icon" aria-label={t.common.lastMonth} onClick={() => navigateMonth(-1)}>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t.common.lastMonth}
+            onClick={() => navigateMonth(-1)}>
             <IconChevronRight className="h-4 w-4" />
           </Button>
-          <span className="font-medium min-w-[150px] text-center">{currentMonth}</span>
-          <Button variant="outline" size="icon" aria-label={t.common.nextMonth} onClick={() => navigateMonth(1)}>
+          <span className="min-w-[150px] text-center font-medium">{currentMonth}</span>
+          <Button
+            variant="outline"
+            size="icon"
+            aria-label={t.common.nextMonth}
+            onClick={() => navigateMonth(1)}>
             <IconChevronLeft className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="flex items-center gap-2">
-          <Select
-            value={employeeFilter}
-            onValueChange={(value) => setEmployeeFilter(value)}
-          >
+          <Select value={employeeFilter} onValueChange={(value) => setEmployeeFilter(value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder={t.common.employee} />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">{t.attendance.allEmployees}</SelectItem>
-                {employees.map((emp) => (
-                  <SelectItem key={emp.id} value={emp.id}>
-                    {getEmployeeFullName(emp.id)}
-                  </SelectItem>
-                ))}
+              {employees.map((emp) => (
+                <SelectItem key={emp.id} value={emp.id}>
+                  {getEmployeeFullName(emp.id)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 
           <Select
             value={statusFilter}
-            onValueChange={(value) => setStatusFilter(value as AttendanceStatus | "all")}
-          >
+            onValueChange={(value) => setStatusFilter(value as AttendanceStatus | "all")}>
             <SelectTrigger className="w-[150px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
@@ -459,7 +457,8 @@ export function AttendanceManager() {
         <CardHeader>
           <CardTitle>{t.attendance.title}</CardTitle>
           <CardDescription>
-            {t.attendance.pAttendanceRecordForTheCurrentM}{filteredRecords.length} {t.attendance.record})
+            {t.attendance.pAttendanceRecordForTheCurrentM}
+            {filteredRecords.length} {t.attendance.record})
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -498,12 +497,12 @@ export function AttendanceManager() {
                         <p className="font-medium">
                           {new Date(record.date).toLocaleDateString("ar-SA", {
                             weekday: "short",
-                            day: "numeric",
+                            day: "numeric"
                           })}
                         </p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {new Date(record.date).toLocaleDateString("ar-SA", {
-                            month: "short",
+                            month: "short"
                           })}
                         </p>
                       </div>
@@ -519,7 +518,7 @@ export function AttendanceManager() {
                           {formatDateTime(record.checkInTime)}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {t.attendance.pExpected} {formatTime(record.expectedCheckIn)}
                       </p>
                     </TableCell>
@@ -530,7 +529,7 @@ export function AttendanceManager() {
                           {formatDateTime(record.checkOutTime)}
                         </span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {t.attendance.pExpected} {formatTime(record.expectedCheckOut)}
                       </p>
                     </TableCell>
@@ -539,7 +538,7 @@ export function AttendanceManager() {
                     </TableCell>
                     <TableCell>
                       {record.lateMinutes && record.lateMinutes > 0 ? (
-                        <span className="text-yellow-600 font-medium">
+                        <span className="font-medium text-yellow-600">
                           {formatMinutesToHours(record.lateMinutes)}
                         </span>
                       ) : (

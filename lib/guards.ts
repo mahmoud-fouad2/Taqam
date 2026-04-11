@@ -1,6 +1,6 @@
 ﻿/**
  * Taqam Route Guards
- * 
+ *
  * Higher-order components ودوال للتحقق من الصلاحيات على مستوى الصفحات
  */
 
@@ -47,7 +47,7 @@ export async function guardTenant() {
  */
 export async function guardRole(allowedRoles: TenantRole | TenantRole[]) {
   await guardAuth();
-  
+
   const user = await getCurrentUser();
   if (!user) {
     redirect("/login");
@@ -65,7 +65,7 @@ export async function guardRole(allowedRoles: TenantRole | TenantRole[]) {
  */
 export async function guardSuperAdmin() {
   await guardAuth();
-  
+
   const user = await getCurrentUser();
   if (!user || !isSuperAdmin(user.role)) {
     redirect("/dashboard?error=unauthorized");
@@ -91,15 +91,12 @@ export async function guardManager() {
  * Get page context with all auth & tenant info
  */
 export async function getPageContext() {
-  const [user, tenant] = await Promise.all([
-    getCurrentUser(),
-    getTenantContext(),
-  ]);
+  const [user, tenant] = await Promise.all([getCurrentUser(), getTenantContext()]);
 
   return {
     user,
     tenant,
     isAuthenticated: user !== null,
-    isSuperAdmin: user ? isSuperAdmin(user.role) : false,
+    isSuperAdmin: user ? isSuperAdmin(user.role) : false
   };
 }

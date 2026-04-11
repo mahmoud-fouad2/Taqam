@@ -30,7 +30,9 @@ export const documentsService = {
    * Get all documents with filters
    */
   async getAll(filters?: DocumentFilters): Promise<ApiResponse<Document[]>> {
-    return apiClient.get<Document[]>("/documents", { params: filters as Record<string, string | number> });
+    return apiClient.get<Document[]>("/documents", {
+      params: filters as Record<string, string | number>
+    });
   },
 
   /**
@@ -60,14 +62,17 @@ export const documentsService = {
     if (data.description) formData.append("description", data.description);
     if (data.expiryDate) formData.append("expiryDate", data.expiryDate);
     if (data.issuedDate) formData.append("issuedDate", data.issuedDate);
-    
+
     return apiClient.upload<Document>("/documents", formData);
   },
 
   /**
    * Update document metadata
    */
-  async update(id: string, data: Partial<Omit<Document, "id" | "url" | "fileName">>): Promise<ApiResponse<Document>> {
+  async update(
+    id: string,
+    data: Partial<Omit<Document, "id" | "url" | "fileName">>
+  ): Promise<ApiResponse<Document>> {
     return apiClient.put<Document>(`/documents/${id}`, data);
   },
 
@@ -97,7 +102,7 @@ export const documentsService = {
    */
   async download(id: string): Promise<ApiResponse<Blob>> {
     return apiClient.get<Blob>(`/documents/${id}/download`, {
-      headers: { Accept: "application/octet-stream" },
+      headers: { Accept: "application/octet-stream" }
     });
   },
 
@@ -106,7 +111,7 @@ export const documentsService = {
    */
   async getExpiring(days: number = 30): Promise<ApiResponse<Document[]>> {
     return apiClient.get<Document[]>("/documents/expiring", { params: { days } });
-  },
+  }
 };
 
 export default documentsService;

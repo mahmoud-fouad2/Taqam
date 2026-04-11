@@ -17,14 +17,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const t = getText(locale);
   const user = await prisma.user.findUnique({
     where: { id },
-    select: { firstName: true, lastName: true },
+    select: { firstName: true, lastName: true }
   });
 
   const name = user ? `${user.firstName} ${user.lastName}`.trim() : "";
-  
+
   return generateMeta({
-    title: locale === "ar" ? `${name || t.audit.entityUser} - تفاصيل` : `${name || "User"} - Details`,
-    description: locale === "ar" ? "عرض تفاصيل المستخدم" : "View user details",
+    title:
+      locale === "ar" ? `${name || t.audit.entityUser} - تفاصيل` : `${name || "User"} - Details`,
+    description: locale === "ar" ? "عرض تفاصيل المستخدم" : "View user details"
   });
 }
 
@@ -36,7 +37,7 @@ export default async function UserDetailsPage({ params }: PageProps) {
   const user = await prisma.user.findFirst({
     where: {
       id,
-      tenantId: currentUser.tenantId,
+      tenantId: currentUser.tenantId
     },
     select: {
       id: true,
@@ -55,14 +56,14 @@ export default async function UserDetailsPage({ params }: PageProps) {
           employeeNumber: true,
           hireDate: true,
           department: {
-            select: { name: true, nameAr: true },
+            select: { name: true, nameAr: true }
           },
           jobTitle: {
-            select: { name: true, nameAr: true },
-          },
-        },
-      },
-    },
+            select: { name: true, nameAr: true }
+          }
+        }
+      }
+    }
   });
 
   if (!user) {
@@ -76,9 +77,9 @@ export default async function UserDetailsPage({ params }: PageProps) {
     employee: user.employee
       ? {
           ...user.employee,
-          hireDate: user.employee.hireDate?.toISOString() || null,
+          hireDate: user.employee.hireDate?.toISOString() || null
         }
-      : null,
+      : null
   };
 
   return <UserDetailsClient user={userData} locale={locale} />;

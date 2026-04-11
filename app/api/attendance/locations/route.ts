@@ -1,8 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import {
+  dataResponse,
+  errorResponse,
+  forbiddenResponse,
+  logApiError,
+  requireSession
+} from "@/lib/api/route-helper";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -20,68 +25,60 @@ const createSchema = z.object({
   lat: z.coerce.number().min(-90).max(90),
   lng: z.coerce.number().min(-180).max(180),
   radiusMeters: z.coerce.number().int().min(10).max(5000).default(150),
-  isActive: z.boolean().optional(),
+  isActive: z.boolean().optional()
 });
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const { searchParams } = new URL(request.url);
     const requestedTenantId = searchParams.get("tenantId") ?? undefined;
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? requestedTenantId ?? session.user.tenantId
+      ? (requestedTenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
+      return errorResponse("Tenant context required", 400);
     }
 
     const items = await prisma.tenantWorkLocation.findMany({
       where: { tenantId },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     });
 
-    return NextResponse.json({ data: { items } });
+    return dataResponse({ items });
   } catch (error) {
-    console.error("Error fetching work locations:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch work locations" },
-      { status: 500 }
-    );
+    logApiError("Error fetching work locations", error);
+    return errorResponse("Failed to fetch work locations");
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     if (!canManageAttendanceSettings(session.user.role)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+      return forbiddenResponse();
     }
 
     const body = await request.json();
     const parsed = createSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: "Invalid payload", issues: parsed.error.issues },
-        { status: 400 }
-      );
+      return errorResponse("Invalid payload", 400, { issues: parsed.error.issues });
     }
 
     const tenantId = isSuperAdmin(session.user.role)
-      ? parsed.data.tenantId ?? session.user.tenantId
+      ? (parsed.data.tenantId ?? session.user.tenantId)
       : session.user.tenantId;
 
     if (!tenantId) {
-      return NextResponse.json({ error: "Tenant context required" }, { status: 400 });
+      return errorResponse("Tenant context required", 400);
     }
 
     const item = await prisma.tenantWorkLocation.create({
@@ -93,16 +90,13 @@ export async function POST(request: NextRequest) {
         lat: parsed.data.lat,
         lng: parsed.data.lng,
         radiusMeters: parsed.data.radiusMeters,
-        isActive: parsed.data.isActive ?? true,
-      },
+        isActive: parsed.data.isActive ?? true
+      }
     });
 
-    return NextResponse.json({ data: item }, { status: 201 });
+    return dataResponse(item, 201);
   } catch (error) {
-    console.error("Error creating work location:", error);
-    return NextResponse.json(
-      { error: "Failed to create work location" },
-      { status: 500 }
-    );
+    logApiError("Error creating work location", error);
+    return errorResponse("Failed to create work location");
   }
 }

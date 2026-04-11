@@ -8,7 +8,7 @@ const DirectionContext = React.createContext<AppDir>("ltr");
 
 export function AppDirectionProvider({
   dir,
-  children,
+  children
 }: {
   dir: AppDir;
   children: React.ReactNode;

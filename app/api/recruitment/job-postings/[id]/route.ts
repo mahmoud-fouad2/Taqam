@@ -7,10 +7,7 @@ import { z } from "zod";
 type RouteContext = { params: Promise<{ id: string }> };
 
 // ==================== GET - Get Single Job Posting ====================
-export async function GET(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function GET(_request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -18,11 +15,11 @@ export async function GET(
     }
 
     const { id } = await context.params;
-    
+
     const jobPosting = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
+        tenantId: session.user.tenantId
       },
       include: {
         department: true,
@@ -32,25 +29,22 @@ export async function GET(
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
+            email: true
+          }
         },
         applicants: {
           select: {
             id: true,
             firstName: true,
             lastName: true,
-            status: true,
-          },
-        },
-      },
+            status: true
+          }
+        }
+      }
     });
 
     if (!jobPosting) {
-      return NextResponse.json(
-        { error: "الوظيفة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الوظيفة غير موجودة" }, { status: 404 });
     }
 
     // Map status to kebab-case
@@ -61,17 +55,14 @@ export async function GET(
       experienceLevel: jobPosting.experienceLevel.toLowerCase().replace(/_/g, "-"),
       applicants: jobPosting.applicants.map((a) => ({
         ...a,
-        status: a.status.toLowerCase().replace(/_/g, "-"),
-      })),
+        status: a.status.toLowerCase().replace(/_/g, "-")
+      }))
     };
 
     return NextResponse.json(mappedJobPosting);
   } catch (error) {
     console.error("Error fetching job posting:", error);
-    return NextResponse.json(
-      { error: "فشل في جلب الوظيفة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في جلب الوظيفة" }, { status: 500 });
   }
 }
 
@@ -90,7 +81,7 @@ const updateSchema = z.object({
   location: z.string().optional(),
   salaryMin: z.number().optional(),
   salaryMax: z.number().optional(),
-  deadline: z.string().optional(),
+  deadline: z.string().optional()
 });
 
 function mapStatusToDb(status: string) {
@@ -105,10 +96,7 @@ function mapExperienceLevelToDb(level: string) {
   return level.toUpperCase().replace(/-/g, "_");
 }
 
-export async function PUT(
-  request: NextRequest,
-  context: RouteContext
-) {
+export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -117,31 +105,29 @@ export async function PUT(
 
     const { id } = await context.params;
     const body = await request.json();
-    
+
     const validated = updateSchema.parse(body);
 
     // Check if job posting exists
     const existing = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
-      },
+        tenantId: session.user.tenantId
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "الوظيفة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الوظيفة غير موجودة" }, { status: 404 });
     }
 
     // Map kebab-case to SCREAMING_SNAKE_CASE for DB
     const updateData: Record<string, unknown> = {};
-    
+
     if (validated.title !== undefined) updateData.title = validated.title;
     if (validated.description !== undefined) updateData.description = validated.description;
     if (validated.requirements !== undefined) updateData.requirements = validated.requirements;
-    if (validated.responsibilities !== undefined) updateData.responsibilities = validated.responsibilities;
+    if (validated.responsibilities !== undefined)
+      updateData.responsibilities = validated.responsibilities;
     if (validated.benefits !== undefined) updateData.benefits = validated.benefits;
     if (validated.departmentId !== undefined) updateData.departmentId = validated.departmentId;
     if (validated.jobTitleId !== undefined) updateData.jobTitleId = validated.jobTitleId;
@@ -149,7 +135,7 @@ export async function PUT(
     if (validated.salaryMin !== undefined) updateData.salaryMin = validated.salaryMin;
     if (validated.salaryMax !== undefined) updateData.salaryMax = validated.salaryMax;
     if (validated.deadline !== undefined) updateData.deadline = new Date(validated.deadline);
-    
+
     if (validated.status !== undefined) {
       updateData.status = mapStatusToDb(validated.status);
     }
@@ -171,10 +157,10 @@ export async function PUT(
             id: true,
             firstName: true,
             lastName: true,
-            email: true,
-          },
-        },
-      },
+            email: true
+          }
+        }
+      }
     });
 
     // Map back to kebab-case
@@ -182,7 +168,7 @@ export async function PUT(
       ...updated,
       status: updated.status.toLowerCase().replace(/_/g, "-"),
       jobType: updated.jobType.toLowerCase().replace(/_/g, "-"),
-      experienceLevel: updated.experienceLevel.toLowerCase().replace(/_/g, "-"),
+      experienceLevel: updated.experienceLevel.toLowerCase().replace(/_/g, "-")
     };
 
     return NextResponse.json(mappedJobPosting);
@@ -194,18 +180,12 @@ export async function PUT(
       );
     }
     console.error("Error updating job posting:", error);
-    return NextResponse.json(
-      { error: "فشل في تحديث الوظيفة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في تحديث الوظيفة" }, { status: 500 });
   }
 }
 
 // ==================== DELETE - Delete Job Posting ====================
-export async function DELETE(
-  _request: NextRequest,
-  context: RouteContext
-) {
+export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.tenantId) {
@@ -218,40 +198,31 @@ export async function DELETE(
     const existing = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId,
+        tenantId: session.user.tenantId
       },
       include: {
         applicants: {
-          select: { id: true },
-        },
-      },
+          select: { id: true }
+        }
+      }
     });
 
     if (!existing) {
-      return NextResponse.json(
-        { error: "الوظيفة غير موجودة" },
-        { status: 404 }
-      );
+      return NextResponse.json({ error: "الوظيفة غير موجودة" }, { status: 404 });
     }
 
     // Don't allow deletion if there are applicants
     if (existing.applicants.length > 0) {
-      return NextResponse.json(
-        { error: "لا يمكن حذف وظيفة تحتوي على متقدمين" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "لا يمكن حذف وظيفة تحتوي على متقدمين" }, { status: 400 });
     }
 
     await prisma.jobPosting.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting job posting:", error);
-    return NextResponse.json(
-      { error: "فشل في حذف الوظيفة" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "فشل في حذف الوظيفة" }, { status: 500 });
   }
 }

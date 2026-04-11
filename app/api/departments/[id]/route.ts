@@ -23,7 +23,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const department = await prisma.department.findFirst({
       where: {
         id,
-        ...(superAdmin ? {} : { tenantId: tenantId! }),
+        ...(superAdmin ? {} : { tenantId: tenantId! })
       },
       include: {
         parent: true,
@@ -48,10 +48,10 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
             id: true,
             firstName: true,
             lastName: true,
-            jobTitle: true,
-          },
-        },
-      },
+            jobTitle: true
+          }
+        }
+      }
     });
 
     if (!department) {
@@ -61,10 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({ data: department });
   } catch (error) {
     console.error("Error fetching department:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch department" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch department" }, { status: 500 });
   }
 }
 
@@ -72,7 +69,7 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -91,12 +88,12 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
     const existingDepartment = await prisma.department.findFirst({
       where: {
         id,
-        ...(superAdmin ? {} : { tenantId: tenantId! }),
+        ...(superAdmin ? {} : { tenantId: tenantId! })
       },
       select: {
         id: true,
-        tenantId: true,
-      },
+        tenantId: true
+      }
     });
 
     if (!existingDepartment) {
@@ -104,7 +101,7 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
     }
 
     const body = await request.json();
-    
+
     // Clean parentId - convert "none" or empty string to null
     const parentId = body.parentId === "none" || body.parentId === "" ? null : body.parentId;
 
@@ -112,9 +109,9 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
       const parent = await prisma.department.findFirst({
         where: {
           id: parentId,
-          tenantId: existingDepartment.tenantId,
+          tenantId: existingDepartment.tenantId
         },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!parent) {
@@ -126,9 +123,9 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
       const manager = await prisma.employee.findFirst({
         where: {
           id: body.managerId,
-          tenantId: existingDepartment.tenantId,
+          tenantId: existingDepartment.tenantId
         },
-        select: { id: true },
+        select: { id: true }
       });
 
       if (!manager) {
@@ -145,17 +142,14 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
         description: body.description,
         parentId: parentId,
         managerId: body.managerId,
-        isActive: body.isActive,
-      },
+        isActive: body.isActive
+      }
     });
 
     return NextResponse.json({ data: department });
   } catch (error) {
     console.error("Error updating department:", error);
-    return NextResponse.json(
-      { error: "Failed to update department" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to update department" }, { status: 500 });
   }
 }
 
@@ -171,7 +165,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
     const { id } = await params;
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -190,12 +184,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const existingDepartment = await prisma.department.findFirst({
       where: {
         id,
-        ...(superAdmin ? {} : { tenantId: tenantId! }),
+        ...(superAdmin ? {} : { tenantId: tenantId! })
       },
       select: {
         id: true,
-        tenantId: true,
-      },
+        tenantId: true
+      }
     });
 
     if (!existingDepartment) {
@@ -206,8 +200,8 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const employeeCount = await prisma.employee.count({
       where: {
         departmentId: id,
-        tenantId: existingDepartment.tenantId,
-      },
+        tenantId: existingDepartment.tenantId
+      }
     });
 
     if (employeeCount > 0) {
@@ -218,15 +212,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     }
 
     await prisma.department.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting department:", error);
-    return NextResponse.json(
-      { error: "Failed to delete department" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to delete department" }, { status: 500 });
   }
 }

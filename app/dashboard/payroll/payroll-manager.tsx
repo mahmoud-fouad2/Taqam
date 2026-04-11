@@ -16,17 +16,11 @@ import {
   IconPlayerPlay,
   IconAlertCircle,
   IconChevronDown,
-  IconCalendar,
+  IconCalendar
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -34,7 +28,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   AlertDialog,
@@ -45,14 +39,14 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -60,14 +54,14 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
@@ -77,7 +71,7 @@ import {
   type PayrollPeriodStatus,
   payrollPeriodStatusLabels,
   formatCurrency,
-  getMonthName,
+  getMonthName
 } from "@/lib/types/payroll";
 import { downloadBlob, fetchBlobOrThrow } from "@/lib/browser/download";
 import { toast } from "sonner";
@@ -138,7 +132,7 @@ export function PayrollProcessingManager() {
             processedAt: p.processedAt ?? undefined,
             notes: p.notes ?? undefined,
             createdAt: p.createdAt ?? new Date().toISOString(),
-            updatedAt: p.updatedAt ?? new Date().toISOString(),
+            updatedAt: p.updatedAt ?? new Date().toISOString()
           }))
         : [];
 
@@ -155,8 +149,8 @@ export function PayrollProcessingManager() {
   }, [loadPeriods]);
 
   const filteredPeriods = periods.filter((p) => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.nameAr.includes(searchQuery);
+    const matchesSearch =
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.nameAr.includes(searchQuery);
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     const matchesYear = !yearFilter || p.startDate.startsWith(yearFilter);
     return matchesSearch && matchesStatus && matchesYear;
@@ -167,9 +161,7 @@ export function PayrollProcessingManager() {
     draft: periods.filter((p) => p.status === "draft").length,
     pending: periods.filter((p) => p.status === "pending_approval").length,
     paid: periods.filter((p) => p.status === "paid").length,
-    totalPaid: periods
-      .filter((p) => p.status === "paid")
-      .reduce((sum, p) => sum + p.totalNet, 0),
+    totalPaid: periods.filter((p) => p.status === "paid").reduce((sum, p) => sum + p.totalNet, 0)
   };
 
   const handleCreatePeriod = async () => {
@@ -187,8 +179,8 @@ export function PayrollProcessingManager() {
           nameAr: `${getMonthName(month, "ar")} ${year}`,
           startDate: startDate.toISOString().split("T")[0],
           endDate: endDate.toISOString().split("T")[0],
-          paymentDate: formPaymentDate || endDate.toISOString().split("T")[0],
-        }),
+          paymentDate: formPaymentDate || endDate.toISOString().split("T")[0]
+        })
       });
 
       const json = (await res.json()) as { data?: any; error?: string };
@@ -211,7 +203,7 @@ export function PayrollProcessingManager() {
 
     try {
       const res = await fetch(`/api/payroll/periods/${encodeURIComponent(periodId)}/process`, {
-        method: "POST",
+        method: "POST"
       });
       const json = (await res.json()) as { data?: any; error?: string };
       if (!res.ok) {
@@ -234,7 +226,7 @@ export function PayrollProcessingManager() {
       const res = await fetch(`/api/payroll/periods/${encodeURIComponent(periodId)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status: newStatus })
       });
       const json = (await res.json()) as { data?: any; error?: string };
       if (!res.ok) {
@@ -248,9 +240,12 @@ export function PayrollProcessingManager() {
 
   const handleSendPayslips = async (periodId: string) => {
     try {
-      const res = await fetch(`/api/payroll/periods/${encodeURIComponent(periodId)}/send-payslips`, {
-        method: "POST",
-      });
+      const res = await fetch(
+        `/api/payroll/periods/${encodeURIComponent(periodId)}/send-payslips`,
+        {
+          method: "POST"
+        }
+      );
       const json = (await res.json()) as { data?: { sent?: number }; error?: string };
       if (!res.ok) {
         throw new Error(json.error || t.payroll.payslipsSendFailed);
@@ -283,16 +278,22 @@ export function PayrollProcessingManager() {
       pending_approval: "outline",
       approved: "default",
       paid: "default",
-      cancelled: "destructive",
+      cancelled: "destructive"
     };
     return (
-      <Badge variant={variants[status] || "secondary"} className={
-        status === "paid" ? "bg-emerald-500" :
-        status === "approved" ? "bg-green-500" :
-        status === "pending_approval" ? "bg-yellow-500 text-yellow-900" :
-        status === "processing" ? "bg-blue-500" :
-        ""
-      }>
+      <Badge
+        variant={variants[status] || "secondary"}
+        className={
+          status === "paid"
+            ? "bg-emerald-500"
+            : status === "approved"
+              ? "bg-green-500"
+              : status === "pending_approval"
+                ? "bg-yellow-500 text-yellow-900"
+                : status === "processing"
+                  ? "bg-blue-500"
+                  : ""
+        }>
         {info.ar}
       </Badge>
     );
@@ -305,7 +306,7 @@ export function PayrollProcessingManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.payroll.totalPeriods}</CardTitle>
-            <IconCalendar className="h-4 w-4 text-muted-foreground" />
+            <IconCalendar className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -341,7 +342,7 @@ export function PayrollProcessingManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.payroll.totalPaid}</CardTitle>
-            <IconCurrencyRiyal className="h-4 w-4 text-muted-foreground" />
+            <IconCurrencyRiyal className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-xl font-bold">{formatCurrency(stats.totalPaid)}</div>
@@ -352,8 +353,8 @@ export function PayrollProcessingManager() {
       {/* Toolbar */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-1 items-center gap-2">
-          <div className="relative flex-1 max-w-sm">
-            <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <div className="relative max-w-sm flex-1">
+            <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder={t.common.searchDots}
               value={searchQuery}
@@ -372,10 +373,9 @@ export function PayrollProcessingManager() {
           </Select>
           <Select
             value={statusFilter}
-            onValueChange={(v) => setStatusFilter(v as PayrollPeriodStatus | "all")}
-          >
+            onValueChange={(v) => setStatusFilter(v as PayrollPeriodStatus | "all")}>
             <SelectTrigger className="w-[160px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
             <SelectContent>
@@ -399,12 +399,10 @@ export function PayrollProcessingManager() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{t.payroll.createNewPeriod}</DialogTitle>
-              <DialogDescription>
-                {t.payroll.pSelectMonthAndYearToCreateANew}
-              </DialogDescription>
+              <DialogDescription>{t.payroll.pSelectMonthAndYearToCreateANew}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t.common.year}</Label>
                   <Select value={formYear} onValueChange={setFormYear}>
@@ -443,7 +441,9 @@ export function PayrollProcessingManager() {
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>{t.common.cancel}</Button>
+              <Button variant="outline" onClick={() => setIsCreateOpen(false)}>
+                {t.common.cancel}
+              </Button>
               <Button onClick={handleCreatePeriod}>{t.common.add}</Button>
             </DialogFooter>
           </DialogContent>
@@ -460,7 +460,7 @@ export function PayrollProcessingManager() {
                 <p className="text-sm font-medium">{t.payroll.processingPayroll}</p>
                 <Progress value={processProgress} className="mt-2" />
               </div>
-              <span className="text-sm text-muted-foreground">{processProgress}%</span>
+              <span className="text-muted-foreground text-sm">{processProgress}%</span>
             </div>
           </CardContent>
         </Card>
@@ -470,9 +470,7 @@ export function PayrollProcessingManager() {
       <Card>
         <CardHeader>
           <CardTitle>{t.payroll.title}</CardTitle>
-          <CardDescription>
-            {t.payroll.pManageAndProcessMonthlyPayroll}
-          </CardDescription>
+          <CardDescription>{t.payroll.pManageAndProcessMonthlyPayroll}</CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -491,8 +489,8 @@ export function PayrollProcessingManager() {
             <TableBody>
               {filteredPeriods.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
-                    <IconFileInvoice className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <TableCell colSpan={8} className="py-8 text-center">
+                    <IconFileInvoice className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
                     <p className="text-muted-foreground">{t.payroll.noPayrollPeriods}</p>
                   </TableCell>
                 </TableRow>
@@ -502,7 +500,7 @@ export function PayrollProcessingManager() {
                     <TableCell>
                       <div>
                         <p className="font-medium">{period.nameAr}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {period.startDate} - {period.endDate}
                         </p>
                       </div>
@@ -510,7 +508,7 @@ export function PayrollProcessingManager() {
                     <TableCell>{period.paymentDate}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        <IconUsers className="h-4 w-4 text-muted-foreground" />
+                        <IconUsers className="text-muted-foreground h-4 w-4" />
                         {period.employeeCount}
                       </div>
                     </TableCell>
@@ -518,63 +516,58 @@ export function PayrollProcessingManager() {
                     <TableCell className="text-red-600">
                       -{formatCurrency(period.totalDeductions)}
                     </TableCell>
-                    <TableCell className="font-bold">
-                      {formatCurrency(period.totalNet)}
-                    </TableCell>
+                    <TableCell className="font-bold">{formatCurrency(period.totalNet)}</TableCell>
                     <TableCell>{getStatusBadge(period.status)}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" size="sm">
                             {t.payroll.pActions}
-                            <IconChevronDown className="h-4 w-4 me-1" />
+                            <IconChevronDown className="me-1 h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           {period.status === "draft" && (
                             <DropdownMenuItem
                               onClick={() => handleProcessPeriod(period.id)}
-                              disabled={isProcessing}
-                            >
-                              <IconPlayerPlay className="h-4 w-4 ms-2" />
+                              disabled={isProcessing}>
+                              <IconPlayerPlay className="ms-2 h-4 w-4" />
                               {t.payroll.pProcessPayroll}
                             </DropdownMenuItem>
                           )}
                           {period.status === "pending_approval" && (
                             <>
                               <DropdownMenuItem
-                                onClick={() => handleStatusChange(period.id, "approved")}
-                              >
-                                <IconCheck className="h-4 w-4 ms-2 text-green-500" />{t.common.accept}</DropdownMenuItem>
+                                onClick={() => handleStatusChange(period.id, "approved")}>
+                                <IconCheck className="ms-2 h-4 w-4 text-green-500" />
+                                {t.common.accept}
+                              </DropdownMenuItem>
                               <DropdownMenuItem
-                                onClick={() => handleStatusChange(period.id, "draft")}
-                              >
-                                <IconX className="h-4 w-4 ms-2 text-red-500" />
+                                onClick={() => handleStatusChange(period.id, "draft")}>
+                                <IconX className="ms-2 h-4 w-4 text-red-500" />
                                 {t.payroll.pReturnForEditing}
                               </DropdownMenuItem>
                             </>
                           )}
                           {period.status === "approved" && (
-                            <DropdownMenuItem
-                              onClick={() => handleStatusChange(period.id, "paid")}
-                            >
-                              <IconCurrencyRiyal className="h-4 w-4 ms-2" />
+                            <DropdownMenuItem onClick={() => handleStatusChange(period.id, "paid")}>
+                              <IconCurrencyRiyal className="ms-2 h-4 w-4" />
                               {t.payroll.pConfirmPayment}
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => setSelectedPeriod(period)}
-                          >
-                            <IconFileInvoice className="h-4 w-4 ms-2" />{t.common.viewDetails}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setSelectedPeriod(period)}>
+                            <IconFileInvoice className="ms-2 h-4 w-4" />
+                            {t.common.viewDetails}
+                          </DropdownMenuItem>
                           {period.status === "paid" && (
                             <>
                               <DropdownMenuItem onClick={() => handleSendPayslips(period.id)}>
-                                <IconSend className="h-4 w-4 ms-2" />
+                                <IconSend className="ms-2 h-4 w-4" />
                                 {t.payroll.pSendPayslips}
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleDownloadBankFile(period)}>
-                                <IconDownload className="h-4 w-4 ms-2" />
+                                <IconDownload className="ms-2 h-4 w-4" />
                                 {t.payroll.pDownloadBankFile}
                               </DropdownMenuItem>
                             </>
@@ -584,9 +577,10 @@ export function PayrollProcessingManager() {
                               <DropdownMenuSeparator />
                               <DropdownMenuItem
                                 className="text-destructive"
-                                onClick={() => handleStatusChange(period.id, "cancelled")}
-                              >
-                                <IconX className="h-4 w-4 ms-2" />{t.common.cancel}</DropdownMenuItem>
+                                onClick={() => handleStatusChange(period.id, "cancelled")}>
+                                <IconX className="ms-2 h-4 w-4" />
+                                {t.common.cancel}
+                              </DropdownMenuItem>
                             </>
                           )}
                         </DropdownMenuContent>
@@ -609,15 +603,15 @@ export function PayrollProcessingManager() {
           </DialogHeader>
           {selectedPeriod && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">{t.payroll.payrollPeriod}</p>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                <div className="bg-muted rounded-lg p-4">
+                  <p className="text-muted-foreground text-sm">{t.payroll.payrollPeriod}</p>
                   <p className="font-medium">
                     {selectedPeriod.startDate} - {selectedPeriod.endDate}
                   </p>
                 </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground">{t.payroll.paymentDate}</p>
+                <div className="bg-muted rounded-lg p-4">
+                  <p className="text-muted-foreground text-sm">{t.payroll.paymentDate}</p>
                   <p className="font-medium">{selectedPeriod.paymentDate}</p>
                 </div>
               </div>
@@ -653,13 +647,22 @@ export function PayrollProcessingManager() {
               </div>
 
               {selectedPeriod.processedAt && (
-                <div className="text-sm text-muted-foreground">
-                  <p>{t.payroll.processedAt} {new Date(selectedPeriod.processedAt).toLocaleDateString("ar-SA")}</p>
+                <div className="text-muted-foreground text-sm">
+                  <p>
+                    {t.payroll.processedAt}{" "}
+                    {new Date(selectedPeriod.processedAt).toLocaleDateString("ar-SA")}
+                  </p>
                   {selectedPeriod.approvedAt && (
-                    <p>{t.payroll.approvedAt} {new Date(selectedPeriod.approvedAt).toLocaleDateString("ar-SA")}</p>
+                    <p>
+                      {t.payroll.approvedAt}{" "}
+                      {new Date(selectedPeriod.approvedAt).toLocaleDateString("ar-SA")}
+                    </p>
                   )}
                   {selectedPeriod.paidAt && (
-                    <p>{t.payroll.paidAt} {new Date(selectedPeriod.paidAt).toLocaleDateString("ar-SA")}</p>
+                    <p>
+                      {t.payroll.paidAt}{" "}
+                      {new Date(selectedPeriod.paidAt).toLocaleDateString("ar-SA")}
+                    </p>
                   )}
                 </div>
               )}

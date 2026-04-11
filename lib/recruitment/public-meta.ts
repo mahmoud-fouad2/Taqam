@@ -3,7 +3,7 @@ export const PUBLIC_JOB_TYPE_OPTIONS = [
   { value: "part-time", dbValue: "PART_TIME", ar: "دوام جزئي", en: "Part-time" },
   { value: "contract", dbValue: "CONTRACT", ar: "عقد", en: "Contract" },
   { value: "internship", dbValue: "INTERNSHIP", ar: "تدريب", en: "Internship" },
-  { value: "temporary", dbValue: "TEMPORARY", ar: "مؤقت", en: "Temporary" },
+  { value: "temporary", dbValue: "TEMPORARY", ar: "مؤقت", en: "Temporary" }
 ] as const;
 
 export const PUBLIC_EXPERIENCE_LEVEL_OPTIONS = [
@@ -12,14 +12,16 @@ export const PUBLIC_EXPERIENCE_LEVEL_OPTIONS = [
   { value: "mid", dbValue: "MID", ar: "متوسط", en: "Mid-level" },
   { value: "senior", dbValue: "SENIOR", ar: "خبير", en: "Senior" },
   { value: "lead", dbValue: "LEAD", ar: "قائد فريق", en: "Lead" },
-  { value: "executive", dbValue: "EXECUTIVE", ar: "تنفيذي", en: "Executive" },
+  { value: "executive", dbValue: "EXECUTIVE", ar: "تنفيذي", en: "Executive" }
 ] as const;
 
 export type PublicLocale = "ar" | "en";
 export type PublicJobTypeValue = (typeof PUBLIC_JOB_TYPE_OPTIONS)[number]["value"];
 export type PublicExperienceLevelValue = (typeof PUBLIC_EXPERIENCE_LEVEL_OPTIONS)[number]["value"];
 
-export function normalizePublicJobType(value: string | null | undefined): PublicJobTypeValue | undefined {
+export function normalizePublicJobType(
+  value: string | null | undefined
+): PublicJobTypeValue | undefined {
   const normalized = value?.trim().toLowerCase();
   return PUBLIC_JOB_TYPE_OPTIONS.find((option) => option.value === normalized)?.value;
 }
@@ -30,7 +32,11 @@ export function mapPublicJobTypeToDb(value: string | null | undefined) {
 }
 
 export function mapDbJobTypeToPublic(value: string | null | undefined): string {
-  return PUBLIC_JOB_TYPE_OPTIONS.find((option) => option.dbValue === value)?.value ?? value?.toLowerCase().replace(/_/g, "-") ?? "";
+  return (
+    PUBLIC_JOB_TYPE_OPTIONS.find((option) => option.dbValue === value)?.value ??
+    value?.toLowerCase().replace(/_/g, "-") ??
+    ""
+  );
 }
 
 export function getPublicJobTypeLabel(locale: PublicLocale, value: string) {
@@ -39,10 +45,16 @@ export function getPublicJobTypeLabel(locale: PublicLocale, value: string) {
 }
 
 export function mapDbExperienceLevelToPublic(value: string | null | undefined): string {
-  return PUBLIC_EXPERIENCE_LEVEL_OPTIONS.find((option) => option.dbValue === value)?.value ?? value?.toLowerCase() ?? "";
+  return (
+    PUBLIC_EXPERIENCE_LEVEL_OPTIONS.find((option) => option.dbValue === value)?.value ??
+    value?.toLowerCase() ??
+    ""
+  );
 }
 
 export function getPublicExperienceLevelLabel(locale: PublicLocale, value: string) {
   const normalized = value?.trim().toLowerCase();
-  return PUBLIC_EXPERIENCE_LEVEL_OPTIONS.find((option) => option.value === normalized)?.[locale] ?? value;
+  return (
+    PUBLIC_EXPERIENCE_LEVEL_OPTIONS.find((option) => option.value === normalized)?.[locale] ?? value
+  );
 }

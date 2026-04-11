@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +18,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
@@ -42,7 +42,7 @@ export function LeaveRequestsAddDialog({
   formData,
   onFormDataChange,
   calculateDays,
-  onSubmit,
+  onSubmit
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -91,8 +91,7 @@ export function LeaveRequestsAddDialog({
               <Label>{t.common.selectEmployee}</Label>
               <Select
                 value={formData.employeeId}
-                onValueChange={(value) => onFormDataChange({ ...formData, employeeId: value })}
-              >
+                onValueChange={(value) => onFormDataChange({ ...formData, employeeId: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.common.selectEmployee} />
                 </SelectTrigger>
@@ -110,8 +109,7 @@ export function LeaveRequestsAddDialog({
               <Label>{t.leaveRequests.leaveTypeRequired}</Label>
               <Select
                 value={formData.leaveTypeId}
-                onValueChange={(value) => onFormDataChange({ ...formData, leaveTypeId: value })}
-              >
+                onValueChange={(value) => onFormDataChange({ ...formData, leaveTypeId: value })}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.leaveRequests.selectLeaveType} />
                 </SelectTrigger>
@@ -121,7 +119,9 @@ export function LeaveRequestsAddDialog({
                     .map((type) => (
                       <SelectItem key={type.id} value={type.id}>
                         <div className="flex items-center gap-2">
-                          <div className={cn("h-3 w-3 rounded-full", getLeaveTheme(type.color).dot)} />
+                          <div
+                            className={cn("h-3 w-3 rounded-full", getLeaveTheme(type.color).dot)}
+                          />
                           {type.name}
                         </div>
                       </SelectItem>
@@ -152,7 +152,7 @@ export function LeaveRequestsAddDialog({
           </div>
 
           {formData.startDate && formData.endDate && (
-            <div className="rounded-lg bg-muted p-3">
+            <div className="bg-muted rounded-lg p-3">
               <div className="flex items-center justify-between">
                 <span className="text-sm">{t.leaveRequests.daysCount}</span>
                 <Badge variant="secondary">
@@ -175,8 +175,7 @@ export function LeaveRequestsAddDialog({
                 value={formData.halfDayPeriod}
                 onValueChange={(value: "morning" | "afternoon") =>
                   onFormDataChange({ ...formData, halfDayPeriod: value })
-                }
-              >
+                }>
                 <SelectTrigger className="w-[150px]">
                   <SelectValue />
                 </SelectTrigger>
@@ -204,8 +203,9 @@ export function LeaveRequestsAddDialog({
             <Label>{t.leaveRequests.delegateEmployee}</Label>
             <Select
               value={formData.delegateEmployeeId}
-              onValueChange={(value) => onFormDataChange({ ...formData, delegateEmployeeId: value })}
-            >
+              onValueChange={(value) =>
+                onFormDataChange({ ...formData, delegateEmployeeId: value })
+              }>
               <SelectTrigger>
                 <SelectValue placeholder={t.leaveRequests.selectDelegate} />
               </SelectTrigger>
@@ -224,7 +224,9 @@ export function LeaveRequestsAddDialog({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)}>{t.common.cancel}</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            {t.common.cancel}
+          </Button>
           <Button
             onClick={onSubmit}
             disabled={
@@ -233,8 +235,7 @@ export function LeaveRequestsAddDialog({
               !formData.startDate ||
               !formData.endDate ||
               !formData.reason
-            }
-          >
+            }>
             <IconSend className="ms-2 h-4 w-4" />
             {t.leaveRequests.pSubmitRequest}
           </Button>

@@ -15,9 +15,15 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       return NextResponse.json({ error: "Payroll period not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ data: { sent: result.updatedCount, failed: 0 } });
+    return NextResponse.json({
+      data: {
+        sent: result.sentCount ?? result.updatedCount,
+        failed: result.failedCount ?? 0
+      }
+    });
   } catch (error) {
     console.error("Error sending payroll payslips:", error);
-    return NextResponse.json({ error: "Failed to send payroll payslips" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Failed to send payroll payslips";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

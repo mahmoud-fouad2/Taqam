@@ -16,7 +16,7 @@ export function generateAvatarFallback(string: string) {
 export function generateMeta({
   title,
   description,
-  noIndex = true,
+  noIndex = true
 }: {
   title: string;
   description: string;
@@ -34,8 +34,8 @@ export function generateMeta({
             index: false,
             follow: false,
             noimageindex: true,
-            noarchive: true,
-          },
+            noarchive: true
+          }
         }
       : {
           index: true,
@@ -45,8 +45,8 @@ export function generateMeta({
             follow: true,
             "max-image-preview": "large",
             "max-snippet": -1,
-            "max-video-preview": -1,
-          },
+            "max-video-preview": -1
+          }
         },
     creator: "Taqam",
     publisher: "Taqam",
@@ -57,15 +57,15 @@ export function generateMeta({
       images: [
         {
           url: "/seo.jpg",
-          alt: `${title} | Taqam`,
-        },
-      ],
+          alt: `${title} | Taqam`
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: ["/seo.jpg"],
-    },
+      images: ["/seo.jpg"]
+    }
   };
 }

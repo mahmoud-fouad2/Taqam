@@ -16,17 +16,11 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const { id } = await context.params;
 
     if (!session?.user) {
-      return NextResponse.json(
-        { success: false, error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
     }
 
     if (session.user.role !== "SUPER_ADMIN") {
-      return NextResponse.json(
-        { success: false, error: "Access denied" },
-        { status: 403 }
-      );
+      return NextResponse.json({ success: false, error: "Access denied" }, { status: 403 });
     }
 
     const body = await request.json().catch(() => ({}));
@@ -35,7 +29,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
     // Get current settings first
     const currentTenant = await prisma.tenant.findUnique({
       where: { id },
-      select: { settings: true },
+      select: { settings: true }
     });
     const currentSettings = (currentTenant?.settings as Record<string, unknown>) ?? {};
 
@@ -47,17 +41,17 @@ export async function POST(request: NextRequest, context: RouteContext) {
           ...currentSettings,
           suspendReason: reason,
           suspendedAt: new Date().toISOString(),
-          suspendedBy: session.user.id,
-        },
+          suspendedBy: session.user.id
+        }
       },
       include: {
         _count: {
           select: {
             employees: true,
-            users: true,
-          },
-        },
-      },
+            users: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -67,8 +61,8 @@ export async function POST(request: NextRequest, context: RouteContext) {
         name: tenant.name,
         nameAr: tenant.nameAr,
         slug: tenant.slug,
-        status: tenant.status.toLowerCase(),
-      },
+        status: tenant.status.toLowerCase()
+      }
     });
   } catch (error) {
     console.error("Error suspending tenant:", error);

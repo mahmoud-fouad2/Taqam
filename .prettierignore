@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+.venv
+
+# Next.js
+.next
+out
+
+# Builds
+build
+dist
+coverage
+
+# Mobile / Android
+android
+apps/mobile
+
+# Temp
+.tmp
+tmp
+
+# Locks
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Generated
+prisma/migrations
+
+# Misc
+*.min.*

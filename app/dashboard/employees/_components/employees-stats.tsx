@@ -10,7 +10,7 @@ export function EmployeesStats({
   totalEmployees,
   activeCount,
   onboardingCount,
-  departmentsCount,
+  departmentsCount
 }: {
   totalEmployees: number;
   activeCount: number;

@@ -64,7 +64,13 @@ export interface EmployeeSalaryComponent {
 
 // ============ Payroll Period ============
 
-export type PayrollPeriodStatus = "draft" | "processing" | "pending_approval" | "approved" | "paid" | "cancelled";
+export type PayrollPeriodStatus =
+  | "draft"
+  | "processing"
+  | "pending_approval"
+  | "approved"
+  | "paid"
+  | "cancelled";
 
 export interface PayrollPeriod {
   id: string;
@@ -112,40 +118,40 @@ export interface Payslip {
   jobTitle: string;
   jobTitleAr: string;
   currency: string;
-  
+
   // Earnings
   basicSalary: number;
   earnings: PayslipEarning[];
   totalEarnings: number;
-  
+
   // Deductions
   deductions: PayslipDeduction[];
   totalDeductions: number;
-  
+
   // Net
   netSalary: number;
-  
+
   // Attendance Info
   workingDays: number;
   actualWorkDays: number;
   absentDays: number;
   lateDays: number;
   overtimeHours: number;
-  
+
   // GOSI
   gosiEmployee: number;
   gosiEmployer: number;
-  
+
   // Status
   status: PayslipStatus;
   sentAt?: string;
   viewedAt?: string;
-  
+
   // Payment
   paymentMethod: string;
   bankName?: string;
   accountNumber?: string;
-  
+
   createdAt: string;
   updatedAt: string;
 }
@@ -174,7 +180,13 @@ export interface Loan {
   id: string;
   employeeId: string;
   tenantId: string;
-  type: "salary_advance" | "personal_loan" | "emergency_loan" | "housing_loan" | "car_loan" | "other";
+  type:
+    | "salary_advance"
+    | "personal_loan"
+    | "emergency_loan"
+    | "housing_loan"
+    | "car_loan"
+    | "other";
   amount: number;
   installments: number;
   installmentAmount: number;
@@ -264,7 +276,7 @@ export const salaryComponentLabels: Record<SalaryComponent, { en: string; ar: st
   transport: { en: "Transport Allowance", ar: "بدل المواصلات" },
   food: { en: "Food Allowance", ar: "بدل الطعام" },
   phone: { en: "Phone Allowance", ar: "بدل الهاتف" },
-  other: { en: "Other", ar: "أخرى" },
+  other: { en: "Other", ar: "أخرى" }
 };
 
 export const deductionTypeLabels: Record<DeductionType, { en: string; ar: string }> = {
@@ -273,7 +285,7 @@ export const deductionTypeLabels: Record<DeductionType, { en: string; ar: string
   loan: { en: "Loan Deduction", ar: "خصم القرض" },
   absence: { en: "Absence Deduction", ar: "خصم الغياب" },
   penalty: { en: "Penalty", ar: "جزاء" },
-  other: { en: "Other", ar: "أخرى" },
+  other: { en: "Other", ar: "أخرى" }
 };
 
 export const allowanceTypeLabels: Record<AllowanceType, { en: string; ar: string }> = {
@@ -282,16 +294,19 @@ export const allowanceTypeLabels: Record<AllowanceType, { en: string; ar: string
   commission: { en: "Commission", ar: "عمولة" },
   incentive: { en: "Incentive", ar: "حافز" },
   travel: { en: "Travel Allowance", ar: "بدل سفر" },
-  other: { en: "Other", ar: "أخرى" },
+  other: { en: "Other", ar: "أخرى" }
 };
 
-export const payrollPeriodStatusLabels: Record<PayrollPeriodStatus, { en: string; ar: string; color: string }> = {
+export const payrollPeriodStatusLabels: Record<
+  PayrollPeriodStatus,
+  { en: string; ar: string; color: string }
+> = {
   draft: { en: "Draft", ar: "مسودة", color: "gray" },
   processing: { en: "Processing", ar: "قيد المعالجة", color: "blue" },
   pending_approval: { en: "Pending Approval", ar: "بانتظار الموافقة", color: "yellow" },
   approved: { en: "Approved", ar: "معتمد", color: "green" },
   paid: { en: "Paid", ar: "مدفوع", color: "emerald" },
-  cancelled: { en: "Cancelled", ar: "ملغي", color: "red" },
+  cancelled: { en: "Cancelled", ar: "ملغي", color: "red" }
 };
 
 export const loanStatusLabels: Record<LoanStatus, { en: string; ar: string; color: string }> = {
@@ -300,7 +315,7 @@ export const loanStatusLabels: Record<LoanStatus, { en: string; ar: string; colo
   active: { en: "Active", ar: "نشط", color: "green" },
   completed: { en: "Completed", ar: "مكتمل", color: "gray" },
   rejected: { en: "Rejected", ar: "مرفوض", color: "red" },
-  cancelled: { en: "Cancelled", ar: "ملغي", color: "gray" },
+  cancelled: { en: "Cancelled", ar: "ملغي", color: "gray" }
 };
 
 export const loanTypeLabels: Record<Loan["type"], { en: string; ar: string }> = {
@@ -309,10 +324,8 @@ export const loanTypeLabels: Record<Loan["type"], { en: string; ar: string }> = 
   emergency_loan: { en: "Emergency Loan", ar: "قرض طارئ" },
   housing_loan: { en: "Housing Loan", ar: "قرض سكني" },
   car_loan: { en: "Car Loan", ar: "قرض سيارة" },
-  other: { en: "Other", ar: "أخرى" },
+  other: { en: "Other", ar: "أخرى" }
 };
-
-
 
 // ============ Helpers ============
 
@@ -321,7 +334,7 @@ export function formatCurrency(amount: number, currency: string = "SAR"): string
     style: "currency",
     currency,
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(amount);
 }
 
@@ -331,12 +344,12 @@ export function calculateGOSI(
   settings: GOSISettings
 ): { employee: number; employer: number } {
   if (!settings.isEnabled) return { employee: 0, employer: 0 };
-  
+
   const gosiBase = Math.min(basicSalary + housingAllowance, settings.maxSalary);
-  
+
   return {
     employee: (gosiBase * settings.employeePercentage) / 100,
-    employer: (gosiBase * settings.employerPercentage) / 100,
+    employer: (gosiBase * settings.employerPercentage) / 100
   };
 }
 
@@ -345,17 +358,17 @@ export function calculateTotalSalary(
   components: SalaryComponentItem[]
 ): number {
   let total = basicSalary;
-  
+
   for (const component of components) {
     if (component.type === "basic") continue;
-    
+
     if (component.isPercentage) {
       total += (basicSalary * component.value) / 100;
     } else {
       total += component.value;
     }
   }
-  
+
   return total;
 }
 

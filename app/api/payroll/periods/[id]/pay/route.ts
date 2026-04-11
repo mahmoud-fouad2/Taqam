@@ -7,7 +7,7 @@ import { z } from "zod";
 const payPeriodPaySchema = z.object({
   paymentMethod: z.string().optional(),
   reference: z.string().optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -19,18 +19,20 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     const rawBody = await request.json().catch(() => ({}));
     const payParsed = payPeriodPaySchema.safeParse(rawBody);
-    const body = payParsed.success ? payParsed.data : { paymentMethod: "", reference: "", notes: "" };
+    const body = payParsed.success
+      ? payParsed.data
+      : { paymentMethod: "", reference: "", notes: "" };
     const noteParts = [
       body.paymentMethod ? `Payment method: ${body.paymentMethod}` : "",
       body.reference ? `Reference: ${body.reference}` : "",
-      body.notes ? `${body.notes}` : "",
+      body.notes ? `${body.notes}` : ""
     ].filter(Boolean);
 
     const updated = await updatePayrollPeriodStatus({
       tenantId,
       id,
       status: "PAID",
-      note: noteParts.join("\n"),
+      note: noteParts.join("\n")
     });
 
     if (!updated) {

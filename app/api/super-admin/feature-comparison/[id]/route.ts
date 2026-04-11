@@ -11,10 +11,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
 // PUT update feature
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "SUPER_ADMIN") {
@@ -33,8 +30,8 @@ export async function PUT(
         inBusiness: body.inBusiness,
         inEnterprise: body.inEnterprise,
         sortOrder: body.sortOrder,
-        isActive: body.isActive,
-      },
+        isActive: body.isActive
+      }
     });
 
     return NextResponse.json({ data: feature });
@@ -45,10 +42,7 @@ export async function PUT(
 }
 
 // DELETE feature
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== "SUPER_ADMIN") {
@@ -58,7 +52,7 @@ export async function DELETE(
     const { id } = await params;
 
     await prisma.planFeatureComparison.delete({
-      where: { id },
+      where: { id }
     });
 
     return NextResponse.json({ message: "Feature deleted successfully" });

@@ -9,7 +9,7 @@ const DEFAULT_GOSI_SETTINGS: Omit<GOSISettings, "tenantId"> = {
   employeePercentage: 9.75,
   employerPercentage: 11.75,
   maxSalary: 45000,
-  isEnabled: true,
+  isEnabled: true
 };
 
 function normalizeGosiSettings(tenantId: string, value: unknown): GOSISettings {
@@ -28,8 +28,10 @@ function normalizeGosiSettings(tenantId: string, value: unknown): GOSISettings {
       typeof input.employerPercentage === "number"
         ? input.employerPercentage
         : DEFAULT_GOSI_SETTINGS.employerPercentage,
-    maxSalary: typeof input.maxSalary === "number" ? input.maxSalary : DEFAULT_GOSI_SETTINGS.maxSalary,
-    isEnabled: typeof input.isEnabled === "boolean" ? input.isEnabled : DEFAULT_GOSI_SETTINGS.isEnabled,
+    maxSalary:
+      typeof input.maxSalary === "number" ? input.maxSalary : DEFAULT_GOSI_SETTINGS.maxSalary,
+    isEnabled:
+      typeof input.isEnabled === "boolean" ? input.isEnabled : DEFAULT_GOSI_SETTINGS.isEnabled
   };
 }
 
@@ -55,12 +57,12 @@ function getStoredGosiSettings(settings: unknown) {
 }
 
 function mergeGosiSettings(settings: unknown, gosiSettings: GOSISettings) {
-  const settingsObject = settings && typeof settings === "object"
-    ? { ...(settings as Record<string, unknown>) }
-    : {};
-  const payrollObject = settingsObject.payroll && typeof settingsObject.payroll === "object"
-    ? { ...(settingsObject.payroll as Record<string, unknown>) }
-    : {};
+  const settingsObject =
+    settings && typeof settings === "object" ? { ...(settings as Record<string, unknown>) } : {};
+  const payrollObject =
+    settingsObject.payroll && typeof settingsObject.payroll === "object"
+      ? { ...(settingsObject.payroll as Record<string, unknown>) }
+      : {};
 
   payrollObject.gosiSettings = gosiSettings;
   settingsObject.payroll = payrollObject;
@@ -72,14 +74,18 @@ function mergeGosiSettings(settings: unknown, gosiSettings: GOSISettings) {
 function validateGosiPayload(input: Partial<GOSISettings>) {
   if (
     input.employeePercentage !== undefined &&
-    (!Number.isFinite(input.employeePercentage) || input.employeePercentage < 0 || input.employeePercentage > 100)
+    (!Number.isFinite(input.employeePercentage) ||
+      input.employeePercentage < 0 ||
+      input.employeePercentage > 100)
   ) {
     return "employeePercentage must be between 0 and 100";
   }
 
   if (
     input.employerPercentage !== undefined &&
-    (!Number.isFinite(input.employerPercentage) || input.employerPercentage < 0 || input.employerPercentage > 100)
+    (!Number.isFinite(input.employerPercentage) ||
+      input.employerPercentage < 0 ||
+      input.employerPercentage > 100)
   ) {
     return "employerPercentage must be between 0 and 100";
   }
@@ -99,7 +105,7 @@ export async function GET(request: NextRequest) {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     if (!tenant) {
@@ -113,8 +119,8 @@ export async function GET(request: NextRequest) {
       await prisma.tenant.update({
         where: { id: tenantId },
         data: {
-          settings: merged as Prisma.InputJsonValue,
-        },
+          settings: merged as Prisma.InputJsonValue
+        }
       });
     }
 
@@ -143,7 +149,7 @@ export async function PUT(request: NextRequest) {
 
     const tenant = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     if (!tenant) {
@@ -154,15 +160,15 @@ export async function PUT(request: NextRequest) {
     const next = normalizeGosiSettings(tenantId, {
       ...current,
       ...body,
-      tenantId,
+      tenantId
     });
 
     const merged = mergeGosiSettings(tenant.settings, next);
     await prisma.tenant.update({
       where: { id: tenantId },
       data: {
-        settings: merged as Prisma.InputJsonValue,
-      },
+        settings: merged as Prisma.InputJsonValue
+      }
     });
 
     return NextResponse.json({ data: next });

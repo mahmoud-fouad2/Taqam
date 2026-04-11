@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -25,10 +26,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
             nameAr: true,
             startDate: true,
             endDate: true,
-            paymentDate: true,
-          },
-        },
-      },
+            paymentDate: true
+          }
+        }
+      }
     });
 
     if (!payslip) {
@@ -37,10 +38,12 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     // Mark as viewed
     if (!payslip.viewedAt) {
-      await prisma.payrollPayslip.update({
-        where: { id },
-        data: { viewedAt: new Date(), status: "VIEWED" },
-      }).catch(() => {});
+      await prisma.payrollPayslip
+        .update({
+          where: { id },
+          data: { viewedAt: new Date(), status: "VIEWED" }
+        })
+        .catch(() => {});
     }
 
     return NextResponse.json({
@@ -66,11 +69,11 @@ export async function GET(request: NextRequest, context: RouteContext) {
         overtimeHours: payslip.overtimeHours,
         gosiEmployee: payslip.gosiEmployee,
         gosiEmployer: payslip.gosiEmployer,
-        status: payslip.status,
-      },
+        status: payslip.status
+      }
     });
   } catch (error) {
-    console.error("Mobile payslip detail error:", error);
+    logger.error("Mobile payslip detail error", undefined, error);
     return NextResponse.json({ error: "Failed to load payslip" }, { status: 500 });
   }
 }

@@ -3,17 +3,20 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  notFoundResponse,
+  requireSession
+} from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -50,53 +53,53 @@ export async function GET(request: NextRequest) {
                 bankName: true,
                 bankAccountNumber: true,
                 iban: true,
-                swiftCode: true,
-              },
+                swiftCode: true
+              }
             },
             department: {
               select: {
                 id: true,
                 name: true,
-                nameAr: true,
-              },
+                nameAr: true
+              }
             },
             jobTitle: {
               select: {
                 id: true,
                 name: true,
-                nameAr: true,
-              },
+                nameAr: true
+              }
             },
             shift: {
               select: {
                 id: true,
                 name: true,
                 startTime: true,
-                endTime: true,
-              },
+                endTime: true
+              }
             },
             manager: {
               select: {
                 id: true,
                 firstName: true,
-                lastName: true,
-              },
-            },
-          },
+                lastName: true
+              }
+            }
+          }
         },
         tenant: {
           select: {
             id: true,
             name: true,
             nameAr: true,
-            logo: true,
-          },
-        },
-      },
+            logo: true
+          }
+        }
+      }
     });
 
     if (!user) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return notFoundResponse("User not found");
     }
 
     const employee = user.employee
@@ -107,29 +110,24 @@ export async function GET(request: NextRequest) {
                 bankName: user.employee.salaryRecords[0].bankName ?? "",
                 accountNumber: user.employee.salaryRecords[0].bankAccountNumber ?? "",
                 iban: user.employee.salaryRecords[0].iban ?? undefined,
-                swiftCode: user.employee.salaryRecords[0].swiftCode ?? undefined,
+                swiftCode: user.employee.salaryRecords[0].swiftCode ?? undefined
               }
-            : undefined,
+            : undefined
         }
       : null;
 
-    return NextResponse.json({ data: { ...user, employee } });
+    return dataResponse({ ...user, employee });
   } catch (error) {
-    console.error("Error fetching profile:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch profile" },
-      { status: 500 }
-    );
+    logApiError("Error fetching profile", error);
+    return errorResponse("Failed to fetch profile");
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const body = await request.json();
 
@@ -148,16 +146,13 @@ export async function PUT(request: NextRequest) {
         firstName: true,
         lastName: true,
         email: true,
-        avatar: true,
-      },
+        avatar: true
+      }
     });
 
-    return NextResponse.json({ data: user });
+    return dataResponse(user);
   } catch (error) {
-    console.error("Error updating profile:", error);
-    return NextResponse.json(
-      { error: "Failed to update profile" },
-      { status: 500 }
-    );
+    logApiError("Error updating profile", error);
+    return errorResponse("Failed to update profile");
   }
 }

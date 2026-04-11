@@ -76,9 +76,9 @@ export async function GET(request: NextRequest) {
       include: {
         applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
         jobPosting: { select: { id: true, title: true, titleAr: true } },
-        department: { select: { id: true, name: true, nameAr: true } },
+        department: { select: { id: true, name: true, nameAr: true } }
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "desc" }
     });
 
     const result = offers.map((o) => ({
@@ -105,13 +105,16 @@ export async function GET(request: NextRequest) {
       declineReason: o.declineReason ?? undefined,
       createdBy: o.createdById,
       createdAt: o.createdAt.toISOString(),
-      updatedAt: o.updatedAt.toISOString(),
+      updatedAt: o.updatedAt.toISOString()
     }));
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
     console.error("Error fetching job offers:", error);
-    return NextResponse.json({ success: false, error: "Failed to fetch job offers" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to fetch job offers" },
+      { status: 500 }
+    );
   }
 }
 
@@ -130,7 +133,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     if (!body.applicantId || !body.jobPostingId) {
-      return NextResponse.json({ success: false, error: "Missing applicantId/jobPostingId" }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: "Missing applicantId/jobPostingId" },
+        { status: 400 }
+      );
     }
 
     const jobType = parseJobType(body.jobType);
@@ -155,13 +161,13 @@ export async function POST(request: NextRequest) {
         sentAt: body.sentAt ? new Date(body.sentAt) : null,
         respondedAt: body.respondedAt ? new Date(body.respondedAt) : null,
         declineReason: body.declineReason ?? null,
-        createdById: session.user.id,
+        createdById: session.user.id
       },
       include: {
         applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
         jobPosting: { select: { id: true, title: true } },
-        department: { select: { id: true, name: true } },
-      },
+        department: { select: { id: true, name: true } }
+      }
     });
 
     return NextResponse.json({
@@ -190,11 +196,14 @@ export async function POST(request: NextRequest) {
         declineReason: created.declineReason ?? undefined,
         createdBy: created.createdById,
         createdAt: created.createdAt.toISOString(),
-        updatedAt: created.updatedAt.toISOString(),
-      },
+        updatedAt: created.updatedAt.toISOString()
+      }
     });
   } catch (error) {
     console.error("Error creating job offer:", error);
-    return NextResponse.json({ success: false, error: "Failed to create job offer" }, { status: 500 });
+    return NextResponse.json(
+      { success: false, error: "Failed to create job offer" },
+      { status: 500 }
+    );
   }
 }

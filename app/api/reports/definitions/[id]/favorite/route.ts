@@ -23,10 +23,7 @@ function coerceTenantSettings(value: unknown): TenantSettings {
   return (value && typeof value === "object" ? (value as TenantSettings) : {}) as TenantSettings;
 }
 
-export async function PATCH(
-  request: NextRequest,
-  context: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user) {
@@ -42,7 +39,7 @@ export async function PATCH(
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     const settings = coerceTenantSettings(tenant?.settings);
@@ -55,7 +52,7 @@ export async function PATCH(
 
     const updated: ReportDefinition = {
       ...defs[idx],
-      isFavorite: !defs[idx].isFavorite,
+      isFavorite: !defs[idx].isFavorite
     };
 
     const nextDefs = [...defs];
@@ -65,13 +62,13 @@ export async function PATCH(
       ...settings,
       reports: {
         ...(settings.reports || {}),
-        definitions: nextDefs,
-      },
+        definitions: nextDefs
+      }
     };
 
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: { settings: nextSettings as unknown as Prisma.InputJsonValue },
+      data: { settings: nextSettings as unknown as Prisma.InputJsonValue }
     });
 
     return NextResponse.json({ data: updated });

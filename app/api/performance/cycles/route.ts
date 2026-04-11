@@ -33,9 +33,9 @@ export async function GET(request: NextRequest) {
       include: {
         _count: { select: { evaluations: true } },
         evaluations: {
-          select: { status: true },
-        },
-      },
+          select: { status: true }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -50,11 +50,13 @@ export async function GET(request: NextRequest) {
         status: mapCycleStatus(c.status),
         templateId: c.templateId ?? undefined,
         totalEvaluations: c._count.evaluations,
-        completedEvaluations: c.evaluations.filter((evaluation) => evaluation.status === "COMPLETED").length,
+        completedEvaluations: c.evaluations.filter(
+          (evaluation) => evaluation.status === "COMPLETED"
+        ).length,
         targetDepartments: c.targetDepartments,
         targetEmployees: c.targetEmployees,
-        createdAt: c.createdAt.toISOString(),
-      })),
+        createdAt: c.createdAt.toISOString()
+      }))
     });
   } catch (error) {
     console.error("Error fetching evaluation cycles:", error);
@@ -89,8 +91,8 @@ export async function POST(request: NextRequest) {
         templateId: body.templateId || null,
         targetDepartments: body.targetDepartments || [],
         targetEmployees: body.targetEmployees || [],
-        createdByUserId: session.user.id || null,
-      },
+        createdByUserId: session.user.id || null
+      }
     });
 
     return NextResponse.json({ data: { id: cycle.id } }, { status: 201 });

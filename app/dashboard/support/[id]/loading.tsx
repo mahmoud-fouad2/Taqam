@@ -6,7 +6,7 @@ export default function TicketDetailLoading() {
       {/* Header */}
       <div className="flex items-center gap-3">
         <Skeleton className="h-8 w-8 rounded-md" />
-        <div className="space-y-1.5 flex-1">
+        <div className="flex-1 space-y-1.5">
           <Skeleton className="h-6 w-64" />
           <Skeleton className="h-4 w-40" />
         </div>
@@ -17,7 +17,7 @@ export default function TicketDetailLoading() {
       <div className="flex flex-col gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex gap-3">
-            <Skeleton className="h-9 w-9 rounded-full shrink-0" />
+            <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
             <div className="flex-1 space-y-2">
               <div className="flex items-center gap-2">
                 <Skeleton className="h-4 w-28" />

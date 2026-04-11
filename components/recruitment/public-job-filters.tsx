@@ -39,7 +39,7 @@ export function PublicJobFilters({
   locations,
   departments,
   jobTypes,
-  searchPlaceholder,
+  searchPlaceholder
 }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -90,14 +90,16 @@ export function PublicJobFilters({
   };
 
   return (
-    <form className="mx-auto mt-8 max-w-5xl rounded-3xl border bg-card/80 p-4 shadow-sm" onSubmit={submit}>
+    <form
+      className="bg-card/80 mx-auto mt-8 max-w-5xl rounded-3xl border p-4 shadow-sm"
+      onSubmit={submit}>
       <div className="grid gap-3 lg:grid-cols-[1.8fr_repeat(3,minmax(0,1fr))]">
         <div className="space-y-2 lg:col-span-1">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">
             {locale === "ar" ? "بحث نصي" : "Keyword search"}
           </p>
           <div className="relative">
-            <Search className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
             <Input
               className="h-11 ps-9"
               onChange={(event) => setQuery(event.target.value)}
@@ -108,7 +110,7 @@ export function PublicJobFilters({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">
             {locale === "ar" ? "المدينة / الموقع" : "City / location"}
           </p>
           <select
@@ -116,9 +118,10 @@ export function PublicJobFilters({
             className={cn(selectClassName)}
             onChange={(event) => setLocation(event.target.value)}
             title={locale === "ar" ? "فلتر المدينة أو الموقع" : "Filter by city or location"}
-            value={location}
-          >
-            <option value="">{locale === "ar" ? "كل المدن والمواقع" : "All cities and locations"}</option>
+            value={location}>
+            <option value="">
+              {locale === "ar" ? "كل المدن والمواقع" : "All cities and locations"}
+            </option>
             {locations.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -128,7 +131,7 @@ export function PublicJobFilters({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">
             {locale === "ar" ? "القسم" : "Department"}
           </p>
           <select
@@ -136,8 +139,7 @@ export function PublicJobFilters({
             className={cn(selectClassName)}
             onChange={(event) => setDepartmentId(event.target.value)}
             title={locale === "ar" ? "فلتر القسم" : "Filter by department"}
-            value={departmentId}
-          >
+            value={departmentId}>
             <option value="">{locale === "ar" ? "كل الأقسام" : "All departments"}</option>
             {departments.map((option) => (
               <option key={option.value} value={option.value}>
@@ -148,7 +150,7 @@ export function PublicJobFilters({
         </div>
 
         <div className="space-y-2">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+          <p className="text-muted-foreground text-xs font-medium tracking-[0.16em] uppercase">
             {locale === "ar" ? "نوع الوظيفة" : "Job type"}
           </p>
           <select
@@ -156,8 +158,7 @@ export function PublicJobFilters({
             className={cn(selectClassName)}
             onChange={(event) => setJobType(event.target.value)}
             title={locale === "ar" ? "فلتر نوع الوظيفة" : "Filter by job type"}
-            value={jobType}
-          >
+            value={jobType}>
             <option value="">{locale === "ar" ? "كل الأنواع" : "All job types"}</option>
             {jobTypes.map((option) => (
               <option key={option.value} value={option.value}>
@@ -169,7 +170,7 @@ export function PublicJobFilters({
       </div>
 
       <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="text-muted-foreground flex items-center gap-2 text-xs">
           <SlidersHorizontal className="h-4 w-4" />
           <span>
             {locale === "ar"

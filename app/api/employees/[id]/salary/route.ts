@@ -1,20 +1,39 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
-import { requireRole, requireTenantSession } from "@/lib/api/route-helper";
+import {
+  dataResponse,
+  errorResponse,
+  logApiError,
+  requireRole,
+  requireTenantSession,
+  validationErrorResponse
+} from "@/lib/api/route-helper";
 import {
   COMPENSATION_ADMIN_ROLES,
   getEmployeeCurrentSalary,
-  saveEmployeeSalary,
+  saveEmployeeSalary
 } from "@/lib/payroll/compensation";
 
 const salaryComponentSchema = z.object({
   componentId: z.string().optional().default(""),
-  type: z.enum(["basic", "housing", "transport", "food", "phone", "other", "overtime", "bonus", "commission", "incentive", "travel"]),
+  type: z.enum([
+    "basic",
+    "housing",
+    "transport",
+    "food",
+    "phone",
+    "other",
+    "overtime",
+    "bonus",
+    "commission",
+    "incentive",
+    "travel"
+  ]),
   name: z.string().min(1),
   nameAr: z.string().min(1),
   amount: z.number().nonnegative(),
-  isFixed: z.boolean().default(true),
+  isFixed: z.boolean().default(true)
 });
 
 const upsertEmployeeSalarySchema = z.object({
@@ -29,7 +48,7 @@ const upsertEmployeeSalarySchema = z.object({
   swiftCode: z.string().optional(),
   paymentMethod: z.enum(["bank_transfer", "cash", "check"]).optional(),
   currency: z.string().min(3).max(5).optional(),
-  notes: z.string().optional(),
+  notes: z.string().optional()
 });
 
 interface RouteParams {
@@ -47,18 +66,18 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       tenantId,
       employeeId: id,
       userId: session.user.id,
-      role: session.user.role,
+      role: session.user.role
     });
 
     if ("error" in result) {
       const { error } = result;
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return errorResponse(error.message, error.status);
     }
 
-    return NextResponse.json({ data: result.salary });
+    return dataResponse(result.salary);
   } catch (error) {
-    console.error("Error fetching employee salary:", error);
-    return NextResponse.json({ error: "Failed to fetch employee salary" }, { status: 500 });
+    logApiError("Error fetching employee salary", error);
+    return errorResponse("Failed to fetch employee salary");
   }
 }
 
@@ -75,21 +94,24 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     const result = await saveEmployeeSalary({
       tenantId,
       employeeId: id,
-      ...validated,
+      ...validated
     });
 
     if ("error" in result) {
       const { error } = result;
-      return NextResponse.json({ error: error.message }, { status: error.status });
+      return errorResponse(error.message, error.status);
     }
 
-    return NextResponse.json({ data: result.salary });
+    return dataResponse(result.salary);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: error.errors[0]?.message || "Invalid salary payload" }, { status: 400 });
+      return validationErrorResponse(
+        error.flatten(),
+        error.errors[0]?.message || "Invalid salary payload"
+      );
     }
 
-    console.error("Error saving employee salary:", error);
-    return NextResponse.json({ error: "Failed to save employee salary" }, { status: 500 });
+    logApiError("Error saving employee salary", error);
+    return errorResponse("Failed to save employee salary");
   }
 }

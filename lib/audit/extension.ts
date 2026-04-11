@@ -55,7 +55,7 @@ const AUDITED_MODELS = new Set([
   "DevelopmentPlan",
   "PerformanceGoal",
   "Loan",
-  "TrainingEnrollment",
+  "TrainingEnrollment"
 ]);
 
 const WRITE_OPS = new Set(["create", "update", "delete", "deleteMany", "updateMany", "createMany"]);
@@ -157,16 +157,12 @@ export function createAuditExtension() {
           const isBulk = ["deleteMany", "updateMany", "createMany"].includes(operation);
           const entityId: string | undefined = isBulk
             ? undefined
-            : ((result as Record<string, unknown>)?.id as string) ??
-              args.where?.id ??
-              undefined;
+            : (((result as Record<string, unknown>)?.id as string) ?? args.where?.id ?? undefined);
 
           // لا تُعطّل العملية بسبب فشل تسجيل الـ audit
           createAuditLog({
             tenantId:
-              ctx.tenantId ??
-              ((result as Record<string, unknown>)?.tenantId as string) ??
-              null,
+              ctx.tenantId ?? ((result as Record<string, unknown>)?.tenantId as string) ?? null,
             userId: ctx.userId ?? null,
             action: getAuditAction(model, operation),
             entity: model,
@@ -179,14 +175,14 @@ export function createAuditExtension() {
                   ? { count: (result as { count?: number })?.count }
                   : (result as Record<string, unknown>),
             ipAddress: ctx.ipAddress ?? null,
-            userAgent: ctx.userAgent ?? null,
+            userAgent: ctx.userAgent ?? null
           }).catch((err) => {
             console.error("[Audit Extension] Failed to log:", err);
           });
 
           return result;
-        },
-      },
-    },
+        }
+      }
+    }
   });
 }

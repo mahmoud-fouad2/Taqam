@@ -16,16 +16,16 @@ export function SectionError({ error, reset }: SectionErrorProps) {
 
   return (
     <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 p-8 text-center">
-      <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
-        <AlertCircle className="h-7 w-7 text-destructive" />
+      <div className="bg-destructive/10 flex h-14 w-14 items-center justify-center rounded-full">
+        <AlertCircle className="text-destructive h-7 w-7" />
       </div>
       <div className="space-y-1.5">
         <h2 className="text-xl font-semibold tracking-tight">حدث خطأ</h2>
-        <p className="max-w-sm text-sm text-muted-foreground">
+        <p className="text-muted-foreground max-w-sm text-sm">
           {error.message || "حدث خطأ أثناء تحميل هذه الصفحة. يرجى المحاولة مجدداً."}
         </p>
         {error.digest && (
-          <p className="text-xs text-muted-foreground/50">رمز الخطأ: {error.digest}</p>
+          <p className="text-muted-foreground/50 text-xs">رمز الخطأ: {error.digest}</p>
         )}
       </div>
       <Button size="sm" onClick={reset} className="gap-2">

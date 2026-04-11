@@ -3,8 +3,11 @@ export const USER_ROLES = [
   "TENANT_ADMIN",
   "HR_MANAGER",
   "MANAGER",
-  "EMPLOYEE",
+  "EMPLOYEE"
 ] as const;
+
+export const ADMIN_ROLES = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"] as const;
+export const APPROVER_ROLES = ["TENANT_ADMIN", "HR_MANAGER", "MANAGER"] as const;
 
 export type UserRole = (typeof USER_ROLES)[number];
 export type LegacyUserRole = UserRole | "ADMIN" | "HR";
@@ -12,7 +15,7 @@ export type TenantDashboardRole = Exclude<UserRole, "SUPER_ADMIN">;
 
 const LEGACY_ROLE_MAP = {
   ADMIN: "TENANT_ADMIN",
-  HR: "HR_MANAGER",
+  HR: "HR_MANAGER"
 } as const satisfies Record<string, UserRole>;
 
 function normalizeAllowedRole(role: LegacyUserRole): UserRole {

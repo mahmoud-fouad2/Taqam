@@ -11,7 +11,7 @@ const listQuerySchema = z.object({
   location: z.string().min(1).optional(),
   department: z.string().min(1).optional(),
   jobType: z.string().min(1).optional(),
-  limit: z.coerce.number().int().positive().max(60).default(24).catch(24),
+  limit: z.coerce.number().int().positive().max(60).default(24).catch(24)
 });
 
 export async function GET(request: NextRequest) {
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
       location: searchParams.get("location") ?? undefined,
       department: searchParams.get("department") ?? undefined,
       jobType: searchParams.get("jobType") ?? undefined,
-      limit: searchParams.get("limit") ?? undefined,
+      limit: searchParams.get("limit") ?? undefined
     });
 
     if (!parsed.success) {
@@ -39,15 +39,15 @@ export async function GET(request: NextRequest) {
       location: parsed.data.location,
       departmentId: parsed.data.department,
       jobType: normalizePublicJobType(parsed.data.jobType),
-      limit: parsed.data.limit,
+      limit: parsed.data.limit
     });
 
     return NextResponse.json({
       data: {
         items: jobs,
         total: jobs.length,
-        filters,
-      },
+        filters
+      }
     });
   } catch (error) {
     console.error("GET public job postings error:", error);

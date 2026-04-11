@@ -20,7 +20,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
+  AlertDialogTrigger
 } from "@/components/ui/alert-dialog";
 import type { Tenant } from "@/lib/types/tenant";
 import { TenantSettingsForm } from "./tenant-settings-form";
@@ -38,7 +38,7 @@ function DeleteTenantDialog({
   tenant,
   busyAction,
   onDelete,
-  text,
+  text
 }: {
   tenant: Tenant;
   busyAction: string | null;
@@ -60,17 +60,19 @@ function DeleteTenantDialog({
   }
 
   return (
-    <div className="flex items-center justify-between rounded-lg border border-destructive/20 bg-destructive/5 p-4">
+    <div className="border-destructive/20 bg-destructive/5 flex items-center justify-between rounded-lg border p-4">
       <div>
-        <p className="font-medium text-destructive">{text.tenant.deleteTitle}</p>
-        <p className="text-sm text-muted-foreground">{text.tenant.deleteDescription}</p>
+        <p className="text-destructive font-medium">{text.tenant.deleteTitle}</p>
+        <p className="text-muted-foreground text-sm">{text.tenant.deleteDescription}</p>
       </div>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <AlertDialogTrigger asChild>
           <Button variant="destructive" disabled={busyAction !== null || deleting}>
             {deleting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />{text.common.deleting}</>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {text.common.deleting}
+              </>
             ) : (
               text.common.delete
             )}
@@ -85,14 +87,12 @@ function DeleteTenantDialog({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={deleting}>{text.common.cancel}</AlertDialogCancel>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={deleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
               {deleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />{text.common.deleting}</>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  {text.common.deleting}
+                </>
               ) : (
                 text.common.confirmDeleteTitle
               )}
@@ -113,27 +113,32 @@ export default function TenantSettingsPage() {
   const [tenant, setTenant] = React.useState<Tenant | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [busyAction, setBusyAction] = React.useState<null | "suspend" | "activate" | "delete">(null);
+  const [busyAction, setBusyAction] = React.useState<null | "suspend" | "activate" | "delete">(
+    null
+  );
   const [suspendReason, setSuspendReason] = React.useState("");
 
-  const loadTenant = React.useCallback(async (tenantId: string) => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const res = await tenantsService.getById(tenantId);
-      if (res.success && res.data) {
-        setTenant(res.data);
-      } else {
+  const loadTenant = React.useCallback(
+    async (tenantId: string) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const res = await tenantsService.getById(tenantId);
+        if (res.success && res.data) {
+          setTenant(res.data);
+        } else {
+          setTenant(null);
+          setError(res.error || t.organization.fetchCompanyError);
+        }
+      } catch (e) {
         setTenant(null);
-        setError(res.error || t.organization.fetchCompanyError);
+        setError(e instanceof Error ? e.message : t.organization.fetchCompanyError);
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      setTenant(null);
-      setError(e instanceof Error ? e.message : t.organization.fetchCompanyError);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [t.organization.fetchCompanyError]);
+    },
+    [t.organization.fetchCompanyError]
+  );
 
   React.useEffect(() => {
     if (!id) return;
@@ -144,7 +149,10 @@ export default function TenantSettingsPage() {
     if (!tenant) return;
     setBusyAction("suspend");
     try {
-      const res = await tenantsService.suspend(tenant.id, suspendReason.trim() || "Suspended by admin");
+      const res = await tenantsService.suspend(
+        tenant.id,
+        suspendReason.trim() || "Suspended by admin"
+      );
       if (!res.success) {
         toast.error(res.error || t.tenants.suspendFailed);
         return;
@@ -190,17 +198,23 @@ export default function TenantSettingsPage() {
 
   if (!id || isLoading) {
     return (
-      <div className="flex items-center justify-center rounded-2xl border border-border/60 bg-card/80 py-10 text-muted-foreground shadow-sm">{t.tenant.settingsLoading}</div>
+      <div className="border-border/60 bg-card/80 text-muted-foreground flex items-center justify-center rounded-2xl border py-10 shadow-sm">
+        {t.tenant.settingsLoading}
+      </div>
     );
   }
 
   if (error) {
     return (
       <div className="space-y-4">
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
-        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
+        <Link
+          href="/dashboard/super-admin/tenants"
+          className="border-border/60 bg-background text-foreground hover:bg-muted inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors">
+          {t.tenant.backToList}
+        </Link>
       </div>
     );
   }
@@ -209,7 +223,11 @@ export default function TenantSettingsPage() {
     return (
       <div className="space-y-4">
         <p className="text-muted-foreground">{t.tenant.notFound}</p>
-        <Link href="/dashboard/super-admin/tenants" className="inline-flex h-9 items-center rounded-md border border-border/60 bg-background px-3 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted">{t.tenant.backToList}</Link>
+        <Link
+          href="/dashboard/super-admin/tenants"
+          className="border-border/60 bg-background text-foreground hover:bg-muted inline-flex h-9 items-center rounded-md border px-3 text-sm font-medium shadow-sm transition-colors">
+          {t.tenant.backToList}
+        </Link>
       </div>
     );
   }
@@ -218,11 +236,15 @@ export default function TenantSettingsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/80 p-5 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70">
-        <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-          <Link href="/dashboard/super-admin/tenants" className="font-medium hover:text-primary">{t.common.companies}</Link>
+      <section className="border-border/60 bg-card/80 supports-[backdrop-filter]:bg-card/70 rounded-2xl border p-5 shadow-sm backdrop-blur">
+        <div className="text-muted-foreground mb-2 flex items-center gap-2 text-sm">
+          <Link href="/dashboard/super-admin/tenants" className="hover:text-primary font-medium">
+            {t.common.companies}
+          </Link>
           <ArrowRight className="h-4 w-4 rotate-180" />
-          <Link href={`/dashboard/super-admin/tenants/${id}`} className="font-medium hover:text-primary">
+          <Link
+            href={`/dashboard/super-admin/tenants/${id}`}
+            className="hover:text-primary font-medium">
             {tenant.nameAr}
           </Link>
           <ArrowRight className="h-4 w-4 rotate-180" />
@@ -232,7 +254,9 @@ export default function TenantSettingsPage() {
           <Settings className="h-6 w-6" />
           {t.tenant.settings}
         </h1>
-        <p className="text-sm text-muted-foreground">{tenant.nameAr} - {tenant.name}</p>
+        <p className="text-muted-foreground text-sm">
+          {tenant.nameAr} - {tenant.name}
+        </p>
       </section>
 
       <Card className="border-border/60 bg-card/85 shadow-sm">
@@ -256,7 +280,7 @@ export default function TenantSettingsPage() {
           <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20">
             <div>
               <p className="font-medium">{isSuspended ? t.tenant.activate : t.tenant.suspend}</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 {isSuspended
                   ? `${t.tenant.pReactivateCompany} - ${t.tenant.pUser}`
                   : `${t.tenant.suspendDesc} - ${t.tenant.pUser}`}
@@ -266,7 +290,9 @@ export default function TenantSettingsPage() {
             {isSuspended ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button disabled={busyAction !== null} className="bg-emerald-600 hover:bg-emerald-700">
+                  <Button
+                    disabled={busyAction !== null}
+                    className="bg-emerald-600 hover:bg-emerald-700">
                     {t.tenant.pEnable}
                   </Button>
                 </AlertDialogTrigger>
@@ -277,7 +303,9 @@ export default function TenantSettingsPage() {
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => void doActivate()} disabled={busyAction !== null}>
+                    <AlertDialogAction
+                      onClick={() => void doActivate()}
+                      disabled={busyAction !== null}>
                       {t.tenant.pConfirm}
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -286,7 +314,9 @@ export default function TenantSettingsPage() {
             ) : (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button disabled={busyAction !== null} className="bg-amber-600 hover:bg-amber-700">
+                  <Button
+                    disabled={busyAction !== null}
+                    className="bg-amber-600 hover:bg-amber-700">
                     {t.tenant.pSuspend}
                   </Button>
                 </AlertDialogTrigger>
@@ -297,11 +327,17 @@ export default function TenantSettingsPage() {
                   </AlertDialogHeader>
                   <div className="space-y-2">
                     <label className="text-sm font-medium">{t.common.reason}</label>
-                    <Input value={suspendReason} onChange={(e) => setSuspendReason(e.target.value)} placeholder={t.tenant.suspendReasonExample} />
+                    <Input
+                      value={suspendReason}
+                      onChange={(e) => setSuspendReason(e.target.value)}
+                      placeholder={t.tenant.suspendReasonExample}
+                    />
                   </div>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => void doSuspend()} disabled={busyAction !== null}>
+                    <AlertDialogAction
+                      onClick={() => void doSuspend()}
+                      disabled={busyAction !== null}>
                       {t.tenant.pConfirm}
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -309,10 +345,10 @@ export default function TenantSettingsPage() {
               </AlertDialog>
             )}
           </div>
-          
-          <DeleteTenantDialog 
-            tenant={tenant} 
-            busyAction={busyAction} 
+
+          <DeleteTenantDialog
+            tenant={tenant}
+            busyAction={busyAction}
             onDelete={doDelete}
             text={t}
           />

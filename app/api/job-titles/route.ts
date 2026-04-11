@@ -10,7 +10,7 @@ import { authOptions } from "@/lib/auth";
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -27,33 +27,30 @@ export async function GET(request: NextRequest) {
       include: {
         _count: {
           select: {
-            employees: true,
-          },
-        },
+            employees: true
+          }
+        }
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: "asc" }
     });
 
     return NextResponse.json({ data: jobTitles });
   } catch (error) {
     console.error("Error fetching job titles:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch job titles" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to fetch job titles" }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const tenantId = session.user.tenantId;
-    
+
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant required" }, { status: 400 });
     }
@@ -70,16 +67,13 @@ export async function POST(request: NextRequest) {
         minSalary: body.minSalary,
         maxSalary: body.maxSalary,
         level: body.level || 1,
-        isActive: true,
-      },
+        isActive: true
+      }
     });
 
     return NextResponse.json({ data: jobTitle }, { status: 201 });
   } catch (error) {
     console.error("Error creating job title:", error);
-    return NextResponse.json(
-      { error: "Failed to create job title" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create job title" }, { status: 500 });
   }
 }

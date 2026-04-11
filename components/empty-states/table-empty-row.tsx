@@ -9,7 +9,7 @@ export function TableEmptyRow({
   description,
   icon,
   actionLabel,
-  onAction,
+  onAction
 }: {
   colSpan: number;
   title: string;

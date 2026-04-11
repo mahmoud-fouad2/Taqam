@@ -5,9 +5,8 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { dataResponse, errorResponse, logApiError, requireSession } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 
 function defaultByType() {
   return {
@@ -18,22 +17,20 @@ function defaultByType() {
     payslip: { email: true, push: true, sms: false },
     "document-expiry": { email: true, push: true, sms: false },
     training: { email: true, push: true, sms: false },
-    system: { email: true, push: true, sms: false },
+    system: { email: true, push: true, sms: false }
   };
 }
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession();
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
 
     const pref = await prisma.notificationPreference.findUnique({
-      where: { userId },
+      where: { userId }
     });
 
     if (!pref) {
@@ -43,44 +40,35 @@ export async function GET() {
           email: true,
           push: true,
           sms: false,
-          byType: defaultByType(),
-        },
+          byType: defaultByType()
+        }
       });
 
-      return NextResponse.json({
-        data: {
-          email: created.email,
-          push: created.push,
-          sms: created.sms,
-          byType: created.byType ?? defaultByType(),
-        },
+      return dataResponse({
+        email: created.email,
+        push: created.push,
+        sms: created.sms,
+        byType: created.byType ?? defaultByType()
       });
     }
 
-    return NextResponse.json({
-      data: {
-        email: pref.email,
-        push: pref.push,
-        sms: pref.sms,
-        byType: pref.byType ?? defaultByType(),
-      },
+    return dataResponse({
+      email: pref.email,
+      push: pref.push,
+      sms: pref.sms,
+      byType: pref.byType ?? defaultByType()
     });
   } catch (error) {
-    console.error("Error fetching notification preferences:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch notification preferences" },
-      { status: 500 }
-    );
+    logApiError("Error fetching notification preferences", error);
+    return errorResponse("Failed to fetch notification preferences");
   }
 }
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const userId = session.user.id;
     const body = await request.json();
@@ -92,29 +80,24 @@ export async function PUT(request: NextRequest) {
         email: body.email ?? true,
         push: body.push ?? true,
         sms: body.sms ?? false,
-        byType: body.byType ?? defaultByType(),
+        byType: body.byType ?? defaultByType()
       },
       update: {
         ...(body.email !== undefined ? { email: Boolean(body.email) } : {}),
         ...(body.push !== undefined ? { push: Boolean(body.push) } : {}),
         ...(body.sms !== undefined ? { sms: Boolean(body.sms) } : {}),
-        ...(body.byType !== undefined ? { byType: body.byType } : {}),
-      },
+        ...(body.byType !== undefined ? { byType: body.byType } : {})
+      }
     });
 
-    return NextResponse.json({
-      data: {
-        email: updated.email,
-        push: updated.push,
-        sms: updated.sms,
-        byType: updated.byType ?? defaultByType(),
-      },
+    return dataResponse({
+      email: updated.email,
+      push: updated.push,
+      sms: updated.sms,
+      byType: updated.byType ?? defaultByType()
     });
   } catch (error) {
-    console.error("Error updating notification preferences:", error);
-    return NextResponse.json(
-      { error: "Failed to update notification preferences" },
-      { status: 500 }
-    );
+    logApiError("Error updating notification preferences", error);
+    return errorResponse("Failed to update notification preferences");
   }
 }

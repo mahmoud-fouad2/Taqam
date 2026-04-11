@@ -8,7 +8,7 @@ export async function generateMetadata() {
   const t = getText(locale);
   return {
     title: t.calendar.pageTitle,
-    description: t.calendar.pageDesc,
+    description: t.calendar.pageDesc
   };
 }
 
@@ -17,14 +17,16 @@ export default async function CalendarPage() {
   const t = getText(locale);
   return (
     <>
-      <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="mb-6 flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
             <CalendarDays className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{t.calendar.pCalendar}</h1>
-            <p className="text-sm text-muted-foreground">{t.calendar.pCalendarViewOfAttendanceRecord}</p>
+            <p className="text-muted-foreground text-sm">
+              {t.calendar.pCalendarViewOfAttendanceRecord}
+            </p>
           </div>
         </div>
       </div>

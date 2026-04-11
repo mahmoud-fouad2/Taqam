@@ -2,18 +2,15 @@
 import React from "react";
 import { cookies } from "next/headers";
 import { requireAuth } from "@/lib/auth";
-import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
+import { AppSidebar } from "@/components/app-sidebar";
+import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/motion/page-transition";
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 export const metadata: Metadata = {
   title: {
     default: "Dashboard | Taqam",
-    template: "%s | Dashboard | Taqam",
+    template: "%s | Dashboard | Taqam"
   },
   robots: {
     index: false,
@@ -23,9 +20,9 @@ export const metadata: Metadata = {
       index: false,
       follow: false,
       noimageindex: true,
-      noarchive: true,
-    },
-  },
+      noarchive: true
+    }
+  }
 };
 
 export default async function Page({ children }: { children: React.ReactNode }) {
@@ -39,11 +36,8 @@ export default async function Page({ children }: { children: React.ReactNode }) 
     <div
       className={`dashboard-shell min-h-screen ${dir === "rtl" ? "direction-rtl" : "direction-ltr"}`}
       data-locale={locale}
-      data-dir={dir}
-    >
-      <SidebarProvider
-        className="[--sidebar-width:calc(var(--spacing)*74)] [--sidebar-width-icon:4.5rem] [--header-height:calc(var(--spacing)*13)]"
-      >
+      data-dir={dir}>
+      <SidebarProvider className="[--header-height:calc(var(--spacing)*13)] [--sidebar-width-icon:4.5rem] [--sidebar-width:calc(var(--spacing)*74)]">
         <AppSidebar variant="inset" side={sidebarSide} dir={dir} />
         <SidebarInset className="dashboard-main-surface">
           <SiteHeader locale={locale} dir={dir} />
@@ -57,5 +51,5 @@ export default async function Page({ children }: { children: React.ReactNode }) 
         </SidebarInset>
       </SidebarProvider>
     </div>
-  )
+  );
 }

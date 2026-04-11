@@ -11,7 +11,7 @@ const t = getText("ar");
 
 export default function DashboardError({
   error,
-  reset,
+  reset
 }: {
   error: Error & { digest?: string };
   reset: () => void;
@@ -27,14 +27,14 @@ export default function DashboardError({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-6 p-8 text-center">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
-        <AlertCircle className="h-8 w-8 text-destructive" />
+      <div className="bg-destructive/10 flex h-16 w-16 items-center justify-center rounded-full">
+        <AlertCircle className="text-destructive h-8 w-8" />
       </div>
       <div className="space-y-2">
         <h2 className="text-2xl font-bold tracking-tight">
           {isEn ? "An unexpected error occurred" : t.common.unexpectedError}
         </h2>
-        <p className="max-w-md text-muted-foreground">
+        <p className="text-muted-foreground max-w-md">
           {error.message
             ? `${error.message}`
             : isEn
@@ -42,14 +42,16 @@ export default function DashboardError({
               : "حدث خطأ ما أثناء تحميل هذه الصفحة. يرجى المحاولة مجددًا."}
         </p>
         {error.digest && (
-          <p className="text-xs text-muted-foreground/60">
+          <p className="text-muted-foreground/60 text-xs">
             {isEn ? "Error code:" : "رمز الخطأ:"} {error.digest}
           </p>
         )}
       </div>
       <div className="flex gap-3">
         <Button onClick={reset}>{isEn ? "Try again" : "إعادة المحاولة"}</Button>
-        <Button variant="outline" onClick={() => (window.location.href = isEn ? "/en/dashboard" : "/dashboard")}>
+        <Button
+          variant="outline"
+          onClick={() => (window.location.href = isEn ? "/en/dashboard" : "/dashboard")}>
           {isEn ? "Back to dashboard" : t.common.goToDashboard2}
         </Button>
       </div>

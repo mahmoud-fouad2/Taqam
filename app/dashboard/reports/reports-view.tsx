@@ -9,22 +9,16 @@ import {
   IconClock,
   IconAlertCircle,
   IconTrendingUp,
-  IconTrendingDown,
+  IconTrendingDown
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   Table,
@@ -32,13 +26,11 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  formatMinutesToHours,
-} from "@/lib/types/attendance";
+import { formatMinutesToHours } from "@/lib/types/attendance";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -124,7 +116,7 @@ export function ReportsView() {
           fetchJson<{ data: ApiEmployee[] }>("/api/employees?limit=1000"),
           fetchJson<{ data: ApiAttendanceRecord[] }>(
             `/api/attendance?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}&limit=10000&page=1`
-          ),
+          )
         ]);
 
         if (cancelled) return;
@@ -161,13 +153,13 @@ export function ReportsView() {
   const totalAbsent = monthRecords.filter((r) => r.status === "absent").length;
   const totalLateMinutes = monthRecords.reduce((sum, r) => sum + (r.lateMinutes || 0), 0);
   const totalWorkMinutes = monthRecords.reduce((sum, r) => sum + (r.totalWorkMinutes || 0), 0);
-  
-  const attendanceRate = totalWorkDays > 0 
-    ? Math.round(((totalPresent + totalLate) / totalWorkDays) * 100) 
-    : 0;
-  const punctualityRate = (totalPresent + totalLate) > 0
-    ? Math.round((totalPresent / (totalPresent + totalLate)) * 100)
-    : 0;
+
+  const attendanceRate =
+    totalWorkDays > 0 ? Math.round(((totalPresent + totalLate) / totalWorkDays) * 100) : 0;
+  const punctualityRate =
+    totalPresent + totalLate > 0
+      ? Math.round((totalPresent / (totalPresent + totalLate)) * 100)
+      : 0;
 
   // Calculate per-employee stats
   const employeeStats = employees.map((emp) => {
@@ -187,7 +179,7 @@ export function ReportsView() {
       absent,
       lateMinutes,
       workMinutes,
-      attendanceRate: workDays > 0 ? Math.round(((present + late) / workDays) * 100) : 0,
+      attendanceRate: workDays > 0 ? Math.round(((present + late) / workDays) * 100) : 0
     };
   });
 
@@ -209,7 +201,7 @@ export function ReportsView() {
       present,
       late,
       absent,
-      attendanceRate: workDays > 0 ? Math.round(((present + late) / workDays) * 100) : 0,
+      attendanceRate: workDays > 0 ? Math.round(((present + late) / workDays) * 100) : 0
     };
   });
 
@@ -228,7 +220,7 @@ export function ReportsView() {
       t.reports.pLate,
       t.reports.pAbsent,
       t.reports.pTotalLateMinutes,
-      t.reports.pAttendanceRate,
+      t.reports.pAttendanceRate
     ];
     const rows = filteredEmployeeStats.map((s) => [
       getEmployeeFullNameSafe(s.employee, "ar"),
@@ -237,7 +229,7 @@ export function ReportsView() {
       s.late,
       s.absent,
       s.lateMinutes,
-      `${s.attendanceRate}%`,
+      `${s.attendanceRate}%`
     ]);
 
     const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
@@ -255,7 +247,7 @@ export function ReportsView() {
     const date = new Date(year, i, 1);
     return {
       value: `${year}-${String(i + 1).padStart(2, "0")}`,
-      label: date.toLocaleString("ar-SA", { month: "long", year: "numeric" }),
+      label: date.toLocaleString("ar-SA", { month: "long", year: "numeric" })
     };
   });
 
@@ -275,7 +267,9 @@ export function ReportsView() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">{t.reports.pScheduleComplianceRate}</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              {t.reports.pScheduleComplianceRate}
+            </CardTitle>
             <IconClock className="h-4 w-4 text-blue-500" />
           </CardHeader>
           <CardContent>
@@ -292,7 +286,7 @@ export function ReportsView() {
             <div className="text-2xl font-bold text-yellow-600">
               {formatMinutesToHours(totalLateMinutes)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-muted-foreground mt-1 text-xs">
               {totalLate} {t.reports.pLateDays}
             </p>
           </CardContent>
@@ -306,7 +300,7 @@ export function ReportsView() {
             <div className="text-2xl font-bold text-purple-600">
               {Math.round(totalWorkMinutes / 60)}
             </div>
-            <p className="text-xs text-muted-foreground mt-1">{t.common.hour}</p>
+            <p className="text-muted-foreground mt-1 text-xs">{t.common.hour}</p>
           </CardContent>
         </Card>
       </div>
@@ -316,7 +310,7 @@ export function ReportsView() {
         <div className="flex items-center gap-2">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-[200px]">
-              <IconCalendar className="h-4 w-4 ms-2" />
+              <IconCalendar className="ms-2 h-4 w-4" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -330,7 +324,7 @@ export function ReportsView() {
 
           <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
             <SelectTrigger className="w-[180px]">
-              <IconFilter className="h-4 w-4 ms-2" />
+              <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.department} />
             </SelectTrigger>
             <SelectContent>
@@ -363,15 +357,23 @@ export function ReportsView() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span className="font-medium">{stat.department.nameAr}</span>
-                    <Badge variant="outline">{stat.employeeCount} {t.reports.pEmployee}</Badge>
+                    <Badge variant="outline">
+                      {stat.employeeCount} {t.reports.pEmployee}
+                    </Badge>
                   </div>
                   <span className="font-bold">{stat.attendanceRate}%</span>
                 </div>
                 <Progress value={stat.attendanceRate} />
-                <div className="flex gap-4 text-xs text-muted-foreground">
-                  <span className="text-green-600">{t.reports.pPresent} {stat.present}</span>
-                  <span className="text-yellow-600">{t.reports.pLate} {stat.late}</span>
-                  <span className="text-red-600">{t.reports.pAbsent} {stat.absent}</span>
+                <div className="text-muted-foreground flex gap-4 text-xs">
+                  <span className="text-green-600">
+                    {t.reports.pPresent} {stat.present}
+                  </span>
+                  <span className="text-yellow-600">
+                    {t.reports.pLate} {stat.late}
+                  </span>
+                  <span className="text-red-600">
+                    {t.reports.pAbsent} {stat.absent}
+                  </span>
                 </div>
               </div>
             ))}
@@ -384,7 +386,8 @@ export function ReportsView() {
         <CardHeader>
           <CardTitle>{t.reports.pEmployeeReport}</CardTitle>
           <CardDescription>
-            {t.reports.pAttendanceDetailsPerEmployee}{filteredEmployeeStats.length} موظف)
+            {t.reports.pAttendanceDetailsPerEmployee}
+            {filteredEmployeeStats.length} موظف)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -405,14 +408,14 @@ export function ReportsView() {
             <TableBody>
               {isLoading ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
+                  <TableCell colSpan={9} className="py-8 text-center">
                     <p className="text-muted-foreground">{t.common.loading}</p>
                   </TableCell>
                 </TableRow>
               ) : filteredEmployeeStats.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="text-center py-8">
-                    <IconUsers className="mx-auto h-12 w-12 text-muted-foreground mb-2" />
+                  <TableCell colSpan={9} className="py-8 text-center">
+                    <IconUsers className="text-muted-foreground mx-auto mb-2 h-12 w-12" />
                     <p className="text-muted-foreground">{t.common.noData}</p>
                   </TableCell>
                 </TableRow>
@@ -453,10 +456,9 @@ export function ReportsView() {
                               stat.attendanceRate >= 90
                                 ? "text-green-600"
                                 : stat.attendanceRate >= 70
-                                ? "text-yellow-600"
-                                : "text-red-600"
-                            }
-                          >
+                                  ? "text-yellow-600"
+                                  : "text-red-600"
+                            }>
                             {stat.attendanceRate}%
                           </span>
                         </div>

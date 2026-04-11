@@ -25,8 +25,8 @@ export async function GET() {
         employeesLabelEn: true,
         featuresAr: true,
         featuresEn: true,
-        isPopular: true,
-      },
+        isPopular: true
+      }
     });
 
     const comparison = await prisma.planFeatureComparison.findMany({
@@ -37,15 +37,15 @@ export async function GET() {
         featureEn: true,
         inStarter: true,
         inBusiness: true,
-        inEnterprise: true,
-      },
+        inEnterprise: true
+      }
     });
 
-    return NextResponse.json({ 
-      data: { 
-        plans, 
-        comparison 
-      } 
+    return NextResponse.json({
+      data: {
+        plans,
+        comparison
+      }
     });
   } catch (error) {
     console.error("GET public pricing error:", error);

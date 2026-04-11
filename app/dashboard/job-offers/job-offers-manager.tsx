@@ -12,33 +12,27 @@ import {
   IconBriefcase,
   IconCurrencyDollar,
   IconCalendar,
-  IconCheck,
+  IconCheck
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
+  TableRow
 } from "@/components/ui/table";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
-  SheetTitle,
+  SheetTitle
 } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -46,21 +40,21 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -71,7 +65,7 @@ import {
   getJobOffers,
   getJobPostings,
   updateJobOffer,
-  updateOfferStatus,
+  updateOfferStatus
 } from "@/lib/api/recruitment";
 import {
   type Applicant,
@@ -81,7 +75,7 @@ import {
   offerStatusLabels,
   type OfferStatus,
   jobTypeLabels,
-  type JobType,
+  type JobType
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -113,7 +107,7 @@ const EMPTY_FORM: OfferFormState = {
   validUntil: "",
   termsAndConditions: "",
   benefits: "",
-  status: "draft",
+  status: "draft"
 };
 
 function splitLines(value: string) {
@@ -144,7 +138,7 @@ function buildFormState(offer: JobOffer): OfferFormState {
     validUntil: toDateInputValue(offer.validUntil),
     termsAndConditions: offer.termsAndConditions || "",
     benefits: stringifyBenefits(offer.benefits),
-    status: offer.status,
+    status: offer.status
   };
 }
 
@@ -178,7 +172,7 @@ export function JobOffersManager() {
       const [offersRes, applicantsRes, jobsRes] = await Promise.all([
         getJobOffers(),
         getApplicants(),
-        getJobPostings(),
+        getJobPostings()
       ]);
       setOffers(offersRes);
       setApplicants(applicantsRes);
@@ -215,7 +209,7 @@ export function JobOffersManager() {
       total: offers.length,
       draft: offers.filter((offer) => offer.status === "draft").length,
       sent: offers.filter((offer) => offer.status === "sent").length,
-      accepted: offers.filter((offer) => offer.status === "accepted").length,
+      accepted: offers.filter((offer) => offer.status === "accepted").length
     }),
     [offers]
   );
@@ -245,7 +239,13 @@ export function JobOffersManager() {
   }
 
   async function handleSave() {
-    if (!form.applicantId || !form.jobPostingId || !form.offeredSalary || !form.startDate || !form.validUntil) {
+    if (
+      !form.applicantId ||
+      !form.jobPostingId ||
+      !form.offeredSalary ||
+      !form.startDate ||
+      !form.validUntil
+    ) {
       toast.error(t.jobOffers.fillRequired);
       return;
     }
@@ -269,7 +269,9 @@ export function JobOffersManager() {
         termsAndConditions: form.termsAndConditions || undefined,
         benefits: splitLines(form.benefits),
         status: form.status,
-        applicantName: applicant?.firstName ? `${applicant.firstName} ${applicant.lastName}` : undefined,
+        applicantName: applicant?.firstName
+          ? `${applicant.firstName} ${applicant.lastName}`
+          : undefined
       };
 
       const saved = editingOffer
@@ -287,7 +289,13 @@ export function JobOffersManager() {
       handleFormOpenChange(false);
       toast.success(editingOffer ? t.jobOffers.offerUpdated : t.jobOffers.offerCreated);
     } catch (saveError) {
-      toast.error(saveError instanceof Error ? saveError.message : editingOffer ? t.jobOffers.updateFailed : t.jobOffers.createFailed);
+      toast.error(
+        saveError instanceof Error
+          ? saveError.message
+          : editingOffer
+            ? t.jobOffers.updateFailed
+            : t.jobOffers.createFailed
+      );
     } finally {
       setIsSaving(false);
     }
@@ -303,7 +311,9 @@ export function JobOffersManager() {
       }
       toast.success(t.jobOffers.statusUpdated);
     } catch (statusError) {
-      toast.error(statusError instanceof Error ? statusError.message : t.jobOffers.statusUpdateFailed);
+      toast.error(
+        statusError instanceof Error ? statusError.message : t.jobOffers.statusUpdateFailed
+      );
     } finally {
       setBusyOfferId(null);
     }
@@ -334,7 +344,7 @@ export function JobOffersManager() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 text-destructive">
+        <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-lg border p-4">
           {error}
         </div>
       )}
@@ -343,7 +353,7 @@ export function JobOffersManager() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">{t.jobOffers.totalOffers}</CardTitle>
-            <IconBriefcase className="h-4 w-4 text-muted-foreground" />
+            <IconBriefcase className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.total}</div>
@@ -394,7 +404,7 @@ export function JobOffersManager() {
         <CardContent>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row">
             <div className="relative flex-1">
-              <IconSearch className="absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder={t.jobOffers.searchPlaceholder}
                 value={searchQuery}
@@ -433,13 +443,13 @@ export function JobOffersManager() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-muted-foreground py-8 text-center">
                       {t.jobOffers.pLoadingJobOffers}
                     </TableCell>
                   </TableRow>
                 ) : filteredOffers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    <TableCell colSpan={6} className="text-muted-foreground py-8 text-center">
                       {t.jobOffers.pNoMatchingOffersFound}
                     </TableCell>
                   </TableRow>
@@ -449,7 +459,7 @@ export function JobOffersManager() {
                       <TableCell>
                         <div className="space-y-1">
                           <p className="font-medium">{offer.applicantName}</p>
-                          <p className="text-sm text-muted-foreground">{offer.applicantEmail}</p>
+                          <p className="text-muted-foreground text-sm">{offer.applicantEmail}</p>
                         </div>
                       </TableCell>
                       <TableCell>{offer.jobTitle}</TableCell>
@@ -458,7 +468,9 @@ export function JobOffersManager() {
                       </TableCell>
                       <TableCell>{formatDate(offer.startDate)}</TableCell>
                       <TableCell>
-                        <Badge className={offerStatusColors[offer.status]}>{offerStatusLabels[offer.status]}</Badge>
+                        <Badge className={offerStatusColors[offer.status]}>
+                          {offerStatusLabels[offer.status]}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -468,31 +480,42 @@ export function JobOffersManager() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              setSelectedOffer(offer);
-                              setIsViewSheetOpen(true);
-                            }}>
-                              <IconEye className="ms-2 h-4 w-4" />{t.common.viewDetails}</DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedOffer(offer);
+                                setIsViewSheetOpen(true);
+                              }}>
+                              <IconEye className="ms-2 h-4 w-4" />
+                              {t.common.viewDetails}
+                            </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openEditDialog(offer)}>
                               <IconEdit className="ms-2 h-4 w-4" />
                               {t.jobOffers.pEditOffer}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             {offer.status !== "sent" && (
-                              <DropdownMenuItem disabled={busyOfferId === offer.id} onClick={() => void handleStatusChange(offer.id, "sent")}>
+                              <DropdownMenuItem
+                                disabled={busyOfferId === offer.id}
+                                onClick={() => void handleStatusChange(offer.id, "sent")}>
                                 <IconMail className="ms-2 h-4 w-4" />
                                 {t.jobOffers.pMarkAsSent}
                               </DropdownMenuItem>
                             )}
                             {offer.status !== "accepted" && (
-                              <DropdownMenuItem disabled={busyOfferId === offer.id} onClick={() => void handleStatusChange(offer.id, "accepted")}>
+                              <DropdownMenuItem
+                                disabled={busyOfferId === offer.id}
+                                onClick={() => void handleStatusChange(offer.id, "accepted")}>
                                 <IconCheck className="ms-2 h-4 w-4" />
                                 {t.jobOffers.pMarkAsAccepted}
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem className="text-red-600" onClick={() => setDeleteOfferId(offer.id)}>
-                              <IconTrash className="ms-2 h-4 w-4" />{t.common.delete}</DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => setDeleteOfferId(offer.id)}>
+                              <IconTrash className="ms-2 h-4 w-4" />
+                              {t.common.delete}
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -508,17 +531,19 @@ export function JobOffersManager() {
       <Dialog open={isFormOpen} onOpenChange={handleFormOpenChange}>
         <DialogContent className="w-full sm:max-w-[560px]">
           <DialogHeader>
-            <DialogTitle>{editingOffer ? t.jobOffers.editOffer : t.jobOffers.createOffer}</DialogTitle>
+            <DialogTitle>
+              {editingOffer ? t.jobOffers.editOffer : t.jobOffers.createOffer}
+            </DialogTitle>
             <DialogDescription>
-              {editingOffer
-                ? t.jobOffers.editDesc
-                : t.jobOffers.createDesc}
+              {editingOffer ? t.jobOffers.editDesc : t.jobOffers.createDesc}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label>{t.jobOffers.candidate}</Label>
-              <Select value={form.applicantId} onValueChange={(value) => updateForm("applicantId", value)}>
+              <Select
+                value={form.applicantId}
+                onValueChange={(value) => updateForm("applicantId", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.jobOffers.chooseCandidate} />
                 </SelectTrigger>
@@ -534,7 +559,9 @@ export function JobOffersManager() {
 
             <div className="grid gap-2">
               <Label>{t.onboarding.jobCol}</Label>
-              <Select value={form.jobPostingId} onValueChange={(value) => updateForm("jobPostingId", value)}>
+              <Select
+                value={form.jobPostingId}
+                onValueChange={(value) => updateForm("jobPostingId", value)}>
                 <SelectTrigger>
                   <SelectValue placeholder={t.jobOffers.chooseJob} />
                 </SelectTrigger>
@@ -551,18 +578,27 @@ export function JobOffersManager() {
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t.leaveTypes.salary}</Label>
-                <Input type="number" value={form.offeredSalary} onChange={(event) => updateForm("offeredSalary", event.target.value)} />
+                <Input
+                  type="number"
+                  value={form.offeredSalary}
+                  onChange={(event) => updateForm("offeredSalary", event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label>{t.salaryStructures.currency}</Label>
-                <Input value={form.currency} onChange={(event) => updateForm("currency", event.target.value)} />
+                <Input
+                  value={form.currency}
+                  onChange={(event) => updateForm("currency", event.target.value)}
+                />
               </div>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
               <div className="grid gap-2">
                 <Label>{t.jobOffers.workType}</Label>
-                <Select value={form.jobType} onValueChange={(value) => updateForm("jobType", value as JobType)}>
+                <Select
+                  value={form.jobType}
+                  onValueChange={(value) => updateForm("jobType", value as JobType)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -577,7 +613,9 @@ export function JobOffersManager() {
               </div>
               <div className="grid gap-2">
                 <Label>{t.common.status}</Label>
-                <Select value={form.status} onValueChange={(value) => updateForm("status", value as OfferStatus)}>
+                <Select
+                  value={form.status}
+                  onValueChange={(value) => updateForm("status", value as OfferStatus)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -595,30 +633,53 @@ export function JobOffersManager() {
             <div className="grid gap-4 md:grid-cols-3">
               <div className="grid gap-2">
                 <Label>{t.common.startDate}</Label>
-                <Input type="date" value={form.startDate} onChange={(event) => updateForm("startDate", event.target.value)} />
+                <Input
+                  type="date"
+                  value={form.startDate}
+                  onChange={(event) => updateForm("startDate", event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label>{t.jobOffers.probationPeriod}</Label>
-                <Input type="number" value={form.probationPeriod} onChange={(event) => updateForm("probationPeriod", event.target.value)} />
+                <Input
+                  type="number"
+                  value={form.probationPeriod}
+                  onChange={(event) => updateForm("probationPeriod", event.target.value)}
+                />
               </div>
               <div className="grid gap-2">
                 <Label>{t.jobOffers.validUntil}</Label>
-                <Input type="date" value={form.validUntil} onChange={(event) => updateForm("validUntil", event.target.value)} />
+                <Input
+                  type="date"
+                  value={form.validUntil}
+                  onChange={(event) => updateForm("validUntil", event.target.value)}
+                />
               </div>
             </div>
 
             <div className="grid gap-2">
               <Label>{t.jobPostings.benefits}</Label>
-              <Textarea rows={4} value={form.benefits} onChange={(event) => updateForm("benefits", event.target.value)} placeholder={t.jobOffers.benefitsPlaceholder} />
+              <Textarea
+                rows={4}
+                value={form.benefits}
+                onChange={(event) => updateForm("benefits", event.target.value)}
+                placeholder={t.jobOffers.benefitsPlaceholder}
+              />
             </div>
 
             <div className="grid gap-2">
               <Label>{t.jobOffers.termsAndConditions}</Label>
-              <Textarea rows={4} value={form.termsAndConditions} onChange={(event) => updateForm("termsAndConditions", event.target.value)} />
+              <Textarea
+                rows={4}
+                value={form.termsAndConditions}
+                onChange={(event) => updateForm("termsAndConditions", event.target.value)}
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => handleFormOpenChange(false)}>{t.common.cancel}</Button>
+            <Button variant="outline" onClick={() => handleFormOpenChange(false)}>
+              {t.common.cancel}
+            </Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
               {editingOffer ? t.common.saveChanges : t.jobOffers.saveOffer}
             </Button>
@@ -635,9 +696,9 @@ export function JobOffersManager() {
           {selectedOffer && (
             <div className="space-y-6 py-4">
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">{t.jobOffers.candidate}</p>
+                <p className="text-muted-foreground text-sm">{t.jobOffers.candidate}</p>
                 <p className="text-lg font-semibold">{selectedOffer.applicantName}</p>
-                <p className="text-sm text-muted-foreground">{selectedOffer.applicantEmail}</p>
+                <p className="text-muted-foreground text-sm">{selectedOffer.applicantEmail}</p>
               </div>
 
               <div className="grid gap-4 md:grid-cols-2">
@@ -664,15 +725,17 @@ export function JobOffersManager() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{t.common.status}</p>
-                <Badge className={offerStatusColors[selectedOffer.status]}>{offerStatusLabels[selectedOffer.status]}</Badge>
+                <p className="text-muted-foreground text-sm">{t.common.status}</p>
+                <Badge className={offerStatusColors[selectedOffer.status]}>
+                  {offerStatusLabels[selectedOffer.status]}
+                </Badge>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{t.jobPostings.benefits}</p>
+                <p className="text-muted-foreground text-sm">{t.jobPostings.benefits}</p>
                 <div className="flex flex-wrap gap-2">
                   {selectedOffer.benefits.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t.jobOffers.noBenefits}</p>
+                    <p className="text-muted-foreground text-sm">{t.jobOffers.noBenefits}</p>
                   ) : (
                     selectedOffer.benefits.map((benefit) => (
                       <Badge key={`${selectedOffer.id}-${benefit.name}`} variant="outline">
@@ -684,28 +747,41 @@ export function JobOffersManager() {
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{t.jobOffers.termsAndConditions}</p>
-                <p className="rounded-lg bg-muted p-3 text-sm">{selectedOffer.termsAndConditions || t.jobOffers.noExtraTerms}</p>
+                <p className="text-muted-foreground text-sm">{t.jobOffers.termsAndConditions}</p>
+                <p className="bg-muted rounded-lg p-3 text-sm">
+                  {selectedOffer.termsAndConditions || t.jobOffers.noExtraTerms}
+                </p>
               </div>
 
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">{t.jobOffers.validity}</p>
-                <p className="font-medium">{t.jobOffers.validUntilPrefix} {formatDate(selectedOffer.validUntil)}</p>
+                <p className="text-muted-foreground text-sm">{t.jobOffers.validity}</p>
+                <p className="font-medium">
+                  {t.jobOffers.validUntilPrefix} {formatDate(selectedOffer.validUntil)}
+                </p>
               </div>
             </div>
           )}
         </SheetContent>
       </Sheet>
 
-      <Dialog open={Boolean(deleteOfferId)} onOpenChange={(open) => !open && setDeleteOfferId(null)}>
+      <Dialog
+        open={Boolean(deleteOfferId)}
+        onOpenChange={(open) => !open && setDeleteOfferId(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{t.jobOffers.deleteTitle}</DialogTitle>
             <DialogDescription>{t.jobOffers.pTheOfferWillBePermanentlyDelet}</DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteOfferId(null)}>{t.common.cancel}</Button>
-            <Button variant="destructive" onClick={() => void handleDelete()} disabled={busyOfferId === deleteOfferId}>{t.common.delete}</Button>
+            <Button variant="outline" onClick={() => setDeleteOfferId(null)}>
+              {t.common.cancel}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => void handleDelete()}
+              disabled={busyOfferId === deleteOfferId}>
+              {t.common.delete}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

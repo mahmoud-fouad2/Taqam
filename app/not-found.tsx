@@ -22,20 +22,30 @@ export default async function NotFound() {
         {
           href: `${p}/careers`,
           title: isAr ? "بوابة الوظائف" : "Careers portal",
-          description: isAr ? "اكتشف الوظائف المفتوحة لدى الشركات العاملة على طاقم." : "Browse active openings across companies running on Taqam.",
+          description: isAr
+            ? "اكتشف الوظائف المفتوحة لدى الشركات العاملة على طاقم."
+            : "Browse active openings across companies running on Taqam."
         },
         {
           href: `${p}/help-center`,
           title: isAr ? "مركز المساعدة" : "Help center",
-          description: isAr ? "أدلة الإعداد والاستخدام والتشغيل في مكان واحد." : "Setup, usage, and operational guidance in one place.",
+          description: isAr
+            ? "أدلة الإعداد والاستخدام والتشغيل في مكان واحد."
+            : "Setup, usage, and operational guidance in one place."
         },
         {
           href: `${p}/dashboard`,
           title: isAr ? "لوحة التحكم" : "Dashboard",
-          description: isAr ? "ارجع مباشرة إلى مساحة العمل إذا كنت مسجل الدخول." : "Jump back to the workspace if you are already signed in.",
-        },
+          description: isAr
+            ? "ارجع مباشرة إلى مساحة العمل إذا كنت مسجل الدخول."
+            : "Jump back to the workspace if you are already signed in."
+        }
       ]}
-      secondaryAction={{ href: `${p}/support`, label: isAr ? "تواصل مع الدعم" : "Contact support", variant: "outline" }}
+      secondaryAction={{
+        href: `${p}/support`,
+        label: isAr ? "تواصل مع الدعم" : "Contact support",
+        variant: "outline"
+      }}
       title={isAr ? "هذه الصفحة لم تعد هنا" : "This page is no longer here"}
     />
   );

@@ -8,6 +8,7 @@
 ## 📊 الوضع الحالي
 
 ### لوحة التحكم (Dashboard)
+
 - **35+ قسم** مبني بالفعل (الموظفون، الحضور، الرواتب، التوظيف، الأداء...)
 - **التنقل:** Sidebar + Header + Breadcrumb
 - **اللغة:** عربي/إنجليزي + RTL كامل
@@ -15,7 +16,8 @@
 - **الأدوار:** SUPER_ADMIN / TENANT_ADMIN / HR_MANAGER / MANAGER / EMPLOYEE
 
 ### نظام Tenant الحالي
-- **Resolution:** Cookie-based (`taqam_tenant`) 
+
+- **Resolution:** Cookie-based (`taqam_tenant`)
 - **وضع Subdomain:** `https://company.taqam.net/dashboard`
 - **وضع Path (fallback):** `https://taqam.net/t/company/dashboard` (Render/Vercel)
 - **الاختيار:** تلقائي عبر `TAQAM_TENANT_URL_MODE` (auto/subdomain/path)
@@ -28,6 +30,7 @@
 ### المحور الأول: النطاقات الفرعية (Subdomain Infrastructure)
 
 #### Phase 1: Wildcard DNS + SSL
+
 - **المهام:**
   - [ ] إعداد wildcard DNS record: `*.taqam.net → server IP`
   - [ ] إعداد wildcard SSL certificate (Let's Encrypt أو Cloudflare)
@@ -35,6 +38,7 @@
   - [ ] اختبار الوصول عبر `company1.taqam.net`
 
 #### Phase 2: Next.js Middleware للنطاقات الفرعية
+
 - **المهام:**
   - [ ] إنشاء `middleware.ts` في root المشروع:
     ```
@@ -48,6 +52,7 @@
   - [ ] Rewrite `/dashboard` → يقرأ tenant من subdomain تلقائياً
 
 #### Phase 3: Custom Domains لكل شركة
+
 - **المهام:**
   - [ ] إضافة `customDomain` field في جدول `Tenant` بقاعدة البيانات
   - [ ] API endpoint: `PUT /api/admin/tenants/:id/domain` لربط domain مخصص
@@ -59,6 +64,7 @@
   - [ ] UI في إعدادات الشركة لإدارة النطاق المخصص
 
 #### Phase 4: Tenant Isolation المتقدم
+
 - **المهام:**
   - [ ] كل tenant لديه:
     - شعار + ألوان مخصصة (white-labeling)
@@ -83,6 +89,7 @@
 ### المحور الثاني: تطوير لوحة التحكم (Dashboard Enhancements)
 
 #### Phase 5: الصفحة الرئيسية الذكية
+
 الصفحة الرئيسية حالياً بسيطة. المطلوب dashboard ذكي:
 
 - [ ] **بطاقات إحصائية** (KPI Cards):
@@ -112,11 +119,11 @@
   - عرض مختلف حسب الدور (TENANT_ADMIN vs EMPLOYEE)
 
 #### Phase 6: نظام التقارير المتقدم
+
 - [ ] **تقرير الحضور الشامل:**
   - فلتر بالقسم + الفترة + الموظف
   - Export إلى Excel/PDF
   - رسوم بيانية تفاعلية
-  
 - [ ] **تقرير الرواتب:**
   - ملخص شهري مقارن
   - تفاصيل GOSI + ضريبة
@@ -132,18 +139,19 @@
   - متوسط وقت التوظيف
 
 #### Phase 7: إدارة المستندات
+
 - [ ] **مستودع مستندات** لكل موظف:
   - عقد العمل + الملحقات
   - الهوية الوطنية / الإقامة
   - الشهادات
   - خطابات (خطاب تعريف، خطاب راتب)
-  
 - [ ] **توليد خطابات تلقائي:**
   - قوالب خطابات (تعريف، راتب، خبرة)
   - PDF generation مع شعار الشركة
   - توقيع إلكتروني
 
 #### Phase 8: نظام التنبيهات المتقدم
+
 - [ ] **Dashboard notifications center:**
   - Inbox مع فلتر (الكل / غير مقروء / مهم)
   - Real-time updates (WebSocket أو SSE)
@@ -157,6 +165,7 @@
   - أرصدة إجازات منخفضة
 
 #### Phase 9: نظام الأدوار المتقدم (RBAC v2)
+
 - [ ] **Custom roles:** السماح للشركة بإنشاء أدوار مخصصة
 - [ ] **Granular permissions:**
   ```
@@ -176,6 +185,7 @@
 ### المحور الثالث: التكاملات والأتمتة
 
 #### Phase 10: التكاملات السعودية
+
 - [ ] **GOSI الآلي:**
   - حساب اشتراكات GOSI تلقائياً من بيانات الموظفين
   - تصدير ملف GOSI الشهري تلقائياً
@@ -195,6 +205,7 @@
   - ملف SIF الشهري
 
 #### Phase 11: API Webhooks
+
 - [ ] **نظام Webhooks:**
   - URLs مخصصة لكل حدث
   - Events: employee.created, leave.approved, payroll.processed, attendance.checkin
@@ -202,6 +213,7 @@
   - Webhook logs + debugging
 
 #### Phase 12: SSO و SAML
+
 - [ ] **تسجيل دخول موحد:**
   - Microsoft Entra ID (Azure AD)
   - Google Workspace
@@ -212,26 +224,27 @@
 
 ## 📐 الأولويات
 
-| المرحلة | الأولوية | التبعيات |
-|---------|----------|----------|
-| Phase 1: Wildcard DNS | 🔴 عالية | بنية تحتية |
-| Phase 2: Middleware | 🔴 عالية | Phase 1 |
-| Phase 5: Dashboard ذكي | 🔴 عالية | مستقل |
-| Phase 6: تقارير | 🟡 متوسطة | Phase 5 |
-| Phase 3: Custom Domains | 🟡 متوسطة | Phase 2 |
-| Phase 4: White-labeling | 🟡 متوسطة | Phase 3 |
-| Phase 7: مستندات | 🟡 متوسطة | مستقل |
-| Phase 8: تنبيهات | 🟡 متوسطة | مستقل |
-| Phase 9: RBAC v2 | 🟡 متوسطة | مستقل |
-| Phase 10: تكاملات سعودية | 🟢 منخفضة | Phase 5 |
-| Phase 11: Webhooks | 🟢 منخفضة | مستقل |
-| Phase 12: SSO | 🟢 منخفضة | مستقل |
+| المرحلة                  | الأولوية  | التبعيات   |
+| ------------------------ | --------- | ---------- |
+| Phase 1: Wildcard DNS    | 🔴 عالية  | بنية تحتية |
+| Phase 2: Middleware      | 🔴 عالية  | Phase 1    |
+| Phase 5: Dashboard ذكي   | 🔴 عالية  | مستقل      |
+| Phase 6: تقارير          | 🟡 متوسطة | Phase 5    |
+| Phase 3: Custom Domains  | 🟡 متوسطة | Phase 2    |
+| Phase 4: White-labeling  | 🟡 متوسطة | Phase 3    |
+| Phase 7: مستندات         | 🟡 متوسطة | مستقل      |
+| Phase 8: تنبيهات         | 🟡 متوسطة | مستقل      |
+| Phase 9: RBAC v2         | 🟡 متوسطة | مستقل      |
+| Phase 10: تكاملات سعودية | 🟢 منخفضة | Phase 5    |
+| Phase 11: Webhooks       | 🟢 منخفضة | مستقل      |
+| Phase 12: SSO            | 🟢 منخفضة | مستقل      |
 
 ---
 
 ## 🔧 التغييرات التقنية المطلوبة
 
 ### قاعدة البيانات
+
 ```prisma
 // إضافات مقترحة لـ schema.prisma
 
@@ -287,6 +300,7 @@ model CustomRole {
 ```
 
 ### الملفات الجديدة
+
 ```
 middleware.ts                              # Root middleware (subdomain routing)
 lib/tenant-branding.ts                     # Tenant branding utilities

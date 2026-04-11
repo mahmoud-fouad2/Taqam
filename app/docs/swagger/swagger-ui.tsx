@@ -22,7 +22,7 @@ export default function SwaggerUi() {
       dom_id: "#swagger-ui",
       deepLinking: true,
       presets: [window.SwaggerUIBundle.presets.apis, window.SwaggerUIStandalonePreset],
-      layout: "StandaloneLayout",
+      layout: "StandaloneLayout"
     });
   }, [ready]);
 

@@ -1,7 +1,7 @@
-import { SectionCards } from "@/components/section-cards"
-import { TenantControls } from "@/components/tenant-controls"
-import { TenantBadge } from "@/components/tenant-badge"
-import { RecentActivities } from "@/components/recent-activities"
+import { SectionCards } from "@/components/section-cards";
+import { TenantControls } from "@/components/tenant-controls";
+import { TenantBadge } from "@/components/tenant-badge";
+import { RecentActivities } from "@/components/recent-activities";
 import { ChartAreaInteractiveClient } from "./chart-area-interactive-client";
 import { DashboardQuickActions } from "@/components/dashboard-quick-actions";
 import { DashboardGreeting } from "@/components/dashboard-greeting";
@@ -13,12 +13,12 @@ import { getText } from "@/lib/i18n/text";
 import { requireTenantAccess } from "@/lib/auth";
 import { getDashboardActivities, getDashboardCharts, getDashboardStats } from "@/lib/dashboard";
 
-export async function generateMetadata(): Promise<Metadata>{
+export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
   const t = getText(locale);
   return generateMeta({
     title: t.dashboard.metaTitle,
-    description: t.dashboard.metaDescription,
+    description: t.dashboard.metaDescription
   });
 }
 
@@ -36,14 +36,14 @@ export default async function Page() {
       attendanceRate: 0,
       pendingLeaves: 0,
       onLeaveToday: 0,
-      newHiresThisMonth: 0,
+      newHiresThisMonth: 0
     })),
     getDashboardCharts({ tenantId: user.tenantId, period: "week" }).catch(() => ({
       attendance: [],
       departments: [],
-      leaves: [],
+      leaves: []
     })),
-    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }).catch(() => []),
+    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }).catch(() => [])
   ]);
 
   const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User";
@@ -51,11 +51,7 @@ export default async function Page() {
   return (
     <>
       <div className="flex items-center justify-between">
-        <DashboardGreeting
-          name={userName}
-          locale={locale}
-          headingLabel={t.dashboard.heading}
-        />
+        <DashboardGreeting name={userName} locale={locale} headingLabel={t.dashboard.heading} />
         <div className="flex items-center gap-3">
           <TenantBadge />
           <TenantControls />
@@ -73,5 +69,5 @@ export default async function Page() {
         <RecentActivities locale={locale} activities={activities} />
       </div>
     </>
-  )
+  );
 }

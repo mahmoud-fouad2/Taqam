@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
+import { logger } from "@/lib/logger";
 import { requireMobileEmployeeAuthWithDevice } from "@/lib/mobile/auth";
 
 /* ── GET /api/mobile/leaves — list employee's leave requests ── */
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest) {
 
     const where: any = {
       tenantId: payloadOrRes.tenantId,
-      employeeId: payloadOrRes.employeeId,
+      employeeId: payloadOrRes.employeeId
     };
     if (statusFilter && validStatuses.includes(statusFilter)) {
       where.status = statusFilter;
@@ -27,13 +28,13 @@ export async function GET(request: NextRequest) {
       prisma.leaveRequest.findMany({
         where,
         include: {
-          leaveType: { select: { name: true, nameAr: true, color: true } },
+          leaveType: { select: { name: true, nameAr: true, color: true } }
         },
         orderBy: { createdAt: "desc" },
         skip: (page - 1) * limit,
-        take: limit,
+        take: limit
       }),
-      prisma.leaveRequest.count({ where }),
+      prisma.leaveRequest.count({ where })
     ]);
 
     return NextResponse.json({
@@ -47,15 +48,15 @@ export async function GET(request: NextRequest) {
           totalDays: Number(r.totalDays),
           reason: r.reason,
           status: r.status.toLowerCase(),
-          createdAt: r.createdAt.toISOString(),
+          createdAt: r.createdAt.toISOString()
         })),
         page,
         limit,
-        total,
-      },
+        total
+      }
     });
   } catch (error) {
-    console.error("Mobile leaves GET error:", error);
+    logger.error("Mobile leaves GET error", undefined, error);
     return NextResponse.json({ error: "Failed to fetch leave requests" }, { status: 500 });
   }
 }
@@ -64,7 +65,7 @@ const createSchema = z.object({
   leaveTypeId: z.string().min(1),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format must be YYYY-MM-DD"),
   endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Format must be YYYY-MM-DD"),
-  reason: z.string().trim().max(1000).optional(),
+  reason: z.string().trim().max(1000).optional()
 });
 
 function countBusinessDays(start: Date, end: Date): number {
@@ -86,7 +87,10 @@ export async function POST(request: NextRequest) {
     const raw = await request.json();
     const parsed = createSchema.safeParse(raw);
     if (!parsed.success) {
-      return NextResponse.json({ error: "Invalid payload", issues: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "Invalid payload", issues: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const { leaveTypeId, startDate, endDate, reason } = parsed.data;
@@ -104,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     // Verify leave type belongs to tenant
     const leaveType = await prisma.leaveType.findFirst({
-      where: { id: leaveTypeId, tenantId: payloadOrRes.tenantId, isActive: true },
+      where: { id: leaveTypeId, tenantId: payloadOrRes.tenantId, isActive: true }
     });
 
     if (!leaveType) {
@@ -122,11 +126,11 @@ export async function POST(request: NextRequest) {
         endDate: end,
         totalDays,
         reason: reason ?? null,
-        status: "PENDING",
+        status: "PENDING"
       },
       include: {
-        leaveType: { select: { name: true, nameAr: true } },
-      },
+        leaveType: { select: { name: true, nameAr: true } }
+      }
     });
 
     // Increment pending balance
@@ -136,19 +140,19 @@ export async function POST(request: NextRequest) {
         employeeId_leaveTypeId_year: {
           employeeId: payloadOrRes.employeeId,
           leaveTypeId,
-          year: currentYear,
-        },
+          year: currentYear
+        }
       },
       create: {
         tenantId: payloadOrRes.tenantId,
         employeeId: payloadOrRes.employeeId,
         leaveTypeId,
         year: currentYear,
-        pending: totalDays,
+        pending: totalDays
       },
       update: {
-        pending: { increment: totalDays },
-      },
+        pending: { increment: totalDays }
+      }
     });
 
     return NextResponse.json(
@@ -159,13 +163,13 @@ export async function POST(request: NextRequest) {
           startDate: leaveRequest.startDate.toISOString().slice(0, 10),
           endDate: leaveRequest.endDate.toISOString().slice(0, 10),
           totalDays: Number(leaveRequest.totalDays),
-          status: "pending",
-        },
+          status: "pending"
+        }
       },
       { status: 201 }
     );
   } catch (error) {
-    console.error("Mobile leaves POST error:", error);
+    logger.error("Mobile leaves POST error", undefined, error);
     return NextResponse.json({ error: "Failed to submit leave request" }, { status: 500 });
   }
 }

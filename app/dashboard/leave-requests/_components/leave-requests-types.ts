@@ -1,6 +1,4 @@
-import type {
-  LeaveRequestStatus,
-} from "@/lib/types/leave";
+import type { LeaveRequestStatus } from "@/lib/types/leave";
 
 export type ApiLeaveType = {
   id: string;

@@ -9,7 +9,7 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
+  DialogTitle
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -17,7 +17,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
+  FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,7 +25,7 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Department, Employee, JobTitle } from "@/lib/types/core-hr";
@@ -45,7 +45,7 @@ export function EmployeeFormDialog({
   jobTitles,
   form,
   saving,
-  onSubmit,
+  onSubmit
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -60,9 +60,11 @@ export function EmployeeFormDialog({
   const t = getText(locale);
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[600px]">
         <DialogHeader>
-          <DialogTitle>{editingEmployee ? t.employeeForm.editTitle : t.employeeForm.addTitle}</DialogTitle>
+          <DialogTitle>
+            {editingEmployee ? t.employeeForm.editTitle : t.employeeForm.addTitle}
+          </DialogTitle>
           <DialogDescription>
             {editingEmployee ? t.employeeForm.editDesc : t.employeeForm.addDesc}
           </DialogDescription>
@@ -77,8 +79,8 @@ export function EmployeeFormDialog({
                 <TabsTrigger value="salary">{t.leaveTypes.salary}</TabsTrigger>
               </TabsList>
 
-              <TabsContent value="personal" className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <TabsContent value="personal" className="mt-4 space-y-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="firstName"
@@ -107,7 +109,7 @@ export function EmployeeFormDialog({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="lastName"
@@ -150,7 +152,7 @@ export function EmployeeFormDialog({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="phone"
@@ -180,7 +182,7 @@ export function EmployeeFormDialog({
                 </div>
               </TabsContent>
 
-              <TabsContent value="employment" className="space-y-4 mt-4">
+              <TabsContent value="employment" className="mt-4 space-y-4">
                 <FormField
                   control={form.control}
                   name="employeeNumber"
@@ -195,7 +197,7 @@ export function EmployeeFormDialog({
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="departmentId"
@@ -247,7 +249,7 @@ export function EmployeeFormDialog({
                   />
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <FormField
                     control={form.control}
                     name="hireDate"
@@ -314,7 +316,7 @@ export function EmployeeFormDialog({
                 />
               </TabsContent>
 
-              <TabsContent value="salary" className="space-y-4 mt-4">
+              <TabsContent value="salary" className="mt-4 space-y-4">
                 <FormField
                   control={form.control}
                   name="basicSalary"
@@ -328,7 +330,7 @@ export function EmployeeFormDialog({
                     </FormItem>
                   )}
                 />
-                <p className="text-sm text-muted-foreground">{t.employees.salaryNote}</p>
+                <p className="text-muted-foreground text-sm">{t.employees.salaryNote}</p>
               </TabsContent>
             </Tabs>
 
@@ -337,8 +339,9 @@ export function EmployeeFormDialog({
                 type="button"
                 variant="outline"
                 onClick={() => onOpenChange(false)}
-                disabled={saving}
-              >{t.common.cancel}</Button>
+                disabled={saving}>
+                {t.common.cancel}
+              </Button>
               <Button type="submit" disabled={saving}>
                 {saving ? t.common.saving : editingEmployee ? t.common.saveChanges : t.common.add}
               </Button>

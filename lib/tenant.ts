@@ -1,6 +1,6 @@
 ﻿/**
  * Taqam Multi-Tenant Utilities
- * 
+ *
  * وظائف مساعدة للتعامل مع الـ Multi-tenancy
  */
 
@@ -44,11 +44,7 @@ function normalizeBaseDomain(domain: string): string {
 /**
  * Build tenant-aware URL
  */
-export function buildTenantUrl(
-  tenantSlug: string,
-  path: string,
-  baseDomain?: string
-): string {
+export function buildTenantUrl(tenantSlug: string, path: string, baseDomain?: string): string {
   const runtimeDomain =
     baseDomain ||
     (typeof window !== "undefined" ? window.location.host : null) ||
@@ -56,7 +52,8 @@ export function buildTenantUrl(
     "localhost:3000";
 
   const domain = normalizeBaseDomain(runtimeDomain);
-  const protocol = domain.includes("localhost") || /^[0-9.]+(?::\d+)?$/.test(domain) ? "http" : "https";
+  const protocol =
+    domain.includes("localhost") || /^[0-9.]+(?::\d+)?$/.test(domain) ? "http" : "https";
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
   const mode = (
@@ -84,11 +81,11 @@ export function buildTenantUrl(
  * Tenant role types (aligned with Prisma UserRole)
  */
 export type TenantRole =
-  | "SUPER_ADMIN"    // Platform admin (no tenant)
-  | "TENANT_ADMIN"   // Tenant owner/admin
-  | "HR_MANAGER"     // HR department manager
-  | "MANAGER"        // Department/team manager
-  | "EMPLOYEE";      // Regular employee
+  | "SUPER_ADMIN" // Platform admin (no tenant)
+  | "TENANT_ADMIN" // Tenant owner/admin
+  | "HR_MANAGER" // HR department manager
+  | "MANAGER" // Department/team manager
+  | "EMPLOYEE"; // Regular employee
 
 /**
  * Check if role has access to tenant management

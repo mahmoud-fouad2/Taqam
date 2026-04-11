@@ -13,7 +13,7 @@ const updateUserSchema = z.object({
   email: z.string().email().optional(),
   role: z.nativeEnum(UserRole).optional(),
   status: z.nativeEnum(UserStatus).optional(),
-  phone: z.string().optional(),
+  phone: z.string().optional()
 });
 
 const ALLOWED_ROLES = [UserRole.TENANT_ADMIN, UserRole.HR_MANAGER] as const;
@@ -21,7 +21,7 @@ const MANAGEABLE_ROLES = new Set<UserRole>([
   UserRole.EMPLOYEE,
   UserRole.HR_MANAGER,
   UserRole.MANAGER,
-  UserRole.TENANT_ADMIN,
+  UserRole.TENANT_ADMIN
 ]);
 
 function canManageTargetUser(actorRole: string | undefined, targetRole: UserRole): boolean {
@@ -78,10 +78,10 @@ export async function GET(request: NextRequest, context: RouteContext) {
             employeeNumber: true,
             hireDate: true,
             department: { select: { name: true, nameAr: true } },
-            jobTitle: { select: { name: true, nameAr: true } },
-          },
-        },
-      },
+            jobTitle: { select: { name: true, nameAr: true } }
+          }
+        }
+      }
     });
 
     if (!user) {
@@ -116,7 +116,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     // Check if user exists and belongs to tenant
     const existingUser = await prisma.user.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingUser) {
@@ -130,7 +130,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     const rawBody = await request.json();
     const parsed = updateUserSchema.safeParse(rawBody);
     if (!parsed.success) {
-      return NextResponse.json({ error: "بيانات غير صالحة", details: parsed.error.flatten() }, { status: 400 });
+      return NextResponse.json(
+        { error: "بيانات غير صالحة", details: parsed.error.flatten() },
+        { status: 400 }
+      );
     }
     const { firstName, lastName, email, role, status, phone } = parsed.data;
 
@@ -141,10 +144,10 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
     // Check if email is being changed and if it's already taken
     if (email && email.toLowerCase() !== existingUser.email.toLowerCase()) {
       const emailTaken = await prisma.user.findFirst({
-        where: { 
+        where: {
           email: email.toLowerCase(),
-          id: { not: id },
-        },
+          id: { not: id }
+        }
       });
 
       if (emailTaken) {
@@ -160,7 +163,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         ...(email && { email: email.toLowerCase() }),
         ...(role && { role }),
         ...(status && { status }),
-        phone: phone || null,
+        phone: phone || null
       },
       select: {
         id: true,
@@ -168,8 +171,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         firstName: true,
         lastName: true,
         role: true,
-        status: true,
-      },
+        status: true
+      }
     });
 
     logger.info("User updated", { userId: user.id, tenantId });
@@ -202,7 +205,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     // Check if user exists and belongs to tenant
     const existingUser = await prisma.user.findFirst({
-      where: { id, tenantId },
+      where: { id, tenantId }
     });
 
     if (!existingUser) {
@@ -219,7 +222,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
     }
 
     await prisma.user.delete({
-      where: { id },
+      where: { id }
     });
 
     logger.info("User deleted", { userId: id, tenantId });
