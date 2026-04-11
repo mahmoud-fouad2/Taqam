@@ -9,6 +9,11 @@ export interface TenantContext {
   theme: "shadcn" | "mantine";
 }
 
+export async function getTenantRequestHost(): Promise<string | undefined> {
+  const headerStore = await headers();
+  return headerStore.get("x-forwarded-host") || headerStore.get("host") || undefined;
+}
+
 /**
  * Get tenant context from request (server-side only)
  */

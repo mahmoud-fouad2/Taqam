@@ -64,6 +64,7 @@ export function EmployeesManager() {
   const setSearchQuery = (v: string) => updateFilter("q", v);
   const setFilterDept = (v: string) => updateFilter("dept", v);
   const setFilterStatus = (v: string) => updateFilter("status", v);
+  const openDialog = searchParams.get("open");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
@@ -171,7 +172,14 @@ export function EmployeesManager() {
   const getJobName = (id: string) => jobTitleNameById.get(id) || "-";
 
   // Add
-  const handleAdd = () => {
+  const clearOpenDialogParam = useCallback(() => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+    nextParams.delete("open");
+    const nextQuery = nextParams.toString();
+    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+  }, [router, pathname, searchParams]);
+
+  const handleAdd = useCallback(() => {
     setEditingEmployee(null);
     const nextNum = employees.length + 1;
     form.reset({
@@ -192,7 +200,16 @@ export function EmployeesManager() {
       status: "onboarding"
     });
     setIsDialogOpen(true);
-  };
+  }, [employees.length, form]);
+
+  useEffect(() => {
+    if (loading || openDialog !== "new") {
+      return;
+    }
+
+    handleAdd();
+    clearOpenDialogParam();
+  }, [loading, openDialog, handleAdd, clearOpenDialogParam]);
 
   // Edit
   const handleEdit = (emp: Employee) => {

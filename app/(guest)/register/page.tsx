@@ -40,7 +40,7 @@ export default async function RegisterPage() {
           <div className="w-full max-w-md space-y-8 px-4">
             <div className={`flex gap-2 ${locale === "ar" ? "justify-start" : "justify-end"}`}>
               <ThemeToggle variant="ghost" />
-              <LocaleToggle variant="ghost" />
+              <LocaleToggle variant="ghost" initialLocale={locale} />
             </div>
 
             <div className="text-center">

@@ -135,6 +135,15 @@ export function isTenantBaseHost(host: string, baseDomain?: string): boolean {
   );
 }
 
+export function isLocalTenantDevelopmentHost(host: string | null | undefined): boolean {
+  const normalizedHost = normalizeTenantDomain(host);
+  if (!normalizedHost) {
+    return false;
+  }
+
+  return normalizedHost === "localhost" || /^[0-9.]+(?::\d+)?$/.test(normalizedHost);
+}
+
 export function extractTenantSlugFromHost(host: string, baseDomain?: string): string | null {
   const cleanHost = hostWithoutPort(host);
 
@@ -278,7 +287,9 @@ export function buildTenantUrl(tenantSlug: string, path: string, baseDomain?: st
   const mustUsePath =
     mode === "path" ||
     (mode === "auto" &&
-      (cleanHost.endsWith(".onrender.com") ||
+      (cleanHost === "localhost" ||
+        /^[0-9.]+$/.test(cleanHost) ||
+        cleanHost.endsWith(".onrender.com") ||
         cleanHost.endsWith(".vercel.app") ||
         cleanHost.endsWith(".netlify.app")));
 

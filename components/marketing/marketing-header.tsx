@@ -18,9 +18,9 @@ function getLocaleFromCookie(): "ar" | "en" {
   return match?.[1] === "en" ? "en" : "ar";
 }
 
-export function MarketingHeader() {
+export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar" | "en" }) {
   const pathname = usePathname();
-  const [locale, setLocale] = React.useState<"ar" | "en">("ar");
+  const [locale, setLocale] = React.useState<"ar" | "en">(initialLocale);
   const [openDropdown, setOpenDropdown] = React.useState<string | null>(null);
 
   const isEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
@@ -110,7 +110,7 @@ export function MarketingHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle variant="ghost" />
-          <LocaleToggle />
+          <LocaleToggle initialLocale={initialLocale} />
           <Link href={localeHref("/login")}>
             <Button variant="brandOutline" size="sm">
               {locale === "ar" ? "تسجيل الدخول" : "Login"}

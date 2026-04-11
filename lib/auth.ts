@@ -22,8 +22,8 @@ import {
   getTenantIssueQueryValue,
   validateTenantAccess
 } from "@/lib/tenant-access";
-import { buildTenantUrl } from "@/lib/tenant";
-import { getTenantContext } from "@/lib/tenant.server";
+import { buildTenantPath, buildTenantUrl, isLocalTenantDevelopmentHost } from "@/lib/tenant";
+import { getTenantContext, getTenantRequestHost } from "@/lib/tenant.server";
 import { redirect } from "next/navigation";
 
 // ============================================
@@ -486,7 +486,12 @@ export async function requireTenantAccess(): Promise<SessionUser & { tenantId: s
   const expectedTenantSlug = user.tenant?.slug;
 
   if (expectedTenantSlug && tenantContext.slug !== expectedTenantSlug) {
-    redirect(buildTenantUrl(expectedTenantSlug, "/dashboard"));
+    const requestHost = await getTenantRequestHost();
+    if (isLocalTenantDevelopmentHost(requestHost)) {
+      redirect(buildTenantPath(expectedTenantSlug, "/dashboard", tenantContext.locale));
+    }
+
+    redirect(buildTenantUrl(expectedTenantSlug, "/dashboard", requestHost));
   }
 
   return user as SessionUser & { tenantId: string };

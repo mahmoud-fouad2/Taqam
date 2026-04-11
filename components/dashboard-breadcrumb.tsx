@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -102,11 +103,11 @@ export function DashboardBreadcrumb() {
         {crumbs.map((crumb, i) => {
           const isLast = i === crumbs.length - 1;
           return (
-            <BreadcrumbItem key={crumb.href} className="min-w-0">
-              {isLast ? (
-                <BreadcrumbPage className="truncate font-medium">{crumb.label}</BreadcrumbPage>
-              ) : (
-                <>
+            <Fragment key={crumb.href}>
+              <BreadcrumbItem className="min-w-0">
+                {isLast ? (
+                  <BreadcrumbPage className="truncate font-medium">{crumb.label}</BreadcrumbPage>
+                ) : (
                   <BreadcrumbLink
                     asChild
                     className="text-muted-foreground/90 hover:text-foreground truncate">
@@ -114,12 +115,14 @@ export function DashboardBreadcrumb() {
                       {crumb.label}
                     </Link>
                   </BreadcrumbLink>
-                  <BreadcrumbSeparator>
-                    <SepIcon className="h-3.5 w-3.5" />
-                  </BreadcrumbSeparator>
-                </>
-              )}
-            </BreadcrumbItem>
+                )}
+              </BreadcrumbItem>
+              {!isLast ? (
+                <BreadcrumbSeparator>
+                  <SepIcon className="h-3.5 w-3.5" />
+                </BreadcrumbSeparator>
+              ) : null}
+            </Fragment>
           );
         })}
       </BreadcrumbList>

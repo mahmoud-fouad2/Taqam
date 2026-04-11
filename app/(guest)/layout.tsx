@@ -35,7 +35,7 @@ export default async function GuestLayout({
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.06),transparent_40%),radial-gradient(circle_at_80%_10%,rgba(59,130,246,0.08),transparent_35%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.08),transparent_35%)]" />
       </div>
 
-      <MarketingHeader />
+      <MarketingHeader initialLocale={locale} />
       {children}
       <MarketingFooter />
     </div>

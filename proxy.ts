@@ -5,6 +5,7 @@ import {
   buildTenantPath,
   buildTenantUrl,
   isValidTenantSlug,
+  isLocalTenantDevelopmentHost,
   isTenantBaseHost,
   resolveTenantDashboardRewrite,
   resolveTenantRequest
@@ -111,6 +112,7 @@ export async function proxy(request: NextRequest) {
     tenantSlug &&
     isDashboard &&
     !isSuperAdminPath &&
+    !isLocalTenantDevelopmentHost(host) &&
     (request.method === "GET" || request.method === "HEAD") &&
     (resolvedTenant.source === "path" ||
       (resolvedTenant.source === "none" && host && isTenantBaseHost(host)));

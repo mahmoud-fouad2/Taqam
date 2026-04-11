@@ -4,7 +4,11 @@ import { generateMeta } from "@/lib/utils";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
 import { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { FadeIn } from "@/components/ui/fade-in";
+import { getCurrentUser } from "@/lib/auth";
+import { buildTenantPath, buildTenantUrl, isLocalTenantDevelopmentHost } from "@/lib/tenant";
+import { getTenantRequestHost } from "@/lib/tenant.server";
 import { LoginForm } from "./login-form";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -18,6 +22,23 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LoginPageV1() {
   const locale = await getAppLocale();
+  const user = await getCurrentUser();
+  if (user?.role === "SUPER_ADMIN") {
+    redirect("/dashboard/super-admin");
+  }
+
+  if (user?.tenantId && user.tenant?.slug) {
+    const requestHost = await getTenantRequestHost();
+    if (isLocalTenantDevelopmentHost(requestHost)) {
+      redirect(buildTenantPath(user.tenant.slug, "/dashboard", locale));
+    }
+
+    redirect(buildTenantUrl(user.tenant.slug, "/dashboard", requestHost));
+  }
+
+  if (user?.tenantId) {
+    redirect("/dashboard");
+  }
   const t = getText(locale);
 
   return (

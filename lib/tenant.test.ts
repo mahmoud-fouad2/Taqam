@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTenantUrl,
   buildTenantCanonicalUrl,
   buildTenantPath,
   resolveTenantDashboardRewrite,
@@ -87,5 +88,14 @@ describe("tenant public URL helpers", () => {
         baseDomain: "taqam.net"
       })
     ).toBe("https://jobs.example.com/en/careers");
+  });
+
+  it("forces path fallback for localhost and IP development hosts", () => {
+    expect(buildTenantUrl("demo", "/dashboard", "localhost:3001")).toBe(
+      "http://localhost:3001/t/demo/dashboard"
+    );
+    expect(buildTenantUrl("demo", "/dashboard", "127.0.0.1:3001")).toBe(
+      "http://127.0.0.1:3001/t/demo/dashboard"
+    );
   });
 });

@@ -11,15 +11,6 @@ function setCookie(name: string, value: string) {
   document.cookie = `${encodeURIComponent(name)}=${encodeURIComponent(value)}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
 }
 
-function getCookie(name: string): string | undefined {
-  const match = document.cookie
-    .split(";")
-    .map((c) => c.trim())
-    .find((c) => c.startsWith(`${encodeURIComponent(name)}=`));
-  if (!match) return undefined;
-  return decodeURIComponent(match.split("=").slice(1).join("="));
-}
-
 /**
  * Pill toggle — AR on the left, EN on the right (always LTR layout),
  * with a sliding indicator that moves between the two sides.
@@ -27,17 +18,16 @@ function getCookie(name: string): string | undefined {
 export function LocaleToggle({
   className,
   // variant kept for backward compat but ignored — pill style is always used
-  variant: _variant
+  variant: _variant,
+  initialLocale
 }: {
   className?: string;
   variant?: string;
+  initialLocale?: Locale;
 }) {
   const pathname = usePathname();
-  const [locale, setLocale] = useState<Locale>(() => {
-    if (typeof document === "undefined") return "ar";
-    const l = getCookie("taqam_locale");
-    return l === "en" || l === "ar" ? l : "ar";
-  });
+  const pathLocale: Locale = pathname === "/en" || pathname.startsWith("/en/") ? "en" : "ar";
+  const [locale, setLocale] = useState<Locale>(initialLocale ?? pathLocale);
 
   const toggleLocale = () => {
     const next: Locale = locale === "ar" ? "en" : "ar";

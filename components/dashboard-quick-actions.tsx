@@ -23,7 +23,7 @@ export function DashboardQuickActions({ locale, pendingLeaves, role }: Props) {
     ...(isHrOrAdmin
       ? [
           {
-            href: `${prefix}/dashboard/employees/new`,
+            href: `${prefix}/dashboard/employees?open=new`,
             label: t.addEmployee,
             icon: UserPlus
           }
