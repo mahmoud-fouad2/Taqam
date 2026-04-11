@@ -1,10 +1,12 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import {
   Bell,
+  Check,
   HelpCircle,
+  Languages,
   LogOut,
   User,
   KeyRound,
@@ -201,28 +203,41 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* Language toggle – always visible */}
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon"
-        className={actionIconBtnClass}
-        aria-label={locale === "ar" ? "Switch to English" : "التبديل للعربية"}
-        onClick={toggleLocale}>
-        <span
-          dir="ltr"
-          className="bg-muted ring-border/50 inline-flex h-5 w-[42px] shrink-0 items-center rounded-full px-0.5 ring-1">
-          <span
-            className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "ar" ? "text-primary" : "text-muted-foreground/40"}`}>
-            AR
-          </span>
-          <span className="bg-border/60 mx-0.5 h-3 w-px" />
-          <span
-            className={`flex-1 text-center text-[9px] font-bold transition-colors ${locale === "en" ? "text-primary" : "text-muted-foreground/40"}`}>
-            EN
-          </span>
-        </span>
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            type="button"
+            variant="ghost"
+            className="h-9 rounded-lg border border-border/70 bg-background/75 px-3 shadow-sm hover:bg-accent/80"
+            aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"}
+          >
+            <Languages className="h-4 w-4" />
+            <span className="text-sm font-medium">{locale === "ar" ? "العربية" : "English"}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className={`w-48 ${dropdownSurfaceClass}`}>
+          <DropdownMenuLabel>{locale === "ar" ? "اللغة" : "Language"}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onSelect={locale === "ar" ? undefined : (e: Event) => {
+            e.preventDefault();
+            toggleLocale();
+          }}>
+            <span className="flex flex-1 items-center justify-between">
+              <span>العربية</span>
+              {locale === "ar" ? <Check className="h-4 w-4" /> : null}
+            </span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={locale === "en" ? undefined : (e: Event) => {
+            e.preventDefault();
+            toggleLocale();
+          }}>
+            <span className="flex flex-1 items-center justify-between">
+              <span>English</span>
+              {locale === "en" ? <Check className="h-4 w-4" /> : null}
+            </span>
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
 
       <Button
         type="button"
@@ -261,6 +276,30 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
+                    href="/dashboard/super-admin/insights"
+                    className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "تقارير المنصة" : "Platform insights"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard/super-admin/content"
+                    className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "المحتوى والسيو" : "Content & SEO"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
                     href="/dashboard/super-admin/tenants"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "إدارة الشركات" : "Manage tenants"}</span>
@@ -276,6 +315,30 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                     href="/dashboard/super-admin/requests"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "طلبات الاشتراك" : "Subscription requests"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard/support"
+                    className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "الدعم الفني" : "Support desk"}</span>
+                    {locale === "ar" ? (
+                      <ChevronLeft className="h-4 w-4 opacity-60" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4 opacity-60" />
+                    )}
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link
+                    href="/dashboard/help-center"
+                    className="flex items-center justify-between">
+                    <span>{locale === "ar" ? "مركز المساعدة" : "Help center"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
                     ) : (

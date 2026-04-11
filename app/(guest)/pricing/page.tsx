@@ -1,4 +1,4 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import Link from "next/link";
 
 import { CheckCircle2, CircleDollarSign, Minus, ShieldCheck, Sparkles } from "lucide-react";
@@ -17,18 +17,19 @@ import {
 } from "@/components/ui/table";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { prisma } from "@/lib/db";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteContent = await getPlatformSiteContent();
+
   return marketingMetadata({
     path: "/pricing",
-    titleAr: "الأسعار | باقات طاقم",
-    titleEn: "Pricing | Taqam Plans",
-    descriptionAr:
-      "اختر الباقة المناسبة لحجم شركتك: Starter, Business, Enterprise. أسعار واضحة ومزايا قابلة للتوسّع.",
-    descriptionEn:
-      "Choose the right plan for your company: Starter, Business, Enterprise. Clear pricing and scalable features."
+    titleAr: `${siteContent.pricing.title.ar} | ${siteContent.siteNameAr}`,
+    titleEn: `${siteContent.pricing.title.en} | ${siteContent.siteNameEn} Plans`,
+    descriptionAr: siteContent.pricing.description.ar,
+    descriptionEn: siteContent.pricing.description.en
   });
 }
 
@@ -208,6 +209,7 @@ async function getPricingData() {
 export default async function PricingPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
+  const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
 
   const { plans, comparison } = await getPricingData();
@@ -225,13 +227,9 @@ export default async function PricingPage() {
       <FadeIn>
         <MarketingPageHero
           icon={CircleDollarSign}
-          badge={isAr ? "أسعار واضحة بدون تعقيد" : "Clear pricing without the clutter"}
-          title={isAr ? "الأسعار" : "Pricing"}
-          description={
-            isAr
-              ? "باقات مرنة للشركات الصغيرة والمتوسطة والمؤسسات، مع انتقال واضح بين المستويات بدل قوائم أسعار معقدة."
-              : "Flexible plans for small teams, growing businesses, and enterprises, with a clear path between tiers instead of noisy pricing tables."
-          }
+          badge={isAr ? siteContent.pricing.badge.ar : siteContent.pricing.badge.en}
+          title={isAr ? siteContent.pricing.title.ar : siteContent.pricing.title.en}
+          description={isAr ? siteContent.pricing.description.ar : siteContent.pricing.description.en}
           actions={[
             {
               href: `${p}/plans`,

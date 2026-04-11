@@ -25,6 +25,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { redirect } from "next/navigation";
 import { FeaturesMarquee } from "@/components/marketing/features-marquee";
@@ -32,14 +33,14 @@ import { HeroVideo } from "@/components/marketing/hero-video";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteContent = await getPlatformSiteContent();
+
   return marketingMetadata({
     path: "/",
-    titleAr: "طاقم | منصة الموارد البشرية والرواتب والحضور",
-    titleEn: "Taqam | HR, Payroll & Attendance Platform",
-    descriptionAr:
-      "طاقم منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية/إنجليزية وامتثال للأنظمة المحلية.",
-    descriptionEn:
-      "Taqam is a cloud HR platform for employees, attendance and payroll with Arabic/English UX and multi-tenant support."
+    titleAr: `${siteContent.siteNameAr} | منصة الموارد البشرية والرواتب والحضور`,
+    titleEn: `${siteContent.siteNameEn} | HR, Payroll & Attendance Platform`,
+    descriptionAr: siteContent.defaultDescriptionAr,
+    descriptionEn: siteContent.defaultDescriptionEn
   });
 }
 
@@ -437,7 +438,11 @@ export default async function LandingPage({
 }) {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
+  const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
+  const homeCtaHref = siteContent.home.primaryCtaHref.startsWith("/")
+    ? `${p}${siteContent.home.primaryCtaHref === "/" ? "" : siteContent.home.primaryCtaHref}`
+    : siteContent.home.primaryCtaHref;
 
   const sp = searchParams ? await searchParams : undefined;
   const tenantRequired = sp?.tenantRequired === "1";
@@ -469,38 +474,18 @@ export default async function LandingPage({
                 <div className="mb-5 flex justify-center lg:justify-start">
                   <span className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-xs font-semibold text-indigo-700 dark:border-indigo-800 dark:bg-indigo-950/50 dark:text-indigo-300">
                     <span className="size-1.5 animate-pulse rounded-full bg-indigo-500" />
-                    {isAr
-                      ? "منصة سعودية • متوافقة مع GOSI وWPS ومدد • ثنائية اللغة"
-                      : "Saudi-built • GOSI, WPS & Mudad compliant • Bilingual"}
+                    {isAr ? siteContent.home.badge.ar : siteContent.home.badge.en}
                   </span>
                 </div>
 
                 <h1 className="text-5xl leading-[1.08] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
-                  {isAr ? (
-                    <>
-                      منصة إدارة{" "}
-                      <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        الموارد البشرية
-                      </span>
-                      <br />
-                      الأكثر تكاملاً
-                    </>
-                  ) : (
-                    <>
-                      HR, Payroll &{" "}
-                      <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        Attendance
-                      </span>
-                      <br />
-                      Built for Saudi Arabia
-                    </>
-                  )}
+                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {isAr ? siteContent.home.title.ar : siteContent.home.title.en}
+                  </span>
                 </h1>
 
                 <p className="text-muted-foreground/80 mx-auto mt-6 max-w-xl text-lg leading-relaxed lg:mx-0">
-                  {isAr
-                    ? "طاقم منصة سحابية متكاملة لإدارة الموارد البشرية والرواتب والحضور، مصممة للسوق السعودي مع تجربة عربية كاملة وامتثال للأنظمة المحلية."
-                    : "Taqam is a modern cloud platform to manage employees, attendance, and payroll—optimized for Saudi compliance with full Arabic/English RTL UX."}
+                  {isAr ? siteContent.home.description.ar : siteContent.home.description.en}
                 </p>
 
                 {/* Trust items */}
@@ -517,12 +502,12 @@ export default async function LandingPage({
 
                 {/* CTA buttons */}
                 <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
-                  <Link href={`${p}/request-demo`}>
+                  <Link href={homeCtaHref}>
                     <Button
                       variant="brand"
                       size="lg"
                       className="h-12 gap-2 px-6 text-base font-semibold">
-                      {isAr ? "طلب عرض تجريبي مجاني" : "Request a free demo"}
+                      {isAr ? siteContent.home.primaryCtaLabel.ar : siteContent.home.primaryCtaLabel.en}
                       <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                     </Button>
                   </Link>
@@ -886,7 +871,7 @@ export default async function LandingPage({
                     ))}
                   </ul>
 
-                  <Link href={`${p}/request-demo`}>
+                  <Link href={homeCtaHref}>
                     <Button
                       className="w-full"
                       variant={plan.popular ? "brand" : "brandOutline"}

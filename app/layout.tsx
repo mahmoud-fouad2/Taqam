@@ -1,58 +1,64 @@
-﻿import Providers from "@/components/providers";
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
+
+import Providers from "@/components/providers";
+import { getAppLocale } from "@/lib/i18n/locale";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
+import { getSiteUrl } from "@/lib/marketing/site";
+
 import "./globals.css";
 
-import { getSiteUrl } from "@/lib/marketing/site";
-import { getAppLocale } from "@/lib/i18n/locale";
+export async function generateMetadata(): Promise<Metadata> {
+  const siteContent = await getPlatformSiteContent();
+  const title = `${siteContent.siteNameEn} | ${siteContent.siteNameAr}`;
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getSiteUrl()),
-  applicationName: "Taqam",
-  title: {
-    default: "Taqam | طاقم",
-    template: "%s | Taqam"
-  },
-  description:
-    "Saudi HR, payroll, attendance, and workforce operations platform with Arabic and English support.",
-  manifest: "/manifest.webmanifest",
-  verification: {
-    google: "googlec1df282af5d25af4"
-  },
-  icons: {
-    icon: [
-      { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
-      { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" },
-      { url: "/icons/taqam-icon.svg", type: "image/svg+xml" }
-    ],
-    apple: [{ url: "/icons/mark-light-256.png", sizes: "256x256" }],
-    shortcut: "/icons/favicon-32.png"
-  },
-  openGraph: {
-    type: "website",
-    siteName: "Taqam",
-    title: "Taqam | طاقم",
-    description: "Saudi HR, payroll, attendance, and workforce operations platform.",
-    images: [
-      {
-        url: "/opengraph-image",
-        alt: "Taqam"
-      }
-    ]
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Taqam | طاقم",
-    description: "Saudi HR, payroll, attendance, and workforce operations platform.",
-    images: ["/twitter-image"]
-  },
-  other: {
-    "mobile-web-app-capable": "yes"
-  },
-  authors: [{ name: "ma-fo.info", url: "https://ma-fo.info" }],
-  creator: "ma-fo.info"
-};
+  return {
+    metadataBase: new URL(getSiteUrl()),
+    applicationName: siteContent.siteNameEn,
+    title: {
+      default: title,
+      template: `%s | ${siteContent.siteNameEn}`
+    },
+    description: siteContent.defaultDescriptionEn,
+    manifest: "/manifest.webmanifest",
+    verification: {
+      google: "googlec1df282af5d25af4"
+    },
+    icons: {
+      icon: [
+        { url: "/icons/favicon-16.png", sizes: "16x16", type: "image/png" },
+        { url: "/icons/favicon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icons/favicon-64.png", sizes: "64x64", type: "image/png" },
+        { url: "/icons/taqam-icon.svg", type: "image/svg+xml" }
+      ],
+      apple: [{ url: "/icons/mark-light-256.png", sizes: "256x256" }],
+      shortcut: "/icons/favicon-32.png"
+    },
+    openGraph: {
+      type: "website",
+      siteName: siteContent.siteNameEn,
+      title,
+      description: siteContent.defaultDescriptionEn,
+      images: [
+        {
+          url: "/opengraph-image",
+          alt: siteContent.siteNameEn
+        }
+      ]
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description: siteContent.defaultDescriptionEn,
+      images: ["/twitter-image"]
+    },
+    other: {
+      "mobile-web-app-capable": "yes"
+    },
+    authors: [{ name: siteContent.siteNameEn }],
+    creator: siteContent.siteNameEn
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

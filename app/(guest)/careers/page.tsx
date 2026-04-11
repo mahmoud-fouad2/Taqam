@@ -20,20 +20,21 @@ import {
 } from "@/components/ui/empty";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
 import { listPublicJobFilters, listPublicJobPostings } from "@/lib/recruitment/public";
 import { buildTenantPath } from "@/lib/tenant";
 import { resolveActiveTenantRecord } from "@/lib/tenant-directory";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteContent = await getPlatformSiteContent();
+
   return marketingMetadata({
     path: "/careers",
-    titleAr: "بوابة الوظائف | طاقم",
-    titleEn: "Careers Portal | Taqam",
-    descriptionAr:
-      "بوابة توظيف مجمعة تعرض الوظائف المفتوحة لدى الشركات العاملة على طاقم مع تقديم مباشر من نفس المكان.",
-    descriptionEn:
-      "An aggregate careers portal listing active roles across companies running on Taqam, with direct applications in one place."
+    titleAr: `${siteContent.careers.title.ar} | ${siteContent.siteNameAr}`,
+    titleEn: `${siteContent.careers.title.en} | ${siteContent.siteNameEn}`,
+    descriptionAr: siteContent.careers.description.ar,
+    descriptionEn: siteContent.careers.description.en
   });
 }
 
@@ -44,6 +45,7 @@ export default async function CareersPage({
 }) {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
+  const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
   const headerStore = await headers();
   const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
@@ -92,21 +94,15 @@ export default async function CareersPage({
                 <span className="mb-5 flex justify-center lg:justify-start">
                   <span className="border-primary/20 bg-primary/[0.07] text-primary inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-semibold">
                     <Sparkles className="h-3.5 w-3.5" />
-                    {isAr
-                      ? "بوابة وظائف مجمعة لكل الشركات على طاقم"
-                      : "Unified careers portal across Taqam companies"}
+                    {isAr ? siteContent.careers.badge.ar : siteContent.careers.badge.en}
                   </span>
                 </span>
 
                 <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl lg:text-6xl">
-                  {isAr
-                    ? "اكتشف فرصك التالية من بوابة توظيف واحدة"
-                    : "Discover your next move from one careers portal"}
+                  {isAr ? siteContent.careers.title.ar : siteContent.careers.title.en}
                 </h1>
                 <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8 lg:mx-0">
-                  {isAr
-                    ? "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة."
-                    : "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."}
+                  {isAr ? siteContent.careers.description.ar : siteContent.careers.description.en}
                 </p>
 
                 <div className="mt-8 grid gap-3 sm:grid-cols-3">

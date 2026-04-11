@@ -1,7 +1,8 @@
-﻿import type { Metadata } from "next";
+import type { Metadata } from "next";
 import { cookies, headers } from "next/headers";
 
 import { getMarketingLocaleFromCookie, getSiteUrl } from "@/lib/marketing/site";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 
 type SeoCopy = {
   titleAr: string;
@@ -17,10 +18,12 @@ type SeoCopy = {
 };
 
 export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
-  const headerStore = await headers();
+  const [headerStore, cookieStore, siteContent] = await Promise.all([
+    headers(),
+    cookies(),
+    getPlatformSiteContent()
+  ]);
   const headerLocale = headerStore.get("x-taqam-locale");
-
-  const cookieStore = await cookies();
   const localeFromCookie = getMarketingLocaleFromCookie(cookieStore.get("taqam_locale")?.value);
   const locale = headerLocale === "en" || headerLocale === "ar" ? headerLocale : localeFromCookie;
   const title = locale === "ar" ? copy.titleAr : copy.titleEn;
@@ -28,10 +31,11 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
   const pageKeywords = locale === "ar" ? (copy.keywordsAr ?? []) : (copy.keywordsEn ?? []);
   const section = locale === "ar" ? copy.sectionAr : copy.sectionEn;
   const noIndex = copy.noIndex === true;
+  const siteName = locale === "ar" ? siteContent.siteNameAr : siteContent.siteNameEn;
+  const defaultKeywords = locale === "ar" ? siteContent.defaultKeywordsAr : siteContent.defaultKeywordsEn;
 
   const base = getSiteUrl();
   const path = copy.path.startsWith("/") ? copy.path : `/${copy.path}`;
-
   const urlAr = `${base}${path}`;
   const urlEn = path === "/" ? `${base}/en` : `${base}/en${path}`;
   const url = locale === "en" ? urlEn : urlAr;
@@ -47,24 +51,16 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
         "en-US": urlEn
       }
     },
-    keywords: [
+    keywords: Array.from(new Set([...
+      defaultKeywords,
+      ...pageKeywords,
       "HR",
       "Payroll",
       "Attendance",
       "Saudi Arabia",
       "WPS",
-      "GOSI",
-      "Taqam",
-      "طاقم",
-      "نظام موارد بشرية",
-      "إدارة الموارد البشرية",
-      "الرواتب",
-      "الحضور والانصراف",
-      "نظام HR سعودي",
-      "HR software Saudi",
-      "حضور وانصراف",
-      ...pageKeywords
-    ],
+      "GOSI"
+    ])),
     category: section ?? (locale === "ar" ? "منصة موارد بشرية سعودية" : "Saudi HR platform"),
     classification:
       locale === "ar"
@@ -81,7 +77,7 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       url,
       title,
       description,
-      siteName: "Taqam",
+      siteName,
       locale: locale === "ar" ? "ar_SA" : "en_US",
       alternateLocale: locale === "ar" ? ["en_US"] : ["ar_SA"],
       images: [
@@ -89,7 +85,7 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
           url: `${base}/opengraph-image`,
           width: 1200,
           height: 630,
-          alt: `${title} | Taqam`
+          alt: `${title} | ${siteName}`
         }
       ]
     },
@@ -112,12 +108,12 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
         "max-video-preview": noIndex ? 0 : -1
       }
     },
-    authors: [{ name: "Taqam" }],
-    creator: "Taqam",
-    publisher: "Taqam",
+    authors: [{ name: siteName }],
+    creator: siteName,
+    publisher: siteName,
     other: {
-      "application-name": "Taqam",
-      "apple-mobile-web-app-title": "Taqam",
+      "application-name": siteName,
+      "apple-mobile-web-app-title": siteName,
       "theme-color": "#ffffff",
       "color-scheme": "light dark"
     }

@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import * as React from "react";
 import {
+  type Icon,
   IconBriefcase,
   IconChartBar,
   IconDashboard,
@@ -13,9 +14,9 @@ import {
 } from "@tabler/icons-react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { useClientLocale } from "@/lib/i18n/use-client-locale";
-import { isSuperAdminRole } from "@/lib/access-control";
 
+import { isSuperAdminRole } from "@/lib/access-control";
+import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { LogoMark } from "@/components/logo-mark";
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -29,33 +30,57 @@ import {
   SidebarMenuItem
 } from "@/components/ui/sidebar";
 
-type NavItem = { title: string; url: string; icon: any };
+type NavItem = {
+  title: string;
+  url: string;
+  icon: Icon;
+};
 
 function getNav(locale: "ar" | "en", role?: string): NavItem[] {
   if (isSuperAdminRole(role)) {
     return [
       {
-        title: locale === "ar" ? "لوحة تحكم السوبر أدمن" : "Super Admin",
+        title: locale === "ar" ? "لوحة المنصة" : "Platform dashboard",
         url: "/dashboard/super-admin",
         icon: IconDashboard
       },
       {
-        title: locale === "ar" ? "طلبات الاشتراك" : "Subscription Requests",
+        title: locale === "ar" ? "الرؤى الشاملة" : "Global insights",
+        url: "/dashboard/super-admin/insights",
+        icon: IconChartBar
+      },
+      {
+        title: locale === "ar" ? "طلبات الاشتراك" : "Subscription requests",
         url: "/dashboard/super-admin/requests",
         icon: IconListDetails
       },
       {
-        title: locale === "ar" ? "الشركات" : "Tenants",
+        title: locale === "ar" ? "الشركات والعملاء" : "Tenants and customers",
         url: "/dashboard/super-admin/tenants",
         icon: IconUsers
       },
       {
-        title: locale === "ar" ? "الأسعار والباقات" : "Pricing & Plans",
+        title: locale === "ar" ? "الأسعار والباقات" : "Pricing and plans",
         url: "/dashboard/super-admin/pricing",
-        icon: IconChartBar
+        icon: IconBriefcase
       },
       {
-        title: locale === "ar" ? "إعدادات المنصة" : "Platform Settings",
+        title: locale === "ar" ? "المحتوى والسيو" : "Content and SEO",
+        url: "/dashboard/super-admin/content",
+        icon: IconFolder
+      },
+      {
+        title: locale === "ar" ? "الدعم الفني" : "Support desk",
+        url: "/dashboard/support",
+        icon: IconMessageCircle
+      },
+      {
+        title: locale === "ar" ? "مركز المساعدة" : "Help center",
+        url: "/dashboard/help-center",
+        icon: IconHelp
+      },
+      {
+        title: locale === "ar" ? "إعدادات المنصة" : "Platform settings",
         url: "/dashboard/super-admin/settings",
         icon: IconFolder
       }
@@ -260,13 +285,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 
   React.useEffect(() => {
-    const sUser = session?.user as any;
-    setRole(sUser?.role);
+    const sessionUser = session?.user as {
+      role?: string;
+      name?: string;
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      avatar?: string;
+    } | undefined;
+
+    setRole(sessionUser?.role);
+
     const name =
-      sUser?.name || `${sUser?.firstName || ""} ${sUser?.lastName || ""}`.trim() || "User";
-    const email = sUser?.email || "";
-    const avatar = sUser?.avatar || "/images/avatars/1.png";
-    setUser(sUser ? { name, email, avatar } : null);
+      sessionUser?.name ||
+      `${sessionUser?.firstName || ""} ${sessionUser?.lastName || ""}`.trim() ||
+      "User";
+    const email = sessionUser?.email || "";
+    const avatar = sessionUser?.avatar || "/images/avatars/1.png";
+
+    setUser(sessionUser ? { name, email, avatar } : null);
   }, [session]);
 
   const navItems = React.useMemo(() => getNav(locale, role), [locale, role]);
@@ -287,7 +324,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               size="lg"
               asChild
-              className="border-sidebar-border/70 bg-sidebar-accent/40 hover:bg-sidebar-accent rounded-xl border !p-2 shadow-sm transition-all">
+              className="border-sidebar-border/70 bg-sidebar-accent/40 hover:bg-sidebar-accent rounded-xl border !p-2 shadow-sm transition-all"
+            >
               <Link href={homeUrl}>
                 <LogoMark
                   frameClassName="size-9 rounded-lg border border-sidebar-border/60 bg-sidebar p-1 shadow-sm"
