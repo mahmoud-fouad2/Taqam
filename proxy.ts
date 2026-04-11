@@ -1,6 +1,14 @@
 ﻿import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
+import {
+  buildTenantPath,
+  buildTenantUrl,
+  isValidTenantSlug,
+  isTenantBaseHost,
+  resolveTenantDashboardRewrite,
+  resolveTenantRequest
+} from "@/lib/tenant";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -8,12 +16,47 @@ function tenantCookieOptions() {
   return { path: "/", sameSite: "strict" as const, secure: isProduction };
 }
 
-function isValidTenantSlug(value: string): boolean {
-  return /^[a-z0-9-]{3,30}$/.test(value);
-}
-
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const requestHeaders = new Headers(request.headers);
+  const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+  const resolvedTenant = resolveTenantRequest(pathname, host);
+  const dashboardRewrite = resolveTenantDashboardRewrite(pathname);
+  const effectivePathname = dashboardRewrite?.pathname ?? pathname;
+
+  if (pathname === "/en/dashboard" || pathname.startsWith("/en/dashboard/")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = pathname.replace(/^\/en(?=\/dashboard)/, "") || "/dashboard";
+
+    const res = NextResponse.redirect(redirectUrl);
+    res.cookies.set("taqam_locale", "en", {
+      path: "/",
+      sameSite: "lax",
+      secure: isProduction
+    });
+    return res;
+  }
+
+  if (resolvedTenant.source === "subdomain" && resolvedTenant.slug) {
+    const publicCareersMatch = pathname.match(/^\/(en\/)?careers$/);
+
+    if (publicCareersMatch) {
+      const rewriteUrl = request.nextUrl.clone();
+      rewriteUrl.pathname = buildTenantPath(
+        resolvedTenant.slug,
+        "/careers",
+        publicCareersMatch[1] ? "en" : "ar"
+      );
+
+      const rewriteResponse = NextResponse.rewrite(rewriteUrl, {
+        request: {
+          headers: requestHeaders
+        }
+      });
+      rewriteResponse.cookies.set("taqam_tenant", resolvedTenant.slug, tenantCookieOptions());
+      return rewriteResponse;
+    }
+  }
 
   // Skip static assets and API routes
   if (
@@ -26,23 +69,30 @@ export async function proxy(request: NextRequest) {
   }
 
   const isDashboard =
-    pathname === "/dashboard" ||
-    pathname.startsWith("/dashboard/") ||
-    pathname === "/en/dashboard" ||
-    pathname.startsWith("/en/dashboard/");
+    effectivePathname === "/dashboard" ||
+    effectivePathname.startsWith("/dashboard/") ||
+    effectivePathname === "/en/dashboard" ||
+    effectivePathname.startsWith("/en/dashboard/");
 
   const isSuperAdminPath =
-    pathname.startsWith("/dashboard/super-admin") ||
-    pathname.startsWith("/en/dashboard/super-admin");
+    effectivePathname.startsWith("/dashboard/super-admin") ||
+    effectivePathname.startsWith("/en/dashboard/super-admin");
+
+  const existingTenant = request.cookies.get("taqam_tenant")?.value;
+  let tenantSlug = resolvedTenant.slug;
+
+  if (tenantSlug) {
+    requestHeaders.set("x-tenant-slug", tenantSlug);
+    requestHeaders.set("x-tenant-source", resolvedTenant.source);
+  }
 
   // For non-super-admin dashboard paths, auto-inject tenant cookie from JWT
   if (isDashboard && !isSuperAdminPath) {
-    // Check if tenant cookie already set
-    const existingTenant = request.cookies.get("taqam_tenant")?.value;
-    if (!existingTenant || !isValidTenantSlug(existingTenant)) {
+    // If there is no tenant from host/path, fallback to cookie/JWT for current production behavior.
+    if (!tenantSlug && (!existingTenant || !isValidTenantSlug(existingTenant))) {
       // Read tenant slug from JWT session token
       const token = await getToken({ req: request, secret: process.env.NEXTAUTH_SECRET });
-      const tenantSlug =
+      tenantSlug =
         typeof token?.tenant === "object" &&
         token.tenant !== null &&
         "slug" in token.tenant &&
@@ -51,15 +101,70 @@ export async function proxy(request: NextRequest) {
           : null;
 
       if (tenantSlug && isValidTenantSlug(tenantSlug)) {
-        // Inject tenant cookie so dashboard can proceed without /select-tenant
-        const res = NextResponse.next();
-        res.cookies.set("taqam_tenant", tenantSlug, tenantCookieOptions());
-        return res;
+        requestHeaders.set("x-tenant-slug", tenantSlug);
+        requestHeaders.set("x-tenant-source", "jwt");
       }
     }
   }
 
-  return NextResponse.next();
+  const shouldCanonicalizeDashboard =
+    tenantSlug &&
+    isDashboard &&
+    !isSuperAdminPath &&
+    (request.method === "GET" || request.method === "HEAD") &&
+    (resolvedTenant.source === "path" ||
+      (resolvedTenant.source === "none" && host && isTenantBaseHost(host)));
+
+  if (shouldCanonicalizeDashboard && tenantSlug) {
+    const canonicalTenantSlug: string = tenantSlug;
+    const canonicalTarget = new URL(
+      buildTenantUrl(canonicalTenantSlug, effectivePathname, host || undefined)
+    );
+    canonicalTarget.search = request.nextUrl.search;
+
+    if (canonicalTarget.toString() !== request.nextUrl.toString()) {
+      const redirectResponse = NextResponse.redirect(canonicalTarget);
+
+      if (canonicalTenantSlug !== existingTenant) {
+        redirectResponse.cookies.set("taqam_tenant", canonicalTenantSlug, tenantCookieOptions());
+      }
+
+      return redirectResponse;
+    }
+  }
+
+  const response = dashboardRewrite
+    ? NextResponse.rewrite(
+        (() => {
+          const rewriteUrl = request.nextUrl.clone();
+          rewriteUrl.pathname = dashboardRewrite.pathname;
+          return rewriteUrl;
+        })(),
+        {
+          request: {
+            headers: requestHeaders
+          }
+        }
+      )
+    : NextResponse.next({
+        request: {
+          headers: requestHeaders
+        }
+      });
+
+  if (dashboardRewrite?.locale === "en") {
+    response.cookies.set("taqam_locale", "en", {
+      path: "/",
+      sameSite: "lax",
+      secure: isProduction
+    });
+  }
+
+  if (tenantSlug && tenantSlug !== existingTenant) {
+    response.cookies.set("taqam_tenant", tenantSlug, tenantCookieOptions());
+  }
+
+  return response;
 }
 
 export const config = {

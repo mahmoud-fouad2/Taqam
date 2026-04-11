@@ -23,6 +23,7 @@ import {
   listPublicJobFilters,
   listPublicJobPostings
 } from "@/lib/recruitment/public";
+import { buildTenantCanonicalUrl, buildTenantPath } from "@/lib/tenant";
 
 import { FadeIn } from "@/components/ui/fade-in";
 
@@ -44,7 +45,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   const companyName = tenant.nameAr || tenant.name;
-  const url = `${base}/t/${tenant.slug}/careers`;
+  const url = buildTenantCanonicalUrl(tenant, "/careers", {
+    baseDomain: base.replace(/^https?:\/\//, "")
+  });
   const title = `${companyName} | Careers | Taqam`;
   const description = `Open roles and direct applications for ${companyName} on Taqam.`;
 
@@ -72,7 +75,6 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
   const { slug } = await params;
   const locale = await getAppLocale();
   const isAr = locale === "ar";
-  const p = locale === "en" ? "/en" : "";
   const sp = searchParams ? await searchParams : undefined;
   const query = typeof sp?.q === "string" ? sp.q.trim() : "";
   const location = typeof sp?.location === "string" ? sp.location.trim() : "";
@@ -161,7 +163,7 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               </div>
 
               <PublicJobFilters
-                basePath={`${p}/t/${slug}/careers`}
+                basePath={buildTenantPath(slug, "/careers", locale)}
                 key={`tenant-careers-filters:${slug}:${query}:${location}:${departmentId}:${jobType}`}
                 departments={filters.departments.map((department) => ({
                   value: department.id,
@@ -230,7 +232,9 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
 
             <div className="flex gap-2">
               <Button asChild variant="outline">
-                <Link href={`${p}/careers`}>{isAr ? "كل وظائف طاقم" : "All Taqam jobs"}</Link>
+                <Link href={locale === "en" ? "/en/careers" : "/careers"}>
+                  {isAr ? "كل وظائف طاقم" : "All Taqam jobs"}
+                </Link>
               </Button>
             </div>
           </div>

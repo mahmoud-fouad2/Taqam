@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { BriefcaseBusiness, Building2, Sparkles } from "lucide-react";
 
 import { PublicJobFilters } from "@/components/recruitment/public-job-filters";
@@ -20,6 +22,8 @@ import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
 import { listPublicJobFilters, listPublicJobPostings } from "@/lib/recruitment/public";
+import { buildTenantPath } from "@/lib/tenant";
+import { resolveActiveTenantRecord } from "@/lib/tenant-directory";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -41,6 +45,14 @@ export default async function CareersPage({
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const headerStore = await headers();
+  const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const hostTenant = await resolveActiveTenantRecord({ host });
+
+  if (hostTenant) {
+    redirect(buildTenantPath(hostTenant.slug, "/careers", locale));
+  }
+
   const sp = searchParams ? await searchParams : undefined;
   const query = typeof sp?.q === "string" ? sp.q.trim() : "";
   const location = typeof sp?.location === "string" ? sp.location.trim() : "";

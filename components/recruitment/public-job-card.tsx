@@ -11,6 +11,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { buildTenantPath } from "@/lib/tenant";
 import {
   getPublicExperienceLevelLabel,
   getPublicJobTypeLabel
@@ -145,7 +146,7 @@ export function PublicJobCard({ job, locale, showTenant = true }: Props) {
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
           <Button asChild variant="outline" size="sm">
-            <Link href={`${p}/t/${job.tenantSlug}/careers`}>
+            <Link href={buildTenantPath(job.tenantSlug, "/careers", locale)}>
               {locale === "ar" ? "بوابة الشركة" : "Company portal"}
             </Link>
           </Button>

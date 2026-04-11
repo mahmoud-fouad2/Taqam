@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect } from "react";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
@@ -18,8 +17,7 @@ export default function DashboardError({
 }) {
   const locale = useClientLocale();
   const t = getText(locale);
-  const pathname = usePathname();
-  const isEn = pathname === "/en/dashboard" || pathname.startsWith("/en/");
+  const isEn = locale === "en";
 
   useEffect(() => {
     console.error("[Dashboard Error]", error);
@@ -49,9 +47,7 @@ export default function DashboardError({
       </div>
       <div className="flex gap-3">
         <Button onClick={reset}>{isEn ? "Try again" : "إعادة المحاولة"}</Button>
-        <Button
-          variant="outline"
-          onClick={() => (window.location.href = isEn ? "/en/dashboard" : "/dashboard")}>
+        <Button variant="outline" onClick={() => (window.location.href = "/dashboard")}>
           {isEn ? "Back to dashboard" : t.common.goToDashboard2}
         </Button>
       </div>

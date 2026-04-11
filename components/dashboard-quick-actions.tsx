@@ -4,26 +4,20 @@ import Link from "next/link";
 import { UserPlus, CalendarOff, Clock, DollarSign, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getText } from "@/lib/i18n/text";
+import type { AppLocale } from "@/lib/i18n/types";
 
 type Props = {
-  locale: string;
+  locale: AppLocale;
   pendingLeaves: number;
   role: string;
-  t: {
-    pendingApprovalsBanner: (n: number) => string;
-    reviewRequests: string;
-    quickActions: string;
-    addEmployee: string;
-    requestLeave: string;
-    recordAttendance: string;
-    runPayroll: string;
-  };
 };
 
-export function DashboardQuickActions({ locale, pendingLeaves, role, t }: Props) {
+export function DashboardQuickActions({ locale, pendingLeaves, role }: Props) {
   const isManager = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"].includes(role);
   const isHrOrAdmin = ["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"].includes(role);
   const prefix = locale === "en" ? "/en" : "";
+  const t = getText(locale).dashboard;
 
   const actions = [
     ...(isHrOrAdmin

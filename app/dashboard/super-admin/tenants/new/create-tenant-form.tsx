@@ -27,6 +27,7 @@ import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
+import { buildTenantUrl } from "@/lib/tenant";
 
 // Validation Schema
 const createTenantSchema = z.object({
@@ -80,6 +81,7 @@ export function CreateTenantForm() {
   // Auto-generate slug from English name
   const name = watch("name");
   const slugPreview = watch("slug");
+  const tenantDashboardPreview = buildTenantUrl(slugPreview || "company", "/dashboard");
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     register("name").onChange(e);
@@ -170,17 +172,14 @@ export function CreateTenantForm() {
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-2">
             <Label htmlFor="slug">{t.tenant.slugLabel}</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="slug"
-                placeholder={t.tenant.slugExample}
-                className="flex-1"
-                {...register("slug")}
-              />
-              <span className="text-muted-foreground text-sm">/t/</span>
-            </div>
+            <Input
+              id="slug"
+              placeholder={t.tenant.slugExample}
+              className="flex-1"
+              {...register("slug")}
+            />
             <p className="text-muted-foreground text-xs">
-              {t.tenant.pCompanyUrlWillBe} /t/{slugPreview || "company"}
+              {t.tenant.pCompanyUrlWillBe} {tenantDashboardPreview}
             </p>
             {errors.slug && <p className="text-destructive text-sm">{errors.slug.message}</p>}
           </div>

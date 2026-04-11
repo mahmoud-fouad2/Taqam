@@ -2,6 +2,8 @@ import { JobPostingStatus, Prisma, UserRole, UserStatus } from "@prisma/client";
 
 import prisma from "@/lib/db";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
+import { buildTenantCanonicalUrl } from "@/lib/tenant";
+import { findActiveTenantBySlug } from "@/lib/tenant-directory";
 import {
   mapDbExperienceLevelToPublic,
   mapDbJobTypeToPublic,
@@ -20,6 +22,7 @@ type PublicTenantEmailSource = {
 type PublicTenantRecord = PublicTenantEmailSource & {
   id: string;
   slug: string;
+  domain: string | null;
   name: string;
   nameAr: string | null;
   logo: string | null;
@@ -31,6 +34,7 @@ type PublicJobPostingRecord = Prisma.JobPostingGetPayload<{
       select: {
         id: true;
         slug: true;
+        domain: true;
         name: true;
         nameAr: true;
         logo: true;
@@ -61,6 +65,7 @@ export type PublicJobPosting = {
   id: string;
   tenantId: string;
   tenantSlug: string;
+  tenantDomain: string | null;
   tenantName: string;
   tenantNameAr: string | null;
   tenantLogo: string | null;
@@ -88,6 +93,7 @@ export type PublicJobPosting = {
 export type PublicCareersTenant = {
   id: string;
   slug: string;
+  domain: string | null;
   name: string;
   nameAr: string | null;
   logo: string | null;
@@ -225,6 +231,7 @@ function mapPublicJobPosting(job: PublicJobPostingRecord): PublicJobPosting {
     id: job.id,
     tenantId: job.tenantId,
     tenantSlug: job.tenant.slug,
+    tenantDomain: job.tenant.domain,
     tenantName: job.tenant.name,
     tenantNameAr: job.tenant.nameAr,
     tenantLogo: job.tenant.logo,
@@ -255,6 +262,7 @@ const publicJobInclude = {
     select: {
       id: true,
       slug: true,
+      domain: true,
       name: true,
       nameAr: true,
       logo: true,
@@ -382,25 +390,7 @@ export async function getPublicJobPostingById(id: string, tenantSlug?: string) {
 export async function getPublicCareersTenantBySlug(
   slug: string
 ): Promise<PublicCareersTenant | null> {
-  const tenant = await prisma.tenant.findFirst({
-    where: {
-      slug,
-      status: "ACTIVE"
-    },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      nameAr: true,
-      logo: true,
-      settings: true,
-      organizationProfile: {
-        select: {
-          email: true
-        }
-      }
-    }
-  });
+  const tenant = await findActiveTenantBySlug(slug);
 
   if (!tenant) {
     return null;
@@ -409,6 +399,7 @@ export async function getPublicCareersTenantBySlug(
   return {
     id: tenant.id,
     slug: tenant.slug,
+    domain: tenant.domain,
     name: tenant.name,
     nameAr: tenant.nameAr,
     logo: tenant.logo,
@@ -455,6 +446,7 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
         select: {
           id: true,
           slug: true,
+          domain: true,
           name: true,
           nameAr: true,
           settings: true,
@@ -509,7 +501,9 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
 
   const portalBase = getAppBaseUrl();
   const publicJobUrl = `${portalBase}/careers/${job.id}`;
-  const tenantPortalUrl = `${portalBase}/t/${job.tenant.slug}/careers`;
+  const tenantPortalUrl = buildTenantCanonicalUrl(job.tenant, "/careers", {
+    baseDomain: portalBase.replace(/^https?:\/\//, "")
+  });
   const companyName = job.tenant.nameAr || job.tenant.name;
   const jobTitle = job.titleAr || job.title;
   const applicantName = `${input.firstName.trim()} ${input.lastName.trim()}`.trim();

@@ -22,8 +22,8 @@ export default async function Error404() {
         code="404"
         description={
           isAr
-            ? "هذه نسخة الهبوط العامة من صفحة 404. استخدمها عندما تريد تحويل المرشح أو الزائر إلى المسارات الصحيحة بدل فقده داخل رابط مكسور."
-            : "This is the public landing version of the 404 experience, designed to redirect a visitor into the right paths instead of leaving them on a dead URL."
+            ? "الصفحة التي طلبتها غير متاحة. استخدم الروابط التالية للوصول إلى القسم المناسب."
+            : "The page you requested is unavailable. Use the links below to reach the appropriate section."
         }
         eyebrow={isAr ? "صفحة غير موجودة" : "Page not found"}
         primaryAction={{ href: p || "/", label: isAr ? "العودة للرئيسية" : "Go back home" }}

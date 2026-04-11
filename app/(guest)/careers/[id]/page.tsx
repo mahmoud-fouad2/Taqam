@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getSiteUrl } from "@/lib/marketing/site";
+import { buildTenantPath } from "@/lib/tenant";
 import {
   getPublicExperienceLevelLabel,
   getPublicJobTypeLabel
@@ -126,7 +127,9 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
                   {isAr ? "بوابة الوظائف" : "Careers"}
                 </Link>
                 <span>/</span>
-                <Link href={`${p}/t/${job.tenantSlug}/careers`} className="hover:text-foreground">
+                <Link
+                  href={buildTenantPath(job.tenantSlug, "/careers", locale)}
+                  className="hover:text-foreground">
                   {companyName}
                 </Link>
               </div>
@@ -286,7 +289,7 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
                 </p>
                 <div className="flex flex-col gap-3">
                   <Button asChild variant="outline">
-                    <Link href={`${p}/t/${job.tenantSlug}/careers`}>
+                    <Link href={buildTenantPath(job.tenantSlug, "/careers", locale)}>
                       {isAr ? "وظائف هذه الشركة" : "This company's careers"}
                     </Link>
                   </Button>

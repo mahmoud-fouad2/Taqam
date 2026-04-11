@@ -37,7 +37,6 @@ import type { Notification } from "@/lib/types/self-service";
 
 export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
   const t = getText(locale);
-  const p = locale === "en" ? "/en" : "";
   const { theme, setTheme } = useTheme();
   const [avatarSrc, setAvatarSrc] = useState<string>("/images/avatars/1.png");
 
@@ -98,7 +97,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
   const exitTenantContext = () => {
     const maxAge = 0;
     document.cookie = `taqam_tenant=; path=/; max-age=${maxAge}; samesite=lax`;
-    window.location.href = `${p}/dashboard/super-admin`;
+    window.location.href = "/dashboard/super-admin";
   };
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -164,6 +163,20 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
     document.cookie = `taqam_locale=${next}; path=/; max-age=${maxAge}; samesite=lax`;
 
     const path = window.location.pathname;
+    const isDashboardPath =
+      path === "/dashboard" ||
+      path.startsWith("/dashboard/") ||
+      path === "/en/dashboard" ||
+      path.startsWith("/en/dashboard/");
+
+    if (isDashboardPath) {
+      const target = path.replace(/^\/en(?=\/dashboard)/, "") || "/dashboard";
+      startLocaleTransition(() => {
+        window.location.href = `${target}${window.location.search}`;
+      });
+      return;
+    }
+
     const hasEnPrefix = path === "/en" || path.startsWith("/en/");
     const stripped = hasEnPrefix ? path.replace(/^\/en(?=\/|$)/, "") || "/" : path;
     const target = next === "en" ? (stripped === "/" ? "/en" : `/en${stripped}`) : stripped;
@@ -236,7 +249,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
               <>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/super-admin`}
+                    href="/dashboard/super-admin"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "لوحة المنصة" : "Platform dashboard"}</span>
                     {locale === "ar" ? (
@@ -248,7 +261,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/super-admin/tenants`}
+                    href="/dashboard/super-admin/tenants"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "إدارة الشركات" : "Manage tenants"}</span>
                     {locale === "ar" ? (
@@ -260,7 +273,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/super-admin/requests`}
+                    href="/dashboard/super-admin/requests"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "طلبات الاشتراك" : "Subscription requests"}</span>
                     {locale === "ar" ? (
@@ -272,7 +285,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/super-admin/pricing`}
+                    href="/dashboard/super-admin/pricing"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الأسعار والباقات" : "Pricing & plans"}</span>
                     {locale === "ar" ? (
@@ -284,7 +297,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/super-admin/settings`}
+                    href="/dashboard/super-admin/settings"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "إعدادات المنصة" : "Platform settings"}</span>
                     {locale === "ar" ? (
@@ -309,7 +322,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
               <>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/help-center`}
+                    href="/dashboard/help-center"
                     className="flex items-center justify-between">
                     <span>{t.common.helpCenter}</span>
                     {locale === "ar" ? (
@@ -321,7 +334,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/academy`}
+                    href="/dashboard/academy"
                     className="flex items-center justify-between">
                     <span>{t.common.academy}</span>
                     {locale === "ar" ? (
@@ -333,7 +346,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/support`}
+                    href="/dashboard/support"
                     className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الدعم الفني" : "Support"}</span>
                     {locale === "ar" ? (
@@ -344,7 +357,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href={`${p}/dashboard/ideas`} className="flex items-center justify-between">
+                  <Link href="/dashboard/ideas" className="flex items-center justify-between">
                     <span>{t.common.shareIdeas}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -355,7 +368,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link
-                    href={`${p}/dashboard/whats-new`}
+                    href="/dashboard/whats-new"
                     className="flex items-center justify-between">
                     <span>{t.common.whatsNew}</span>
                     {locale === "ar" ? (
@@ -465,7 +478,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem asChild>
-              <Link href={`${p}/dashboard/my-profile`}>
+              <Link href="/dashboard/my-profile">
                 <User className="me-2 h-4 w-4" />
                 {t.common.viewProfile}
               </Link>
@@ -481,13 +494,13 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
               </DropdownMenuItem>
             ) : null}
             <DropdownMenuItem asChild>
-              <Link href={`${p}/dashboard/account/change-password`}>
+              <Link href="/dashboard/account/change-password">
                 <KeyRound className="me-2 h-4 w-4" />
                 {t.common.changePassword}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link href={`${p}/dashboard/account/change-email`}>
+              <Link href="/dashboard/account/change-email">
                 <Mail className="me-2 h-4 w-4" />
                 {locale === "ar" ? "تغيير البريد الإلكتروني" : "Change email"}
               </Link>

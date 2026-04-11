@@ -61,7 +61,6 @@ export default async function Page() {
         locale={locale}
         pendingLeaves={stats.pendingLeaves}
         role={user.role}
-        t={t.dashboard}
       />
       <SectionCards locale={locale} stats={stats} />
       <div className="grid grid-cols-1 gap-4 @5xl/main:grid-cols-2">

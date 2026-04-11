@@ -32,33 +32,31 @@ import {
 type NavItem = { title: string; url: string; icon: any };
 
 function getNav(locale: "ar" | "en", role?: string): NavItem[] {
-  const p = locale === "en" ? "/en" : "";
-
   if (isSuperAdminRole(role)) {
     return [
       {
         title: locale === "ar" ? "لوحة تحكم السوبر أدمن" : "Super Admin",
-        url: `${p}/dashboard/super-admin`,
+        url: "/dashboard/super-admin",
         icon: IconDashboard
       },
       {
         title: locale === "ar" ? "طلبات الاشتراك" : "Subscription Requests",
-        url: `${p}/dashboard/super-admin/requests`,
+        url: "/dashboard/super-admin/requests",
         icon: IconListDetails
       },
       {
         title: locale === "ar" ? "الشركات" : "Tenants",
-        url: `${p}/dashboard/super-admin/tenants`,
+        url: "/dashboard/super-admin/tenants",
         icon: IconUsers
       },
       {
         title: locale === "ar" ? "الأسعار والباقات" : "Pricing & Plans",
-        url: `${p}/dashboard/super-admin/pricing`,
+        url: "/dashboard/super-admin/pricing",
         icon: IconChartBar
       },
       {
         title: locale === "ar" ? "إعدادات المنصة" : "Platform Settings",
-        url: `${p}/dashboard/super-admin/settings`,
+        url: "/dashboard/super-admin/settings",
         icon: IconFolder
       }
     ];
@@ -68,27 +66,27 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
     return [
       {
         title: locale === "ar" ? "الرئيسية" : "Dashboard",
-        url: `${p}/dashboard`,
+        url: "/dashboard",
         icon: IconDashboard
       },
       {
         title: locale === "ar" ? "طلباتي" : "My Requests",
-        url: `${p}/dashboard/my-requests`,
+        url: "/dashboard/my-requests",
         icon: IconListDetails
       },
       {
         title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: `${p}/dashboard/help-center`,
+        url: "/dashboard/help-center",
         icon: IconHelp
       },
       {
         title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: `${p}/dashboard/support`,
+        url: "/dashboard/support",
         icon: IconMessageCircle
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
-        url: `${p}/dashboard/settings`,
+        url: "/dashboard/settings",
         icon: IconFolder
       }
     ];
@@ -98,37 +96,37 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
     return [
       {
         title: locale === "ar" ? "الرئيسية" : "Dashboard",
-        url: `${p}/dashboard`,
+        url: "/dashboard",
         icon: IconDashboard
       },
       {
         title: locale === "ar" ? "الموظفون" : "Employees",
-        url: `${p}/dashboard/employees`,
+        url: "/dashboard/employees",
         icon: IconUsers
       },
       {
         title: locale === "ar" ? "الطلبات" : "Requests",
-        url: `${p}/dashboard/requests`,
+        url: "/dashboard/requests",
         icon: IconListDetails
       },
       {
         title: locale === "ar" ? "طلباتي" : "My Requests",
-        url: `${p}/dashboard/my-requests`,
+        url: "/dashboard/my-requests",
         icon: IconChartBar
       },
       {
         title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: `${p}/dashboard/help-center`,
+        url: "/dashboard/help-center",
         icon: IconHelp
       },
       {
         title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: `${p}/dashboard/support`,
+        url: "/dashboard/support",
         icon: IconMessageCircle
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
-        url: `${p}/dashboard/settings`,
+        url: "/dashboard/settings",
         icon: IconFolder
       }
     ];
@@ -138,52 +136,52 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
     return [
       {
         title: locale === "ar" ? "الرئيسية" : "Dashboard",
-        url: `${p}/dashboard`,
+        url: "/dashboard",
         icon: IconDashboard
       },
       {
         title: locale === "ar" ? "الموظفون" : "Employees",
-        url: `${p}/dashboard/employees`,
+        url: "/dashboard/employees",
         icon: IconUsers
       },
       {
         title: locale === "ar" ? "الأقسام" : "Departments",
-        url: `${p}/dashboard/departments`,
+        url: "/dashboard/departments",
         icon: IconFolder
       },
       {
         title: locale === "ar" ? "المسميات الوظيفية" : "Job Titles",
-        url: `${p}/dashboard/job-titles`,
+        url: "/dashboard/job-titles",
         icon: IconBriefcase
       },
       {
         title: locale === "ar" ? "المستخدمون" : "Users",
-        url: `${p}/dashboard/users`,
+        url: "/dashboard/users",
         icon: IconUsers
       },
       {
         title: locale === "ar" ? "الطلبات" : "Requests",
-        url: `${p}/dashboard/requests`,
+        url: "/dashboard/requests",
         icon: IconListDetails
       },
       {
         title: locale === "ar" ? "التقارير" : "Reports",
-        url: `${p}/dashboard/reports`,
+        url: "/dashboard/reports",
         icon: IconChartBar
       },
       {
         title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: `${p}/dashboard/help-center`,
+        url: "/dashboard/help-center",
         icon: IconHelp
       },
       {
         title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: `${p}/dashboard/support`,
+        url: "/dashboard/support",
         icon: IconMessageCircle
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
-        url: `${p}/dashboard/settings`,
+        url: "/dashboard/settings",
         icon: IconFolder
       }
     ];
@@ -192,62 +190,62 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
   return [
     {
       title: locale === "ar" ? "الرئيسية" : "Dashboard",
-      url: `${p}/dashboard`,
+      url: "/dashboard",
       icon: IconDashboard
     },
     {
       title: locale === "ar" ? "الموظفون" : "Employees",
-      url: `${p}/dashboard/employees`,
+      url: "/dashboard/employees",
       icon: IconChartBar
     },
     {
       title: locale === "ar" ? "الأقسام" : "Departments",
-      url: `${p}/dashboard/departments`,
+      url: "/dashboard/departments",
       icon: IconFolder
     },
     {
       title: locale === "ar" ? "المسميات الوظيفية" : "Job Titles",
-      url: `${p}/dashboard/job-titles`,
+      url: "/dashboard/job-titles",
       icon: IconFolder
     },
     {
       title: locale === "ar" ? "الهيكل التنظيمي" : "Organization",
-      url: `${p}/dashboard/organization`,
+      url: "/dashboard/organization",
       icon: IconFolder
     },
     {
       title: locale === "ar" ? "المستخدمون" : "Users",
-      url: `${p}/dashboard/users`,
+      url: "/dashboard/users",
       icon: IconUsers
     },
     {
       title: locale === "ar" ? "الوظائف الشاغرة" : "Job Postings",
-      url: `${p}/dashboard/job-postings`,
+      url: "/dashboard/job-postings",
       icon: IconListDetails
     },
     {
       title: locale === "ar" ? "المتقدمون" : "Applicants",
-      url: `${p}/dashboard/applicants`,
+      url: "/dashboard/applicants",
       icon: IconUsers
     },
     {
       title: locale === "ar" ? "العروض الوظيفية" : "Job Offers",
-      url: `${p}/dashboard/job-offers`,
+      url: "/dashboard/job-offers",
       icon: IconBriefcase
     },
     {
       title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-      url: `${p}/dashboard/help-center`,
+      url: "/dashboard/help-center",
       icon: IconHelp
     },
     {
       title: locale === "ar" ? "الدعم الفني" : "Support",
-      url: `${p}/dashboard/support`,
+      url: "/dashboard/support",
       icon: IconMessageCircle
     },
     {
       title: locale === "ar" ? "إعدادات النظام" : "Settings",
-      url: `${p}/dashboard/settings`,
+      url: "/dashboard/settings",
       icon: IconUsers
     }
   ];
@@ -255,7 +253,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const locale = useClientLocale("ar");
-  const p = locale === "en" ? "/en" : "";
   const { data: session } = useSession();
   const [role, setRole] = React.useState<string | undefined>(undefined);
   const [user, setUser] = React.useState<{ name: string; email: string; avatar: string } | null>(
@@ -273,7 +270,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   }, [session]);
 
   const navItems = React.useMemo(() => getNav(locale, role), [locale, role]);
-  const homeUrl = isSuperAdminRole(role) ? `${p}/dashboard/super-admin` : `${p}/dashboard`;
+  const homeUrl = isSuperAdminRole(role) ? "/dashboard/super-admin" : "/dashboard";
   const workspaceLabel = isSuperAdminRole(role)
     ? locale === "ar"
       ? "إدارة المنصة"

@@ -85,7 +85,7 @@ export function NavUser({
           </DropdownMenuTrigger>
           <DropdownMenuContent
             className="border-border/70 bg-popover/95 w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-xl border shadow-xl backdrop-blur-xl"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? "bottom" : locale === "ar" ? "left" : "right"}
             align="end"
             sideOffset={4}>
             <DropdownMenuLabel className="p-0 font-normal">

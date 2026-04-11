@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { LogoMark } from "@/components/logo-mark";
 
 const EVENT_NAME = "taqam:locale-transition";
 
@@ -84,8 +85,16 @@ export function LocaleTransitionOverlay() {
           "transition-all duration-200 ease-out",
           phase === "in" ? "scale-100 opacity-100" : "scale-90 opacity-0"
         )}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo-dark.png" alt="Taqam" className="h-[72px] w-auto brightness-0 invert" />
+        <div className="flex flex-col items-center gap-4 text-white">
+          <LogoMark
+            frameClassName="size-24 rounded-[28px] border border-white/20 bg-white/10 p-3 shadow-2xl backdrop-blur-sm"
+            imageClassName="h-11 w-auto max-w-none"
+          />
+          <div className="text-center">
+            <div className="text-lg font-semibold tracking-tight">Taqam</div>
+            <div className="text-white/70 text-sm">طاقم</div>
+          </div>
+        </div>
       </div>
     </div>
   );

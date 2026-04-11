@@ -11,6 +11,7 @@ import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { FadeIn } from "@/components/ui/fade-in";
 import { getCurrentUser } from "@/lib/auth";
+import { buildTenantUrl } from "@/lib/tenant";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -34,19 +35,21 @@ export default async function SelectTenantPage({
 }: {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
+  const sp = searchParams ? await searchParams : undefined;
+  const nextPath = safeNextPath(sp?.next) ?? "/dashboard";
+
   // If the user is already authenticated and has a tenant, skip this page entirely
   const user = await getCurrentUser();
+  if (user?.tenantId && user.tenant?.slug) {
+    redirect(buildTenantUrl(user.tenant.slug, nextPath));
+  }
+
   if (user?.tenantId) {
-    const sp = searchParams ? await searchParams : undefined;
-    const nextPath = safeNextPath(sp?.next);
-    redirect(nextPath ?? "/dashboard");
+    redirect(nextPath);
   }
 
   const locale = await getAppLocale();
   const isAr = locale === "ar";
-
-  const sp = searchParams ? await searchParams : undefined;
-  const nextPath = safeNextPath(sp?.next);
 
   const demoTenants = [
     { slug: "demo", labelAr: "Demo", labelEn: "Demo" },

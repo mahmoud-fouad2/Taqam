@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 
 import { getSiteUrl } from "@/lib/marketing/site";
 import prisma from "@/lib/db";
+import { buildTenantCanonicalUrl } from "@/lib/tenant";
 
 type EntrySpec = {
   path: string;
@@ -68,7 +69,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       updatedAt: true,
       tenant: {
         select: {
-          slug: true
+          slug: true,
+          domain: true
         }
       }
     },
@@ -79,8 +81,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   for (const locale of ["ar", "en"] as const) {
     for (const slug of tenantSlugs) {
+      const tenant = publicJobs.find((job) => job.tenant.slug === slug)?.tenant;
+      if (!tenant) continue;
+
       entries.push({
-        url: `${base}${localizedPath(locale, `/t/${slug}/careers`)}`,
+        url: buildTenantCanonicalUrl(tenant, "/careers", {
+          locale,
+          baseDomain: base.replace(/^https?:\/\//, "")
+        }),
         lastModified,
         changeFrequency: "daily",
         priority: 0.7

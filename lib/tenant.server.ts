@@ -1,6 +1,7 @@
 ﻿import "server-only";
 
 import { cookies, headers } from "next/headers";
+import { extractTenantSlugFromHost, isValidTenantSlug } from "@/lib/tenant";
 
 export interface TenantContext {
   slug: string | null;
@@ -16,7 +17,16 @@ export async function getTenantContext(): Promise<TenantContext> {
   const headerStore = await headers();
 
   // Try header first (set by proxy), then fallback to cookie
-  const slug = headerStore.get("x-tenant-slug") || cookieStore.get("taqam_tenant")?.value || null;
+  const slugFromHeader = headerStore.get("x-tenant-slug");
+  const slugFromHost = extractTenantSlugFromHost(
+    headerStore.get("x-forwarded-host") || headerStore.get("host") || ""
+  );
+  const slugFromCookie = cookieStore.get("taqam_tenant")?.value;
+  const slug =
+    (slugFromHeader && isValidTenantSlug(slugFromHeader) ? slugFromHeader : null) ||
+    slugFromHost ||
+    (slugFromCookie && isValidTenantSlug(slugFromCookie) ? slugFromCookie : null) ||
+    null;
 
   const locale = (cookieStore.get("taqam_locale")?.value as "ar" | "en") || "ar";
 

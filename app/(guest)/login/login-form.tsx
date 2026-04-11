@@ -9,6 +9,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { buildTenantUrl } from "@/lib/tenant";
 
 type LoginFormProps = {
   locale: "ar" | "en";
@@ -29,6 +30,17 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  const navigateTo = (target: string) => {
+    const targetUrl = new URL(target, window.location.origin);
+
+    if (targetUrl.origin === window.location.origin) {
+      router.replace(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`);
+      return;
+    }
+
+    window.location.assign(targetUrl.toString());
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,7 +83,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       if (role === "SUPER_ADMIN") {
         router.replace("/dashboard/super-admin");
       } else if (tenantSlug) {
-        router.replace(`/t/${tenantSlug}/dashboard`);
+        navigateTo(buildTenantUrl(tenantSlug, "/dashboard"));
       } else {
         router.replace("/dashboard");
       }

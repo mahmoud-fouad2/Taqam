@@ -96,12 +96,12 @@ export function NotFoundShell({
                   {code}
                 </p>
                 <h2 className="mt-3 text-2xl font-black tracking-tight">
-                  {isAr ? "مسار استعادة سريع" : "Route Recovery"}
+                  {isAr ? "روابط مفيدة" : "Helpful links"}
                 </h2>
                 <p className="text-muted-foreground mt-3 max-w-md text-sm leading-7">
                   {isAr
-                    ? "هذا التصميم يعيد المستخدم بسرعة إلى السطح الصحيح بدل تركه في صفحة ميتة أو مسار غير مفهوم."
-                    : "This fallback is designed to get the user back into the right surface quickly instead of leaving them on a dead end."}
+                    ? "إذا وصلت إلى رابط غير موجود، استخدم الروابط التالية للرجوع إلى المكان الصحيح بسرعة."
+                    : "If you reached an unavailable link, use the shortcuts below to return to the right place quickly."}
                 </p>
                 <div className="mt-5 flex flex-wrap gap-2">
                   <span className="border-border/60 bg-background/80 text-foreground/80 rounded-full border px-3 py-1 text-xs font-medium">

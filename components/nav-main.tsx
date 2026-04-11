@@ -22,6 +22,22 @@ export function NavMain({
 }) {
   const pathname = usePathname();
 
+  const isActiveItem = (itemUrl: string) => {
+    const isDashboardRoot =
+      itemUrl === "/dashboard" || itemUrl === "/en/dashboard" || itemUrl.endsWith("/dashboard/super-admin");
+
+    if (isDashboardRoot) {
+      return pathname === itemUrl;
+    }
+
+    if (pathname === itemUrl) {
+      return true;
+    }
+
+    const nextChar = pathname.charAt(itemUrl.length);
+    return pathname.startsWith(itemUrl) && (nextChar === "/" || nextChar === "-");
+  };
+
   return (
     <SidebarGroup className="px-1 py-2">
       <SidebarGroupContent className="flex flex-col gap-2">
@@ -30,7 +46,7 @@ export function NavMain({
             <SidebarMenuItem key={item.title}>
               <SidebarMenuButton
                 tooltip={item.title}
-                isActive={pathname === item.url || pathname.startsWith(item.url + "/")}
+                isActive={isActiveItem(item.url)}
                 asChild>
                 <Link
                   href={item.url}

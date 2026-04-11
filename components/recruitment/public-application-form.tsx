@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { buildTenantPath } from "@/lib/tenant";
 
 type Props = {
   locale: "ar" | "en";
@@ -42,7 +43,6 @@ export function PublicApplicationForm({
   jobTitle,
   companyName
 }: Props) {
-  const p = locale === "en" ? "/en" : "";
   const [form, setForm] = useState(initialForm);
   const [resumeFile, setResumeFile] = useState<File | null>(null);
   const [resumeInputKey, setResumeInputKey] = useState(0);
@@ -220,12 +220,14 @@ export function PublicApplicationForm({
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row">
           <Button asChild variant="brand">
-            <Link href={`${p}/t/${tenantSlug}/careers`}>
+            <Link href={buildTenantPath(tenantSlug, "/careers", locale)}>
               {locale === "ar" ? "وظائف هذه الشركة" : "This company's jobs"}
             </Link>
           </Button>
           <Button asChild variant="outline">
-            <Link href={`${p}/careers`}>{locale === "ar" ? "كل الوظائف" : "All careers"}</Link>
+            <Link href={locale === "en" ? "/en/careers" : "/careers"}>
+              {locale === "ar" ? "كل الوظائف" : "All careers"}
+            </Link>
           </Button>
         </CardContent>
       </Card>

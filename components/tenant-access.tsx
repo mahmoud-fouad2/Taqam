@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
-function isValidTenantSlug(value: string): boolean {
-  return /^[a-z0-9-]{3,30}$/.test(value);
-}
+import { buildTenantUrl, isValidTenantSlug } from "@/lib/tenant";
 
 function safeNextPath(value: string | undefined): string | undefined {
   if (!value) return undefined;
@@ -36,9 +33,17 @@ export function TenantAccess({
   const [tenant, setTenant] = React.useState("");
   const [error, setError] = React.useState<string | null>(null);
 
-  const buildTenantUrl = (slug: string) => {
+  const navigateToTenant = (slug: string) => {
     const next = safeNextPath(nextPath) ?? "/dashboard";
-    return `/t/${slug}${next}`;
+    const target = buildTenantUrl(slug, next);
+    const targetUrl = new URL(target, window.location.origin);
+
+    if (targetUrl.origin === window.location.origin) {
+      router.push(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`);
+      return;
+    }
+
+    window.location.assign(targetUrl.toString());
   };
 
   const onSubmit = (e: React.FormEvent) => {
@@ -54,7 +59,7 @@ export function TenantAccess({
     }
     setError(null);
 
-    router.push(buildTenantUrl(value));
+    navigateToTenant(value);
   };
 
   return (
@@ -70,7 +75,7 @@ export function TenantAccess({
               type="button"
               variant="secondary"
               size="sm"
-              onClick={() => router.push(buildTenantUrl(p.slug))}>
+              onClick={() => navigateToTenant(p.slug)}>
               {locale === "ar" ? p.labelAr : p.labelEn}
             </Button>
           ))}

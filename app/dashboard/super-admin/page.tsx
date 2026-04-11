@@ -14,6 +14,7 @@ import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
+import { buildTenantUrl } from "@/lib/tenant";
 
 export default async function SuperAdminPage() {
   const locale = await getAppLocale();
@@ -157,7 +158,8 @@ export default async function SuperAdminPage() {
                       {tenant.nameAr ?? tenant.name}
                     </Link>
                     <p className="text-muted-foreground text-sm">
-                      /t/{tenant.slug} • {tenant._count.users} {t.superAdmin.pUser}
+                      {buildTenantUrl(tenant.slug, "/dashboard")} • {tenant._count.users}{" "}
+                      {t.superAdmin.pUser}
                     </p>
                   </div>
                   <Badge
