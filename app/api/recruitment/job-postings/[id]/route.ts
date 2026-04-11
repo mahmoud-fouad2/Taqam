@@ -1,25 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { ExperienceLevel, JobPostingStatus, JobType } from "@prisma/client";
 import prisma from "@/lib/db";
 import { z } from "zod";
+import { requireRole } from "@/lib/api/route-helper";
 
 type RouteContext = { params: Promise<{ id: string }> };
+const RECRUITMENT_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
 // ==================== GET - Get Single Job Posting ====================
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.tenantId) {
-      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
-    }
+    const auth = await requireRole(_request, RECRUITMENT_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await context.params;
 
     const jobPosting = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId
+        tenantId
       },
       include: {
         department: true,
@@ -67,52 +67,135 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 }
 
 // ==================== PUT - Update Job Posting ====================
-const updateSchema = z.object({
-  title: z.string().optional(),
-  description: z.string().optional(),
-  requirements: z.array(z.string()).optional(),
-  responsibilities: z.array(z.string()).optional(),
-  benefits: z.array(z.string()).optional(),
-  status: z.enum(["draft", "active", "closed", "filled"]).optional(),
-  departmentId: z.string().optional(),
-  jobTitleId: z.string().optional(),
-  jobType: z.enum(["full-time", "part-time", "contract", "internship"]).optional(),
-  experienceLevel: z.enum(["entry", "intermediate", "senior", "executive"]).optional(),
-  location: z.string().optional(),
-  salaryMin: z.number().optional(),
-  salaryMax: z.number().optional(),
-  deadline: z.string().optional()
-});
-
-function mapStatusToDb(status: string) {
-  return status.toUpperCase().replace(/-/g, "_");
+function isValidDate(value: unknown): boolean {
+  if (typeof value !== "string") return false;
+  const d = new Date(value);
+  return !Number.isNaN(d.getTime());
 }
 
-function mapJobTypeToDb(type: string) {
-  return type.toUpperCase().replace(/-/g, "_");
+const updateSchema = z
+  .object({
+    title: z.string().min(2).optional(),
+    titleAr: z.string().min(2).optional().nullable(),
+    description: z.string().min(5).optional(),
+    requirements: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .nullable(),
+    responsibilities: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .nullable(),
+    benefits: z
+      .union([z.string(), z.array(z.string())])
+      .optional()
+      .nullable(),
+    status: z.string().optional(),
+    departmentId: z.string().optional().nullable(),
+    jobTitleId: z.string().optional().nullable(),
+    jobType: z.string().optional(),
+    experienceLevel: z.string().optional(),
+    positions: z.number().int().positive().optional(),
+    location: z.string().optional().nullable(),
+    salaryMin: z.union([z.string(), z.number()]).optional().nullable(),
+    salaryMax: z.union([z.string(), z.number()]).optional().nullable(),
+    salaryCurrency: z.string().min(1).optional(),
+    postedAt: z.string().refine(isValidDate, "Invalid postedAt").optional().nullable(),
+    expiresAt: z.string().refine(isValidDate, "Invalid expiresAt").optional().nullable(),
+    deadline: z.string().refine(isValidDate, "Invalid deadline").optional().nullable()
+  })
+  .strict();
+
+function parseJobPostingStatus(value: unknown): JobPostingStatus | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.toUpperCase().replace(/-/g, "_");
+  return normalized in JobPostingStatus ? (normalized as JobPostingStatus) : undefined;
 }
 
-function mapExperienceLevelToDb(level: string) {
-  return level.toUpperCase().replace(/-/g, "_");
+function parseJobType(value: unknown): JobType | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.toUpperCase().replace(/-/g, "_");
+  return normalized in JobType ? (normalized as JobType) : undefined;
+}
+
+function parseExperienceLevel(value: unknown): ExperienceLevel | undefined {
+  if (typeof value !== "string") return undefined;
+  const normalized = value.toUpperCase().replace(/-/g, "_");
+  return normalized in ExperienceLevel ? (normalized as ExperienceLevel) : undefined;
+}
+
+function normalizeMultilineField(
+  value: string | string[] | null | undefined
+): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return null;
+
+  if (Array.isArray(value)) {
+    const joined = value
+      .map((item) => item.trim())
+      .filter(Boolean)
+      .join("\n");
+
+    return joined || null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed || null;
+}
+
+function parseOptionalNumber(
+  value: string | number | null | undefined,
+  field: string
+): { ok: true; value: number | null | undefined } | { ok: false; message: string } {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (value === null) return { ok: true, value: null };
+
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) {
+    return { ok: false, message: `${field} must be a valid number` };
+  }
+
+  return { ok: true, value: parsed };
 }
 
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.tenantId) {
-      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
-    }
+    const auth = await requireRole(request, RECRUITMENT_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await context.params;
     const body = await request.json();
 
     const validated = updateSchema.parse(body);
+    const salaryMin = parseOptionalNumber(validated.salaryMin, "salaryMin");
+    if (!salaryMin.ok) {
+      return NextResponse.json({ error: salaryMin.message }, { status: 400 });
+    }
+
+    const salaryMax = parseOptionalNumber(validated.salaryMax, "salaryMax");
+    if (!salaryMax.ok) {
+      return NextResponse.json({ error: salaryMax.message }, { status: 400 });
+    }
+
+    if (
+      salaryMin.value !== undefined &&
+      salaryMin.value !== null &&
+      salaryMax.value !== undefined &&
+      salaryMax.value !== null &&
+      salaryMin.value > salaryMax.value
+    ) {
+      return NextResponse.json(
+        { error: "الحد الأدنى للراتب يجب أن يكون أقل من أو يساوي الحد الأعلى" },
+        { status: 400 }
+      );
+    }
 
     // Check if job posting exists
     const existing = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId
+        tenantId
       }
     });
 
@@ -124,26 +207,54 @@ export async function PUT(request: NextRequest, context: RouteContext) {
     const updateData: Record<string, unknown> = {};
 
     if (validated.title !== undefined) updateData.title = validated.title;
+    if (validated.titleAr !== undefined) updateData.titleAr = validated.titleAr;
     if (validated.description !== undefined) updateData.description = validated.description;
-    if (validated.requirements !== undefined) updateData.requirements = validated.requirements;
+    if (validated.requirements !== undefined) {
+      updateData.requirements = normalizeMultilineField(validated.requirements);
+    }
     if (validated.responsibilities !== undefined)
-      updateData.responsibilities = validated.responsibilities;
-    if (validated.benefits !== undefined) updateData.benefits = validated.benefits;
+      updateData.responsibilities = normalizeMultilineField(validated.responsibilities);
+    if (validated.benefits !== undefined)
+      updateData.benefits = normalizeMultilineField(validated.benefits);
     if (validated.departmentId !== undefined) updateData.departmentId = validated.departmentId;
     if (validated.jobTitleId !== undefined) updateData.jobTitleId = validated.jobTitleId;
     if (validated.location !== undefined) updateData.location = validated.location;
-    if (validated.salaryMin !== undefined) updateData.salaryMin = validated.salaryMin;
-    if (validated.salaryMax !== undefined) updateData.salaryMax = validated.salaryMax;
-    if (validated.deadline !== undefined) updateData.deadline = new Date(validated.deadline);
+    if (validated.positions !== undefined) updateData.positions = validated.positions;
+    if (salaryMin.value !== undefined) updateData.salaryMin = salaryMin.value;
+    if (salaryMax.value !== undefined) updateData.salaryMax = salaryMax.value;
+    if (validated.salaryCurrency !== undefined)
+      updateData.salaryCurrency = validated.salaryCurrency;
+    if (validated.postedAt !== undefined) {
+      updateData.postedAt = validated.postedAt ? new Date(validated.postedAt) : null;
+    }
+    if (validated.expiresAt !== undefined || validated.deadline !== undefined) {
+      const expiresAt = validated.expiresAt ?? validated.deadline;
+      updateData.expiresAt = expiresAt ? new Date(expiresAt) : null;
+    }
 
     if (validated.status !== undefined) {
-      updateData.status = mapStatusToDb(validated.status);
+      const status = parseJobPostingStatus(validated.status);
+      if (!status) {
+        return NextResponse.json({ error: "حالة الوظيفة غير صالحة" }, { status: 400 });
+      }
+
+      updateData.status = status;
     }
     if (validated.jobType !== undefined) {
-      updateData.jobType = mapJobTypeToDb(validated.jobType);
+      const jobType = parseJobType(validated.jobType);
+      if (!jobType) {
+        return NextResponse.json({ error: "نوع الوظيفة غير صالح" }, { status: 400 });
+      }
+
+      updateData.jobType = jobType;
     }
     if (validated.experienceLevel !== undefined) {
-      updateData.experienceLevel = mapExperienceLevelToDb(validated.experienceLevel);
+      const experienceLevel = parseExperienceLevel(validated.experienceLevel);
+      if (!experienceLevel) {
+        return NextResponse.json({ error: "مستوى الخبرة غير صالح" }, { status: 400 });
+      }
+
+      updateData.experienceLevel = experienceLevel;
     }
 
     const updated = await prisma.jobPosting.update({
@@ -187,10 +298,9 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 // ==================== DELETE - Delete Job Posting ====================
 export async function DELETE(_request: NextRequest, context: RouteContext) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.tenantId) {
-      return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
-    }
+    const auth = await requireRole(_request, RECRUITMENT_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await context.params;
 
@@ -198,7 +308,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
     const existing = await prisma.jobPosting.findFirst({
       where: {
         id,
-        tenantId: session.user.tenantId
+        tenantId
       },
       include: {
         applicants: {

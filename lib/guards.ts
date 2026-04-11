@@ -6,7 +6,7 @@
 
 import { redirect } from "next/navigation";
 import { getCurrentUser, isAuthenticated } from "./auth";
-import { isSuperAdmin, TenantRole } from "./tenant";
+import { isSuperAdminRole, type UserRole } from "./access-control";
 import { getTenantContext, hasTenant } from "./tenant.server";
 
 /**
@@ -45,7 +45,7 @@ export async function guardTenant() {
 /**
  * Guard: Require specific role(s)
  */
-export async function guardRole(allowedRoles: TenantRole | TenantRole[]) {
+export async function guardRole(allowedRoles: UserRole | UserRole[]) {
   await guardAuth();
 
   const user = await getCurrentUser();
@@ -54,7 +54,7 @@ export async function guardRole(allowedRoles: TenantRole | TenantRole[]) {
   }
 
   const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
-  if (!roles.includes(user.role as TenantRole)) {
+  if (!roles.includes(user.role as UserRole)) {
     redirect("/dashboard?error=unauthorized");
   }
 }
@@ -67,7 +67,7 @@ export async function guardSuperAdmin() {
   await guardAuth();
 
   const user = await getCurrentUser();
-  if (!user || !isSuperAdmin(user.role)) {
+  if (!user || !isSuperAdminRole(user.role)) {
     redirect("/dashboard?error=unauthorized");
   }
 }
@@ -97,6 +97,6 @@ export async function getPageContext() {
     user,
     tenant,
     isAuthenticated: user !== null,
-    isSuperAdmin: user ? isSuperAdmin(user.role) : false
+    isSuperAdmin: user ? isSuperAdminRole(user.role) : false
   };
 }

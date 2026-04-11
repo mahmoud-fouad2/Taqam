@@ -27,6 +27,7 @@ yarn-error.log*
 
 # local temp artifacts
 /tmp/
+/\.tmp-*
 *.cookies.txt
 *.out.log
 *.err.log

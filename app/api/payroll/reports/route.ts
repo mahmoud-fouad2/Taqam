@@ -8,9 +8,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMonthName } from "@/lib/types/payroll";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { requireRole } from "@/lib/api/route-helper";
 import { ensurePayslipsForPeriod } from "@/lib/payroll/payslips";
 import { buildCsv } from "@/lib/payroll/export";
+
+const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
 function monthKey(date: Date) {
   const y = date.getUTCFullYear();
@@ -24,7 +26,7 @@ function toNumber(v: any) {
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireTenantSession(request);
+    const auth = await requireRole(request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
     const { tenantId } = auth;
 

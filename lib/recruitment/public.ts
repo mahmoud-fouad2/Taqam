@@ -309,48 +309,55 @@ export async function listPublicJobFilters(
   try {
     // Keep these reads outside a transaction to avoid pooled Postgres transaction-start failures
     // on low-resource production environments while still returning the same filter catalog.
-    const locationRows = await prisma.jobPosting.findMany({
-      where: {
-        ...where,
-        location: {
-          not: null
+    const [locationRows, jobTypeRows, departmentRows] = await Promise.all([
+      prisma.jobPosting.findMany({
+        where: {
+          ...where,
+          location: {
+            not: null
+          }
+        },
+        select: {
+          location: true
+        },
+        distinct: ["location"],
+        orderBy: {
+          location: "asc"
         }
-      },
-      select: {
-        location: true
-      },
-      distinct: ["location"],
-      orderBy: {
-        location: "asc"
-      }
-    });
-
-    const jobTypeRows = await prisma.jobPosting.findMany({
-      where,
-      select: {
-        jobType: true
-      },
-      distinct: ["jobType"],
-      orderBy: {
-        jobType: "asc"
-      }
-    });
-
-    const departments = await prisma.department.findMany({
-      where: {
-        jobPostings: {
-          some: where
+      }),
+      prisma.jobPosting.findMany({
+        where,
+        select: {
+          jobType: true
+        },
+        distinct: ["jobType"],
+        orderBy: {
+          jobType: "asc"
         }
-      },
-      select: {
-        id: true,
-        name: true,
-        nameAr: true
-      },
-      orderBy: {
-        name: "asc"
-      }
-    });
+      }),
+      prisma.jobPosting.findMany({
+        where: {
+          ...where,
+          departmentId: {
+            not: null
+          }
+        },
+        select: {
+          departmentId: true,
+          department: {
+            select: {
+              id: true,
+              name: true,
+              nameAr: true
+            }
+          }
+        },
+        distinct: ["departmentId"],
+        orderBy: {
+          departmentId: "asc"
+        }
+      })
+    ]);
 
     const locations = Array.from(
       new Set(locationRows.map((row) => row.location?.trim()).filter(Boolean) as string[])
@@ -358,6 +365,12 @@ export async function listPublicJobFilters(
     const jobTypes = PUBLIC_JOB_TYPE_OPTIONS.filter((option) =>
       jobTypeRows.some((row) => row.jobType === option.dbValue)
     ).map((option) => option.value);
+    const departments = departmentRows
+      .map((row) => row.department)
+      .filter((department): department is NonNullable<typeof departmentRows[number]["department"]> =>
+        Boolean(department)
+      )
+      .sort((left, right) => left.name.localeCompare(right.name, "ar"));
 
     return {
       locations,

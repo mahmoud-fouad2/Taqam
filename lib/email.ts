@@ -98,15 +98,19 @@ export async function sendEmail(input: SendEmailInput) {
     contentType: attachment.contentType
   }));
 
-  await transporter.sendMail({
-    from,
-    to: input.to,
-    subject: input.subject,
-    text: input.text,
-    html: input.html,
-    replyTo: input.replyTo,
-    attachments
-  });
-
-  return { sent: true as const, skipped: false as const };
+  try {
+    await transporter.sendMail({
+      from,
+      to: input.to,
+      subject: input.subject,
+      text: input.text,
+      html: input.html,
+      replyTo: input.replyTo,
+      attachments
+    });
+    return { sent: true as const, skipped: false as const };
+  } catch (error) {
+    logger.error("Failed to send email", { to: input.to, subject: input.subject }, error);
+    return { sent: false as const, skipped: false as const };
+  }
 }

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -117,14 +118,38 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
 
           <div className="container mx-auto px-4">
             <div className="mx-auto max-w-4xl text-center">
-              <div className="bg-card text-primary mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border text-3xl font-black shadow-sm">
-                {initial}
+              <div className="mx-auto mb-5 flex items-center justify-center">
+                <div className="bg-card text-primary flex h-20 w-20 items-center justify-center overflow-hidden rounded-3xl border text-3xl font-black shadow-sm">
+                  {tenant.logo ? (
+                    <Image
+                      src={tenant.logo}
+                      alt={companyName}
+                      width={80}
+                      height={80}
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    initial
+                  )}
+                </div>
               </div>
               <Badge className="mb-5 gap-2 rounded-full px-4 py-1.5 text-xs" variant="secondary">
                 <Building2 className="h-3.5 w-3.5" />
                 {isAr ? "بوابة التوظيف الخاصة بالشركة" : "Company-specific careers portal"}
               </Badge>
-              <h1 className="text-4xl font-black tracking-tight sm:text-5xl">{companyName}</h1>
+              <h1 className="flex items-center justify-center gap-3 text-4xl font-black tracking-tight sm:text-5xl">
+                <span>{companyName}</span>
+                {tenant.logo ? (
+                  <Image
+                    src={tenant.logo}
+                    alt=""
+                    width={40}
+                    height={40}
+                    className="h-10 w-10 rounded-2xl border object-cover shadow-sm"
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </h1>
               <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">
                 {isAr
                   ? "كل الوظائف المفتوحة الخاصة بهذه الشركة، مع تقديم مباشر يصل إلى لوحة المتقدمين داخل حسابها على طاقم."

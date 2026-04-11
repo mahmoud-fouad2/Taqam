@@ -4,12 +4,17 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
+import { requireSession } from "@/lib/api/route-helper";
 import type { Prisma } from "@prisma/client";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
+}
+
+function canManageLeaveBalances(role: string | undefined) {
+  return (
+    role === "SUPER_ADMIN" || role === "TENANT_ADMIN" || role === "HR_MANAGER" || role === "MANAGER"
+  );
 }
 
 function nonEmpty(value: string | null): string | undefined {
@@ -28,11 +33,9 @@ function parseYear(value: string | undefined): number | null {
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const auth = await requireSession(request);
+    if (!auth.ok) return auth.response;
+    const { session } = auth;
 
     const { searchParams } = new URL(request.url);
     const requestedTenantId = nonEmpty(searchParams.get("tenantId"));
@@ -59,6 +62,32 @@ export async function GET(request: NextRequest) {
     if (leaveTypeId) where.leaveTypeId = leaveTypeId;
     if (departmentId) {
       where.employee = { departmentId };
+    }
+
+    const requesterEmployee = await prisma.employee.findFirst({
+      where: { tenantId, userId: session.user.id },
+      select: { id: true }
+    });
+
+    if (session.user.role === "MANAGER") {
+      if (!requesterEmployee) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      where.OR = [
+        { employeeId: requesterEmployee.id },
+        { employee: { managerId: requesterEmployee.id } }
+      ];
+    } else if (!canManageLeaveBalances(session.user.role)) {
+      if (!requesterEmployee) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      if (employeeId && employeeId !== requesterEmployee.id) {
+        return NextResponse.json({ error: "Access denied" }, { status: 403 });
+      }
+
+      where.employeeId = requesterEmployee.id;
     }
 
     const items = await prisma.leaveBalance.findMany({

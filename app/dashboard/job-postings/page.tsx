@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
-import { getCurrentUser } from "@/lib/auth";
+import { requireTenantRole } from "@/lib/auth";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { buildTenantUrl } from "@/lib/tenant";
 
@@ -9,10 +10,18 @@ import { JobPostingsManager } from "./job-postings-manager";
 import { getText } from "@/lib/i18n/text";
 
 export default async function JobPostingsPage() {
-  const [user, locale] = await Promise.all([getCurrentUser(), getAppLocale()]);
+  const [user, locale] = await Promise.all([
+    requireTenantRole(["TENANT_ADMIN", "HR_MANAGER"]),
+    getAppLocale()
+  ]);
   const t = getText(locale);
   const tenantSlug = user?.tenant?.slug;
   const p = locale === "en" ? "/en" : "";
+
+  if (!tenantSlug) {
+    redirect(`${p}/dashboard`);
+  }
+
   const companyPortalHref = tenantSlug ? buildTenantUrl(tenantSlug, "/careers") : `${p}/careers`;
 
   return (

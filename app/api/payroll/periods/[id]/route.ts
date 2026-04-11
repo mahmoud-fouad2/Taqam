@@ -5,16 +5,19 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { PayrollPeriodStatus } from "@prisma/client";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { requireRole } from "@/lib/api/route-helper";
 import {
+  getPayrollPeriodStatusTransitionError,
   getPayrollPeriodById,
   mapPayrollPeriod,
   updatePayrollPeriodStatus
 } from "@/lib/payroll/periods";
 
+const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireTenantSession(_request);
+    const auth = await requireRole(_request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
     const { tenantId } = auth;
 
@@ -35,7 +38,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireTenantSession(request);
+    const auth = await requireRole(request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
     const { tenantId } = auth;
 
@@ -48,7 +51,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     }
 
     const nextStatus = String(statusInput).toUpperCase();
-    const allowed: PayrollPeriodStatus[] = ["APPROVED", "PAID", "CANCELLED"];
+    const allowed: PayrollPeriodStatus[] = ["DRAFT", "APPROVED", "PAID", "CANCELLED"];
     if (!allowed.includes(nextStatus as PayrollPeriodStatus)) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
@@ -62,11 +65,18 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
       note: body?.notes
     });
 
-    if (!updated) {
-      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    if (!updated.ok) {
+      if (updated.error === "not-found") {
+        return NextResponse.json({ error: "Not found" }, { status: 404 });
+      }
+
+      return NextResponse.json(
+        { error: getPayrollPeriodStatusTransitionError(updated.currentStatus, nextStatusEnum) },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json({ data: mapPayrollPeriod(updated) });
+    return NextResponse.json({ data: mapPayrollPeriod(updated.period) });
   } catch (error) {
     console.error("Error updating payroll period:", error);
     return NextResponse.json({ error: "Failed to update payroll period" }, { status: 500 });

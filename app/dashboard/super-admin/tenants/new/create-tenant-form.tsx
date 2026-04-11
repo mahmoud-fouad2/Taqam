@@ -6,11 +6,12 @@
  */
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Building2, User, Settings } from "lucide-react";
+import { Loader2, Building2, User, Settings, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -61,6 +62,9 @@ export function CreateTenantForm() {
   const t = getText(locale);
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [logoUrl, setLogoUrl] = useState("");
+  const [logoPreview, setLogoPreview] = useState("");
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
 
   const {
     register,
@@ -95,6 +99,74 @@ export function CreateTenantForm() {
     setValue("slug", slug);
   };
 
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      toast.error(locale === "ar" ? "يجب اختيار ملف صورة صالح" : "Please choose a valid image file");
+      e.target.value = "";
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      toast.error(locale === "ar" ? "حجم الشعار يجب ألا يتجاوز 3MB" : "Logo size must be 3MB or less");
+      e.target.value = "";
+      return;
+    }
+
+    const localPreview = URL.createObjectURL(file);
+    setLogoPreview(localPreview);
+    setIsUploadingLogo(true);
+
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+
+      const res = await fetch("/api/admin/tenants/logo", {
+        method: "POST",
+        body: formData
+      });
+
+      const json = await res.json().catch(() => ({}) as any);
+      const uploadedUrl = json?.data?.url;
+
+      if (!res.ok || typeof uploadedUrl !== "string" || !uploadedUrl) {
+        setLogoPreview("");
+        setLogoUrl("");
+        toast.error(
+          json?.error ||
+            (locale === "ar" ? "فشل رفع شعار الشركة" : "Failed to upload company logo")
+        );
+        return;
+      }
+
+      setLogoUrl(uploadedUrl);
+      setLogoPreview(uploadedUrl);
+    } catch (error) {
+      setLogoPreview("");
+      setLogoUrl("");
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : locale === "ar"
+            ? "تعذر رفع الشعار حالياً"
+            : "Could not upload the logo right now"
+      );
+    } finally {
+      URL.revokeObjectURL(localPreview);
+      setIsUploadingLogo(false);
+      e.target.value = "";
+    }
+  };
+
+  const clearLogo = () => {
+    setLogoUrl("");
+    setLogoPreview("");
+  };
+
   const onSubmit = async (data: CreateTenantInput) => {
     setIsLoading(true);
     try {
@@ -105,11 +177,15 @@ export function CreateTenantForm() {
           name: data.name,
           nameAr: data.nameAr,
           slug: data.slug,
+          logo: logoUrl || undefined,
           plan: data.plan,
           email: data.email,
           phone: data.phone,
           defaultLocale: data.defaultLocale,
           defaultTheme: data.defaultTheme,
+          adminName: data.adminName,
+          adminEmail: data.adminEmail,
+          sendInvite: data.sendInvite,
           // Prisma model stores settings as Json
           settings: {
             defaultLocale: data.defaultLocale,
@@ -205,6 +281,78 @@ export function CreateTenantForm() {
             <Label htmlFor="phone">{t.common.phone}</Label>
             <Input id="phone" placeholder="+966501234567" {...register("phone")} />
           </div>
+        </div>
+
+        <div className="space-y-3">
+          <Label htmlFor="logo-upload">{locale === "ar" ? "شعار الشركة" : "Company logo"}</Label>
+          <div className="flex flex-col gap-3 rounded-2xl border border-dashed p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-muted flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border">
+                {logoPreview ? (
+                  <Image
+                    src={logoPreview}
+                    alt={locale === "ar" ? "معاينة شعار الشركة" : "Company logo preview"}
+                    width={64}
+                    height={64}
+                    className="h-full w-full object-cover"
+                    unoptimized
+                  />
+                ) : (
+                  <Building2 className="text-muted-foreground h-6 w-6" />
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <p className="text-sm font-medium">
+                  {logoUrl
+                    ? locale === "ar"
+                      ? "تم رفع الشعار بنجاح"
+                      : "Logo uploaded successfully"
+                    : locale === "ar"
+                      ? "ارفع شعارًا صغيرًا يظهر في البوابات العامة"
+                      : "Upload a compact logo for public portals"}
+                </p>
+                <p className="text-muted-foreground text-xs">
+                  {locale === "ar"
+                    ? "PNG أو JPG أو WebP حتى 3MB"
+                    : "PNG, JPG, or WebP up to 3MB"}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <Button type="button" variant="outline" asChild disabled={isUploadingLogo}>
+                <Label htmlFor="logo-upload" className="cursor-pointer">
+                  {isUploadingLogo ? (
+                    <Loader2 className="me-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Upload className="me-2 h-4 w-4" />
+                  )}
+                  {isUploadingLogo
+                    ? locale === "ar"
+                      ? "جارٍ الرفع..."
+                      : "Uploading..."
+                    : locale === "ar"
+                      ? "رفع الشعار"
+                      : "Upload logo"}
+                </Label>
+              </Button>
+
+              {logoPreview ? (
+                <Button type="button" variant="ghost" onClick={clearLogo} disabled={isUploadingLogo}>
+                  <X className="me-2 h-4 w-4" />
+                  {locale === "ar" ? "إزالة" : "Remove"}
+                </Button>
+              ) : null}
+            </div>
+          </div>
+          <Input
+            id="logo-upload"
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/svg+xml"
+            className="hidden"
+            onChange={handleLogoChange}
+          />
         </div>
       </div>
 
@@ -322,7 +470,7 @@ export function CreateTenantForm() {
         <Button type="button" variant="outline" onClick={() => router.back()}>
           {t.common.cancel}
         </Button>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" disabled={isLoading || isUploadingLogo}>
           {isLoading && <Loader2 className="me-2 h-4 w-4 animate-spin" />}
           {t.tenant.pCreateCompany}
         </Button>

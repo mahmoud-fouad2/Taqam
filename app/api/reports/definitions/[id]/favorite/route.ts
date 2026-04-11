@@ -3,12 +3,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import type { ReportDefinition } from "@/lib/types/reports";
 import { Prisma } from "@prisma/client";
+import { requireRole } from "@/lib/api/route-helper";
+
+const REPORTS_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
 type ReportsSettings = {
   definitions?: ReportDefinition[];
@@ -25,15 +26,9 @@ function coerceTenantSettings(value: unknown): TenantSettings {
 
 export async function PATCH(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireRole(request, REPORTS_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { id } = await context.params;
 

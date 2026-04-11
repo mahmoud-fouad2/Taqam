@@ -17,7 +17,7 @@
     "analyze": "set ANALYZE=true&& next build --webpack",
     "start": "node scripts/start-production.mjs",
     "start:render": "node scripts/render-start.mjs",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "pnpm exec next typegen && tsc --noEmit",
     "typecheck:mobile": "pnpm --dir apps/mobile typecheck",
     "lint": "eslint app components hooks i18n lib prisma scripts types proxy.ts capacitor.config.ts next.config.ts prisma.config.ts sentry.edge.config.ts sentry.server.config.ts instrumentation.ts instrumentation-client.ts vitest.config.ts eslint.config.mjs postcss.config.mjs",
     "lint:strict": "eslint --max-warnings=0 app components hooks i18n lib prisma scripts types proxy.ts capacitor.config.ts next.config.ts prisma.config.ts sentry.edge.config.ts sentry.server.config.ts instrumentation.ts instrumentation-client.ts vitest.config.ts eslint.config.mjs postcss.config.mjs",

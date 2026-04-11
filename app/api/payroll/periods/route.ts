@@ -6,25 +6,40 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { requireRole } from "@/lib/api/route-helper";
 import { mapPayrollPeriod } from "@/lib/payroll/periods";
+
+const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+
+function parseDateInput(value: unknown): Date | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
 
 export async function GET(request: NextRequest) {
   try {
-    const auth = await requireTenantSession(request);
+    const auth = await requireRole(request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
-    const { tenantId, session } = auth;
-
-    const PAYROLL_READ_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
-    if (!PAYROLL_READ_ROLES.includes(session.user.role ?? "")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { tenantId } = auth;
 
     const { searchParams } = new URL(request.url);
 
-    const year = searchParams.get("year") ? Number(searchParams.get("year")) : undefined;
-    const month = searchParams.get("month") ? Number(searchParams.get("month")) : undefined;
+    const yearRaw = searchParams.get("year") ? Number(searchParams.get("year")) : undefined;
+    const monthRaw = searchParams.get("month") ? Number(searchParams.get("month")) : undefined;
     const status = searchParams.get("status") || undefined;
+
+    const year =
+      yearRaw !== undefined && Number.isFinite(yearRaw) && yearRaw >= 1900 && yearRaw <= 2200
+        ? yearRaw
+        : undefined;
+    const month =
+      monthRaw !== undefined && Number.isFinite(monthRaw) && monthRaw >= 1 && monthRaw <= 12
+        ? monthRaw
+        : undefined;
 
     const where: any = { tenantId };
 
@@ -56,14 +71,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const auth = await requireTenantSession(request);
+    const auth = await requireRole(request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
-    const { tenantId, session } = auth;
-
-    const PAYROLL_WRITE_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
-    if (!PAYROLL_WRITE_ROLES.includes(session.user.role ?? "")) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const { tenantId } = auth;
 
     const body = await request.json();
 
@@ -73,14 +83,33 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    const startDate = parseDateInput(body.startDate);
+    const endDate = parseDateInput(body.endDate);
+    const paymentDate = parseDateInput(body.paymentDate);
+
+    if (!startDate || !endDate || !paymentDate) {
+      return NextResponse.json({ error: "Invalid payroll period dates" }, { status: 400 });
+    }
+
+    if (endDate < startDate) {
+      return NextResponse.json({ error: "endDate must be on or after startDate" }, { status: 400 });
+    }
+
+    if (paymentDate < endDate) {
+      return NextResponse.json(
+        { error: "paymentDate must be on or after endDate" },
+        { status: 400 }
+      );
+    }
+
     const period = await prisma.payrollPeriod.create({
       data: {
         tenantId,
         name: body.name,
         nameAr: body.nameAr,
-        startDate: new Date(body.startDate),
-        endDate: new Date(body.endDate),
-        paymentDate: new Date(body.paymentDate),
+        startDate,
+        endDate,
+        paymentDate,
         status: "DRAFT",
         totalGross: 0,
         totalDeductions: 0,

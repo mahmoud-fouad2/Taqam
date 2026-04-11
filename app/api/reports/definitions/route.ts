@@ -5,12 +5,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import type { ReportDefinition } from "@/lib/types/reports";
 import { Prisma } from "@prisma/client";
+import { requireRole } from "@/lib/api/route-helper";
+
+const REPORTS_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
 type ReportsSettings = {
   definitions?: ReportDefinition[];
@@ -26,17 +27,11 @@ function coerceTenantSettings(value: unknown): TenantSettings {
   return (value && typeof value === "object" ? (value as TenantSettings) : {}) as TenantSettings;
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireRole(request, REPORTS_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const tenant = await prisma.tenant.findFirst({
       where: { id: tenantId },
@@ -55,15 +50,9 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
+    const auth = await requireRole(request, REPORTS_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId, session } = auth;
 
     const body = (await request.json().catch(() => null)) as Partial<ReportDefinition> | null;
     if (!body?.name || !body.category || !body.format) {

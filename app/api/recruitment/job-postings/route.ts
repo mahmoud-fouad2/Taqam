@@ -5,10 +5,11 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { ExperienceLevel, JobPostingStatus, JobType, Prisma } from "@prisma/client";
 import { z } from "zod";
+import { requireRole } from "@/lib/api/route-helper";
+
+const RECRUITMENT_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
 // Map DB status to kebab-case
 function mapStatus(status: string): string {
@@ -73,15 +74,9 @@ const jobPostingCreateSchema = z
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
-    }
+    const auth = await requireRole(request, RECRUITMENT_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId } = auth;
 
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
@@ -169,15 +164,9 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user) {
-      return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
-    }
-
-    const tenantId = session.user.tenantId;
-    if (!tenantId) {
-      return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
-    }
+    const auth = await requireRole(request, RECRUITMENT_ALLOWED_ROLES);
+    if (!auth.ok) return auth.response;
+    const { tenantId, session } = auth;
 
     const parsedBody = jobPostingCreateSchema.safeParse(await request.json());
     if (!parsedBody.success) {

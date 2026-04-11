@@ -2,6 +2,7 @@ import { ReportsView } from "./reports-view";
 import { BarChart3 } from "lucide-react";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { requireTenantRole } from "@/lib/auth";
 
 export async function generateMetadata() {
   const locale = await getAppLocale();
@@ -13,6 +14,7 @@ export async function generateMetadata() {
 }
 
 export default async function ReportsPage() {
+  await requireTenantRole(["TENANT_ADMIN", "HR_MANAGER"]);
   const locale = await getAppLocale();
   const t = getText(locale);
   return (

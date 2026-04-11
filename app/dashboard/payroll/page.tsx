@@ -2,8 +2,10 @@ import { PayrollProcessingManager } from "./payroll-manager";
 import { DollarSign } from "lucide-react";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { requireTenantRole } from "@/lib/auth";
 
 export default async function PayrollPage() {
+  await requireTenantRole(["TENANT_ADMIN", "HR_MANAGER"]);
   const locale = await getAppLocale();
   const t = getText(locale);
   return (

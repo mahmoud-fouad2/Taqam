@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { requireRole } from "@/lib/api/route-helper";
 import { buildCsv, sanitizeFilename } from "@/lib/payroll/export";
 import { listPayslipsForPeriod } from "@/lib/payroll/payslips";
 
+const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const auth = await requireTenantSession(request);
+    const auth = await requireRole(request, PAYROLL_ALLOWED_ROLES);
     if (!auth.ok) return auth.response;
     const { tenantId } = auth;
     const { id } = await params;

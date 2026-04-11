@@ -7,8 +7,13 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import type { Tenant, TenantStatus } from "@/lib/types/tenant";
 import type { Prisma } from "@prisma/client";
+import type { Tenant, TenantStatus } from "@/lib/types/tenant";
+import { hash } from "bcryptjs";
+import { randomBytes, randomUUID } from "node:crypto";
+
+import { createActionToken } from "@/lib/security/action-tokens";
+import { getAppBaseUrl, sendEmail } from "@/lib/email";
 
 const UNLIMITED_EMPLOYEES = 1_000_000;
 
@@ -20,7 +25,8 @@ function normalizeTenantStatus(
   const v = String(input ?? "").trim();
   if (!v) return undefined;
   const upper = v.toUpperCase();
-  if (VALID_TENANT_STATUSES.has(upper)) return upper as any;
+  if (VALID_TENANT_STATUSES.has(upper))
+    return upper as "PENDING" | "ACTIVE" | "SUSPENDED" | "CANCELLED";
   return undefined;
 }
 
@@ -62,12 +68,32 @@ function readString(v: unknown): string | undefined {
   return undefined;
 }
 
+function readBoolean(v: unknown): boolean | undefined {
+  if (typeof v === "boolean") return v;
+  return undefined;
+}
+
 function pickString(settings: Record<string, unknown>, keys: string[]): string | undefined {
   for (const key of keys) {
     const v = readString(settings[key]);
     if (v) return v;
   }
   return undefined;
+}
+
+function splitName(name: string) {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) {
+    return {
+      firstName: parts[0] ?? "Tenant",
+      lastName: "Admin"
+    };
+  }
+
+  return {
+    firstName: parts[0]!,
+    lastName: parts.slice(1).join(" ")
+  };
 }
 
 // Map DB tenant to client format
@@ -195,6 +221,19 @@ export async function POST(request: NextRequest) {
 
     const incomingSettings: Record<string, unknown> =
       body.settings && typeof body.settings === "object" ? body.settings : {};
+    const adminName = readString(body.adminName) ?? readString(incomingSettings.adminName);
+    const adminEmailRaw =
+      readString(body.adminEmail) ?? readString(incomingSettings.adminEmail) ?? undefined;
+    const adminEmail = adminEmailRaw?.toLowerCase();
+    const sendInvite =
+      readBoolean(body.sendInvite) ?? readBoolean(incomingSettings.sendInvite) ?? true;
+
+    if (!adminName || !adminEmail) {
+      return NextResponse.json(
+        { success: false, error: "Admin name and email are required" },
+        { status: 400 }
+      );
+    }
 
     const normalizedSettings: Prisma.InputJsonObject = {
       ...incomingSettings,
@@ -209,6 +248,18 @@ export async function POST(request: NextRequest) {
         ? { contactPhone: incomingSettings.companyPhone }
         : {})
     } as Prisma.InputJsonObject;
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: adminEmail },
+      select: { id: true }
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { success: false, error: "Admin email already belongs to an existing user" },
+        { status: 409 }
+      );
+    }
 
     // Check if slug is unique
     const existingTenant = await prisma.tenant.findFirst({
@@ -303,35 +354,195 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "Invalid planExpiresAt" }, { status: 400 });
     }
 
-    const tenant = await prisma.tenant.create({
-      data: {
-        name: body.name,
-        nameAr: body.nameAr ?? body.name,
-        slug: body.slug,
-        domain: body.domain,
-        logo: body.logo,
-        timezone: body.timezone || "Asia/Riyadh",
-        currency: body.currency || "SAR",
-        weekStartDay: body.weekStartDay || 0,
-        plan,
-        planExpiresAt,
-        maxEmployees,
-        status: "ACTIVE",
-        settings: normalizedSettings
-      },
-      include: {
-        _count: {
-          select: {
-            employees: true,
-            users: true
+    const { firstName, lastName } = splitName(adminName);
+    const randomPassword = randomBytes(24).toString("hex");
+    const passwordHash = await hash(randomPassword, 12);
+
+    const { tenant, adminUser } = await prisma.$transaction(async (tx) => {
+      const createdTenant = await tx.tenant.create({
+        data: {
+          name: body.name,
+          nameAr: body.nameAr ?? body.name,
+          slug: body.slug,
+          domain: body.domain,
+          logo: body.logo,
+          timezone: body.timezone || "Asia/Riyadh",
+          currency: body.currency || "SAR",
+          weekStartDay: body.weekStartDay || 0,
+          plan,
+          planExpiresAt,
+          maxEmployees,
+          status: "ACTIVE",
+          settings: normalizedSettings
+        }
+      });
+
+      await tx.organizationProfile.create({
+        data: {
+          tenantId: createdTenant.id,
+          name: body.name,
+          nameAr: body.nameAr ?? body.name,
+          commercialRegister:
+            readString(body.commercialRegister) ??
+            readString(incomingSettings.commercialRegister) ??
+            null,
+          phone: readString(body.phone) ?? null,
+          email: readString(body.email) ?? null,
+          country: readString(body.country) ?? "SA",
+          logo: readString(body.logo) ?? null
+        }
+      });
+
+      const adminUserId = randomUUID();
+      const adminRows = await tx.$queryRawUnsafe<
+        Array<{
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          passwordChangedAt: Date | null;
+        }>
+      >(
+        `
+          INSERT INTO "User" (
+            "id",
+            "tenantId",
+            "email",
+            "password",
+            "firstName",
+            "lastName",
+            "role",
+            "status",
+            "permissions",
+            "failedLoginAttempts",
+            "lockedUntil",
+            "createdAt",
+            "updatedAt"
+          )
+          VALUES (
+            $1,
+            $2,
+            $3,
+            $4,
+            $5,
+            $6,
+            $7,
+            $8,
+            ARRAY[]::text[],
+            0,
+            NULL,
+            NOW(),
+            NOW()
+          )
+          RETURNING "id", "email", "firstName", "lastName", "passwordChangedAt"
+        `,
+        adminUserId,
+        createdTenant.id,
+        adminEmail,
+        passwordHash,
+        firstName,
+        lastName,
+        "TENANT_ADMIN",
+        "PENDING_VERIFICATION"
+      );
+
+      const createdAdmin = adminRows[0]!;
+
+
+
+      await tx.auditLog.create({
+        data: {
+          tenantId: createdTenant.id,
+          userId: session.user.id ?? null,
+          action: "SUPER_ADMIN_CREATE_TENANT",
+          entity: "Tenant",
+          entityId: createdTenant.id,
+          newData: {
+            slug: createdTenant.slug,
+            adminEmail,
+            sendInvite
           }
         }
-      }
+      });
+
+      const tenantWithCounts = await tx.tenant.findUnique({
+        where: { id: createdTenant.id },
+        include: {
+          _count: {
+            select: {
+              employees: true,
+              users: true
+            }
+          }
+        }
+      });
+
+      return { tenant: tenantWithCounts!, adminUser: createdAdmin };
     });
 
-    return NextResponse.json({ success: true, data: mapTenant(tenant) }, { status: 201 });
+    const activationToken = await createActionToken(
+      {
+        type: "tenant-admin-activation",
+        userId: adminUser.id,
+        email: adminUser.email,
+        tenantId: tenant.id,
+        passwordChangedAt: adminUser.passwordChangedAt?.toISOString() ?? null
+      },
+      "72h"
+    );
+
+    const activationUrl = `${getAppBaseUrl()}/reset-password?token=${encodeURIComponent(activationToken)}`;
+
+    let activationEmailSent = false;
+    if (sendInvite) {
+      try {
+        const emailResult = await sendEmail({
+          to: adminUser.email,
+          subject: `تفعيل حساب مدير الشركة | ${tenant.nameAr ?? tenant.name}`,
+          text: [
+            `مرحبًا ${adminName}`,
+            `تم إنشاء مساحة شركتك ${tenant.nameAr ?? tenant.name} بنجاح على طاقم.`,
+            "فعّل حسابك من الرابط التالي:",
+            activationUrl
+          ].join("\n\n"),
+          html: `
+            <div style="font-family:Arial,sans-serif;line-height:1.8;color:#111827">
+              <h2 style="margin:0 0 16px">تم إنشاء الشركة بنجاح</h2>
+              <p>مرحبًا ${adminName}،</p>
+              <p>تم إنشاء مساحة شركتك <strong>${tenant.nameAr ?? tenant.name}</strong> على طاقم.</p>
+              <p>لتفعيل حساب مدير الشركة وتحديد كلمة المرور، استخدم الزر التالي:</p>
+              <p style="margin:24px 0">
+                <a href="${activationUrl}" style="display:inline-block;padding:12px 20px;border-radius:12px;background:#0ea5e9;color:#fff;text-decoration:none;font-weight:700">تفعيل الحساب</a>
+              </p>
+              <p>إذا لم يعمل الزر، استخدم هذا الرابط مباشرة:</p>
+              <p><a href="${activationUrl}">${activationUrl}</a></p>
+            </div>
+          `,
+          replyTo: process.env.NEXT_PUBLIC_SUPPORT_EMAIL ?? undefined
+        });
+        activationEmailSent = emailResult.sent;
+      } catch {
+        activationEmailSent = false;
+      }
+    }
+
+    return NextResponse.json(
+      {
+        success: true,
+        data: mapTenant(tenant),
+        activation: {
+          email: adminUser.email,
+          sent: activationEmailSent,
+          skipped: !sendInvite,
+          activationUrl
+        }
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error("Error creating tenant:", error);
     return NextResponse.json({ success: false, error: "Failed to create tenant" }, { status: 500 });
   }
 }
+
+

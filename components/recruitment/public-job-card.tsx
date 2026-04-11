@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   ArrowUpLeft,
@@ -65,6 +66,7 @@ type Props = {
 export function PublicJobCard({ job, locale, showTenant = true }: Props) {
   const p = locale === "en" ? "/en" : "";
   const companyName = job.tenantNameAr || job.tenantName;
+  const companyInitial = companyName.trim().charAt(0).toUpperCase() || "?";
 
   return (
     <Card className="group border-border/70 bg-card/80 overflow-hidden shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -73,7 +75,20 @@ export function PublicJobCard({ job, locale, showTenant = true }: Props) {
           <div className="space-y-2">
             {showTenant ? (
               <div className="bg-primary/10 text-primary inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium">
-                <Building2 className="h-3.5 w-3.5" />
+                {job.tenantLogo ? (
+                  <Image
+                    src={job.tenantLogo}
+                    alt=""
+                    width={20}
+                    height={20}
+                    className="h-5 w-5 rounded-full border border-white/70 object-cover shadow-sm"
+                    aria-hidden="true"
+                  />
+                ) : (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full border border-white/70 bg-white/70 text-[10px] font-bold shadow-sm">
+                    {companyInitial}
+                  </span>
+                )}
                 <span>{companyName}</span>
               </div>
             ) : null}
