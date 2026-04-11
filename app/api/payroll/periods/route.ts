@@ -8,8 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { requireRole } from "@/lib/api/route-helper";
 import { mapPayrollPeriod } from "@/lib/payroll/periods";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 function parseDateInput(value: unknown): Date | null {
   if (typeof value !== "string") {

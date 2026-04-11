@@ -7,61 +7,8 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import type { Tenant, TenantStatus } from "@/lib/types/tenant";
-
-function mapPlanFromDb(plan: unknown): Tenant["plan"] {
-  const v = String(plan ?? "").toUpperCase();
-  if (v === "ENTERPRISE") return "enterprise";
-  if (v === "PROFESSIONAL" || v === "BUSINESS") return "business";
-  if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
-  const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter")
-    return lower as Tenant["plan"];
-  return "starter";
-}
-
-function readSettings(t: any): Record<string, unknown> {
-  return (t?.settings as Record<string, unknown>) ?? {};
-}
-
-function readString(v: unknown): string | undefined {
-  if (typeof v === "string" && v.trim()) return v;
-  return undefined;
-}
-
-function pickString(settings: Record<string, unknown>, keys: string[]): string | undefined {
-  for (const key of keys) {
-    const v = readString(settings[key]);
-    if (v) return v;
-  }
-  return undefined;
-}
-
-// Map DB tenant to client format
-function mapTenant(t: any): Tenant {
-  const settings = readSettings(t);
-  return {
-    id: t.id,
-    name: t.name,
-    nameAr: t.nameAr ?? t.name,
-    slug: t.slug,
-    status: (t.status?.toLowerCase() ?? "pending") as TenantStatus,
-    plan: mapPlanFromDb(t.plan),
-    email: pickString(settings, ["contactEmail", "companyEmail"]) ?? "",
-    phone: pickString(settings, ["contactPhone", "companyPhone"]),
-    address: pickString(settings, ["address"]),
-    city: pickString(settings, ["city"]),
-    country: pickString(settings, ["country"]) ?? "SA",
-    defaultLocale: (pickString(settings, ["defaultLocale"]) as Tenant["defaultLocale"]) ?? "ar",
-    defaultTheme: (pickString(settings, ["defaultTheme"]) as Tenant["defaultTheme"]) ?? "shadcn",
-    timezone: t.timezone ?? "Asia/Riyadh",
-    usersCount: t._count?.users ?? 0,
-    employeesCount: t._count?.employees ?? 0,
-    createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
-    createdBy: t.createdBy ?? ""
-  };
-}
+import type { TenantStatus } from "@/lib/types/tenant";
+import { mapTenantFromDb, readSettings } from "@/lib/admin/tenant-mapping";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -95,7 +42,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       return NextResponse.json({ success: false, error: "Tenant not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ success: true, data: mapTenant(tenant) });
+    return NextResponse.json({ success: true, data: mapTenantFromDb(tenant) });
   } catch (error) {
     console.error("Error fetching tenant:", error);
     return NextResponse.json({ success: false, error: "Failed to fetch tenant" }, { status: 500 });
@@ -180,7 +127,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       }
     });
 
-    return NextResponse.json({ success: true, data: mapTenant(tenant) });
+    return NextResponse.json({ success: true, data: mapTenantFromDb(tenant) });
   } catch (error) {
     console.error("Error updating tenant:", error);
     return NextResponse.json({ success: false, error: "Failed to update tenant" }, { status: 500 });

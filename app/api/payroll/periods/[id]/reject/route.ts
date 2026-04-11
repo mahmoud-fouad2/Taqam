@@ -6,8 +6,7 @@ import {
   mapPayrollPeriod,
   updatePayrollPeriodStatus
 } from "@/lib/payroll/periods";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

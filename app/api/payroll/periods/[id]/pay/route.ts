@@ -7,8 +7,7 @@ import {
   updatePayrollPeriodStatus
 } from "@/lib/payroll/periods";
 import { z } from "zod";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 const payPeriodPaySchema = z.object({
   paymentMethod: z.string().optional(),

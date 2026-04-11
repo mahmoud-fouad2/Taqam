@@ -14,8 +14,7 @@ import {
   mapPayrollPeriod
 } from "@/lib/payroll/periods";
 import prisma from "@/lib/db";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 import { requireRole } from "@/lib/api/route-helper";
 import { sendPayslipsForPeriod } from "@/lib/payroll/payslips";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {

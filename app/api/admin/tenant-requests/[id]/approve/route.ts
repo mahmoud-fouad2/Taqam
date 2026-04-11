@@ -7,7 +7,8 @@ import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { createActionToken } from "@/lib/security/action-tokens";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
-import type { Tenant, TenantStatus } from "@/lib/types/tenant";
+import type { Tenant } from "@/lib/types/tenant";
+import { mapTenantFromDb } from "@/lib/admin/tenant-mapping";
 
 const UNLIMITED_EMPLOYEES = 1_000_000;
 
@@ -73,17 +74,6 @@ function parseOptionalDateInput(
   return { provided: true, value: d };
 }
 
-function mapPlanFromDb(plan: unknown): Tenant["plan"] {
-  const v = String(plan ?? "").toUpperCase();
-  if (v === "ENTERPRISE") return "enterprise";
-  if (v === "PROFESSIONAL" || v === "BUSINESS") return "business";
-  if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
-  const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter")
-    return lower as Tenant["plan"];
-  return "starter";
-}
-
 function isValidSlug(value: string): boolean {
   return /^[a-z0-9-]{3,30}$/.test(value);
 }
@@ -106,27 +96,6 @@ function splitName(name: string) {
   return {
     firstName: parts[0]!,
     lastName: parts.slice(1).join(" ")
-  };
-}
-
-function mapTenant(t: any): Tenant {
-  return {
-    id: t.id,
-    name: t.name,
-    nameAr: t.nameAr ?? t.name,
-    slug: t.slug,
-    status: (t.status?.toLowerCase() ?? "pending") as TenantStatus,
-    plan: mapPlanFromDb(t.plan),
-    email: "",
-    country: "SA",
-    defaultLocale: "ar",
-    defaultTheme: "shadcn",
-    timezone: t.timezone ?? "Asia/Riyadh",
-    usersCount: t._count?.users ?? 0,
-    employeesCount: t._count?.employees ?? 0,
-    createdAt: t.createdAt?.toISOString?.() ?? new Date().toISOString(),
-    updatedAt: t.updatedAt?.toISOString?.() ?? new Date().toISOString(),
-    createdBy: ""
   };
 }
 
@@ -362,7 +331,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   }
 
   return NextResponse.json({
-    data: mapTenant(tenant),
+    data: mapTenantFromDb(tenant),
     activation: {
       email: adminUser.email,
       sent: activationEmailSent,

@@ -8,12 +8,13 @@ import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import type { Prisma } from "@prisma/client";
-import type { Tenant, TenantStatus } from "@/lib/types/tenant";
+import type { TenantStatus } from "@/lib/types/tenant";
 import { hash } from "bcryptjs";
 import { randomBytes, randomUUID } from "node:crypto";
 
 import { createActionToken } from "@/lib/security/action-tokens";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
+import { mapTenantFromDb, readString } from "@/lib/admin/tenant-mapping";
 
 const UNLIMITED_EMPLOYEES = 1_000_000;
 
@@ -28,18 +29,6 @@ function normalizeTenantStatus(
   if (VALID_TENANT_STATUSES.has(upper))
     return upper as "PENDING" | "ACTIVE" | "SUSPENDED" | "CANCELLED";
   return undefined;
-}
-
-function mapPlanFromDb(plan: unknown): Tenant["plan"] {
-  const v = String(plan ?? "").toUpperCase();
-  if (v === "ENTERPRISE") return "enterprise";
-  if (v === "PROFESSIONAL" || v === "BUSINESS") return "business";
-  if (v === "BASIC" || v === "STARTER" || v === "TRIAL") return "starter";
-  // Also accept already-normalized values.
-  const lower = String(plan ?? "").toLowerCase();
-  if (lower === "enterprise" || lower === "business" || lower === "starter")
-    return lower as Tenant["plan"];
-  return "starter";
 }
 
 function mapPlanToDb(plan: unknown): "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTERPRISE" {
@@ -59,25 +48,8 @@ function planToPricingSlug(
   return "starter";
 }
 
-function readSettings(t: any): Record<string, unknown> {
-  return (t?.settings as Record<string, unknown>) ?? {};
-}
-
-function readString(v: unknown): string | undefined {
-  if (typeof v === "string" && v.trim()) return v;
-  return undefined;
-}
-
 function readBoolean(v: unknown): boolean | undefined {
   if (typeof v === "boolean") return v;
-  return undefined;
-}
-
-function pickString(settings: Record<string, unknown>, keys: string[]): string | undefined {
-  for (const key of keys) {
-    const v = readString(settings[key]);
-    if (v) return v;
-  }
   return undefined;
 }
 
@@ -93,32 +65,6 @@ function splitName(name: string) {
   return {
     firstName: parts[0]!,
     lastName: parts.slice(1).join(" ")
-  };
-}
-
-// Map DB tenant to client format
-function mapTenant(t: any): Tenant {
-  const settings = readSettings(t);
-  return {
-    id: t.id,
-    name: t.name,
-    nameAr: t.nameAr ?? t.name,
-    slug: t.slug,
-    status: (t.status?.toLowerCase() ?? "pending") as TenantStatus,
-    plan: mapPlanFromDb(t.plan),
-    email: pickString(settings, ["contactEmail", "companyEmail"]) ?? "",
-    phone: pickString(settings, ["contactPhone", "companyPhone"]),
-    address: pickString(settings, ["address"]),
-    city: pickString(settings, ["city"]),
-    country: pickString(settings, ["country"]) ?? "SA",
-    defaultLocale: (pickString(settings, ["defaultLocale"]) as Tenant["defaultLocale"]) ?? "ar",
-    defaultTheme: (pickString(settings, ["defaultTheme"]) as Tenant["defaultTheme"]) ?? "shadcn",
-    timezone: t.timezone ?? "Asia/Riyadh",
-    usersCount: t._count?.users ?? 0,
-    employeesCount: t._count?.employees ?? 0,
-    createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
-    updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
-    createdBy: t.createdBy ?? ""
   };
 }
 
@@ -191,7 +137,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      data: tenants.map(mapTenant),
+      data: tenants.map(mapTenantFromDb),
       pagination: {
         page,
         pageSize,
@@ -529,7 +475,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         success: true,
-        data: mapTenant(tenant),
+        data: mapTenantFromDb(tenant),
         activation: {
           email: adminUser.email,
           sent: activationEmailSent,

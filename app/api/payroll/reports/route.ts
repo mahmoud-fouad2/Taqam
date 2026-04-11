@@ -11,8 +11,7 @@ import { getMonthName } from "@/lib/types/payroll";
 import { requireRole } from "@/lib/api/route-helper";
 import { ensurePayslipsForPeriod } from "@/lib/payroll/payslips";
 import { buildCsv } from "@/lib/payroll/export";
-
-const PAYROLL_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
+import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
 function monthKey(date: Date) {
   const y = date.getUTCFullYear();
