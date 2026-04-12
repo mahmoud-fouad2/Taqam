@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,17 +26,16 @@ type LoginFormProps = {
 
 export function LoginForm({ locale, labels }: LoginFormProps) {
   const router = useRouter();
-  const captchaRef = useRef<ReCAPTCHA>(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const navigateTo = (target: string) => {
+  const navigateTo = useCallback((target: string) => {
     const targetUrl = new URL(target, window.location.origin);
 
     if (targetUrl.origin === window.location.origin) {
@@ -45,9 +44,9 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
     }
 
     window.location.assign(targetUrl.toString());
-  };
+  }, [router]);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -59,17 +58,21 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       return;
     }
 
-    if (!siteKey) {
+    if (!siteKey || !executeRecaptcha) {
       setError(t(locale, "captcha.missingConfig"));
       return;
     }
 
-    if (!captchaToken) {
-      setError(t(locale, "captcha.required"));
+    setIsLoading(true);
+    let captchaToken: string;
+    try {
+      captchaToken = await executeRecaptcha("login");
+    } catch {
+      setError(t(locale, "captcha.invalid"));
+      setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
     try {
       const res = await signIn("credentials", {
         email: trimmedEmail,
@@ -90,8 +93,6 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         } else {
           setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
         }
-        captchaRef.current?.reset();
-        setCaptchaToken(null);
         return;
       }
 
@@ -108,12 +109,10 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       }
     } catch {
       setError(locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in");
-      captchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [email, password, locale, siteKey, executeRecaptcha, router, navigateTo]);
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -182,36 +181,18 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         </div>
       ) : null}
 
-      <div className="space-y-3 rounded-[1.5rem] border border-border/60 bg-muted/20 p-4">
-        <div>
-          <Label className="text-sm font-semibold">
-            {locale === "ar" ? "Google reCAPTCHA" : "Google reCAPTCHA"}
-          </Label>
-          <p className="text-muted-foreground mt-1 text-xs leading-5">
+      {siteKey ? (
+        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3.5 py-2.5">
+          <ShieldCheck className="text-primary size-4 shrink-0" />
+          <p className="text-muted-foreground text-xs leading-5">
             {locale === "ar"
-              ? "لحماية صفحة الدخول من المحاولات الآلية، أكمل التحقق قبل المتابعة."
-              : "Complete the Google reCAPTCHA challenge before signing in."}
+              ? "محمي بـ Google reCAPTCHA v3 — يعمل تلقائيًا في الخلفية."
+              : "Protected by Google reCAPTCHA v3 — runs automatically in the background."}
           </p>
         </div>
-
-        {siteKey ? (
-          <div className="flex justify-center overflow-hidden rounded-2xl bg-background/70 p-2 sm:justify-start">
-            <ReCAPTCHA
-              ref={captchaRef}
-              sitekey={siteKey}
-              hl={locale}
-              onChange={(token) => setCaptchaToken(token)}
-              onExpired={() => setCaptchaToken(null)}
-              onErrored={() => {
-                setCaptchaToken(null);
-                setError(t(locale, "captcha.invalid"));
-              }}
-            />
-          </div>
-        ) : (
-          <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
-        )}
-      </div>
+      ) : (
+        <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
+      )}
 
       <Button
         type="submit"

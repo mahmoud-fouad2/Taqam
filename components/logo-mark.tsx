@@ -25,7 +25,7 @@ export function LogoMark({
           frameClassName
         )}>
         <Image
-          src="/logo-tight.jpeg"
+          src="/logo-light.png"
           alt={alt}
           width={877}
           height={496}

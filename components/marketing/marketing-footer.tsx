@@ -117,11 +117,11 @@ export async function MarketingFooter() {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 xl:justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-2.5">
               {badgeItems.map((item) => {
                 const content = (
                   <div
-                    className="group border-border/60 bg-background/88 hover:border-border/90 flex h-11 w-[4.2rem] items-center justify-center overflow-hidden rounded-[1rem] border shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:h-12 sm:w-[4.75rem]"
+                    className="group border-border/60 bg-background/88 hover:border-border/90 flex h-9 w-[3.6rem] items-center justify-center overflow-hidden rounded-[0.9rem] border shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:h-10 sm:w-[4rem]"
                     title={item.title}>
                     <div className={`relative h-full w-full overflow-hidden ${item.frameClassName}`}>
                       <Image

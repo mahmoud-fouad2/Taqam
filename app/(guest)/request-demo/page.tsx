@@ -11,6 +11,7 @@ import { LogoMark } from "@/components/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscriptionRequestForm } from "./subscription-request-form";
+import { RecaptchaProvider } from "@/components/recaptcha-provider";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -111,7 +112,9 @@ export default async function RequestDemoPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-6 py-6 sm:px-8 sm:py-8">
+                  <RecaptchaProvider>
                   <SubscriptionRequestForm locale={locale} />
+                  </RecaptchaProvider>
                 </CardContent>
               </Card>
             </FadeIn>

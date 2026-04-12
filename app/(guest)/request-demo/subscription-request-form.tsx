@@ -5,12 +5,12 @@
  * نموذج طلب الاشتراك
  */
 
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CheckCircle2 } from "lucide-react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -55,14 +55,13 @@ type SubscriptionRequestFormProps = {
 
 export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps) {
   const router = useRouter();
-  const captchaRef = useRef<ReCAPTCHA>(null);
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const requestSchema = useMemo(() => createRequestSchema(isAr), [isAr]);
 
@@ -84,20 +83,23 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
     }
   });
 
-  const onSubmit = async (data: RequestInput) => {
+  const onSubmit = useCallback(async (data: RequestInput) => {
     setSubmitError(null);
 
-    if (!siteKey) {
+    if (!siteKey || !executeRecaptcha) {
       setSubmitError(t(locale, "captcha.missingConfig"));
       return;
     }
 
-    if (!captchaToken) {
-      setSubmitError(t(locale, "captcha.required"));
+    setIsLoading(true);
+    let captchaToken: string;
+    try {
+      captchaToken = await executeRecaptcha("request_demo");
+    } catch {
+      setSubmitError(t(locale, "captcha.invalid"));
+      setIsLoading(false);
       return;
     }
-
-    setIsLoading(true);
 
     try {
       const res = await fetch("/api/public/tenant-requests", {
@@ -120,12 +122,10 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
       setSubmitError(
         e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request"
       );
-      captchaRef.current?.reset();
-      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [locale, siteKey, executeRecaptcha, isAr]);
 
   if (isSuccess) {
     return (
@@ -261,34 +261,18 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         />
       </div>
 
-      <div className="space-y-3 rounded-[1.5rem] border border-border/60 bg-muted/20 p-4">
-        <div>
-          <Label className="text-sm font-semibold">Google reCAPTCHA</Label>
-          <p className="text-muted-foreground mt-1 text-xs leading-5">
+      {siteKey ? (
+        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3.5 py-2.5">
+          <ShieldCheck className="text-primary size-4 shrink-0" />
+          <p className="text-muted-foreground text-xs leading-5">
             {isAr
-              ? "هذا التحقق مطلوب لحماية نموذج الطلب من الإرسال الآلي أو المزعج."
-              : "This challenge protects the demo form from automated or abusive submissions."}
+              ? "محمي بـ Google reCAPTCHA v3 — يعمل تلقائيًا في الخلفية."
+              : "Protected by Google reCAPTCHA v3 — runs automatically in the background."}
           </p>
         </div>
-
-        {siteKey ? (
-          <div className="flex justify-center overflow-hidden rounded-2xl bg-background/70 p-2 sm:justify-start">
-            <ReCAPTCHA
-              ref={captchaRef}
-              sitekey={siteKey}
-              hl={locale}
-              onChange={(token) => setCaptchaToken(token)}
-              onExpired={() => setCaptchaToken(null)}
-              onErrored={() => {
-                setCaptchaToken(null);
-                setSubmitError(t(locale, "captcha.invalid"));
-              }}
-            />
-          </div>
-        ) : (
-          <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
-        )}
-      </div>
+      ) : (
+        <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
+      )}
 
       {submitError ? (
         <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm">

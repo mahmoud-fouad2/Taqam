@@ -27,6 +27,7 @@ export default function Providers({
           attribute="class"
           defaultTheme="light"
           enableSystem={false}
+          storageKey="taqam-theme"
           disableTransitionOnChange>
           <AppLocaleProvider locale={locale}>
             <AppDirectionProvider dir={dir}>

@@ -11,6 +11,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { buildTenantPath, buildTenantUrl, isLocalTenantDevelopmentHost } from "@/lib/tenant";
 import { getTenantRequestHost } from "@/lib/tenant.server";
 import { LoginForm } from "./login-form";
+import { RecaptchaProvider } from "@/components/recaptcha-provider";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
@@ -73,6 +74,7 @@ export default async function LoginPageV1() {
                   </div>
                 </div>
 
+                <RecaptchaProvider>
                 <LoginForm
                   locale={locale}
                   labels={{
@@ -83,6 +85,7 @@ export default async function LoginPageV1() {
                     submit: t.login.submit
                   }}
                 />
+                </RecaptchaProvider>
 
                 <div className="mt-6 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-muted-foreground text-sm">

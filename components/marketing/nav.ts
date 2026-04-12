@@ -75,7 +75,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: LayoutDashboard
           },
           {
-            href: "/#features",
+            href: "/features#core",
             labelAr: "المميزات",
             labelEn: "Features",
             descAr: "شاهد كيف ينظم طاقم الموظفين والحضور والرواتب في مسار واحد.",
@@ -83,7 +83,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: Sparkles
           },
           {
-            href: "/#integrations",
+            href: "/features#integrations",
             labelAr: "التكاملات",
             labelEn: "Integrations",
             descAr: "ربط مباشر مع GOSI وWPS ومدد والأنظمة التي تعتمد عليها فعلاً.",
@@ -97,7 +97,7 @@ export const marketingNav: MarketingNavItem[] = [
         titleEn: "Core Operations",
         items: [
           {
-            href: "/features",
+            href: "/features#people",
             labelAr: "الموظفون",
             labelEn: "People",
             descAr: "ملفات الموظفين، الهيكل التنظيمي، والصلاحيات من لوحة واحدة.",
@@ -105,7 +105,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: Users
           },
           {
-            href: "/features",
+            href: "/features#attendance",
             labelAr: "الحضور والانصراف",
             labelEn: "Attendance",
             descAr: "دوام، شفتات، تأخيرات، وطلبات يومية بدون تعقيد.",
@@ -113,7 +113,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: Clock3
           },
           {
-            href: "/features",
+            href: "/features#payroll",
             labelAr: "الرواتب والامتثال",
             labelEn: "Payroll & Compliance",
             descAr: "رواتب، WPS، وتأمينات في نفس المسار التشغيلي.",
@@ -177,7 +177,7 @@ export const marketingNav: MarketingNavItem[] = [
         titleEn: "Best For",
         items: [
           {
-            href: "/plans",
+            href: "/plans#small-teams",
             labelAr: "الشركات الصغيرة",
             labelEn: "Small Teams",
             descAr: "تشغيل أساسي سريع وواضح من أول يوم.",
@@ -185,7 +185,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: Building2
           },
           {
-            href: "/plans",
+            href: "/plans#growing-teams",
             labelAr: "الفرق المتنامية",
             labelEn: "Growing Teams",
             descAr: "تقارير وصلاحيات أوسع مع مرونة أعلى في التشغيل.",
@@ -193,7 +193,7 @@ export const marketingNav: MarketingNavItem[] = [
             icon: BriefcaseBusiness
           },
           {
-            href: "/plans",
+            href: "/plans#enterprises",
             labelAr: "المؤسسات",
             labelEn: "Enterprises",
             descAr: "تكاملات أعمق، دعم أعلى، ومسارات تشغيل أكثر تخصيصًا.",
