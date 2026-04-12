@@ -482,7 +482,7 @@ export default async function LandingPage({
                 </div>
 
                 <h1 className="text-5xl leading-[1.08] font-extrabold tracking-tight sm:text-6xl lg:text-7xl">
-                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-indigo-600 via-blue-600 to-purple-600 bg-clip-text text-transparent dark:from-sky-200 dark:via-cyan-100 dark:to-blue-200">
                     {isAr ? siteContent.home.title.ar : siteContent.home.title.en}
                   </span>
                 </h1>
@@ -510,7 +510,9 @@ export default async function LandingPage({
                       variant="brand"
                       size="lg"
                       className="h-12 gap-2 px-6 text-base font-semibold">
-                      {isAr ? siteContent.home.primaryCtaLabel.ar : siteContent.home.primaryCtaLabel.en}
+                      {isAr
+                        ? siteContent.home.primaryCtaLabel.ar
+                        : siteContent.home.primaryCtaLabel.en}
                       <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                     </Button>
                   </Link>
@@ -917,7 +919,7 @@ export default async function LandingPage({
             {integrations.map((item) => (
               <div
                 key={item.id}
-                className="group border-border/45 bg-card/78 hover:border-sky-200/80 flex flex-col rounded-[1.85rem] border p-2 shadow-[0_10px_28px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] sm:p-2.5">
+                className="group border-border/45 bg-card/78 flex flex-col rounded-[1.85rem] border p-2 shadow-[0_10px_28px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200/80 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] sm:p-2.5">
                 <div className="bg-background/85 mx-auto w-full rounded-[1.45rem] p-2">
                   <div
                     className={`relative aspect-[1.08/1] w-full overflow-hidden rounded-[1.15rem] border border-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${item.frameClassName}`}>
@@ -927,7 +929,7 @@ export default async function LandingPage({
                       fill
                       sizes="(max-width: 640px) 42vw, (max-width: 1280px) 26vw, 12vw"
                       unoptimized
-                      className={`rounded-[0.95rem] scale-[0.84] transition-transform duration-300 group-hover:scale-[0.88] ${item.imageClassName}`}
+                      className={`scale-[0.84] rounded-[0.95rem] transition-transform duration-300 group-hover:scale-[0.88] ${item.imageClassName}`}
                     />
                   </div>
                 </div>

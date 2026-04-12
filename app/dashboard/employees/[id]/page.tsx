@@ -63,6 +63,7 @@ export default async function EmployeeDetailsPage({ params }: PageProps) {
       hireDate: true,
       employmentType: true,
       status: true,
+      overtimeEligible: true,
       workLocation: true,
       baseSalary: true,
       currency: true,
@@ -157,6 +158,78 @@ export default async function EmployeeDetailsPage({ params }: PageProps) {
     redirect("/dashboard?error=unauthorized");
   }
 
+  const [recentPayslips, recentLoans, totalLoansCount, activeLoansCount, activeLoanTotals] =
+    await Promise.all([
+      prisma.payrollPayslip.findMany({
+        where: {
+          tenantId: currentUser.tenantId,
+          employeeId: employee.id
+        },
+        orderBy: [{ payrollPeriod: { startDate: "desc" } }, { createdAt: "desc" }],
+        take: 3,
+        select: {
+          id: true,
+          status: true,
+          netSalary: true,
+          currency: true,
+          overtimeHours: true,
+          payrollPeriod: {
+            select: {
+              id: true,
+              name: true,
+              nameAr: true,
+              startDate: true,
+              endDate: true,
+              paymentDate: true
+            }
+          }
+        }
+      }),
+      prisma.loan.findMany({
+        where: {
+          tenantId: currentUser.tenantId,
+          employeeId: employee.id
+        },
+        orderBy: [{ createdAt: "desc" }],
+        take: 3,
+        select: {
+          id: true,
+          type: true,
+          status: true,
+          amount: true,
+          remainingAmount: true,
+          installments: true,
+          paidInstallments: true,
+          createdAt: true,
+          startDate: true,
+          endDate: true
+        }
+      }),
+      prisma.loan.count({
+        where: {
+          tenantId: currentUser.tenantId,
+          employeeId: employee.id
+        }
+      }),
+      prisma.loan.count({
+        where: {
+          tenantId: currentUser.tenantId,
+          employeeId: employee.id,
+          status: "ACTIVE"
+        }
+      }),
+      prisma.loan.aggregate({
+        where: {
+          tenantId: currentUser.tenantId,
+          employeeId: employee.id,
+          status: "ACTIVE"
+        },
+        _sum: {
+          remainingAmount: true
+        }
+      })
+    ]);
+
   const employeeData = {
     id: employee.id,
     employeeNumber: employee.employeeNumber,
@@ -171,6 +244,7 @@ export default async function EmployeeDetailsPage({ params }: PageProps) {
     hireDate: employee.hireDate.toISOString(),
     employmentType: employee.employmentType,
     status: mapEmployeeStatus(employee.status),
+    overtimeEligible: employee.overtimeEligible,
     workLocation: employee.workLocation ?? null,
     baseSalary: employee.baseSalary?.toString() ?? null,
     currency: employee.currency ?? "SAR",
@@ -206,7 +280,39 @@ export default async function EmployeeDetailsPage({ params }: PageProps) {
           ...employee.user,
           email: employee.user.email ?? null
         }
-      : null
+      : null,
+    loanSummary: {
+      totalCount: totalLoansCount,
+      activeCount: activeLoansCount,
+      activeRemainingAmount: Number(activeLoanTotals._sum.remainingAmount ?? 0)
+    },
+    recentLoans: recentLoans.map((loan) => ({
+      id: loan.id,
+      type: loan.type,
+      status: loan.status,
+      amount: Number(loan.amount),
+      remainingAmount: Number(loan.remainingAmount),
+      installments: loan.installments,
+      paidInstallments: loan.paidInstallments,
+      createdAt: loan.createdAt.toISOString(),
+      startDate: loan.startDate?.toISOString() ?? null,
+      endDate: loan.endDate?.toISOString() ?? null
+    })),
+    recentPayslips: recentPayslips.map((payslip) => ({
+      id: payslip.id,
+      status: payslip.status,
+      netSalary: Number(payslip.netSalary),
+      currency: payslip.currency,
+      overtimeHours: payslip.overtimeHours,
+      payrollPeriod: {
+        id: payslip.payrollPeriod.id,
+        name: payslip.payrollPeriod.name,
+        nameAr: payslip.payrollPeriod.nameAr,
+        startDate: payslip.payrollPeriod.startDate.toISOString(),
+        endDate: payslip.payrollPeriod.endDate.toISOString(),
+        paymentDate: payslip.payrollPeriod.paymentDate.toISOString()
+      }
+    }))
   };
 
   return <EmployeeDetailsClient employee={employeeData} initialLocale={locale} />;

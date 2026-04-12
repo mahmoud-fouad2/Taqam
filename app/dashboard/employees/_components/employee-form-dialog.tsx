@@ -28,7 +28,13 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { getEmployeeFullName, type Department, type Employee, type JobTitle } from "@/lib/types/core-hr";
+import { Switch } from "@/components/ui/switch";
+import {
+  getEmployeeFullName,
+  type Department,
+  type Employee,
+  type JobTitle
+} from "@/lib/types/core-hr";
 
 import { contractTypes, statusOptions } from "./employee-constants";
 import type { EmployeeFormData } from "./employee-form-schema";
@@ -156,9 +162,7 @@ export function EmployeeFormDialog({
                             <SelectTrigger>
                               <SelectValue
                                 placeholder={
-                                  locale === "ar"
-                                    ? "اختر المدير المباشر"
-                                    : "Choose direct manager"
+                                  locale === "ar" ? "اختر المدير المباشر" : "Choose direct manager"
                                 }
                               />
                             </SelectTrigger>
@@ -357,6 +361,29 @@ export function EmployeeFormDialog({
               </TabsContent>
 
               <TabsContent value="salary" className="mt-4 space-y-4">
+                <FormField
+                  control={form.control}
+                  name="overtimeEligible"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center justify-between rounded-xl border p-4">
+                      <div className="space-y-1">
+                        <FormLabel>
+                          {locale === "ar"
+                            ? "مؤهل لحساب الأوفر تايم"
+                            : "Eligible for overtime calculation"}
+                        </FormLabel>
+                        <p className="text-muted-foreground text-sm">
+                          {locale === "ar"
+                            ? "لن يدخل هذا الموظف في الحساب التلقائي إلا إذا كان هذا الخيار مفعلاً مع سياسة الحضور وتفعيل الأوفر تايم في الوردية."
+                            : "This employee is included in automatic overtime only when attendance policy and shift overtime are enabled."}
+                        </p>
+                      </div>
+                      <FormControl>
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="basicSalary"

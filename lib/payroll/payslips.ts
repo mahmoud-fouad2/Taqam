@@ -30,6 +30,7 @@ export type PayrollEmployeeSnapshot = {
   baseSalary: Prisma.Decimal | number | null;
   currency: string;
   nationality: string | null;
+  overtimeEligible?: boolean;
   salaryRecords?: Array<{
     structureId: string | null;
     basicSalary: Prisma.Decimal | number;
@@ -239,6 +240,7 @@ export function computePayslipSnapshot(input: {
   employee: PayrollEmployeeSnapshot;
   period: PayrollPeriodSnapshot;
   gosiSettings?: GOSISettings;
+  overtimeHours?: number;
 }): PayslipSnapshot {
   const compensation = extractCurrentCompensation(input.employee);
   const basicSalary = roundMoney(compensation.basicSalary);
@@ -263,6 +265,7 @@ export function computePayslipSnapshot(input: {
       .reduce((sum, component) => sum + component.amount, 0)
   );
   const workingDays = 22;
+  const overtimeHours = Number(input.overtimeHours ?? 0);
 
   const deductionsSummary = calculatePayrollDeductions({
     basicSalary,
@@ -353,7 +356,7 @@ export function computePayslipSnapshot(input: {
     actualWorkDays: workingDays,
     absentDays: 0,
     lateDays: 0,
-    overtimeHours: 0,
+    overtimeHours,
     gosiEmployee,
     gosiEmployer,
     status: "generated",
@@ -370,11 +373,13 @@ export function buildPayslipCreateData(input: {
   employee: PayrollEmployeeSnapshot;
   period: PayrollPeriodSnapshot;
   gosiSettings?: GOSISettings;
+  overtimeHours?: number;
 }) {
   const snapshot = computePayslipSnapshot({
     employee: input.employee,
     period: input.period,
-    gosiSettings: input.gosiSettings
+    gosiSettings: input.gosiSettings,
+    overtimeHours: input.overtimeHours
   });
 
   return {
@@ -439,6 +444,7 @@ export async function ensurePayslipsForPeriod(tenantId: string, periodId: string
       baseSalary: true,
       currency: true,
       nationality: true,
+      overtimeEligible: true,
       salaryRecords: {
         where: {
           effectiveDate: { lte: period.paymentDate },
@@ -463,6 +469,28 @@ export async function ensurePayslipsForPeriod(tenantId: string, periodId: string
     }
   });
 
+  const overtimeRows = await prisma.attendanceRecord.groupBy({
+    by: ["employeeId"],
+    where: {
+      tenantId,
+      employeeId: { in: employees.map((employee) => employee.id) },
+      date: {
+        gte: period.startDate,
+        lte: period.endDate
+      }
+    },
+    _sum: {
+      overtimeMinutes: true
+    }
+  });
+
+  const overtimeByEmployeeId = new Map(
+    overtimeRows.map((row) => [
+      row.employeeId,
+      roundInt(Number(row._sum.overtimeMinutes || 0) / 60)
+    ])
+  );
+
   if (employees.length === 0) {
     return { period, generatedCount: 0 };
   }
@@ -481,7 +509,8 @@ export async function ensurePayslipsForPeriod(tenantId: string, periodId: string
           tenantId,
           employee: employee as PayrollEmployeeSnapshot,
           period,
-          gosiSettings
+          gosiSettings,
+          overtimeHours: overtimeByEmployeeId.get(employee.id) ?? 0
         }),
         update: {}
       })

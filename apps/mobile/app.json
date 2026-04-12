@@ -23,14 +23,14 @@
     "ios": {
       "supportsTablet": true,
       "buildNumber": "1",
-      "bundleIdentifier": "com.jisr.app"
+      "bundleIdentifier": "com.taqam.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/brand/adaptive-foreground.png",
         "backgroundColor": "#0a0f1e"
       },
-      "package": "com.jisr.app",
+      "package": "com.taqam.app",
       "versionCode": 1,
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false

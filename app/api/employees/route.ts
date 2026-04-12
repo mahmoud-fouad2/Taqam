@@ -202,6 +202,7 @@ export async function POST(request: NextRequest) {
     const employmentType =
       normalizeEnumValue(body.employmentType, Object.values(EmploymentType)) ??
       EmploymentType.FULL_TIME;
+    const overtimeEligible = Boolean(body.overtimeEligible);
 
     const baseSalaryValue = body.baseSalary;
     const normalizedBaseSalary =
@@ -337,6 +338,7 @@ export async function POST(request: NextRequest) {
             status: "ACTIVE",
             shiftId,
             workLocation: body.workLocation,
+            overtimeEligible,
             baseSalary: normalizedBaseSalary,
             branchId: branchId ?? branch?.id
           },

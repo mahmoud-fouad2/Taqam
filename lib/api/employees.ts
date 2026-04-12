@@ -35,6 +35,7 @@ type ApiEmployee = {
   departmentId?: string | null;
   jobTitleId?: string | null;
   managerId?: string | null;
+  overtimeEligible?: boolean | null;
   hireDate: string;
   employmentType?: ApiEmploymentType | null;
   status?: ApiEmployeeStatus | null;
@@ -58,9 +59,7 @@ type ApiEmployee = {
   } | null;
 };
 
-function mapEmployeeSummaryFromApi(
-  employee?: ApiEmployee["manager"]
-): EmployeeSummary | undefined {
+function mapEmployeeSummaryFromApi(employee?: ApiEmployee["manager"]): EmployeeSummary | undefined {
   if (!employee) return undefined;
 
   return {
@@ -224,6 +223,7 @@ function mapEmployeeFromApi(emp: ApiEmployee): Employee {
     branchId: undefined,
     hireDate: toYmd(emp.hireDate) ?? emp.hireDate,
     contractType: mapEmploymentTypeFromApi(emp.employmentType ?? undefined),
+    overtimeEligible: Boolean(emp.overtimeEligible),
     probationEndDate: toYmd(emp.probationEndDate) ?? undefined,
     status: mapStatusFromApi(emp.status ?? undefined),
     terminationDate: toYmd(emp.terminationDate) ?? undefined,
@@ -252,6 +252,7 @@ function mapEmployeeCreateToApi(input: EmployeeCreateInput) {
     managerId: input.managerId,
     hireDate: input.hireDate,
     employmentType: mapEmploymentTypeToApi(input.contractType),
+    overtimeEligible: input.overtimeEligible,
     baseSalary: input.basicSalary
   };
 }
@@ -274,6 +275,7 @@ function mapEmployeeUpdateToApi(input: Partial<Employee>) {
     managerId: input.managerId,
     hireDate: input.hireDate,
     employmentType: input.contractType ? mapEmploymentTypeToApi(input.contractType) : undefined,
+    overtimeEligible: input.overtimeEligible,
     status: input.status ? mapStatusToApi(input.status) : undefined,
     baseSalary: input.basicSalary,
     currency: input.currency

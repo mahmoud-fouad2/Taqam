@@ -3,6 +3,8 @@
  * Handles file uploads/downloads to R2 bucket
  */
 
+import "server-only";
+
 import {
   S3Client,
   PutObjectCommand,
@@ -18,14 +20,22 @@ import { getStorageRuntimeStatus } from "@/lib/runtime-integrations";
 const R2_ENDPOINT =
   process.env.R2_ENDPOINT || `https://${process.env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`;
 
-const R2 = new S3Client({
-  region: "auto",
-  endpoint: R2_ENDPOINT,
-  credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || ""
+let r2Client: S3Client | null = null;
+
+function getR2Client() {
+  if (!r2Client) {
+    r2Client = new S3Client({
+      region: "auto",
+      endpoint: R2_ENDPOINT,
+      credentials: {
+        accessKeyId: process.env.R2_ACCESS_KEY_ID || "",
+        secretAccessKey: process.env.R2_SECRET_ACCESS_KEY || ""
+      }
+    });
   }
-});
+
+  return r2Client;
+}
 
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "";
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
@@ -86,7 +96,7 @@ export async function uploadFile(
       }
     });
 
-    await R2.send(command);
+    await getR2Client().send(command);
 
     // Return public URL if available, otherwise the key
     const url = PUBLIC_URL ? `${PUBLIC_URL}/${key}` : key;
@@ -118,7 +128,7 @@ export async function getSignedDownloadUrl(
       Key: key
     });
 
-    const url = await getSignedUrl(R2, command, { expiresIn });
+    const url = await getSignedUrl(getR2Client(), command, { expiresIn });
     return url;
   } catch (error) {
     console.error("R2 Signed URL Error:", error);
@@ -141,7 +151,7 @@ export async function getSignedUploadUrl(
       ContentType: contentType
     });
 
-    const url = await getSignedUrl(R2, command, { expiresIn });
+    const url = await getSignedUrl(getR2Client(), command, { expiresIn });
     return url;
   } catch (error) {
     console.error("R2 Upload URL Error:", error);
@@ -159,7 +169,7 @@ export async function deleteFile(key: string): Promise<boolean> {
       Key: key
     });
 
-    await R2.send(command);
+    await getR2Client().send(command);
     return true;
   } catch (error) {
     console.error("R2 Delete Error:", error);
@@ -178,7 +188,7 @@ export async function listFiles(prefix: string, maxKeys: number = 100): Promise<
       MaxKeys: maxKeys
     });
 
-    const response = await R2.send(command);
+    const response = await getR2Client().send(command);
 
     return (response.Contents || []).map((obj) => ({
       key: obj.Key || "",
@@ -201,7 +211,7 @@ export async function getFile(key: string): Promise<Buffer | null> {
       Key: key
     });
 
-    const response = await R2.send(command);
+    const response = await getR2Client().send(command);
 
     if (!response.Body) return null;
 

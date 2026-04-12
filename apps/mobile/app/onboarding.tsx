@@ -1,17 +1,14 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
-  Animated,
   Dimensions,
   FlatList,
   Pressable,
   Text,
   View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
   type ViewToken,
 } from "react-native";
 import { useRouter } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { useAppSettings } from "@/components/app-settings-provider";
 import { useTheme } from "@/theme";
@@ -20,34 +17,46 @@ import { setOnboardingDone } from "@/lib/settings-storage";
 const { width: SCREEN_W } = Dimensions.get("window");
 
 type Slide = {
-  icon: React.ComponentProps<typeof FontAwesome>["name"];
+  icon: React.ComponentProps<typeof Ionicons>["name"];
+  accent: string;
   titleAr: string;
   titleEn: string;
   descAr: string;
   descEn: string;
+  chipAr: string;
+  chipEn: string;
 };
 
 const slides: Slide[] = [
   {
-    icon: "clock-o",
+    icon: "finger-print-outline",
+    accent: "#dbeafe",
     titleAr: "حضور ذكي",
     titleEn: "Smart Attendance",
     descAr: "سجّل حضورك وانصرافك بنقرة واحدة مع تحقق الموقع والبصمة",
     descEn: "Clock in & out with one tap using location and biometric verification",
+    chipAr: "بصمة + موقع",
+    chipEn: "Biometric + location",
   },
   {
-    icon: "calendar-check-o",
+    icon: "calendar-clear-outline",
+    accent: "#dcfce7",
     titleAr: "إجازاتك بين يديك",
     titleEn: "Leave Management",
     descAr: "تقدّم بطلبات الإجازة وتابع أرصدتك واعتمادات مديرك فوراً",
     descEn: "Request leaves, track balances, and get instant manager approvals",
+    chipAr: "طلبات وموافقات",
+    chipEn: "Requests & approvals",
   },
   {
-    icon: "money",
+    icon: "wallet-outline",
+    accent: "#fef3c7",
     titleAr: "رواتبك واضحة",
     titleEn: "Payslip Details",
     descAr: "اطلع على تفاصيل راتبك الشهري والمستقطعات وصافي الراتب",
     descEn: "View monthly salary breakdown, deductions, and net pay",
+    chipAr: "مسيرات ورواتب",
+    chipEn: "Payroll & payslips",
   },
 ];
 
@@ -84,8 +93,10 @@ export default function OnboardingScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Skip */}
-      <View style={{ flexDirection: "row", justifyContent: "flex-end", paddingHorizontal: spacing.md, paddingTop: 50 }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: spacing.md, paddingTop: 50, paddingBottom: 8 }}>
+        <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800" }}>
+          {isRtl ? "طاقم موبايل" : "Taqam Mobile"}
+        </Text>
         <Pressable onPress={skip}>
           <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 14 }}>
             {isRtl ? "تخطي" : "Skip"}
@@ -104,33 +115,63 @@ export default function OnboardingScreen() {
         viewabilityConfig={viewabilityConfig}
         keyExtractor={(_, i) => String(i)}
         renderItem={({ item }) => (
-          <View style={{ width: SCREEN_W, alignItems: "center", justifyContent: "center", paddingHorizontal: 40 }}>
+          <View style={{ width: SCREEN_W, alignItems: "center", justifyContent: "center", paddingHorizontal: 24 }}>
             <View
               style={{
-                width: 120,
-                height: 120,
-                borderRadius: 60,
-                backgroundColor: colors.primaryLight,
-                alignItems: "center",
-                justifyContent: "center",
-                marginBottom: 32,
+                width: "100%",
+                maxWidth: 360,
+                borderRadius: 32,
+                backgroundColor: colors.surface,
+                padding: 24,
+                borderWidth: 1,
+                borderColor: colors.border,
+                shadowColor: "#000",
+                shadowOpacity: 0.06,
+                shadowRadius: 18,
+                shadowOffset: { width: 0, height: 8 },
+                elevation: 4,
               }}
             >
-              <FontAwesome name={item.icon} size={48} color={colors.primary} />
+              <View style={{ flexDirection: "row", justifyContent: isRtl ? "flex-end" : "flex-start", marginBottom: 18 }}>
+                <View
+                  style={{
+                    paddingHorizontal: 12,
+                    paddingVertical: 8,
+                    borderRadius: 999,
+                    backgroundColor: item.accent,
+                  }}
+                >
+                  <Text style={{ color: colors.text, fontSize: 12, fontWeight: "800" }}>
+                    {isRtl ? item.chipAr : item.chipEn}
+                  </Text>
+                </View>
+              </View>
+              <View
+                style={{
+                  width: 84,
+                  height: 84,
+                  borderRadius: 28,
+                  backgroundColor: colors.primaryLight,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 24,
+                  alignSelf: isRtl ? "flex-end" : "flex-start",
+                }}
+              >
+                <Ionicons name={item.icon} size={34} color={colors.primary} />
+              </View>
+              <Text style={{ color: colors.text, fontSize: 28, fontWeight: "900", textAlign: isRtl ? "right" : "left", marginBottom: 12 }}>
+                {isRtl ? item.titleAr : item.titleEn}
+              </Text>
+              <Text style={{ color: colors.textSecondary, fontSize: 16, lineHeight: 26, textAlign: isRtl ? "right" : "left" }}>
+                {isRtl ? item.descAr : item.descEn}
+              </Text>
             </View>
-            <Text style={{ color: colors.text, fontSize: 26, fontWeight: "900", textAlign: "center", marginBottom: 16 }}>
-              {isRtl ? item.titleAr : item.titleEn}
-            </Text>
-            <Text style={{ color: colors.textSecondary, fontSize: 16, lineHeight: 26, textAlign: "center" }}>
-              {isRtl ? item.descAr : item.descEn}
-            </Text>
           </View>
         )}
       />
 
-      {/* Dots + button */}
       <View style={{ paddingHorizontal: spacing.lg, paddingBottom: 50 }}>
-        {/* Dots */}
         <View style={{ flexDirection: "row", justifyContent: "center", gap: 8, marginBottom: 24 }}>
           {slides.map((_, i) => (
             <View
@@ -145,7 +186,6 @@ export default function OnboardingScreen() {
           ))}
         </View>
 
-        {/* Next / Get Started button */}
         <Pressable
           onPress={goNext}
           style={{
@@ -153,6 +193,9 @@ export default function OnboardingScreen() {
             borderRadius: radius.lg,
             paddingVertical: 16,
             alignItems: "center",
+            flexDirection: isRtl ? "row-reverse" : "row",
+            justifyContent: "center",
+            gap: 8,
           }}
         >
           <Text style={{ color: "#fff", fontSize: 16, fontWeight: "800" }}>
@@ -164,6 +207,11 @@ export default function OnboardingScreen() {
                 ? "التالي"
                 : "Next"}
           </Text>
+          <Ionicons
+            name={currentIndex === slides.length - 1 ? (isRtl ? "rocket-outline" : "rocket-outline") : isRtl ? "arrow-back-outline" : "arrow-forward-outline"}
+            size={18}
+            color="#fff"
+          />
         </Pressable>
       </View>
     </View>

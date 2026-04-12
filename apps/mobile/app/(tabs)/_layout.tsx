@@ -1,5 +1,5 @@
 import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Tabs } from 'expo-router';
 import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -8,8 +8,8 @@ import { useAppSettings } from '@/components/app-settings-provider';
 
 const BRAND = '#3b82f6';
 
-function TabIcon(props: { name: React.ComponentProps<typeof FontAwesome>['name']; color: string }) {
-  return <FontAwesome size={21} style={{ marginBottom: -2 }} {...props} />;
+function TabIcon(props: { name: React.ComponentProps<typeof Ionicons>['name']; color: string }) {
+  return <Ionicons size={22} style={{ marginBottom: -2 }} {...props} />;
 }
 
 export default function TabLayout() {
@@ -52,28 +52,28 @@ export default function TabLayout() {
         name="index"
         options={{
           title: isAr ? 'الرئيسية' : 'Home',
-          tabBarIcon: ({ color }) => <TabIcon name="home" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="home-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: isAr ? 'الحضور' : 'Attendance',
-          tabBarIcon: ({ color }) => <TabIcon name="clock-o" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="time-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="leaves"
         options={{
           title: isAr ? 'طلباتي' : 'Requests',
-          tabBarIcon: ({ color }) => <TabIcon name="file-text-o" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="document-text-outline" color={color} />,
         }}
       />
       <Tabs.Screen
         name="more"
         options={{
           title: isAr ? 'المزيد' : 'More',
-          tabBarIcon: ({ color }) => <TabIcon name="th-large" color={color} />,
+          tabBarIcon: ({ color }) => <TabIcon name="grid-outline" color={color} />,
         }}
       />
       {/* Hidden screens accessible via navigation */}

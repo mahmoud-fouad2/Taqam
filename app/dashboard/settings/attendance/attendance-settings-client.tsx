@@ -51,6 +51,7 @@ type Policy = {
   enforceGeofence: boolean;
   allowCheckInWithoutLocation: boolean;
   maxAccuracyMeters: number;
+  autoCalculateOvertime: boolean;
 };
 
 type WorkLocation = {
@@ -144,7 +145,8 @@ export default function AttendanceSettingsClient({ locale: _locale }: { locale: 
         body: JSON.stringify({
           enforceGeofence: policy.enforceGeofence,
           allowCheckInWithoutLocation: policy.allowCheckInWithoutLocation,
-          maxAccuracyMeters: policy.maxAccuracyMeters
+          maxAccuracyMeters: policy.maxAccuracyMeters,
+          autoCalculateOvertime: policy.autoCalculateOvertime
         })
       });
 
@@ -335,6 +337,31 @@ export default function AttendanceSettingsClient({ locale: _locale }: { locale: 
                             }
                           : p
                       )
+                    }
+                  />
+                </div>
+
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between rtl:lg:flex-row-reverse">
+                  <div className="space-y-1">
+                    <div className="text-start font-medium">
+                      {pickText(
+                        locale,
+                        "الحساب التلقائي للأوفر تايم",
+                        "Automatic Overtime Calculation"
+                      )}
+                    </div>
+                    <div className="text-muted-foreground text-start text-sm">
+                      {pickText(
+                        locale,
+                        "إذا فُعّل، فلن يُحتسب الأوفر تايم إلا للموظفين المسموح لهم وعلى الورديات المفعّل لها أوفر تايم.",
+                        "When enabled, overtime is calculated only for eligible employees and overtime-enabled shifts."
+                      )}
+                    </div>
+                  </div>
+                  <Switch
+                    checked={policy.autoCalculateOvertime}
+                    onCheckedChange={(v) =>
+                      setPolicy((p) => (p ? { ...p, autoCalculateOvertime: v } : p))
                     }
                   />
                 </div>

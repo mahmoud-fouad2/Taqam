@@ -45,6 +45,7 @@ export interface Employee {
   branchId?: string;
   hireDate: string;
   contractType: ContractType;
+  overtimeEligible?: boolean;
   probationEndDate?: string;
 
   // Status
@@ -77,6 +78,7 @@ export interface EmployeeCreateInput {
   managerId?: string;
   hireDate: string;
   contractType: ContractType;
+  overtimeEligible?: boolean;
   basicSalary?: number;
 }
 

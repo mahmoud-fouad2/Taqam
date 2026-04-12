@@ -37,15 +37,24 @@ type DashboardData = {
   approvals: { pendingCount: number };
 } | null;
 
+type LocationReadiness = {
+  servicesEnabled: boolean;
+  permissionGranted: boolean;
+  accuracyMeters: number | null;
+  capturedAt: string | null;
+};
+
 export default function AttendanceScreen() {
   const { accessToken, user, authFetch } = useAuth();
   const { language, biometricsEnabled } = useAppSettings();
+  const { colors } = useTheme();
   const [busy, setBusy] = useState(false);
   const [last, setLast] = useState<LastResult | null>(null);
   const [today, setToday] = useState<TodayStatus | null>(null);
   const [loadingToday, setLoadingToday] = useState(false);
   const [locationIssue, setLocationIssue] = useState<"PERMISSION" | "SERVICES" | null>(null);
   const [dashboard, setDashboard] = useState<DashboardData>(null);
+  const [locationReadiness, setLocationReadiness] = useState<LocationReadiness | null>(null);
 
   const header = useMemo(() => {
     const name = user ? `${user.firstName} ${user.lastName}` : "";
@@ -73,9 +82,35 @@ export default function AttendanceScreen() {
     }
   }, [accessToken, authFetch, language]);
 
+  const loadLocationReadiness = useCallback(async () => {
+    try {
+      const [servicesEnabled, permission] = await Promise.all([
+        Location.hasServicesEnabledAsync(),
+        Location.getForegroundPermissionsAsync(),
+      ]);
+
+      setLocationReadiness((current) => ({
+        servicesEnabled,
+        permissionGranted: permission.status === "granted",
+        accuracyMeters: current?.accuracyMeters ?? null,
+        capturedAt: current?.capturedAt ?? null,
+      }));
+    } catch {
+      setLocationReadiness((current) =>
+        current ?? {
+          servicesEnabled: false,
+          permissionGranted: false,
+          accuracyMeters: null,
+          capturedAt: null,
+        }
+      );
+    }
+  }, []);
+
   useEffect(() => {
     void loadToday();
-  }, [loadToday]);
+    void loadLocationReadiness();
+  }, [loadLocationReadiness, loadToday]);
 
   const doAttendance = async (type: "check-in" | "check-out") => {
     if (!accessToken) {
@@ -107,16 +142,34 @@ export default function AttendanceScreen() {
       const servicesEnabled = await Location.hasServicesEnabledAsync();
       if (!servicesEnabled) {
         setLocationIssue("SERVICES");
+        setLocationReadiness((current) => ({
+          servicesEnabled: false,
+          permissionGranted: current?.permissionGranted ?? false,
+          accuracyMeters: current?.accuracyMeters ?? null,
+          capturedAt: current?.capturedAt ?? null,
+        }));
         throw new Error("Location services are off");
       }
 
       const perm = await Location.requestForegroundPermissionsAsync();
       if (perm.status !== "granted") {
         setLocationIssue("PERMISSION");
+        setLocationReadiness((current) => ({
+          servicesEnabled: true,
+          permissionGranted: false,
+          accuracyMeters: current?.accuracyMeters ?? null,
+          capturedAt: current?.capturedAt ?? null,
+        }));
         throw new Error("Location permission is required");
       }
 
       const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
+      setLocationReadiness({
+        servicesEnabled: true,
+        permissionGranted: true,
+        accuracyMeters: pos.coords.accuracy ?? null,
+        capturedAt: new Date().toISOString(),
+      });
 
       const challenge = await authFetch<{ data: { nonce: string } }>("/api/mobile/auth/challenge", { method: "POST" });
 
@@ -154,6 +207,9 @@ export default function AttendanceScreen() {
 
   const canCheckIn = !!accessToken && !busy && (today?.canCheckIn ?? true);
   const canCheckOut = !!accessToken && !busy && (today?.canCheckOut ?? true);
+  const locationReady = Boolean(
+    locationReadiness?.servicesEnabled && locationReadiness?.permissionGranted
+  );
 
   const fmt = (iso: string | null | undefined) => {
     if (!iso) return "—";
@@ -164,18 +220,32 @@ export default function AttendanceScreen() {
     }
   };
 
+  const fmtAccuracy = (value: number | null | undefined) => {
+    if (typeof value !== "number" || Number.isNaN(value)) return "—";
+    return `${Math.round(value)}m`;
+  };
+
+  const locationStatusText = locationReady
+    ? tStr(language, "الموقع جاهز للتوثيق", "Location ready for verification")
+    : tStr(language, "الموقع يحتاج تفعيل قبل الحضور", "Location needs attention before attendance");
+
   return (
     <ScrollView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: colors.background }]}
       contentContainerStyle={styles.scrollContent}
       refreshControl={
-        <RefreshControl refreshing={loadingToday} onRefresh={() => void loadToday()} colors={[BRAND]} tintColor={BRAND} />
+        <RefreshControl
+          refreshing={loadingToday}
+          onRefresh={() => void loadToday()}
+          colors={[colors.primary]}
+          tintColor={colors.primary}
+        />
       }
     >
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>{header}</Text>
-        <Text style={styles.todayDate}>
+        <Text style={[styles.title, { color: colors.text }]}>{header}</Text>
+        <Text style={[styles.todayDate, { color: colors.textSecondary }] }>
           {new Date().toLocaleDateString(language === "ar" ? "ar-SA" : "en-US", {
             weekday: "long", year: "numeric", month: "long", day: "numeric",
           })}
@@ -185,38 +255,119 @@ export default function AttendanceScreen() {
       {/* Status card */}
       <View style={[
         styles.statusCard,
-        today?.status === "CHECKED_IN"  && styles.statusCardGreen,
-        today?.status === "CHECKED_OUT" && styles.statusCardBlue,
+        {
+          backgroundColor:
+            today?.status === "CHECKED_IN"
+              ? colors.successLight
+              : today?.status === "CHECKED_OUT"
+                ? colors.primaryLight
+                : colors.surface,
+          borderColor:
+            today?.status === "CHECKED_IN"
+              ? colors.success
+              : today?.status === "CHECKED_OUT"
+                ? colors.primary
+                : colors.border,
+        },
       ]}>
         <View style={styles.statusRow}>
           <View style={[
             styles.statusDot,
-            today?.status === "CHECKED_IN"  ? styles.dotGreen :
-            today?.status === "CHECKED_OUT" ? styles.dotBlue : styles.dotGray,
+            {
+              backgroundColor:
+                today?.status === "CHECKED_IN"
+                  ? colors.success
+                  : today?.status === "CHECKED_OUT"
+                    ? colors.primary
+                    : colors.textMuted,
+            },
           ]} />
-          <Text style={styles.statusLabel}>{t(language, "today")}</Text>
+          <Text style={[styles.statusLabel, { color: colors.textSecondary }]}>{t(language, "today")}</Text>
           <Pressable
             onPress={() => void loadToday()}
             disabled={loadingToday || busy}
-            style={[styles.refreshBtn, (loadingToday || busy) && { opacity: 0.5 }]}
+            style={[
+              styles.refreshBtn,
+              { borderColor: colors.border, backgroundColor: colors.surfaceSecondary },
+              (loadingToday || busy) && { opacity: 0.5 }
+            ]}
           >
             {loadingToday
-              ? <ActivityIndicator color={BRAND} size="small" />
-              : <Text style={styles.refreshText}>{t(language, "refresh")}</Text>}
+              ? <ActivityIndicator color={colors.primary} size="small" />
+              : <Text style={[styles.refreshText, { color: colors.text }]}>{t(language, "refresh")}</Text>}
           </Pressable>
         </View>
-        <Text style={styles.statusValue}>{statusText}</Text>
+        <Text style={[styles.statusValue, { color: colors.text }]}>{statusText}</Text>
         <View style={styles.timesRow}>
           <View style={styles.timeBlock}>
-            <Text style={styles.timeLabel}>{t(language, "last_check_in")}</Text>
-            <Text style={styles.timeValue}>{fmt(today?.record?.checkInTime)}</Text>
+            <Text style={[styles.timeLabel, { color: colors.textMuted }]}>{t(language, "last_check_in")}</Text>
+            <Text style={[styles.timeValue, { color: colors.text }]}>{fmt(today?.record?.checkInTime)}</Text>
           </View>
-          <View style={styles.timeDivider} />
+          <View style={[styles.timeDivider, { backgroundColor: colors.border }]} />
           <View style={styles.timeBlock}>
-            <Text style={styles.timeLabel}>{t(language, "last_check_out")}</Text>
-            <Text style={styles.timeValue}>{fmt(today?.record?.checkOutTime)}</Text>
+            <Text style={[styles.timeLabel, { color: colors.textMuted }]}>{t(language, "last_check_out")}</Text>
+            <Text style={[styles.timeValue, { color: colors.text }]}>{fmt(today?.record?.checkOutTime)}</Text>
           </View>
         </View>
+      </View>
+
+      <View
+        style={[
+          styles.locationCard,
+          locationReady
+            ? { backgroundColor: colors.successLight, borderColor: colors.success }
+            : { backgroundColor: colors.warningLight, borderColor: colors.warning }
+        ]}>
+        <View style={styles.locationHeaderRow}>
+          <View>
+            <Text style={[styles.locationTitle, { color: colors.text }]}>{tStr(language, "حالة التحقق بالموقع", "Location verification")}</Text>
+            <Text style={[styles.locationSubtitle, { color: colors.textSecondary }]}>{locationStatusText}</Text>
+          </View>
+          <View
+            style={[
+              styles.locationBadge,
+              locationReady
+                ? { backgroundColor: colors.surface, borderColor: colors.success }
+                : { backgroundColor: colors.surface, borderColor: colors.warning }
+            ]}>
+            <Text
+              style={[
+                styles.locationBadgeText,
+                { color: locationReady ? colors.success : colors.warning }
+              ]}>
+              {locationReady ? tStr(language, "جاهز", "Ready") : tStr(language, "تحقق مطلوب", "Needs action")}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.locationStatsRow}>
+          <View style={[styles.locationStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.locationStatLabel, { color: colors.textSecondary }]}>{tStr(language, "الخدمات", "Services")}</Text>
+            <Text style={[styles.locationStatValue, { color: colors.text }]}>
+              {locationReadiness?.servicesEnabled
+                ? tStr(language, "مفعلة", "Enabled")
+                : tStr(language, "متوقفة", "Off")}
+            </Text>
+          </View>
+          <View style={[styles.locationStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.locationStatLabel, { color: colors.textSecondary }]}>{tStr(language, "الصلاحية", "Permission")}</Text>
+            <Text style={[styles.locationStatValue, { color: colors.text }]}>
+              {locationReadiness?.permissionGranted
+                ? tStr(language, "مسموح", "Granted")
+                : tStr(language, "غير مسموح", "Not granted")}
+            </Text>
+          </View>
+          <View style={[styles.locationStatCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Text style={[styles.locationStatLabel, { color: colors.textSecondary }]}>{tStr(language, "الدقة", "Accuracy")}</Text>
+            <Text style={[styles.locationStatValue, { color: colors.text }]}>{fmtAccuracy(locationReadiness?.accuracyMeters)}</Text>
+          </View>
+        </View>
+
+        <Text style={[styles.locationMeta, { color: colors.textSecondary }]}>
+          {locationReadiness?.capturedAt
+            ? `${tStr(language, "آخر تحقق", "Last verified")} ${fmt(locationReadiness.capturedAt)}`
+            : tStr(language, "سيتم تسجيل آخر دقة موقع بعد أول حضور أو انصراف ناجح.", "Latest verified accuracy will appear after the next successful check-in or check-out.")}
+        </Text>
       </View>
 
       {/* Action buttons */}
@@ -226,12 +377,12 @@ export default function AttendanceScreen() {
           disabled={!canCheckIn}
           style={({ pressed }) => [
             styles.button,
-            styles.checkIn,
+            { backgroundColor: colors.success, shadowColor: colors.success },
             !canCheckIn && styles.buttonDisabled,
             pressed && canCheckIn && { opacity: 0.88, transform: [{ scale: 0.98 }] },
           ]}
         >
-          {busy ? <ActivityIndicator color="#0b1220" /> : <Text style={styles.buttonText}>{t(language, "check_in")}</Text>}
+          {busy ? <ActivityIndicator color={colors.text} /> : <Text style={styles.buttonText}>{t(language, "check_in")}</Text>}
         </Pressable>
 
         <Pressable
@@ -239,26 +390,36 @@ export default function AttendanceScreen() {
           disabled={!canCheckOut}
           style={({ pressed }) => [
             styles.button,
-            styles.checkOut,
+            { backgroundColor: colors.surfaceSecondary, borderColor: colors.border, borderWidth: 1 },
             !canCheckOut && styles.buttonDisabled,
             pressed && canCheckOut && { opacity: 0.88, transform: [{ scale: 0.98 }] },
           ]}
         >
-          {busy ? <ActivityIndicator color="#0f172a" /> : <Text style={[styles.buttonText, styles.buttonTextAlt]}>{t(language, "check_out")}</Text>}
+          {busy ? <ActivityIndicator color={colors.text} /> : <Text style={[styles.buttonText, styles.buttonTextAlt, { color: colors.text }]}>{t(language, "check_out")}</Text>}
         </Pressable>
       </View>
 
       {/* Last result */}
       {last ? (
-        <View style={[styles.alert, last.ok ? styles.alertOk : styles.alertErr]}>
-          <Text style={styles.alertText}>{last.message}</Text>
+        <View
+          style={[
+            styles.alert,
+            last.ok
+              ? { backgroundColor: colors.successLight, borderColor: colors.success }
+              : { backgroundColor: colors.errorLight, borderColor: colors.error }
+          ]}>
+          <Text style={[styles.alertText, { color: colors.text }]}>{last.message}</Text>
           {!last.ok && (locationIssue === "PERMISSION" || locationIssue === "SERVICES") ? (
             <View style={styles.alertActions}>
-              <Pressable onPress={() => void Linking.openSettings()} style={[styles.smallBtn, styles.smallBtnPrimary]}>
-                <Text style={styles.smallBtnText}>{t(language, "open_settings")}</Text>
+              <Pressable
+                onPress={() => void Linking.openSettings()}
+                style={[styles.smallBtn, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
+                <Text style={[styles.smallBtnText, { color: colors.primary }]}>{t(language, "open_settings")}</Text>
               </Pressable>
-              <Pressable onPress={() => void loadToday()} style={[styles.smallBtn, styles.smallBtnSecondary]}>
-                <Text style={styles.smallBtnText}>{t(language, "try_again")}</Text>
+              <Pressable
+                onPress={() => void loadToday()}
+                style={[styles.smallBtn, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}>
+                <Text style={[styles.smallBtnText, { color: colors.primary }]}>{t(language, "try_again")}</Text>
               </Pressable>
             </View>
           ) : null}
@@ -276,16 +437,16 @@ export default function AttendanceScreen() {
         <View style={styles.dashSection}>
           {/* Leave balances */}
           {dashboard.leaves.balances.length > 0 && (
-            <View style={styles.dashCard}>
-              <Text style={styles.dashTitle}>
+            <View style={[styles.dashCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.dashTitle, { color: colors.textMuted }] }>
                 {tStr(language, "رصيد الإجازات", "Leave Balances")}
               </Text>
               <View style={styles.dashBalGrid}>
                 {dashboard.leaves.balances.map((b, i) => (
                   <View key={i} style={styles.dashBalItem}>
-                    <View style={[styles.dashBalDot, b.color ? { backgroundColor: b.color } : undefined]} />
-                    <Text style={styles.dashBalLabel} numberOfLines={1}>{b.typeName}</Text>
-                    <Text style={styles.dashBalNum}>{b.remaining}<Text style={styles.dashBalTotal}>/{b.entitled}</Text></Text>
+                    <View style={[styles.dashBalDot, { backgroundColor: b.color || colors.primary }]} />
+                    <Text style={[styles.dashBalLabel, { color: colors.textSecondary }]} numberOfLines={1}>{b.typeName}</Text>
+                    <Text style={[styles.dashBalNum, { color: colors.text }]}>{b.remaining}<Text style={[styles.dashBalTotal, { color: colors.textMuted }]}>/{b.entitled}</Text></Text>
                   </View>
                 ))}
               </View>
@@ -295,17 +456,17 @@ export default function AttendanceScreen() {
           {/* Quick stats row */}
           <View style={styles.dashStatsRow}>
             {dashboard.leaves.pendingCount > 0 && (
-              <View style={[styles.dashStat, { borderLeftColor: "#f59e0b", borderLeftWidth: 3 }]}>
-                <Text style={styles.dashStatNum}>{dashboard.leaves.pendingCount}</Text>
-                <Text style={styles.dashStatLabel}>
+              <View style={[styles.dashStat, { backgroundColor: colors.surface, borderColor: colors.border, borderLeftColor: colors.warning, borderLeftWidth: 3 }]}>
+                <Text style={[styles.dashStatNum, { color: colors.text }]}>{dashboard.leaves.pendingCount}</Text>
+                <Text style={[styles.dashStatLabel, { color: colors.textSecondary }]}>
                   {tStr(language, "طلبات معلقة", "Pending")}
                 </Text>
               </View>
             )}
             {dashboard.approvals.pendingCount > 0 && (
-              <View style={[styles.dashStat, { borderLeftColor: "#ef4444", borderLeftWidth: 3 }]}>
-                <Text style={styles.dashStatNum}>{dashboard.approvals.pendingCount}</Text>
-                <Text style={styles.dashStatLabel}>
+              <View style={[styles.dashStat, { backgroundColor: colors.surface, borderColor: colors.border, borderLeftColor: colors.error, borderLeftWidth: 3 }]}>
+                <Text style={[styles.dashStatNum, { color: colors.text }]}>{dashboard.approvals.pendingCount}</Text>
+                <Text style={[styles.dashStatLabel, { color: colors.textSecondary }]}>
                   {tStr(language, "بانتظار موافقتك", "Need approval")}
                 </Text>
               </View>
@@ -315,8 +476,8 @@ export default function AttendanceScreen() {
       )}
 
       {/* Note */}
-      <View style={styles.note}>
-        <Text style={styles.noteText}>
+      <View style={[styles.note, { backgroundColor: colors.primaryLight, borderColor: colors.primary }]}>
+        <Text style={[styles.noteText, { color: colors.textSecondary }]}>
           {t(language, "geofence_note")}
         </Text>
       </View>
@@ -396,6 +557,90 @@ const styles = StyleSheet.create({
     fontSize: 19,
     fontWeight: "900",
     marginBottom: 14,
+  },
+  locationCard: {
+    marginBottom: 16,
+    padding: 16,
+    borderRadius: 18,
+    borderWidth: 1,
+  },
+  locationCardReady: {
+    backgroundColor: "rgba(34,197,94,0.06)",
+    borderColor: "rgba(34,197,94,0.22)",
+  },
+  locationCardNeedsAttention: {
+    backgroundColor: "rgba(245,158,11,0.08)",
+    borderColor: "rgba(245,158,11,0.22)",
+  },
+  locationHeaderRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    justifyContent: "space-between",
+    gap: 12,
+    marginBottom: 14,
+  },
+  locationTitle: {
+    color: "#0f172a",
+    fontSize: 16,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  locationSubtitle: {
+    color: "#64748b",
+    fontSize: 12,
+  },
+  locationBadge: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderWidth: 1,
+  },
+  locationBadgeReady: {
+    backgroundColor: "rgba(34,197,94,0.10)",
+    borderColor: "rgba(34,197,94,0.20)",
+  },
+  locationBadgeWarn: {
+    backgroundColor: "rgba(245,158,11,0.10)",
+    borderColor: "rgba(245,158,11,0.20)",
+  },
+  locationBadgeText: {
+    fontSize: 11,
+    fontWeight: "800",
+  },
+  locationBadgeTextReady: {
+    color: "#15803d",
+  },
+  locationBadgeTextWarn: {
+    color: "#b45309",
+  },
+  locationStatsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 12,
+  },
+  locationStatCard: {
+    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.82)",
+    borderRadius: 14,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(226,232,240,0.9)",
+  },
+  locationStatLabel: {
+    color: "#64748b",
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 6,
+  },
+  locationStatValue: {
+    color: "#0f172a",
+    fontSize: 14,
+    fontWeight: "900",
+  },
+  locationMeta: {
+    color: "#475569",
+    fontSize: 12,
+    lineHeight: 18,
   },
   timesRow: {
     flexDirection: "row",

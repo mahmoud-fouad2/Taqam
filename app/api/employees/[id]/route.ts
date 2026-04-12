@@ -186,6 +186,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           status: body.status,
           shiftId: body.shiftId,
           workLocation: body.workLocation,
+          overtimeEligible: Boolean(body.overtimeEligible),
           baseSalary: body.baseSalary
         }
       : buildSelfEmployeeUpdate(body);

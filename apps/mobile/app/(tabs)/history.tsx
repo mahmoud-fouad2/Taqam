@@ -21,7 +21,8 @@ export default function HistoryScreen() {
   const isRtl = language === "ar";
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rows, setRows] = useState<AttendanceRecordRow[]>([]);
+  const [listRows, setListRows] = useState<AttendanceRecordRow[]>([]);
+  const [calendarRows, setCalendarRows] = useState<AttendanceRecordRow[]>([]);
   const [days, setDays] = useState<7 | 30 | 90>(30);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
@@ -32,7 +33,7 @@ export default function HistoryScreen() {
     return { year: now.getFullYear(), month: now.getMonth() };
   });
 
-  const hasMore = rows.length < total;
+  const hasMore = listRows.length < total;
 
   const buildRangeQuery = (daysBack: 7 | 30 | 90) => {
     const end = new Date();
@@ -72,7 +73,7 @@ export default function HistoryScreen() {
 
         setTotal(res.data.total || 0);
         setPage(res.data.page || nextPage);
-        setRows((prev) => (reset ? (res.data.items || []) : [...prev, ...(res.data.items || [])]));
+        setListRows((prev) => (reset ? (res.data.items || []) : [...prev, ...(res.data.items || [])]));
       } catch (e: any) {
         setError(humanizeApiError(language, e?.message || ""));
       } finally {
@@ -89,7 +90,7 @@ export default function HistoryScreen() {
 
   const setFilter = (d: 7 | 30 | 90) => {
     setDays(d);
-    setRows([]);
+    setListRows([]);
     setTotal(0);
     setPage(1);
     void load({ reset: true, nextDays: d, nextPage: 1 });
@@ -113,12 +114,12 @@ export default function HistoryScreen() {
 
   const attendanceMap = useMemo(() => {
     const map: Record<string, AttendanceRecordRow> = {};
-    for (const r of rows) {
+    for (const r of calendarRows) {
       const d = r.date.slice(0, 10);
       map[d] = r;
     }
     return map;
-  }, [rows]);
+  }, [calendarRows]);
 
   const calMonthLabel = useMemo(() => {
     const d = new Date(calMonth.year, calMonth.month, 1);
@@ -148,8 +149,7 @@ export default function HistoryScreen() {
       `/api/mobile/attendance?startDate=${start}&endDate=${end}&page=1&limit=31`,
     )
       .then((res) => {
-        setRows(res.data.items || []);
-        setTotal(res.data.total || 0);
+        setCalendarRows(res.data.items || []);
       })
       .catch((e: any) => setError(humanizeApiError(language, e?.message || "")))
       .finally(() => setBusy(false));
@@ -208,17 +208,21 @@ export default function HistoryScreen() {
           {error ? <Text style={{ color: colors.error, marginBottom: 10, fontSize: 13 }}>{error}</Text> : null}
 
           <FlatList
-            data={rows}
+            data={listRows}
             keyExtractor={(item) => item.id}
             refreshControl={
-              <RefreshControl refreshing={busy && rows.length > 0} onRefresh={() => void load({ reset: true, nextPage: 1 })} colors={[colors.primary]} tintColor={colors.primary} />
+              <RefreshControl refreshing={busy && listRows.length > 0} onRefresh={() => void load({ reset: true, nextPage: 1 })} colors={[colors.primary]} tintColor={colors.primary} />
             }
-            contentContainerStyle={rows.length === 0 ? { flexGrow: 1, justifyContent: "center", alignItems: "center", paddingTop: 60 } : undefined}
+            contentContainerStyle={listRows.length === 0 ? { flexGrow: 1, justifyContent: "center", alignItems: "center", paddingTop: 60 } : undefined}
             ListEmptyComponent={!busy ? <Text style={{ color: colors.textMuted, fontSize: 15, marginTop: 8 }}>{t(language, "empty_history")}</Text> : null}
             onEndReachedThreshold={0.4}
             onEndReached={loadMore}
+            removeClippedSubviews
+            initialNumToRender={8}
+            maxToRenderPerBatch={8}
+            windowSize={7}
             ListFooterComponent={
-              rows.length > 0 ? (
+              listRows.length > 0 ? (
                 <View style={{ paddingTop: 6, paddingBottom: 14 }}>
                   <Pressable
                     onPress={loadMore}

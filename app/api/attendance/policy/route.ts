@@ -20,7 +20,8 @@ const upsertSchema = z.object({
   tenantId: z.string().optional(),
   enforceGeofence: z.boolean().optional(),
   allowCheckInWithoutLocation: z.boolean().optional(),
-  maxAccuracyMeters: z.coerce.number().int().min(5).max(1000).optional()
+  maxAccuracyMeters: z.coerce.number().int().min(5).max(1000).optional(),
+  autoCalculateOvertime: z.boolean().optional()
 });
 
 export async function GET(request: NextRequest) {
@@ -49,7 +50,8 @@ export async function GET(request: NextRequest) {
         tenantId,
         enforceGeofence: false,
         allowCheckInWithoutLocation: true,
-        maxAccuracyMeters: 50
+        maxAccuracyMeters: 50,
+        autoCalculateOvertime: false
       },
       exists: Boolean(policy)
     });
@@ -86,7 +88,8 @@ export async function POST(request: NextRequest) {
     const data = {
       enforceGeofence: parsed.data.enforceGeofence,
       allowCheckInWithoutLocation: parsed.data.allowCheckInWithoutLocation,
-      maxAccuracyMeters: parsed.data.maxAccuracyMeters
+      maxAccuracyMeters: parsed.data.maxAccuracyMeters,
+      autoCalculateOvertime: parsed.data.autoCalculateOvertime
     };
 
     const policy = await prisma.tenantAttendancePolicy.upsert({
@@ -95,7 +98,8 @@ export async function POST(request: NextRequest) {
         tenantId,
         enforceGeofence: data.enforceGeofence ?? false,
         allowCheckInWithoutLocation: data.allowCheckInWithoutLocation ?? true,
-        maxAccuracyMeters: data.maxAccuracyMeters ?? 50
+        maxAccuracyMeters: data.maxAccuracyMeters ?? 50,
+        autoCalculateOvertime: data.autoCalculateOvertime ?? false
       },
       update: Object.fromEntries(Object.entries(data).filter(([, v]) => typeof v !== "undefined"))
     });

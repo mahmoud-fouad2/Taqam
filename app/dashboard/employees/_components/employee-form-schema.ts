@@ -14,6 +14,7 @@ export const employeeSchema = z.object({
   managerId: z.string().optional(),
   hireDate: z.string().min(1, "تاريخ التعيين مطلوب"),
   contractType: z.string().min(1, "نوع العقد مطلوب"),
+  overtimeEligible: z.boolean().default(false),
   basicSalary: z.string().optional(),
   status: z.string().optional()
 });

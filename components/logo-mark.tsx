@@ -6,6 +6,7 @@ type LogoMarkProps = {
   className?: string;
   frameClassName?: string;
   imageClassName?: string;
+  darkImageClassName?: string;
   alt?: string;
 };
 
@@ -13,6 +14,7 @@ export function LogoMark({
   className,
   frameClassName,
   imageClassName,
+  darkImageClassName,
   alt = "Taqam"
 }: LogoMarkProps) {
   return (
@@ -34,7 +36,11 @@ export function LogoMark({
           alt={alt}
           width={1536}
           height={1024}
-          className={cn("hidden h-10 w-auto max-w-none dark:block", imageClassName)}
+          className={cn(
+            "hidden h-10 w-auto max-w-none dark:block",
+            imageClassName,
+            darkImageClassName
+          )}
         />
       </span>
     </span>

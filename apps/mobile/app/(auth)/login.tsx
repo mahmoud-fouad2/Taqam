@@ -10,15 +10,18 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { useAuth } from "@/components/auth-provider";
 import { BrandLogo } from "@/components/brand-logo";
 import { useAppSettings } from "@/components/app-settings-provider";
 import { humanizeApiError, t } from "@/lib/i18n";
+import { useTheme } from "@/theme";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
   const { language } = useAppSettings();
+  const { colors, radius } = useTheme();
   const isRtl = language === "ar";
 
   const [email, setEmail] = useState("");
@@ -44,97 +47,126 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.select({ ios: "padding", android: "height" })}
-      style={styles.root}
+      style={[styles.root, { backgroundColor: colors.background }]}
     >
       <ScrollView
         contentContainerStyle={styles.scroll}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        {/* Logo */}
-        <View style={styles.logoWrap}>
-          <BrandLogo style={styles.logo} variant="light" />
+        <View style={[styles.hero, { backgroundColor: colors.primaryLight }]}> 
+          <View style={[styles.heroOrb, styles.heroOrbPrimary, { backgroundColor: colors.primary + "1c" }]} />
+          <View style={[styles.heroOrb, styles.heroOrbSecondary, { backgroundColor: colors.primary + "12" }]} />
+          <View style={styles.logoWrap}>
+            <BrandLogo style={styles.logo} variant="light" />
+          </View>
+          <Text style={[styles.title, { color: colors.text }, isRtl && styles.rtlText]}>{t(language, "login_title")}</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }, isRtl && styles.rtlText]}>{t(language, "login_subtitle")}</Text>
+
+          <View style={[styles.heroChips, isRtl && styles.rowReverse]}>
+            <View style={[styles.heroChip, { backgroundColor: colors.surface }]}> 
+              <Ionicons name="finger-print-outline" size={16} color={colors.primary} />
+              <Text style={[styles.heroChipText, { color: colors.text }, isRtl && styles.rtlText]}>
+                {isRtl ? "بصمة آمنة" : "Biometric secure"}
+              </Text>
+            </View>
+            <View style={[styles.heroChip, { backgroundColor: colors.surface }]}> 
+              <Ionicons name="location-outline" size={16} color={colors.primary} />
+              <Text style={[styles.heroChipText, { color: colors.text }, isRtl && styles.rtlText]}>
+                {isRtl ? "تحقق بالموقع" : "Location verified"}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        {/* Title */}
-        <Text style={[styles.title, isRtl && styles.rtlText]}>{t(language, "login_title")}</Text>
-        <Text style={[styles.subtitle, isRtl && styles.rtlText]}>{t(language, "login_subtitle")}</Text>
-
-        {/* Form */}
-        <View style={styles.form}>
+        <View style={[styles.formCard, { backgroundColor: colors.surface, borderColor: colors.border, borderRadius: radius.xl }]}> 
           {/* Email */}
-          <View style={styles.field}>
-            <Text style={[styles.label, isRtl && styles.rtlText]}>{t(language, "email_label")}</Text>
-            <TextInput
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="email-address"
-              textContentType="emailAddress"
-              autoComplete="email"
-              placeholder="name@company.com"
-              placeholderTextColor="#94a3b8"
-              value={email}
-              onChangeText={setEmail}
-              style={[styles.input, isRtl && styles.rtlInput]}
-            />
-          </View>
-
-          {/* Password */}
-          <View style={styles.field}>
-            <Text style={[styles.label, isRtl && styles.rtlText]}>{t(language, "password_label")}</Text>
-            <View style={styles.inputWrap}>
-              <TextInput
-                secureTextEntry={!showPass}
-                textContentType="password"
-                autoComplete="password"
-                placeholder="••••••••"
-                placeholderTextColor="#94a3b8"
-                value={password}
-                onChangeText={setPassword}
-                style={[styles.input, isRtl ? styles.inputWithToggleRtl : styles.inputWithToggleLtr, isRtl && styles.rtlInput]}
-              />
-              <Pressable
-                onPress={() => setShowPass((v) => !v)}
-                style={[styles.toggleBtn, isRtl ? styles.toggleBtnRtl : styles.toggleBtnLtr]}
-                hitSlop={8}
-              >
-                <Text style={styles.toggleText}>{showPass ? "🙈" : "👁"}</Text>
-              </Pressable>
+          <View style={styles.form}>
+            <View style={styles.field}>
+              <Text style={[styles.label, { color: colors.textSecondary }, isRtl && styles.rtlText]}>{t(language, "email_label")}</Text>
+              <View style={[styles.inputShell, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }]}> 
+                <Ionicons name="mail-outline" size={18} color={colors.textMuted} />
+                <TextInput
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  autoComplete="email"
+                  placeholder="name@company.com"
+                  placeholderTextColor={colors.textMuted}
+                  value={email}
+                  onChangeText={setEmail}
+                  style={[styles.inputModern, { color: colors.text }, isRtl && styles.rtlInput]}
+                />
+              </View>
             </View>
-          </View>
 
-          {/* Error */}
-          {error ? (
-            <View style={styles.errorBox}>
-              <Text style={[styles.errorText, isRtl && styles.rtlText]}>{error}</Text>
+            {/* Password */}
+            <View style={styles.field}>
+              <Text style={[styles.label, { color: colors.textSecondary }, isRtl && styles.rtlText]}>{t(language, "password_label")}</Text>
+              <View style={[styles.inputShell, { backgroundColor: colors.surfaceSecondary, borderColor: colors.border }, isRtl && styles.rowReverse]}> 
+                <Ionicons name="lock-closed-outline" size={18} color={colors.textMuted} />
+                <TextInput
+                  secureTextEntry={!showPass}
+                  textContentType="password"
+                  autoComplete="password"
+                  placeholder="••••••••"
+                  placeholderTextColor={colors.textMuted}
+                  value={password}
+                  onChangeText={setPassword}
+                  style={[styles.inputModern, { color: colors.text }, isRtl && styles.rtlInput]}
+                />
+                <Pressable
+                  onPress={() => setShowPass((v) => !v)}
+                  style={styles.toggleBtnModern}
+                  hitSlop={8}
+                >
+                  <Ionicons
+                    name={showPass ? "eye-off-outline" : "eye-outline"}
+                    size={18}
+                    color={colors.textMuted}
+                  />
+                </Pressable>
+              </View>
             </View>
-          ) : null}
 
-          {/* Submit */}
-          <Pressable
-            onPress={() => void submit()}
-            disabled={!canSubmit}
-            style={({ pressed }) => [
-              styles.btn,
-              !canSubmit && styles.btnDisabled,
-              pressed && canSubmit && styles.btnPressed,
-            ]}
-          >
-            {submitting ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.btnText}>{t(language, "sign_in")}</Text>
-            )}
-          </Pressable>
+            {error ? (
+              <View style={[styles.errorBox, { backgroundColor: colors.errorLight, borderColor: colors.error + "30" }]}> 
+                <Text style={[styles.errorText, { color: colors.error }, isRtl && styles.rtlText]}>{error}</Text>
+              </View>
+            ) : null}
+
+            <Pressable
+              onPress={() => void submit()}
+              disabled={!canSubmit}
+              style={({ pressed }) => [
+                styles.btn,
+                { backgroundColor: canSubmit ? colors.primary : colors.border, shadowColor: colors.primary },
+                !canSubmit && styles.btnDisabled,
+                pressed && canSubmit && styles.btnPressed,
+              ]}
+            >
+              {submitting ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <View style={[styles.btnContent, isRtl && styles.rowReverse]}>
+                  <Text style={styles.btnText}>{t(language, "sign_in")}</Text>
+                  <Ionicons name={isRtl ? "arrow-back-outline" : "arrow-forward-outline"} size={18} color="#fff" />
+                </View>
+              )}
+            </Pressable>
+
+            <Text style={[styles.helperText, { color: colors.textSecondary }, isRtl && styles.rtlText]}>
+              {isRtl ? "الدخول يربط الحضور والإشعارات والبيانات الشخصية بحسابك مباشرة." : "Sign in to connect attendance, notifications, and your employee profile."}
+            </Text>
+          </View>
         </View>
 
-        {/* Dev hint — only visible in dev builds */}
         {__DEV__ && (
-          <Text style={[styles.hint, isRtl && styles.rtlText]}>{t(language, "dev_base_url_hint")}</Text>
+          <Text style={[styles.hint, { color: colors.textSecondary }, isRtl && styles.rtlText]}>{t(language, "dev_base_url_hint")}</Text>
         )}
 
-        {/* Copyright */}
-        <Text style={[styles.copyright, isRtl && styles.rtlText]}>
+        <Text style={[styles.copyright, { color: colors.textMuted }, isRtl && styles.rtlText]}>
           {t(language, "copyright")}
         </Text>
       </ScrollView>
@@ -149,128 +181,160 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    padding: 28,
+    padding: 24,
     justifyContent: "center",
     minHeight: "100%",
   },
+  hero: {
+    borderRadius: 28,
+    paddingHorizontal: 22,
+    paddingTop: 28,
+    paddingBottom: 22,
+    marginBottom: 18,
+    overflow: "hidden",
+  },
+  heroOrb: {
+    position: "absolute",
+    borderRadius: 999,
+  },
+  heroOrbPrimary: {
+    width: 180,
+    height: 180,
+    top: -70,
+    right: -50,
+  },
+  heroOrbSecondary: {
+    width: 130,
+    height: 130,
+    bottom: -45,
+    left: -30,
+  },
   logoWrap: {
-    alignItems: "center",
-    marginBottom: 36,
+    alignItems: "flex-start",
+    marginBottom: 26,
   },
   logo: {
     alignItems: "center",
   },
   title: {
     color: "#0f172a",
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "800",
     marginBottom: 6,
   },
   subtitle: {
-    color: "#64748b",
     fontSize: 15,
-    marginBottom: 32,
+    marginBottom: 18,
     lineHeight: 22,
+  },
+  heroChips: {
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+  },
+  heroChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 999,
+  },
+  heroChipText: {
+    fontSize: 13,
+    fontWeight: "700",
   },
   rtlText: {
     textAlign: "right",
   },
+  rowReverse: {
+    flexDirection: "row-reverse",
+  },
+  formCard: {
+    borderWidth: 1,
+    padding: 18,
+    marginBottom: 18,
+  },
   form: {
     gap: 18,
-    marginBottom: 24,
   },
   field: {
     gap: 7,
   },
   label: {
-    color: "#334155",
     fontSize: 14,
     fontWeight: "600",
   },
-  input: {
-    backgroundColor: "#ffffff",
+  inputShell: {
+    minHeight: 54,
     borderWidth: 1,
-    borderColor: "#e2e8f0",
-    borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: Platform.OS === "ios" ? 15 : 13,
-    color: "#0f172a",
+    borderRadius: 18,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  inputModern: {
+    flex: 1,
     fontSize: 15,
+    paddingVertical: Platform.OS === "ios" ? 15 : 12,
   },
   rtlInput: {
     textAlign: "right",
   },
-  inputWrap: {
-    position: "relative",
-  },
-  inputWithToggleLtr: {
-    paddingRight: 50,
-  },
-  inputWithToggleRtl: {
-    paddingLeft: 50,
-  },
-  toggleBtn: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    justifyContent: "center",
-    paddingHorizontal: 14,
-  },
-  toggleBtnLtr: { right: 0 },
-  toggleBtnRtl: { left: 0 },
-  toggleText: {
-    fontSize: 16,
+  toggleBtnModern: {
+    paddingLeft: 6,
+    paddingRight: 2,
   },
   errorBox: {
-    backgroundColor: "#fef2f2",
     borderWidth: 1,
-    borderColor: "#fecaca",
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 12,
   },
   errorText: {
-    color: "#dc2626",
     fontSize: 14,
     lineHeight: 20,
   },
   btn: {
-    backgroundColor: "#0ea5e9",
-    borderRadius: 14,
+    borderRadius: 18,
     paddingVertical: 16,
     alignItems: "center",
     marginTop: 4,
-    shadowColor: "#0ea5e9",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.30,
-    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.26,
+    shadowRadius: 18,
     elevation: 8,
   },
   btnDisabled: {
-    backgroundColor: "#cbd5e1",
     shadowOpacity: 0,
     elevation: 0,
   },
   btnPressed: {
-    opacity: 0.88,
-    transform: [{ scale: 0.985 }],
+    opacity: 0.92,
+    transform: [{ scale: 0.988 }],
+  },
+  btnContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
   },
   btnText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "800",
-    letterSpacing: 0.3,
+  },
+  helperText: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   hint: {
-    color: "#94a3b8",
-    fontSize: 11,
-    textAlign: "center",
+    fontSize: 12,
     lineHeight: 18,
+    marginBottom: 18,
   },
   copyright: {
-    color: "#94a3b8",
-    fontSize: 11,
     textAlign: "center",
-    marginTop: 6,
+    fontSize: 12,
     lineHeight: 18,
   },
 });

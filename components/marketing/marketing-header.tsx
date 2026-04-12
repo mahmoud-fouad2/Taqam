@@ -10,7 +10,12 @@ import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo-mark";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { LocaleToggle } from "@/components/locale-toggle";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger
+} from "@/components/ui/accordion";
 import {
   Sheet,
   SheetContent,
@@ -149,17 +154,18 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
   }, [clearCloseTimer, closeMenus, openDropdown, scheduleClose]);
 
   return (
-    <header className="bg-background/90 sticky top-0 z-50 border-b border-border/50 backdrop-blur-xl">
+    <header className="bg-background/90 border-border/50 sticky top-0 z-50 border-b backdrop-blur-xl">
       <div className="mx-auto w-full max-w-[96rem] px-4 py-3 sm:px-6 lg:px-8">
         <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3 lg:gap-5">
           <Link href={localeHref("/")} className="flex items-center gap-2">
             <LogoMark
               frameClassName="rounded-[1rem] p-0 dark:ring-white/10"
               imageClassName="h-9"
+              darkImageClassName="h-[2.65rem]"
             />
-        </Link>
+          </Link>
 
-          <div className="hidden md:flex justify-center">
+          <div className="hidden justify-center md:flex">
             <div
               ref={desktopNavRef}
               className="relative"
@@ -220,7 +226,9 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                 {expandedItem?.sections && expandedItem.spotlight ? (
                   <motion.div
                     key={expandedItem.href}
-                    initial={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
+                    initial={
+                      shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }
+                    }
                     animate={shouldReduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
                     exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -8, scale: 0.985 }}
                     transition={
@@ -229,15 +237,15 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                         : { duration: 0.18, ease: [0.22, 1, 0.36, 1] }
                     }
                     className="absolute top-full left-1/2 z-50 mt-3 w-[min(58rem,calc(100vw-2rem))] -translate-x-1/2 px-1">
-                    <div className="grid gap-3 rounded-[2rem] border border-border/70 bg-background/95 p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
-                      <div className="from-sky-500/10 via-cyan-500/5 to-amber-400/15 flex flex-col justify-between rounded-[1.6rem] border border-sky-100/70 bg-gradient-to-br p-5 dark:border-sky-900/40 dark:from-sky-950/30 dark:via-transparent dark:to-amber-950/20">
+                    <div className="border-border/70 bg-background/95 grid gap-3 rounded-[2rem] border p-3 shadow-[0_28px_80px_rgba(15,23,42,0.14)] backdrop-blur-2xl lg:grid-cols-[minmax(0,0.84fr)_minmax(0,1.16fr)]">
+                      <div className="flex flex-col justify-between rounded-[1.6rem] border border-sky-100/70 bg-gradient-to-br from-sky-500/10 via-cyan-500/5 to-amber-400/15 p-5 dark:border-sky-900/40 dark:from-sky-950/30 dark:via-transparent dark:to-amber-950/20">
                         <div>
-                          <span className="bg-background/80 text-foreground inline-flex rounded-full border border-border/60 px-3 py-1 text-[11px] font-semibold tracking-[0.14em]">
+                          <span className="bg-background/80 text-foreground border-border/60 inline-flex rounded-full border px-3 py-1 text-[11px] font-semibold tracking-[0.14em]">
                             {locale === "ar"
                               ? expandedItem.spotlight.badgeAr
                               : expandedItem.spotlight.badgeEn}
                           </span>
-                          <h3 className="mt-4 text-xl font-bold leading-8">
+                          <h3 className="mt-4 text-xl leading-8 font-bold">
                             {locale === "ar"
                               ? expandedItem.spotlight.titleAr
                               : expandedItem.spotlight.titleEn}
@@ -257,14 +265,16 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                             ).map((tag) => (
                               <span
                                 key={tag}
-                                className="bg-background/85 text-muted-foreground inline-flex rounded-full border border-border/60 px-3 py-1 text-xs">
+                                className="bg-background/85 text-muted-foreground border-border/60 inline-flex rounded-full border px-3 py-1 text-xs">
                                 {tag}
                               </span>
                             ))}
                           </div>
 
                           <Link href={localeHref(expandedItem.spotlight.href)} onClick={closeMenus}>
-                            <Button variant="brand" className="h-11 rounded-xl px-5 text-sm font-semibold">
+                            <Button
+                              variant="brand"
+                              className="h-11 rounded-xl px-5 text-sm font-semibold">
                               {locale === "ar"
                                 ? expandedItem.spotlight.ctaAr
                                 : expandedItem.spotlight.ctaEn}
@@ -285,7 +295,8 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                             <div className="space-y-1.5">
                               {section.items.map((child) => {
                                 const activeChild =
-                                  stripHash(child.href) !== "/" && strippedPath === stripHash(child.href);
+                                  stripHash(child.href) !== "/" &&
+                                  strippedPath === stripHash(child.href);
                                 const Icon = child.icon;
 
                                 return (
@@ -297,7 +308,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                                       activeChild && "bg-accent/70 border-border/70"
                                     )}
                                     onClick={closeMenus}>
-                                    <span className="bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200 inline-flex rounded-xl p-2">
+                                    <span className="inline-flex rounded-xl bg-sky-50 p-2 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200">
                                       <Icon className="size-4" />
                                     </span>
                                     <span className="flex min-w-0 flex-col">
@@ -323,7 +334,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
           </div>
 
           <div className="flex items-center justify-end gap-2">
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden items-center gap-2 md:flex">
               <ThemeToggle variant="ghost" />
               <LocaleToggle initialLocale={initialLocale} />
               <Link href={localeHref("/login")}>
@@ -351,14 +362,17 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                 <SheetContent
                   side={locale === "ar" ? "right" : "left"}
                   className="w-[88vw] max-w-sm gap-0 p-0 sm:max-w-sm">
-                  <SheetHeader className="border-b border-border/60 px-5 py-5">
+                  <SheetHeader className="border-border/60 border-b px-5 py-5">
                     <div className="flex items-center gap-3">
                       <LogoMark
                         frameClassName="size-11 rounded-[1rem] p-0 dark:ring-white/10"
                         imageClassName="h-6"
+                        darkImageClassName="h-7"
                       />
                       <div>
-                        <SheetTitle>{locale === "ar" ? "تنقّل داخل طاقم" : "Navigate Taqam"}</SheetTitle>
+                        <SheetTitle>
+                          {locale === "ar" ? "تنقّل داخل طاقم" : "Navigate Taqam"}
+                        </SheetTitle>
                         <SheetDescription>
                           {locale === "ar"
                             ? "مسارات أوضح للمنتج والباقات والموارد والوظائف من قائمة واحدة مرتبة."
@@ -397,7 +411,9 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                             <AccordionContent>
                               <div className="space-y-3">
                                 {item.sections?.map((section) => (
-                                  <div key={`${item.href}-${section.titleEn}`} className="space-y-1.5">
+                                  <div
+                                    key={`${item.href}-${section.titleEn}`}
+                                    className="space-y-1.5">
                                     <p className="text-muted-foreground px-1 text-[11px] font-semibold tracking-[0.18em] uppercase">
                                       {locale === "ar" ? section.titleAr : section.titleEn}
                                     </p>
@@ -410,7 +426,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                                           href={localeHref(child.href)}
                                           className="hover:bg-accent/50 flex items-start gap-3 rounded-[1rem] px-3 py-3 transition"
                                           onClick={closeMenus}>
-                                          <span className="bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200 inline-flex rounded-xl p-2">
+                                          <span className="inline-flex rounded-xl bg-sky-50 p-2 text-sky-700 dark:bg-sky-950/40 dark:text-sky-200">
                                             <Icon className="size-4" />
                                           </span>
                                           <span className="flex min-w-0 flex-col">
@@ -433,7 +449,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                     </Accordion>
                   </div>
 
-                  <div className="border-t border-border/60 p-5">
+                  <div className="border-border/60 border-t p-5">
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                       <Link href={localeHref("/login")} onClick={closeMenus}>
                         <Button variant="brandOutline" className="w-full rounded-xl">

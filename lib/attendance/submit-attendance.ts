@@ -21,13 +21,46 @@ export type SubmitAttendanceInput = {
   address?: string;
 };
 
+function buildLocalDateWithTime(baseDate: Date, hhmm?: string | null) {
+  if (!hhmm) return null;
+
+  const [hoursRaw, minutesRaw] = hhmm.split(":");
+  const hours = Number(hoursRaw);
+  const minutes = Number(minutesRaw);
+
+  if (Number.isNaN(hours) || Number.isNaN(minutes)) {
+    return null;
+  }
+
+  return new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    hours,
+    minutes,
+    0,
+    0
+  );
+}
+
 export async function submitAttendance(input: SubmitAttendanceInput) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   const employee = await prisma.employee.findFirst({
     where: { id: input.employeeId, tenantId: input.tenantId },
-    select: { id: true, shiftId: true }
+    select: {
+      id: true,
+      shiftId: true,
+      overtimeEligible: true,
+      shift: {
+        select: {
+          id: true,
+          endTime: true,
+          overtimeEnabled: true
+        }
+      }
+    }
   });
 
   if (!employee) {
@@ -136,6 +169,14 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
 
     const checkInTime = new Date(record.checkInTime);
     const totalMinutes = Math.floor((now.getTime() - checkInTime.getTime()) / 60000);
+    const shiftEndTime = buildLocalDateWithTime(today, employee.shift?.endTime);
+    const overtimeMinutes =
+      policy?.autoCalculateOvertime &&
+      employee.overtimeEligible &&
+      employee.shift?.overtimeEnabled &&
+      shiftEndTime
+        ? Math.max(Math.floor((now.getTime() - shiftEndTime.getTime()) / 60000), 0)
+        : 0;
 
     record = await prisma.attendanceRecord.update({
       where: { id: record.id },
@@ -146,7 +187,8 @@ export async function submitAttendance(input: SubmitAttendanceInput) {
         checkOutLng: input.longitude,
         checkOutAddress: input.address,
         checkOutLocationId: matchedLocationId,
-        totalWorkMinutes: totalMinutes
+        totalWorkMinutes: totalMinutes,
+        overtimeMinutes
       }
     });
   }

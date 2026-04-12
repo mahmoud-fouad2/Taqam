@@ -14,6 +14,8 @@ import {
 import Constants from "expo-constants";
 import * as ImagePicker from "expo-image-picker";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
 
 import { useAuth } from "@/components/auth-provider";
 import { useAppSettings } from "@/components/app-settings-provider";
@@ -38,6 +40,7 @@ export default function ProfileScreen() {
   const { user, signOut, accessToken, authFetch, refreshUser } = useAuth();
   const { language, setLanguage } = useAppSettings();
   const { colors, isDark, spacing, radius } = useTheme();
+  const router = useRouter();
   const isRtl = language === "ar";
 
   const [msg, setMsg]             = useState<string | null>(null);
@@ -199,6 +202,12 @@ export default function ProfileScreen() {
     { icon: "building" as const, labelAr: "الشركة",       labelEn: "Company",       value: tenantName ?? null },
   ].filter((r) => !!r.value);
 
+  const quickActions = [
+    { icon: "wallet-outline" as const, labelAr: "الرواتب", labelEn: "Payslips", route: "/(tabs)/payslips" },
+    { icon: "document-text-outline" as const, labelAr: "طلباتي", labelEn: "Requests", route: "/(tabs)/leaves" },
+    { icon: "settings-outline" as const, labelAr: "الإعدادات", labelEn: "Settings", route: "/(tabs)/settings" },
+  ];
+
   const initials = user
     ? `${(user.firstName[0] ?? "").toUpperCase()}${(user.lastName[0] ?? "").toUpperCase()}`
     : "?";
@@ -259,6 +268,51 @@ export default function ProfileScreen() {
         {tenantName ? (
           <Text style={{ color: colors.textSecondary, fontSize: 14, textAlign: "center" }}>{tenantName}</Text>
         ) : null}
+        <View style={[{ flexDirection: "row", gap: 8, marginTop: 12 }, isRtl && { flexDirection: "row-reverse" }]}>
+          <View style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.primaryLight }}>
+            <Text style={{ color: colors.primary, fontSize: 12, fontWeight: "800" }}>
+              {user?.role ? roleName(user.role, language) : isRtl ? "مستخدم" : "User"}
+            </Text>
+          </View>
+          <View style={{ paddingHorizontal: 10, paddingVertical: 6, borderRadius: 999, backgroundColor: colors.surfaceSecondary }}>
+            <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "700" }}>
+              {isRtl ? "الإصدار" : "Version"} {APP_VERSION}
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={{ marginHorizontal: spacing.md, marginBottom: 14 }}>
+        <Text style={[{ color: colors.textMuted, fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }, isRtl && { textAlign: "right" }]}>
+          {isRtl ? "اختصارات سريعة" : "Quick actions"}
+        </Text>
+        <View style={{ flexDirection: "row", gap: 10 }}>
+          {quickActions.map((action) => (
+            <Pressable
+              key={action.route}
+              onPress={() => router.push(action.route as any)}
+              style={({ pressed }) => ({
+                flex: 1,
+                backgroundColor: colors.surface,
+                borderRadius: radius.lg,
+                borderWidth: 1,
+                borderColor: colors.border,
+                paddingVertical: 16,
+                paddingHorizontal: 12,
+                alignItems: "center",
+                gap: 8,
+                opacity: pressed ? 0.8 : 1,
+              })}
+            >
+              <View style={{ width: 42, height: 42, borderRadius: 14, backgroundColor: colors.primaryLight, alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name={action.icon} size={20} color={colors.primary} />
+              </View>
+              <Text style={{ color: colors.text, fontSize: 12, fontWeight: "700", textAlign: "center" }}>
+                {isRtl ? action.labelAr : action.labelEn}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
       </View>
 
       {/* Edit Profile / Info */}

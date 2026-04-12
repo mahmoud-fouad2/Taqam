@@ -264,14 +264,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   );
 
   React.useEffect(() => {
-    const sessionUser = session?.user as {
-      role?: string;
-      name?: string;
-      firstName?: string;
-      lastName?: string;
-      email?: string;
-      avatar?: string;
-    } | undefined;
+    const sessionUser = session?.user as
+      | {
+          role?: string;
+          name?: string;
+          firstName?: string;
+          lastName?: string;
+          email?: string;
+          avatar?: string;
+        }
+      | undefined;
 
     setRole(sessionUser?.role);
 
@@ -303,12 +305,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenuButton
               size="lg"
               asChild
-              className="border-sidebar-border/70 bg-sidebar-accent/40 hover:bg-sidebar-accent rounded-xl border !p-2 shadow-sm transition-all"
-            >
+              className="border-sidebar-border/70 bg-sidebar-accent/40 hover:bg-sidebar-accent rounded-xl border !p-2 shadow-sm transition-all">
               <Link href={homeUrl}>
                 <LogoMark
                   frameClassName="size-9 rounded-lg border border-sidebar-border/60 bg-sidebar p-1 shadow-sm"
                   imageClassName="h-[18px]"
+                  darkImageClassName="h-[21px]"
                 />
                 <div className="grid flex-1 text-start text-sm leading-tight group-data-[collapsible=icon]:hidden">
                   <span className="truncate font-bold tracking-tight">طاقم</span>

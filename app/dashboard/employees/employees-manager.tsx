@@ -130,6 +130,7 @@ export function EmployeesManager() {
       managerId: "",
       hireDate: "",
       contractType: "full_time",
+      overtimeEligible: false,
       basicSalary: "",
       status: "active"
     }
@@ -170,12 +171,15 @@ export function EmployeesManager() {
   const getJobName = (id: string) => jobTitleNameById.get(id) || "-";
 
   // Add
-  const clearDialogParam = useCallback((key: string) => {
-    const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.delete(key);
-    const nextQuery = nextParams.toString();
-    router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
-  }, [router, pathname, searchParams]);
+  const clearDialogParam = useCallback(
+    (key: string) => {
+      const nextParams = new URLSearchParams(searchParams.toString());
+      nextParams.delete(key);
+      const nextQuery = nextParams.toString();
+      router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
+    },
+    [router, pathname, searchParams]
+  );
 
   const handleAdd = useCallback(() => {
     setEditingEmployee(null);
@@ -194,33 +198,38 @@ export function EmployeesManager() {
       managerId: "",
       hireDate: new Date().toISOString().split("T")[0],
       contractType: "full_time",
+      overtimeEligible: false,
       basicSalary: "",
       status: "onboarding"
     });
     setIsDialogOpen(true);
   }, [employees.length, form]);
 
-  const handleEdit = useCallback((emp: Employee) => {
-    setEditingEmployee(emp);
-    form.reset({
-      employeeNumber: emp.employeeNumber,
-      firstName: emp.firstName,
-      firstNameAr: emp.firstNameAr || "",
-      lastName: emp.lastName,
-      lastNameAr: emp.lastNameAr || "",
-      email: emp.email,
-      phone: emp.phone || "",
-      nationalId: emp.nationalId || "",
-      departmentId: emp.departmentId,
-      jobTitleId: emp.jobTitleId,
-      managerId: emp.managerId || "",
-      hireDate: emp.hireDate,
-      contractType: emp.contractType,
-      basicSalary: emp.basicSalary?.toString() || "",
-      status: emp.status
-    });
-    setIsDialogOpen(true);
-  }, [form]);
+  const handleEdit = useCallback(
+    (emp: Employee) => {
+      setEditingEmployee(emp);
+      form.reset({
+        employeeNumber: emp.employeeNumber,
+        firstName: emp.firstName,
+        firstNameAr: emp.firstNameAr || "",
+        lastName: emp.lastName,
+        lastNameAr: emp.lastNameAr || "",
+        email: emp.email,
+        phone: emp.phone || "",
+        nationalId: emp.nationalId || "",
+        departmentId: emp.departmentId,
+        jobTitleId: emp.jobTitleId,
+        managerId: emp.managerId || "",
+        hireDate: emp.hireDate,
+        contractType: emp.contractType,
+        overtimeEligible: Boolean(emp.overtimeEligible),
+        basicSalary: emp.basicSalary?.toString() || "",
+        status: emp.status
+      });
+      setIsDialogOpen(true);
+    },
+    [form]
+  );
 
   useEffect(() => {
     if (loading || openDialog !== "new") {
@@ -263,6 +272,7 @@ export function EmployeesManager() {
           managerId: data.managerId || undefined,
           hireDate: data.hireDate,
           contractType: data.contractType as ContractType,
+          overtimeEligible: data.overtimeEligible,
           basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined,
           status: (data.status as EmployeeStatus) || editingEmployee.status
         });
@@ -284,6 +294,7 @@ export function EmployeesManager() {
           managerId: data.managerId || undefined,
           hireDate: data.hireDate,
           contractType: data.contractType as ContractType,
+          overtimeEligible: data.overtimeEligible,
           basicSalary: data.basicSalary ? parseFloat(data.basicSalary) : undefined
         });
         if (!res.success) throw new Error(res.error || "Failed to create employee");

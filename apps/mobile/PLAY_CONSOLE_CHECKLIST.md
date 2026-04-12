@@ -5,7 +5,7 @@ Status date: 2026-04-06
 ## Already Ready
 
 - App name in Expo config: `Taqam`
-- Android package ID: `com.jisr.app`
+- Android package ID: `com.taqam.app`
 - Version: `1.0.0`
 - Version code: `1`
 - Android release build scripts are wired through `pnpm --dir apps/mobile android:aab:release` and `android:apk:release`
@@ -17,7 +17,7 @@ Status date: 2026-04-06
 
 - Configure a real upload keystore instead of the current debug signing fallback
 - Build a fresh signed AAB after signing is configured
-- Create or confirm the Play Console app record for package `com.jisr.app`
+- Create or confirm the Play Console app record for package `com.taqam.app`
 - Prepare the store listing text in Arabic and English
 - Prepare Play Store graphics:
   - App icon 512x512
@@ -30,7 +30,7 @@ Status date: 2026-04-06
 ## Recommended Operator Checks
 
 - Confirm that `https://taqam.net` remains the final public backend domain before store submission
-- Verify that the package ID `com.jisr.app` is the permanent store identity you want to keep
+- Verify that the package ID `com.taqam.app` is the permanent store identity you want to keep
 - Install the signed release APK on at least one real Android device and verify login, attendance, biometrics, logout-all, and language switching
 - Archive the upload keystore outside the repository with backup and access control
 
