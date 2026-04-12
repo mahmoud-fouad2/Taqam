@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
+import { logApiError } from "@/lib/api/route-helper";
 import { authOptions } from "@/lib/auth";
 import { createAuditLog, getRequestMetadata } from "@/lib/audit/logger";
 import {
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: summary }, { status: 200 });
   } catch (error) {
-    console.error("Error bulk importing employees:", error);
+    logApiError("Error bulk importing employees", error);
     return NextResponse.json({ error: "Failed to bulk import employees" }, { status: 500 });
   }
 }

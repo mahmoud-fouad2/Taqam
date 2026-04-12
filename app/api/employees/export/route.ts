@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { logApiError } from "@/lib/api/route-helper";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
 
@@ -131,7 +132,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error exporting employees CSV:", error);
+    logApiError("Error exporting employees CSV", error);
     return NextResponse.json({ error: "Failed to export employees" }, { status: 500 });
   }
 }

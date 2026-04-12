@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
+import { logApiError } from "@/lib/api/route-helper";
 import { authOptions } from "@/lib/auth";
 import { createAuditLog, getRequestMetadata } from "@/lib/audit/logger";
 import { csvRowsToObjects, parseCsv } from "@/lib/csv/parse";
@@ -198,7 +199,7 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     );
   } catch (error) {
-    console.error("Error importing employees CSV:", error);
+    logApiError("Error importing employees CSV", error);
     return NextResponse.json({ error: "Failed to import employees" }, { status: 500 });
   }
 }
