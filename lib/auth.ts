@@ -8,6 +8,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { verifyGoogleRecaptcha } from "@/lib/security/recaptcha";
 import {
   hasRole as roleMatches,
   isSuperAdminRole,
@@ -36,11 +37,57 @@ export const authOptions: NextAuthOptions = {
       name: "credentials",
       credentials: {
         email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        password: { label: "Password", type: "password" },
+        locale: { label: "Locale", type: "text" },
+        captchaToken: { label: "Captcha Token", type: "text" }
       },
       async authorize(credentials) {
+        const locale = credentials?.locale === "en" ? "en" : "ar";
+        const authCopy = {
+          missingCredentials: {
+            ar: "البريد الإلكتروني وكلمة المرور مطلوبان",
+            en: "Email and password are required"
+          },
+          missingCaptcha: {
+            ar: "يرجى إدخال رمز التحقق قبل المتابعة",
+            en: "Please complete the captcha before continuing"
+          },
+          invalidCaptcha: {
+            ar: "رمز التحقق غير صحيح أو انتهت صلاحيته. حدّثه وحاول مرة أخرى.",
+            en: "The captcha is invalid or has expired. Refresh it and try again."
+          },
+          invalidCredentials: {
+            ar: "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+            en: "Invalid email or password"
+          },
+          locked: {
+            ar: "تم تعليق الحساب مؤقتاً. حاول مرة أخرى لاحقاً",
+            en: "This account is temporarily locked. Please try again later."
+          },
+          disabled: {
+            ar: "الحساب معطل. تواصل مع الدعم الفني",
+            en: "This account is disabled. Please contact support."
+          },
+          pendingVerification: {
+            ar: "يرجى تأكيد البريد الإلكتروني أولاً",
+            en: "Please verify your email address first."
+          }
+        } as const;
+
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("البريد الإلكتروني وكلمة المرور مطلوبان");
+          throw new Error(authCopy.missingCredentials[locale]);
+        }
+
+        if (!credentials.captchaToken) {
+          throw new Error(authCopy.missingCaptcha[locale]);
+        }
+
+        const captcha = await verifyGoogleRecaptcha({
+          token: credentials.captchaToken
+        });
+
+        if (!captcha.ok) {
+          throw new Error(authCopy.invalidCaptcha[locale]);
         }
 
         const normalizedEmail = credentials.email.toLowerCase();
@@ -142,21 +189,21 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+          throw new Error(authCopy.invalidCredentials[locale]);
         }
 
         // Check if user is locked
         if (user.lockedUntil && user.lockedUntil > new Date()) {
-          throw new Error("تم تعليق الحساب مؤقتاً. حاول مرة أخرى لاحقاً");
+          throw new Error(authCopy.locked[locale]);
         }
 
         // Check user status
         if (user.status === "INACTIVE" || user.status === "SUSPENDED") {
-          throw new Error("الحساب معطل. تواصل مع الدعم الفني");
+          throw new Error(authCopy.disabled[locale]);
         }
 
         if (user.status === "PENDING_VERIFICATION") {
-          throw new Error("يرجى تأكيد البريد الإلكتروني أولاً");
+          throw new Error(authCopy.pendingVerification[locale]);
         }
 
         // Verify password
@@ -179,7 +226,7 @@ export const authOptions: NextAuthOptions = {
             attempts: user.failedLoginAttempts
           });
 
-          throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة");
+          throw new Error(authCopy.invalidCredentials[locale]);
         }
 
         if (!isSuperAdminRole(user.role)) {
@@ -189,7 +236,7 @@ export const authOptions: NextAuthOptions = {
               reason: tenantIssue,
               tenantId: user.tenantId
             });
-            throw new Error(getTenantAccessMessage(tenantIssue, "ar"));
+            throw new Error(getTenantAccessMessage(tenantIssue, locale));
           }
         }
 

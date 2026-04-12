@@ -1,15 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import ReCAPTCHA from "react-google-recaptcha";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { buildTenantUrl } from "@/lib/tenant";
+import { t } from "@/lib/i18n/messages";
 
 type LoginFormProps = {
   locale: "ar" | "en";
@@ -24,9 +26,12 @@ type LoginFormProps = {
 
 export function LoginForm({ locale, labels }: LoginFormProps) {
   const router = useRouter();
+  const captchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -54,11 +59,23 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       return;
     }
 
+    if (!siteKey) {
+      setError(t(locale, "captcha.missingConfig"));
+      return;
+    }
+
+    if (!captchaToken) {
+      setError(t(locale, "captcha.required"));
+      return;
+    }
+
     setIsLoading(true);
     try {
       const res = await signIn("credentials", {
         email: trimmedEmail,
         password,
+        locale,
+        captchaToken,
         redirect: false
       });
 
@@ -73,6 +90,8 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         } else {
           setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
         }
+        captchaRef.current?.reset();
+        setCaptchaToken(null);
         return;
       }
 
@@ -87,6 +106,10 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
       } else {
         router.replace("/dashboard");
       }
+    } catch {
+      setError(locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in");
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -158,6 +181,37 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
           {error}
         </div>
       ) : null}
+
+      <div className="space-y-3 rounded-[1.5rem] border border-border/60 bg-muted/20 p-4">
+        <div>
+          <Label className="text-sm font-semibold">
+            {locale === "ar" ? "Google reCAPTCHA" : "Google reCAPTCHA"}
+          </Label>
+          <p className="text-muted-foreground mt-1 text-xs leading-5">
+            {locale === "ar"
+              ? "لحماية صفحة الدخول من المحاولات الآلية، أكمل التحقق قبل المتابعة."
+              : "Complete the Google reCAPTCHA challenge before signing in."}
+          </p>
+        </div>
+
+        {siteKey ? (
+          <div className="flex justify-center overflow-hidden rounded-2xl bg-background/70 p-2 sm:justify-start">
+            <ReCAPTCHA
+              ref={captchaRef}
+              sitekey={siteKey}
+              hl={locale}
+              onChange={(token) => setCaptchaToken(token)}
+              onExpired={() => setCaptchaToken(null)}
+              onErrored={() => {
+                setCaptchaToken(null);
+                setError(t(locale, "captcha.invalid"));
+              }}
+            />
+          </div>
+        ) : (
+          <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
+        )}
+      </div>
 
       <Button
         type="submit"

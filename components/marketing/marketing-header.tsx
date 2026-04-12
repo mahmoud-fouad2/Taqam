@@ -36,7 +36,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
   return (
     <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href={localeHref("/")} className="flex items-center gap-2">
           <LogoMark frameClassName="rounded-lg p-0 dark:ring-white/10" imageClassName="h-9" />
         </Link>
 

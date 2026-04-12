@@ -351,8 +351,7 @@ const testimonials = [
     nameEn: "Sarah Al-Shahrani",
     roleAr: "مدير الموارد البشرية — شركة الباحة للمقاولات",
     roleEn: "HR Manager — Al-Baha Contracting Co.",
-    avatar:
-      "https://images.pexels.com/photos/8154420/pexels-photo-8154420.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop"
+    avatar: "/images/marketing/testimonials/sarah.jpg"
   },
   {
     quoteAr:
@@ -363,8 +362,7 @@ const testimonials = [
     nameEn: "Noura Al-Ghamdi",
     roleAr: "مديرة شؤون الموظفين — مجموعة سدير التجارية",
     roleEn: "People Director — Sudair Trading Group",
-    avatar:
-      "https://images.pexels.com/photos/9218636/pexels-photo-9218636.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop"
+    avatar: "/images/marketing/testimonials/noura.jpg"
   },
   {
     quoteAr:
@@ -375,8 +373,7 @@ const testimonials = [
     nameEn: "Khalid Al-Otaibi",
     roleAr: "المدير التنفيذي — مركز الخبر للتقنية",
     roleEn: "CEO — Al-Khobar Tech Center",
-    avatar:
-      "https://images.pexels.com/photos/6700380/pexels-photo-6700380.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop"
+    avatar: "/images/marketing/testimonials/khalid.jpg"
   }
 ];
 
@@ -386,48 +383,54 @@ const integrations = [
     name: "GOSI",
     descAr: "التأمينات الاجتماعية",
     descEn: "Social Insurance",
-    fill: "#1B7B4B",
-    fontSize: 12
+    src: "/images/marketing/integrations/gosi.png",
+    frameClassName: "bg-white p-4",
+    imageClassName: "object-contain"
   },
   {
     id: "wps",
     name: "WPS",
     descAr: "نظام حماية الأجور",
     descEn: "Wage Protection",
-    fill: "#005BAA",
-    fontSize: 13
+    src: "/images/marketing/integrations/wps.jpg",
+    frameClassName: "bg-white p-2",
+    imageClassName: "object-contain"
   },
   {
     id: "mudad",
     name: "مدد",
     descAr: "إدارة العمالة الوافدة",
     descEn: "Expat Labour Mgmt",
-    fill: "#D4480A",
-    fontSize: 15
+    src: "/images/marketing/integrations/mudad.png",
+    frameClassName: "bg-white p-3",
+    imageClassName: "object-contain"
   },
   {
     id: "muqeem",
     name: "مقيم",
     descAr: "خدمات الإقامة",
     descEn: "Residency Services",
-    fill: "#1A3670",
-    fontSize: 13
+    src: "/images/marketing/integrations/muqeem.png",
+    frameClassName: "bg-white p-3",
+    imageClassName: "object-contain"
   },
   {
     id: "mustafid",
     name: "مستفيد",
     descAr: "التوظيف والتدريب",
     descEn: "Employment Portal",
-    fill: "#007850",
-    fontSize: 10
+    src: "/images/marketing/integrations/mustafid.jpg",
+    frameClassName: "bg-white p-4",
+    imageClassName: "object-contain"
   },
   {
     id: "sap",
     name: "SAP",
     descAr: "تكامل ERP",
     descEn: "ERP Integration",
-    fill: "#0070F2",
-    fontSize: 13
+    src: "/images/marketing/integrations/sap.png",
+    frameClassName: "bg-white p-4",
+    imageClassName: "object-contain"
   }
 ];
 
@@ -907,35 +910,28 @@ export default async function LandingPage({
                 : "Taqam connects directly with Saudi government entities and accounting systems"}
             </p>
           </div>
-          <div className="grid grid-cols-3 gap-3 sm:grid-cols-6 sm:gap-4">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
             {integrations.map((item) => (
               <div
                 key={item.id}
-                className="group border-border/40 bg-card/60 hover:border-border/80 flex flex-col items-center gap-2.5 rounded-[1.75rem] border p-5 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1.5 hover:shadow-lg">
-                <svg
-                  aria-label={item.name}
-                  height="48"
-                  role="img"
-                  viewBox="0 0 48 48"
-                  width="48"
-                  className="rounded-xl shadow-sm">
-                  <rect width="48" height="48" rx="10" fill={item.fill} />
-                  <text
-                    dominantBaseline="middle"
-                    fill="white"
-                    fontFamily="system-ui,-apple-system,Arial,sans-serif"
-                    fontSize={item.fontSize}
-                    fontWeight="700"
-                    textAnchor="middle"
-                    x="24"
-                    y="25">
-                    {item.name}
-                  </text>
-                </svg>
-                <p className="text-center text-xs font-semibold">{item.name}</p>
-                <p className="text-muted-foreground text-center text-[10px] leading-tight">
-                  {isAr ? item.descAr : item.descEn}
-                </p>
+                className="group border-border/40 bg-card/70 hover:border-border/80 flex flex-col rounded-[1.85rem] border p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-4">
+                <div
+                  className={`relative aspect-[5/4] w-full overflow-hidden rounded-[1.4rem] border border-black/5 shadow-sm ${item.frameClassName}`}>
+                  <Image
+                    src={item.src}
+                    alt={item.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 16vw"
+                    unoptimized
+                    className={`transition-transform duration-300 group-hover:scale-[1.03] ${item.imageClassName}`}
+                  />
+                </div>
+                <div className="mt-3 text-center">
+                  <p className="text-sm font-semibold tracking-tight">{item.name}</p>
+                  <p className="text-muted-foreground mt-1 text-[11px] leading-5">
+                    {isAr ? item.descAr : item.descEn}
+                  </p>
+                </div>
               </div>
             ))}
           </div>

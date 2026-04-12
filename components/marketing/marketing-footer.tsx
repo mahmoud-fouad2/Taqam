@@ -48,6 +48,44 @@ export async function MarketingFooter() {
   const highlights = isAr ? ["الموظفون", "الرواتب", "الحضور"] : ["People", "Payroll", "Attendance"];
   const rights = isAr ? "طاقم. جميع الحقوق محفوظة." : "Taqam. All rights reserved.";
   const downloadHref = "/downloads/taqam-android.apk";
+  const badgeItems = [
+    {
+      id: "trusted",
+      src: "/images/marketing/badges/trusted.jpg",
+      title: isAr ? "Trusted" : "Trusted",
+      frameClassName: "bg-white p-1.5",
+      imageClassName: "object-contain"
+    },
+    {
+      id: "high-service",
+      src: "/images/marketing/badges/high-service.jpg",
+      title: isAr ? "High Service" : "High Service",
+      frameClassName: "bg-white p-2.5",
+      imageClassName: "object-contain"
+    },
+    {
+      id: "oracle",
+      src: "/images/marketing/badges/oracle.png",
+      title: "Oracle",
+      frameClassName: "bg-white p-2.5",
+      imageClassName: "object-contain"
+    },
+    {
+      id: "faheemly",
+      src: "/images/marketing/badges/faheemly.png",
+      title: isAr ? "تعاون مع فهملي" : "In collaboration with Faheemly",
+      href: "https://faheemly.com/",
+      frameClassName: "bg-white p-2",
+      imageClassName: "object-contain"
+    },
+    {
+      id: "best-practice",
+      src: "/images/marketing/badges/best-practice.jpg",
+      title: isAr ? "Best Practice" : "Best Practice",
+      frameClassName: "bg-white p-1.5",
+      imageClassName: "object-contain"
+    }
+  ];
 
   return (
     <footer className="bg-background/95 border-t">
@@ -111,6 +149,52 @@ export async function MarketingFooter() {
             </div>
           </div>
 
+          <div className="border-t border-border/60 pt-3">
+            <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-foreground text-xs font-semibold tracking-[0.18em] uppercase">
+                {isAr ? "شركاء الثقة والتكامل" : "Trust & integration partners"}
+              </p>
+              <p className="text-muted-foreground text-xs">
+                {isAr ? "أيقونات محلية مخزنة داخل المشروع" : "All icons are stored locally in the project"}
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
+              {badgeItems.map((item) => {
+                const content = (
+                  <div className="group border-border/60 bg-background/88 hover:border-border flex h-full flex-col rounded-[1.35rem] border p-2.5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+                    <div
+                      className={`relative flex h-14 items-center justify-center overflow-hidden rounded-[1rem] ${item.frameClassName}`}>
+                      <Image
+                        src={item.src}
+                        alt={item.title}
+                        fill
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 18vw"
+                        unoptimized
+                        className={item.imageClassName}
+                      />
+                    </div>
+                    <p className="text-foreground mt-2 text-xs font-semibold leading-5">{item.title}</p>
+                  </div>
+                );
+
+                if (item.href) {
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block">
+                      {content}
+                    </Link>
+                  );
+                }
+
+                return <div key={item.id}>{content}</div>;
+              })}
+            </div>
+          </div>
+
           <div className="border-border/60 text-muted-foreground flex flex-col gap-2 border-t pt-2 text-xs sm:flex-row sm:items-center sm:justify-between">
             <span>
               © {year} {rights}
@@ -121,12 +205,12 @@ export async function MarketingFooter() {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1.5 transition-opacity hover:opacity-80">
               <Image
-                src="https://ma-fo.info/logo2.png"
+                src="/images/marketing/partners/ma-fo.png"
                 alt="Ma-Fo"
                 width={22}
                 height={22}
-                className="h-[22px] w-auto object-contain"
-                unoptimized
+                style={{ width: "auto", height: "22px" }}
+                className="object-contain"
               />
               <span>Development By Ma-Fo</span>
             </Link>

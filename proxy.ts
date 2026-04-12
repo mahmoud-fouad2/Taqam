@@ -21,13 +21,20 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const requestHeaders = new Headers(request.headers);
   const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
-  const resolvedTenant = resolveTenantRequest(pathname, host);
-  const dashboardRewrite = resolveTenantDashboardRewrite(pathname);
-  const effectivePathname = dashboardRewrite?.pathname ?? pathname;
+  const hasEnPrefix = pathname === "/en" || pathname.startsWith("/en/");
+  const localizedPathname = hasEnPrefix ? pathname.replace(/^\/en(?=\/|$)/, "") || "/" : pathname;
 
-  if (pathname === "/en/dashboard" || pathname.startsWith("/en/dashboard/")) {
+  if (hasEnPrefix) {
+    requestHeaders.set("x-taqam-locale", "en");
+  }
+
+  const resolvedTenant = resolveTenantRequest(localizedPathname, host);
+  const dashboardRewrite = resolveTenantDashboardRewrite(localizedPathname);
+  const effectivePathname = dashboardRewrite?.pathname ?? localizedPathname;
+
+  if (hasEnPrefix && (localizedPathname === "/dashboard" || localizedPathname.startsWith("/dashboard/"))) {
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = pathname.replace(/^\/en(?=\/dashboard)/, "") || "/dashboard";
+    redirectUrl.pathname = localizedPathname;
 
     const res = NextResponse.redirect(redirectUrl);
     res.cookies.set("taqam_locale", "en", {
@@ -39,15 +46,11 @@ export async function proxy(request: NextRequest) {
   }
 
   if (resolvedTenant.source === "subdomain" && resolvedTenant.slug) {
-    const publicCareersMatch = pathname.match(/^\/(en\/)?careers$/);
+    const publicCareersMatch = localizedPathname === "/careers";
 
     if (publicCareersMatch) {
       const rewriteUrl = request.nextUrl.clone();
-      rewriteUrl.pathname = buildTenantPath(
-        resolvedTenant.slug,
-        "/careers",
-        publicCareersMatch[1] ? "en" : "ar"
-      );
+      rewriteUrl.pathname = buildTenantPath(resolvedTenant.slug, "/careers", hasEnPrefix ? "en" : "ar");
 
       const rewriteResponse = NextResponse.rewrite(rewriteUrl, {
         request: {
@@ -148,13 +151,26 @@ export async function proxy(request: NextRequest) {
           }
         }
       )
-    : NextResponse.next({
-        request: {
-          headers: requestHeaders
-        }
-      });
+    : hasEnPrefix
+      ? NextResponse.rewrite(
+          (() => {
+            const rewriteUrl = request.nextUrl.clone();
+            rewriteUrl.pathname = localizedPathname;
+            return rewriteUrl;
+          })(),
+          {
+            request: {
+              headers: requestHeaders
+            }
+          }
+        )
+      : NextResponse.next({
+          request: {
+            headers: requestHeaders
+          }
+        });
 
-  if (dashboardRewrite?.locale === "en") {
+  if (dashboardRewrite?.locale === "en" || hasEnPrefix) {
     response.cookies.set("taqam_locale", "en", {
       path: "/",
       sameSite: "lax",

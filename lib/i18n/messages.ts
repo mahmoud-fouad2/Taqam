@@ -22,6 +22,7 @@ export type WebMessageKey =
   | "form.privacyPolicy"
   | "form.terms"
   | "captcha.required"
+  | "captcha.invalid"
   | "captcha.missingConfig";
 
 const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
@@ -53,12 +54,16 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
   "form.terms": { ar: "شروط الاستخدام", en: "Terms" },
 
   "captcha.required": {
-    ar: "يرجى إكمال التحقق (reCAPTCHA) قبل الإرسال.",
-    en: "Please complete the reCAPTCHA verification before submitting."
+    ar: "يرجى إكمال Google reCAPTCHA قبل الإرسال.",
+    en: "Please complete Google reCAPTCHA before submitting."
+  },
+  "captcha.invalid": {
+    ar: "فشل التحقق عبر Google reCAPTCHA أو انتهت صلاحيته. أعد المحاولة.",
+    en: "Google reCAPTCHA verification failed or expired. Please try again."
   },
   "captcha.missingConfig": {
-    ar: "reCAPTCHA غير مُهيأ. تواصل مع الإدارة لإضافة المفاتيح.",
-    en: "reCAPTCHA is not configured. Please contact the admin to add the keys."
+    ar: "Google reCAPTCHA غير مُهيأ حاليًا. تواصل مع الإدارة.",
+    en: "Google reCAPTCHA is not configured right now. Please contact the admin."
   }
 };
 

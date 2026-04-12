@@ -81,6 +81,22 @@ export default async function RequestDemoPage() {
                     ? "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال."
                     : "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."}
                 </p>
+
+                <div className="mt-6 grid gap-2 sm:grid-cols-3 lg:hidden">
+                  {highlights.map((item) => (
+                    <div
+                      key={item.title}
+                      className="border-border/60 bg-background/85 rounded-[1.35rem] border p-3 shadow-sm">
+                      <div className="text-primary flex h-9 w-9 items-center justify-center rounded-xl bg-sky-500/10">
+                        <item.icon className="h-4 w-4" />
+                      </div>
+                      <p className="mt-3 text-sm font-semibold">{item.title}</p>
+                      <p className="text-muted-foreground mt-1 text-xs leading-5">
+                        {item.description}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               </div>
             </FadeIn>
 
@@ -119,7 +135,7 @@ export default async function RequestDemoPage() {
             </FadeIn>
           </div>
 
-          <aside className="relative hidden overflow-hidden rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-indigo-50/70 p-8 text-slate-950 shadow-xl shadow-sky-100/40 lg:block dark:border-white/10 dark:from-neutral-950 dark:via-neutral-900 dark:to-slate-900 dark:text-white dark:shadow-none">
+          <aside className="relative hidden overflow-hidden rounded-[2rem] border border-slate-200/70 bg-gradient-to-br from-sky-50 via-white to-indigo-50/70 p-8 text-slate-950 shadow-xl shadow-sky-100/40 lg:sticky lg:top-24 lg:block dark:border-white/10 dark:from-neutral-950 dark:via-neutral-900 dark:to-slate-900 dark:text-white dark:shadow-none">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-sky-200/70 via-sky-50/50 to-indigo-100/70 dark:from-indigo-900/20 dark:via-transparent dark:to-transparent" />
             <div className="marketing-grid-pattern absolute inset-0 opacity-[0.04] dark:opacity-[0.05]" />
 

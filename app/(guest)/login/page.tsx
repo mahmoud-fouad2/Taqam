@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LogoMark } from "@/components/logo-mark";
 import { generateMeta } from "@/lib/utils";
@@ -40,6 +41,7 @@ export default async function LoginPageV1() {
     redirect("/dashboard");
   }
   const t = getText(locale);
+  const prefix = locale === "en" ? "/en" : "";
 
   return (
     <div className="bg-background min-h-screen">
@@ -48,24 +50,60 @@ export default async function LoginPageV1() {
         <div className="relative flex items-center justify-center px-6 py-10 lg:px-12">
           <FadeIn direction="up">
             <div className="w-full max-w-md">
-              <div className="text-center">
-                <div className="mb-6 flex justify-center">
-                  <LogoMark frameClassName="rounded-2xl p-0 shadow-md" imageClassName="h-16" />
-                </div>
-                <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
-                <p className="text-muted-foreground mt-2 text-sm">{t.login.subtitle}</p>
-              </div>
+              <div className="border-border/60 bg-card/80 rounded-[2rem] border p-6 shadow-[0_20px_70px_-35px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-8">
+                <div className="text-center">
+                  <div className="mb-6 flex justify-center">
+                    <LogoMark frameClassName="rounded-2xl p-0 shadow-md" imageClassName="h-16" />
+                  </div>
+                  <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
+                  <p className="text-muted-foreground mt-2 text-sm">{t.login.subtitle}</p>
 
-              <LoginForm
-                locale={locale}
-                labels={{
-                  email: t.login.email,
-                  emailPlaceholder: t.login.emailPlaceholder,
-                  password: t.login.password,
-                  passwordPlaceholder: t.login.passwordPlaceholder,
-                  submit: t.login.submit
-                }}
-              />
+                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
+                    {[
+                      locale === "ar" ? "حماية الدخول" : "Protected access",
+                      locale === "ar" ? "دخول عربي / إنجليزي" : "Arabic / English",
+                      locale === "ar" ? "تحقق Google" : "Google verification"
+                    ].map((item) => (
+                      <span
+                        key={item}
+                        className="border-border/60 bg-background/85 text-muted-foreground inline-flex items-center justify-center rounded-full border px-3 py-2 text-[11px] font-medium">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <LoginForm
+                  locale={locale}
+                  labels={{
+                    email: t.login.email,
+                    emailPlaceholder: t.login.emailPlaceholder,
+                    password: t.login.password,
+                    passwordPlaceholder: t.login.passwordPlaceholder,
+                    submit: t.login.submit
+                  }}
+                />
+
+                <div className="mt-6 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                  <p className="text-muted-foreground text-sm">
+                    {locale === "ar"
+                      ? "تحتاج حسابًا جديدًا أو عرضًا سريعًا؟"
+                      : "Need a new account or a quick walkthrough?"}
+                  </p>
+                  <div className="flex flex-col gap-2 sm:flex-row">
+                    <Button asChild variant="brandOutline" className="h-10 rounded-xl">
+                      <Link href={`${prefix}/request-demo`}>
+                        {locale === "ar" ? "طلب عرض تجريبي" : "Request a demo"}
+                      </Link>
+                    </Button>
+                    <Button asChild variant="ghost" className="h-10 rounded-xl">
+                      <Link href={`${prefix}/pricing`}>
+                        {locale === "ar" ? "عرض الأسعار" : "View pricing"}
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </FadeIn>
         </div>

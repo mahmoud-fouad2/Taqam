@@ -4,6 +4,7 @@ import { z } from "zod";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
+import { verifyGoogleRecaptcha } from "@/lib/security/recaptcha";
 
 const requestSchema = z.object({
   captchaToken: z.string().min(1),
@@ -13,7 +14,8 @@ const requestSchema = z.object({
   contactEmail: z.string().email(),
   contactPhone: z.string().optional().or(z.literal("")),
   employeesCount: z.string().min(1),
-  message: z.string().max(2000).optional().or(z.literal(""))
+  message: z.string().max(2000).optional().or(z.literal("")),
+  locale: z.enum(["ar", "en"]).optional()
 });
 
 const EMAIL_RATE_LIMIT = {
@@ -22,42 +24,11 @@ const EMAIL_RATE_LIMIT = {
   keyPrefix: "public:tenant_requests:contact_email"
 } as const;
 
-async function verifyRecaptcha(token: string) {
-  const secret = process.env.RECAPTCHA_SECRET_KEY;
-  if (!secret) {
-    return { ok: false, error: "RECAPTCHA_SECRET_KEY is not configured" } as const;
-  }
-
-  const body = new URLSearchParams();
-  body.set("secret", secret);
-  body.set("response", token);
-
-  const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body,
-    cache: "no-store"
-  });
-
-  const data = (await res.json()) as {
-    success: boolean;
-    score?: number;
-    action?: string;
-    challenge_ts?: string;
-    hostname?: string;
-    "error-codes"?: string[];
-  };
-
-  // Support both v2 and v3 responses.
-  if (!data.success) {
-    return { ok: false, error: "reCAPTCHA verification failed" } as const;
-  }
-
-  if (typeof data.score === "number" && data.score < 0.4) {
-    return { ok: false, error: "reCAPTCHA score too low" } as const;
-  }
-
-  return { ok: true } as const;
+function getCaptchaErrorMessage(locale: "ar" | "en") {
+  return {
+    ar: "رمز التحقق غير صحيح أو انتهت صلاحيته. حدّثه وحاول مرة أخرى.",
+    en: "The captcha is invalid or has expired. Refresh it and try again."
+  }[locale];
 }
 
 export async function POST(req: NextRequest) {
@@ -89,6 +60,7 @@ export async function POST(req: NextRequest) {
     }
 
     const input = parsed.data;
+    const locale = input.locale === "en" ? "en" : "ar";
 
     const emailRate = await checkRateLimit(req, {
       ...EMAIL_RATE_LIMIT,
@@ -106,13 +78,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const captcha = await verifyRecaptcha(input.captchaToken);
+    const captcha = await verifyGoogleRecaptcha({
+      token: input.captchaToken,
+      remoteIp: req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null
+    });
+
     if (!captcha.ok) {
-      return withRateLimitHeaders(NextResponse.json({ error: captcha.error }, { status: 400 }), {
-        limit,
-        remaining: limitInfo.remaining,
-        resetAt: limitInfo.resetAt
-      });
+      return withRateLimitHeaders(
+        NextResponse.json({ error: getCaptchaErrorMessage(locale) }, { status: 400 }),
+        {
+          limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
+      );
     }
 
     await prisma.tenantRequest.create({

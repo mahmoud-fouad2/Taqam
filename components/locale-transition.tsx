@@ -36,9 +36,9 @@ export function LocaleTransitionOverlay() {
       const cb = (e as CustomEvent<{ onCovered?: () => void }>).detail?.onCovered;
       clearTimer();
       setPhase("in");
-      // After the slide-in animation completes, trigger navigation
+      // Give the overlay enough time to cover before navigation starts.
       if (cb) {
-        timerRef.current = setTimeout(cb, 280);
+        timerRef.current = setTimeout(cb, 180);
       }
     };
     window.addEventListener(EVENT_NAME, handler);
@@ -67,32 +67,38 @@ export function LocaleTransitionOverlay() {
   return (
     <div
       aria-hidden="true"
-      className={[
-        "pointer-events-none fixed inset-0 z-[9999]",
-        "bg-primary",
-        "will-change-transform",
-        "transition-transform duration-[280ms] ease-[cubic-bezier(0.4,0,0.2,1)]",
-        phase === "idle"
-          ? "translate-x-full"
-          : phase === "in"
-            ? "translate-x-0"
-            : "-translate-x-full"
-      ].join(" ")}>
-      {/* Logo centered on the curtain — fades in once fully covering */}
-      <div
-        className={cn(
-          "absolute inset-0 flex items-center justify-center",
-          "transition-all duration-200 ease-out",
-          phase === "in" ? "scale-100 opacity-100" : "scale-90 opacity-0"
-        )}>
-        <div className="flex flex-col items-center gap-4 text-white">
-          <LogoMark
-            frameClassName="size-24 rounded-[28px] border border-white/20 bg-white/10 p-3 shadow-2xl backdrop-blur-sm"
-            imageClassName="h-11 w-auto max-w-none"
-          />
-          <div className="text-center">
-            <div className="text-lg font-semibold tracking-tight">Taqam</div>
-            <div className="text-white/70 text-sm">طاقم</div>
+      className={cn(
+        "pointer-events-none fixed inset-0 z-[9999] transition-opacity duration-200 ease-out",
+        phase === "idle" ? "opacity-0" : "opacity-100"
+      )}>
+      <div className="absolute inset-0 bg-slate-950/12 backdrop-blur-[2px] dark:bg-slate-950/35" />
+
+      <div className="absolute inset-0 flex items-center justify-center px-4">
+        <div
+          className={cn(
+            "border-border/60 bg-background/95 w-full max-w-xs rounded-[2rem] border px-6 py-5 shadow-[0_30px_80px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl",
+            "transition-all duration-200 ease-out",
+            phase === "in" && "translate-y-0 scale-100 opacity-100",
+            phase === "out" && "-translate-y-1 scale-[1.02] opacity-0",
+            phase === "idle" && "translate-y-2 scale-95 opacity-0"
+          )}>
+          <div className="flex items-center gap-4">
+            <LogoMark
+              frameClassName="size-14 rounded-[1.25rem] border border-border/70 bg-background p-2 shadow-sm"
+              imageClassName="h-7 w-auto max-w-none"
+            />
+            <div className="min-w-0">
+              <div className="text-foreground text-sm font-semibold tracking-tight">
+                Switching language
+              </div>
+              <div className="text-muted-foreground text-sm">جاري تبديل اللغة</div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex gap-1.5">
+            <span className="bg-primary/65 h-1.5 w-6 animate-pulse rounded-full [animation-delay:0ms]" />
+            <span className="bg-primary/45 h-1.5 w-6 animate-pulse rounded-full [animation-delay:120ms]" />
+            <span className="bg-primary/25 h-1.5 w-6 animate-pulse rounded-full [animation-delay:240ms]" />
           </div>
         </div>
       </div>

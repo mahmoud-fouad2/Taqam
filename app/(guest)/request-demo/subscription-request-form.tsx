@@ -5,7 +5,7 @@
  * نموذج طلب الاشتراك
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -55,12 +55,12 @@ type SubscriptionRequestFormProps = {
 
 export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps) {
   const router = useRouter();
+  const captchaRef = useRef<ReCAPTCHA>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
-
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
@@ -105,6 +105,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          locale,
           captchaToken
         })
       });
@@ -119,6 +120,8 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
       setSubmitError(
         e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request"
       );
+      captchaRef.current?.reset();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -258,15 +261,28 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         />
       </div>
 
-      <div className="border-border/60 bg-muted/20 space-y-2 rounded-2xl border p-4">
-        <Label>{isAr ? "التحقق" : "Verification"}</Label>
+      <div className="space-y-3 rounded-[1.5rem] border border-border/60 bg-muted/20 p-4">
+        <div>
+          <Label className="text-sm font-semibold">Google reCAPTCHA</Label>
+          <p className="text-muted-foreground mt-1 text-xs leading-5">
+            {isAr
+              ? "هذا التحقق مطلوب لحماية نموذج الطلب من الإرسال الآلي أو المزعج."
+              : "This challenge protects the demo form from automated or abusive submissions."}
+          </p>
+        </div>
+
         {siteKey ? (
-          <div className="flex justify-center sm:justify-start">
+          <div className="flex justify-center overflow-hidden rounded-2xl bg-background/70 p-2 sm:justify-start">
             <ReCAPTCHA
+              ref={captchaRef}
               sitekey={siteKey}
               hl={locale}
-              onChange={(token: string | null) => setCaptchaToken(token)}
+              onChange={(token) => setCaptchaToken(token)}
               onExpired={() => setCaptchaToken(null)}
+              onErrored={() => {
+                setCaptchaToken(null);
+                setSubmitError(t(locale, "captcha.invalid"));
+              }}
             />
           </div>
         ) : (
