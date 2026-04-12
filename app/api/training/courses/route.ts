@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -179,7 +180,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching training courses:", error);
+    logApiError("Error fetching training courses", error);
     return NextResponse.json({ error: "Failed to fetch training courses" }, { status: 500 });
   }
 }
@@ -243,7 +244,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating training course:", error);
+    logApiError("Error creating training course", error);
     return NextResponse.json({ error: "Failed to create training course" }, { status: 500 });
   }
 }

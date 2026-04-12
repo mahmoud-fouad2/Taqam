@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import prisma from "@/lib/db";
-import { parsePagination, requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, parsePagination, requireTenantSession } from "@/lib/api/route-helper";
 import {
   mapLoan,
   parseLoanStatus,
@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching payroll loans:", error);
+    logApiError("Error fetching payroll loans", error);
     return NextResponse.json({ error: "Failed to fetch payroll loans" }, { status: 500 });
   }
 }
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.error("Error creating payroll loan:", error);
+    logApiError("Error creating payroll loan", error);
     return NextResponse.json({ error: "Failed to create payroll loan" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -42,7 +43,7 @@ export async function GET() {
 
     return NextResponse.json({ data: Array.isArray(workflows) ? workflows : [] });
   } catch (e) {
-    console.error("GET /api/settings/workflows failed:", e);
+    logApiError("GET /api/settings/workflows failed", e);
     return NextResponse.json({ error: "Failed to load workflows" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
@@ -111,7 +112,7 @@ export async function POST(request: NextRequest) {
       { remaining: rate.remaining, resetAt: rate.resetAt, limit: RATE_LIMIT.limit }
     );
   } catch (error) {
-    console.error("POST public job resume upload error:", error);
+    logApiError("POST public job resume upload error", error);
     return withRateLimitHeaders(
       NextResponse.json({ error: "Internal server error" }, { status: 500 }),
       { remaining: rate.remaining, resetAt: rate.resetAt, limit: RATE_LIMIT.limit }

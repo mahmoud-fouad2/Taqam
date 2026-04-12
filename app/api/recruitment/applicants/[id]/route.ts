@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -69,7 +70,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json(mappedApplicant);
   } catch (error) {
-    console.error("Error fetching applicant:", error);
+    logApiError("Error fetching applicant", error);
     return NextResponse.json({ error: "فشل في جلب المتقدم" }, { status: 500 });
   }
 }
@@ -163,7 +164,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    console.error("Error updating applicant:", error);
+    logApiError("Error updating applicant", error);
     return NextResponse.json({ error: "فشل في تحديث المتقدم" }, { status: 500 });
   }
 }
@@ -210,7 +211,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting applicant:", error);
+    logApiError("Error deleting applicant", error);
     return NextResponse.json({ error: "فشل في حذف المتقدم" }, { status: 500 });
   }
 }

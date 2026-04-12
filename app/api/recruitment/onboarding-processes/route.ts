@@ -3,6 +3,7 @@
  * /api/recruitment/onboarding-processes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -94,7 +95,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error("Error fetching onboarding processes:", error);
+    logApiError("Error fetching onboarding processes", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch onboarding processes" },
       { status: 500 }
@@ -168,7 +169,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating onboarding process:", error);
+    logApiError("Error creating onboarding process", error);
     return NextResponse.json(
       { success: false, error: "Failed to create onboarding process" },
       { status: 500 }

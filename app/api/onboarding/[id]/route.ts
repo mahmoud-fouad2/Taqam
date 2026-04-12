@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(process);
   } catch (error) {
-    console.error("Error fetching process:", error);
+    logApiError("Error fetching process", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات البرنامج" }, { status: 500 });
   }
 }
@@ -182,7 +183,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       process: updatedProcess
     });
   } catch (error) {
-    console.error("Error updating process:", error);
+    logApiError("Error updating process", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -231,7 +232,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف برنامج التأهيل بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting process:", error);
+    logApiError("Error deleting process", error);
     return NextResponse.json({ error: "حدث خطأ في حذف البرنامج" }, { status: 500 });
   }
 }

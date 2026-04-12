@@ -2,6 +2,7 @@
  * Single Shift API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: shift });
   } catch (error) {
-    console.error("Error fetching shift:", error);
+    logApiError("Error fetching shift", error);
     return NextResponse.json({ error: "Failed to fetch shift" }, { status: 500 });
   }
 }
@@ -97,7 +98,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: shift });
   } catch (error) {
-    console.error("Error updating shift:", error);
+    logApiError("Error updating shift", error);
     return NextResponse.json({ error: "Failed to update shift" }, { status: 500 });
   }
 }
@@ -131,7 +132,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Shift deleted successfully" });
   } catch (error) {
-    console.error("Error deleting shift:", error);
+    logApiError("Error deleting shift", error);
     return NextResponse.json({ error: "Failed to delete shift" }, { status: 500 });
   }
 }

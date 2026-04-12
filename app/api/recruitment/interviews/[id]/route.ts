@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -77,7 +78,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json(mappedInterview);
   } catch (error) {
-    console.error("Error fetching interview:", error);
+    logApiError("Error fetching interview", error);
     return NextResponse.json({ error: "فشل في جلب المقابلة" }, { status: 500 });
   }
 }
@@ -119,7 +120,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting interview:", error);
+    logApiError("Error deleting interview", error);
     return NextResponse.json({ error: "فشل في حذف المقابلة" }, { status: 500 });
   }
 }

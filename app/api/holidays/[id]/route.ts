@@ -2,6 +2,7 @@
  * Single Holiday API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: holiday });
   } catch (error) {
-    console.error("Error fetching holiday:", error);
+    logApiError("Error fetching holiday", error);
     return NextResponse.json({ error: "Failed to fetch holiday" }, { status: 500 });
   }
 }
@@ -75,7 +76,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: holiday });
   } catch (error) {
-    console.error("Error updating holiday:", error);
+    logApiError("Error updating holiday", error);
     return NextResponse.json({ error: "Failed to update holiday" }, { status: 500 });
   }
 }
@@ -107,7 +108,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Holiday deleted successfully" });
   } catch (error) {
-    console.error("Error deleting holiday:", error);
+    logApiError("Error deleting holiday", error);
     return NextResponse.json({ error: "Failed to delete holiday" }, { status: 500 });
   }
 }

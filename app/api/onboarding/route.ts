@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -129,7 +130,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching onboarding processes:", error);
+    logApiError("Error fetching onboarding processes", error);
     return NextResponse.json({ error: "حدث خطأ في جلب عمليات التأهيل" }, { status: 500 });
   }
 }
@@ -225,7 +226,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating onboarding process:", error);
+    logApiError("Error creating onboarding process", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

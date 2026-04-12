@@ -8,6 +8,7 @@ import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 
 import { authOptions } from "@/lib/auth";
+import { logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
 
 type RouteContext = { params: Promise<{ id: string }> };
@@ -44,7 +45,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, data: admins });
   } catch (error) {
-    console.error("Error fetching tenant admins:", error);
+    logApiError("Error fetching tenant admins", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch tenant admins" },
       { status: 500 }
@@ -151,7 +152,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, message: "تم تحديث بيانات مدير الشركة" });
   } catch (error) {
-    console.error("Error updating tenant admin:", error);
+    logApiError("Error updating tenant admin", error);
     return NextResponse.json(
       { success: false, error: "Failed to update tenant admin" },
       { status: 500 }

@@ -5,6 +5,7 @@
  * DELETE - Delete plan
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -30,7 +31,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ data: plan });
   } catch (error) {
-    console.error("GET pricing plan error:", error);
+    logApiError("GET pricing plan error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -88,7 +89,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ data: plan });
   } catch (error) {
-    console.error("PUT pricing plan error:", error);
+    logApiError("PUT pricing plan error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -109,7 +110,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ message: "Plan deleted successfully" });
   } catch (error) {
-    console.error("DELETE pricing plan error:", error);
+    logApiError("DELETE pricing plan error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

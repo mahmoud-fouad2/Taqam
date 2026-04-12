@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -67,7 +68,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
       _count: undefined
     });
   } catch (error) {
-    console.error("Error fetching branch:", error);
+    logApiError("Error fetching branch", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات الفرع" }, { status: 500 });
   }
 }
@@ -125,7 +126,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       branch: updatedBranch
     });
   } catch (error) {
-    console.error("Error updating branch:", error);
+    logApiError("Error updating branch", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -192,7 +193,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف الفرع بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting branch:", error);
+    logApiError("Error deleting branch", error);
     return NextResponse.json({ error: "حدث خطأ في حذف الفرع" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@
  * /api/recruitment/onboarding-processes/:id
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -64,7 +65,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
       }
     });
   } catch (error) {
-    console.error("Error fetching onboarding process:", error);
+    logApiError("Error fetching onboarding process", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch onboarding process" },
       { status: 500 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { getPayslipById, updatePayslipAdjustments } from "@/lib/payroll/payslips";
 import type { PayslipDeduction, PayslipEarning } from "@/lib/types/payroll";
 
@@ -18,7 +18,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ data: payslip });
   } catch (error) {
-    console.error("Error fetching payslip:", error);
+    logApiError("Error fetching payslip", error);
     return NextResponse.json({ error: "Failed to fetch payslip" }, { status: 500 });
   }
 }
@@ -48,7 +48,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Error updating payslip:", error);
+    logApiError("Error updating payslip", error);
     return NextResponse.json({ error: "Failed to update payslip" }, { status: 500 });
   }
 }

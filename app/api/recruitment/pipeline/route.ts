@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -50,7 +51,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json(pipeline);
   } catch (error) {
-    console.error("Error fetching recruitment pipeline:", error);
+    logApiError("Error fetching recruitment pipeline", error);
     return NextResponse.json({ error: "فشل في جلب مسار التوظيف" }, { status: 500 });
   }
 }

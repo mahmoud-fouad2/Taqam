@@ -2,6 +2,7 @@
  * Holidays API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: holidays });
   } catch (error) {
-    console.error("Error fetching holidays:", error);
+    logApiError("Error fetching holidays", error);
     return NextResponse.json({ error: "Failed to fetch holidays" }, { status: 500 });
   }
 }
@@ -75,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: holiday }, { status: 201 });
   } catch (error) {
-    console.error("Error creating holiday:", error);
+    logApiError("Error creating holiday", error);
     return NextResponse.json({ error: "Failed to create holiday" }, { status: 500 });
   }
 }

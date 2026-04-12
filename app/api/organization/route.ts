@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -71,7 +72,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error("Error fetching organization:", error);
+    logApiError("Error fetching organization", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات الشركة" }, { status: 500 });
   }
 }
@@ -125,7 +126,7 @@ export async function PUT(request: NextRequest) {
       profile
     });
   } catch (error) {
-    console.error("Error updating organization:", error);
+    logApiError("Error updating organization", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

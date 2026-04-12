@@ -6,7 +6,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { mapPayrollPeriod } from "@/lib/payroll/periods";
 import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: periods.map(mapPayrollPeriod) });
   } catch (error) {
-    console.error("Error fetching payroll periods:", error);
+    logApiError("Error fetching payroll periods", error);
     return NextResponse.json({ error: "Failed to fetch payroll periods" }, { status: 500 });
   }
 }
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: mapPayrollPeriod(period) }, { status: 201 });
   } catch (error) {
-    console.error("Error creating payroll period:", error);
+    logApiError("Error creating payroll period", error);
     return NextResponse.json({ error: "Failed to create payroll period" }, { status: 500 });
   }
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 
 import prisma from "@/lib/db";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import type { GOSISettings } from "@/lib/types/payroll";
 
 const DEFAULT_GOSI_SETTINGS: Omit<GOSISettings, "tenantId"> = {
@@ -126,7 +126,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: gosiSettings });
   } catch (error) {
-    console.error("Error loading GOSI settings:", error);
+    logApiError("Error loading GOSI settings", error);
     return NextResponse.json({ error: "Failed to load GOSI settings" }, { status: 500 });
   }
 }
@@ -173,7 +173,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data: next });
   } catch (error) {
-    console.error("Error saving GOSI settings:", error);
+    logApiError("Error saving GOSI settings", error);
     return NextResponse.json({ error: "Failed to save GOSI settings" }, { status: 500 });
   }
 }

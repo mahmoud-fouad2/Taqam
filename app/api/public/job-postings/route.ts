@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("GET public job postings error:", error);
+    logApiError("GET public job postings error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

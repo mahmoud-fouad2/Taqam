@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       }))
     });
   } catch (error) {
-    console.error("Error fetching evaluations:", error);
+    logApiError("Error fetching evaluations", error);
     return NextResponse.json({ error: "Failed to fetch evaluations" }, { status: 500 });
   }
 }
@@ -119,7 +120,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: { id: evaluation.id } }, { status: 201 });
   } catch (error) {
-    console.error("Error creating evaluation:", error);
+    logApiError("Error creating evaluation", error);
     return NextResponse.json({ error: "Failed to create evaluation" }, { status: 500 });
   }
 }

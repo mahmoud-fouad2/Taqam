@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { getPayslipById } from "@/lib/payroll/payslips";
 import { buildPayslipHtmlDocument, escapeHtml, sanitizeFilename } from "@/lib/payroll/export";
 import { buildPayslipPdfBytes } from "@/lib/payroll/payslip-pdf.server";
@@ -79,7 +79,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       }
     });
   } catch (error) {
-    console.error("Error downloading payslip:", error);
+    logApiError("Error downloading payslip", error);
     return NextResponse.json({ error: "Failed to download payslip" }, { status: 500 });
   }
 }

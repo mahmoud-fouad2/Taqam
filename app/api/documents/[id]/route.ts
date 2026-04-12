@@ -2,6 +2,7 @@
  * Single Document API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -45,7 +46,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: document });
   } catch (error) {
-    console.error("Error fetching document:", error);
+    logApiError("Error fetching document", error);
     return NextResponse.json({ error: "Failed to fetch document" }, { status: 500 });
   }
 }
@@ -107,7 +108,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: document });
   } catch (error) {
-    console.error("Error updating document:", error);
+    logApiError("Error updating document", error);
     return NextResponse.json({ error: "Failed to update document" }, { status: 500 });
   }
 }
@@ -138,7 +139,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       try {
         await deleteFile(existingDocument.fileName);
       } catch (r2Error) {
-        console.error("Error deleting file from R2:", r2Error);
+        logApiError("Error deleting file from R2", r2Error);
         // Continue with database deletion even if R2 fails
       }
     }
@@ -150,7 +151,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Document deleted successfully" });
   } catch (error) {
-    console.error("Error deleting document:", error);
+    logApiError("Error deleting document", error);
     return NextResponse.json({ error: "Failed to delete document" }, { status: 500 });
   }
 }

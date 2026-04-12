@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching templates:", error);
+    logApiError("Error fetching templates", error);
     return NextResponse.json({ error: "حدث خطأ في جلب القوالب" }, { status: 500 });
   }
 }
@@ -143,7 +144,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: "تم إنشاء القالب بنجاح", template }, { status: 201 });
   } catch (error) {
-    console.error("Error creating template:", error);
+    logApiError("Error creating template", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

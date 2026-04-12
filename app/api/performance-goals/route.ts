@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
       stats: statusCounts
     });
   } catch (error) {
-    console.error("Error fetching goals:", error);
+    logApiError("Error fetching goals", error);
     return NextResponse.json({ error: "حدث خطأ في جلب الأهداف" }, { status: 500 });
   }
 }
@@ -219,7 +220,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating goal:", error);
+    logApiError("Error creating goal", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

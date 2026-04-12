@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import prisma from "@/lib/db";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { LOAN_ADMIN_ROLES, mapLoan } from "@/lib/payroll/loans";
 import { notifyLoanApproved } from "@/lib/notifications/send";
 
@@ -52,12 +52,12 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         employeeUserId,
         amount: Number(existing.amount),
         loanId: id
-      }).catch(console.error);
+      }).catch((error) => logApiError("Failed to send payroll loan approval notification", error));
     }
 
     return NextResponse.json({ data: mapLoan(updated) });
   } catch (error) {
-    console.error("Error approving payroll loan:", error);
+    logApiError("Error approving payroll loan", error);
     return NextResponse.json({ error: "Failed to approve payroll loan" }, { status: 500 });
   }
 }

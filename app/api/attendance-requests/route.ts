@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
@@ -167,7 +168,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: { items: items.map(serializeAttendanceRequest) } });
   } catch (error) {
-    console.error("Error fetching attendance requests:", error);
+    logApiError("Error fetching attendance requests", error);
     return NextResponse.json({ error: "Failed to fetch attendance requests" }, { status: 500 });
   }
 }
@@ -237,7 +238,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: serializeAttendanceRequest(created) }, { status: 201 });
   } catch (error) {
-    console.error("Error creating attendance request:", error);
+    logApiError("Error creating attendance request", error);
     return NextResponse.json({ error: "Failed to create attendance request" }, { status: 500 });
   }
 }

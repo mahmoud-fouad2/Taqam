@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -107,7 +108,7 @@ export async function GET(_request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching training enrollments:", error);
+    logApiError("Error fetching training enrollments", error);
     return NextResponse.json({ error: "Failed to fetch training enrollments" }, { status: 500 });
   }
 }

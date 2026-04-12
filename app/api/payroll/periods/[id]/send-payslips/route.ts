@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { sendPayslipsForPeriod } from "@/lib/payroll/payslips";
 import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
@@ -23,7 +23,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
       }
     });
   } catch (error) {
-    console.error("Error sending payroll payslips:", error);
+    logApiError("Error sending payroll payslips", error);
     const message = error instanceof Error ? error.message : "Failed to send payroll payslips";
     return NextResponse.json({ error: message }, { status: 500 });
   }

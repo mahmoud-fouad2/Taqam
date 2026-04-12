@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -123,7 +124,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching evaluations:", error);
+    logApiError("Error fetching evaluations", error);
     return NextResponse.json({ error: "حدث خطأ في جلب التقييمات" }, { status: 500 });
   }
 }
@@ -218,7 +219,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating evaluation:", error);
+    logApiError("Error creating evaluation", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

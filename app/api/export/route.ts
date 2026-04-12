@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -296,7 +297,7 @@ export async function GET(request: NextRequest) {
       total: data.length
     });
   } catch (error) {
-    console.error("Error exporting data:", error);
+    logApiError("Error exporting data", error);
     return NextResponse.json({ error: "حدث خطأ في تصدير البيانات" }, { status: 500 });
   }
 }

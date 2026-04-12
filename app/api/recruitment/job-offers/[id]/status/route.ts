@@ -3,6 +3,7 @@
  * PATCH /api/recruitment/job-offers/:id/status
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -95,7 +96,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
       }
     });
   } catch (error) {
-    console.error("Error updating offer status:", error);
+    logApiError("Error updating offer status", error);
     return NextResponse.json(
       { success: false, error: "Failed to update offer status" },
       { status: 500 }

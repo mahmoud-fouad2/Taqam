@@ -5,7 +5,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { listPayslipsForPeriod, sendPayslipsForPeriod, toIsoDate } from "@/lib/payroll/payslips";
 
 export async function GET(request: NextRequest) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error loading payslips:", error);
+    logApiError("Error loading payslips", error);
     return NextResponse.json({ error: "Failed to load payslips" }, { status: 500 });
   }
 }
@@ -73,7 +73,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error sending payslips:", error);
+    logApiError("Error sending payslips", error);
     const message = error instanceof Error ? error.message : "Failed to send payslips";
     return NextResponse.json({ error: message }, { status: 500 });
   }

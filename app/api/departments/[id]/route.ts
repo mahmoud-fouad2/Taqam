@@ -2,6 +2,7 @@
  * Single Department API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -60,7 +61,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: department });
   } catch (error) {
-    console.error("Error fetching department:", error);
+    logApiError("Error fetching department", error);
     return NextResponse.json({ error: "Failed to fetch department" }, { status: 500 });
   }
 }
@@ -148,7 +149,7 @@ async function updateDepartment(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: department });
   } catch (error) {
-    console.error("Error updating department:", error);
+    logApiError("Error updating department", error);
     return NextResponse.json({ error: "Failed to update department" }, { status: 500 });
   }
 }
@@ -217,7 +218,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting department:", error);
+    logApiError("Error deleting department", error);
     return NextResponse.json({ error: "Failed to delete department" }, { status: 500 });
   }
 }

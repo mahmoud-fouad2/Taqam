@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -194,7 +195,7 @@ export async function GET() {
 
     return NextResponse.json({ data: systemSettings });
   } catch (e) {
-    console.error("GET /api/settings/system failed:", e);
+    logApiError("GET /api/settings/system failed", e);
     return NextResponse.json({ error: "Failed to load settings" }, { status: 500 });
   }
 }
@@ -239,7 +240,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ data: systemSettings });
   } catch (e) {
-    console.error("PUT /api/settings/system failed:", e);
+    logApiError("PUT /api/settings/system failed", e);
     return NextResponse.json({ error: "Failed to save settings" }, { status: 500 });
   }
 }

@@ -3,6 +3,7 @@
  * PATCH /api/recruitment/onboarding-processes/:id/tasks/:taskId
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -105,7 +106,7 @@ export async function PATCH(
       }
     });
   } catch (error) {
-    console.error("Error updating onboarding task:", error);
+    logApiError("Error updating onboarding task", error);
     return NextResponse.json(
       { success: false, error: "Failed to update onboarding task" },
       { status: 500 }

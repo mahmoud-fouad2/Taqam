@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -87,7 +88,7 @@ export async function GET(request: NextRequest) {
       }))
     });
   } catch (error) {
-    console.error("Error fetching goals:", error);
+    logApiError("Error fetching goals", error);
     return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 });
   }
 }
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: { id: goal.id } }, { status: 201 });
   } catch (error) {
-    console.error("Error creating goal:", error);
+    logApiError("Error creating goal", error);
     return NextResponse.json({ error: "Failed to create goal" }, { status: 500 });
   }
 }

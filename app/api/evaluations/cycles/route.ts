@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -108,7 +109,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching evaluation cycles:", error);
+    logApiError("Error fetching evaluation cycles", error);
     return NextResponse.json({ error: "حدث خطأ في جلب دورات التقييم" }, { status: 500 });
   }
 }
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating evaluation cycle:", error);
+    logApiError("Error creating evaluation cycle", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

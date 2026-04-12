@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { listPayslipsForPeriod } from "@/lib/payroll/payslips";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,7 +21,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ data: result.payslips });
   } catch (error) {
-    console.error("Error fetching period payslips:", error);
+    logApiError("Error fetching period payslips", error);
     return NextResponse.json({ error: "Failed to fetch period payslips" }, { status: 500 });
   }
 }

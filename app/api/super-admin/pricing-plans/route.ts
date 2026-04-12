@@ -4,6 +4,7 @@
  * POST - Create new plan
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -97,7 +98,7 @@ export async function GET() {
 
     return NextResponse.json({ data: plans });
   } catch (error) {
-    console.error("GET pricing plans error:", error);
+    logApiError("GET pricing plans error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -143,7 +144,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: plan }, { status: 201 });
   } catch (error) {
-    console.error("POST pricing plan error:", error);
+    logApiError("POST pricing plan error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

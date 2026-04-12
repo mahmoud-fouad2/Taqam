@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -72,7 +73,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(goal);
   } catch (error) {
-    console.error("Error fetching goal:", error);
+    logApiError("Error fetching goal", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات الهدف" }, { status: 500 });
   }
 }
@@ -163,7 +164,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       goal: updatedGoal
     });
   } catch (error) {
-    console.error("Error updating goal:", error);
+    logApiError("Error updating goal", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -211,7 +212,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف الهدف بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting goal:", error);
+    logApiError("Error deleting goal", error);
     return NextResponse.json({ error: "حدث خطأ في حذف الهدف" }, { status: 500 });
   }
 }

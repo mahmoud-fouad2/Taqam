@@ -4,6 +4,7 @@
  * POST /api/payroll/structures - Create salary structure
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -29,7 +30,7 @@ export async function GET() {
 
     return NextResponse.json({ data: structures });
   } catch (error) {
-    console.error("Error fetching salary structures:", error);
+    logApiError("Error fetching salary structures", error);
     return NextResponse.json({ error: "Failed to fetch salary structures" }, { status: 500 });
   }
 }
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: structure }, { status: 201 });
   } catch (error) {
-    console.error("Error creating salary structure:", error);
+    logApiError("Error creating salary structure", error);
     return NextResponse.json({ error: "Failed to create salary structure" }, { status: 500 });
   }
 }

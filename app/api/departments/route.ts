@@ -4,6 +4,7 @@
  * POST /api/departments - Create department
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: departments });
   } catch (error) {
-    console.error("Error fetching departments:", error);
+    logApiError("Error fetching departments", error);
     return NextResponse.json({ error: "Failed to fetch departments" }, { status: 500 });
   }
 }
@@ -144,7 +145,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: department }, { status: 201 });
   } catch (error) {
-    console.error("Error creating department:", error);
+    logApiError("Error creating department", error);
     return NextResponse.json({ error: "Failed to create department" }, { status: 500 });
   }
 }

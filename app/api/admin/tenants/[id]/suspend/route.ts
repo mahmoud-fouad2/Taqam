@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logApiError } from "@/lib/api/route-helper";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
       }
     });
   } catch (error) {
-    console.error("Error suspending tenant:", error);
+    logApiError("Error suspending tenant", error);
     return NextResponse.json(
       { success: false, error: "Failed to suspend tenant" },
       { status: 500 }

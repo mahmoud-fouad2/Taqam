@@ -3,6 +3,7 @@
  * /api/recruitment/job-offers/:id
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -131,7 +132,7 @@ export async function GET(_request: NextRequest, context: { params: Promise<{ id
 
     return NextResponse.json({ success: true, data: mapOffer(offer) });
   } catch (error) {
-    console.error("Error fetching job offer:", error);
+    logApiError("Error fetching job offer", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch job offer" },
       { status: 500 }
@@ -266,7 +267,7 @@ export async function PATCH(request: NextRequest, context: { params: Promise<{ i
 
     return NextResponse.json({ success: true, data: mapOffer(updated) });
   } catch (error) {
-    console.error("Error updating job offer:", error);
+    logApiError("Error updating job offer", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
@@ -296,7 +297,7 @@ export async function DELETE(_request: NextRequest, context: { params: Promise<{
     await prisma.jobOffer.deleteMany({ where: { id, tenantId } });
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting job offer:", error);
+    logApiError("Error deleting job offer", error);
     return NextResponse.json(
       { success: false, error: "Failed to delete job offer" },
       { status: 500 }

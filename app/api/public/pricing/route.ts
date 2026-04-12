@@ -3,6 +3,7 @@
  * GET - Get active pricing plans (no auth required)
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -48,7 +49,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error("GET public pricing error:", error);
+    logApiError("GET public pricing error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

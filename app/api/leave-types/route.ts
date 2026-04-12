@@ -2,6 +2,7 @@
  * Leave Types API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: leaveTypes });
   } catch (error) {
-    console.error("Error fetching leave types:", error);
+    logApiError("Error fetching leave types", error);
     return NextResponse.json({ error: "Failed to fetch leave types" }, { status: 500 });
   }
 }
@@ -113,7 +114,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: leaveType }, { status: 201 });
   } catch (error) {
-    console.error("Error creating leave type:", error);
+    logApiError("Error creating leave type", error);
     return NextResponse.json({ error: "Failed to create leave type" }, { status: 500 });
   }
 }

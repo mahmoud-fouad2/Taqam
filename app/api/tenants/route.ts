@@ -2,6 +2,7 @@
  * Tenants API Routes - Super Admin Only
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -120,7 +121,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching tenants:", error);
+    logApiError("Error fetching tenants", error);
     return NextResponse.json({ error: "Failed to fetch tenants" }, { status: 500 });
   }
 }
@@ -230,7 +231,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: tenant }, { status: 201 });
   } catch (error) {
-    console.error("Error creating tenant:", error);
+    logApiError("Error creating tenant", error);
     return NextResponse.json({ error: "Failed to create tenant" }, { status: 500 });
   }
 }

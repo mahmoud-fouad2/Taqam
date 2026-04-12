@@ -2,6 +2,7 @@
  * Single Job Title API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: jobTitle });
   } catch (error) {
-    console.error("Error fetching job title:", error);
+    logApiError("Error fetching job title", error);
     return NextResponse.json({ error: "Failed to fetch job title" }, { status: 500 });
   }
 }
@@ -88,7 +89,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: jobTitle });
   } catch (error) {
-    console.error("Error updating job title:", error);
+    logApiError("Error updating job title", error);
     return NextResponse.json({ error: "Failed to update job title" }, { status: 500 });
   }
 }
@@ -122,7 +123,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Job title deleted successfully" });
   } catch (error) {
-    console.error("Error deleting job title:", error);
+    logApiError("Error deleting job title", error);
     return NextResponse.json({ error: "Failed to delete job title" }, { status: 500 });
   }
 }

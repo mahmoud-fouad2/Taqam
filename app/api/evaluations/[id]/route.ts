@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -99,7 +100,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(evaluation);
   } catch (error) {
-    console.error("Error fetching evaluation:", error);
+    logApiError("Error fetching evaluation", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات التقييم" }, { status: 500 });
   }
 }
@@ -201,7 +202,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       evaluation: updatedEvaluation
     });
   } catch (error) {
-    console.error("Error updating evaluation:", error);
+    logApiError("Error updating evaluation", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -258,7 +259,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف التقييم بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting evaluation:", error);
+    logApiError("Error deleting evaluation", error);
     return NextResponse.json({ error: "حدث خطأ في حذف التقييم" }, { status: 500 });
   }
 }

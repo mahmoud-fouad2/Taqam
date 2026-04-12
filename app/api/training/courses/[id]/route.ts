@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -79,7 +80,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: null });
   } catch (error) {
-    console.error("Error deleting training course:", error);
+    logApiError("Error deleting training course", error);
     return NextResponse.json({ error: "Failed to delete training course" }, { status: 500 });
   }
 }
@@ -151,7 +152,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: { id } });
   } catch (error) {
-    console.error("Error updating training course:", error);
+    logApiError("Error updating training course", error);
     return NextResponse.json({ error: "Failed to update training course" }, { status: 500 });
   }
 }

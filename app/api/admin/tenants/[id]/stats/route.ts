@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logApiError } from "@/lib/api/route-helper";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -55,7 +56,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
       }
     });
   } catch (error) {
-    console.error("Error fetching tenant stats:", error);
+    logApiError("Error fetching tenant stats", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch tenant stats" },
       { status: 500 }

@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -120,7 +121,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: serializeAttendanceRequest(requestItem) });
   } catch (error) {
-    console.error("Error fetching attendance request:", error);
+    logApiError("Error fetching attendance request", error);
     return NextResponse.json({ error: "Failed to fetch attendance request" }, { status: 500 });
   }
 }
@@ -192,7 +193,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: serializeAttendanceRequest(updated) });
   } catch (error) {
-    console.error("Error updating attendance request:", error);
+    logApiError("Error updating attendance request", error);
     return NextResponse.json({ error: "Failed to update attendance request" }, { status: 500 });
   }
 }
@@ -237,7 +238,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error cancelling attendance request:", error);
+    logApiError("Error cancelling attendance request", error);
     return NextResponse.json({ error: "Failed to cancel attendance request" }, { status: 500 });
   }
 }

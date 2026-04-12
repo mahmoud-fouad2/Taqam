@@ -4,6 +4,7 @@
  * GET /api/audit-logs/stats - Get audit log statistics
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -53,7 +54,7 @@ export async function GET(request: NextRequest) {
       pagination: result.pagination
     });
   } catch (error) {
-    console.error("Error fetching audit logs:", error);
+    logApiError("Error fetching audit logs", error);
     return NextResponse.json({ error: "Failed to fetch audit logs" }, { status: 500 });
   }
 }

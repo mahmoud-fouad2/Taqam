@@ -3,6 +3,7 @@
  * /api/recruitment/interviews
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -145,7 +146,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error("Error fetching interviews:", error);
+    logApiError("Error fetching interviews", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch interviews" },
       { status: 500 }
@@ -216,7 +217,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating interview:", error);
+    logApiError("Error creating interview", error);
     return NextResponse.json(
       { success: false, error: "Failed to create interview" },
       { status: 500 }

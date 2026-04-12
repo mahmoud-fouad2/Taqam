@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -104,14 +105,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
             employeeUserId,
             courseTitle,
             enrollmentId: id
-          }).catch(console.error),
+          }).catch((error) => logApiError("Failed to send training enrollment approval notification", error)),
         rejected: () =>
           notifyTrainingEnrollmentRejected({
             tenantId,
             employeeUserId,
             courseTitle,
             enrollmentId: id
-          }).catch(console.error),
+          }).catch((error) => logApiError("Failed to send training enrollment rejection notification", error)),
         completed: () =>
           notifyTrainingCompleted({
             tenantId,
@@ -119,14 +120,14 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
             courseTitle,
             score: input.score ?? undefined,
             enrollmentId: id
-          }).catch(console.error)
+          }).catch((error) => logApiError("Failed to send training completion notification", error))
       };
       notifyMap[input.status]?.();
     }
 
     return NextResponse.json(responseData);
   } catch (error) {
-    console.error("Error updating training enrollment:", error);
+    logApiError("Error updating training enrollment", error);
     return NextResponse.json({ error: "Failed to update training enrollment" }, { status: 500 });
   }
 }

@@ -2,6 +2,7 @@
  * Job Titles API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: jobTitles });
   } catch (error) {
-    console.error("Error fetching job titles:", error);
+    logApiError("Error fetching job titles", error);
     return NextResponse.json({ error: "Failed to fetch job titles" }, { status: 500 });
   }
 }
@@ -73,7 +74,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: jobTitle }, { status: 201 });
   } catch (error) {
-    console.error("Error creating job title:", error);
+    logApiError("Error creating job title", error);
     return NextResponse.json({ error: "Failed to create job title" }, { status: 500 });
   }
 }

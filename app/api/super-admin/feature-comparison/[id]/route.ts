@@ -4,6 +4,7 @@
  * DELETE - Delete feature
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -36,7 +37,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     return NextResponse.json({ data: feature });
   } catch (error) {
-    console.error("PUT feature comparison error:", error);
+    logApiError("PUT feature comparison error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -57,7 +58,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     return NextResponse.json({ message: "Feature deleted successfully" });
   } catch (error) {
-    console.error("DELETE feature comparison error:", error);
+    logApiError("DELETE feature comparison error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 
 import { getPublicJobPostingById } from "@/lib/recruitment/public";
@@ -17,7 +18,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: job });
   } catch (error) {
-    console.error("GET public job posting error:", error);
+    logApiError("GET public job posting error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

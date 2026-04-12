@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { ensurePayslipsForPeriod, summarizePayrollPeriod } from "@/lib/payroll/payslips";
 import {
   canTransitionPayrollPeriodStatus,
@@ -48,7 +48,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
-    console.error("Error submitting payroll period:", error);
+    logApiError("Error submitting payroll period", error);
     return NextResponse.json({ error: "Failed to submit payroll period" }, { status: 500 });
   }
 }

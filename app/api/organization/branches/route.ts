@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -96,7 +97,7 @@ export async function GET(request: NextRequest) {
       stats
     });
   } catch (error) {
-    console.error("Error fetching branches:", error);
+    logApiError("Error fetching branches", error);
     return NextResponse.json({ error: "حدث خطأ في جلب الفروع" }, { status: 500 });
   }
 }
@@ -146,7 +147,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating branch:", error);
+    logApiError("Error creating branch", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

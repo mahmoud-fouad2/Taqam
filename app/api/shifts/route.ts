@@ -2,6 +2,7 @@
  * Shifts API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: shifts });
   } catch (error) {
-    console.error("Error fetching shifts:", error);
+    logApiError("Error fetching shifts", error);
     return NextResponse.json({ error: "Failed to fetch shifts" }, { status: 500 });
   }
 }
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: shift }, { status: 201 });
   } catch (error) {
-    console.error("Error creating shift:", error);
+    logApiError("Error creating shift", error);
     return NextResponse.json({ error: "Failed to create shift" }, { status: 500 });
   }
 }

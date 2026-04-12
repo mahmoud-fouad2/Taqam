@@ -3,6 +3,7 @@
  * /api/recruitment/applicants
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -110,7 +111,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error("Error fetching applicants:", error);
+    logApiError("Error fetching applicants", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch applicants" },
       { status: 500 }
@@ -179,7 +180,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating applicant:", error);
+    logApiError("Error creating applicant", error);
     return NextResponse.json(
       { success: false, error: "Failed to create applicant" },
       { status: 500 }

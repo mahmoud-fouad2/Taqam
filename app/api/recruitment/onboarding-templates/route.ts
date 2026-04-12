@@ -3,6 +3,7 @@
  * /api/recruitment/onboarding-templates
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -48,7 +49,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error("Error fetching onboarding templates:", error);
+    logApiError("Error fetching onboarding templates", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch onboarding templates" },
       { status: 500 }
@@ -112,7 +113,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating onboarding template:", error);
+    logApiError("Error creating onboarding template", error);
     return NextResponse.json(
       { success: false, error: "Failed to create onboarding template" },
       { status: 500 }

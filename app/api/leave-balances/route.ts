@@ -4,7 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
-import { requireSession } from "@/lib/api/route-helper";
+import { logApiError, requireSession } from "@/lib/api/route-helper";
 import type { Prisma } from "@prisma/client";
 
 function isSuperAdmin(role: string | undefined) {
@@ -110,7 +110,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: items });
   } catch (error) {
-    console.error("Error fetching leave balances:", error);
+    logApiError("Error fetching leave balances", error);
     return NextResponse.json({ error: "Failed to fetch leave balances" }, { status: 500 });
   }
 }

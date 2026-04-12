@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
 import prisma from "@/lib/db";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { LOAN_ADMIN_ROLES, mapLoan } from "@/lib/payroll/loans";
 import { notifyLoanRejected } from "@/lib/notifications/send";
 
@@ -54,7 +54,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
         employeeUserId,
         reason: validated.reason,
         loanId: id
-      }).catch(console.error);
+      }).catch((error) => logApiError("Failed to send payroll loan rejection notification", error));
     }
 
     return NextResponse.json({ data: mapLoan(updated) });
@@ -66,7 +66,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
-    console.error("Error rejecting payroll loan:", error);
+    logApiError("Error rejecting payroll loan", error);
     return NextResponse.json({ error: "Failed to reject payroll loan" }, { status: 500 });
   }
 }

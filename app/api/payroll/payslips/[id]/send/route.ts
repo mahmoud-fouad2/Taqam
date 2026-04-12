@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { sendSinglePayslip } from "@/lib/payroll/payslips";
 
 export async function POST(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -22,7 +22,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: { id: updated.id } });
   } catch (error) {
-    console.error("Error sending payslip:", error);
+    logApiError("Error sending payslip", error);
     const message = error instanceof Error ? error.message : "Failed to send payslip";
     return NextResponse.json({ error: message }, { status: 500 });
   }

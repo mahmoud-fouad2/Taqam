@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -205,7 +206,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(plan);
   } catch (error) {
-    console.error("Error fetching plan:", error);
+    logApiError("Error fetching plan", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات الخطة" }, { status: 500 });
   }
 }
@@ -377,7 +378,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
             message: notifyPayload.message,
             link: `/dashboard/development-plans`,
             metadata: { planId: id }
-          }).catch((err) => console.error("[notifications] dev-plan status:", err));
+          }).catch((err) => logApiError("[notifications] dev-plan status", err));
         }
 
         // For PENDING_APPROVAL — also notify HR managers in tenant
@@ -410,7 +411,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       plan: updatedPlan
     });
   } catch (error) {
-    console.error("Error updating plan:", error);
+    logApiError("Error updating plan", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -465,7 +466,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف خطة التطوير بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting plan:", error);
+    logApiError("Error deleting plan", error);
     return NextResponse.json({ error: "حدث خطأ في حذف الخطة" }, { status: 500 });
   }
 }

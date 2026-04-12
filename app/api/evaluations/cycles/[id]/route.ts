@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -76,7 +77,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(cycle);
   } catch (error) {
-    console.error("Error fetching cycle:", error);
+    logApiError("Error fetching cycle", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات الدورة" }, { status: 500 });
   }
 }
@@ -135,7 +136,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       cycle: updatedCycle
     });
   } catch (error) {
-    console.error("Error updating cycle:", error);
+    logApiError("Error updating cycle", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -195,7 +196,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف الدورة بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting cycle:", error);
+    logApiError("Error deleting cycle", error);
     return NextResponse.json({ error: "حدث خطأ في حذف الدورة" }, { status: 500 });
   }
 }

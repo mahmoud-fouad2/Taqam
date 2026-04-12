@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -234,7 +235,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching development plans:", error);
+    logApiError("Error fetching development plans", error);
     return NextResponse.json({ error: "حدث خطأ في جلب خطط التطوير" }, { status: 500 });
   }
 }
@@ -360,7 +361,7 @@ export async function POST(request: NextRequest) {
         message: `تم إنشاء خطة تطوير جديدة لك: "${plan.title}"`,
         link: `/dashboard/development-plans`,
         metadata: { planId: plan.id, employeeName: empName }
-      }).catch((err) => console.error("[notifications] dev-plan create:", err));
+      }).catch((err) => logApiError("[notifications] dev-plan create", err));
     }
 
     return NextResponse.json(
@@ -371,7 +372,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating development plan:", error);
+    logApiError("Error creating development plan", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(

@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -79,7 +80,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    console.error("Error updating applicant status:", error);
+    logApiError("Error updating applicant status", error);
     return NextResponse.json({ error: "فشل في تحديث حالة المتقدم" }, { status: 500 });
   }
 }

@@ -7,16 +7,18 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import type { TenantStatus } from "@/lib/types/tenant";
 import { hash } from "bcryptjs";
 import { randomBytes, randomUUID } from "node:crypto";
 
+import { logApiError } from "@/lib/api/route-helper";
 import { createActionToken } from "@/lib/security/action-tokens";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
 import { mapTenantFromDb, readString } from "@/lib/admin/tenant-mapping";
 
 const UNLIMITED_EMPLOYEES = 1_000_000;
+type PricingSlug = "starter" | "business" | "enterprise";
 
 const VALID_TENANT_STATUSES = new Set(["PENDING", "ACTIVE", "SUSPENDED", "CANCELLED"]);
 
@@ -40,12 +42,14 @@ function mapPlanToDb(plan: unknown): "TRIAL" | "BASIC" | "PROFESSIONAL" | "ENTER
   return "TRIAL";
 }
 
-function planToPricingSlug(
-  plan: ReturnType<typeof mapPlanToDb>
-): "starter" | "business" | "enterprise" {
+function planToPricingSlug(plan: ReturnType<typeof mapPlanToDb>): PricingSlug {
   if (plan === "ENTERPRISE") return "enterprise";
   if (plan === "PROFESSIONAL") return "business";
   return "starter";
+}
+
+function isPricingSlug(value: string): value is PricingSlug {
+  return value === "starter" || value === "business" || value === "enterprise";
 }
 
 function readBoolean(v: unknown): boolean | undefined {
@@ -88,7 +92,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get("status");
     const subscriptionPlan = searchParams.get("subscriptionPlan");
 
-    const where: any = {
+    const where: Prisma.TenantWhereInput = {
       // Default: hide cancelled/deleted tenants unless explicitly requested.
       status: { not: "CANCELLED" }
     };
@@ -146,7 +150,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching tenants:", error);
+    logApiError("Error fetching tenants", error);
     return NextResponse.json({ success: false, error: "Failed to fetch tenants" }, { status: 500 });
   }
 }
@@ -235,12 +239,9 @@ export async function POST(request: NextRequest) {
       Number.isFinite(trialMaxEmployeesRaw) && trialMaxEmployeesRaw > 0 ? trialMaxEmployeesRaw : 10;
 
     const planSlugFromBody = typeof body.plan === "string" ? body.plan.trim().toLowerCase() : "";
-    const pricingSlug: "starter" | "business" | "enterprise" =
-      planSlugFromBody === "starter" ||
-      planSlugFromBody === "business" ||
-      planSlugFromBody === "enterprise"
-        ? (planSlugFromBody as any)
-        : planToPricingSlug(plan);
+    const pricingSlug: PricingSlug = isPricingSlug(planSlugFromBody)
+      ? planSlugFromBody
+      : planToPricingSlug(plan);
 
     const pricingPlan =
       plan === "TRIAL"
@@ -340,7 +341,7 @@ export async function POST(request: NextRequest) {
       });
 
       const adminUserId = randomUUID();
-      const adminRows = await tx.$queryRawUnsafe<
+      const adminRows = await tx.$queryRaw<
         Array<{
           id: string;
           email: string;
@@ -348,8 +349,7 @@ export async function POST(request: NextRequest) {
           lastName: string;
           passwordChangedAt: Date | null;
         }>
-      >(
-        `
+      >(Prisma.sql`
           INSERT INTO "User" (
             "id",
             "tenantId",
@@ -366,14 +366,14 @@ export async function POST(request: NextRequest) {
             "updatedAt"
           )
           VALUES (
-            $1,
-            $2,
-            $3,
-            $4,
-            $5,
-            $6,
-            $7,
-            $8,
+            ${adminUserId},
+            ${createdTenant.id},
+            ${adminEmail},
+            ${passwordHash},
+            ${firstName},
+            ${lastName},
+            ${"TENANT_ADMIN"},
+            ${"PENDING_VERIFICATION"},
             ARRAY[]::text[],
             0,
             NULL,
@@ -381,20 +381,9 @@ export async function POST(request: NextRequest) {
             NOW()
           )
           RETURNING "id", "email", "firstName", "lastName", "passwordChangedAt"
-        `,
-        adminUserId,
-        createdTenant.id,
-        adminEmail,
-        passwordHash,
-        firstName,
-        lastName,
-        "TENANT_ADMIN",
-        "PENDING_VERIFICATION"
-      );
+        `);
 
       const createdAdmin = adminRows[0]!;
-
-
 
       await tx.auditLog.create({
         data: {
@@ -486,7 +475,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error creating tenant:", error);
+    logApiError("Error creating tenant", error);
     return NextResponse.json({ success: false, error: "Failed to create tenant" }, { status: 500 });
   }
 }

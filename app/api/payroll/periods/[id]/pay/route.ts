@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import {
   getPayrollPeriodStatusTransitionError,
   mapPayrollPeriod,
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ data: mapPayrollPeriod(updated.period) });
   } catch (error) {
-    console.error("Error marking payroll period as paid:", error);
+    logApiError("Error marking payroll period as paid", error);
     return NextResponse.json({ error: "Failed to mark payroll period as paid" }, { status: 500 });
   }
 }

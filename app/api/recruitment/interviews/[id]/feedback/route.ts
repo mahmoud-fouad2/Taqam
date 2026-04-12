@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -93,7 +94,7 @@ export async function POST(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    console.error("Error submitting interview feedback:", error);
+    logApiError("Error submitting interview feedback", error);
     return NextResponse.json({ error: "فشل في حفظ تقييم المقابلة" }, { status: 500 });
   }
 }

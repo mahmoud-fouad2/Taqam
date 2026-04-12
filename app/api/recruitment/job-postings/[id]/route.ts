@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { ExperienceLevel, JobPostingStatus, JobType } from "@prisma/client";
 import prisma from "@/lib/db";
 import { z } from "zod";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 
 type RouteContext = { params: Promise<{ id: string }> };
 const RECRUITMENT_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
@@ -61,7 +61,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json(mappedJobPosting);
   } catch (error) {
-    console.error("Error fetching job posting:", error);
+    logApiError("Error fetching job posting", error);
     return NextResponse.json({ error: "فشل في جلب الوظيفة" }, { status: 500 });
   }
 }
@@ -290,7 +290,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
         { status: 400 }
       );
     }
-    console.error("Error updating job posting:", error);
+    logApiError("Error updating job posting", error);
     return NextResponse.json({ error: "فشل في تحديث الوظيفة" }, { status: 500 });
   }
 }
@@ -332,7 +332,7 @@ export async function DELETE(_request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting job posting:", error);
+    logApiError("Error deleting job posting", error);
     return NextResponse.json({ error: "فشل في حذف الوظيفة" }, { status: 500 });
   }
 }

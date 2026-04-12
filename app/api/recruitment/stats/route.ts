@@ -3,6 +3,7 @@
  * /api/recruitment/stats
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -54,7 +55,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error fetching recruitment stats:", error);
+    logApiError("Error fetching recruitment stats", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch recruitment stats" },
       { status: 500 }

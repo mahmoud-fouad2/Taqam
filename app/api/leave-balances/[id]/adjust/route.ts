@@ -2,6 +2,7 @@
  * Adjust Leave Balance API Route (HR/admin)
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -68,7 +69,7 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Error adjusting leave balance:", error);
+    logApiError("Error adjusting leave balance", error);
     return NextResponse.json({ error: "Failed to adjust leave balance" }, { status: 500 });
   }
 }

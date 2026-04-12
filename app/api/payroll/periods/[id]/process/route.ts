@@ -4,7 +4,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { ensurePayslipsForPeriod, summarizePayrollPeriod } from "@/lib/payroll/payslips";
 import {
@@ -68,7 +68,7 @@ export async function POST(_request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: mapPayrollPeriod(updated) });
   } catch (error) {
-    console.error("Error processing payroll period:", error);
+    logApiError("Error processing payroll period", error);
     return NextResponse.json({ error: "Failed to process payroll period" }, { status: 500 });
   }
 }

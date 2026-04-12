@@ -2,6 +2,7 @@
  * Single Tenant API Routes - Super Admin Only
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: tenant });
   } catch (error) {
-    console.error("Error fetching tenant:", error);
+    logApiError("Error fetching tenant", error);
     return NextResponse.json({ error: "Failed to fetch tenant" }, { status: 500 });
   }
 }
@@ -103,7 +104,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: tenant });
   } catch (error) {
-    console.error("Error updating tenant:", error);
+    logApiError("Error updating tenant", error);
     return NextResponse.json({ error: "Failed to update tenant" }, { status: 500 });
   }
 }
@@ -137,7 +138,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Tenant deleted successfully" });
   } catch (error) {
-    console.error("Error deleting tenant:", error);
+    logApiError("Error deleting tenant", error);
     return NextResponse.json({ error: "Failed to delete tenant" }, { status: 500 });
   }
 }

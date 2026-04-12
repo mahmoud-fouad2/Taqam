@@ -4,6 +4,7 @@
  * POST - Create new feature
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -82,7 +83,7 @@ export async function GET() {
 
     return NextResponse.json({ data: features });
   } catch (error) {
-    console.error("GET feature comparison error:", error);
+    logApiError("GET feature comparison error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -111,7 +112,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ data: feature }, { status: 201 });
   } catch (error) {
-    console.error("POST feature comparison error:", error);
+    logApiError("POST feature comparison error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

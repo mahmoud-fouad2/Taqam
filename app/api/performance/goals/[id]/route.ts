@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -41,7 +42,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: { id: updated.id } });
   } catch (error) {
-    console.error("Error updating goal:", error);
+    logApiError("Error updating goal", error);
     return NextResponse.json({ error: "Failed to update goal" }, { status: 500 });
   }
 }
@@ -72,7 +73,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ data: null });
   } catch (error) {
-    console.error("Error deleting goal:", error);
+    logApiError("Error deleting goal", error);
     return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
   }
 }

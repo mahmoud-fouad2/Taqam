@@ -2,6 +2,7 @@
  * Leave Type (single) API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -111,7 +112,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.error("Error updating leave type:", error);
+    logApiError("Error updating leave type", error);
     return NextResponse.json({ error: "Failed to update leave type" }, { status: 500 });
   }
 }
@@ -158,7 +159,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       );
     }
 
-    console.error("Error deleting leave type:", error);
+    logApiError("Error deleting leave type", error);
     return NextResponse.json({ error: "Failed to delete leave type" }, { status: 500 });
   }
 }

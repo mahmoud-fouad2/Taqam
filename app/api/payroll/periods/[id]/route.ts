@@ -5,7 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { PayrollPeriodStatus } from "@prisma/client";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import {
   getPayrollPeriodStatusTransitionError,
   getPayrollPeriodById,
@@ -30,7 +30,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ data: mapPayrollPeriod(period) });
   } catch (error) {
-    console.error("Error fetching payroll period:", error);
+    logApiError("Error fetching payroll period", error);
     return NextResponse.json({ error: "Failed to fetch payroll period" }, { status: 500 });
   }
 }
@@ -77,7 +77,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: mapPayrollPeriod(updated.period) });
   } catch (error) {
-    console.error("Error updating payroll period:", error);
+    logApiError("Error updating payroll period", error);
     return NextResponse.json({ error: "Failed to update payroll period" }, { status: 500 });
   }
 }

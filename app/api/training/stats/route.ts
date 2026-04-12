@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -69,7 +70,7 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error("Error fetching training stats:", error);
+    logApiError("Error fetching training stats", error);
     return NextResponse.json({ error: "Failed to fetch training stats" }, { status: 500 });
   }
 }

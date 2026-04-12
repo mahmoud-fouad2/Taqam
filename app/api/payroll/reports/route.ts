@@ -8,7 +8,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getMonthName } from "@/lib/types/payroll";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { ensurePayslipsForPeriod } from "@/lib/payroll/payslips";
 import { buildCsv } from "@/lib/payroll/export";
 import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
@@ -241,7 +241,7 @@ export async function GET(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error generating payroll report:", error);
+    logApiError("Error generating payroll report", error);
     return NextResponse.json({ error: "Failed to generate payroll report" }, { status: 500 });
   }
 }

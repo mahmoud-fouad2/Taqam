@@ -2,6 +2,7 @@
  * Single Announcement API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: announcement });
   } catch (error) {
-    console.error("Error fetching announcement:", error);
+    logApiError("Error fetching announcement", error);
     return NextResponse.json({ error: "Failed to fetch announcement" }, { status: 500 });
   }
 }
@@ -82,7 +83,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ data: announcement });
   } catch (error) {
-    console.error("Error updating announcement:", error);
+    logApiError("Error updating announcement", error);
     return NextResponse.json({ error: "Failed to update announcement" }, { status: 500 });
   }
 }
@@ -114,7 +115,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     return NextResponse.json({ message: "Announcement deleted successfully" });
   } catch (error) {
-    console.error("Error deleting announcement:", error);
+    logApiError("Error deleting announcement", error);
     return NextResponse.json({ error: "Failed to delete announcement" }, { status: 500 });
   }
 }

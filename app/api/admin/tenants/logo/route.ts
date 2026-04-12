@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { logApiError } from "@/lib/api/route-helper";
 import { isR2Configured, uploadFile } from "@/lib/r2-storage";
 
 export async function POST(request: NextRequest) {
@@ -77,7 +78,7 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    console.error("Error uploading tenant logo:", error);
+    logApiError("Error uploading tenant logo", error);
     return NextResponse.json({ error: "Failed to upload tenant logo" }, { status: 500 });
   }
 }

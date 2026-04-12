@@ -3,6 +3,7 @@
  * /api/recruitment/job-offers
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -173,7 +174,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: offers.map(mapOffer) });
   } catch (error) {
-    console.error("Error fetching job offers:", error);
+    logApiError("Error fetching job offers", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch job offers" },
       { status: 500 }
@@ -284,7 +285,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: mapOffer(created) });
   } catch (error) {
-    console.error("Error creating job offer:", error);
+    logApiError("Error creating job offer", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantSession } from "@/lib/api/route-helper";
 import { getScopedLoan, mapLoan } from "@/lib/payroll/loans";
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -27,7 +27,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ data: mapLoan(result.loan) });
   } catch (error) {
-    console.error("Error fetching payroll loan:", error);
+    logApiError("Error fetching payroll loan", error);
     return NextResponse.json({ error: "Failed to fetch payroll loan" }, { status: 500 });
   }
 }

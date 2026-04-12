@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const updateSchema = z.object({
   status: z.enum(["OPEN", "IN_PROGRESS", "WAITING_CUSTOMER", "RESOLVED", "CLOSED"]).optional(),
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ data: ticket });
   } catch (error) {
-    console.error("Error fetching ticket:", error);
+    logApiError("Error fetching ticket", error);
     return NextResponse.json({ error: "Failed to fetch ticket" }, { status: 500 });
   }
 }
@@ -106,7 +106,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Error updating ticket:", error);
+    logApiError("Error updating ticket", error);
     return NextResponse.json({ error: "Failed to update ticket" }, { status: 500 });
   }
 }

@@ -1,9 +1,10 @@
-﻿/**
+/**
  * Platform Settings API (Super Admin Only)
  * GET  - Get platform settings
  * PUT  - Update platform settings
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
@@ -36,7 +37,7 @@ export async function GET() {
 
     return NextResponse.json({ data: settings });
   } catch (error) {
-    console.error("GET platform settings error:", error);
+    logApiError("GET platform settings error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
@@ -86,7 +87,7 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json({ data: settings });
   } catch (error) {
-    console.error("PUT platform settings error:", error);
+    logApiError("PUT platform settings error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }

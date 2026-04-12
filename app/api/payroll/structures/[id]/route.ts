@@ -5,6 +5,7 @@
  * DELETE /api/payroll/structures/:id
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -47,7 +48,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ data: structure });
   } catch (error) {
-    console.error("Error fetching salary structure:", error);
+    logApiError("Error fetching salary structure", error);
     return NextResponse.json({ error: "Failed to fetch salary structure" }, { status: 500 });
   }
 }
@@ -105,7 +106,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 
     return NextResponse.json({ data: updated });
   } catch (error) {
-    console.error("Error updating salary structure:", error);
+    logApiError("Error updating salary structure", error);
     return NextResponse.json({ error: "Failed to update salary structure" }, { status: 500 });
   }
 }
@@ -141,7 +142,7 @@ export async function DELETE(
 
     return NextResponse.json({ data: null });
   } catch (error) {
-    console.error("Error deleting salary structure:", error);
+    logApiError("Error deleting salary structure", error);
     return NextResponse.json({ error: "Failed to delete salary structure" }, { status: 500 });
   }
 }

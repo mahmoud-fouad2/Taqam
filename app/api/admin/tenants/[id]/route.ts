@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { logApiError } from "@/lib/api/route-helper";
 import type { TenantStatus } from "@/lib/types/tenant";
 import { mapTenantFromDb, readSettings } from "@/lib/admin/tenant-mapping";
 
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, data: mapTenantFromDb(tenant) });
   } catch (error) {
-    console.error("Error fetching tenant:", error);
+    logApiError("Error fetching tenant", error);
     return NextResponse.json({ success: false, error: "Failed to fetch tenant" }, { status: 500 });
   }
 }
@@ -129,7 +130,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true, data: mapTenantFromDb(tenant) });
   } catch (error) {
-    console.error("Error updating tenant:", error);
+    logApiError("Error updating tenant", error);
     return NextResponse.json({ success: false, error: "Failed to update tenant" }, { status: 500 });
   }
 }
@@ -155,7 +156,7 @@ export async function DELETE(request: NextRequest, context: RouteContext) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error deleting tenant:", error);
+    logApiError("Error deleting tenant", error);
     return NextResponse.json({ success: false, error: "Failed to delete tenant" }, { status: 500 });
   }
 }

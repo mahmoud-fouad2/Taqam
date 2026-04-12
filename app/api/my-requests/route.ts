@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
@@ -247,7 +248,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ data: { items } });
   } catch (error) {
-    console.error("Error fetching my requests:", error);
+    logApiError("Error fetching my requests", error);
     return NextResponse.json({ error: "Failed to fetch my requests" }, { status: 500 });
   }
 }
@@ -340,7 +341,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ data: responseItem }, { status: 201 });
   } catch (error) {
-    console.error("Error creating my request:", error);
+    logApiError("Error creating my request", error);
     return NextResponse.json({ error: "Failed to create request" }, { status: 500 });
   }
 }

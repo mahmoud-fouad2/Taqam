@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { ExperienceLevel, JobPostingStatus, JobType, Prisma } from "@prisma/client";
 import { z } from "zod";
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 
 const RECRUITMENT_ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"];
 
@@ -154,7 +154,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ success: true, data: result });
   } catch (error) {
-    console.error("Error fetching job postings:", error);
+    logApiError("Error fetching job postings", error);
     return NextResponse.json(
       { success: false, error: "Failed to fetch job postings" },
       { status: 500 }
@@ -266,7 +266,7 @@ export async function POST(request: NextRequest) {
       }
     });
   } catch (error) {
-    console.error("Error creating job posting:", error);
+    logApiError("Error creating job posting", error);
     return NextResponse.json(
       { success: false, error: "Failed to create job posting" },
       { status: 500 }

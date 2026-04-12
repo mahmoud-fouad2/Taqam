@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import prisma from "@/lib/db";
-import { requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
+import { logApiError, requireTenantOrSuperAdminSession } from "@/lib/api/route-helper";
 
 const createMessageSchema = z.object({
   body: z.string().min(1).max(5000),
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
     return NextResponse.json({ data: message }, { status: 201 });
   } catch (error) {
-    console.error("Error adding ticket message:", error);
+    logApiError("Error adding ticket message", error);
     return NextResponse.json({ error: "Failed to add message" }, { status: 500 });
   }
 }

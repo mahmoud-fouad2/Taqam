@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 
 import prisma from "@/lib/db";
-import { requireRole, requireTenantSession } from "@/lib/api/route-helper";
+import { logApiError, requireRole, requireTenantSession } from "@/lib/api/route-helper";
 import { getScopedLoan, LOAN_ADMIN_ROLES, mapLoanPayment } from "@/lib/payroll/loans";
 
 const createPaymentSchema = z.object({
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       data: result.loan.payments.map((payment, index) => mapLoanPayment(payment, index + 1))
     });
   } catch (error) {
-    console.error("Error fetching payroll loan payments:", error);
+    logApiError("Error fetching payroll loan payments", error);
     return NextResponse.json({ error: "Failed to fetch payroll loan payments" }, { status: 500 });
   }
 }
@@ -132,7 +132,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       );
     }
 
-    console.error("Error recording payroll loan payment:", error);
+    logApiError("Error recording payroll loan payment", error);
     return NextResponse.json({ error: "Failed to record payroll loan payment" }, { status: 500 });
   }
 }

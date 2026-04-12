@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-import { requireRole } from "@/lib/api/route-helper";
+import { logApiError, requireRole } from "@/lib/api/route-helper";
 import { buildCsv, sanitizeFilename } from "@/lib/payroll/export";
 import { listPayslipsForPeriod } from "@/lib/payroll/payslips";
 import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
@@ -45,7 +45,7 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       }
     });
   } catch (error) {
-    console.error("Error generating GOSI report:", error);
+    logApiError("Error generating GOSI report", error);
     return NextResponse.json({ error: "Failed to generate GOSI report" }, { status: 500 });
   }
 }

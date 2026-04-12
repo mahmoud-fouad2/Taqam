@@ -1,3 +1,4 @@
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -61,7 +62,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
 
     return NextResponse.json(template);
   } catch (error) {
-    console.error("Error fetching template:", error);
+    logApiError("Error fetching template", error);
     return NextResponse.json({ error: "حدث خطأ في جلب بيانات القالب" }, { status: 500 });
   }
 }
@@ -119,7 +120,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       template: updatedTemplate
     });
   } catch (error) {
-    console.error("Error updating template:", error);
+    logApiError("Error updating template", error);
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -176,7 +177,7 @@ export async function DELETE(request: NextRequest, { params }: { params: Params 
       message: "تم حذف القالب بنجاح"
     });
   } catch (error) {
-    console.error("Error deleting template:", error);
+    logApiError("Error deleting template", error);
     return NextResponse.json({ error: "حدث خطأ في حذف القالب" }, { status: 500 });
   }
 }

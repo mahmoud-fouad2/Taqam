@@ -2,6 +2,7 @@
  * Announcements API Routes
  */
 
+import { logApiError } from "@/lib/api/route-helper";
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
@@ -42,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ data: announcements });
   } catch (error) {
-    console.error("Error fetching announcements:", error);
+    logApiError("Error fetching announcements", error);
     return NextResponse.json({ error: "Failed to fetch announcements" }, { status: 500 });
   }
 }
@@ -110,13 +111,13 @@ export async function POST(request: NextRequest) {
           });
         }
       } catch (err) {
-        console.error("Failed to send announcement notifications:", err);
+        logApiError("Failed to send announcement notifications", err);
       }
     })();
 
     return NextResponse.json({ data: announcement }, { status: 201 });
   } catch (error) {
-    console.error("Error creating announcement:", error);
+    logApiError("Error creating announcement", error);
     return NextResponse.json({ error: "Failed to create announcement" }, { status: 500 });
   }
 }
