@@ -272,7 +272,7 @@ export function ShiftsManager() {
               type="color"
               value={formData.color}
               onChange={(e) => setFormData((p) => ({ ...p, color: e.target.value }))}
-              className="h-10 w-12 p-1"
+              className="h-12 w-14 rounded-xl p-1"
             />
             <Input
               value={formData.color}
@@ -422,7 +422,7 @@ export function ShiftsManager() {
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.total}</CardTitle>
               <IconClock className="text-muted-foreground h-4 w-4" />
@@ -431,7 +431,7 @@ export function ShiftsManager() {
               <div className="text-2xl font-bold">{shifts.length}</div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.active}</CardTitle>
               <IconCalendar className="h-4 w-4 text-green-500" />
@@ -442,7 +442,7 @@ export function ShiftsManager() {
               </div>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.default}</CardTitle>
               <IconSun className="h-4 w-4 text-yellow-500" />
@@ -463,13 +463,13 @@ export function ShiftsManager() {
               placeholder={t.shifts.searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="ps-9"
+              className="h-12 rounded-xl ps-10"
             />
           </div>
 
           <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
             <DialogTrigger asChild>
-              <Button onClick={resetForm}>
+              <Button onClick={resetForm} className="h-12 rounded-xl px-5">
                 <IconPlus className="ms-2 h-4 w-4" />
                 {t.shifts.add}
               </Button>
@@ -481,10 +481,10 @@ export function ShiftsManager() {
               </DialogHeader>
               <ShiftForm />
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+                <Button variant="outline" onClick={() => setIsAddOpen(false)} className="h-12 rounded-xl px-5">
                   {t.common.cancel}
                 </Button>
-                <Button onClick={handleSave} disabled={!formData.nameAr || !formData.code}>
+                <Button onClick={handleSave} disabled={!formData.nameAr || !formData.code} className="h-12 rounded-xl px-5">
                   {t.common.add}
                 </Button>
               </DialogFooter>
@@ -493,7 +493,7 @@ export function ShiftsManager() {
         </div>
 
         {/* Shifts Table */}
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader>
             <CardTitle>{t.shifts.title}</CardTitle>
             <CardDescription>

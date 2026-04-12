@@ -16,11 +16,11 @@ export default async function AttendancePage() {
   const locale = await getAppLocale();
   const t = getText(locale);
   return (
-    <>
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-green-500/10">
-            <Clock className="h-5 w-5 text-green-600 dark:text-green-400" />
+    <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
+      <div className="flex items-start justify-between gap-4">
+        <div className="group flex items-center gap-3">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-green-500/10 shadow-sm transition-transform duration-300 group-hover:scale-105">
+            <Clock className="h-6 w-6 text-green-600 transition-transform group-hover:scale-110 dark:text-green-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{t.attendance.title}</h1>
@@ -31,6 +31,6 @@ export default async function AttendancePage() {
         </div>
       </div>
       <AttendanceManager />
-    </>
+    </div>
   );
 }

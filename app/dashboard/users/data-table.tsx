@@ -398,18 +398,18 @@ export default function UsersDataTable({ data }: { data: User[] }) {
             placeholder={isRtl ? "بحث عن مستخدم..." : "Search users..."}
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
+            className="h-12 max-w-sm rounded-xl"
           />
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="h-12 rounded-xl px-4">
                 <PlusCircle className="me-2 h-4 w-4" />
                 {isRtl ? t.common.status : "Status"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-52 p-0">
               <Command>
-                <CommandInput placeholder={isRtl ? t.common.status : "Status"} className="h-9" />
+                <CommandInput placeholder={isRtl ? t.common.status : "Status"} className="h-12" />
                 <CommandList>
                   <CommandEmpty>{isRtl ? "لا توجد حالة." : "No status found."}</CommandEmpty>
                   <CommandGroup>
@@ -438,14 +438,14 @@ export default function UsersDataTable({ data }: { data: User[] }) {
           </Popover>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="h-12 rounded-xl px-4">
                 <PlusCircle className="me-2 h-4 w-4" />
                 {isRtl ? "الخطة" : "Plan"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-52 p-0">
               <Command>
-                <CommandInput placeholder={isRtl ? "الخطة" : "Plan"} className="h-9" />
+                <CommandInput placeholder={isRtl ? "الخطة" : "Plan"} className="h-12" />
                 <CommandList>
                   <CommandEmpty>{isRtl ? "لا توجد خطة." : "No plan found."}</CommandEmpty>
                   <CommandGroup>
@@ -474,14 +474,14 @@ export default function UsersDataTable({ data }: { data: User[] }) {
           </Popover>
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="outline">
+              <Button variant="outline" className="h-12 rounded-xl px-4">
                 <PlusCircle className="me-2 h-4 w-4" />
                 {isRtl ? t.common.role : "Role"}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-52 p-0">
               <Command>
-                <CommandInput placeholder={isRtl ? t.common.role : "Role"} className="h-9" />
+                <CommandInput placeholder={isRtl ? t.common.role : "Role"} className="h-12" />
                 <CommandList>
                   <CommandEmpty>{isRtl ? "لا يوجد دور." : "No role found."}</CommandEmpty>
                   <CommandGroup>

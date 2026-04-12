@@ -359,7 +359,7 @@ export function LeaveRequestsManager() {
       <LeaveRequestsStats stats={stats} />
 
       {/* Filters and Table */}
-      <Card>
+      <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardHeader>
           <LeaveRequestsFilters
             activeTab={activeTab}
@@ -373,12 +373,12 @@ export function LeaveRequestsManager() {
         </CardHeader>
         <CardContent>
           {loadError && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-200/60 bg-red-50/80 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
               {loadError}
             </div>
           )}
           {employeesError && (
-            <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-200/60 bg-red-50/80 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
               {employeesError}
             </div>
           )}

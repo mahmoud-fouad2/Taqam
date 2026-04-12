@@ -125,7 +125,7 @@ export function LeaveRequestsViewDialog({
                   </div>
                 )}
                 {request.rejectionReason && (
-                  <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+                  <div className="rounded-2xl border border-red-200/60 bg-red-50/80 p-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
                     {request.rejectionReason}
                   </div>
                 )}

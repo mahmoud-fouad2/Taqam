@@ -293,7 +293,7 @@ export function AttendanceManager() {
       )}
 
       {/* Quick Check-in Card */}
-      <Card className="border-primary/20 bg-primary/5">
+      <Card className="rounded-3xl border-primary/20 bg-primary/5 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardContent className="pt-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -322,7 +322,8 @@ export function AttendanceManager() {
               size="lg"
               onClick={handleQuickCheckIn}
               variant={todayRecord?.checkOutTime ? "outline" : "default"}
-              disabled={!!todayRecord?.checkOutTime}>
+              disabled={!!todayRecord?.checkOutTime}
+              className="h-12 rounded-xl px-5">
               {!todayRecord?.checkInTime ? (
                 <>
                   <IconLogin className="ms-2 h-5 w-5" />
@@ -346,7 +347,7 @@ export function AttendanceManager() {
 
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-5">
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.shifts.workingDays}</CardTitle>
             <IconCalendar className="text-muted-foreground h-4 w-4" />
@@ -356,7 +357,7 @@ export function AttendanceManager() {
             <p className="text-muted-foreground text-xs">{t.attendance.thisMonthLabel}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.attendance.present}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
@@ -366,7 +367,7 @@ export function AttendanceManager() {
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.attendance.late}</CardTitle>
             <IconAlertCircle className="h-4 w-4 text-yellow-500" />
@@ -376,7 +377,7 @@ export function AttendanceManager() {
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.attendance.absent}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
@@ -386,7 +387,7 @@ export function AttendanceManager() {
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.attendance.avgWork}</CardTitle>
             <IconClock className="h-4 w-4 text-blue-500" />
@@ -420,7 +421,7 @@ export function AttendanceManager() {
 
         <div className="flex items-center gap-2">
           <Select value={employeeFilter} onValueChange={(value) => setEmployeeFilter(value)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="h-12 w-[180px] rounded-xl">
               <SelectValue placeholder={t.common.employee} />
             </SelectTrigger>
             <SelectContent>
@@ -436,7 +437,7 @@ export function AttendanceManager() {
           <Select
             value={statusFilter}
             onValueChange={(value) => setStatusFilter(value as AttendanceStatus | "all")}>
-            <SelectTrigger className="w-[150px]">
+            <SelectTrigger className="h-12 w-[170px] rounded-xl">
               <IconFilter className="ms-2 h-4 w-4" />
               <SelectValue placeholder={t.common.status} />
             </SelectTrigger>
@@ -453,7 +454,7 @@ export function AttendanceManager() {
       </div>
 
       {/* Attendance Table */}
-      <Card>
+      <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardHeader>
           <CardTitle>{t.attendance.title}</CardTitle>
           <CardDescription>

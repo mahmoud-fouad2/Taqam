@@ -144,7 +144,7 @@ function RequestsTable({
   onReject
 }: RequestsTableProps) {
   return (
-    <Card>
+    <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
       <CardHeader>
         <CardTitle>
           {isApprovalMode ? t.requests.needsApproval : t.requests.myRequestsLabel}
@@ -548,7 +548,7 @@ export function RequestsManager() {
       )}
 
       <div className="grid gap-4 md:grid-cols-5">
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.requests.totalMyRequests}</CardTitle>
             <IconFileDescription className="text-muted-foreground h-4 w-4" />
@@ -557,7 +557,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
@@ -566,7 +566,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.documents.approved}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
@@ -575,7 +575,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.rejected}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
@@ -585,7 +585,7 @@ export function RequestsManager() {
           </CardContent>
         </Card>
         {canApprove && (
-          <Card className="border-primary/30 bg-primary/5">
+          <Card className="rounded-3xl border-primary/30 bg-primary/5 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.requests.needsYourApproval}</CardTitle>
               <IconClock className="text-primary h-4 w-4" />
@@ -620,18 +620,18 @@ export function RequestsManager() {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder={searchPlaceholder}
-                className="h-9 pe-9"
+                className="h-12 rounded-xl pe-10"
               />
             </div>
 
-            <Badge variant="outline" className="text-muted-foreground h-9 px-3 text-xs">
+            <Badge variant="outline" className="text-muted-foreground h-12 rounded-xl px-4 text-xs">
               {pendingCountLabel}: {activeTab === "my" ? stats.pending : stats.pendingApproval}
             </Badge>
 
             <Select
               value={typeFilter}
               onValueChange={(value) => setTypeFilter(value as AttendanceRequestType | "all")}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="h-12 w-[170px] rounded-xl">
                 <IconFilter className="ms-2 h-4 w-4" />
                 <SelectValue placeholder={t.common.type} />
               </SelectTrigger>
@@ -648,7 +648,7 @@ export function RequestsManager() {
             <Select
               value={statusFilter}
               onValueChange={(value) => setStatusFilter(value as AttendanceRequestStatus | "all")}>
-              <SelectTrigger className="w-[150px]">
+              <SelectTrigger className="h-12 w-[170px] rounded-xl">
                 <SelectValue placeholder={t.common.status} />
               </SelectTrigger>
               <SelectContent>
@@ -663,7 +663,7 @@ export function RequestsManager() {
 
             <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
               <DialogTrigger asChild>
-                <Button onClick={resetForm}>
+                <Button onClick={resetForm} className="h-12 rounded-xl px-5">
                   <IconPlus className="ms-2 h-4 w-4" />
                   {t.myRequests.newRequest}
                 </Button>
