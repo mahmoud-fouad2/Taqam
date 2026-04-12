@@ -825,7 +825,9 @@ export default async function LandingPage({
               {isAr ? "باقات تناسب كل حجم" : "Plans for every team size"}
             </h2>
             <p className="text-muted-foreground/80 mx-auto mt-4 max-w-lg text-lg">
-              {isAr ? "ابدأ مجانًا، ادفع عند النمو" : "Start free, pay as you grow"}
+              {isAr
+                ? "اختر الباقة المناسبة الآن ووسّعها لاحقًا حسب نمو فريقك"
+                : "Choose the right plan now and scale it as your team grows"}
             </p>
           </div>
           <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -898,9 +900,10 @@ export default async function LandingPage({
       </section>
 
       {/* ── INTEGRATIONS ─────────────────────────────────────── */}
-      <section className="bg-muted/10 border-t py-24">
-        <FadeIn direction="up" className="container mx-auto px-4">
-          <div className="mb-10 text-center">
+      <section id="integrations" className="relative overflow-hidden border-t py-20">
+        <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.08),transparent_52%)]" />
+        <FadeIn direction="up" className="container mx-auto max-w-6xl px-4">
+          <div className="mx-auto mb-8 max-w-2xl text-center">
             <h3 className="text-xl font-bold">
               {isAr ? "يتكامل مع الأنظمة التي تعرفها" : "Integrates with the systems you know"}
             </h3>
@@ -910,25 +913,27 @@ export default async function LandingPage({
                 : "Taqam connects directly with Saudi government entities and accounting systems"}
             </p>
           </div>
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-6">
+          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-3.5 xl:grid-cols-6">
             {integrations.map((item) => (
               <div
                 key={item.id}
-                className="group border-border/40 bg-card/70 hover:border-border/80 flex flex-col rounded-[1.85rem] border p-3 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:p-4">
-                <div
-                  className={`relative aspect-[5/4] w-full overflow-hidden rounded-[1.4rem] border border-black/5 shadow-sm ${item.frameClassName}`}>
-                  <Image
-                    src={item.src}
-                    alt={item.name}
-                    fill
-                    sizes="(max-width: 640px) 50vw, (max-width: 1280px) 33vw, 16vw"
-                    unoptimized
-                    className={`transition-transform duration-300 group-hover:scale-[1.03] ${item.imageClassName}`}
-                  />
+                className="group border-border/45 bg-card/78 hover:border-sky-200/80 flex flex-col rounded-[1.85rem] border p-2 shadow-[0_10px_28px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] sm:p-2.5">
+                <div className="bg-background/85 mx-auto w-full rounded-[1.45rem] p-2">
+                  <div
+                    className={`relative aspect-[1.08/1] w-full overflow-hidden rounded-[1.15rem] border border-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${item.frameClassName}`}>
+                    <Image
+                      src={item.src}
+                      alt={item.name}
+                      fill
+                      sizes="(max-width: 640px) 42vw, (max-width: 1280px) 26vw, 12vw"
+                      unoptimized
+                      className={`rounded-[0.95rem] scale-[0.84] transition-transform duration-300 group-hover:scale-[0.88] ${item.imageClassName}`}
+                    />
+                  </div>
                 </div>
-                <div className="mt-3 text-center">
-                  <p className="text-sm font-semibold tracking-tight">{item.name}</p>
-                  <p className="text-muted-foreground mt-1 text-[11px] leading-5">
+                <div className="mt-2 text-center">
+                  <p className="text-[13px] font-semibold tracking-tight sm:text-sm">{item.name}</p>
+                  <p className="text-muted-foreground mt-1 text-[10px] leading-4.5 sm:text-[11px]">
                     {isAr ? item.descAr : item.descEn}
                   </p>
                 </div>

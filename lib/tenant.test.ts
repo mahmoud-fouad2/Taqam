@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import {
   buildTenantUrl,
@@ -9,6 +9,31 @@ import {
   extractTenantSlugFromPath,
   resolveTenantRequest
 } from "@/lib/tenant";
+
+const originalBaseDomain = process.env.TAQAM_BASE_DOMAIN;
+const originalAppUrl = process.env.NEXT_PUBLIC_APP_URL;
+const originalAuthUrl = process.env.NEXTAUTH_URL;
+const originalPublicSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const originalTenantUrlMode = process.env.TAQAM_TENANT_URL_MODE;
+const originalPublicTenantUrlMode = process.env.NEXT_PUBLIC_TAQAM_TENANT_URL_MODE;
+
+beforeEach(() => {
+  delete process.env.TAQAM_BASE_DOMAIN;
+  delete process.env.NEXT_PUBLIC_APP_URL;
+  delete process.env.NEXTAUTH_URL;
+  delete process.env.NEXT_PUBLIC_SITE_URL;
+  delete process.env.TAQAM_TENANT_URL_MODE;
+  delete process.env.NEXT_PUBLIC_TAQAM_TENANT_URL_MODE;
+});
+
+afterEach(() => {
+  process.env.TAQAM_BASE_DOMAIN = originalBaseDomain;
+  process.env.NEXT_PUBLIC_APP_URL = originalAppUrl;
+  process.env.NEXTAUTH_URL = originalAuthUrl;
+  process.env.NEXT_PUBLIC_SITE_URL = originalPublicSiteUrl;
+  process.env.TAQAM_TENANT_URL_MODE = originalTenantUrlMode;
+  process.env.NEXT_PUBLIC_TAQAM_TENANT_URL_MODE = originalPublicTenantUrlMode;
+});
 
 describe("extractTenantSlugFromHost", () => {
   it("extracts tenant slug from configured base domain", () => {
@@ -97,5 +122,13 @@ describe("tenant public URL helpers", () => {
     expect(buildTenantUrl("demo", "/dashboard", "127.0.0.1:3001")).toBe(
       "http://127.0.0.1:3001/t/demo/dashboard"
     );
+  });
+
+  it("derives the production base domain from NEXT_PUBLIC_APP_URL when no explicit base domain is set", () => {
+    delete process.env.TAQAM_BASE_DOMAIN;
+    process.env.NEXT_PUBLIC_APP_URL = "https://taqam.net";
+    process.env.TAQAM_TENANT_URL_MODE = "subdomain";
+
+    expect(buildTenantUrl("demo", "/dashboard")).toBe("https://demo.taqam.net/dashboard");
   });
 });

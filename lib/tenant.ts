@@ -74,6 +74,16 @@ function hostWithoutPort(host: string): string {
   return stripPort(host).host.toLowerCase();
 }
 
+function isLocalOrPlatformHost(host: string): boolean {
+  return (
+    host === "localhost" ||
+    /^[0-9.]+$/.test(host) ||
+    host.endsWith(".onrender.com") ||
+    host.endsWith(".vercel.app") ||
+    host.endsWith(".netlify.app")
+  );
+}
+
 function normalizeBaseDomain(domain: string): string {
   const { host, port } = stripPort(domain);
   const cleanHost = host.toLowerCase();
@@ -99,6 +109,16 @@ function normalizeBaseDomain(domain: string): string {
   return port ? `${cleanHost}:${port}` : cleanHost;
 }
 
+function getConfiguredBaseDomain(): string | null {
+  return normalizeTenantDomain(
+    process.env.TAQAM_BASE_DOMAIN ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      null
+  );
+}
+
 export function normalizeTenantDomain(value: string | null | undefined): string | null {
   if (!value) return null;
 
@@ -121,7 +141,7 @@ export function isTenantBaseHost(host: string, baseDomain?: string): boolean {
     return false;
   }
 
-  const normalizedBaseDomain = normalizeTenantDomain(baseDomain || process.env.TAQAM_BASE_DOMAIN);
+  const normalizedBaseDomain = normalizeTenantDomain(baseDomain || getConfiguredBaseDomain());
   if (normalizedBaseDomain && normalizedHost === normalizedBaseDomain) {
     return true;
   }
@@ -156,7 +176,7 @@ export function extractTenantSlugFromHost(host: string, baseDomain?: string): st
     return normalizeTenantSlug(hostLabels[0]);
   }
 
-  const configuredBaseDomain = baseDomain || process.env.TAQAM_BASE_DOMAIN;
+  const configuredBaseDomain = baseDomain || getConfiguredBaseDomain();
   const normalizedBaseDomain = configuredBaseDomain
     ? hostWithoutPort(normalizeBaseDomain(configuredBaseDomain))
     : null;
@@ -166,16 +186,18 @@ export function extractTenantSlugFromHost(host: string, baseDomain?: string): st
       return null;
     }
 
-    if (!cleanHost.endsWith(`.${normalizedBaseDomain}`)) {
-      return null;
+    if (cleanHost.endsWith(`.${normalizedBaseDomain}`)) {
+      const candidate = cleanHost.slice(0, -(normalizedBaseDomain.length + 1));
+      if (!candidate || candidate.includes(".")) {
+        return null;
+      }
+
+      return normalizeTenantSlug(candidate);
     }
 
-    const candidate = cleanHost.slice(0, -(normalizedBaseDomain.length + 1));
-    if (!candidate || candidate.includes(".")) {
+    if (!isLocalOrPlatformHost(normalizedBaseDomain)) {
       return null;
     }
-
-    return normalizeTenantSlug(candidate);
   }
 
   if (hostLabels.length < 3) {
@@ -269,7 +291,7 @@ export function buildTenantUrl(tenantSlug: string, path: string, baseDomain?: st
   const runtimeDomain =
     baseDomain ||
     (typeof window !== "undefined" ? window.location.host : null) ||
-    process.env.TAQAM_BASE_DOMAIN ||
+    getConfiguredBaseDomain() ||
     "localhost:3000";
 
   const domain = normalizeBaseDomain(runtimeDomain);
@@ -284,12 +306,14 @@ export function buildTenantUrl(tenantSlug: string, path: string, baseDomain?: st
   ).toLowerCase();
 
   const cleanHost = hostWithoutPort(domain);
+  if (cleanHost === "localhost" || /^[0-9.]+$/.test(cleanHost)) {
+    return `${protocol}://${domain}/t/${tenantSlug}${normalizedPath}`;
+  }
+
   const mustUsePath =
     mode === "path" ||
     (mode === "auto" &&
-      (cleanHost === "localhost" ||
-        /^[0-9.]+$/.test(cleanHost) ||
-        cleanHost.endsWith(".onrender.com") ||
+      (cleanHost.endsWith(".onrender.com") ||
         cleanHost.endsWith(".vercel.app") ||
         cleanHost.endsWith(".netlify.app")));
 

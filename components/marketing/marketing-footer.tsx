@@ -91,7 +91,7 @@ export async function MarketingFooter() {
     <footer className="bg-background/95 border-t">
       <div className="mx-auto w-full max-w-[96rem] px-4 py-4 sm:px-6 sm:py-5 lg:px-8">
         <div className="border-border/40 bg-card/60 hover:border-border/80 flex flex-col gap-3 rounded-[2.25rem] border px-6 py-4 shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-xl transition-all duration-500 hover:shadow-xl sm:px-8 sm:py-[1.125rem] lg:px-10 xl:px-12">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-4 xl:grid xl:grid-cols-[minmax(0,1.15fr)_auto_minmax(0,0.95fr)] xl:items-center">
             <div className="flex items-start gap-3.5 sm:gap-4">
               <Link href={p || "/"} className="inline-flex shrink-0 transition hover:opacity-80">
                 <LogoMark
@@ -117,7 +117,43 @@ export async function MarketingFooter() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 lg:min-w-[16rem] lg:items-end">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 xl:justify-center">
+              {badgeItems.map((item) => {
+                const content = (
+                  <div
+                    className="group border-border/60 bg-background/88 hover:border-border/90 flex h-11 w-[4.2rem] items-center justify-center overflow-hidden rounded-[1rem] border shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:h-12 sm:w-[4.75rem]"
+                    title={item.title}>
+                    <div className={`relative h-full w-full overflow-hidden ${item.frameClassName}`}>
+                      <Image
+                        src={item.src}
+                        alt={item.title}
+                        fill
+                        sizes="76px"
+                        unoptimized
+                        className={item.imageClassName}
+                      />
+                    </div>
+                  </div>
+                );
+
+                if (item.href) {
+                  return (
+                    <Link
+                      key={item.id}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block">
+                      {content}
+                    </Link>
+                  );
+                }
+
+                return <div key={item.id}>{content}</div>;
+              })}
+            </div>
+
+            <div className="flex flex-col gap-2 xl:min-w-[16rem] xl:items-end">
               <nav className="text-muted-foreground flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm lg:justify-end">
                 {legalLinks.map((link) => (
                   <Link
@@ -146,52 +182,6 @@ export async function MarketingFooter() {
                   </p>
                 </div>
               </a>
-            </div>
-          </div>
-
-          <div className="border-t border-border/60 pt-3">
-            <div className="mb-3 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-              <p className="text-foreground text-xs font-semibold tracking-[0.18em] uppercase">
-                {isAr ? "شركاء الثقة والتكامل" : "Trust & integration partners"}
-              </p>
-              <p className="text-muted-foreground text-xs">
-                {isAr ? "أيقونات محلية مخزنة داخل المشروع" : "All icons are stored locally in the project"}
-              </p>
-            </div>
-            <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5">
-              {badgeItems.map((item) => {
-                const content = (
-                  <div className="group border-border/60 bg-background/88 hover:border-border flex h-full flex-col rounded-[1.35rem] border p-2.5 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
-                    <div
-                      className={`relative flex h-14 items-center justify-center overflow-hidden rounded-[1rem] ${item.frameClassName}`}>
-                      <Image
-                        src={item.src}
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 18vw"
-                        unoptimized
-                        className={item.imageClassName}
-                      />
-                    </div>
-                    <p className="text-foreground mt-2 text-xs font-semibold leading-5">{item.title}</p>
-                  </div>
-                );
-
-                if (item.href) {
-                  return (
-                    <Link
-                      key={item.id}
-                      href={item.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block">
-                      {content}
-                    </Link>
-                  );
-                }
-
-                return <div key={item.id}>{content}</div>;
-              })}
             </div>
           </div>
 
