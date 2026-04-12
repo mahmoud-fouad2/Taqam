@@ -5,11 +5,10 @@ import {
   type Icon,
   IconBriefcase,
   IconChartBar,
+  IconClock,
   IconDashboard,
   IconFolder,
-  IconHelp,
   IconListDetails,
-  IconMessageCircle,
   IconUsers
 } from "@tabler/icons-react";
 import Link from "next/link";
@@ -70,16 +69,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconFolder
       },
       {
-        title: locale === "ar" ? "الدعم الفني" : "Support desk",
-        url: "/dashboard/support",
-        icon: IconMessageCircle
-      },
-      {
-        title: locale === "ar" ? "مركز المساعدة" : "Help center",
-        url: "/dashboard/help-center",
-        icon: IconHelp
-      },
-      {
         title: locale === "ar" ? "إعدادات المنصة" : "Platform settings",
         url: "/dashboard/super-admin/settings",
         icon: IconFolder
@@ -100,14 +89,9 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconListDetails
       },
       {
-        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: "/dashboard/help-center",
-        icon: IconHelp
-      },
-      {
-        title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: "/dashboard/support",
-        icon: IconMessageCircle
+        title: locale === "ar" ? "الحضور والانصراف" : "Attendance",
+        url: "/dashboard/attendance",
+        icon: IconClock
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
@@ -130,6 +114,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconUsers
       },
       {
+        title: locale === "ar" ? "الحضور والانصراف" : "Attendance",
+        url: "/dashboard/attendance",
+        icon: IconClock
+      },
+      {
         title: locale === "ar" ? "الطلبات" : "Requests",
         url: "/dashboard/requests",
         icon: IconListDetails
@@ -138,16 +127,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         title: locale === "ar" ? "طلباتي" : "My Requests",
         url: "/dashboard/my-requests",
         icon: IconChartBar
-      },
-      {
-        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: "/dashboard/help-center",
-        icon: IconHelp
-      },
-      {
-        title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: "/dashboard/support",
-        icon: IconMessageCircle
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
@@ -185,6 +164,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconUsers
       },
       {
+        title: locale === "ar" ? "الحضور والانصراف" : "Attendance",
+        url: "/dashboard/attendance",
+        icon: IconClock
+      },
+      {
         title: locale === "ar" ? "الطلبات" : "Requests",
         url: "/dashboard/requests",
         icon: IconListDetails
@@ -193,16 +177,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         title: locale === "ar" ? "التقارير" : "Reports",
         url: "/dashboard/reports",
         icon: IconChartBar
-      },
-      {
-        title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-        url: "/dashboard/help-center",
-        icon: IconHelp
-      },
-      {
-        title: locale === "ar" ? "الدعم الفني" : "Support",
-        url: "/dashboard/support",
-        icon: IconMessageCircle
       },
       {
         title: locale === "ar" ? "إعدادات النظام" : "Settings",
@@ -244,6 +218,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
       icon: IconUsers
     },
     {
+      title: locale === "ar" ? "الحضور والانصراف" : "Attendance",
+      url: "/dashboard/attendance",
+      icon: IconClock
+    },
+    {
       title: locale === "ar" ? "الوظائف الشاغرة" : "Job Postings",
       url: "/dashboard/job-postings",
       icon: IconListDetails
@@ -259,19 +238,9 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
       icon: IconBriefcase
     },
     {
-      title: locale === "ar" ? "مركز المساعدة" : "Help Center",
-      url: "/dashboard/help-center",
-      icon: IconHelp
-    },
-    {
-      title: locale === "ar" ? "الدعم الفني" : "Support",
-      url: "/dashboard/support",
-      icon: IconMessageCircle
-    },
-    {
       title: locale === "ar" ? "إعدادات النظام" : "Settings",
       url: "/dashboard/settings",
-      icon: IconUsers
+      icon: IconFolder
     }
   ];
 }

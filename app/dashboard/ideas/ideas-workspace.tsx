@@ -257,23 +257,23 @@ export function IdeasWorkspace({
         </Card>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,22rem)_minmax(0,1fr)]">
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
         <Card>
           <CardHeader>
             <CardTitle>{locale === "ar" ? "إرسال فكرة أو بلاغ" : "Submit feedback"}</CardTitle>
             <CardDescription>
               {locale === "ar"
-                ? "كل إرسال يُنشئ تذكرة فعلية داخل النظام حتى يمكن متابعته والرد عليه من نفس المسار."
+                ? "اختر التصنيف المناسب واكتب وصفًا واضحًا حتى يصل الطلب للفريق الصحيح ويُتابع بسرعة."
                 : "Each submission creates a real tracked ticket so it can be followed up through the same workflow."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {canSubmit ? null : (
-              <Alert>
+              <Alert className="rounded-2xl border-border/60 bg-muted/40">
                 <AlertTitle>{locale === "ar" ? "وضع العرض فقط" : "View only"}</AlertTitle>
                 <AlertDescription>
                   {locale === "ar"
-                    ? "إنشاء المقترحات يتم من داخل لوحة الشركة. يمكنك هنا مراجعة ما تم رفعه فقط."
+                    ? "يمكن للمشرف العام مراجعة المقترحات هنا، أما الإرسال فيتم من داخل لوحة الشركة نفسها."
                     : "Ideas are submitted from tenant dashboards. You can review them here only."}
                 </AlertDescription>
               </Alert>
@@ -288,20 +288,20 @@ export function IdeasWorkspace({
                   <button
                     key={key}
                     type="button"
-                    className={`rounded-xl border p-3 text-start transition ${
+                    className={`rounded-2xl border p-4 text-start transition ${
                       category === key
-                        ? "border-primary bg-primary/5"
-                        : "border-border hover:border-primary/40"
+                        ? "border-primary/30 bg-primary/5 shadow-sm"
+                        : "border-border/60 bg-background hover:border-primary/30 hover:bg-muted/30"
                     }`}
                     onClick={() => setCategory(key)}
                     disabled={!canSubmit}>
                     <div className="flex items-start gap-3">
-                      <div className="bg-muted rounded-lg p-2">
+                      <div className="rounded-xl bg-muted p-2.5">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
                         <div className="font-medium">{locale === "ar" ? meta.ar : meta.en}</div>
-                        <div className="text-muted-foreground text-sm">
+                        <div className="text-muted-foreground mt-1 text-sm leading-6">
                           {locale === "ar" ? meta.arDesc : meta.enDesc}
                         </div>
                       </div>
@@ -322,6 +322,7 @@ export function IdeasWorkspace({
                     ? t.ideas.subjectExample
                     : "Example: multi-step approval for expenses"
                 }
+                className="h-12 rounded-xl"
                 disabled={!canSubmit || submitting}
               />
             </div>
@@ -334,7 +335,7 @@ export function IdeasWorkspace({
                 id="idea-priority"
                 aria-label={locale === "ar" ? t.ideas.priority : "Idea priority"}
                 title={locale === "ar" ? t.ideas.priority : "Idea priority"}
-                className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
+                className="border-input bg-background h-12 w-full rounded-xl border px-3 text-sm"
                 value={priority}
                 onChange={(event) => setPriority(event.target.value as Ticket["priority"])}
                 disabled={!canSubmit || submitting}>
@@ -356,15 +357,16 @@ export function IdeasWorkspace({
                 onChange={(event) => setMessage(event.target.value)}
                 placeholder={
                   locale === "ar"
-                    ? "اكتب تفاصيل واضحة: الخطوات الحالية، المشكلة أو الفرصة، والأثر المتوقع بعد التحسين."
+                    ? "اكتب الوضع الحالي، المشكلة أو الفرصة، وما النتيجة التي تتوقعها بعد التنفيذ أو المعالجة."
                     : "Describe the current flow, the problem or opportunity, and the expected outcome after the improvement."
                 }
+                className="min-h-40 rounded-2xl"
                 disabled={!canSubmit || submitting}
               />
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={() => void handleSubmit()} disabled={!canSubmit || submitting}>
+              <Button onClick={() => void handleSubmit()} disabled={!canSubmit || submitting} className="h-12 rounded-xl px-5">
                 <Send className="me-2 h-4 w-4" />
                 {submitting
                   ? locale === "ar"
@@ -374,9 +376,9 @@ export function IdeasWorkspace({
                     ? t.common.send
                     : "Submit"}
               </Button>
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="h-12 rounded-xl px-5">
                 <Link href={`${prefix}/dashboard/support`}>
-                  {locale === "ar" ? "فتح مساحة الدعم" : "Open support workspace"}
+                  {locale === "ar" ? "فتح تذاكر الدعم" : "Open support workspace"}
                   <ArrowUpRight className="ms-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -388,15 +390,15 @@ export function IdeasWorkspace({
           <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <CardTitle>
-                {locale === "ar" ? "آخر المقترحات والبلاغات" : "Recent ideas and reports"}
+                {locale === "ar" ? "سجل المقترحات والمتابعة" : "Ideas and follow-up log"}
               </CardTitle>
               <CardDescription>
                 {locale === "ar"
-                  ? "المدخلات هنا مرتبطة بنفس نظام التذاكر، لذلك الحالة والردود تتحدث في مكان واحد."
+                  ? "كل عنصر هنا مرتبط بنفس سجل التذكرة، لذلك ستجد الحالة وآخر تحديث وعدد الرسائل في مكان واحد."
                   : "Entries here are tied to the same ticketing workflow, so status and replies stay in one place."}
               </CardDescription>
             </div>
-            <Button variant="outline" onClick={() => void load()} disabled={loading}>
+            <Button variant="outline" onClick={() => void load()} disabled={loading} className="h-12 rounded-xl px-5">
               <RefreshCw className="me-2 h-4 w-4" />
               {locale === "ar" ? t.common.update : "Refresh"}
             </Button>
@@ -412,13 +414,13 @@ export function IdeasWorkspace({
             ) : null}
 
             {loading ? (
-              <div className="text-muted-foreground py-10 text-center text-sm">
+              <div className="text-muted-foreground rounded-2xl border border-dashed border-border/60 bg-muted/20 py-10 text-center text-sm">
                 {locale === "ar" ? "جاري تحميل المقترحات..." : "Loading ideas..."}
               </div>
             ) : relevantItems.length === 0 ? (
-              <div className="text-muted-foreground rounded-xl border border-dashed p-8 text-center text-sm">
+              <div className="text-muted-foreground rounded-2xl border border-dashed border-border/60 bg-muted/20 p-8 text-center text-sm leading-7">
                 {locale === "ar"
-                  ? "لا توجد مقترحات أو بلاغات مصنفة بعد. أول إرسال من هذه الصفحة سيظهر هنا مباشرة."
+                  ? "لا توجد عناصر مصنفة بعد. أول مقترح أو بلاغ يتم إرساله من هذه الصفحة سيظهر هنا فورًا مع حالته الحالية."
                   : "There are no categorized ideas or bug reports yet. The first submission from this page will appear here immediately."}
               </div>
             ) : (
@@ -430,7 +432,7 @@ export function IdeasWorkspace({
                     <Link
                       key={item.id}
                       href={`${prefix}/dashboard/support/${item.id}`}
-                      className="hover:bg-muted/40 rounded-xl border p-4 transition">
+                      className="rounded-2xl border border-border/60 bg-background p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-muted/20 hover:shadow-sm">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div className="space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
