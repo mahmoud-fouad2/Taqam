@@ -7,7 +7,60 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { JobType, OfferStatus, Prisma } from "@prisma/client";
+import { ApplicationStatus, JobType, OfferStatus, Prisma } from "@prisma/client";
+import { z } from "zod";
+
+const offerBenefitSchema = z.object({
+  name: z.string().min(1),
+  value: z.string().optional(),
+  description: z.string().optional()
+});
+
+const offerApproverSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.string(),
+  status: z.enum(["pending", "approved", "rejected"]),
+  comments: z.string().optional(),
+  actionAt: z.string().optional()
+});
+
+const manualCandidateSchema = z.object({
+  firstName: z.string().min(1),
+  lastName: z.string().min(1),
+  email: z.string().email(),
+  phone: z.string().optional()
+});
+
+const createOfferSchema = z
+  .object({
+    applicantId: z.string().min(1).optional(),
+    manualCandidate: manualCandidateSchema.optional(),
+    jobPostingId: z.string().min(1),
+    departmentId: z.string().nullable().optional(),
+    offeredSalary: z.number().nonnegative().nullable().optional(),
+    currency: z.string().min(1).optional(),
+    jobType: z.string().optional(),
+    startDate: z.string().nullable().optional(),
+    probationPeriod: z.number().int().min(0).nullable().optional(),
+    benefits: z.array(offerBenefitSchema).optional(),
+    termsAndConditions: z.string().nullable().optional(),
+    status: z.string().optional(),
+    validUntil: z.string().nullable().optional(),
+    approvers: z.array(offerApproverSchema).optional(),
+    sentAt: z.string().nullable().optional(),
+    respondedAt: z.string().nullable().optional(),
+    declineReason: z.string().nullable().optional()
+  })
+  .superRefine((value, ctx) => {
+    if (!value.applicantId && !value.manualCandidate) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["applicantId"],
+        message: "Either applicantId or manualCandidate is required"
+      });
+    }
+  });
 
 function mapStatus(status: string): string {
   return status.toLowerCase().replace(/_/g, "-");
@@ -28,6 +81,43 @@ function parseOfferStatus(value: unknown): OfferStatus | undefined {
 function mapJobType(type: string | null | undefined): string | null {
   if (!type) return null;
   return type.toLowerCase().replace(/_/g, "-");
+}
+
+type JobOfferRecord = Prisma.JobOfferGetPayload<{
+  include: {
+    applicant: { select: { id: true; firstName: true; lastName: true; email: true } };
+    jobPosting: { select: { id: true; title: true; titleAr: true } };
+    department: { select: { id: true; name: true; nameAr: true } };
+  };
+}>;
+
+function mapOffer(offer: JobOfferRecord) {
+  return {
+    id: offer.id,
+    applicantId: offer.applicantId,
+    applicantName: `${offer.applicant.firstName} ${offer.applicant.lastName}`,
+    applicantEmail: offer.applicant.email,
+    jobPostingId: offer.jobPostingId,
+    jobTitle: offer.jobPosting.title,
+    departmentId: offer.departmentId ?? "",
+    departmentName: offer.department?.name ?? "",
+    offeredSalary: offer.offeredSalary ? Number(offer.offeredSalary) : 0,
+    currency: offer.currency ?? "SAR",
+    jobType: mapJobType(offer.jobType) ?? "full-time",
+    startDate: offer.startDate?.toISOString() ?? new Date().toISOString(),
+    probationPeriod: offer.probationPeriod ?? undefined,
+    benefits: (offer.benefits as any) ?? [],
+    termsAndConditions: offer.termsAndConditions ?? undefined,
+    status: mapStatus(offer.status),
+    validUntil: offer.validUntil?.toISOString() ?? new Date().toISOString(),
+    approvers: (offer.approvers as any) ?? [],
+    sentAt: offer.sentAt?.toISOString() ?? undefined,
+    respondedAt: offer.respondedAt?.toISOString() ?? undefined,
+    declineReason: offer.declineReason ?? undefined,
+    createdBy: offer.createdById,
+    createdAt: offer.createdAt.toISOString(),
+    updatedAt: offer.updatedAt.toISOString()
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -81,34 +171,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: "desc" }
     });
 
-    const result = offers.map((o) => ({
-      id: o.id,
-      applicantId: o.applicantId,
-      applicantName: `${o.applicant.firstName} ${o.applicant.lastName}`,
-      applicantEmail: o.applicant.email,
-      jobPostingId: o.jobPostingId,
-      jobTitle: o.jobPosting.title,
-      departmentId: o.departmentId ?? "",
-      departmentName: o.department?.name ?? "",
-      offeredSalary: o.offeredSalary ? Number(o.offeredSalary) : 0,
-      currency: o.currency ?? "SAR",
-      jobType: mapJobType(o.jobType) ?? "full-time",
-      startDate: o.startDate?.toISOString() ?? new Date().toISOString(),
-      probationPeriod: o.probationPeriod ?? undefined,
-      benefits: (o.benefits as any) ?? [],
-      termsAndConditions: o.termsAndConditions ?? undefined,
-      status: mapStatus(o.status),
-      validUntil: o.validUntil?.toISOString() ?? new Date().toISOString(),
-      approvers: (o.approvers as any) ?? [],
-      sentAt: o.sentAt?.toISOString() ?? undefined,
-      respondedAt: o.respondedAt?.toISOString() ?? undefined,
-      declineReason: o.declineReason ?? undefined,
-      createdBy: o.createdById,
-      createdAt: o.createdAt.toISOString(),
-      updatedAt: o.updatedAt.toISOString()
-    }));
-
-    return NextResponse.json({ success: true, data: result });
+    return NextResponse.json({ success: true, data: offers.map(mapOffer) });
   } catch (error) {
     console.error("Error fetching job offers:", error);
     return NextResponse.json(
@@ -130,77 +193,103 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "No tenant" }, { status: 400 });
     }
 
-    const body = await request.json();
+    const body = createOfferSchema.parse(await request.json());
 
-    if (!body.applicantId || !body.jobPostingId) {
-      return NextResponse.json(
-        { success: false, error: "Missing applicantId/jobPostingId" },
-        { status: 400 }
-      );
+    const jobPosting = await prisma.jobPosting.findFirst({
+      where: { id: body.jobPostingId, tenantId },
+      select: { id: true, departmentId: true }
+    });
+
+    if (!jobPosting) {
+      return NextResponse.json({ success: false, error: "Job posting not found" }, { status: 400 });
     }
 
-    const jobType = parseJobType(body.jobType);
-    const status = parseOfferStatus(body.status) ?? OfferStatus.DRAFT;
-
-    const created = await prisma.jobOffer.create({
-      data: {
-        tenantId,
-        applicantId: body.applicantId,
-        jobPostingId: body.jobPostingId,
-        departmentId: body.departmentId ?? null,
-        offeredSalary: body.offeredSalary ?? null,
-        currency: body.currency ?? "SAR",
-        jobType,
-        startDate: body.startDate ? new Date(body.startDate) : null,
-        probationPeriod: body.probationPeriod ?? null,
-        benefits: body.benefits ?? [],
-        termsAndConditions: body.termsAndConditions ?? null,
-        status,
-        validUntil: body.validUntil ? new Date(body.validUntil) : null,
-        approvers: body.approvers ?? [],
-        sentAt: body.sentAt ? new Date(body.sentAt) : null,
-        respondedAt: body.respondedAt ? new Date(body.respondedAt) : null,
-        declineReason: body.declineReason ?? null,
-        createdById: session.user.id
-      },
-      include: {
-        applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
-        jobPosting: { select: { id: true, title: true } },
-        department: { select: { id: true, name: true } }
+    if (body.applicantId) {
+      const applicant = await prisma.applicant.findFirst({
+        where: { id: body.applicantId, tenantId }
+      });
+      if (!applicant) {
+        return NextResponse.json({ success: false, error: "Applicant not found" }, { status: 400 });
       }
+    }
+
+    if (body.departmentId) {
+      const department = await prisma.department.findFirst({
+        where: { id: body.departmentId, tenantId }
+      });
+      if (!department) {
+        return NextResponse.json({ success: false, error: "Department not found" }, { status: 400 });
+      }
+    }
+
+    const jobType = body.jobType ? parseJobType(body.jobType) : undefined;
+    if (body.jobType && !jobType) {
+      return NextResponse.json({ success: false, error: "Invalid job type" }, { status: 400 });
+    }
+
+    const status = body.status ? parseOfferStatus(body.status) : OfferStatus.DRAFT;
+    if (body.status && !status) {
+      return NextResponse.json({ success: false, error: "Invalid status" }, { status: 400 });
+    }
+
+    const created = await prisma.$transaction(async (tx) => {
+      let applicantId = body.applicantId;
+
+      if (!applicantId && body.manualCandidate) {
+        const newApplicant = await tx.applicant.create({
+          data: {
+            tenantId,
+            jobPostingId: body.jobPostingId,
+            firstName: body.manualCandidate.firstName.trim(),
+            lastName: body.manualCandidate.lastName.trim(),
+            email: body.manualCandidate.email.trim().toLowerCase(),
+            phone: body.manualCandidate.phone?.trim() || null,
+            status: ApplicationStatus.OFFER,
+            source: "direct",
+            notes: "Created from direct offer workflow"
+          }
+        });
+
+        applicantId = newApplicant.id;
+      }
+
+      return tx.jobOffer.create({
+        data: {
+          tenantId,
+          applicantId: applicantId!,
+          jobPostingId: body.jobPostingId,
+          departmentId: body.departmentId ?? jobPosting.departmentId ?? null,
+          offeredSalary: body.offeredSalary ?? null,
+          currency: body.currency ?? "SAR",
+          jobType,
+          startDate: body.startDate ? new Date(body.startDate) : null,
+          probationPeriod: body.probationPeriod ?? null,
+          benefits: body.benefits ?? [],
+          termsAndConditions: body.termsAndConditions ?? null,
+          status,
+          validUntil: body.validUntil ? new Date(body.validUntil) : null,
+          approvers: body.approvers ?? [],
+          sentAt: body.sentAt ? new Date(body.sentAt) : null,
+          respondedAt: body.respondedAt ? new Date(body.respondedAt) : null,
+          declineReason: body.declineReason ?? null,
+          createdById: session.user.id
+        },
+        include: {
+          applicant: { select: { id: true, firstName: true, lastName: true, email: true } },
+          jobPosting: { select: { id: true, title: true, titleAr: true } },
+          department: { select: { id: true, name: true, nameAr: true } }
+        }
+      });
     });
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        id: created.id,
-        applicantId: created.applicantId,
-        applicantName: `${created.applicant.firstName} ${created.applicant.lastName}`,
-        applicantEmail: created.applicant.email,
-        jobPostingId: created.jobPostingId,
-        jobTitle: created.jobPosting.title,
-        departmentId: created.departmentId ?? "",
-        departmentName: created.department?.name ?? "",
-        offeredSalary: created.offeredSalary ? Number(created.offeredSalary) : 0,
-        currency: created.currency ?? "SAR",
-        jobType: mapJobType(created.jobType) ?? "full-time",
-        startDate: created.startDate?.toISOString() ?? new Date().toISOString(),
-        probationPeriod: created.probationPeriod ?? undefined,
-        benefits: (created.benefits as any) ?? [],
-        termsAndConditions: created.termsAndConditions ?? undefined,
-        status: mapStatus(created.status),
-        validUntil: created.validUntil?.toISOString() ?? new Date().toISOString(),
-        approvers: (created.approvers as any) ?? [],
-        sentAt: created.sentAt?.toISOString() ?? undefined,
-        respondedAt: created.respondedAt?.toISOString() ?? undefined,
-        declineReason: created.declineReason ?? undefined,
-        createdBy: created.createdById,
-        createdAt: created.createdAt.toISOString(),
-        updatedAt: created.updatedAt.toISOString()
-      }
-    });
+    return NextResponse.json({ success: true, data: mapOffer(created) });
   } catch (error) {
     console.error("Error creating job offer:", error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json({ success: false, error: "Invalid payload" }, { status: 400 });
+    }
+
     return NextResponse.json(
       { success: false, error: "Failed to create job offer" },
       { status: 500 }

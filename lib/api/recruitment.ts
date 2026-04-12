@@ -602,6 +602,19 @@ export async function getApplicant(id: string): Promise<Applicant | null> {
   return res.success && res.data ? mapApplicantFromApi(res.data) : null;
 }
 
+export async function createApplicant(
+  data: Pick<Applicant, "jobPostingId" | "firstName" | "lastName" | "email"> &
+    Partial<Pick<Applicant, "phone" | "status" | "source" | "notes">>
+): Promise<Applicant> {
+  const res = await apiClient.post<{ id: string }>("/recruitment/applicants", data);
+  const created = mustData(res);
+  const fullRecord = await getApplicant(created.id);
+  if (!fullRecord) {
+    throw new Error("Failed to load created applicant");
+  }
+  return fullRecord;
+}
+
 export async function updateApplicantStatus(
   id: string,
   status: ApplicationStatus

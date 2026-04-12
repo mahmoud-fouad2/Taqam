@@ -1,6 +1,4 @@
 import { SectionCards } from "@/components/section-cards";
-import { TenantControls } from "@/components/tenant-controls";
-import { TenantBadge } from "@/components/tenant-badge";
 import { RecentActivities } from "@/components/recent-activities";
 import { ChartAreaInteractiveClient } from "./chart-area-interactive-client";
 import { DashboardQuickActions } from "@/components/dashboard-quick-actions";
@@ -47,15 +45,17 @@ export default async function Page() {
   ]);
 
   const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User";
+  const workspaceLabel = user.tenant?.nameAr || user.tenant?.name || null;
 
   return (
     <>
-      <div className="flex items-center justify-between">
-        <DashboardGreeting name={userName} locale={locale} headingLabel={t.dashboard.heading} />
-        <div className="flex items-center gap-3">
-          <TenantBadge />
-          <TenantControls />
-        </div>
+      <div className="flex items-start justify-between gap-4">
+        <DashboardGreeting
+          name={userName}
+          locale={locale}
+          headingLabel={t.dashboard.heading}
+          workspaceLabel={workspaceLabel}
+        />
       </div>
       <DashboardQuickActions
         locale={locale}

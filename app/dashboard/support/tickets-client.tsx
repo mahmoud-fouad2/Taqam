@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -17,6 +18,13 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { SupportTicketsSkeleton } from "@/components/skeletons/support-tickets-skeleton";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
@@ -112,6 +120,24 @@ export function SupportTicketsClient({
   const [submitting, setSubmitting] = useState(false);
 
   const canCreate = !isSuperAdmin;
+  const categoryOptions =
+    locale === "ar"
+      ? [
+          "الوصول والصلاحيات",
+          "الحضور والانصراف",
+          "الرواتب والاستحقاقات",
+          "الطلبات وسير العمل",
+          "تقارير وبيانات",
+          "أخرى"
+        ]
+      : [
+          "Access and permissions",
+          "Attendance",
+          "Payroll and benefits",
+          "Requests and workflows",
+          "Reports and data",
+          "Other"
+        ];
 
   const load = async () => {
     setLoading(true);
@@ -135,6 +161,11 @@ export function SupportTicketsClient({
   }, []);
 
   const submitNew = async () => {
+    if (!subject.trim() || !message.trim()) {
+      setError(locale === "ar" ? t.common.fillRequired : "Please complete the required fields.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
@@ -189,64 +220,107 @@ export function SupportTicketsClient({
             <DialogTrigger asChild>
               <Button>{locale === "ar" ? "فتح تذكرة جديدة" : "New ticket"}</Button>
             </DialogTrigger>
-            <DialogContent className="w-full sm:max-w-lg">
-              <DialogHeader>
-                <DialogTitle>
-                  {locale === "ar" ? "تذكرة دعم جديدة" : "New support ticket"}
-                </DialogTitle>
+            <DialogContent className="w-full overflow-hidden sm:max-w-2xl">
+              <DialogHeader className="border-b pb-4">
+                <div className="from-primary/10 via-primary/5 rounded-2xl bg-gradient-to-br to-transparent p-4">
+                  <DialogTitle className="text-xl">
+                    {locale === "ar" ? "تذكرة دعم جديدة" : "New support ticket"}
+                  </DialogTitle>
+                  <DialogDescription className="mt-2 text-sm leading-6">
+                    {locale === "ar"
+                      ? "اكتب المشكلة بوضوح وحدد المجال المتأثر، وسيتابع فريق الدعم الحالة بشكل أسرع وأكثر دقة."
+                      : "Describe the issue clearly and choose the affected area so the support team can triage it faster."}
+                  </DialogDescription>
+                </div>
               </DialogHeader>
 
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="subject">{locale === "ar" ? t.common.subject : "Subject"}</Label>
-                  <Input
-                    id="subject"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                  />
-                </div>
+              <div className="space-y-5 py-2">
+                {error ? (
+                  <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm">
+                    {error}
+                  </div>
+                ) : null}
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="category">
-                      {locale === "ar" ? t.common.category : "Category"}
-                    </Label>
+                    <Label htmlFor="subject">{locale === "ar" ? t.common.subject : "Subject"}</Label>
                     <Input
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
+                      id="subject"
+                      value={subject}
+                      placeholder={
+                        locale === "ar"
+                          ? "مثال: تعذر اعتماد الحضور لفريق المبيعات"
+                          : "Example: Unable to approve attendance for sales team"
+                      }
+                      onChange={(e) => setSubject(e.target.value)}
                     />
                   </div>
+
                   <div className="space-y-2">
-                    <Label htmlFor="priority">
-                      {locale === "ar" ? t.common.priority : "Priority"}
-                    </Label>
-                    <select
-                      id="priority"
-                      aria-label={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
-                      title={locale === "ar" ? "أولوية التذكرة" : "Ticket priority"}
-                      className="border-input bg-background h-9 w-full rounded-md border px-3 text-sm"
-                      value={priority}
-                      onChange={(e) => setPriority(e.target.value as Ticket["priority"])}>
-                      <option value="LOW">{priorityLabel(locale, "LOW", t)}</option>
-                      <option value="NORMAL">{priorityLabel(locale, "NORMAL", t)}</option>
-                      <option value="HIGH">{priorityLabel(locale, "HIGH", t)}</option>
-                      <option value="URGENT">{priorityLabel(locale, "URGENT", t)}</option>
-                    </select>
+                    <Label htmlFor="category">{locale === "ar" ? t.common.category : "Category"}</Label>
+                    <Select value={category || undefined} onValueChange={setCategory}>
+                      <SelectTrigger id="category">
+                        <SelectValue
+                          placeholder={locale === "ar" ? "اختر التصنيف الأقرب" : "Choose a category"}
+                        />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option} value={option}>
+                            {option}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="message">{locale === "ar" ? "الرسالة" : "Message"}</Label>
-                  <Textarea
-                    id="message"
-                    rows={6}
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
+                <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
+                  <div className="space-y-2">
+                    <Label htmlFor="message">{locale === "ar" ? "تفاصيل الحالة" : "Case details"}</Label>
+                    <Textarea
+                      id="message"
+                      rows={7}
+                      value={message}
+                      placeholder={
+                        locale === "ar"
+                          ? "اذكر ما الذي حدث، متى بدأ، ومن المتأثر، وما الذي جربته قبل فتح التذكرة."
+                          : "Share what happened, when it started, who is affected, and what you already tried."
+                      }
+                      onChange={(e) => setMessage(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="space-y-2 rounded-2xl border bg-muted/30 p-4">
+                      <Label htmlFor="priority">{locale === "ar" ? t.common.priority : "Priority"}</Label>
+                      <Select value={priority} onValueChange={(value) => setPriority(value as Ticket["priority"])}>
+                        <SelectTrigger id="priority">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="LOW">{priorityLabel(locale, "LOW", t)}</SelectItem>
+                          <SelectItem value="NORMAL">{priorityLabel(locale, "NORMAL", t)}</SelectItem>
+                          <SelectItem value="HIGH">{priorityLabel(locale, "HIGH", t)}</SelectItem>
+                          <SelectItem value="URGENT">{priorityLabel(locale, "URGENT", t)}</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="rounded-2xl border border-dashed bg-background p-4 text-sm leading-6">
+                      <p className="font-medium">
+                        {locale === "ar" ? "بعد الإرسال" : "After submission"}
+                      </p>
+                      <p className="text-muted-foreground mt-2">
+                        {locale === "ar"
+                          ? "ستظهر التذكرة فورًا في قائمة الدعم، ويمكنك متابعة الردود وإضافة أي تحديثات لاحقًا من نفس المسار."
+                          : "The ticket will appear instantly in support, and you can track replies and add updates later from the same route."}
+                      </p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <div className="flex flex-col-reverse gap-2 border-t pt-2 sm:flex-row sm:justify-end">
                   <Button variant="outline" onClick={() => setOpenNew(false)}>
                     {locale === "ar" ? t.common.cancel : "Cancel"}
                   </Button>
@@ -256,8 +330,8 @@ export function SupportTicketsClient({
                         ? t.common.sending
                         : "Submitting..."
                       : locale === "ar"
-                        ? t.common.send
-                        : "Submit"}
+                        ? "إرسال التذكرة"
+                        : "Submit ticket"}
                   </Button>
                 </div>
               </div>

@@ -489,7 +489,7 @@ export default function MyProfileManager() {
               </Button>
               <Button onClick={handleSave} disabled={isSaving}>
                 <Save className="me-2 h-4 w-4" />
-                {isSaving ? "${t.myProfile.saving}" : "${t.common.saveChanges}"}
+                {isSaving ? t.myProfile.saving : t.common.saveChanges}
               </Button>
             </>
           ) : (

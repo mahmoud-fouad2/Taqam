@@ -19,6 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function SettingsLayout({ children }: { children: React.ReactNode }) {
   const locale = await getAppLocale();
+  const isRtl = locale === "ar";
 
   const p = locale === "en" ? "/en" : "";
 
@@ -66,7 +67,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
   ];
 
   return (
-    <>
+    <div dir={isRtl ? "rtl" : "ltr"} className="space-y-4">
       <div className="mb-4 space-y-1">
         <h2 className="text-start text-2xl font-bold tracking-tight">
           {locale === "ar" ? "إعدادات النظام" : "Settings"}
@@ -77,7 +78,7 @@ export default async function SettingsLayout({ children }: { children: React.Rea
             : "Manage your account settings and email preferences."}
         </p>
       </div>
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-start rtl:lg:flex-row-reverse">
+      <div className={`flex flex-col gap-6 lg:items-start ${isRtl ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
         <aside className="lg:sticky lg:top-20 lg:w-64 lg:shrink-0">
           <div className="bg-card rounded-lg border p-2 shadow-sm">
             <SidebarNav items={sidebarNavItems} />
@@ -87,6 +88,6 @@ export default async function SettingsLayout({ children }: { children: React.Rea
           <div className="bg-card rounded-lg border p-6 shadow-sm">{children}</div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

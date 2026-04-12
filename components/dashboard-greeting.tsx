@@ -6,6 +6,7 @@ type Props = {
   name: string;
   locale: "ar" | "en";
   headingLabel: string;
+  workspaceLabel?: string | null;
 };
 
 function getGreeting(locale: "ar" | "en"): string {
@@ -21,7 +22,7 @@ function getGreeting(locale: "ar" | "en"): string {
   }
 }
 
-export function DashboardGreeting({ name, locale, headingLabel }: Props) {
+export function DashboardGreeting({ name, locale, headingLabel, workspaceLabel }: Props) {
   const greeting = useMemo(() => getGreeting(locale), [locale]);
   const firstName = name.split(" ")[0];
   const subtitle =
@@ -38,6 +39,12 @@ export function DashboardGreeting({ name, locale, headingLabel }: Props) {
         {greeting} {firstName}
       </h1>
       <p className="text-muted-foreground text-sm">{subtitle}</p>
+      {workspaceLabel ? (
+        <p className="text-muted-foreground text-xs">
+          {locale === "ar" ? "الشركة الحالية: " : "Current company: "}
+          <span className="text-foreground font-medium">{workspaceLabel}</span>
+        </p>
+      ) : null}
     </div>
   );
 }

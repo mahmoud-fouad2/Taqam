@@ -59,6 +59,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import {
+  createApplicant,
   createJobOffer,
   deleteJobOffer,
   getApplicants,
@@ -83,7 +84,12 @@ import { getText } from "@/lib/i18n/text";
 const t = getText("ar");
 
 type OfferFormState = {
+  candidateMode: "existing" | "manual";
   applicantId: string;
+  manualFirstName: string;
+  manualLastName: string;
+  manualEmail: string;
+  manualPhone: string;
   jobPostingId: string;
   offeredSalary: string;
   currency: string;
@@ -97,7 +103,12 @@ type OfferFormState = {
 };
 
 const EMPTY_FORM: OfferFormState = {
+  candidateMode: "existing",
   applicantId: "",
+  manualFirstName: "",
+  manualLastName: "",
+  manualEmail: "",
+  manualPhone: "",
   jobPostingId: "",
   offeredSalary: "",
   currency: "SAR",
@@ -127,8 +138,15 @@ function toDateInputValue(value?: string) {
 }
 
 function buildFormState(offer: JobOffer): OfferFormState {
+  const [manualFirstName, ...rest] = offer.applicantName.split(" ").filter(Boolean);
+
   return {
+    candidateMode: "existing",
     applicantId: offer.applicantId,
+    manualFirstName: manualFirstName || "",
+    manualLastName: rest.join(" "),
+    manualEmail: offer.applicantEmail || "",
+    manualPhone: "",
     jobPostingId: offer.jobPostingId,
     offeredSalary: String(offer.offeredSalary || ""),
     currency: offer.currency || "SAR",
@@ -213,6 +231,7 @@ export function JobOffersManager() {
     }),
     [offers]
   );
+  const isManualCandidate = !editingOffer && form.candidateMode === "manual";
 
   function updateForm<K extends keyof OfferFormState>(key: K, value: OfferFormState[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -239,25 +258,56 @@ export function JobOffersManager() {
   }
 
   async function handleSave() {
+    const hasRequiredDates = Boolean(
+      form.jobPostingId && form.offeredSalary && form.startDate && form.validUntil
+    );
+    const hasExistingCandidate = Boolean(form.applicantId);
+    const hasManualCandidate = Boolean(
+      form.manualFirstName.trim() && form.manualLastName.trim() && form.manualEmail.trim()
+    );
+
     if (
-      !form.applicantId ||
-      !form.jobPostingId ||
-      !form.offeredSalary ||
-      !form.startDate ||
-      !form.validUntil
+      !hasRequiredDates ||
+      (!isManualCandidate && !hasExistingCandidate) ||
+      (isManualCandidate && !hasManualCandidate)
     ) {
-      toast.error(t.jobOffers.fillRequired);
+      toast.error(
+        isManualCandidate
+          ? locale === "ar"
+            ? "أكمل بيانات الشخص مباشرة قبل إنشاء العرض أو العقد."
+            : "Complete the direct candidate details before creating the offer or contract."
+          : t.jobOffers.fillRequired
+      );
       return;
     }
 
     setIsSaving(true);
     setError(null);
     try {
-      const applicant = applicants.find((item) => item.id === form.applicantId);
+      let applicantId = form.applicantId;
+      if (isManualCandidate) {
+        const createdApplicant = await createApplicant({
+          jobPostingId: form.jobPostingId,
+          firstName: form.manualFirstName.trim(),
+          lastName: form.manualLastName.trim(),
+          email: form.manualEmail.trim(),
+          phone: form.manualPhone.trim() || undefined,
+          status: "offer",
+          source: "direct",
+          notes:
+            locale === "ar"
+              ? "تمت إضافته مباشرة من مسار عرض/عقد وظيفي"
+              : "Added directly from the offer/contract workflow"
+        });
+        applicantId = createdApplicant.id;
+        setApplicants((current) => [createdApplicant, ...current]);
+      }
+
+      const applicant = applicants.find((item) => item.id === applicantId);
       const job = jobs.find((item) => item.id === form.jobPostingId);
 
       const payload = {
-        applicantId: form.applicantId,
+        applicantId,
         jobPostingId: form.jobPostingId,
         departmentId: job?.departmentId || undefined,
         offeredSalary: Number(form.offeredSalary),
@@ -529,33 +579,110 @@ export function JobOffersManager() {
       </Card>
 
       <Dialog open={isFormOpen} onOpenChange={handleFormOpenChange}>
-        <DialogContent className="w-full sm:max-w-[560px]">
+        <DialogContent className="w-full sm:max-w-[720px]">
           <DialogHeader>
             <DialogTitle>
               {editingOffer ? t.jobOffers.editOffer : t.jobOffers.createOffer}
             </DialogTitle>
             <DialogDescription>
-              {editingOffer ? t.jobOffers.editDesc : t.jobOffers.createDesc}
+              {editingOffer
+                ? t.jobOffers.editDesc
+                : locale === "ar"
+                  ? "أنشئ عرضًا من مرشح موجود أو أدخل بيانات شخص جديد مباشرة لإصدار عرض أو عقد."
+                  : "Create an offer from an existing candidate or enter a direct contract profile for a new person."}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>{t.jobOffers.candidate}</Label>
-              <Select
-                value={form.applicantId}
-                onValueChange={(value) => updateForm("applicantId", value)}>
-                <SelectTrigger>
-                  <SelectValue placeholder={t.jobOffers.chooseCandidate} />
-                </SelectTrigger>
-                <SelectContent>
-                  {applicants.map((applicant) => (
-                    <SelectItem key={applicant.id} value={applicant.id}>
-                      {applicant.firstName} {applicant.lastName} - {applicant.jobTitle}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            {!editingOffer ? (
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  onClick={() => updateForm("candidateMode", "existing")}
+                  className={`rounded-xl border px-4 py-3 text-sm transition-colors ${
+                    !isManualCandidate
+                      ? "border-primary bg-primary/5 text-primary"
+                      : "hover:bg-muted"
+                  }`}>
+                  {locale === "ar" ? "اختيار من المرشحين" : "Select existing candidate"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateForm("candidateMode", "manual")}
+                  className={`rounded-xl border px-4 py-3 text-sm transition-colors ${
+                    isManualCandidate
+                      ? "border-primary bg-primary/5 text-primary"
+                      : "hover:bg-muted"
+                  }`}>
+                  {locale === "ar" ? "إدخال مباشر / عقد" : "Direct entry / contract"}
+                </button>
+              </div>
+            ) : null}
+
+            {isManualCandidate ? (
+              <div className="grid gap-4 rounded-2xl border bg-muted/20 p-4">
+                <div>
+                  <p className="font-medium">
+                    {locale === "ar" ? "بيانات الشخص" : "Person details"}
+                  </p>
+                  <p className="text-muted-foreground mt-1 text-sm">
+                    {locale === "ar"
+                      ? "استخدم هذا المسار إذا كان الشخص لم يتقدم على وظيفة من قبل وتريد إصدار عرض أو عقد مباشرة."
+                      : "Use this path when the person did not apply through the jobs funnel and you want to issue an offer or contract directly."}
+                  </p>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label>{locale === "ar" ? "الاسم الأول" : "First name"}</Label>
+                    <Input
+                      value={form.manualFirstName}
+                      onChange={(event) => updateForm("manualFirstName", event.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>{locale === "ar" ? "اسم العائلة" : "Last name"}</Label>
+                    <Input
+                      value={form.manualLastName}
+                      onChange={(event) => updateForm("manualLastName", event.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="grid gap-2">
+                    <Label>{locale === "ar" ? t.common.email : "Email"}</Label>
+                    <Input
+                      type="email"
+                      value={form.manualEmail}
+                      onChange={(event) => updateForm("manualEmail", event.target.value)}
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label>{locale === "ar" ? t.common.phone : "Phone"}</Label>
+                    <Input
+                      value={form.manualPhone}
+                      onChange={(event) => updateForm("manualPhone", event.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-2">
+                <Label>{locale === "ar" ? "المرشح" : t.jobOffers.candidate}</Label>
+                <Select
+                  value={form.applicantId}
+                  onValueChange={(value) => updateForm("applicantId", value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t.jobOffers.chooseCandidate} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {applicants.map((applicant) => (
+                      <SelectItem key={applicant.id} value={applicant.id}>
+                        {applicant.firstName} {applicant.lastName} - {applicant.jobTitle}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
 
             <div className="grid gap-2">
               <Label>{t.onboarding.jobCol}</Label>
@@ -681,7 +808,7 @@ export function JobOffersManager() {
               {t.common.cancel}
             </Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
-              {editingOffer ? t.common.saveChanges : t.jobOffers.saveOffer}
+              {editingOffer ? t.common.saveChanges : locale === "ar" ? "حفظ العرض / العقد" : "Save offer / contract"}
             </Button>
           </DialogFooter>
         </DialogContent>

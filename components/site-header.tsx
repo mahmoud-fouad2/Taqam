@@ -1,5 +1,6 @@
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DashboardBackButton } from "@/components/dashboard-back-button";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 import { DashboardHeaderActions } from "@/components/dashboard-header-actions";
 
@@ -14,6 +15,7 @@ export function SiteHeader({ locale, dir }: { locale: "ar" | "en"; dir: "rtl" | 
           orientation="vertical"
           className="mx-1 hidden data-[orientation=vertical]:h-5 sm:block"
         />
+        <DashboardBackButton locale={locale} />
         <div className="min-w-0 flex-1 overflow-hidden">
           <DashboardBreadcrumb />
         </div>

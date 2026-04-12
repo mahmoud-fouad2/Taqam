@@ -608,7 +608,7 @@ export function OrganizationManager() {
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button type="submit" disabled={isSaving}>
-                        {isSaving ? t.common.saving : "${t.common.saveChanges}"}
+                        {isSaving ? t.common.saving : t.common.saveChanges}
                       </Button>
                     </div>
                   </form>

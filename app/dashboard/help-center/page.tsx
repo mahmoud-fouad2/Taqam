@@ -19,8 +19,8 @@ export default async function HelpCenterPage() {
         <h1 className="text-2xl font-bold">{t.common.helpCenter}</h1>
         <p className="text-muted-foreground">
           {locale === "ar"
-            ? "بوابة موحدة تربط بين مركز المساعدة العام، التذاكر، وروابط العمل داخل لوحة الشركة أو السوبر أدمن."
-            : "A unified hub linking the public help center, support tickets, and the right workspace routes for tenant or super-admin users."}
+            ? "هنا ستجد أدلة الاستخدام، روابط الدعم، والمسارات السريعة للأقسام الأكثر استخدامًا داخل النظام."
+            : "Find guidance, support routes, and quick links to the most-used areas across the platform."}
         </p>
       </div>
 
@@ -64,8 +64,8 @@ export default async function HelpCenterPage() {
           <CardContent className="text-muted-foreground space-y-3 text-sm">
             <p>
               {locale === "ar"
-                ? "لو المشكلة تشغيلية داخل الحساب، ارفع تذكرة من لوحة الدعم لتبقى الحالة مرتبطة بالشركة والمستخدم المتأثر."
-                : "If the issue is operational inside the account, open a ticket so the case stays linked to the affected company and user."}
+                ? "إذا واجهتك مشكلة تشغيلية داخل الحساب، افتح تذكرة دعم ليتم تتبع الحالة والرد عليها بشكل منظم."
+                : "If you hit an operational issue inside the account, open a support ticket so the case can be tracked and answered clearly."}
             </p>
             <Button asChild size="sm">
               <Link href={`${p}/dashboard/support`}>
@@ -78,12 +78,12 @@ export default async function HelpCenterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{locale === "ar" ? "مسارات العمل الصحيحة" : "Correct work paths"}</CardTitle>
+          <CardTitle>{locale === "ar" ? "ابدأ من المسار المناسب" : "Start from the right route"}</CardTitle>
         </CardHeader>
         <CardContent className="text-sm">
           <div className="grid gap-2 md:grid-cols-2">
             <Link className="text-primary hover:underline" href={`${p}/dashboard/help-center`}>
-              {locale === "ar" ? "مساعدة داخلية للداشبورد" : "In-app help center"}
+              {locale === "ar" ? "شرح الأدوات داخل الداشبورد" : "In-app help"}
             </Link>
             <Link className="text-primary hover:underline" href={`${p}/faq`}>
               {locale === "ar" ? "الأسئلة الشائعة العامة" : "Public FAQ"}
@@ -114,33 +114,31 @@ export default async function HelpCenterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>
-            {locale === "ar" ? "تمييز مهم بين الأسطح" : "Important surface distinction"}
-          </CardTitle>
+          <CardTitle>{locale === "ar" ? "قبل فتح تذكرة" : "Before opening a ticket"}</CardTitle>
         </CardHeader>
         <CardContent className="text-muted-foreground space-y-3 text-sm">
           <div>
             <p className="text-foreground font-medium">
               {locale === "ar"
-                ? "ما الفرق بين الموظفين والمستخدمين؟"
-                : "What's the difference between Employees and Users?"}
+                ? "ابدأ بالمعلومة أو الخطوة الأقرب لسؤالك"
+                : "Start with the closest route to your question"}
             </p>
             <p>
               {locale === "ar"
-                ? "الموظف = ملف موارد بشرية داخل الشركة. المستخدم = حساب تسجيل دخول وصلاحيات. ممكن يكون عندك موظف بدون حساب دخول، أو مستخدم بدون ملف موظف (مثل السوبر أدمن)."
-                : "Employee is an HR record inside a tenant. User is a login account with permissions. You can have employees without logins, and users without employee records (e.g. Super Admin)."}
+                ? "إذا كان المطلوب شرحًا أو سياسة استخدام، راجع مركز المساعدة أو التوثيق أولًا. وإذا كانت المشكلة داخل بيانات شركتك أو الصلاحيات أو العمليات اليومية، افتح تذكرة من لوحة الدعم."
+                : "If you need guidance or policy clarification, start with the help center or docs. If the issue is inside your company data, permissions, or day-to-day operations, open a support ticket from the dashboard."}
             </p>
           </div>
           <div>
             <p className="text-foreground font-medium">
               {locale === "ar"
-                ? "متى أستخدم السوبر أدمن ومتى أستخدم لوحة الشركة؟"
-                : "When do I use super-admin vs tenant dashboard?"}
+                ? "متى أستخدم لوحة الشركة ومتى أرجع لإدارة المنصة؟"
+                : "When should I use the company workspace vs platform admin?"}
             </p>
             <p>
               {locale === "ar"
-                ? "السوبر أدمن لإدارة المنصة والشركات والباقات. لوحة الشركة لإدارة الموظفين والحضور والرواتب داخل شركة محددة."
-                : "Use super-admin for platform, tenant, and plan management. Use a tenant dashboard for employees, attendance, payroll, and company-specific operations."}
+                ? "لوحة الشركة مخصصة لتشغيل الموظفين والحضور والرواتب والطلبات داخل شركة محددة. أما إدارة المنصة فهي للشركات والباقات والإعدادات العامة على مستوى الـ SaaS كله."
+                : "Use the company workspace for employees, attendance, payroll, and requests within one tenant. Use platform admin for tenants, plans, and SaaS-wide controls."}
             </p>
           </div>
         </CardContent>
