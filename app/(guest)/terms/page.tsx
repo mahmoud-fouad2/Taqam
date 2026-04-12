@@ -235,14 +235,7 @@ export default async function TermsPage() {
               variant: "brand"
             }
           ]}
-          stats={[
-            { value: `${termsSections.length}`, label: isAr ? "محاور تعاقدية" : "Contract topics" },
-            {
-              value: isAr ? "تشغيل SaaS" : "SaaS operations",
-              label: isAr ? "طبيعة الخدمة" : "Service model"
-            },
-            { value: "support@taqam.net", label: isAr ? "قناة التواصل" : "Contact channel" }
-          ]}
+          stats={[]}
         />
       </FadeIn>
 

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { getSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 
 import { Button } from "@/components/ui/button";
@@ -181,16 +181,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         </div>
       ) : null}
 
-      {siteKey ? (
-        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3.5 py-2.5">
-          <ShieldCheck className="text-primary size-4 shrink-0" />
-          <p className="text-muted-foreground text-xs leading-5">
-            {locale === "ar"
-              ? "محمي بـ Google reCAPTCHA v3 — يعمل تلقائيًا في الخلفية."
-              : "Protected by Google reCAPTCHA v3 — runs automatically in the background."}
-          </p>
-        </div>
-      ) : (
+      {!siteKey && (
         <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
       )}
 

@@ -74,17 +74,9 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
 
   const isItemActive = (href: string) => strippedPath === stripHash(href);
 
-  const isDropdownActive = (href: string, sections?: (typeof marketingNav)[number]["sections"]) => {
-    if (isItemActive(href)) return true;
-
-    return (
-      sections?.some((section) =>
-        section.items.some((child) => {
-          const childHref = stripHash(child.href);
-          return childHref !== "/" && strippedPath === childHref;
-        })
-      ) ?? false
-    );
+  const isDropdownActive = (href: string) => {
+    if (href === "/") return strippedPath === "/";
+    return strippedPath === href || strippedPath.startsWith(href + "/");
   };
 
   const expandedItem = marketingNav.find((item) => item.href === openDropdown && item.sections);
@@ -183,7 +175,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
               }}>
               <nav className="border-border/60 bg-background/80 inline-flex items-center gap-1 rounded-full border p-1 shadow-[0_10px_32px_rgba(15,23,42,0.06)] backdrop-blur-xl">
                 {marketingNav.map((item) => {
-                  const active = isDropdownActive(item.href, item.sections);
+                  const active = isDropdownActive(item.href);
 
                   if (item.sections) {
                     return (
@@ -294,9 +286,7 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
                             </p>
                             <div className="space-y-1.5">
                               {section.items.map((child) => {
-                                const activeChild =
-                                  stripHash(child.href) !== "/" &&
-                                  strippedPath === stripHash(child.href);
+                                const activeChild = strippedPath === child.href;
                                 const Icon = child.icon;
 
                                 return (

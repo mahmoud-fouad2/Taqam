@@ -9,7 +9,7 @@ import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CheckCircle2, Loader2, ShieldCheck } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -261,16 +261,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         />
       </div>
 
-      {siteKey ? (
-        <div className="flex items-center gap-2 rounded-xl border border-border/50 bg-muted/20 px-3.5 py-2.5">
-          <ShieldCheck className="text-primary size-4 shrink-0" />
-          <p className="text-muted-foreground text-xs leading-5">
-            {isAr
-              ? "محمي بـ Google reCAPTCHA v3 — يعمل تلقائيًا في الخلفية."
-              : "Protected by Google reCAPTCHA v3 — runs automatically in the background."}
-          </p>
-        </div>
-      ) : (
+      {!siteKey && (
         <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
       )}
 

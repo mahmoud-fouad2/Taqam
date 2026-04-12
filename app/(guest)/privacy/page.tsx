@@ -237,11 +237,7 @@ export default async function PrivacyPage() {
               variant: "brand"
             }
           ]}
-          stats={[
-            { value: lastUpdated, label: isAr ? "آخر تحديث" : "Last updated" },
-            { value: `${privacySections.length}`, label: isAr ? "محاور رئيسية" : "Core sections" },
-            { value: "privacy@taqam.net", label: isAr ? "قناة الخصوصية" : "Privacy channel" }
-          ]}
+          stats={[]}
         />
       </FadeIn>
 

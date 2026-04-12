@@ -59,19 +59,7 @@ export default async function LoginPageV1() {
                   <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
                   <p className="text-muted-foreground mt-2 text-sm">{t.login.subtitle}</p>
 
-                  <div className="mt-5 grid gap-2 sm:grid-cols-3">
-                    {[
-                      locale === "ar" ? "حماية الدخول" : "Protected access",
-                      locale === "ar" ? "دخول عربي / إنجليزي" : "Arabic / English",
-                      locale === "ar" ? "تحقق Google" : "Google verification"
-                    ].map((item) => (
-                      <span
-                        key={item}
-                        className="border-border/60 bg-background/85 text-muted-foreground inline-flex items-center justify-center rounded-full border px-3 py-2 text-[11px] font-medium">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
+
                 </div>
 
                 <RecaptchaProvider>

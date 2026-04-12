@@ -3,5 +3,6 @@
   "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
   "powershell.scriptAnalysis.enable": true,
   "powershell.scriptAnalysis.settingsPath": ".vscode/analyzersettings.psd1",
-  "java.compile.nullAnalysis.mode": "automatic"
+  "java.compile.nullAnalysis.mode": "automatic",
+  "java.configuration.updateBuildConfiguration": "interactive"
 }
