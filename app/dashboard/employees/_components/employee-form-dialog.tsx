@@ -28,7 +28,7 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { Department, Employee, JobTitle } from "@/lib/types/core-hr";
+import { getEmployeeFullName, type Department, type Employee, type JobTitle } from "@/lib/types/core-hr";
 
 import { contractTypes, statusOptions } from "./employee-constants";
 import type { EmployeeFormData } from "./employee-form-schema";
@@ -43,6 +43,7 @@ export function EmployeeFormDialog({
   editingEmployee,
   departments,
   jobTitles,
+  employees,
   form,
   saving,
   onSubmit
@@ -52,12 +53,17 @@ export function EmployeeFormDialog({
   editingEmployee: Employee | null;
   departments: Department[];
   jobTitles: JobTitle[];
+  employees: Employee[];
   form: UseFormReturn<EmployeeFormData>;
   saving: boolean;
   onSubmit: (data: EmployeeFormData) => Promise<void>;
 }) {
   const locale = useClientLocale();
   const t = getText(locale);
+  const managerOptions = employees.filter(
+    (employee) => employee.id !== editingEmployee?.id && employee.status !== "terminated"
+  );
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[90vh] w-full overflow-y-auto sm:max-w-[600px]">
@@ -132,6 +138,40 @@ export function EmployeeFormDialog({
                         <FormControl>
                           <Input placeholder={t.employeeForm.lastNamePlaceholder} {...field} />
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="managerId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t.workflows.directManager}</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(value === "none" ? "" : value)}
+                          value={field.value || "none"}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue
+                                placeholder={
+                                  locale === "ar"
+                                    ? "اختر المدير المباشر"
+                                    : "Choose direct manager"
+                                }
+                              />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="none">-</SelectItem>
+                            {managerOptions.map((manager) => (
+                              <SelectItem key={manager.id} value={manager.id}>
+                                {getEmployeeFullName(manager, locale)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}

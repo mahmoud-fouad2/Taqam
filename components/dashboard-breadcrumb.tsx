@@ -69,6 +69,27 @@ function label(segment: string, locale: "ar" | "en"): string {
   return SEGMENT_LABELS[segment]?.[locale] ?? segment;
 }
 
+function dynamicLabel(
+  segment: string,
+  previousSegment: string | undefined,
+  locale: "ar" | "en"
+): string {
+  const isUuidOrId = /^[0-9a-f-]{8,}$|^\d+$/.test(segment);
+  if (!isUuidOrId) {
+    return label(segment, locale);
+  }
+
+  if (previousSegment === "employees") {
+    return locale === "ar" ? "ملف الموظف" : "Employee Profile";
+  }
+
+  if (previousSegment === "users") {
+    return locale === "ar" ? "تفاصيل المستخدم" : "User Details";
+  }
+
+  return "...";
+}
+
 export function DashboardBreadcrumb() {
   const locale = useClientLocale("ar") as "ar" | "en";
   const pathname = usePathname();
@@ -88,9 +109,8 @@ export function DashboardBreadcrumb() {
   for (let i = 0; i < segments.length; i++) {
     const seg = segments[i]!;
     accumulated += `/${seg}`;
-    const isUuidOrId = /^[0-9a-f-]{8,}$|^\d+$/.test(seg);
     crumbs.push({
-      label: isUuidOrId ? "..." : label(seg, locale),
+      label: dynamicLabel(seg, segments[i - 1], locale),
       href: accumulated
     });
   }

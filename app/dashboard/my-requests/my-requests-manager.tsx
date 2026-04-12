@@ -375,9 +375,6 @@ export default function MyRequestsManager() {
                   onClick={() => setSelectedRequest(request)}>
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <p className="text-muted-foreground mb-2 text-sm">
-                        {t.myRequests.approvalPath}
-                      </p>
                       <div>
                         <h4 className="font-semibold">{request.title}</h4>
                         <p className="text-muted-foreground text-sm">{request.description}</p>
@@ -401,12 +398,12 @@ export default function MyRequestsManager() {
                       </p>
                     </div>
                   </div>
-                  {request.approvers.length > 0 && (
-                    <div className="mt-3 border-t pt-3">
-                      <p className="text-muted-foreground mb-2 text-sm">
-                        {t.myRequests.approvalPath}
-                      </p>
-                      <div className="flex items-center gap-2">
+                  <div className="mt-3 border-t pt-3">
+                    <p className="text-muted-foreground mb-2 text-sm">
+                      {t.myRequests.approvalPath}
+                    </p>
+                    {request.approvers.length > 0 ? (
+                      <div className="flex flex-wrap items-center gap-2">
                         {request.approvers.map((approver, index) => (
                           <div key={approver.id} className="flex items-center gap-1">
                             <span
@@ -425,8 +422,14 @@ export default function MyRequestsManager() {
                           </div>
                         ))}
                       </div>
-                    </div>
-                  )}
+                    ) : (
+                      <p className="text-muted-foreground text-sm">
+                        {request.status === "pending"
+                          ? t.myRequests.approvalPathPendingAssignment
+                          : t.myRequests.approvalPathUnavailable}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ))
             )}
@@ -480,30 +483,41 @@ export default function MyRequestsManager() {
               )}
               <div>
                 <p className="text-muted-foreground mb-2 text-sm">{t.myRequests.approvalPath}</p>
-                <div className="space-y-2">
-                  {selectedRequest.approvers.map((approver) => (
-                    <div
-                      key={approver.id}
-                      className="flex items-center justify-between rounded border p-2">
-                      <div className="flex items-center gap-2">
-                        {approver.status === "approved" ? (
-                          <CheckCircle2 className="h-4 w-4 text-green-600" />
-                        ) : approver.status === "rejected" ? (
-                          <XCircle className="h-4 w-4 text-red-600" />
-                        ) : (
-                          <Clock className="h-4 w-4 text-yellow-600" />
+                {selectedRequest.approvers.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedRequest.approvers.map((approver) => (
+                      <div key={approver.id} className="rounded border p-2">
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="flex items-center gap-2">
+                            {approver.status === "approved" ? (
+                              <CheckCircle2 className="h-4 w-4 text-green-600" />
+                            ) : approver.status === "rejected" ? (
+                              <XCircle className="h-4 w-4 text-red-600" />
+                            ) : (
+                              <Clock className="h-4 w-4 text-yellow-600" />
+                            )}
+                            <span className="font-medium">{approver.name}</span>
+                            <span className="text-muted-foreground text-sm">({approver.role})</span>
+                          </div>
+                          {approver.actionAt && (
+                            <span className="text-muted-foreground text-sm">
+                              {new Date(approver.actionAt).toLocaleDateString("ar-SA")}
+                            </span>
+                          )}
+                        </div>
+                        {approver.comments && (
+                          <p className="text-muted-foreground mt-2 text-sm">{approver.comments}</p>
                         )}
-                        <span className="font-medium">{approver.name}</span>
-                        <span className="text-muted-foreground text-sm">({approver.role})</span>
                       </div>
-                      {approver.actionAt && (
-                        <span className="text-muted-foreground text-sm">
-                          {new Date(approver.actionAt).toLocaleDateString("ar-SA")}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">
+                    {selectedRequest.status === "pending"
+                      ? t.myRequests.approvalPathPendingAssignment
+                      : t.myRequests.approvalPathUnavailable}
+                  </p>
+                )}
               </div>
             </div>
           )}

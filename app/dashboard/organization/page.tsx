@@ -3,6 +3,7 @@ import { generateMeta } from "@/lib/utils";
 import { OrganizationManager } from "./organization-manager-new";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { requireTenantRole } from "@/lib/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
@@ -14,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function OrganizationPage() {
+  await requireTenantRole(["TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
   const locale = await getAppLocale();
   const t = getText(locale);
   return (

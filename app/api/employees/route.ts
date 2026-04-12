@@ -19,6 +19,7 @@ import {
 } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { z } from "zod";
+import { validateEmployeeManagerAssignment } from "@/lib/employees/manager-validation";
 
 const EMPLOYEE_LIST_ROLES = new Set(["TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
 
@@ -101,8 +102,13 @@ export async function GET(request: NextRequest) {
           manager: {
             select: {
               id: true,
+              employeeNumber: true,
               firstName: true,
-              lastName: true
+              firstNameAr: true,
+              lastName: true,
+              lastNameAr: true,
+              email: true,
+              avatar: true
             }
           }
         },
@@ -256,6 +262,17 @@ export async function POST(request: NextRequest) {
 
     if (!branchId && branchCode && !branch) {
       return errorResponse(`Unknown branch code: ${branchCode}`, 400);
+    }
+
+    if (managerId) {
+      const managerValidation = await validateEmployeeManagerAssignment({
+        tenantId,
+        managerId
+      });
+
+      if (!managerValidation.ok) {
+        return errorResponse(managerValidation.error, 400);
+      }
     }
 
     // Generate employee number

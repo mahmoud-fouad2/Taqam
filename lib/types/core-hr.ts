@@ -9,6 +9,17 @@ export type Gender = "male" | "female";
 export type MaritalStatus = "single" | "married" | "divorced" | "widowed";
 export type ContractType = "full_time" | "part_time" | "contract" | "intern";
 
+export interface EmployeeSummary {
+  id: string;
+  employeeNumber?: string;
+  firstName: string;
+  firstNameAr?: string | null;
+  lastName: string;
+  lastNameAr?: string | null;
+  email?: string;
+  avatar?: string;
+}
+
 export interface Employee {
   id: string;
   employeeNumber: string; // الرقم الوظيفي
@@ -30,6 +41,7 @@ export interface Employee {
   departmentId: string;
   jobTitleId: string;
   managerId?: string; // المدير المباشر
+  manager?: EmployeeSummary;
   branchId?: string;
   hireDate: string;
   contractType: ContractType;
@@ -178,7 +190,10 @@ export function getDisplayName(
 }
 
 // Helper to get employee full name
-export function getEmployeeFullName(emp: Employee, locale: "ar" | "en" = "ar"): string {
+export function getEmployeeFullName(
+  emp: Pick<EmployeeSummary, "firstName" | "lastName" | "firstNameAr" | "lastNameAr">,
+  locale: "ar" | "en" = "ar"
+): string {
   if (locale === "ar" && emp.firstNameAr && emp.lastNameAr) {
     return `${emp.firstNameAr} ${emp.lastNameAr}`;
   }

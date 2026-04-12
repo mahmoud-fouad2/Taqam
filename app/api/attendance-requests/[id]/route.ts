@@ -185,8 +185,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
       where: { id },
       data: {
         status: nextStatus,
-        approvedById: nextStatus === "APPROVED" ? session.user.id : null,
-        approvedAt: nextStatus === "APPROVED" ? new Date() : null,
+        approvedById: session.user.id,
+        approvedAt: new Date(),
         rejectionReason: nextStatus === "REJECTED" ? (parsed.data.rejectionReason ?? null) : null
       }
     });

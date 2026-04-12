@@ -7,6 +7,7 @@ import type {
   ContractType,
   Employee,
   EmployeeCreateInput,
+  EmployeeSummary,
   EmployeeStatus,
   Gender,
   MaritalStatus
@@ -45,7 +46,34 @@ type ApiEmployee = {
   tenantId: string;
   createdAt: string;
   updatedAt: string;
+  manager?: {
+    id: string;
+    employeeNumber?: string | null;
+    firstName: string;
+    lastName: string;
+    firstNameAr?: string | null;
+    lastNameAr?: string | null;
+    email?: string | null;
+    avatar?: string | null;
+  } | null;
 };
+
+function mapEmployeeSummaryFromApi(
+  employee?: ApiEmployee["manager"]
+): EmployeeSummary | undefined {
+  if (!employee) return undefined;
+
+  return {
+    id: employee.id,
+    employeeNumber: employee.employeeNumber ?? undefined,
+    firstName: employee.firstName,
+    firstNameAr: employee.firstNameAr ?? undefined,
+    lastName: employee.lastName,
+    lastNameAr: employee.lastNameAr ?? undefined,
+    email: employee.email ?? undefined,
+    avatar: employee.avatar ?? undefined
+  };
+}
 
 function toYmd(dateValue?: string | null): string | undefined {
   if (!dateValue) return undefined;
@@ -192,6 +220,7 @@ function mapEmployeeFromApi(emp: ApiEmployee): Employee {
     departmentId: emp.departmentId ?? "",
     jobTitleId: emp.jobTitleId ?? "",
     managerId: emp.managerId ?? undefined,
+    manager: mapEmployeeSummaryFromApi(emp.manager),
     branchId: undefined,
     hireDate: toYmd(emp.hireDate) ?? emp.hireDate,
     contractType: mapEmploymentTypeFromApi(emp.employmentType ?? undefined),

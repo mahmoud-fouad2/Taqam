@@ -9,17 +9,15 @@ import type {
   SelfServiceRequest,
   SelfServiceRequestType
 } from "@/lib/types/self-service";
+import {
+  buildAssignedRequestApprovers,
+  buildManagedRequestApprovers,
+  employeeDisplayName,
+  pickFallbackApprover,
+  type UserApproverCandidate
+} from "@/lib/self-service/request-approvers";
 
-function employeeDisplayName(employee: {
-  firstName: string;
-  lastName: string;
-  firstNameAr: string | null;
-  lastNameAr: string | null;
-}): string {
-  const ar = [employee.firstNameAr, employee.lastNameAr].filter(Boolean).join(" ").trim();
-  if (ar) return ar;
-  return `${employee.firstName} ${employee.lastName}`.trim();
-}
+const FALLBACK_APPROVER_ROLES = ["HR_MANAGER", "TENANT_ADMIN", "SUPER_ADMIN", "MANAGER"];
 
 function mapDbRequestStatus(db: string | null | undefined): RequestStatus {
   switch (String(db)) {
@@ -98,7 +96,17 @@ export async function GET(_request: NextRequest) {
         firstName: true,
         lastName: true,
         firstNameAr: true,
-        lastNameAr: true
+        lastNameAr: true,
+        manager: {
+          select: {
+            id: true,
+            userId: true,
+            firstName: true,
+            lastName: true,
+            firstNameAr: true,
+            lastNameAr: true
+          }
+        }
       }
     });
 
@@ -132,10 +140,91 @@ export async function GET(_request: NextRequest) {
         where: { tenantId, createdById: userId },
         orderBy: { lastMessageAt: "desc" },
         include: {
+          assignedTo: {
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              employee: {
+                select: {
+                  id: true,
+                  userId: true,
+                  firstName: true,
+                  lastName: true,
+                  firstNameAr: true,
+                  lastNameAr: true
+                }
+              }
+            }
+          },
           _count: { select: { messages: true } }
         }
       })
     ]);
+
+    const actualApproverIds = [
+      ...new Set(
+        [...leaveRequests, ...attendanceRequests]
+          .map((requestItem) => requestItem.approvedById)
+          .filter((value): value is string => Boolean(value))
+      )
+    ];
+
+    const [actualApproverUsers, fallbackApproverUsers] = await Promise.all([
+      actualApproverIds.length > 0
+        ? prisma.user.findMany({
+            where: { id: { in: actualApproverIds } },
+            select: {
+              id: true,
+              firstName: true,
+              lastName: true,
+              role: true,
+              employee: {
+                select: {
+                  id: true,
+                  userId: true,
+                  firstName: true,
+                  lastName: true,
+                  firstNameAr: true,
+                  lastNameAr: true
+                }
+              }
+            }
+          })
+        : Promise.resolve([]),
+      prisma.user.findMany({
+        where: {
+          tenantId,
+          status: "ACTIVE",
+          role: { in: FALLBACK_APPROVER_ROLES as any }
+        },
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          employee: {
+            select: {
+              id: true,
+              userId: true,
+              firstName: true,
+              lastName: true,
+              firstNameAr: true,
+              lastNameAr: true
+            }
+          }
+        }
+      })
+    ]);
+
+    const approverUsersById = new Map<string, UserApproverCandidate>();
+    for (const approver of [...actualApproverUsers, ...fallbackApproverUsers]) {
+      approverUsersById.set(approver.id, approver);
+    }
+
+    const directManager = employee?.manager && employee.manager.id !== employee.id ? employee.manager : null;
+    const fallbackApprover = pickFallbackApprover(fallbackApproverUsers, userId);
 
     const items: SelfServiceRequest[] = [];
 
@@ -143,6 +232,7 @@ export async function GET(_request: NextRequest) {
       const leaveTypeName = lr.leaveType?.nameAr || lr.leaveType?.name || "إجازة";
       const start = lr.startDate.toISOString().split("T")[0];
       const end = lr.endDate.toISOString().split("T")[0];
+      const status = mapDbRequestStatus(lr.status);
       items.push({
         id: `leave:${lr.id}`,
         type: "leave",
@@ -150,10 +240,17 @@ export async function GET(_request: NextRequest) {
         employeeName,
         title: `${leaveTypeName} (${start} → ${end})`,
         description: lr.reason ?? undefined,
-        status: mapDbRequestStatus(lr.status),
+        status,
         priority: "medium",
         attachments: lr.attachmentUrl ? [lr.attachmentUrl] : undefined,
-        approvers: [],
+        approvers: buildManagedRequestApprovers({
+          requestStatus: status,
+          directManager,
+          fallbackApprover,
+          resolvedBy: lr.approvedById ? (approverUsersById.get(lr.approvedById) ?? null) : null,
+          actionAt: lr.approvedAt,
+          rejectionReason: lr.rejectionReason
+        }),
         createdAt: lr.createdAt.toISOString(),
         updatedAt: lr.updatedAt.toISOString(),
         resolvedAt: lr.approvedAt ? lr.approvedAt.toISOString() : undefined,
@@ -180,6 +277,8 @@ export async function GET(_request: NextRequest) {
         title = `طلب تعديل حضور (${date})`;
       }
 
+      const status = mapDbRequestStatus(ar.status);
+
       items.push({
         id: `attendance:${ar.id}`,
         type,
@@ -187,10 +286,17 @@ export async function GET(_request: NextRequest) {
         employeeName,
         title,
         description: ar.reason,
-        status: mapDbRequestStatus(ar.status),
+        status,
         priority: "medium",
         attachments: ar.attachmentUrl ? [ar.attachmentUrl] : undefined,
-        approvers: [],
+        approvers: buildManagedRequestApprovers({
+          requestStatus: status,
+          directManager,
+          fallbackApprover,
+          resolvedBy: ar.approvedById ? (approverUsersById.get(ar.approvedById) ?? null) : null,
+          actionAt: ar.approvedAt,
+          rejectionReason: ar.rejectionReason
+        }),
         createdAt: ar.createdAt.toISOString(),
         updatedAt: ar.updatedAt.toISOString(),
         resolvedAt: ar.approvedAt ? ar.approvedAt.toISOString() : undefined,
@@ -199,6 +305,8 @@ export async function GET(_request: NextRequest) {
     }
 
     for (const e of enrollments) {
+      const status = mapEnrollmentStatus(e.status);
+
       items.push({
         id: `training:${e.id}`,
         type: "training",
@@ -206,7 +314,7 @@ export async function GET(_request: NextRequest) {
         employeeName,
         title: `طلب تدريب: ${e.course.title}`,
         description: undefined,
-        status: mapEnrollmentStatus(e.status),
+        status,
         priority: "medium",
         approvers: [],
         createdAt: e.createdAt.toISOString(),
@@ -217,6 +325,7 @@ export async function GET(_request: NextRequest) {
     }
 
     for (const t of tickets) {
+      const status = mapTicketStatus(t.status);
       const priority: "low" | "medium" | "high" =
         String(t.priority) === "LOW"
           ? "low"
@@ -231,9 +340,14 @@ export async function GET(_request: NextRequest) {
         employeeName,
         title: t.subject,
         description: t.category ?? undefined,
-        status: mapTicketStatus(t.status),
+        status,
         priority,
-        approvers: [],
+        approvers: buildAssignedRequestApprovers({
+          requestStatus: status,
+          assignee: t.assignedTo,
+          actionAt:
+            status === "approved" ? t.updatedAt : undefined
+        }),
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),
         resolvedAt:

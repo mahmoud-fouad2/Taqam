@@ -5,7 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { toast } from "sonner";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -22,7 +22,6 @@ import type {
 import { departmentsService, employeesService, jobTitlesService } from "@/lib/api";
 
 import { EmployeeFormDialog } from "./_components/employee-form-dialog";
-import { EmployeeViewDialog } from "./_components/employee-view-dialog";
 import { EmployeeDeleteDialog } from "./_components/employee-delete-dialog";
 import { EmployeesFilters } from "./_components/employees-filters";
 import { EmployeesList } from "./_components/employees-list";
@@ -41,7 +40,6 @@ export function EmployeesManager() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const queryClient = useQueryClient();
 
   const [saving, setSaving] = useState(false);
 
@@ -65,11 +63,11 @@ export function EmployeesManager() {
   const setFilterDept = (v: string) => updateFilter("dept", v);
   const setFilterStatus = (v: string) => updateFilter("status", v);
   const openDialog = searchParams.get("open");
+  const editEmployeeId = searchParams.get("edit");
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [viewingEmployee, setViewingEmployee] = useState<Employee | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [employeeToDelete, setEmployeeToDelete] = useState<Employee | null>(null);
 
@@ -172,9 +170,9 @@ export function EmployeesManager() {
   const getJobName = (id: string) => jobTitleNameById.get(id) || "-";
 
   // Add
-  const clearOpenDialogParam = useCallback(() => {
+  const clearDialogParam = useCallback((key: string) => {
     const nextParams = new URLSearchParams(searchParams.toString());
-    nextParams.delete("open");
+    nextParams.delete(key);
     const nextQuery = nextParams.toString();
     router.replace(nextQuery ? `${pathname}?${nextQuery}` : pathname, { scroll: false });
   }, [router, pathname, searchParams]);
@@ -202,17 +200,7 @@ export function EmployeesManager() {
     setIsDialogOpen(true);
   }, [employees.length, form]);
 
-  useEffect(() => {
-    if (loading || openDialog !== "new") {
-      return;
-    }
-
-    handleAdd();
-    clearOpenDialogParam();
-  }, [loading, openDialog, handleAdd, clearOpenDialogParam]);
-
-  // Edit
-  const handleEdit = (emp: Employee) => {
+  const handleEdit = useCallback((emp: Employee) => {
     setEditingEmployee(emp);
     form.reset({
       employeeNumber: emp.employeeNumber,
@@ -232,7 +220,29 @@ export function EmployeesManager() {
       status: emp.status
     });
     setIsDialogOpen(true);
-  };
+  }, [form]);
+
+  useEffect(() => {
+    if (loading || openDialog !== "new") {
+      return;
+    }
+
+    handleAdd();
+    clearDialogParam("open");
+  }, [loading, openDialog, handleAdd, clearDialogParam]);
+
+  useEffect(() => {
+    if (loading || !editEmployeeId) {
+      return;
+    }
+
+    const employee = employees.find((item) => item.id === editEmployeeId);
+    if (employee) {
+      handleEdit(employee);
+    }
+
+    clearDialogParam("edit");
+  }, [loading, editEmployeeId, employees, handleEdit, clearDialogParam]);
 
   // Submit
   const onSubmit = async (data: EmployeeFormData) => {
@@ -409,7 +419,6 @@ export function EmployeesManager() {
             getDeptName={getDeptName}
             getJobName={getJobName}
             onAdd={handleAdd}
-            onView={(emp) => setViewingEmployee(emp)}
             onEdit={handleEdit}
             onDelete={handleDeleteClick}
           />
@@ -422,17 +431,10 @@ export function EmployeesManager() {
         editingEmployee={editingEmployee}
         departments={departments}
         jobTitles={jobTitles}
+        employees={employees}
         form={form}
         saving={saving}
         onSubmit={onSubmit}
-      />
-
-      <EmployeeViewDialog
-        employee={viewingEmployee}
-        onClose={() => setViewingEmployee(null)}
-        onEdit={handleEdit}
-        getDeptName={getDeptName}
-        getJobName={getJobName}
       />
 
       <EmployeeDeleteDialog

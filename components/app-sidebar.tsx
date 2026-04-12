@@ -114,6 +114,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconUsers
       },
       {
+        title: locale === "ar" ? "الهيكل التنظيمي" : "Organization",
+        url: "/dashboard/organization",
+        icon: IconFolder
+      },
+      {
         title: locale === "ar" ? "الحضور والانصراف" : "Attendance",
         url: "/dashboard/attendance",
         icon: IconClock
@@ -151,6 +156,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
       {
         title: locale === "ar" ? "الأقسام" : "Departments",
         url: "/dashboard/departments",
+        icon: IconFolder
+      },
+      {
+        title: locale === "ar" ? "الهيكل التنظيمي" : "Organization",
+        url: "/dashboard/organization",
         icon: IconFolder
       },
       {

@@ -15,6 +15,7 @@ import {
   requireTenantOrSuperAdminSession
 } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
+import { validateEmployeeManagerAssignment } from "@/lib/employees/manager-validation";
 
 const EMPLOYEE_VIEW_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
 const EMPLOYEE_MANAGE_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER"]);
@@ -25,6 +26,15 @@ function canViewEmployee(role: string | undefined) {
 
 function canManageEmployee(role: string | undefined) {
   return EMPLOYEE_MANAGE_ROLES.has(role ?? "");
+}
+
+function normalizeOptionalString(value: unknown) {
+  if (typeof value !== "string") {
+    return value === null ? null : undefined;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
 
 function buildSelfEmployeeUpdate(body: Record<string, any>) {
@@ -62,8 +72,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
         manager: {
           select: {
             id: true,
+            employeeNumber: true,
             firstName: true,
-            lastName: true
+            firstNameAr: true,
+            lastName: true,
+            lastNameAr: true,
+            email: true,
+            avatar: true
           }
         },
         shift: true,
@@ -135,6 +150,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       return forbiddenResponse();
     }
 
+    const managerId = normalizeOptionalString(body.managerId);
+
+    if (isPrivilegedManager) {
+      const managerValidation = await validateEmployeeManagerAssignment({
+        tenantId: existing.tenantId,
+        employeeId: existing.id,
+        managerId
+      });
+
+      if (!managerValidation.ok) {
+        return errorResponse(managerValidation.error, 400);
+      }
+    }
+
     const data = isPrivilegedManager
       ? {
           firstName: body.firstName,
@@ -152,7 +181,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
           emergencyContact: body.emergencyContact ?? undefined,
           departmentId: body.departmentId,
           jobTitleId: body.jobTitleId,
-          managerId: body.managerId,
+          managerId,
           employmentType: body.employmentType,
           status: body.status,
           shiftId: body.shiftId,

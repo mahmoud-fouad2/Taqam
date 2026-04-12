@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { IconEye, IconPencil, IconPlus, IconTrash, IconUser } from "@tabler/icons-react";
 
 import { Badge } from "@/components/ui/badge";
@@ -30,7 +31,6 @@ export function EmployeesList({
   getDeptName,
   getJobName,
   onAdd,
-  onView,
   onEdit,
   onDelete
 }: {
@@ -38,7 +38,6 @@ export function EmployeesList({
   getDeptName: (departmentId: string) => string;
   getJobName: (jobTitleId: string) => string;
   onAdd: () => void;
-  onView: (employee: Employee) => void;
   onEdit: (employee: Employee) => void;
   onDelete: (employee: Employee) => void;
 }) {
@@ -91,7 +90,11 @@ export function EmployeesList({
                         <IconUser className="size-4" />
                       </div>
                       <div className="min-w-0">
-                        <div className="truncate font-medium">{getEmployeeFullName(emp, "ar")}</div>
+                        <Link
+                          href={`/dashboard/employees/${emp.id}`}
+                          className="truncate font-medium transition-colors hover:text-primary hover:underline">
+                          {getEmployeeFullName(emp, locale)}
+                        </Link>
                         <div className="text-muted-foreground truncate text-sm">{emp.email}</div>
                       </div>
                     </div>
@@ -108,6 +111,11 @@ export function EmployeesList({
                       <div className="text-muted-foreground">{t.common.jobTitle}</div>
                       <div className="truncate text-start">{getJobName(emp.jobTitleId)}</div>
 
+                      <div className="text-muted-foreground">{t.workflows.directManager}</div>
+                      <div className="truncate text-start">
+                        {emp.manager ? getEmployeeFullName(emp.manager, locale) : "-"}
+                      </div>
+
                       <div className="text-muted-foreground">{t.common.status}</div>
                       <div className="text-start">
                         <EmployeeStatusBadge status={emp.status} />
@@ -119,13 +127,10 @@ export function EmployeesList({
                   </div>
 
                   <div className="flex shrink-0 flex-col items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      aria-label={t.common.view}
-                      onClick={() => onView(emp)}
-                      title={t.common.view}>
-                      <IconEye className="h-4 w-4" />
+                    <Button variant="ghost" size="icon" aria-label={t.common.viewProfile} asChild>
+                      <Link href={`/dashboard/employees/${emp.id}`} title={t.common.viewProfile}>
+                        <IconEye className="h-4 w-4" />
+                      </Link>
                     </Button>
                     <Button
                       variant="ghost"
@@ -153,11 +158,12 @@ export function EmployeesList({
 
       <div className="hidden rounded-md border md:block">
         <div className="bg-muted/50 border-b">
-          <div className="grid grid-cols-[140px_2fr_1fr_1fr_140px_160px_140px] items-center gap-2 px-3 py-2 text-sm font-medium">
+          <div className="grid grid-cols-[140px_2fr_1fr_1fr_1fr_140px_160px_140px] items-center gap-2 px-3 py-2 text-sm font-medium">
             <div className="text-start">{t.common.number}</div>
             <div className="text-start">{t.common.name}</div>
             <div className="text-start">{t.common.department}</div>
             <div className="text-start">{t.common.jobTitle}</div>
+            <div className="text-start">{t.workflows.directManager}</div>
             <div className="text-start">{t.common.status}</div>
             <div className="text-start">{t.common.hireDate}</div>
             <div className="text-start">{t.common.actions}</div>
@@ -196,7 +202,7 @@ export function EmployeesList({
                       el.style.transform = `translateY(${virtualRow.start}px)`;
                     }}
                     data-index={virtualRow.index}>
-                    <div className="hover:bg-muted/50 grid grid-cols-[140px_2fr_1fr_1fr_140px_160px_140px] items-center gap-2 px-3 py-2 text-sm">
+                    <div className="hover:bg-muted/50 grid grid-cols-[140px_2fr_1fr_1fr_1fr_140px_160px_140px] items-center gap-2 px-3 py-2 text-sm">
                       <div>
                         <Badge variant="outline">{emp.employeeNumber}</Badge>
                       </div>
@@ -206,9 +212,11 @@ export function EmployeesList({
                             <IconUser className="size-4" />
                           </div>
                           <div className="min-w-0">
-                            <div className="truncate font-medium">
-                              {getEmployeeFullName(emp, "ar")}
-                            </div>
+                            <Link
+                              href={`/dashboard/employees/${emp.id}`}
+                              className="truncate font-medium transition-colors hover:text-primary hover:underline">
+                              {getEmployeeFullName(emp, locale)}
+                            </Link>
                             <div className="text-muted-foreground truncate text-xs">
                               {emp.email}
                             </div>
@@ -217,19 +225,19 @@ export function EmployeesList({
                       </div>
                       <div className="truncate">{getDeptName(emp.departmentId)}</div>
                       <div className="truncate">{getJobName(emp.jobTitleId)}</div>
+                      <div className="truncate">
+                        {emp.manager ? getEmployeeFullName(emp.manager, locale) : "-"}
+                      </div>
                       <div>
                         <EmployeeStatusBadge status={emp.status} />
                       </div>
                       <div className="truncate">{emp.hireDate}</div>
                       <div>
                         <div className="flex items-center justify-start gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={t.common.view}
-                            onClick={() => onView(emp)}
-                            title={t.common.view}>
-                            <IconEye className="h-4 w-4" />
+                          <Button variant="ghost" size="icon" aria-label={t.common.viewProfile} asChild>
+                            <Link href={`/dashboard/employees/${emp.id}`} title={t.common.viewProfile}>
+                              <IconEye className="h-4 w-4" />
+                            </Link>
                           </Button>
                           <Button
                             variant="ghost"

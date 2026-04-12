@@ -19,6 +19,8 @@ const branchSchema = z.object({
   isActive: z.boolean().optional().default(true)
 });
 
+const readAllowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER", "MANAGER"];
+
 // GET - Get all branches
 export async function GET(request: NextRequest) {
   try {
@@ -26,6 +28,10 @@ export async function GET(request: NextRequest) {
 
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+    }
+
+    if (!readAllowedRoles.includes(session.user.role || "")) {
+      return NextResponse.json({ error: "لا تملك صلاحية عرض الفروع" }, { status: 403 });
     }
 
     const tenantId = session.user.tenantId;

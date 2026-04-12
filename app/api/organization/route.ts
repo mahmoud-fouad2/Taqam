@@ -20,6 +20,8 @@ const organizationSchema = z.object({
   logo: z.string().optional().nullable()
 });
 
+const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER", "MANAGER"];
+
 // GET - Get organization profile
 export async function GET() {
   try {
@@ -27,6 +29,10 @@ export async function GET() {
 
     if (!session?.user?.tenantId) {
       return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
+    }
+
+    if (!allowedRoles.includes(session.user.role || "")) {
+      return NextResponse.json({ error: "لا تملك صلاحية عرض بيانات الشركة" }, { status: 403 });
     }
 
     const tenantId = session.user.tenantId;
@@ -87,8 +93,8 @@ export async function PUT(request: NextRequest) {
     }
 
     // Check permissions
-    const allowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
-    if (!allowedRoles.includes(session.user.role || "")) {
+    const mutateAllowedRoles = ["TENANT_ADMIN", "SUPER_ADMIN", "HR_MANAGER"];
+    if (!mutateAllowedRoles.includes(session.user.role || "")) {
       return NextResponse.json({ error: "لا تملك صلاحية تعديل بيانات الشركة" }, { status: 403 });
     }
 

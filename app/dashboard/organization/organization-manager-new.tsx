@@ -58,6 +58,7 @@ import {
 } from "@tabler/icons-react";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
+import { OrganizationOrgChart } from "./organization-org-chart";
 
 const t = getText("ar");
 
@@ -426,6 +427,9 @@ export function OrganizationManager() {
         <TabsList>
           <TabsTrigger value="company">{t.organization.companySection}</TabsTrigger>
           <TabsTrigger value="branches">{t.organization.branches}</TabsTrigger>
+          <TabsTrigger value="org-chart">
+            {locale === "ar" ? "شجرة الإدارة" : "Org Chart"}
+          </TabsTrigger>
         </TabsList>
 
         {/* Company Tab */}
@@ -759,6 +763,10 @@ export function OrganizationManager() {
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="org-chart" className="mt-6">
+          <OrganizationOrgChart />
         </TabsContent>
       </Tabs>
 
