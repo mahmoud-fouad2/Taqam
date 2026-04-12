@@ -16,11 +16,11 @@ export default async function DocumentsPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
   return (
-    <>
-      <div className="mb-6 flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
+      <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-yellow-500/10">
-            <FolderOpen className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+          <div className="flex h-12 w-12 shrink-0 transition-transform duration-300 group-hover:scale-105 items-center justify-center rounded-2xl bg-yellow-500/10">
+            <FolderOpen className="h-6 w-6 transition-transform group-hover:scale-110 text-yellow-600 dark:text-yellow-400" />
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">{t.onboarding.documents}</h1>
@@ -31,6 +31,7 @@ export default async function DocumentsPage() {
         </div>
       </div>
       <DocumentsManager />
-    </>
+    </div>
   );
 }
+
