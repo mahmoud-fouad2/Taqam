@@ -20,11 +20,70 @@ import {
 } from "@/components/ui/empty";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { getCommercialClaimsBySurface } from "@/lib/marketing/commercial-registry";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
 import { listPublicJobFilters, listPublicJobPostings } from "@/lib/recruitment/public";
 import { buildTenantPath } from "@/lib/tenant";
 import { resolveActiveTenantRecord } from "@/lib/tenant-directory";
+
+type DifferentiatorCard = {
+  slot: string;
+  icon: typeof Building2;
+  titleAr: string;
+  titleEn: string;
+  descAr: string;
+  descEn: string;
+};
+
+const careersDifferentiatorClaims = getCommercialClaimsBySurface("careers.differentiator");
+const careersDifferentiatorBySlot = new Map(
+  careersDifferentiatorClaims.map((claim) => [claim.slot, claim] as const)
+);
+
+const differentiatorCards: DifferentiatorCard[] = [
+  {
+    slot: "company-portal",
+    icon: Building2,
+    titleAr: "بوابة خاصة بكل شركة",
+    titleEn: "Dedicated portal per company",
+    descAr: "لكل شركة صفحة توظيف مستقلة يمكن مشاركتها مباشرة مع المرشحين على رابط خاص بها.",
+    descEn: "Each company gets a dedicated careers portal that can be shared directly with candidates."
+  },
+  {
+    slot: "jobs-hub",
+    icon: BriefcaseBusiness,
+    titleAr: "مجمّع وظائف المنصة",
+    titleEn: "Platform-wide jobs hub",
+    descAr: "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة.",
+    descEn:
+      "Candidates can browse all active openings across the platform and jump into either a job page or a company portal."
+  },
+  {
+    slot: "integrated-applications",
+    icon: Sparkles,
+    titleAr: "تقديم مباشر ومتكامل",
+    titleEn: "Direct integrated applications",
+    descAr:
+      "أي طلب يصل مباشرة إلى قاعدة البيانات وإلى لوحة المتقدمين داخل الشركة المعنية مع إشعارات بريدية عند تفعيل SMTP.",
+    descEn:
+      "Every application lands directly in the database and the tenant's applicants dashboard, with optional email alerts when SMTP is enabled."
+  }
+].map((card) => {
+  const claim = careersDifferentiatorBySlot.get(card.slot);
+
+  if (!claim) {
+    return card;
+  }
+
+  return {
+    ...card,
+    titleAr: claim.title.ar,
+    titleEn: claim.title.en,
+    descAr: claim.description.ar,
+    descEn: claim.description.en
+  };
+});
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteContent = await getPlatformSiteContent();
@@ -297,51 +356,21 @@ export default async function CareersPage({
         <section className="relative border-t py-24">
           <div className="pointer-events-none absolute inset-0 -z-10 bg-[linear-gradient(180deg,rgba(248,250,252,0.3),rgba(255,255,255,1)_50%)] dark:bg-[linear-gradient(180deg,rgba(15,23,42,0.2),rgba(2,6,23,0.5)_50%)]" />
           <FadeIn direction="up" className="container mx-auto grid gap-6 px-4 md:grid-cols-3">
-            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <CardContent className="space-y-3 p-7">
-                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
-                  <Building2 className="text-primary h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-semibold">
-                  {isAr ? "بوابة خاصة بكل شركة" : "Dedicated portal per company"}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-7">
-                  {isAr
-                    ? "لكل شركة صفحة توظيف مستقلة يمكن مشاركتها مباشرة مع المرشحين على رابط خاص بها."
-                    : "Each company gets a dedicated careers portal that can be shared directly with candidates."}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <CardContent className="space-y-3 p-7">
-                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
-                  <BriefcaseBusiness className="text-primary h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-semibold">
-                  {isAr ? "مجمّع وظائف المنصة" : "Platform-wide jobs hub"}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-7">
-                  {isAr
-                    ? "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة."
-                    : "Candidates can browse all active openings across the platform and jump into either a job page or a company portal."}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
-              <CardContent className="space-y-3 p-7">
-                <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
-                  <Sparkles className="text-primary h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-semibold">
-                  {isAr ? "تقديم مباشر ومتكامل" : "Direct integrated applications"}
-                </h3>
-                <p className="text-muted-foreground text-sm leading-7">
-                  {isAr
-                    ? "أي طلب يصل مباشرة إلى قاعدة البيانات وإلى لوحة المتقدمين داخل الشركة المعنية مع إشعارات بريدية عند تفعيل SMTP."
-                    : "Every application lands directly in the database and the tenant's applicants dashboard, with optional email alerts when SMTP is enabled."}
-                </p>
-              </CardContent>
-            </Card>
+            {differentiatorCards.map((card) => (
+              <Card
+                key={card.slot}
+                className="border-border/50 bg-card/80 rounded-[2rem] backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <CardContent className="space-y-3 p-7">
+                  <div className="bg-primary/[0.07] flex h-12 w-12 items-center justify-center rounded-2xl">
+                    <card.icon className="text-primary h-5 w-5" />
+                  </div>
+                  <h3 className="text-lg font-semibold">{isAr ? card.titleAr : card.titleEn}</h3>
+                  <p className="text-muted-foreground text-sm leading-7">
+                    {isAr ? card.descAr : card.descEn}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
           </FadeIn>
         </section>
       </StaggerContainer>

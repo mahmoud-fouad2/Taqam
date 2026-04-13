@@ -11,6 +11,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { pricingPlanPayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 // GET single plan
 export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -46,6 +47,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await req.json();
+    const parsed = pricingPlanPayloadSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid plan payload", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const data = parsed.data;
 
     // Check if plan exists
     const existing = await prisma.pricingPlan.findUnique({
@@ -57,9 +68,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     // Check slug uniqueness if changed
-    if (body.slug && body.slug !== existing.slug) {
+    if (data.slug !== existing.slug) {
       const slugExists = await prisma.pricingPlan.findUnique({
-        where: { slug: body.slug }
+        where: { slug: data.slug }
       });
       if (slugExists) {
         return NextResponse.json({ error: "Slug already exists" }, { status: 400 });
@@ -69,21 +80,21 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const plan = await prisma.pricingPlan.update({
       where: { id },
       data: {
-        name: body.name,
-        nameAr: body.nameAr,
-        slug: body.slug,
-        priceMonthly: body.priceMonthly,
-        priceYearly: body.priceYearly,
-        currency: body.currency,
-        maxEmployees: body.maxEmployees,
-        employeesLabel: body.employeesLabel,
-        employeesLabelEn: body.employeesLabelEn,
-        featuresAr: body.featuresAr,
-        featuresEn: body.featuresEn,
-        planType: body.planType,
-        isPopular: body.isPopular,
-        isActive: body.isActive,
-        sortOrder: body.sortOrder
+        name: data.name,
+        nameAr: data.nameAr,
+        slug: data.slug,
+        priceMonthly: data.priceMonthly,
+        priceYearly: data.priceYearly,
+        currency: data.currency,
+        maxEmployees: data.maxEmployees,
+        employeesLabel: data.employeesLabel,
+        employeesLabelEn: data.employeesLabelEn,
+        featuresAr: data.featuresAr,
+        featuresEn: data.featuresEn,
+        planType: data.planType,
+        isPopular: data.isPopular,
+        isActive: data.isActive,
+        sortOrder: data.sortOrder
       }
     });
 

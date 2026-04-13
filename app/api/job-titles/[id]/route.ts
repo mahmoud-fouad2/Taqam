@@ -52,42 +52,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const existingJobTitle = await prisma.jobTitle.findUnique({
-      where: { id }
-    });
-
-    if (!existingJobTitle) {
-      return NextResponse.json({ error: "Job title not found" }, { status: 404 });
-    }
-
-    if (session.user.tenantId && existingJobTitle.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
-    }
-
-    const body = await request.json();
-
-    const jobTitle = await prisma.jobTitle.update({
-      where: { id },
-      data: {
-        name: body.name,
-        nameAr: body.nameAr,
-        code: body.code,
-        description: body.description,
-        minSalary: body.minSalary,
-        maxSalary: body.maxSalary,
-        level: body.level,
-        isActive: body.isActive
-      }
-    });
-
-    return NextResponse.json({ data: jobTitle });
+    return NextResponse.json(
+      { error: "Job titles are managed centrally by the platform" },
+      { status: 403 }
+    );
   } catch (error) {
     logApiError("Error updating job title", error);
     return NextResponse.json({ error: "Failed to update job title" }, { status: 500 });
@@ -96,32 +70,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
   try {
-    const { id } = await params;
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const existingJobTitle = await prisma.jobTitle.findUnique({
-      where: { id }
-    });
-
-    if (!existingJobTitle) {
-      return NextResponse.json({ error: "Job title not found" }, { status: 404 });
-    }
-
-    if (session.user.tenantId && existingJobTitle.tenantId !== session.user.tenantId) {
-      return NextResponse.json({ error: "Access denied" }, { status: 403 });
-    }
-
-    // Soft delete
-    await prisma.jobTitle.update({
-      where: { id },
-      data: { isActive: false }
-    });
-
-    return NextResponse.json({ message: "Job title deleted successfully" });
+    return NextResponse.json(
+      { error: "Job titles are managed centrally by the platform" },
+      { status: 403 }
+    );
   } catch (error) {
     logApiError("Error deleting job title", error);
     return NextResponse.json({ error: "Failed to delete job title" }, { status: 500 });

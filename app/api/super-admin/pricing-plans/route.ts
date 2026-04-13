@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { pricingPlanPayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 async function ensureDefaultPricingPlans() {
   const count = await prisma.pricingPlan.count();
@@ -112,10 +113,20 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = pricingPlanPayloadSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid plan payload", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const data = parsed.data;
 
     // Check slug uniqueness
     const existing = await prisma.pricingPlan.findUnique({
-      where: { slug: body.slug }
+      where: { slug: data.slug }
     });
 
     if (existing) {
@@ -124,21 +135,21 @@ export async function POST(req: NextRequest) {
 
     const plan = await prisma.pricingPlan.create({
       data: {
-        name: body.name,
-        nameAr: body.nameAr,
-        slug: body.slug,
-        priceMonthly: body.priceMonthly,
-        priceYearly: body.priceYearly,
-        currency: body.currency || "SAR",
-        maxEmployees: body.maxEmployees,
-        employeesLabel: body.employeesLabel,
-        employeesLabelEn: body.employeesLabelEn,
-        featuresAr: body.featuresAr || [],
-        featuresEn: body.featuresEn || [],
-        planType: body.planType || "TRIAL",
-        isPopular: body.isPopular || false,
-        isActive: body.isActive ?? true,
-        sortOrder: body.sortOrder || 0
+        name: data.name,
+        nameAr: data.nameAr,
+        slug: data.slug,
+        priceMonthly: data.priceMonthly,
+        priceYearly: data.priceYearly,
+        currency: data.currency,
+        maxEmployees: data.maxEmployees,
+        employeesLabel: data.employeesLabel,
+        employeesLabelEn: data.employeesLabelEn,
+        featuresAr: data.featuresAr,
+        featuresEn: data.featuresEn,
+        planType: data.planType,
+        isPopular: data.isPopular,
+        isActive: data.isActive,
+        sortOrder: data.sortOrder
       }
     });
 

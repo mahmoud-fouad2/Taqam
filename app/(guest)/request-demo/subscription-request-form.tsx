@@ -5,13 +5,13 @@
  * نموذج طلب الاشتراك
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CheckCircle2, Loader2 } from "lucide-react";
 import { useGoogleReCaptcha } from "react-google-recaptcha-v3";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -40,6 +40,7 @@ function createRequestSchema(isAr: boolean) {
         isAr ? "رقم الهاتف غير صحيح" : "Invalid phone number"
       ),
     employeesCount: z.string().min(1, isAr ? "اختر عدد الموظفين" : "Select employee count"),
+    plan: z.enum(["trial", "starter", "business", "enterprise"]).optional(),
     message: z
       .string()
       .optional()
@@ -53,8 +54,17 @@ type SubscriptionRequestFormProps = {
   locale: "ar" | "en";
 };
 
+function normalizeRequestedPlan(value: string | null): RequestInput["plan"] {
+  if (value === "trial" || value === "starter" || value === "business" || value === "enterprise") {
+    return value;
+  }
+
+  return undefined;
+}
+
 export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
@@ -62,6 +72,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY;
+  const requestedPlan = normalizeRequestedPlan(searchParams.get("plan"));
 
   const requestSchema = useMemo(() => createRequestSchema(isAr), [isAr]);
 
@@ -69,6 +80,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm<RequestInput>({
     resolver: zodResolver(requestSchema),
@@ -79,9 +91,16 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
       contactEmail: "",
       contactPhone: "",
       employeesCount: "",
+      plan: requestedPlan,
       message: ""
     }
   });
+
+  useEffect(() => {
+    if (requestedPlan) {
+      setValue("plan", requestedPlan, { shouldDirty: false, shouldValidate: true });
+    }
+  }, [requestedPlan, setValue]);
 
   const onSubmit = useCallback(async (data: RequestInput) => {
     setSubmitError(null);
@@ -247,6 +266,25 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
             <p className="text-destructive text-sm">{errors.employeesCount.message}</p>
           )}
         </div>
+      </div>
+
+      <div className="space-y-1.5">
+        <Label>{isAr ? "الباقة الأقرب لاحتياجك" : "Preferred plan"}</Label>
+        <Select
+          value={watch("plan")}
+          onValueChange={(value) =>
+            setValue("plan", normalizeRequestedPlan(value), { shouldDirty: true, shouldValidate: true })
+          }>
+          <SelectTrigger className="bg-muted/50 focus:bg-background h-11 rounded-xl">
+            <SelectValue placeholder={isAr ? "اختر الباقة المناسبة مبدئياً" : "Select the closest plan"} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="trial">{isAr ? "تجريبي / مبدئي" : "Trial / initial"}</SelectItem>
+            <SelectItem value="starter">{isAr ? "Starter / الأساسية" : "Starter"}</SelectItem>
+            <SelectItem value="business">{isAr ? "Business / الأعمال" : "Business"}</SelectItem>
+            <SelectItem value="enterprise">{isAr ? "Enterprise / المؤسسات" : "Enterprise"}</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Message */}

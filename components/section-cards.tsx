@@ -1,5 +1,5 @@
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, Clock, CalendarOff, UserPlus } from "lucide-react";
+import { Users, Clock, CalendarOff, UserPlus, Banknote, Briefcase } from "lucide-react";
 import type { AppLocale } from "@/lib/i18n/types";
 import { getText } from "@/lib/i18n/text";
 import type { DashboardStats } from "@/lib/dashboard";
@@ -7,6 +7,15 @@ import type { DashboardStats } from "@/lib/dashboard";
 export function SectionCards({ locale, stats }: { locale: AppLocale; stats: DashboardStats }) {
   const t = getText(locale);
   const num = (n: number) => n.toLocaleString(locale === "ar" ? "ar-SA" : "en-US");
+
+  const currency = (n: number) =>
+    n === 0
+      ? "—"
+      : n.toLocaleString(locale === "ar" ? "ar-SA" : "en-US", {
+          style: "currency",
+          currency: "SAR",
+          maximumFractionDigits: 0
+        });
 
   const cards = [
     {
@@ -36,11 +45,25 @@ export function SectionCards({ locale, stats }: { locale: AppLocale; stats: Dash
       subtitle: `${t.sectionCards.departments}: ${num(stats.departments)}`,
       icon: UserPlus,
       iconClassName: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400"
+    },
+    {
+      title: t.sectionCards.monthlyPayrollTotal,
+      value: currency(stats.monthlyPayrollTotal),
+      subtitle: t.sectionCards.lastPayrollPeriod,
+      icon: Banknote,
+      iconClassName: "bg-violet-500/10 text-violet-600 dark:text-violet-400"
+    },
+    {
+      title: t.sectionCards.activeJobOpenings,
+      value: num(stats.activeJobOpenings),
+      subtitle: `${num(stats.activeJobOpenings)} ${t.sectionCards.openPositions}`,
+      icon: Briefcase,
+      iconClassName: "bg-rose-500/10 text-rose-600 dark:text-rose-400"
     }
-  ] as const;
+  ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+    <div className="grid grid-cols-1 gap-4 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
       {cards.map((card) => {
         const Icon = card.icon;
 

@@ -59,6 +59,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconUsers
       },
       {
+        title: locale === "ar" ? "مكتبة المسميات" : "Job title library",
+        url: "/dashboard/super-admin/job-titles",
+        icon: IconBriefcase
+      },
+      {
         title: locale === "ar" ? "الأسعار والباقات" : "Pricing and plans",
         url: "/dashboard/super-admin/pricing",
         icon: IconBriefcase
@@ -164,11 +169,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconFolder
       },
       {
-        title: locale === "ar" ? "المسميات الوظيفية" : "Job Titles",
-        url: "/dashboard/job-titles",
-        icon: IconBriefcase
-      },
-      {
         title: locale === "ar" ? "المستخدمون" : "Users",
         url: "/dashboard/users",
         icon: IconUsers
@@ -210,11 +210,6 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
     {
       title: locale === "ar" ? "الأقسام" : "Departments",
       url: "/dashboard/departments",
-      icon: IconFolder
-    },
-    {
-      title: locale === "ar" ? "المسميات الوظيفية" : "Job Titles",
-      url: "/dashboard/job-titles",
       icon: IconFolder
     },
     {

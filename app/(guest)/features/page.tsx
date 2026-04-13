@@ -29,6 +29,8 @@ import {
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
+import type { MarketingFeatureSuiteIconKey } from "@/lib/marketing/commercial-registry";
+import { getCommercialClaimsBySurface, getMarketingFeatureSuites } from "@/lib/marketing/commercial-registry";
 import { cn } from "@/lib/utils";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -69,340 +71,83 @@ type FeatureSection = {
   items: FeatureItem[];
 };
 
-const platformHighlights = [
-  {
-    icon: Zap,
-    titleAr: "تشغيل يومي أسرع",
-    titleEn: "Faster daily operations",
-    descAr: "بدل التنقل بين Sheets وأدوات متفرقة، كل مسار التشغيل في شاشة واحدة مترابطة.",
-    descEn:
-      "Instead of jumping between sheets and scattered tools, every workflow lives in one connected place."
-  },
-  {
-    icon: Shield,
-    titleAr: "امتثال سعودي أوضح",
-    titleEn: "Clear Saudi compliance",
-    descAr: "الرواتب، WPS، والصلاحيات وسجلات التدقيق مصممة لتقليل الأخطاء التشغيلية.",
-    descEn: "Payroll, WPS, roles, and audit trails are designed to reduce operational mistakes."
-  },
-  {
-    icon: Globe,
-    titleAr: "تجربة عربية/إنجليزية سليمة",
-    titleEn: "Solid Arabic/English UX",
-    descAr: "واجهة RTL/LTR متسقة بحيث لا يشعر المستخدم أن العربية طبقة مضافة فوق النظام.",
-    descEn:
-      "A consistent RTL/LTR experience so Arabic feels native, not layered on top of the product."
-  },
-  {
-    icon: Star,
-    titleAr: "واجهة تنفيذية أنظف",
-    titleEn: "Cleaner executive UX",
-    descAr: "تنظيم بصري يوضح ما يهم المدير التنفيذي، وما يهم HR، وما يخص الموظف نفسه.",
-    descEn: "A visual structure that separates what matters to executives, HR teams, and employees."
-  }
-];
+const featuresHeroClaims = getCommercialClaimsBySurface("features.hero");
+const featuresHeroBadgeClaim = featuresHeroClaims.find((claim) => claim.slot === "badge");
+const featuresHeroPrimaryClaim = featuresHeroClaims.find((claim) => claim.slot === "primary");
+const featuresPlatformAnatomyClaim = getCommercialClaimsBySurface("features.platform-anatomy").find(
+  (claim) => claim.slot === "primary"
+);
 
-const featureSections: FeatureSection[] = [
-  {
-    titleAr: "الموارد البشرية الأساسية",
-    titleEn: "Core HR",
-    eyebrowAr: "قاعدة التشغيل",
-    eyebrowEn: "Operational foundation",
-    summaryAr:
-      "كل ما يخص بيانات الموظفين وهيكل الشركة والتنبيهات الأساسية في طبقة تشغيل واحدة واضحة وسهلة الإدارة.",
-    summaryEn:
-      "Everything around employee records, company structure, and operational visibility in one clear foundation layer.",
-    outcomes: [
-      { ar: "ملفات موظفين كاملة وقابلة للتحديث", en: "Full employee records that stay up to date" },
-      {
-        ar: "هيكل إداري واضح بدل الجداول المتفرقة",
-        en: "A clear org structure instead of scattered sheets"
-      },
-      {
-        ar: "لوحة تحكم تُظهر ما يحتاجه الفريق يومياً",
-        en: "A dashboard that surfaces what teams need every day"
-      }
-    ],
-    items: [
-      {
-        icon: Users,
-        titleAr: "إدارة الموظفين",
-        titleEn: "Employee Management",
-        descAr:
-          "ملف موظف شامل: بيانات شخصية، وظيفية، عقد، تاريخ التعيين، والحالة الوظيفية مع سهولة الوصول والتحديث.",
-        descEn:
-          "A full employee profile with personal data, job info, contract details, hire date, and current status."
-      },
-      {
-        icon: Building2,
-        titleAr: "هيكل الشركة",
-        titleEn: "Org Structure",
-        descAr:
-          "أقسام ومسميات وظيفية وورديات وتوزيع للموظفين في هيكل هرمي واضح يسهل متابعته عند النمو.",
-        descEn:
-          "Departments, job titles, shifts, and employee assignment in a hierarchy that remains clear as you scale."
-      },
-      {
-        icon: LayoutDashboard,
-        titleAr: "لوحة التحكم",
-        titleEn: "Dashboard",
-        descAr:
-          "نظرة شاملة على الحضور، الإجازات، الرواتب، والتنبيهات اليومية بدون الحاجة لفتح عدة صفحات في كل مرة.",
-        descEn:
-          "A single overview for attendance, leave, payroll, and daily alerts without opening multiple pages each time."
-      }
-    ]
-  },
-  {
-    titleAr: "الحضور والإجازات",
-    titleEn: "Attendance & Leave",
-    eyebrowAr: "الإيقاع اليومي للعمل",
-    eyebrowEn: "The daily work rhythm",
-    summaryAr:
-      "إدارة الوقت لا تكون فعالة عندما تكون منفصلة عن الإجازات والطلبات. هنا المسار كله مربوط من الحضور إلى الموافقة إلى التقرير.",
-    summaryEn:
-      "Time management is weak when it is isolated from leave and approvals. Here the whole path is connected end to end.",
-    outcomes: [
-      {
-        ar: "تتبع يومي واضح للحضور والتأخير",
-        en: "Clear daily tracking for attendance and tardiness"
-      },
-      { ar: "طلبات إجازة بمسار موافقات مفهوم", en: "Leave requests with a clean approval flow" },
-      {
-        ar: "تجربة موبايل تخدم الموظف مباشرة",
-        en: "A mobile experience that serves employees directly"
-      }
-    ],
-    items: [
-      {
-        icon: Clock,
-        titleAr: "الحضور والانصراف",
-        titleEn: "Time & Attendance",
-        descAr:
-          "سجلات حضور دقيقة، ورديات مرنة، رصد التأخر والغياب، وتقارير يومية تعطي الفريق التشغيلي صورة دقيقة لحظة بلحظة.",
-        descEn:
-          "Accurate attendance logs, flexible shifts, tardiness tracking, and daily reports for a real operational view."
-      },
-      {
-        icon: Smartphone,
-        titleAr: "تسجيل حضور من الجوال",
-        titleEn: "Mobile Check-in",
-        descAr:
-          "يسجّل الموظف حضوره وانصرافه من التطبيق مع قابلية ربطه بالموقع الجغرافي عند الحاجة دون تعقيد على المستخدم.",
-        descEn:
-          "Employees check in and out from mobile, with optional location verification when needed."
-      },
-      {
-        icon: MessageSquare,
-        titleAr: "إدارة الإجازات",
-        titleEn: "Leave Management",
-        descAr:
-          "طلبات إجازة، موافقة أو رفض، أنواع متعددة من الإجازات، وأرصدة تُحتسب تلقائياً بدل المتابعة اليدوية.",
-        descEn:
-          "Leave requests, approval or rejection, multiple leave types, and balances that update automatically."
-      }
-    ]
-  },
-  {
-    titleAr: "الرواتب والمالية",
-    titleEn: "Payroll & Finance",
-    eyebrowAr: "المسار المالي",
-    eyebrowEn: "The finance layer",
-    summaryAr:
-      "بدل أن تكون الرواتب مرحلة منفصلة ومرهقة، طاقم يحولها إلى مسار واضح من الإدخال إلى المراجعة إلى التصدير والإرسال.",
-    summaryEn:
-      "Instead of payroll being a separate painful cycle, Taqam turns it into a clear flow from input to approval to export.",
-    outcomes: [
-      { ar: "تشغيل مسير رواتب شهري أو دوري", en: "Run payroll monthly or on custom cycles" },
-      { ar: "تصدير WPS وقسائم راتب احترافية", en: "WPS export and polished payslips" },
-      {
-        ar: "تقليل الأخطاء اليدوية في الاستحقاقات",
-        en: "Reduce manual errors in entitlements and deductions"
-      }
-    ],
-    items: [
-      {
-        icon: CreditCard,
-        titleAr: "مسير الرواتب",
-        titleEn: "Payroll Run",
-        descAr:
-          "تشغيل شهري أو دوري للرواتب مع استحقاقات واستقطاعات مرنة ومراجعة أو إقرار بسرعة قبل الإرسال النهائي.",
-        descEn:
-          "Run payroll on monthly or custom schedules with flexible allowances, deductions, and quick approval steps."
-      },
-      {
-        icon: FileDown,
-        titleAr: "تصدير WPS",
-        titleEn: "WPS Export",
-        descAr:
-          "تصدير ملفات الرواتب بصيغة WPS المتوافقة مع متطلبات وزارة الموارد البشرية دون تحويلات يدوية إضافية.",
-        descEn:
-          "Export payroll files in WPS format aligned with Saudi labor requirements without extra manual steps."
-      },
-      {
-        icon: Wallet,
-        titleAr: "كشوف الرواتب",
-        titleEn: "Payslips",
-        descAr:
-          "قسائم راتب احترافية قابلة للطباعة والتحميل والإرسال للموظفين بشكل يليق بالعلامة ويقلل الأسئلة المتكررة.",
-        descEn:
-          "Professional payslips that can be printed, downloaded, and sent to employees in a cleaner branded format."
-      }
-    ]
-  },
-  {
-    titleAr: "الأداء والتطوير",
-    titleEn: "Performance & Development",
-    eyebrowAr: "النمو الداخلي",
-    eyebrowEn: "Internal growth",
-    summaryAr:
-      "المنصة لا يجب أن تتوقف عند التوظيف والرواتب. هذا المسار يحافظ على التطوير المهني وتقييم الأداء كجزء من التشغيل نفسه.",
-    summaryEn:
-      "The platform should not stop at payroll and records. This layer keeps growth and performance inside the operating system.",
-    outcomes: [
-      { ar: "دورات تقييم متكررة وواضحة", en: "Repeatable and structured review cycles" },
-      {
-        ar: "أهداف قابلة للمتابعة وليست شكلية",
-        en: "Trackable goals that are not just ceremonial"
-      },
-      { ar: "برامج تدريب مرتبطة بحالة الموظف", en: "Training linked directly to employee progress" }
-    ],
-    items: [
-      {
-        icon: Star,
-        titleAr: "تقييم الأداء",
-        titleEn: "Performance Reviews",
-        descAr:
-          "نماذج تقييم مخصصة ودورات تقييم دورية وتقارير تجعل مراجعة الأداء عملية يمكن البناء عليها لا مجرد إجراء سنوي.",
-        descEn:
-          "Custom review templates, recurring evaluation cycles, and reports that make performance review actionable."
-      },
-      {
-        icon: Target,
-        titleAr: "الأهداف وخطط التطوير",
-        titleEn: "Goals & Development Plans",
-        descAr: "تحديد أهداف لكل موظف وربطها بخطط تطوير ومتابعة نسب التقدم من داخل النظام نفسه.",
-        descEn:
-          "Set goals per employee, link them to development plans, and track progress from within the platform."
-      },
-      {
-        icon: GraduationCap,
-        titleAr: "التدريب والأكاديمية",
-        titleEn: "Training & Academy",
-        descAr:
-          "إدارة برامج التدريب والتسجيل في الدورات ومتابعة إتمام الموظفين للمواد التدريبية بصورة منظمة.",
-        descEn:
-          "Manage training programs, enrollments, and completion tracking with a structured learning flow."
-      }
-    ]
-  },
-  {
-    titleAr: "التوظيف",
-    titleEn: "Recruitment",
-    eyebrowAr: "بوابة النمو",
-    eyebrowEn: "Growth entry point",
-    summaryAr:
-      "التوظيف ليس مجرد نشر إعلان. طاقم يجمع الإعلان والمتقدمين والمقابلات والعروض في مسار واحد مفهوم للفريق.",
-    summaryEn:
-      "Recruitment is more than publishing a job post. Taqam keeps postings, applicants, interviews, and offers in one path.",
-    outcomes: [
-      {
-        ar: "إعلان وظيفة ومتابعة المتقدمين من مكان واحد",
-        en: "Job posting and applicant tracking in one place"
-      },
-      { ar: "تقليل الفوضى بين البريد والملفات", en: "Reduce chaos across email and manual files" },
-      {
-        ar: "تحويل المرشح إلى موظف دون فقدان السياق",
-        en: "Move candidates into onboarding without losing context"
-      }
-    ],
-    items: [
-      {
-        icon: BookOpen,
-        titleAr: "إعلانات الوظائف",
-        titleEn: "Job Postings",
-        descAr:
-          "نشر إعلانات الوظائف وإدارة المسارات المفتوحة بسهولة مع رؤية واضحة لحالة كل فرصة توظيف.",
-        descEn:
-          "Publish and manage job openings with clearer visibility into each recruitment pipeline."
-      },
-      {
-        icon: Users,
-        titleAr: "إدارة المقابلات",
-        titleEn: "Interview Management",
-        descAr:
-          "جدولة المقابلات وتسجيل الملاحظات وإصدار عروض العمل مباشرةً دون الاعتماد على مسارات خارجية مشتتة.",
-        descEn:
-          "Schedule interviews, capture notes, and issue offers directly instead of relying on external fragmented flows."
-      }
-    ]
-  },
-  {
-    titleAr: "التقارير والامتثال",
-    titleEn: "Reports & Compliance",
-    eyebrowAr: "طبقة القرار والحوكمة",
-    eyebrowEn: "Decision and governance layer",
-    summaryAr:
-      "حتى أفضل العمليات تفقد قيمتها إذا لم تكن قابلة للقياس. هذا المسار يعطي الإدارة والتشغيل نظرة قابلة للفهم والتنفيذ.",
-    summaryEn:
-      "Even great operations lose value if they cannot be measured. This layer makes the system observable and governable.",
-    outcomes: [
-      {
-        ar: "تقارير موارد بشرية ورواتب في مكان واحد",
-        en: "HR and payroll reporting from one surface"
-      },
-      { ar: "سجلات تدقيق وصلاحيات واضحة", en: "Clear permissions and audit trails" },
-      { ar: "استيراد وتصدير منظم للبيانات", en: "Structured import and export workflows" }
-    ],
-    items: [
-      {
-        icon: BarChart3,
-        titleAr: "تقارير HR متعددة",
-        titleEn: "HR Reports",
-        descAr:
-          "تقارير حضور وإجازات ورواتب ودوران عمالة وتكاليف في صفحة منظمة تساعدك على التحليل بدلاً من جمع البيانات أولاً.",
-        descEn:
-          "Attendance, leave, payroll, turnover, and cost reports organized for analysis instead of manual aggregation."
-      },
-      {
-        icon: TrendingUp,
-        titleAr: "تقارير الرواتب",
-        titleEn: "Payroll Reports",
-        descAr:
-          "تحليلات مفصّلة لتكاليف الرواتب والمكافآت والاستقطاعات مع مقارنة الفترات وإظهار الاتجاهات المهمة بسرعة.",
-        descEn:
-          "Detailed payroll analysis across salaries, bonuses, deductions, and period comparisons with faster signal detection."
-      },
-      {
-        icon: Shield,
-        titleAr: "الأدوار وسجلات التدقيق",
-        titleEn: "Roles & Audit Logs",
-        descAr:
-          "صلاحيات دقيقة لكل مستخدم مع سجل كامل للعمليات الحساسة بما يعطي الإدارة ثقة وتشغيلاً يمكن مراجعته.",
-        descEn:
-          "Fine-grained permissions with a full trail of sensitive actions for better trust and operational reviewability."
-      },
-      {
-        icon: FileSpreadsheet,
-        titleAr: "استيراد وتصدير Excel",
-        titleEn: "Excel Import & Export",
-        descAr:
-          "استيراد بيانات الموظفين والإجازات وتصدير التقارير بسهولة بحيث يكون الانتقال إلى النظام أقل احتكاكاً.",
-        descEn:
-          "Import employees and leave data, then export reports with less friction during rollout and daily usage."
-      },
-      {
-        icon: Globe,
-        titleAr: "عربي / إنجليزي بالكامل",
-        titleEn: "Full Arabic / English",
-        descAr:
-          "واجهة كاملة بالعربية مع دعم RTL وتبديل فوري للإنجليزية، بدون شعور بأن أحد اللغتين أقل جودة من الأخرى.",
-        descEn:
-          "A full Arabic UI with RTL support and instant English switching, without one locale feeling secondary."
-      }
-    ]
-  }
-];
+const featuresPlatformHighlightAppearance = {
+  "faster-operations": { icon: Zap },
+  "clear-compliance": { icon: Shield },
+  "bilingual-ux": { icon: Globe },
+  "executive-ux": { icon: Star }
+} as const;
+
+type FeaturesPlatformHighlightSlot = keyof typeof featuresPlatformHighlightAppearance;
+
+const platformHighlights = getCommercialClaimsBySurface("features.platform-highlights")
+  .map((claim) => {
+    const appearance =
+      featuresPlatformHighlightAppearance[claim.slot as FeaturesPlatformHighlightSlot];
+
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      icon: appearance.icon,
+      titleAr: claim.title.ar,
+      titleEn: claim.title.en,
+      descAr: claim.description.ar,
+      descEn: claim.description.en
+    };
+  })
+  .filter((highlight): highlight is NonNullable<typeof highlight> => highlight !== null);
+
+const suiteIconMap: Record<MarketingFeatureSuiteIconKey, LucideIcon> = {
+  users: Users,
+  building2: Building2,
+  layoutDashboard: LayoutDashboard,
+  clock: Clock,
+  smartphone: Smartphone,
+  messageSquare: MessageSquare,
+  creditCard: CreditCard,
+  fileDown: FileDown,
+  wallet: Wallet,
+  star: Star,
+  target: Target,
+  graduationCap: GraduationCap,
+  bookOpen: BookOpen,
+  barChart3: BarChart3,
+  trendingUp: TrendingUp,
+  shield: Shield,
+  fileSpreadsheet: FileSpreadsheet,
+  globe: Globe
+};
+
+const featureSections: FeatureSection[] = getMarketingFeatureSuites()
+  .slice()
+  .sort((a, b) => a.sortOrder - b.sortOrder)
+  .map((suite) => ({
+    titleAr: suite.title.ar,
+    titleEn: suite.title.en,
+    eyebrowAr: suite.eyebrow.ar,
+    eyebrowEn: suite.eyebrow.en,
+    summaryAr: suite.summary.ar,
+    summaryEn: suite.summary.en,
+    outcomes: suite.outcomes.map((outcome) => ({ ar: outcome.ar, en: outcome.en })),
+    items: suite.items
+      .filter((item) => item.visibility === "public" && item.statusGate === "live-only")
+      .map((item) => ({
+        icon: suiteIconMap[item.icon],
+        titleAr: item.title.ar,
+        titleEn: item.title.en,
+        descAr: item.description.ar,
+        descEn: item.description.en
+      }))
+  }));
 
 const suiteThemes = [
   {
@@ -485,12 +230,22 @@ export default async function FeaturesPage() {
       <StaggerContainer>
         <MarketingPageHero
           icon={Sparkles}
-          badge={isAr ? "منصة موارد بشرية متكاملة" : "All-in-one HR platform"}
-          title={isAr ? "نظام تشغيل فعلي للموارد البشرية" : "A real operating system for HR"}
+          badge={
+            isAr
+              ? (featuresHeroBadgeClaim?.title.ar ?? "منصة موارد بشرية متكاملة")
+              : (featuresHeroBadgeClaim?.title.en ?? "All-in-one HR platform")
+          }
+          title={
+            isAr
+              ? (featuresHeroPrimaryClaim?.title.ar ?? "نظام تشغيل فعلي للموارد البشرية")
+              : (featuresHeroPrimaryClaim?.title.en ?? "A real operating system for HR")
+          }
           description={
             isAr
-              ? "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف."
-              : "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment."
+              ? (featuresHeroPrimaryClaim?.description.ar ??
+                "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف.")
+              : (featuresHeroPrimaryClaim?.description.en ??
+                "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment.")
           }
           actions={[
             {
@@ -530,13 +285,17 @@ export default async function FeaturesPage() {
                   </p>
                   <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
                     {isAr
-                      ? "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها"
-                      : "One platform instead of six disconnected tools"}
+                      ? (featuresPlatformAnatomyClaim?.title.ar ??
+                        "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها")
+                      : (featuresPlatformAnatomyClaim?.title.en ??
+                        "One platform instead of six disconnected tools")}
                   </h2>
                   <p className="mt-4 max-w-xl leading-8 text-slate-600 dark:text-slate-400">
                     {isAr
-                      ? "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط."
-                      : "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system."}
+                      ? (featuresPlatformAnatomyClaim?.description.ar ??
+                        "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط.")
+                      : (featuresPlatformAnatomyClaim?.description.en ??
+                        "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system.")}
                   </p>
                   <div className="mt-8 grid gap-3 sm:grid-cols-2">
                     {platformHighlights.map((highlight) => (

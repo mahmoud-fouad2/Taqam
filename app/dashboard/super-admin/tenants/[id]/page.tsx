@@ -484,6 +484,58 @@ export default function TenantDetailsPage() {
             </Card>
           </div>
 
+          {/* Activation State */}
+          <Card className="border-border/60 bg-card/85 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                حالة التفعيل
+                {tenant.setupCompletedAt ? (
+                  <Badge variant="default" className="text-xs">مكتمل</Badge>
+                ) : (tenant.setupStep ?? 0) > 0 ? (
+                  <Badge variant="secondary" className="text-xs">جارٍ الإعداد</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">لم يبدأ</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 sm:grid-cols-3">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">خطوة الإعداد</span>
+                <span className="font-semibold">
+                  {tenant.setupCompletedAt
+                    ? "✓ مكتمل"
+                    : `${tenant.setupStep ?? 0} / 5`}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">تاريخ الاكتمال</span>
+                <span className="font-semibold text-sm">
+                  {tenant.setupCompletedAt
+                    ? new Date(tenant.setupCompletedAt).toLocaleDateString(
+                        locale === "ar" ? "ar-SA" : "en-US"
+                      )
+                    : "—"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground text-sm">رابط المتابعة</span>
+                {!tenant.setupCompletedAt ? (
+                  <a
+                    href={buildTenantUrl(tenant.slug, "/dashboard/setup")}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-primary hover:underline text-sm font-medium flex items-center gap-1"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                    فتح wizard
+                  </a>
+                ) : (
+                  <span className="text-muted-foreground text-sm">—</span>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Suspended Warning */}
           {tenant.status === "suspended" && tenant.suspendedReason && (
             <Card className="border-destructive">

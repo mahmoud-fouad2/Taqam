@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { comparisonFeaturePayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 // PUT update feature
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
@@ -21,17 +22,27 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const body = await req.json();
+    const parsed = comparisonFeaturePayloadSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid comparison payload", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const data = parsed.data;
 
     const feature = await prisma.planFeatureComparison.update({
       where: { id },
       data: {
-        featureAr: body.featureAr,
-        featureEn: body.featureEn,
-        inStarter: body.inStarter,
-        inBusiness: body.inBusiness,
-        inEnterprise: body.inEnterprise,
-        sortOrder: body.sortOrder,
-        isActive: body.isActive
+        featureAr: data.featureAr,
+        featureEn: data.featureEn,
+        inStarter: data.inStarter,
+        inBusiness: data.inBusiness,
+        inEnterprise: data.inEnterprise,
+        sortOrder: data.sortOrder,
+        isActive: data.isActive
       }
     });
 

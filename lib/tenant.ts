@@ -93,6 +93,25 @@ function normalizeBaseDomain(domain: string): string {
     return port ? `${cleanHost}:${port}` : cleanHost;
   }
 
+  const configuredBaseDomain = getConfiguredBaseDomain();
+  const normalizedConfiguredBaseDomain = configuredBaseDomain
+    ? stripPort(configuredBaseDomain).host.toLowerCase()
+    : null;
+
+  if (normalizedConfiguredBaseDomain) {
+    if (cleanHost === normalizedConfiguredBaseDomain) {
+      return port ? `${normalizedConfiguredBaseDomain}:${port}` : normalizedConfiguredBaseDomain;
+    }
+
+    if (cleanHost.endsWith(`.${normalizedConfiguredBaseDomain}`)) {
+      const candidate = cleanHost.slice(0, -(normalizedConfiguredBaseDomain.length + 1));
+
+      if (candidate && !candidate.includes(".")) {
+        return port ? `${normalizedConfiguredBaseDomain}:${port}` : normalizedConfiguredBaseDomain;
+      }
+    }
+  }
+
   // If the current host is like "admin.example.com" or "tenant.example.com",
   // strip only RESERVED subdomains.
   const labels = cleanHost.split(".");

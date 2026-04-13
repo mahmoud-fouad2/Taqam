@@ -76,6 +76,7 @@ function defaultSystemSettings(input: {
   currency: string;
   weekStartDay: number;
   tenantName: string;
+  tenantLogo?: string | null;
 }): SystemSettings {
   const weekStartDay =
     input.weekStartDay === 0 ||
@@ -89,6 +90,7 @@ function defaultSystemSettings(input: {
     general: {
       companyName: input.tenantName,
       companyNameEn: input.tenantName,
+      companyLogo: input.tenantLogo || undefined,
       timezone: input.timezone || "Asia/Riyadh",
       dateFormat: "DD/MM/YYYY",
       timeFormat: "12h",
@@ -159,6 +161,7 @@ export async function GET() {
       select: {
         id: true,
         name: true,
+        logo: true,
         timezone: true,
         currency: true,
         weekStartDay: true,
@@ -174,14 +177,23 @@ export async function GET() {
       tenant.settings && typeof tenant.settings === "object" ? (tenant.settings as any) : {};
     const existing = settingsObj?.systemSettings as SystemSettings | undefined;
 
-    const systemSettings =
+    const baseSystemSettings =
       existing ??
       defaultSystemSettings({
         tenantName: tenant.name,
+        tenantLogo: tenant.logo,
         timezone: tenant.timezone,
         currency: tenant.currency,
         weekStartDay: tenant.weekStartDay
       });
+
+    const systemSettings: SystemSettings = {
+      ...baseSystemSettings,
+      general: {
+        ...baseSystemSettings.general,
+        companyLogo: baseSystemSettings.general.companyLogo || tenant.logo || undefined
+      }
+    };
 
     if (!existing) {
       const nextSettings = { ...settingsObj, systemSettings };
@@ -231,6 +243,8 @@ export async function PUT(request: NextRequest) {
     await prisma.tenant.update({
       where: { id: tenantId },
       data: {
+        name: systemSettings.general.companyName,
+        logo: systemSettings.general.companyLogo || null,
         timezone: systemSettings.general.timezone,
         currency: systemSettings.general.currency,
         weekStartDay: Number(systemSettings.general.weekStartDay),

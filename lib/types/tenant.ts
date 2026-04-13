@@ -5,6 +5,7 @@
 
 export type TenantStatus = "active" | "suspended" | "pending" | "cancelled" | "deleted";
 export type SubscriptionPlan = "starter" | "business" | "enterprise";
+export type RequestedSubscriptionPlan = "trial" | "starter" | "business" | "enterprise";
 
 export interface Tenant {
   id: string;
@@ -39,6 +40,10 @@ export interface Tenant {
   deletedAt?: string;
   suspendedAt?: string;
   suspendedReason?: string;
+
+  // Activation
+  setupStep?: number;
+  setupCompletedAt?: string;
 }
 
 export interface TenantCreateInput {
@@ -77,12 +82,14 @@ export interface SubscriptionRequest {
   contactEmail: string;
   contactPhone?: string;
   employeesCount?: string; // "1-10", "11-50", "51-200", "200+"
+  plan?: RequestedSubscriptionPlan;
   message?: string;
   status: "pending" | "approved" | "rejected";
   createdAt: string;
   reviewedAt?: string;
   reviewedBy?: string;
   notes?: string;
+  tenantId?: string;
 }
 
 

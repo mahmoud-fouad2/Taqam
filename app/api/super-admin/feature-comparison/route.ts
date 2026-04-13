@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { comparisonFeaturePayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 async function ensureDefaultFeatureComparison() {
   const count = await prisma.planFeatureComparison.count();
@@ -97,16 +98,26 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
+    const parsed = comparisonFeaturePayloadSchema.safeParse(body);
+
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid comparison payload", details: parsed.error.flatten() },
+        { status: 400 }
+      );
+    }
+
+    const data = parsed.data;
 
     const feature = await prisma.planFeatureComparison.create({
       data: {
-        featureAr: body.featureAr,
-        featureEn: body.featureEn,
-        inStarter: body.inStarter || false,
-        inBusiness: body.inBusiness || false,
-        inEnterprise: body.inEnterprise || false,
-        sortOrder: body.sortOrder || 0,
-        isActive: body.isActive ?? true
+        featureAr: data.featureAr,
+        featureEn: data.featureEn,
+        inStarter: data.inStarter,
+        inBusiness: data.inBusiness,
+        inEnterprise: data.inEnterprise,
+        sortOrder: data.sortOrder,
+        isActive: data.isActive
       }
     });
 

@@ -10,6 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
+import {
+  getPricingData,
+  getPricingMarketingContent,
+  getPricingPlanTagline
+} from "@/lib/marketing/pricing";
 
 export async function generateMetadata(): Promise<Metadata> {
   return marketingMetadata({
@@ -23,121 +28,27 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const planDetails = [
-  {
-    nameAr: "الأساسية",
-    nameEn: "Starter",
-    sizeAr: "من 5 إلى 10 موظفين",
-    sizeEn: "5–10 employees",
-    tagAr: "مثالية للشركات الناشئة",
-    tagEn: "Perfect for growing teams",
-    highlightsAr: [
-      "إعداد كامل خلال يوم عمل",
-      "ملفات الموظفين + الأقسام + المسميات الوظيفية",
-      "حضور وانصراف مع ورديات مرنة",
-      "إدارة الإجازات وأرصدتها تلقائياً",
-      "تسجيل حضور من التطبيق",
-      "التقارير الأساسية",
-      "استيراد بيانات من Excel",
-      "واجهة عربية / إنجليزية كاملة"
-    ],
-    highlightsEn: [
-      "Full setup in one business day",
-      "Employee profiles, departments & job titles",
-      "Attendance with flexible shifts",
-      "Leave management with automatic balances",
-      "Mobile check-in via the app",
-      "Basic reports",
-      "Excel data import",
-      "Full Arabic / English interface"
-    ]
-  },
-  {
-    nameAr: "الأعمال",
-    nameEn: "Business",
-    sizeAr: "من 10 إلى 25 موظفًا",
-    sizeEn: "10–25 employees",
-    tagAr: "الأكثر طلباً للشركات المتوسطة",
-    tagEn: "Most popular for mid-sized companies",
-    highlightsAr: [
-      "كل مميزات الأساسية",
-      "مسير الرواتب الشهرية والدورية",
-      "كشوف رواتب بتنسيق احترافي",
-      "تصدير ملفات WPS",
-      "هياكل الرواتب + الاستحقاقات والاستقطاعات",
-      "صلاحيات وأدوار متقدمة",
-      "سجلات التدقيق للعمليات الحساسة",
-      "تقييم الأداء وخطط التطوير",
-      "إدارة التوظيف والمقابلات",
-      "الدعم الفني المتقدم"
-    ],
-    highlightsEn: [
-      "Everything in Starter",
-      "Monthly and periodic payroll runs",
-      "Professional payslip generation",
-      "WPS file export",
-      "Salary structures, allowances & deductions",
-      "Advanced roles & permissions",
-      "Audit logs for sensitive actions",
-      "Performance reviews & development plans",
-      "Recruitment & interview management",
-      "Priority support"
-    ],
-    popular: true
-  },
-  {
-    nameAr: "المؤسسات",
-    nameEn: "Enterprise",
-    sizeAr: "من 25 إلى 100+ موظف",
-    sizeEn: "25–100+ employees",
-    tagAr: "للشركات الكبيرة والمؤسسات",
-    tagEn: "For large companies and enterprises",
-    highlightsAr: [
-      "كل مميزات الأعمال",
-      "تكاملات مخصصة (GOSI / WPS / ERP)",
-      "واجهة وتقارير حسب هوية شركتك",
-      "SLA مخصص لضمان الاستجابة",
-      "مدير حساب مخصص",
-      "نشر على بنية تحتية مخصصة",
-      "API Access حسب العقد",
-      "تدريب فريق HR"
-    ],
-    highlightsEn: [
-      "Everything in Business",
-      "Custom integrations (GOSI / WPS / ERP)",
-      "Custom UI and reporting to match your brand",
-      "Custom SLA guarantee",
-      "Dedicated account manager",
-      "Custom infrastructure deployment",
-      "API access per contract",
-      "HR team training"
-    ]
-  }
-];
-
-const addons = [
-  {
-    ar: "إعداد وهجرة البيانات (متاح لكل الباقات)",
-    en: "Data migration & setup (any plan)"
-  },
-  {
-    ar: "تدريب فريق HR منفصل عن الباقة",
-    en: "Standalone HR team training"
-  },
-  {
-    ar: "دعم تقني ميداني (زيارات مباشرة)",
-    en: "On-site technical support visits"
-  },
-  {
-    ar: "تخصيص قوالب الرواتب وهوية الشركة",
-    en: "Payslip templates & brand customisation"
-  }
-];
-
 export default async function PlansPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
+  const { plans, comparison } = await getPricingData();
+  const pricingMarketing = getPricingMarketingContent();
+  const planDetails = plans.map((plan) => ({
+    slug: plan.slug,
+    nameAr: plan.nameAr,
+    nameEn: plan.name,
+    sizeAr: plan.employeesLabel || "حسب نطاق الشركة",
+    sizeEn: plan.employeesLabelEn || "Based on company scope",
+    tagAr: getPricingPlanTagline(plan).ar,
+    tagEn: getPricingPlanTagline(plan).en,
+    highlightsAr: plan.featuresAr || [],
+    highlightsEn: plan.featuresEn || [],
+    popular: plan.isPopular,
+    priceMonthly: plan.priceMonthly,
+    currency: plan.currency,
+    planType: plan.planType
+  }));
   const totalHighlights = planDetails.reduce((sum, plan) => sum + plan.highlightsAr.length, 0);
 
   return (
@@ -145,30 +56,35 @@ export default async function PlansPage() {
       <FadeIn>
         <MarketingPageHero
           icon={Layers3}
-          badge={isAr ? "3 باقات واضحة وقابلة للتوسع" : "3 clear plans built to scale"}
-          title={
-            isAr ? "اختَر الباقة المناسبة لحجم شركتك" : "Choose the right plan for your company"
-          }
+          badge={isAr ? pricingMarketing.plansPage.heroBadge.ar : pricingMarketing.plansPage.heroBadge.en}
+          title={isAr ? pricingMarketing.plansPage.heroTitle.ar : pricingMarketing.plansPage.heroTitle.en}
           description={
             isAr
-              ? "كل باقة مبنية على احتياج فعلي: تشغيل سريع، وضوح في المميزات، ومسار توسّع طبيعي كلما كبرت الشركة."
-              : "Each plan is built around a real operating need: fast launch, clear features, and a natural upgrade path as you grow."
+              ? pricingMarketing.plansPage.heroDescription.ar
+              : pricingMarketing.plansPage.heroDescription.en
           }
           actions={[
             {
               href: `${prefix}/pricing`,
-              label: isAr ? "مقارنة الأسعار" : "Compare pricing",
+              label: isAr
+                ? pricingMarketing.plansPage.heroSecondaryCtaLabel.ar
+                : pricingMarketing.plansPage.heroSecondaryCtaLabel.en,
               variant: "outline"
             },
             {
               href: `${prefix}/request-demo`,
-              label: isAr ? "طلب عرض تجريبي" : "Request a demo",
+              label: isAr
+                ? pricingMarketing.plansPage.heroPrimaryCtaLabel.ar
+                : pricingMarketing.plansPage.heroPrimaryCtaLabel.en,
               variant: "brand"
             }
           ]}
           stats={[
-            { value: "3", label: isAr ? "باقات أساسية" : "Core plans" },
-            { value: "1", label: isAr ? "يوم عمل للإعداد" : "Business day setup" },
+            { value: `${plans.length}`, label: isAr ? "باقات أساسية" : "Core plans" },
+            {
+              value: `${comparison.length}+`,
+              label: isAr ? "عنصر مقارنة" : "Comparison points"
+            },
             { value: `${totalHighlights}+`, label: isAr ? "ميزة موضحة" : "Listed capabilities" }
           ]}
         />
@@ -178,11 +94,15 @@ export default async function PlansPage() {
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="mb-8 max-w-2xl">
-              <h2 className="text-2xl font-bold">{isAr ? "تفاصيل كل باقة" : "Plan breakdown"}</h2>
+              <h2 className="text-2xl font-bold">
+                {isAr
+                  ? pricingMarketing.plansPage.breakdownSectionTitle.ar
+                  : pricingMarketing.plansPage.breakdownSectionTitle.en}
+              </h2>
               <p className="text-muted-foreground mt-2">
                 {isAr
-                  ? "المحتوى هنا مكتوب بلغة تشغيلية واضحة، عشان تعرف بالضبط ماذا ستحصل عليه في كل مستوى."
-                  : "Each plan is written in operational terms, so you can quickly see what is included at every level."}
+                  ? pricingMarketing.plansPage.breakdownSectionDescription.ar
+                  : pricingMarketing.plansPage.breakdownSectionDescription.en}
               </p>
             </div>
           </FadeIn>
@@ -190,11 +110,12 @@ export default async function PlansPage() {
           <StaggerContainer className="grid gap-6 lg:grid-cols-3">
             {planDetails.map((plan) => {
               const PlanIcon =
-                plan.nameEn === "Starter"
+                plan.planType === "BASIC"
                   ? Rocket
-                  : plan.nameEn === "Business"
+                  : plan.planType === "PROFESSIONAL"
                     ? Sparkles
                     : ShieldCheck;
+              const price = plan.priceMonthly != null ? Number(plan.priceMonthly) : null;
 
               return (
                 <StaggerItem key={plan.nameEn}>
@@ -220,6 +141,15 @@ export default async function PlansPage() {
                       <p className="text-primary mt-1 text-sm font-medium">
                         {isAr ? plan.tagAr : plan.tagEn}
                       </p>
+                      <p className="text-muted-foreground mt-3 text-sm font-medium">
+                        {price != null
+                          ? isAr
+                            ? `${price} ${plan.currency} / شهر`
+                            : `${price} ${plan.currency} / month`
+                          : isAr
+                            ? "سعر مخصص حسب نطاق المشروع"
+                            : "Custom pricing based on project scope"}
+                      </p>
                     </CardHeader>
                     <CardContent>
                       <ul className="space-y-3">
@@ -233,7 +163,7 @@ export default async function PlansPage() {
                         ))}
                       </ul>
                       <div className="mt-8">
-                        <Link href={`${prefix}/request-demo`}>
+                        <Link href={`${prefix}/request-demo?plan=${plan.slug}`}>
                           <Button
                             className="w-full"
                             variant={plan.popular ? "brand" : "brandOutline"}>
@@ -255,18 +185,20 @@ export default async function PlansPage() {
           <FadeIn>
             <div className="mb-8 max-w-2xl">
               <h2 className="text-2xl font-bold">
-                {isAr ? "إضافات اختيارية حسب الاحتياج" : "Optional add-ons"}
+                {isAr
+                  ? pricingMarketing.plansPage.addonsSectionTitle.ar
+                  : pricingMarketing.plansPage.addonsSectionTitle.en}
               </h2>
               <p className="text-muted-foreground mt-2">
                 {isAr
-                  ? "خدمات إضافية تساعدك في سرعة الإطلاق أو ربط المنصة بعملياتك الحالية."
-                  : "Additional services to help you launch faster or connect the platform to your current workflows."}
+                  ? pricingMarketing.plansPage.addonsSectionDescription.ar
+                  : pricingMarketing.plansPage.addonsSectionDescription.en}
               </p>
             </div>
           </FadeIn>
 
           <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {addons.map((addon) => (
+            {pricingMarketing.addons.map((addon) => (
               <StaggerItem key={addon.en}>
                 <div className="bg-background h-full rounded-2xl border p-5 shadow-sm">
                   <div className="bg-primary/10 mb-3 inline-flex h-10 w-10 items-center justify-center rounded-xl">
@@ -282,19 +214,27 @@ export default async function PlansPage() {
 
       <FadeIn>
         <MarketingPageCta
-          title={isAr ? "غير متأكد أي باقة تناسبك؟" : "Not sure which plan fits best?"}
+          title={
+            isAr
+              ? pricingMarketing.plansPage.recommendationCtaTitle.ar
+              : pricingMarketing.plansPage.recommendationCtaTitle.en
+          }
           description={
             isAr
-              ? "شاركنا عدد الموظفين، وهل تحتاج الرواتب فقط أم المنصة كاملة، وسنرشّح لك الباقة الأنسب بدون تعقيد تجاري زائد."
-              : "Tell us your headcount and whether you need payroll only or the full platform, and we will recommend the right plan without the usual sales noise."
+              ? pricingMarketing.plansPage.recommendationCtaDescription.ar
+              : pricingMarketing.plansPage.recommendationCtaDescription.en
           }
           primaryAction={{
             href: `${prefix}/request-demo`,
-            label: isAr ? "اطلب توصية مخصصة" : "Get a tailored recommendation"
+            label: isAr
+              ? pricingMarketing.plansPage.recommendationCtaPrimaryLabel.ar
+              : pricingMarketing.plansPage.recommendationCtaPrimaryLabel.en
           }}
           secondaryAction={{
             href: `${prefix}/features`,
-            label: isAr ? "استعرض المميزات" : "Explore features"
+            label: isAr
+              ? pricingMarketing.plansPage.recommendationCtaSecondaryLabel.ar
+              : pricingMarketing.plansPage.recommendationCtaSecondaryLabel.en
           }}
         />
       </FadeIn>

@@ -142,6 +142,7 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
       }
 
       const exportData: ExportData = await response.json();
+      const logoSrc = `${window.location.origin}/logo-light.png`;
 
       // Generate printable HTML for PDF
       const generatePrintableHTML = (data: ExportData) => {
@@ -166,6 +167,24 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
                 margin-bottom: 30px;
                 border-bottom: 2px solid #333;
                 padding-bottom: 20px;
+              }
+              .brand {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                margin-bottom: 16px;
+              }
+              .brand img {
+                height: 42px;
+                width: auto;
+                object-fit: contain;
+              }
+              .brand-label {
+                font-size: 13px;
+                font-weight: 700;
+                letter-spacing: 0.16em;
+                color: #0f172a;
               }
               .header h1 {
                 margin: 0 0 10px 0;
@@ -234,6 +253,10 @@ export function ExportButton({ type, filters = {}, disabled }: ExportButtonProps
           </head>
           <body>
             <div class="header">
+              <div class="brand">
+                <img src="${logoSrc}" alt="Taqam logo" />
+                <div class="brand-label">TAQAM</div>
+              </div>
               <h1>تقرير ${title}</h1>
               <div class="date">تاريخ التصدير: ${date}</div>
             </div>

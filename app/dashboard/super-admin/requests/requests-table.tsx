@@ -88,6 +88,13 @@ function getStatusMeta(status: unknown, t: LocaleText) {
   );
 }
 
+function getPlanLabel(plan: SubscriptionRequest["plan"], t: LocaleText) {
+  if (plan === "enterprise") return t.common.institutions;
+  if (plan === "business") return t.pricingPlans.professional;
+  if (plan === "starter") return t.common.basic;
+  return t.pricingPlans.trial;
+}
+
 export function RequestsTable() {
   const locale = useClientLocale();
   const t = getText(locale);
@@ -378,6 +385,9 @@ export function RequestsTable() {
                     {request.companyNameAr && (
                       <p className="text-muted-foreground text-sm">{request.companyName}</p>
                     )}
+                    <div className="mt-2">
+                      <Badge variant="outline">{getPlanLabel(request.plan, t)}</Badge>
+                    </div>
                   </div>
                 </TableCell>
                 <TableCell>
@@ -450,10 +460,12 @@ export function RequestsTable() {
                             {t.common.viewDetails}
                           </Link>
                         </DropdownMenuItem>
-                        {request.status === "approved" && (
-                          <DropdownMenuItem>
+                        {request.status === "approved" && request.tenantId && (
+                          <DropdownMenuItem asChild>
+                            <Link href={`/dashboard/super-admin/tenants/${request.tenantId}`}>
                             <Building2 className="me-2 h-4 w-4" />
                             {t.superAdmin.pViewCompany}
+                            </Link>
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>

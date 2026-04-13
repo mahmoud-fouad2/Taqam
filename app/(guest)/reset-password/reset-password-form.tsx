@@ -97,8 +97,8 @@ export function ResetPasswordForm({
           <p className="text-muted-foreground mt-3 text-sm leading-7">
             {mode === "tenant-admin-activation"
               ? isAr
-                ? "تم إنشاء كلمة المرور وتفعيل حساب مدير الشركة بنجاح. يمكنك تسجيل الدخول الآن."
-                : "Your company admin account is now active and ready for sign-in."
+                ? "تم إنشاء كلمة المرور وتفعيل حساب مدير الشركة ومساحة الشركة بنجاح. يمكنك تسجيل الدخول الآن."
+                : "Your company admin account and workspace are now active and ready for sign-in."
               : isAr
                 ? "تم حفظ كلمة المرور الجديدة. يمكنك تسجيل الدخول فورًا."
                 : "Your new password has been saved. You can sign in right away."}

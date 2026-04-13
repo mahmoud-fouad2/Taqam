@@ -104,7 +104,7 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 
     const admin = await prisma.user.findFirst({
       where: { id: userId, tenantId, role: "TENANT_ADMIN" },
-      select: { id: true, email: true }
+      select: { id: true, email: true, status: true }
     });
 
     if (!admin) {
@@ -139,15 +139,29 @@ export async function PUT(request: NextRequest, context: RouteContext) {
       data.passwordChangedAt = new Date();
       data.failedLoginAttempts = 0;
       data.lockedUntil = null;
+
+      if (admin.status === "PENDING_VERIFICATION") {
+        data.status = "ACTIVE";
+        data.emailVerified = new Date();
+      }
     }
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json({ success: true, message: "لا يوجد تغيير" });
     }
 
-    await prisma.user.updateMany({
-      where: { id: admin.id },
-      data
+    await prisma.$transaction(async (tx) => {
+      await tx.user.updateMany({
+        where: { id: admin.id },
+        data
+      });
+
+      if (newPasswordRaw && admin.status === "PENDING_VERIFICATION") {
+        await tx.tenant.updateMany({
+          where: { id: tenantId, status: "PENDING" },
+          data: { status: "ACTIVE" }
+        });
+      }
     });
 
     return NextResponse.json({ success: true, message: "تم تحديث بيانات مدير الشركة" });

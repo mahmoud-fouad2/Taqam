@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TableEmptyRow } from "@/components/empty-states/table-empty-row";
 import {
   Table,
   TableBody,
@@ -69,8 +70,6 @@ import {
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
-
-const t = getText("ar");
 
 export function ApplicantsManager() {
   const locale = useClientLocale();
@@ -222,7 +221,7 @@ export function ApplicantsManager() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.applicants.total}</CardTitle>
             <IconUser className="text-muted-foreground h-4 w-4" />
           </CardHeader>
@@ -233,7 +232,7 @@ export function ApplicantsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.applicants.new}</CardTitle>
             <IconFileText className="h-4 w-4 text-blue-600" />
           </CardHeader>
@@ -244,7 +243,7 @@ export function ApplicantsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.applicants.pInInterviews}</CardTitle>
             <IconCalendar className="h-4 w-4 text-purple-600" />
           </CardHeader>
@@ -255,7 +254,7 @@ export function ApplicantsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.applicants.pAccepted}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-green-600" />
           </CardHeader>
@@ -272,7 +271,7 @@ export function ApplicantsManager() {
           <CardDescription>{t.applicants.description}</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
@@ -311,7 +310,7 @@ export function ApplicantsManager() {
             </Select>
           </div>
 
-          <div className="overflow-x-auto rounded-md border">
+          <div className="rounded-md border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -325,12 +324,18 @@ export function ApplicantsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!isLoading && filteredApplicants.length === 0 ? (
+                {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="py-8 text-center">
-                      <p className="text-muted-foreground">{t.applicants.noMatches}</p>
+                    <TableCell colSpan={7} className="text-muted-foreground py-8 text-center">
+                      {t.common.loading}
                     </TableCell>
                   </TableRow>
+                ) : filteredApplicants.length === 0 ? (
+                  <TableEmptyRow
+                    colSpan={7}
+                    title={t.applicants.noMatches}
+                    icon={<IconUser className="size-5" />}
+                  />
                 ) : (
                   filteredApplicants.map((applicant) => (
                     <TableRow key={applicant.id}>
@@ -389,7 +394,9 @@ export function ApplicantsManager() {
                         </Select>
                       </TableCell>
                       <TableCell>
-                        {new Date(applicant.appliedAt).toLocaleDateString("ar-SA")}
+                        {new Date(applicant.appliedAt).toLocaleDateString(
+                          locale === "ar" ? "ar-SA" : "en-US"
+                        )}
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>

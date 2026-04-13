@@ -86,8 +86,8 @@ export const marketingNav: MarketingNavItem[] = [
             href: "/features#integrations",
             labelAr: "التكاملات",
             labelEn: "Integrations",
-            descAr: "ربط مباشر مع GOSI وWPS ومدد والأنظمة التي تعتمد عليها فعلاً.",
-            descEn: "Direct connections to GOSI, WPS, Mudad, and the systems you already use.",
+            descAr: "ربط مباشر مع GOSI وWPS، مع تكاملات مخصصة للمؤسسات عند الطلب.",
+            descEn: "Direct GOSI and WPS connections, with custom enterprise integrations on request.",
             icon: ShieldCheck
           }
         ]

@@ -480,20 +480,20 @@ export default function MyProfileManager() {
           <h1 className="text-2xl font-bold">{t.myProfile.title}</h1>
           <p className="text-muted-foreground">{t.myProfile.description}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
           {isEditing ? (
             <>
-              <Button variant="outline" onClick={handleCancel}>
+              <Button variant="outline" onClick={handleCancel} className="flex-1 sm:flex-none">
                 <X className="me-2 h-4 w-4" />
                 {t.common.cancel}
               </Button>
-              <Button onClick={handleSave} disabled={isSaving}>
+              <Button onClick={handleSave} disabled={isSaving} className="flex-1 sm:flex-none">
                 <Save className="me-2 h-4 w-4" />
                 {isSaving ? t.myProfile.saving : t.common.saveChanges}
               </Button>
             </>
           ) : (
-            <Button onClick={() => setIsEditing(true)}>
+            <Button onClick={() => setIsEditing(true)} className="w-full sm:w-auto">
               <Edit className="me-2 h-4 w-4" />
               {t.myProfile.editData}
             </Button>
@@ -567,11 +567,19 @@ export default function MyProfileManager() {
 
       {/* Tabs */}
       <Tabs defaultValue="personal" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="personal">{t.employees.personalInfo}</TabsTrigger>
-          <TabsTrigger value="contact">{t.organization.contactInfo}</TabsTrigger>
-          <TabsTrigger value="bank">{t.common.bankData}</TabsTrigger>
-          <TabsTrigger value="documents">{t.onboarding.documents}</TabsTrigger>
+        <TabsList className="flex h-auto w-full flex-wrap justify-start">
+          <TabsTrigger value="personal" className="flex-1 min-w-[140px]">
+            {t.employees.personalInfo}
+          </TabsTrigger>
+          <TabsTrigger value="contact" className="flex-1 min-w-[140px]">
+            {t.organization.contactInfo}
+          </TabsTrigger>
+          <TabsTrigger value="bank" className="flex-1 min-w-[140px]">
+            {t.common.bankData}
+          </TabsTrigger>
+          <TabsTrigger value="documents" className="flex-1 min-w-[140px]">
+            {t.onboarding.documents}
+          </TabsTrigger>
         </TabsList>
 
         {/* Personal Info Tab */}

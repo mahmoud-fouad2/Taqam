@@ -9,6 +9,8 @@ export type DashboardStats = {
   pendingLeaves: number;
   onLeaveToday: number;
   newHiresThisMonth: number;
+  monthlyPayrollTotal: number;
+  activeJobOpenings: number;
 };
 
 export async function getDashboardStats(tenantId?: string | null): Promise<DashboardStats> {
@@ -26,7 +28,9 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
     todayAttendance,
     pendingLeaves,
     onLeaveToday,
-    newHiresThisMonth
+    newHiresThisMonth,
+    latestPayroll,
+    activeJobOpenings
   ] = await Promise.all([
     prisma.employee.count({ where }),
     prisma.employee.count({ where: { ...where, status: "ACTIVE" } }),
@@ -52,7 +56,17 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
         ...where,
         hireDate: { gte: new Date(Date.UTC(now.getFullYear(), now.getMonth(), 1)) }
       }
-    })
+    }),
+    // Latest approved payroll period total for this tenant
+    tenantId
+      ? prisma.payrollPeriod.findFirst({
+          where: { tenantId, status: { in: ["APPROVED", "PAID"] } },
+          orderBy: { paymentDate: "desc" },
+          select: { totalNet: true }
+        })
+      : Promise.resolve(null),
+    // Active job openings
+    prisma.jobPosting.count({ where: { ...where, status: "ACTIVE" } })
   ]);
 
   const attendanceRate =
@@ -66,7 +80,9 @@ export async function getDashboardStats(tenantId?: string | null): Promise<Dashb
     attendanceRate,
     pendingLeaves,
     onLeaveToday,
-    newHiresThisMonth
+    newHiresThisMonth,
+    monthlyPayrollTotal: latestPayroll ? Number(latestPayroll.totalNet) : 0,
+    activeJobOpenings
   };
 }
 

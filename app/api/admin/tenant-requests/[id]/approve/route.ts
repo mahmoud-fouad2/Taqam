@@ -214,7 +214,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         nameAr: body.nameAr ?? item.companyNameAr ?? item.companyName,
         slug,
         plan,
-        status: "ACTIVE",
+        status: "PENDING",
         maxEmployees,
         settings: {
           defaultLocale: body.defaultLocale ?? "ar",
@@ -306,16 +306,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       subject: `تفعيل حساب مدير الشركة | ${tenant.nameAr ?? tenant.name}`,
       text: [
         `مرحبًا ${item.contactName}`,
-        `تمت الموافقة على طلب شركتك ${tenant.nameAr ?? tenant.name}.`,
-        `فعّل حسابك من الرابط التالي:`,
+        `تمت الموافقة على طلب شركتك ${tenant.nameAr ?? tenant.name}، ومساحة الشركة بانتظار تفعيل حساب مدير الشركة.`,
+        `فعّل حسابك من الرابط التالي لتشغيل مساحة الشركة:`,
         activationUrl
       ].join("\n\n"),
       html: `
         <div style="font-family:Arial,sans-serif;line-height:1.8;color:#111827">
           <h2 style="margin:0 0 16px">تمت الموافقة على طلب شركتك</h2>
           <p>مرحبًا ${item.contactName}،</p>
-          <p>تم إنشاء مساحة شركتك <strong>${tenant.nameAr ?? tenant.name}</strong> بنجاح على طاقم.</p>
-          <p>لتفعيل حساب مدير الشركة وتحديد كلمة المرور، استخدم الزر التالي:</p>
+          <p>تم تجهيز مساحة شركتك <strong>${tenant.nameAr ?? tenant.name}</strong> على طاقم وهي الآن بانتظار تفعيل حساب مدير الشركة.</p>
+          <p>لتفعيل حساب مدير الشركة وتحديد كلمة المرور وتشغيل مساحة الشركة، استخدم الزر التالي:</p>
           <p style="margin:24px 0">
             <a href="${activationUrl}" style="display:inline-block;padding:12px 20px;border-radius:12px;background:#0ea5e9;color:#fff;text-decoration:none;font-weight:700">تفعيل الحساب</a>
           </p>

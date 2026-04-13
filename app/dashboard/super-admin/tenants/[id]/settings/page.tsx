@@ -233,6 +233,8 @@ export default function TenantSettingsPage() {
   }
 
   const isSuspended = tenant.status === "suspended";
+  const isPending = tenant.status === "pending";
+  const canActivate = isSuspended || isPending;
 
   return (
     <div className="space-y-6">
@@ -279,15 +281,19 @@ export default function TenantSettingsPage() {
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between gap-4 rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-800 dark:bg-amber-950/20">
             <div>
-              <p className="font-medium">{isSuspended ? t.tenant.activate : t.tenant.suspend}</p>
+              <p className="font-medium">{canActivate ? t.tenant.activate : t.tenant.suspend}</p>
               <p className="text-muted-foreground text-sm">
-                {isSuspended
-                  ? `${t.tenant.pReactivateCompany} - ${t.tenant.pUser}`
+                {canActivate
+                  ? isPending
+                    ? locale === "ar"
+                      ? "الشركة منشأة ولكنها ما زالت بانتظار التفعيل النهائي. فعّلها عندما يصبح حساب مدير الشركة جاهزًا."
+                      : "The company has been created but is still awaiting final activation. Activate it when the company admin account is ready."
+                    : `${t.tenant.pReactivateCompany} - ${t.tenant.pUser}`
                   : `${t.tenant.suspendDesc} - ${t.tenant.pUser}`}
               </p>
             </div>
 
-            {isSuspended ? (
+            {canActivate ? (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button
@@ -298,8 +304,20 @@ export default function TenantSettingsPage() {
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{t.tenant.activateConfirm}</AlertDialogTitle>
-                    <AlertDialogDescription>{t.tenant.activateWarning}</AlertDialogDescription>
+                    <AlertDialogTitle>
+                      {isPending
+                        ? locale === "ar"
+                          ? "تأكيد تفعيل الشركة الجديدة"
+                          : "Confirm initial company activation"
+                        : t.tenant.activateConfirm}
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {isPending
+                        ? locale === "ar"
+                          ? "سيتم تحويل الشركة من Pending إلى Active والسماح بالدخول بعد جاهزية حساب مدير الشركة والمستخدمين المرتبطين بها."
+                          : "The company will move from Pending to Active and linked users will be allowed to sign in once their accounts are ready."
+                        : t.tenant.activateWarning}
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>{t.common.cancel}</AlertDialogCancel>

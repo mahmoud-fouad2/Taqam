@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { TableEmptyRow } from "@/components/empty-states/table-empty-row";
 import {
   Table,
   TableBody,
@@ -79,8 +80,6 @@ import {
 } from "@/lib/types/recruitment";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
-
-const t = getText("ar");
 
 type JobFormState = {
   title: string;
@@ -145,6 +144,7 @@ function splitLines(value: string) {
 
 export function JobPostingsManager() {
   const locale = useClientLocale("ar");
+  const t = getText(locale);
   const numLocale = locale === "en" ? "en-US" : "ar-SA";
   const [jobs, setJobs] = React.useState<JobPosting[]>([]);
   const [departments, setDepartments] = React.useState<Department[]>([]);
@@ -177,11 +177,11 @@ export function JobPostingsManager() {
     } catch (error) {
       setJobs([]);
       setDepartments([]);
-      toast.error(error instanceof Error ? error.message : t.applicants.fetchFailed);
+      toast.error(error instanceof Error ? error.message : t.jobPostings.fetchFailed);
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [t.jobPostings.fetchDeptsFailed, t.jobPostings.fetchFailed]);
 
   React.useEffect(() => {
     void loadData();
@@ -330,7 +330,7 @@ export function JobPostingsManager() {
     <div className="space-y-6">
       <div className="grid gap-4 md:grid-cols-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.jobPostings.totalJobs}</CardTitle>
             <IconBriefcase className="text-muted-foreground h-4 w-4" />
           </CardHeader>
@@ -341,7 +341,7 @@ export function JobPostingsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.jobPostings.openPositions}</CardTitle>
             <IconUsers className="h-4 w-4 text-green-600" />
           </CardHeader>
@@ -352,7 +352,7 @@ export function JobPostingsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.jobPostings.filled}</CardTitle>
             <IconBriefcase className="h-4 w-4 text-blue-600" />
           </CardHeader>
@@ -363,7 +363,7 @@ export function JobPostingsManager() {
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.jobPostings.vacantPositions}</CardTitle>
             <IconUsers className="h-4 w-4 text-orange-600" />
           </CardHeader>
@@ -393,7 +393,7 @@ export function JobPostingsManager() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center">
             <div className="relative flex-1">
               <IconSearch className="text-muted-foreground absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2" />
               <Input
@@ -434,12 +434,18 @@ export function JobPostingsManager() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {!isLoading && filteredJobs.length === 0 ? (
+                {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="py-8 text-center">
-                      <p className="text-muted-foreground">{t.jobPostings.noMatchingJobs}</p>
+                    <TableCell colSpan={8} className="text-muted-foreground py-8 text-center">
+                      {t.common.loading}
                     </TableCell>
                   </TableRow>
+                ) : filteredJobs.length === 0 ? (
+                  <TableEmptyRow
+                    colSpan={8}
+                    title={t.jobPostings.noMatchingJobs}
+                    icon={<IconBriefcase className="size-5" />}
+                  />
                 ) : (
                   filteredJobs.map((job) => (
                     <TableRow key={job.id}>
@@ -454,7 +460,7 @@ export function JobPostingsManager() {
                       <TableCell>{job.departmentName}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-1">
-                          <IconMapPin className="h-3 w-3" />
+                          <IconMapPin className="text-muted-foreground h-3 w-3" />
                           {job.location}
                         </div>
                       </TableCell>
@@ -468,7 +474,11 @@ export function JobPostingsManager() {
                           {jobStatusLabels[job.status]}
                         </Badge>
                       </TableCell>
-                      <TableCell>{new Date(job.postedDate).toLocaleDateString("ar-SA")}</TableCell>
+                      <TableCell>
+                        {new Date(job.postedDate).toLocaleDateString(
+                          locale === "ar" ? "ar-SA" : "en-US"
+                        )}
+                      </TableCell>
                       <TableCell>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -688,7 +698,7 @@ export function JobPostingsManager() {
               />
             </div>
 
-            <div className="flex gap-2 pt-4">
+            <div className="flex flex-col gap-2 pt-4 sm:flex-row">
               <Button
                 variant="outline"
                 className="flex-1"
@@ -727,17 +737,17 @@ export function JobPostingsManager() {
                 </Badge>
               </div>
 
-              <div className="grid gap-4">
-                <div className="flex items-center gap-2 text-sm">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="bg-muted/20 flex items-center gap-2 rounded-lg border p-3 text-sm">
                   <IconBriefcase className="text-muted-foreground h-4 w-4" />
                   <span>{selectedJob.departmentName}</span>
                 </div>
-                <div className="flex items-center gap-2 text-sm">
+                <div className="bg-muted/20 flex items-center gap-2 rounded-lg border p-3 text-sm">
                   <IconMapPin className="text-muted-foreground h-4 w-4" />
                   <span>{selectedJob.location}</span>
                 </div>
-                {selectedJob.showSalary && (
-                  <div className="flex items-center gap-2 text-sm">
+                {selectedJob.showSalary ? (
+                  <div className="bg-muted/20 flex items-center gap-2 rounded-lg border p-3 text-sm">
                     <IconCurrencyDollar className="text-muted-foreground h-4 w-4" />
                     <span>
                       {selectedJob.salaryMin?.toLocaleString(numLocale) || "0"} -{" "}
@@ -745,8 +755,8 @@ export function JobPostingsManager() {
                       {selectedJob.currency}
                     </span>
                   </div>
-                )}
-                <div className="flex items-center gap-2 text-sm">
+                ) : null}
+                <div className="bg-muted/20 flex items-center gap-2 rounded-lg border p-3 text-sm">
                   <IconUsers className="text-muted-foreground h-4 w-4" />
                   <span>
                     {selectedJob.openPositions} {t.jobPostings.requiredPositions}
@@ -787,7 +797,9 @@ export function JobPostingsManager() {
                 <div>
                   <h4 className="mb-2 font-semibold">{t.jobPostings.applicationDeadline}</h4>
                   <p className="text-muted-foreground text-sm">
-                    {new Date(selectedJob.applicationDeadline).toLocaleDateString("ar-SA")}
+                    {new Date(selectedJob.applicationDeadline).toLocaleDateString(
+                      locale === "ar" ? "ar-SA" : "en-US"
+                    )}
                   </p>
                 </div>
               )}

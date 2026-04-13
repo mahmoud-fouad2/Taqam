@@ -315,5 +315,11 @@ export default async function EmployeeDetailsPage({ params }: PageProps) {
     }))
   };
 
-  return <EmployeeDetailsClient employee={employeeData} initialLocale={locale} />;
+  return (
+    <EmployeeDetailsClient
+      employee={employeeData}
+      initialLocale={locale}
+      canManageAvatar={currentUser.role === "TENANT_ADMIN" || currentUser.role === "HR_MANAGER"}
+    />
+  );
 }

@@ -46,11 +46,15 @@ export default async function SettingsLayout({ children }: { children: React.Rea
     },
     {
       title: locale === "ar" ? "التكاملات" : "Integrations",
-      href: `${p}/dashboard/settings-advanced?section=integrations`
+      href: `${p}/dashboard/settings/integrations`
     },
     {
       title: locale === "ar" ? "الأدوار والصلاحيات" : "Roles & Permissions",
-      href: `${p}/dashboard/settings-advanced?section=roles`
+      href: `${p}/dashboard/settings/roles`
+    },
+    {
+      title: locale === "ar" ? "تسجيل الدخول الموحد (SSO)" : "Single Sign-On",
+      href: `${p}/dashboard/settings/sso`
     },
     {
       title: locale === "ar" ? "أنواع الإجازات" : "Leave Types",

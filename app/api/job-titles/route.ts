@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { ensureTenantJobTitleCatalog } from "@/lib/hr/job-title-catalog";
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,13 +19,17 @@ export async function GET(request: NextRequest) {
 
     const tenantId = session.user.tenantId;
 
-    const where: any = {};
-    if (tenantId) {
-      where.tenantId = tenantId;
+    if (!tenantId) {
+      return NextResponse.json({ data: [] });
     }
 
+    await ensureTenantJobTitleCatalog(tenantId);
+
     const jobTitles = await prisma.jobTitle.findMany({
-      where,
+      where: {
+        tenantId,
+        isActive: true
+      },
       include: {
         _count: {
           select: {
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
           }
         }
       },
-      orderBy: { name: "asc" }
+      orderBy: [{ level: "asc" }, { name: "asc" }]
     });
 
     return NextResponse.json({ data: jobTitles });
@@ -50,29 +55,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const tenantId = session.user.tenantId;
-
-    if (!tenantId) {
-      return NextResponse.json({ error: "Tenant required" }, { status: 400 });
-    }
-
-    const body = await request.json();
-
-    const jobTitle = await prisma.jobTitle.create({
-      data: {
-        tenantId,
-        name: body.name,
-        nameAr: body.nameAr,
-        code: body.code,
-        description: body.description,
-        minSalary: body.minSalary,
-        maxSalary: body.maxSalary,
-        level: body.level || 1,
-        isActive: true
-      }
-    });
-
-    return NextResponse.json({ data: jobTitle }, { status: 201 });
+    return NextResponse.json(
+      { error: "Job titles are managed centrally by the platform" },
+      { status: 403 }
+    );
   } catch (error) {
     logApiError("Error creating job title", error);
     return NextResponse.json({ error: "Failed to create job title" }, { status: 500 });

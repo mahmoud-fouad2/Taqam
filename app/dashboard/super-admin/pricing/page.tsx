@@ -7,6 +7,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
+import { FeatureComparisonManager } from "./feature-comparison-manager";
 import { PricingPlansManager } from "./pricing-plans-manager";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
@@ -29,9 +30,13 @@ export default async function PricingPlansPage() {
         <p className="text-muted-foreground mt-1 text-sm">
           {t.pricingPlans.pUpdatePlanPricesAndFeaturesSho}
         </p>
+        <p className="text-muted-foreground mt-1 text-sm">
+          {t.pricingPlans.comparisonManagementHint}
+        </p>
       </section>
 
       <PricingPlansManager />
+      <FeatureComparisonManager />
     </div>
   );
 }

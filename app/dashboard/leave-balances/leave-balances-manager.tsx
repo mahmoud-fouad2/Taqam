@@ -306,7 +306,25 @@ export function LeaveBalancesManager() {
               <SelectItem value="2026">2026</SelectItem>
             </SelectContent>
           </Select>
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={async () => {
+              try {
+                const res = await fetch(
+                  `/api/export?type=leaves&format=csv&year=${selectedYear}`
+                );
+                if (!res.ok) throw new Error();
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `leaves_${selectedYear}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              } catch {
+                toast.error("فشل التصدير");
+              }
+            }}>
             <IconDownload className="ms-2 h-4 w-4" />
             {t.common.exportData}
           </Button>

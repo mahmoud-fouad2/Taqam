@@ -54,14 +54,14 @@ export function SettingsSidebar({
   return (
     <Card className="lg:col-span-1">
       <CardContent className="p-2">
-        <nav className="space-y-1">
+        <nav className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
           {SECTIONS.map((section) => {
             const Icon = section.icon;
             return (
               <button
                 key={section.id}
                 onClick={() => onChange(section.id)}
-                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors ${
+                className={`flex shrink-0 items-center gap-3 rounded-lg px-3 py-2 text-sm whitespace-nowrap transition-colors lg:w-full ${
                   activeSection === section.id
                     ? "bg-primary text-primary-foreground"
                     : "hover:bg-muted"

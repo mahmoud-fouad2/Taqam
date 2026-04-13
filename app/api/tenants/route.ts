@@ -224,7 +224,7 @@ export async function POST(request: NextRequest) {
         plan,
         planExpiresAt,
         maxEmployees,
-        status: "ACTIVE",
+        status: "PENDING",
         settings: body.settings || {}
       }
     });

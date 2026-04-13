@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { generateMeta } from "@/lib/utils";
 import { Metadata } from "next";
 import Image from "next/image";
@@ -21,6 +22,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function RegisterPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
+  const prefix = locale === "en" ? "/en" : "";
 
   return (
     <div className="flex pb-8 lg:h-screen lg:pb-0">
@@ -37,7 +39,7 @@ export default async function RegisterPage() {
 
       <div className="flex w-full items-center justify-center lg:w-1/2">
         <FadeIn direction="up">
-          <div className="w-full max-w-md space-y-8 px-4">
+          <div className="w-full max-w-lg space-y-8 px-4">
             <div className={`flex gap-2 ${locale === "ar" ? "justify-start" : "justify-end"}`}>
               <ThemeToggle variant="ghost" />
               <LocaleToggle variant="ghost" initialLocale={locale} />
@@ -52,13 +54,11 @@ export default async function RegisterPage() {
               <RegisterForm
                 locale={locale}
                 labels={{
-                  name: t.register.name,
-                  namePlaceholder: t.register.namePlaceholder,
-                  email: t.register.email,
-                  emailPlaceholder: t.register.emailPlaceholder,
-                  password: t.register.password,
-                  passwordPlaceholder: t.register.passwordPlaceholder,
-                  submit: t.register.submit
+                  summary: t.register.summary,
+                  steps: [t.register.stepOne, t.register.stepTwo, t.register.stepThree],
+                  primaryAction: t.register.primaryAction,
+                  secondaryAction: t.register.secondaryAction,
+                  inviteNote: t.register.inviteNote
                 }}
               />
             </div>
@@ -66,9 +66,9 @@ export default async function RegisterPage() {
             <div className="mt-6">
               <p className="mt-6 text-center text-sm text-gray-600">
                 {t.register.alreadyHaveAccount}{" "}
-                <a href="/login" className="text-primary hover:underline">
+                <Link href={`${prefix}/login`} className="text-primary hover:underline">
                   {t.register.loginLink}
-                </a>
+                </Link>
               </p>
             </div>
           </div>

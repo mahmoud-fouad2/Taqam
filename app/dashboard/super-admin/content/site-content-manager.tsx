@@ -33,11 +33,38 @@ const emptyState: PlatformSiteContent = {
     badge: { ar: "", en: "" },
     title: { ar: "", en: "" },
     description: { ar: "", en: "" }
+  },
+  requestDemo: {
+    badge: { ar: "", en: "" },
+    title: { ar: "", en: "" },
+    description: { ar: "", en: "" },
+    formTitle: { ar: "", en: "" },
+    formDescription: { ar: "", en: "" },
+    sideTitle: { ar: "", en: "" },
+    sideDescription: { ar: "", en: "" },
+    secondaryCtaTitle: { ar: "", en: "" },
+    secondaryCtaDescription: { ar: "", en: "" },
+    secondaryCtaLabel: { ar: "", en: "" },
+    highlights: [
+      {
+        title: { ar: "", en: "" },
+        description: { ar: "", en: "" }
+      },
+      {
+        title: { ar: "", en: "" },
+        description: { ar: "", en: "" }
+      },
+      {
+        title: { ar: "", en: "" },
+        description: { ar: "", en: "" }
+      }
+    ]
   }
 };
 
 type SectionKey = "home" | "pricing" | "careers";
 type LocalizedFieldKey = "badge" | "title" | "description" | "primaryCtaLabel";
+type RequestDemoFieldKey = Exclude<keyof PlatformSiteContent["requestDemo"], "highlights">;
 type LocalizedFieldValue = { ar: string; en: string };
 type LocalizedSection = {
   badge: LocalizedFieldValue;
@@ -72,17 +99,32 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
     async function load() {
       setLoading(true);
       setMessage("");
-      const response = await fetch("/api/super-admin/site-content", { cache: "no-store" });
-      const json = await response.json();
+      try {
+        const response = await fetch("/api/super-admin/site-content", { cache: "no-store" });
+        const json = await response.json();
 
-      if (!active) {
-        return;
+        if (!active) {
+          return;
+        }
+
+        if (!response.ok || !json.data) {
+          setMessage(isAr ? "تعذر تحميل المحتوى الحالي." : "Unable to load current content.");
+          setLoading(false);
+          return;
+        }
+
+        setForm(json.data);
+        setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
+        setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
+        setLoading(false);
+      } catch {
+        if (!active) {
+          return;
+        }
+
+        setMessage(isAr ? "حدث خطأ أثناء تحميل المحتوى." : "An error occurred while loading content.");
+        setLoading(false);
       }
-
-      setForm(json.data);
-      setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
-      setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
-      setLoading(false);
     }
 
     void load();
@@ -90,7 +132,7 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
     return () => {
       active = false;
     };
-  }, []);
+  }, [isAr]);
 
   function updateField<K extends keyof PlatformSiteContent>(key: K, value: PlatformSiteContent[K]) {
     setForm((current) => ({ ...current, [key]: value }));
@@ -123,6 +165,44 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
     });
   }
 
+  function updateRequestDemoField(field: RequestDemoFieldKey, lang: "ar" | "en", value: string) {
+    setForm((current) => ({
+      ...current,
+      requestDemo: {
+        ...current.requestDemo,
+        [field]: {
+          ...current.requestDemo[field],
+          [lang]: value
+        }
+      }
+    }));
+  }
+
+  function updateRequestDemoHighlight(
+    index: number,
+    field: "title" | "description",
+    lang: "ar" | "en",
+    value: string
+  ) {
+    setForm((current) => ({
+      ...current,
+      requestDemo: {
+        ...current.requestDemo,
+        highlights: current.requestDemo.highlights.map((highlight, highlightIndex) =>
+          highlightIndex === index
+            ? {
+                ...highlight,
+                [field]: {
+                  ...highlight[field],
+                  [lang]: value
+                }
+              }
+            : highlight
+        )
+      }
+    }));
+  }
+
   async function handleSave() {
     setSaving(true);
     setMessage("");
@@ -133,20 +213,31 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
       defaultKeywordsEn: fromCsv(keywordsEn)
     };
 
-    const response = await fetch("/api/super-admin/site-content", {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-    const json = await response.json();
+    try {
+      const response = await fetch("/api/super-admin/site-content", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      const json = await response.json();
 
-    setForm(json.data);
-    setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
-    setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
-    setSaving(false);
-    setMessage(isAr ? "تم حفظ التعديلات بنجاح." : "Changes saved successfully.");
+      if (!response.ok || !json.data) {
+        setSaving(false);
+        setMessage(json.error ?? (isAr ? "تعذر حفظ التعديلات." : "Unable to save changes."));
+        return;
+      }
+
+      setForm(json.data);
+      setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
+      setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
+      setSaving(false);
+      setMessage(isAr ? "تم حفظ التعديلات بنجاح." : "Changes saved successfully.");
+    } catch {
+      setSaving(false);
+      setMessage(isAr ? "حدث خطأ أثناء حفظ التعديلات." : "An error occurred while saving changes.");
+    }
   }
 
   if (loading) {
@@ -183,10 +274,11 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
           </div>
 
           <Tabs defaultValue="home" className="w-full">
-            <TabsList>
+            <TabsList className="flex h-auto flex-wrap justify-start">
               <TabsTrigger value="home">{isAr ? "الرئيسية" : "Home"}</TabsTrigger>
               <TabsTrigger value="pricing">{isAr ? "الأسعار" : "Pricing"}</TabsTrigger>
               <TabsTrigger value="careers">{isAr ? "الوظائف" : "Careers"}</TabsTrigger>
+              <TabsTrigger value="request-demo">{isAr ? "طلب العرض" : "Request demo"}</TabsTrigger>
               <TabsTrigger value="seo">SEO</TabsTrigger>
             </TabsList>
 
@@ -211,6 +303,35 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
               <LocalizedField labelAr="شارة القسم" labelEn="Badge" valueAr={form.careers.badge.ar} valueEn={form.careers.badge.en} onChangeAr={(value) => updateLocalizedSection("careers", "badge", "ar", value)} onChangeEn={(value) => updateLocalizedSection("careers", "badge", "en", value)} />
               <LocalizedField labelAr="العنوان" labelEn="Title" valueAr={form.careers.title.ar} valueEn={form.careers.title.en} onChangeAr={(value) => updateLocalizedSection("careers", "title", "ar", value)} onChangeEn={(value) => updateLocalizedSection("careers", "title", "en", value)} />
               <LocalizedField labelAr="الوصف" labelEn="Description" valueAr={form.careers.description.ar} valueEn={form.careers.description.en} onChangeAr={(value) => updateLocalizedSection("careers", "description", "ar", value)} onChangeEn={(value) => updateLocalizedSection("careers", "description", "en", value)} textarea />
+            </TabsContent>
+
+            <TabsContent value="request-demo" className="space-y-4 pt-4">
+              <LocalizedField labelAr="شارة القسم" labelEn="Badge" valueAr={form.requestDemo.badge.ar} valueEn={form.requestDemo.badge.en} onChangeAr={(value) => updateRequestDemoField("badge", "ar", value)} onChangeEn={(value) => updateRequestDemoField("badge", "en", value)} />
+              <LocalizedField labelAr="العنوان" labelEn="Title" valueAr={form.requestDemo.title.ar} valueEn={form.requestDemo.title.en} onChangeAr={(value) => updateRequestDemoField("title", "ar", value)} onChangeEn={(value) => updateRequestDemoField("title", "en", value)} textarea />
+              <LocalizedField labelAr="الوصف" labelEn="Description" valueAr={form.requestDemo.description.ar} valueEn={form.requestDemo.description.en} onChangeAr={(value) => updateRequestDemoField("description", "ar", value)} onChangeEn={(value) => updateRequestDemoField("description", "en", value)} textarea />
+              <LocalizedField labelAr="عنوان النموذج" labelEn="Form title" valueAr={form.requestDemo.formTitle.ar} valueEn={form.requestDemo.formTitle.en} onChangeAr={(value) => updateRequestDemoField("formTitle", "ar", value)} onChangeEn={(value) => updateRequestDemoField("formTitle", "en", value)} />
+              <LocalizedField labelAr="وصف النموذج" labelEn="Form description" valueAr={form.requestDemo.formDescription.ar} valueEn={form.requestDemo.formDescription.en} onChangeAr={(value) => updateRequestDemoField("formDescription", "ar", value)} onChangeEn={(value) => updateRequestDemoField("formDescription", "en", value)} textarea />
+              <LocalizedField labelAr="عنوان العمود الجانبي" labelEn="Sidebar title" valueAr={form.requestDemo.sideTitle.ar} valueEn={form.requestDemo.sideTitle.en} onChangeAr={(value) => updateRequestDemoField("sideTitle", "ar", value)} onChangeEn={(value) => updateRequestDemoField("sideTitle", "en", value)} />
+              <LocalizedField labelAr="وصف العمود الجانبي" labelEn="Sidebar description" valueAr={form.requestDemo.sideDescription.ar} valueEn={form.requestDemo.sideDescription.en} onChangeAr={(value) => updateRequestDemoField("sideDescription", "ar", value)} onChangeEn={(value) => updateRequestDemoField("sideDescription", "en", value)} textarea />
+              <LocalizedField labelAr="عنوان الدعوة الثانوية" labelEn="Secondary CTA title" valueAr={form.requestDemo.secondaryCtaTitle.ar} valueEn={form.requestDemo.secondaryCtaTitle.en} onChangeAr={(value) => updateRequestDemoField("secondaryCtaTitle", "ar", value)} onChangeEn={(value) => updateRequestDemoField("secondaryCtaTitle", "en", value)} />
+              <LocalizedField labelAr="وصف الدعوة الثانوية" labelEn="Secondary CTA description" valueAr={form.requestDemo.secondaryCtaDescription.ar} valueEn={form.requestDemo.secondaryCtaDescription.en} onChangeAr={(value) => updateRequestDemoField("secondaryCtaDescription", "ar", value)} onChangeEn={(value) => updateRequestDemoField("secondaryCtaDescription", "en", value)} textarea />
+              <LocalizedField labelAr="نص زر الدعوة الثانوية" labelEn="Secondary CTA label" valueAr={form.requestDemo.secondaryCtaLabel.ar} valueEn={form.requestDemo.secondaryCtaLabel.en} onChangeAr={(value) => updateRequestDemoField("secondaryCtaLabel", "ar", value)} onChangeEn={(value) => updateRequestDemoField("secondaryCtaLabel", "en", value)} />
+              <div className="space-y-4 rounded-2xl border border-dashed p-4">
+                <div>
+                  <h3 className="text-sm font-semibold">{isAr ? "نقاط الثقة السريعة" : "Quick trust highlights"}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {isAr
+                      ? "ثلاث نقاط مختصرة تظهر بجوار نموذج طلب العرض."
+                      : "Three concise points shown alongside the request-demo form."}
+                  </p>
+                </div>
+                {form.requestDemo.highlights.map((highlight, index) => (
+                  <div key={index} className="space-y-3 rounded-xl border p-4">
+                    <LocalizedField labelAr={`عنوان النقطة ${index + 1}`} labelEn={`Highlight ${index + 1} title`} valueAr={highlight.title.ar} valueEn={highlight.title.en} onChangeAr={(value) => updateRequestDemoHighlight(index, "title", "ar", value)} onChangeEn={(value) => updateRequestDemoHighlight(index, "title", "en", value)} />
+                    <LocalizedField labelAr={`وصف النقطة ${index + 1}`} labelEn={`Highlight ${index + 1} description`} valueAr={highlight.description.ar} valueEn={highlight.description.en} onChangeAr={(value) => updateRequestDemoHighlight(index, "description", "ar", value)} onChangeEn={(value) => updateRequestDemoHighlight(index, "description", "en", value)} textarea />
+                  </div>
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="seo" className="space-y-4 pt-4">
@@ -248,6 +369,7 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
           <PreviewBlock title={isAr ? "الرئيسية" : "Home"} badge={locale === "ar" ? form.home.badge.ar : form.home.badge.en} heading={locale === "ar" ? form.home.title.ar : form.home.title.en} description={locale === "ar" ? form.home.description.ar : form.home.description.en} />
           <PreviewBlock title={isAr ? "الأسعار" : "Pricing"} badge={locale === "ar" ? form.pricing.badge.ar : form.pricing.badge.en} heading={locale === "ar" ? form.pricing.title.ar : form.pricing.title.en} description={locale === "ar" ? form.pricing.description.ar : form.pricing.description.en} />
           <PreviewBlock title={isAr ? "الوظائف" : "Careers"} badge={locale === "ar" ? form.careers.badge.ar : form.careers.badge.en} heading={locale === "ar" ? form.careers.title.ar : form.careers.title.en} description={locale === "ar" ? form.careers.description.ar : form.careers.description.en} />
+          <PreviewBlock title={isAr ? "طلب العرض" : "Request demo"} badge={locale === "ar" ? form.requestDemo.badge.ar : form.requestDemo.badge.en} heading={locale === "ar" ? form.requestDemo.title.ar : form.requestDemo.title.en} description={locale === "ar" ? form.requestDemo.description.ar : form.requestDemo.description.en} />
         </CardContent>
       </Card>
     </div>

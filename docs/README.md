@@ -5,6 +5,8 @@
 ## Current Layout
 
 - `../README.md` و `../QUICK_START.md` و `../SETUP_GUIDE.md` و `../SUMMARY.md` و `../NODE_24_UPGRADE_PLAN.md`: الوثائق التشغيلية الأساسية.
+- `LAUNCH_READINESS_MASTER_PLAN.md`: الخطة التنفيذية الرئيسية للانطلاق التجاري والتقني، وتشمل activation، الباقات، التكاملات، الموبايل، والأتمتة.
+- `COMMERCIAL_CLAIMS_AUDIT_AND_CATALOG_SHAPE.md`: حصر surfaces الوعود التجارية الحالية وتعريف الشكل المقترح للـ Feature Catalog والـ Claims Registry.
 - `FINAL_DEVELOPMENT_GUIDE.md`: المرجع النهائي المحدث للحالة الحالية وخطوط التطوير اللاحقة.
 - `reports/`: تقارير تاريخية، نتائج اختبارات، وملخصات تنفيذ سابقة.
 - `archive/plans/`: خطط قديمة محفوظة للرجوع إليها فقط.

@@ -1,8 +1,19 @@
 "use client";
 
+import { useState } from "react";
+
 import type { UseFormReturn } from "react-hook-form";
+import { Check, ChevronsUpDown } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +31,7 @@ import {
   FormMessage
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -40,6 +52,7 @@ import { contractTypes, statusOptions } from "./employee-constants";
 import type { EmployeeFormData } from "./employee-form-schema";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
+import { cn } from "@/lib/utils";
 
 const t = getText("ar");
 
@@ -66,6 +79,7 @@ export function EmployeeFormDialog({
 }) {
   const locale = useClientLocale();
   const t = getText(locale);
+  const [jobTitlePickerOpen, setJobTitlePickerOpen] = useState(false);
   const managerOptions = employees.filter(
     (employee) => employee.id !== editingEmployee?.id && employee.status !== "terminated"
   );
@@ -85,10 +99,16 @@ export function EmployeeFormDialog({
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="personal">{t.employees.personalInfo}</TabsTrigger>
-                <TabsTrigger value="employment">{t.employees.employmentInfo}</TabsTrigger>
-                <TabsTrigger value="salary">{t.leaveTypes.salary}</TabsTrigger>
+              <TabsList className="flex h-auto w-full flex-wrap justify-start">
+                <TabsTrigger value="personal" className="flex-1 min-w-[140px]">
+                  {t.employees.personalInfo}
+                </TabsTrigger>
+                <TabsTrigger value="employment" className="flex-1 min-w-[140px]">
+                  {t.employees.employmentInfo}
+                </TabsTrigger>
+                <TabsTrigger value="salary" className="flex-1 min-w-[140px]">
+                  {t.leaveTypes.salary}
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="personal" className="mt-4 space-y-4">
@@ -271,22 +291,79 @@ export function EmployeeFormDialog({
                     control={form.control}
                     name="jobTitleId"
                     render={({ field }) => (
-                      <FormItem>
+                      <FormItem className="flex flex-col">
                         <FormLabel>{t.employeeForm.jobTitleLabel}</FormLabel>
-                        <Select onValueChange={field.onChange} value={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder={t.employeeForm.selectJobTitle} />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {jobTitles.map((j) => (
-                              <SelectItem key={j.id} value={j.id}>
-                                {j.nameAr || j.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                        <Popover open={jobTitlePickerOpen} onOpenChange={setJobTitlePickerOpen}>
+                          <PopoverTrigger asChild>
+                            <FormControl>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                role="combobox"
+                                className={cn(
+                                  "w-full justify-between",
+                                  !field.value && "text-muted-foreground"
+                                )}>
+                                <span className="truncate">
+                                  {jobTitles.find((jobTitle) => jobTitle.id === field.value)
+                                    ? jobTitles.find((jobTitle) => jobTitle.id === field.value)?.nameAr ||
+                                      jobTitles.find((jobTitle) => jobTitle.id === field.value)?.name
+                                    : t.employeeForm.selectJobTitle}
+                                </span>
+                                <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
+                              </Button>
+                            </FormControl>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                            <Command>
+                              <CommandInput
+                                placeholder={
+                                  locale === "ar"
+                                    ? "ابحث في المسميات الوظيفية"
+                                    : "Search job titles"
+                                }
+                              />
+                              <CommandList>
+                                <CommandEmpty>
+                                  {locale === "ar"
+                                    ? "لا توجد مسميات مطابقة"
+                                    : "No matching job titles"}
+                                </CommandEmpty>
+                                <CommandGroup>
+                                  {jobTitles.map((jobTitle) => (
+                                    <CommandItem
+                                      key={jobTitle.id}
+                                      value={`${jobTitle.nameAr || ""} ${jobTitle.name} ${jobTitle.code || ""}`}
+                                      onSelect={() => {
+                                        field.onChange(jobTitle.id);
+                                        setJobTitlePickerOpen(false);
+                                      }}>
+                                      <Check
+                                        className={cn(
+                                          "h-4 w-4",
+                                          jobTitle.id === field.value ? "opacity-100" : "opacity-0"
+                                        )}
+                                      />
+                                      <div className="flex min-w-0 flex-col">
+                                        <span className="truncate">{jobTitle.nameAr || jobTitle.name}</span>
+                                        {jobTitle.nameAr && jobTitle.nameAr !== jobTitle.name ? (
+                                          <span className="text-muted-foreground truncate text-xs">
+                                            {jobTitle.name}
+                                          </span>
+                                        ) : null}
+                                      </div>
+                                    </CommandItem>
+                                  ))}
+                                </CommandGroup>
+                              </CommandList>
+                            </Command>
+                          </PopoverContent>
+                        </Popover>
+                        <p className="text-muted-foreground text-xs">
+                          {locale === "ar"
+                            ? "المسميات تُدار مركزيًا من المنصة وتظهر هنا تلقائيًا لكل شركة."
+                            : "Job titles are managed centrally by the platform and appear here automatically."}
+                        </p>
                         <FormMessage />
                       </FormItem>
                     )}

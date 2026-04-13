@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { IconEye, IconPencil, IconPlus, IconTrash, IconUser } from "@tabler/icons-react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,6 +26,10 @@ import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
 
 const t = getText("ar");
+
+function getInitials(employee: Employee) {
+  return `${employee.firstName?.[0] || ""}${employee.lastName?.[0] || ""}`.toUpperCase();
+}
 
 export function EmployeesList({
   employees,
@@ -86,9 +91,10 @@ export function EmployeesList({
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-full">
-                        <IconUser className="size-4" />
-                      </div>
+                      <Avatar className="size-9 shrink-0">
+                        <AvatarImage src={emp.avatar || undefined} alt="" />
+                        <AvatarFallback>{getInitials(emp)}</AvatarFallback>
+                      </Avatar>
                       <div className="min-w-0">
                         <Link
                           href={`/dashboard/employees/${emp.id}`}
@@ -208,9 +214,10 @@ export function EmployeesList({
                       </div>
                       <div className="min-w-0">
                         <div className="flex min-w-0 items-center gap-2">
-                          <div className="bg-muted flex size-8 shrink-0 items-center justify-center rounded-full">
-                            <IconUser className="size-4" />
-                          </div>
+                          <Avatar className="size-8 shrink-0">
+                            <AvatarImage src={emp.avatar || undefined} alt="" />
+                            <AvatarFallback>{getInitials(emp)}</AvatarFallback>
+                          </Avatar>
                           <div className="min-w-0">
                             <Link
                               href={`/dashboard/employees/${emp.id}`}

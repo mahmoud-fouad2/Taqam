@@ -235,7 +235,7 @@ export function PublicApplicationForm({
   }
 
   return (
-    <Card className="border-border/80 shadow-sm">
+    <Card className="border-border/70 bg-card/80 shadow-sm">
       <CardHeader>
         <CardTitle>{locale === "ar" ? "قدّم الآن" : "Apply now"}</CardTitle>
         <CardDescription>

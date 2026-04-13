@@ -1,11 +1,14 @@
 ﻿import type { Metadata } from "next";
 import React from "react";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { requireAuth } from "@/lib/auth";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/motion/page-transition";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+import { isSuperAdminRole } from "@/lib/access-control";
+import { getSetupStatus } from "@/lib/setup";
 
 export const metadata: Metadata = {
   title: {
@@ -26,7 +29,24 @@ export const metadata: Metadata = {
 };
 
 export default async function Page({ children }: { children: React.ReactNode }) {
-  await requireAuth();
+  const user = await requireAuth();
+
+  // Redirect new tenant admins to setup wizard until setup is complete
+  const headerStore = await headers();
+  const pathname = headerStore.get("x-invoke-path") || headerStore.get("x-pathname") || "";
+  const isSetupPage = pathname.includes("/dashboard/setup");
+  if (
+    !isSetupPage &&
+    user.tenantId &&
+    !isSuperAdminRole(user.role) &&
+    user.role === "TENANT_ADMIN"
+  ) {
+    const setupStatus = await getSetupStatus(user.tenantId);
+    if (!setupStatus.isComplete) {
+      redirect("/dashboard/setup");
+    }
+  }
+
   const cookieStore = await cookies();
   const locale = cookieStore.get("taqam_locale")?.value === "en" ? "en" : "ar";
   const dir = locale === "ar" ? "rtl" : "ltr";

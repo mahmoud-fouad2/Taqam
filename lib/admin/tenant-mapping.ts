@@ -54,6 +54,8 @@ export function mapTenantFromDb(t: any): Tenant {
     employeesCount: t._count?.employees ?? 0,
     createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
-    createdBy: t.createdBy ?? ""
+    createdBy: t.createdBy ?? "",
+    ...(t.setupStep !== undefined && t.setupStep !== null ? { setupStep: t.setupStep as number } : {}),
+    ...(t.setupCompletedAt ? { setupCompletedAt: (t.setupCompletedAt as Date).toISOString() } : {})
   };
 }

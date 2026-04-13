@@ -208,7 +208,15 @@ export function CreateTenantForm() {
         return;
       }
 
-      toast.success(t.tenants.createdSuccess);
+      toast.success(
+        locale === "ar"
+          ? data.sendInvite
+            ? "تم إنشاء الشركة بحالة بانتظار التفعيل وإرسال رابط تفعيل لمدير الشركة."
+            : "تم إنشاء الشركة بحالة بانتظار التفعيل. فعّل حساب مدير الشركة أو فعّل الشركة يدويًا عند الجاهزية."
+          : data.sendInvite
+            ? "Company created pending activation and an activation link was sent to the company admin."
+            : "Company created pending activation. Activate the company admin account or activate the company manually when ready."
+      );
       router.push("/dashboard/super-admin/tenants?created=true");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t.tenants.connectionFailed);

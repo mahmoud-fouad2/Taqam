@@ -27,10 +27,12 @@ import { getText } from "@/lib/i18n/text";
 
 export function RequestActions({
   requestId,
-  status
+  status,
+  initialPlan
 }: {
   requestId: string;
   status: "PENDING" | "APPROVED" | "REJECTED" | string;
+  initialPlan?: "trial" | "starter" | "business" | "enterprise";
 }) {
   const locale = useClientLocale();
   const t = getText(locale);
@@ -40,7 +42,7 @@ export function RequestActions({
   const [approveSlug, setApproveSlug] = React.useState("");
   const [approvePlan, setApprovePlan] = React.useState<
     "trial" | "starter" | "business" | "enterprise" | undefined
-  >(undefined);
+  >(initialPlan);
   const [approveMaxEmployees, setApproveMaxEmployees] = React.useState("");
   const [approveExpiryDate, setApproveExpiryDate] = React.useState("");
 
@@ -70,7 +72,11 @@ export function RequestActions({
         toast.error(res.error || t.requests.acceptFailed);
         return;
       }
-      toast.success(t.superAdmin.pRequestAcceptedAndCompanyCreat);
+      toast.success(
+        locale === "ar"
+          ? "تم قبول الطلب وإنشاء الشركة بحالة بانتظار التفعيل."
+          : "Request accepted and company created pending activation."
+      );
       window.location.reload();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t.requests.acceptFailed);

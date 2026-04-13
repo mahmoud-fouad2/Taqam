@@ -91,6 +91,21 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (
+      payload.type === "tenant-admin-activation" &&
+      payload.tenantId &&
+      user.tenantId !== payload.tenantId
+    ) {
+      return withRateLimitHeaders(
+        NextResponse.json({ error: "Invalid or expired token" }, { status: 400 }),
+        {
+          limit: RESET_PASSWORD_RATE_LIMIT.limit,
+          remaining: limitInfo.remaining,
+          resetAt: limitInfo.resetAt
+        }
+      );
+    }
+
     const currentPasswordChangedAt = user.passwordChangedAt?.toISOString() ?? null;
     if (currentPasswordChangedAt !== (payload.passwordChangedAt ?? null)) {
       return withRateLimitHeaders(
@@ -115,26 +130,47 @@ export async function POST(request: NextRequest) {
     }
 
     const hashedPassword = await hash(parsed.data.newPassword, 12);
-    await prisma.user.updateMany({
-      where: { id: user.id },
-      data: {
-        password: hashedPassword,
-        passwordChangedAt: new Date(),
-        status: "ACTIVE",
-        emailVerified: user.emailVerified ?? new Date(),
-        failedLoginAttempts: 0,
-        lockedUntil: null
-      }
-    });
+    await prisma.$transaction(async (tx) => {
+      await tx.user.updateMany({
+        where: { id: user.id },
+        data: {
+          password: hashedPassword,
+          passwordChangedAt: new Date(),
+          status: "ACTIVE",
+          emailVerified: user.emailVerified ?? new Date(),
+          failedLoginAttempts: 0,
+          lockedUntil: null
+        }
+      });
 
-    await prisma.auditLog.create({
-      data: {
-        tenantId: user.tenantId,
-        userId: user.id,
-        action: payload.type === "tenant-admin-activation" ? "ACCOUNT_ACTIVATED" : "PASSWORD_RESET",
-        entity: "User",
-        entityId: user.id
+      if (payload.type === "tenant-admin-activation" && user.tenantId) {
+        const activatedTenant = await tx.tenant.updateMany({
+          where: { id: user.tenantId, status: "PENDING" },
+          data: { status: "ACTIVE" }
+        });
+
+        if (activatedTenant.count > 0) {
+          await tx.auditLog.create({
+            data: {
+              tenantId: user.tenantId,
+              userId: user.id,
+              action: "TENANT_ACTIVATED",
+              entity: "Tenant",
+              entityId: user.tenantId
+            }
+          });
+        }
       }
+
+      await tx.auditLog.create({
+        data: {
+          tenantId: user.tenantId,
+          userId: user.id,
+          action: payload.type === "tenant-admin-activation" ? "ACCOUNT_ACTIVATED" : "PASSWORD_RESET",
+          entity: "User",
+          entityId: user.id
+        }
+      });
     });
 
     await revokeAllRefreshTokensForUser(prisma as any, user.id);

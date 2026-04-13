@@ -251,6 +251,65 @@ export async function GET(request: NextRequest) {
         filename = `loans_export_${new Date().toISOString().split("T")[0]}`;
         break;
 
+      case "leaves":
+        const whereLeaves: any = { tenantId };
+        const leavesYear = searchParams.get("year")
+          ? Number(searchParams.get("year"))
+          : new Date().getFullYear();
+        whereLeaves.year = leavesYear;
+
+        const leaveBalances = await prisma.leaveBalance.findMany({
+          where: whereLeaves,
+          include: {
+            employee: {
+              select: {
+                employeeNumber: true,
+                firstName: true,
+                lastName: true,
+                firstNameAr: true,
+                lastNameAr: true,
+                department: { select: { name: true, nameAr: true } }
+              }
+            },
+            leaveType: { select: { name: true, nameAr: true } }
+          },
+          orderBy: [{ employee: { employeeNumber: "asc" } }]
+        });
+
+        data = leaveBalances.map((bal: any) => {
+          const entitled = Number(bal.entitled ?? 0) + Number(bal.adjustment ?? 0);
+          const used = Number(bal.used ?? 0);
+          const pending = Number(bal.pending ?? 0);
+          const carried = Number(bal.carriedOver ?? 0);
+          return {
+            employeeNumber: bal.employee.employeeNumber || "",
+            employeeName: `${bal.employee.firstNameAr || bal.employee.firstName} ${bal.employee.lastNameAr || bal.employee.lastName}`,
+            department: bal.employee.department?.nameAr || bal.employee.department?.name || "",
+            leaveType: bal.leaveType?.nameAr || bal.leaveType?.name || "",
+            year: String(leavesYear),
+            entitled: String(entitled),
+            carriedOver: String(carried),
+            used: String(used),
+            pending: String(pending),
+            remaining: String(entitled + carried - used - pending)
+          };
+        });
+
+        columns = [
+          { key: "employeeNumber", label: "رقم الموظف" },
+          { key: "employeeName", label: "اسم الموظف" },
+          { key: "department", label: "القسم" },
+          { key: "leaveType", label: "نوع الإجازة" },
+          { key: "year", label: "السنة" },
+          { key: "entitled", label: "المستحق" },
+          { key: "carriedOver", label: "المرحّل" },
+          { key: "used", label: "المستخدم" },
+          { key: "pending", label: "قيد الانتظار" },
+          { key: "remaining", label: "المتبقي" }
+        ];
+        filename = `leaves_export_${leavesYear}`;
+        break;
+
       default:
         return NextResponse.json({ error: "نوع التصدير غير مدعوم" }, { status: 400 });
     }

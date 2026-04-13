@@ -23,9 +23,53 @@ import {
   getTenantIssueQueryValue,
   validateTenantAccess
 } from "@/lib/tenant-access";
-import { buildTenantPath, buildTenantUrl, isLocalTenantDevelopmentHost } from "@/lib/tenant";
+import {
+  buildTenantPath,
+  buildTenantUrl,
+  isLocalTenantDevelopmentHost,
+  normalizeTenantDomain
+} from "@/lib/tenant";
 import { getTenantContext, getTenantRequestHost } from "@/lib/tenant.server";
 import { redirect } from "next/navigation";
+
+const isProduction = process.env.NODE_ENV === "production";
+
+function stripPortFromHost(host: string): string {
+  const [hostname] = host.split(":");
+  return hostname?.toLowerCase() ?? "";
+}
+
+function resolveSharedAuthCookieDomain(): string | undefined {
+  const configuredDomain = normalizeTenantDomain(
+    process.env.TAQAM_BASE_DOMAIN ||
+      process.env.NEXT_PUBLIC_APP_URL ||
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_SITE_URL ||
+      null
+  );
+
+  if (!configuredDomain) {
+    return undefined;
+  }
+
+  const hostname = stripPortFromHost(configuredDomain);
+
+  if (
+    !hostname ||
+    hostname === "localhost" ||
+    /^[0-9.]+$/.test(hostname) ||
+    hostname.endsWith(".onrender.com") ||
+    hostname.endsWith(".vercel.app") ||
+    hostname.endsWith(".netlify.app")
+  ) {
+    return undefined;
+  }
+
+  return hostname;
+}
+
+const sharedAuthCookieDomain = resolveSharedAuthCookieDomain();
+const secureAuthCookiePrefix = isProduction ? "__Secure-" : "";
 
 // ============================================
 // NextAuth Configuration
@@ -397,6 +441,32 @@ export const authOptions: NextAuthOptions = {
     strategy: "jwt",
     maxAge: 7 * 24 * 60 * 60 // 7 days
   },
+
+  ...(sharedAuthCookieDomain
+    ? {
+        cookies: {
+          sessionToken: {
+            name: `${secureAuthCookiePrefix}next-auth.session-token`,
+            options: {
+              httpOnly: true,
+              sameSite: "lax" as const,
+              path: "/",
+              secure: isProduction,
+              domain: sharedAuthCookieDomain
+            }
+          },
+          callbackUrl: {
+            name: `${secureAuthCookiePrefix}next-auth.callback-url`,
+            options: {
+              sameSite: "lax" as const,
+              path: "/",
+              secure: isProduction,
+              domain: sharedAuthCookieDomain
+            }
+          }
+        }
+      }
+    : {}),
 
   jwt: {
     maxAge: 7 * 24 * 60 * 60 // 7 days

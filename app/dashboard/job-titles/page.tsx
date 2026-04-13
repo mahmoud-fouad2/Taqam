@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
+import { getServerSession } from "next-auth";
+
 import { generateMeta } from "@/lib/utils";
-import { JobTitlesManager } from "./job-titles-manager";
+import { authOptions } from "@/lib/auth";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
 
@@ -14,14 +17,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function JobTitlesPage() {
-  const locale = await getAppLocale();
-  const t = getText(locale);
-  return (
-    <>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-bold tracking-tight">{t.jobTitles.title}</h1>
-      </div>
-      <JobTitlesManager />
-    </>
-  );
+  const session = await getServerSession(authOptions);
+
+  if (session?.user?.role === "SUPER_ADMIN") {
+    redirect("/dashboard/super-admin/job-titles");
+  }
+
+  redirect("/dashboard/employees");
 }

@@ -35,6 +35,11 @@ model Tenant {
   // Status
   status TenantStatus @default(ACTIVE)
 
+  // Setup wizard tracking (null = not started, 8 = fully completed)
+  setupStep        Int?
+  setupCompletedAt DateTime?
+  setupData        Json?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -76,6 +81,9 @@ model Tenant {
   evaluationTemplates   EvaluationTemplate[]
   developmentPlans      DevelopmentPlan[]
   employeeSalaryRecords EmployeeSalaryRecord[]
+  integrationConnections IntegrationConnection[]
+  webhooks              Webhook[]
+  customRoles           CustomRole[]
 
   @@index([slug])
   @@index([status])
@@ -209,6 +217,10 @@ model User {
   // Role & Permissions
   role        UserRole @default(EMPLOYEE)
   permissions String[] @default([])
+
+  // Custom role override (optional – supplements the built-in role)
+  customRoleId String?
+  customRole   CustomRole? @relation(fields: [customRoleId], references: [id], onDelete: SetNull)
 
   // Status
   status UserStatus @default(ACTIVE)
@@ -2189,4 +2201,154 @@ model PlanFeatureComparison {
   updatedAt DateTime @updatedAt
 
   @@index([isActive, sortOrder])
+}
+
+// =============================================
+// INTEGRATIONS PLATFORM
+// =============================================
+
+enum IntegrationMode {
+  NATIVE_API
+  EMBEDDED
+  MANUAL_BRIDGE
+  ENTERPRISE_CUSTOM
+}
+
+enum IntegrationStatus {
+  DISCONNECTED
+  PENDING
+  CONNECTED
+  DEGRADED
+  ERROR
+}
+
+/// One connection record per tenant per integration provider
+model IntegrationConnection {
+  id          String @id @default(cuid())
+  tenantId    String
+  providerKey String // "gosi", "wps", "mudad", etc.
+
+  mode   IntegrationMode   @default(NATIVE_API)
+  status IntegrationStatus @default(DISCONNECTED)
+
+  // Encrypted credential blob (never exposed to client)
+  credentialsEncrypted String?
+  // Extra provider-specific config (scopes, endpoint overrides, etc.)
+  config Json?
+
+  lastConnectedAt   DateTime?
+  lastHealthCheckAt DateTime?
+  lastSyncAt        DateTime?
+  lastError         String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  runs IntegrationRun[]
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, providerKey])
+  @@index([tenantId, status])
+}
+
+/// One run record per sync / health-check / push execution
+model IntegrationRun {
+  id           String  @id @default(cuid())
+  connectionId String
+  operation    String  // "sync", "push", "health-check", "test"
+  status       String  // "running", "success", "failed", "partial"
+
+  summary      String?
+  errorMessage String?
+  durationMs   Int?
+  retryCount   Int     @default(0)
+
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+
+  connection IntegrationConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+
+  @@index([connectionId, startedAt])
+}
+
+
+// =============================================
+// WEBHOOKS
+// =============================================
+
+/// One webhook endpoint per URL per tenant; delivers signed payloads for each registered event.
+model Webhook {
+  id       String @id @default(cuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  url         String  // HTTPS endpoint to deliver to
+  description String?
+
+  // Comma-separated list of subscribed events e.g. "employee.created,leave.approved"
+  events String[] @default([])
+
+  // HMAC-SHA256 secret (never exposed after creation — hash only)
+  secretHash String // SHA-256 hash of the raw secret
+
+  isActive  Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deliveries WebhookDelivery[]
+
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+}
+
+/// One delivery attempt per webhook per event.
+model WebhookDelivery {
+  id        String  @id @default(cuid())
+  webhookId String
+  webhook   Webhook @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  event      String // e.g. "employee.created"
+  payload    Json
+  status     String @default("pending") // "pending" | "success" | "failed"
+  statusCode Int?
+  response   String? // truncated response body
+  attempt    Int     @default(1)
+
+  sentAt     DateTime @default(now())
+  deliveredAt DateTime?
+
+  @@index([webhookId, sentAt])
+  @@index([status])
+}
+
+// =============================================
+// RBAC V2 – CUSTOM ROLES
+// =============================================
+
+/// Tenant-defined roles with granular permission sets.
+/// Built-in system roles (Admin / HR / Manager / Employee) can also be stored
+/// here with isBuiltin=true so they appear in the permission matrix UI.
+model CustomRole {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  name        String
+  nameAr      String?
+  description String?
+
+  /// Flat permission keys e.g. ["employees.view", "payroll.run"]
+  permissions String[] @default([])
+
+  /// Built-in roles cannot be deleted, only edited (permissions).
+  isBuiltin Boolean @default(false)
+
+  users User[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
 }

@@ -33,8 +33,8 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: "Tenant not found" }, { status: 404 });
   }
 
-  if (tenant.status !== "ACTIVE") {
-    return NextResponse.json({ error: "Tenant is not active" }, { status: 400 });
+  if (tenant.status === "SUSPENDED" || tenant.status === "CANCELLED") {
+    return NextResponse.json({ error: "Tenant is not available" }, { status: 400 });
   }
 
   let body: any;
@@ -66,34 +66,43 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     select: { id: true, tenantId: true }
   });
 
-  const user = existing
-    ? await prisma.user.update({
-        where: { email },
-        data: {
-          password: passwordHash,
-          role: "TENANT_ADMIN",
-          status: "ACTIVE",
-          tenantId,
-          failedLoginAttempts: 0,
-          lockedUntil: null,
-          firstName,
-          lastName
-        },
-        select: { id: true, email: true, role: true, status: true, tenantId: true }
-      })
-    : await prisma.user.create({
-        data: {
-          email,
-          password: passwordHash,
-          firstName,
-          lastName,
-          role: "TENANT_ADMIN",
-          status: "ACTIVE",
-          permissions: [],
-          tenantId
-        },
-        select: { id: true, email: true, role: true, status: true, tenantId: true }
+  const user = await prisma.$transaction(async (tx) => {
+    if (tenant.status === "PENDING") {
+      await tx.tenant.update({
+        where: { id: tenantId },
+        data: { status: "ACTIVE" }
       });
+    }
+
+    return existing
+      ? await tx.user.update({
+          where: { email },
+          data: {
+            password: passwordHash,
+            role: "TENANT_ADMIN",
+            status: "ACTIVE",
+            tenantId,
+            failedLoginAttempts: 0,
+            lockedUntil: null,
+            firstName,
+            lastName
+          },
+          select: { id: true, email: true, role: true, status: true, tenantId: true }
+        })
+      : await tx.user.create({
+          data: {
+            email,
+            password: passwordHash,
+            firstName,
+            lastName,
+            role: "TENANT_ADMIN",
+            status: "ACTIVE",
+            permissions: [],
+            tenantId
+          },
+          select: { id: true, email: true, role: true, status: true, tenantId: true }
+        });
+  });
 
   await prisma.auditLog.create({
     data: {

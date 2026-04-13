@@ -1,14 +1,17 @@
 "use client";
 
+import { useRef, useState } from "react";
 import Link from "next/link";
 import {
   IconArrowLeft,
   IconArrowRight,
   IconBriefcase,
   IconBuilding,
+  IconCamera,
   IconCalendar,
   IconClock,
   IconId,
+  IconLoader2,
   IconMail,
   IconMapPin,
   IconPencil,
@@ -22,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { toast } from "sonner";
 import { EmployeeStatusBadge } from "../_components/employee-status-badge";
 import { getEmployeeFullName } from "@/lib/types/core-hr";
 import { formatCurrency } from "@/lib/types/payroll";
@@ -121,6 +125,7 @@ type EmployeeProfile = Nameable & {
 interface Props {
   employee: EmployeeProfile;
   initialLocale: "ar" | "en";
+  canManageAvatar: boolean;
 }
 
 function formatDate(iso: string, locale: "ar" | "en") {
@@ -285,16 +290,57 @@ function getPayrollPeriodLabel(period: RecentPayslip["payrollPeriod"], locale: "
   );
 }
 
-export default function EmployeeDetailsClient({ employee, initialLocale }: Props) {
+export default function EmployeeDetailsClient({ employee, initialLocale, canManageAvatar }: Props) {
   const locale = useClientLocale(initialLocale);
   const t = getText(locale);
   const isRtl = locale === "ar";
   const ArrowIcon = isRtl ? IconArrowRight : IconArrowLeft;
+  const [avatarUrl, setAvatarUrl] = useState(employee.avatar);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement | null>(null);
   const fullName = getEmployeeFullName(employee, locale);
   const managerName = employee.manager ? getEmployeeFullName(employee.manager, locale) : null;
   const directReportsCount = employee.directReports.length;
   const latestPayslip = employee.recentPayslips[0] ?? null;
   const latestLoan = employee.recentLoans[0] ?? null;
+
+  const onAvatarSelected: React.ChangeEventHandler<HTMLInputElement> = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setIsUploadingAvatar(true);
+    try {
+      const res = await fetch(`/api/employees/${employee.id}/avatar`, {
+        method: "POST",
+        body: formData
+      });
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok || !json?.data?.url) {
+        throw new Error(
+          json?.error ||
+            (locale === "ar" ? "تعذر رفع صورة الموظف." : "Failed to upload employee photo.")
+        );
+      }
+
+      setAvatarUrl(json.data.url);
+      toast.success(locale === "ar" ? "تم تحديث صورة الموظف." : "Employee photo updated.");
+    } catch (error) {
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : locale === "ar"
+            ? "حدث خطأ أثناء رفع الصورة."
+            : "An error occurred while uploading the photo."
+      );
+    } finally {
+      setIsUploadingAvatar(false);
+      if (event.target) event.target.value = "";
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -307,12 +353,40 @@ export default function EmployeeDetailsClient({ employee, initialLocale }: Props
           </Button>
 
           <div className="flex min-w-0 items-start gap-4">
-            <Avatar className="border-border/70 h-20 w-20 rounded-3xl border shadow-sm">
-              <AvatarImage src={employee.avatar || undefined} alt={fullName} />
-              <AvatarFallback className="text-lg font-semibold">
-                {getInitials(employee)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative">
+              <Avatar className="border-border/70 h-20 w-20 rounded-3xl border shadow-sm">
+                <AvatarImage src={avatarUrl || undefined} alt={fullName} />
+                <AvatarFallback className="text-lg font-semibold">
+                  {getInitials(employee)}
+                </AvatarFallback>
+              </Avatar>
+              {canManageAvatar ? (
+                <>
+                  <Button
+                    type="button"
+                    size="icon"
+                    variant="secondary"
+                    className="absolute -bottom-2 -end-2 h-8 w-8 rounded-full"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={isUploadingAvatar}
+                    aria-label={locale === "ar" ? "رفع صورة الموظف" : "Upload employee photo"}>
+                    {isUploadingAvatar ? (
+                      <IconLoader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <IconCamera className="h-4 w-4" />
+                    )}
+                  </Button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    aria-label={locale === "ar" ? "اختر صورة الموظف" : "Choose employee photo"}
+                    onChange={onAvatarSelected}
+                  />
+                </>
+              ) : null}
+            </div>
 
             <div className="min-w-0 space-y-2">
               <div>

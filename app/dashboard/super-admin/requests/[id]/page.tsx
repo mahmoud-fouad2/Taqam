@@ -21,6 +21,20 @@ function mapStatus(
   return { label: t.common.rejected, variant: "destructive" };
 }
 
+function getPlanLabel(plan: string, t: LocaleText) {
+  if (plan === "ENTERPRISE") return t.common.institutions;
+  if (plan === "PROFESSIONAL") return t.pricingPlans.professional;
+  if (plan === "BASIC") return t.common.basic;
+  return t.pricingPlans.trial;
+}
+
+function mapRequestPlan(plan: string): "trial" | "starter" | "business" | "enterprise" {
+  if (plan === "ENTERPRISE") return "enterprise";
+  if (plan === "PROFESSIONAL") return "business";
+  if (plan === "BASIC") return "starter";
+  return "trial";
+}
+
 export default async function SuperAdminRequestDetailsPage({
   params
 }: {
@@ -87,6 +101,16 @@ export default async function SuperAdminRequestDetailsPage({
               <div className="text-sm font-medium">{t.common.employees}</div>
               <div className="text-muted-foreground text-sm">{item.employeeCount ?? "—"}</div>
             </div>
+            <div>
+              <div className="text-sm font-medium">{t.pricingPlans.planType}</div>
+              <div className="text-muted-foreground text-sm">{getPlanLabel(item.plan, t)}</div>
+            </div>
+            <div>
+              <div className="text-sm font-medium">{t.common.updatedAt}</div>
+              <div className="text-muted-foreground text-sm">
+                {item.processedAt ? item.processedAt.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US") : "—"}
+              </div>
+            </div>
           </div>
 
           <div>
@@ -97,8 +121,18 @@ export default async function SuperAdminRequestDetailsPage({
           </div>
 
           <div className="pt-2">
-            <RequestActions requestId={item.id} status={item.status} />
+            <RequestActions requestId={item.id} status={item.status} initialPlan={mapRequestPlan(item.plan)} />
           </div>
+
+          {item.tenantId ? (
+            <div className="pt-2">
+              <Link
+                href={`/dashboard/super-admin/tenants/${item.tenantId}`}
+                className="text-primary text-sm font-medium hover:underline">
+                {t.superAdmin.pViewCompany}
+              </Link>
+            </div>
+          ) : null}
         </CardContent>
       </Card>
     </div>

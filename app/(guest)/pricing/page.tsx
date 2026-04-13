@@ -18,8 +18,8 @@ import {
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
+import { getPricingData, getPricingMarketingContent } from "@/lib/marketing/pricing";
 import { getAppLocale } from "@/lib/i18n/locale";
-import { prisma } from "@/lib/db";
 
 export async function generateMetadata(): Promise<Metadata> {
   const siteContent = await getPlatformSiteContent();
@@ -33,184 +33,12 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-// Fallback plans if database is empty
-const fallbackPlans = [
-  {
-    name: "Starter",
-    nameAr: "الأساسية",
-    priceMonthly: 499,
-    currency: "SAR",
-    employeesLabel: "من 5 إلى 10 موظفين",
-    employeesLabelEn: "5–10 employees",
-    featuresAr: [
-      "ملفات الموظفين والحضور والإجازات",
-      "تسجيل الحضور من التطبيق",
-      "التقارير الأساسية",
-      "واجهة عربية / إنجليزية كاملة"
-    ],
-    featuresEn: [
-      "Employee profiles, attendance & leave",
-      "Mobile check-in app",
-      "Basic reports (PDF / Excel)",
-      "Full Arabic / English interface"
-    ],
-    isPopular: false
-  },
-  {
-    name: "Business",
-    nameAr: "الأعمال",
-    priceMonthly: 999,
-    currency: "SAR",
-    employeesLabel: "من 10 إلى 25 موظفًا",
-    employeesLabelEn: "10–25 employees",
-    featuresAr: [
-      "كل مميزات الأساسية",
-      "مسير الرواتب + تصدير WPS",
-      "تكامل GOSI والاستحقاقات",
-      "تقييم الأداء والتوظيف"
-    ],
-    featuresEn: [
-      "Everything in Starter",
-      "Payroll processing + WPS export",
-      "GOSI integration & allowances",
-      "Performance reviews & recruitment"
-    ],
-    isPopular: true
-  },
-  {
-    name: "Enterprise",
-    nameAr: "المؤسسات",
-    priceMonthly: null,
-    currency: "SAR",
-    employeesLabel: "من 25 إلى 100+ موظف",
-    employeesLabelEn: "25–100+ employees",
-    featuresAr: [
-      "كل مميزات الأعمال",
-      "تكاملات مخصصة (مدد / ERP)",
-      "مدير حساب + SLA مخصص",
-      "وصول API وتقارير مخصصة"
-    ],
-    featuresEn: [
-      "Everything in Business",
-      "Custom integrations (Mudad / ERP)",
-      "Dedicated account manager + custom SLA",
-      "API access & custom reports"
-    ],
-    isPopular: false
-  }
-];
-
-const fallbackComparison = [
-  {
-    featureAr: "إدارة الموظفين والهيكل التنظيمي",
-    featureEn: "Employee management & org chart",
-    inStarter: true,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "الحضور والانصراف والورديات",
-    featureEn: "Time & attendance with shifts",
-    inStarter: true,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "إدارة الإجازات والأرصدة",
-    featureEn: "Leave management & balances",
-    inStarter: true,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "تطبيق الجوال (iOS & Android)",
-    featureEn: "Mobile app (iOS & Android)",
-    inStarter: true,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "مسير الرواتب الشهرية",
-    featureEn: "Payroll processing",
-    inStarter: false,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "تصدير WPS + تكامل GOSI",
-    featureEn: "WPS export + GOSI integration",
-    inStarter: false,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "تقييم الأداء والتوظيف",
-    featureEn: "Performance reviews & recruitment",
-    inStarter: false,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "أدوار متقدمة وسجلات تدقيق",
-    featureEn: "Advanced roles & audit logs",
-    inStarter: false,
-    inBusiness: true,
-    inEnterprise: true
-  },
-  {
-    featureAr: "تكاملات مدد / ERP",
-    featureEn: "Mudad / ERP integrations",
-    inStarter: false,
-    inBusiness: false,
-    inEnterprise: true
-  },
-  {
-    featureAr: "مدير حساب مخصص + SLA",
-    featureEn: "Dedicated account manager + SLA",
-    inStarter: false,
-    inBusiness: false,
-    inEnterprise: true
-  },
-  {
-    featureAr: "وصول API وتقارير مخصصة",
-    featureEn: "API access & custom reports",
-    inStarter: false,
-    inBusiness: false,
-    inEnterprise: true
-  }
-];
-
-async function getPricingData() {
-  try {
-    const [dbPlans, dbComparison] = await Promise.all([
-      prisma.pricingPlan.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" }
-      }),
-      prisma.planFeatureComparison.findMany({
-        where: { isActive: true },
-        orderBy: { sortOrder: "asc" }
-      })
-    ]);
-
-    return {
-      plans: dbPlans.length > 0 ? dbPlans : fallbackPlans,
-      comparison: dbComparison.length > 0 ? dbComparison : fallbackComparison
-    };
-  } catch {
-    // Return fallback data if database fails
-    return {
-      plans: fallbackPlans,
-      comparison: fallbackComparison
-    };
-  }
-}
-
 export default async function PricingPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
+  const pricingMarketing = getPricingMarketingContent();
 
   const { plans, comparison } = await getPricingData();
   const startingPrice = plans.reduce<number | null>((min, plan) => {
@@ -257,11 +85,15 @@ export default async function PricingPage() {
         <div className="container mx-auto px-4">
           <FadeIn>
             <div className="mb-8 max-w-2xl">
-              <h2 className="text-2xl font-bold">{isAr ? "الباقات المتاحة" : "Available plans"}</h2>
+              <h2 className="text-2xl font-bold">
+                {isAr
+                  ? pricingMarketing.pricingPage.plansSectionTitle.ar
+                  : pricingMarketing.pricingPage.plansSectionTitle.en}
+              </h2>
               <p className="text-muted-foreground mt-2">
                 {isAr
-                  ? "كل بطاقة توضح مستوى الخدمة والسعة والميزات الأساسية بشكل مباشر."
-                  : "Each card shows the service level, capacity, and core capabilities in a direct way."}
+                  ? pricingMarketing.pricingPage.plansSectionDescription.ar
+                  : pricingMarketing.pricingPage.plansSectionDescription.en}
               </p>
             </div>
           </FadeIn>
@@ -324,7 +156,7 @@ export default async function PricingPage() {
                           </li>
                         ))}
                       </ul>
-                      <Link href={`${p}/request-demo`} className="mt-8 block">
+                      <Link href={`${p}/request-demo?plan=${plan.slug}`} className="mt-8 block">
                         <Button
                           className="w-full"
                           variant={plan.isPopular ? "brand" : "brandOutline"}>
@@ -345,15 +177,21 @@ export default async function PricingPage() {
           <FadeIn>
             <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div className="max-w-2xl">
-                <h2 className="text-2xl font-bold">{isAr ? "مقارنة سريعة" : "Quick comparison"}</h2>
+                <h2 className="text-2xl font-bold">
+                  {isAr
+                    ? pricingMarketing.pricingPage.comparisonSectionTitle.ar
+                    : pricingMarketing.pricingPage.comparisonSectionTitle.en}
+                </h2>
                 <p className="text-muted-foreground mt-2">
                   {isAr
-                    ? "جدول مختصر يعطيك الصورة العامة: ما الذي يدخل في كل خطة، وما الذي يحتاج مستوى أعلى."
-                    : "A compact overview of what is included in each plan and what requires a higher tier."}
+                    ? pricingMarketing.pricingPage.comparisonSectionDescription.ar
+                    : pricingMarketing.pricingPage.comparisonSectionDescription.en}
                 </p>
               </div>
               <div className="bg-background text-muted-foreground rounded-full border px-4 py-2 text-sm">
-                {isAr ? "قابل للتخصيص حسب نطاق المشروع" : "Can be tailored to project scope"}
+                {isAr
+                  ? pricingMarketing.pricingPage.comparisonFootnote.ar
+                  : pricingMarketing.pricingPage.comparisonFootnote.en}
               </div>
             </div>
           </FadeIn>
@@ -407,19 +245,27 @@ export default async function PricingPage() {
 
       <FadeIn>
         <MarketingPageCta
-          title={isAr ? "تحتاج عرض سعر مختلف؟" : "Need a custom commercial offer?"}
+          title={
+            isAr
+              ? pricingMarketing.pricingPage.customCtaTitle.ar
+              : pricingMarketing.pricingPage.customCtaTitle.en
+          }
           description={
             isAr
-              ? "إذا كان عندك عدد موظفين كبير، أو تحتاج نشر خاص أو تكاملات خارجية، نجهز لك عرضًا يناسب شكل التشغيل الحقيقي عندك."
-              : "If you have a large workforce, need dedicated deployment, or external integrations, we can shape a commercial offer around your actual operating setup."
+              ? pricingMarketing.pricingPage.customCtaDescription.ar
+              : pricingMarketing.pricingPage.customCtaDescription.en
           }
           primaryAction={{
             href: `${p}/request-demo`,
-            label: isAr ? "اطلب عرض سعر مخصص" : "Request custom pricing"
+            label: isAr
+              ? pricingMarketing.pricingPage.customCtaPrimaryLabel.ar
+              : pricingMarketing.pricingPage.customCtaPrimaryLabel.en
           }}
           secondaryAction={{
             href: `${p}/plans`,
-            label: isAr ? "راجع تفاصيل الباقات" : "Review plan details"
+            label: isAr
+              ? pricingMarketing.pricingPage.customCtaSecondaryLabel.ar
+              : pricingMarketing.pricingPage.customCtaSecondaryLabel.en
           }}
         />
       </FadeIn>

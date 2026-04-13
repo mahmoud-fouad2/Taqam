@@ -135,7 +135,7 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               </div>
               <Badge className="mb-5 gap-2 rounded-full px-4 py-1.5 text-xs" variant="secondary">
                 <Building2 className="h-3.5 w-3.5" />
-                {isAr ? "بوابة التوظيف الخاصة بالشركة" : "Company-specific careers portal"}
+                {isAr ? "وظائف هذه الشركة" : "Jobs at this company"}
               </Badge>
               <h1 className="flex items-center justify-center gap-3 text-4xl font-black tracking-tight sm:text-5xl">
                 <span>{companyName}</span>
@@ -152,8 +152,8 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               </h1>
               <p className="text-muted-foreground mx-auto mt-5 max-w-2xl text-lg leading-8">
                 {isAr
-                  ? "كل الوظائف المفتوحة الخاصة بهذه الشركة، مع تقديم مباشر يصل إلى لوحة المتقدمين داخل حسابها على طاقم."
-                  : "All open roles for this company, with direct applications that land in the tenant's applicants dashboard on Taqam."}
+                  ? "كل الوظائف المفتوحة لدى هذه الشركة مع تقديم مباشر يصل إلى فريق التوظيف لديها."
+                  : "Browse this company's open roles and apply directly to its recruitment team."}
               </p>
 
               <div className="mt-8 grid gap-3 sm:grid-cols-3">
@@ -204,7 +204,7 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
                 }))}
                 locale={locale}
                 locations={filters.locations.map((value) => ({ value, label: value }))}
-                searchPlaceholder={isAr ? "ابحث داخل وظائف الشركة" : "Search this company's roles"}
+                searchPlaceholder={isAr ? "ابحث في وظائف الشركة" : "Search company jobs"}
               />
             </div>
           </div>
@@ -224,8 +224,8 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
                       ? `نتائج البحث داخل ${companyName}: ${query}`
                       : `Search results inside ${companyName}: ${query}`
                     : isAr
-                      ? "هذه الصفحة يمكن مشاركتها مباشرة مع المرشحين كـ career portal مستقل لهذه الشركة."
-                      : "This page can be shared directly with candidates as this company's dedicated careers portal."}
+                      ? "يمكن مشاركة هذه الصفحة مباشرة مع المرشحين كصفحة الوظائف الرسمية الخاصة بالشركة."
+                      : "This page can be shared directly with candidates as the company's official jobs page."}
               </p>
               {hasFilters ? (
                 <div className="mt-3 flex flex-wrap gap-2">

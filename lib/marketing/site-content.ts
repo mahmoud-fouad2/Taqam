@@ -20,6 +20,25 @@ export type SectionContent = {
   description: LocalizedText;
 };
 
+export type RequestDemoHighlightContent = {
+  title: LocalizedText;
+  description: LocalizedText;
+};
+
+export type RequestDemoContent = {
+  badge: LocalizedText;
+  title: LocalizedText;
+  description: LocalizedText;
+  formTitle: LocalizedText;
+  formDescription: LocalizedText;
+  sideTitle: LocalizedText;
+  sideDescription: LocalizedText;
+  secondaryCtaTitle: LocalizedText;
+  secondaryCtaDescription: LocalizedText;
+  secondaryCtaLabel: LocalizedText;
+  highlights: RequestDemoHighlightContent[];
+};
+
 export type PlatformSiteContent = {
   siteNameAr: string;
   siteNameEn: string;
@@ -30,6 +49,7 @@ export type PlatformSiteContent = {
   home: HomeContent;
   pricing: SectionContent;
   careers: SectionContent;
+  requestDemo: RequestDemoContent;
 };
 
 const contentFilePath = path.join(process.cwd(), "data", "platform-site-content.json");
@@ -59,8 +79,8 @@ const defaultContent: PlatformSiteContent = {
   ],
   home: {
     badge: {
-      ar: "منصة سعودية • متوافقة مع GOSI وWPS ومدد • ثنائية اللغة",
-      en: "Saudi-built • GOSI, WPS & Mudad compliant • Bilingual"
+      ar: "منصة سعودية • متوافقة مع GOSI وWPS • ثنائية اللغة",
+      en: "Saudi-built • GOSI & WPS ready • Bilingual"
     },
     title: {
       ar: "منصة إدارة الموارد البشرية الأكثر تكاملاً",
@@ -103,6 +123,80 @@ const defaultContent: PlatformSiteContent = {
       ar: "كل الوظائف المفتوحة لدى الشركات العاملة على طاقم في مكان واحد، مع صفحات مستقلة لكل شركة وتقديم مباشر من نفس البوابة.",
       en: "Browse active roles across companies running on Taqam, with dedicated portals for each company and direct applications from the same hub."
     }
+  },
+  requestDemo: {
+    badge: {
+      ar: "عرض سريع • تهيئة مخصصة • دعم مباشر",
+      en: "Fast demo • Tailored setup • Direct support"
+    },
+    title: {
+      ar: "اطلب عرضًا يوضح كيف ستعمل طاقم داخل شركتك",
+      en: "Request a demo tailored to how Taqam fits your company"
+    },
+    description: {
+      ar: "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال.",
+      en: "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."
+    },
+    formTitle: {
+      ar: "بيانات الشركة",
+      en: "Company details"
+    },
+    formDescription: {
+      ar: "جميع الحقول المطلوبة معلمة بـ *",
+      en: "Required fields are marked with *"
+    },
+    sideTitle: {
+      ar: "Demo عملي يركز على ما يهم فريقك",
+      en: "A practical demo focused on what matters to your team"
+    },
+    sideDescription: {
+      ar: "بدلاً من عرض عام، نجهز الجلسة على أساس عدد الموظفين، التعقيد التشغيلي، والخطوات التي تريد أتمتتها أولاً.",
+      en: "Instead of a generic tour, we shape the session around employee count, operational complexity, and the workflows you want to automate first."
+    },
+    secondaryCtaTitle: {
+      ar: "هل تريد مراجعة الباقات أولاً؟",
+      en: "Prefer to review plans first?"
+    },
+    secondaryCtaDescription: {
+      ar: "اطلع على الباقات والأسعار الحالية، ثم عد لطلب العرض عندما تكون جاهزًا.",
+      en: "Review the current plans and pricing, then come back for a tailored demo when you're ready."
+    },
+    secondaryCtaLabel: {
+      ar: "استعراض الباقات",
+      en: "Explore plans"
+    },
+    highlights: [
+      {
+        title: {
+          ar: "استجابة خلال 24 ساعة",
+          en: "Response within 24 hours"
+        },
+        description: {
+          ar: "فريقنا يراجع الطلب بسرعة ويقترح لك المسار المناسب مباشرة.",
+          en: "Our team reviews your request quickly and recommends the right rollout path."
+        }
+      },
+      {
+        title: {
+          ar: "مهيأ للامتثال السعودي",
+          en: "Ready for Saudi compliance"
+        },
+        description: {
+          ar: "رواتب، حضور، ولوائح تشغيل بصياغة تناسب السوق السعودي.",
+          en: "Payroll, attendance, and HR workflows tailored for the Saudi market."
+        }
+      },
+      {
+        title: {
+          ar: "تهيئة حسب شركتك",
+          en: "Configured for your company"
+        },
+        description: {
+          ar: "نضبط الصلاحيات، الهيكل، والخطوات حسب حجم فريقك ونشاطك.",
+          en: "We configure roles, structure, and workflows for your team size and operating model."
+        }
+      }
+    ]
   }
 };
 
@@ -140,6 +234,51 @@ function normalizeSection(value: unknown, fallback: SectionContent): SectionCont
     badge: normalizeLocalizedText(section.badge, fallback.badge),
     title: normalizeLocalizedText(section.title, fallback.title),
     description: normalizeLocalizedText(section.description, fallback.description)
+  };
+}
+
+function normalizeRequestDemoHighlight(
+  value: unknown,
+  fallback: RequestDemoHighlightContent
+): RequestDemoHighlightContent {
+  if (!value || typeof value !== "object") {
+    return fallback;
+  }
+
+  const source = value as Partial<RequestDemoHighlightContent>;
+  return {
+    title: normalizeLocalizedText(source.title, fallback.title),
+    description: normalizeLocalizedText(source.description, fallback.description)
+  };
+}
+
+function normalizeRequestDemo(value: unknown, fallback: RequestDemoContent): RequestDemoContent {
+  if (!value || typeof value !== "object") {
+    return fallback;
+  }
+
+  const source = value as Partial<RequestDemoContent> & { highlights?: unknown };
+  const highlights = Array.isArray(source.highlights)
+    ? fallback.highlights.map((item, index) =>
+        normalizeRequestDemoHighlight(source.highlights?.[index], item)
+      )
+    : fallback.highlights;
+
+  return {
+    badge: normalizeLocalizedText(source.badge, fallback.badge),
+    title: normalizeLocalizedText(source.title, fallback.title),
+    description: normalizeLocalizedText(source.description, fallback.description),
+    formTitle: normalizeLocalizedText(source.formTitle, fallback.formTitle),
+    formDescription: normalizeLocalizedText(source.formDescription, fallback.formDescription),
+    sideTitle: normalizeLocalizedText(source.sideTitle, fallback.sideTitle),
+    sideDescription: normalizeLocalizedText(source.sideDescription, fallback.sideDescription),
+    secondaryCtaTitle: normalizeLocalizedText(source.secondaryCtaTitle, fallback.secondaryCtaTitle),
+    secondaryCtaDescription: normalizeLocalizedText(
+      source.secondaryCtaDescription,
+      fallback.secondaryCtaDescription
+    ),
+    secondaryCtaLabel: normalizeLocalizedText(source.secondaryCtaLabel, fallback.secondaryCtaLabel),
+    highlights
   };
 }
 
@@ -181,7 +320,8 @@ function normalizeContent(value: unknown): PlatformSiteContent {
           : defaultContent.home.primaryCtaHref
     },
     pricing: normalizeSection(source.pricing, defaultContent.pricing),
-    careers: normalizeSection(source.careers, defaultContent.careers)
+    careers: normalizeSection(source.careers, defaultContent.careers),
+    requestDemo: normalizeRequestDemo(source.requestDemo, defaultContent.requestDemo)
   };
 }
 

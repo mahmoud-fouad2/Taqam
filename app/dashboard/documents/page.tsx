@@ -1,4 +1,5 @@
 import { DocumentsManager } from "./documents-manager";
+import { LetterGenerator } from "@/components/letters/letter-generator";
 import { FolderOpen } from "lucide-react";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -30,6 +31,7 @@ export default async function DocumentsPage() {
           </div>
         </div>
       </div>
+      <LetterGenerator />
       <DocumentsManager />
     </div>
   );

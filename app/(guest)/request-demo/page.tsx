@@ -14,46 +14,33 @@ import { SubscriptionRequestForm } from "./subscription-request-form";
 import { RecaptchaProvider } from "@/components/recaptcha-provider";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const siteContent = await getPlatformSiteContent();
+
   return marketingMetadata({
     path: "/request-demo",
     titleAr: "طلب عرض تجريبي | طاقم",
     titleEn: "Request a Demo | Taqam",
-    descriptionAr: "اطلب عرض تجريبي لمنصة طاقم. املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة.",
-    descriptionEn:
-      "Request a demo of Taqam. Fill the form and our team will contact you within 24 hours."
+    descriptionAr: siteContent.requestDemo.description.ar,
+    descriptionEn: siteContent.requestDemo.description.en
   });
 }
 
 export default async function RequestDemoPage() {
   const locale = await getAppLocale();
+  const siteContent = await getPlatformSiteContent();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
-  const highlights = [
-    {
-      icon: Clock3,
-      title: isAr ? "استجابة خلال 24 ساعة" : "Response within 24 hours",
-      description: isAr
-        ? "فريقنا يراجع الطلب بسرعة ويقترح لك المسار المناسب مباشرة."
-        : "Our team reviews your request quickly and recommends the right rollout path."
-    },
-    {
-      icon: ShieldCheck,
-      title: isAr ? "مهيأ للامتثال السعودي" : "Ready for Saudi compliance",
-      description: isAr
-        ? "رواتب، حضور، ولوائح تشغيل بصياغة تناسب السوق السعودي."
-        : "Payroll, attendance, and HR workflows tailored for the Saudi market."
-    },
-    {
-      icon: CheckCircle2,
-      title: isAr ? "تهيئة حسب شركتك" : "Configured for your company",
-      description: isAr
-        ? "نضبط الصلاحيات، الهيكل، والخطوات حسب حجم فريقك ونشاطك."
-        : "We configure roles, structure, and workflows for your team size and operating model."
-    }
-  ];
+  const requestDemoContent = siteContent.requestDemo;
+  const highlightIcons = [Clock3, ShieldCheck, CheckCircle2];
+  const highlights = requestDemoContent.highlights.map((highlight, index) => ({
+    icon: highlightIcons[index] ?? CheckCircle2,
+    title: isAr ? highlight.title.ar : highlight.title.en,
+    description: isAr ? highlight.description.ar : highlight.description.en
+  }));
 
   return (
     <main className="bg-background min-h-[calc(100vh-8rem)]">
@@ -68,19 +55,13 @@ export default async function RequestDemoPage() {
                   imageClassName="h-16"
                 />
                 <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
-                  {isAr
-                    ? "عرض سريع • تهيئة مخصصة • دعم مباشر"
-                    : "Fast demo • Tailored setup • Direct support"}
+                  {isAr ? requestDemoContent.badge.ar : requestDemoContent.badge.en}
                 </span>
                 <h1 className="mt-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
-                  {isAr
-                    ? "اطلب عرضًا يوضح كيف ستعمل طاقم داخل شركتك"
-                    : "Request a demo tailored to how Taqam fits your company"}
+                  {isAr ? requestDemoContent.title.ar : requestDemoContent.title.en}
                 </h1>
                 <p className="text-muted-foreground mt-4 max-w-xl text-base leading-7">
-                  {isAr
-                    ? "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال."
-                    : "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."}
+                  {isAr ? requestDemoContent.description.ar : requestDemoContent.description.en}
                 </p>
 
                 <div className="mt-6 grid gap-2 sm:grid-cols-3 lg:hidden">
@@ -105,15 +86,17 @@ export default async function RequestDemoPage() {
               <Card className="border-border/70 overflow-hidden rounded-[1.75rem] shadow-xl shadow-black/5">
                 <CardHeader className="bg-muted/30 border-b px-6 py-6 sm:px-8">
                   <CardTitle className="text-xl">
-                    {isAr ? "بيانات الشركة" : "Company details"}
+                    {isAr ? requestDemoContent.formTitle.ar : requestDemoContent.formTitle.en}
                   </CardTitle>
                   <CardDescription>
-                    {isAr ? "جميع الحقول المطلوبة معلمة بـ *" : "Required fields are marked with *"}
+                    {isAr
+                      ? requestDemoContent.formDescription.ar
+                      : requestDemoContent.formDescription.en}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="px-6 py-6 sm:px-8 sm:py-8">
                   <RecaptchaProvider>
-                  <SubscriptionRequestForm locale={locale} />
+                    <SubscriptionRequestForm locale={locale} />
                   </RecaptchaProvider>
                 </CardContent>
               </Card>
@@ -146,14 +129,10 @@ export default async function RequestDemoPage() {
               <FadeIn>
                 <LogoMark className="mb-6" frameClassName="rounded-xl p-0" imageClassName="h-10" />
                 <h2 className="text-3xl leading-tight font-bold">
-                  {isAr
-                    ? "Demo عملي يركز على ما يهم فريقك"
-                    : "A practical demo focused on what matters to your team"}
+                  {isAr ? requestDemoContent.sideTitle.ar : requestDemoContent.sideTitle.en}
                 </h2>
                 <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 dark:text-white/70">
-                  {isAr
-                    ? "بدلاً من عرض عام، نجهز الجلسة على أساس عدد الموظفين، التعقيد التشغيلي، والخطوات التي تريد أتمتتها أولاً."
-                    : "Instead of a generic tour, we shape the session around employee count, operational complexity, and the workflows you want to automate first."}
+                  {isAr ? requestDemoContent.sideDescription.ar : requestDemoContent.sideDescription.en}
                 </p>
               </FadeIn>
 
@@ -182,19 +161,25 @@ export default async function RequestDemoPage() {
               <FadeIn>
                 <div className="mt-8 rounded-2xl border border-slate-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm dark:border-white/10 dark:bg-white/5 dark:shadow-none">
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">
-                    {isAr ? "هل تريد مراجعة الباقات أولاً؟" : "Prefer to review plans first?"}
+                    {isAr
+                      ? requestDemoContent.secondaryCtaTitle.ar
+                      : requestDemoContent.secondaryCtaTitle.en}
                   </p>
                   <p className="mt-2 text-sm leading-6 text-slate-600 dark:text-white/65">
                     {isAr
-                      ? "اطلع على الباقات والأسعار الحالية، ثم عد لطلب العرض عندما تكون جاهزًا."
-                      : "Review the current plans and pricing, then come back for a tailored demo when you're ready."}
+                      ? requestDemoContent.secondaryCtaDescription.ar
+                      : requestDemoContent.secondaryCtaDescription.en}
                   </p>
                   <div className="mt-4">
                     <Button
                       asChild
                       variant="brandOutline"
                       className="w-full border-sky-200 bg-sky-50 text-sky-900 hover:bg-sky-100 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:hover:text-white">
-                      <Link href={`${p}/plans`}>{isAr ? "استعراض الباقات" : "Explore plans"}</Link>
+                      <Link href={`${p}/plans`}>
+                        {isAr
+                          ? requestDemoContent.secondaryCtaLabel.ar
+                          : requestDemoContent.secondaryCtaLabel.en}
+                      </Link>
                     </Button>
                   </div>
                 </div>

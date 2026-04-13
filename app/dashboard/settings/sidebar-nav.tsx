@@ -27,7 +27,10 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
   return (
     <nav
       dir={isRtl ? "rtl" : "ltr"}
-      className={cn("flex flex-wrap gap-2 lg:flex-col lg:items-stretch", className)}
+      className={cn(
+        "flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:items-stretch lg:overflow-visible lg:pb-0",
+        className
+      )}
       {...props}>
       {items.map((item) => (
         <Link
@@ -38,7 +41,7 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
             currentPath === item.href || pathname === item.href
               ? "bg-muted hover:bg-muted"
               : "hover:bg-muted",
-            "w-full justify-start text-start rtl:justify-end rtl:text-right"
+            "w-max shrink-0 justify-start whitespace-nowrap text-start rtl:justify-end rtl:text-right lg:w-full"
           )}>
           {item.title}
         </Link>

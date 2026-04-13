@@ -30,6 +30,7 @@ export interface Employee {
   lastName: string;
   lastNameAr?: string;
   email: string;
+  avatar?: string;
   phone?: string;
   nationalId?: string;
   nationality?: string;

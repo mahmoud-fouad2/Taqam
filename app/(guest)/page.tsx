@@ -24,6 +24,13 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  getCommercialClaimsBySurface,
+  getMarketingTestimonials,
+  getMarketingPersonaShowcase,
+  getMarketingIntegrationShowcase
+} from "@/lib/marketing/commercial-registry";
+import { getPricingData } from "@/lib/marketing/pricing";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -44,140 +51,142 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
-const features = [
-  {
+const homeFeatureGridAppearance = {
+  "employee-management": {
     icon: Users,
-    color: "text-blue-600 bg-blue-500/10",
-    title: "إدارة الموظفين",
-    titleEn: "Employee Management",
-    description: "ملفات موظفين شاملة، هياكل تنظيمية، وإدارة مستندات كاملة.",
-    descriptionEn: "Full employee profiles, org charts, and document management."
+    color: "text-blue-600 bg-blue-500/10"
   },
-  {
+  "time-attendance": {
     icon: Clock,
-    color: "text-green-600 bg-green-500/10",
-    title: "الحضور والانصراف",
-    titleEn: "Time & Attendance",
-    description: "تتبع دقيق لأوقات الدوام والشفتات والغياب والتأخير.",
-    descriptionEn: "Accurate tracking of work hours, shifts, absences, and late arrivals."
+    color: "text-green-600 bg-green-500/10"
   },
-  {
+  "payroll-management": {
     icon: CreditCard,
-    color: "text-purple-600 bg-purple-500/10",
-    title: "إدارة الرواتب",
-    titleEn: "Payroll Management",
-    description: "احتساب تلقائي للرواتب والبدلات والاستقطاعات مع تصدير WPS.",
-    descriptionEn: "Auto-calculate salaries, allowances, deductions with WPS export."
+    color: "text-purple-600 bg-purple-500/10"
   },
-  {
+  "saudi-compliance": {
     icon: Shield,
-    color: "text-orange-600 bg-orange-500/10",
-    title: "الامتثال السعودي",
-    titleEn: "Saudi Compliance",
-    description: "تكامل مع GOSI وWPS ومقيم ومدد، متوافق مع نظام العمل السعودي.",
-    descriptionEn: "GOSI, WPS, Muqeem & Mudad integration. Saudi labor law compliant."
+    color: "text-orange-600 bg-orange-500/10"
   },
-  {
+  "bilingual-experience": {
     icon: Globe,
-    color: "text-teal-600 bg-teal-500/10",
-    title: "عربي / إنجليزي",
-    titleEn: "Arabic & English",
-    description: "واجهة كاملة بالعربية والإنجليزية مع دعم RTL من البداية.",
-    descriptionEn: "Full Arabic/English UI with first-class RTL support built-in."
+    color: "text-teal-600 bg-teal-500/10"
   },
-  {
+  "multi-tenant": {
     icon: Building2,
-    color: "text-indigo-600 bg-indigo-500/10",
-    title: "متعدد الشركات",
-    titleEn: "Multi-Tenant",
-    description: "كل شركة في بيئة معزولة وآمنة تمامًا مع صلاحيات مرنة.",
-    descriptionEn: "Each company in a fully isolated, secure environment with flexible roles."
+    color: "text-indigo-600 bg-indigo-500/10"
   },
-  {
+  analytics: {
     icon: BarChart3,
-    color: "text-rose-600 bg-rose-500/10",
-    title: "التقارير والتحليلات",
-    titleEn: "Reports & Analytics",
-    description: "لوحات بيانات لحظية، تقارير مخصصة، تصدير Excel وPDF.",
-    descriptionEn: "Real-time dashboards, custom reports, Excel & PDF export."
+    color: "text-rose-600 bg-rose-500/10"
   },
-  {
+  "leave-management": {
     icon: Layers,
-    color: "text-amber-600 bg-amber-500/10",
-    title: "إدارة الإجازات",
-    titleEn: "Leave Management",
-    description: "طلبات إجازة، موافقة مدير، أرصدة تلقائية، وتقويم مريح.",
-    descriptionEn: "Leave requests, manager approval, auto balances, and calendar view."
+    color: "text-amber-600 bg-amber-500/10"
   }
-];
+} as const;
 
-const plans = [
-  {
-    name: "Starter",
-    nameAr: "الأساسية",
-    price: "499",
-    sizeAr: "من 5 إلى 10 موظفين",
-    sizeEn: "5–10 employees",
-    features: [
-      { ar: "ملفات الموظفين والهيكل التنظيمي", en: "Employee profiles & org chart" },
-      { ar: "الحضور والانصراف والورديات", en: "Time & attendance with shifts" },
-      { ar: "إدارة الإجازات والأرصدة", en: "Leave management & balances" },
-      { ar: "تسجيل الحضور من التطبيق", en: "Mobile app check-in" },
-      { ar: "التقارير الأساسية (PDF / Excel)", en: "Basic reports (PDF / Excel)" }
-    ]
-  },
-  {
-    name: "Business",
-    nameAr: "الأعمال",
-    price: "999",
-    sizeAr: "من 10 إلى 25 موظفًا",
-    sizeEn: "10–25 employees",
-    features: [
-      { ar: "كل مميزات الأساسية", en: "All Starter features" },
-      { ar: "مسير الرواتب + تصدير WPS", en: "Payroll processing + WPS export" },
-      { ar: "تكامل GOSI والاستحقاقات", en: "GOSI integration & allowances" },
-      { ar: "تقييم الأداء والتوظيف", en: "Performance reviews & recruitment" },
-      { ar: "أدوار متقدمة + سجلات تدقيق", en: "Advanced roles + audit logs" }
-    ],
-    popular: true
-  },
-  {
-    name: "Enterprise",
-    nameAr: "المؤسسات",
-    price: "تواصل معنا",
-    priceEn: "Contact us",
-    sizeAr: "من 25 إلى 100+ موظف",
-    sizeEn: "25–100+ employees",
-    features: [
-      { ar: "كل مميزات الأعمال", en: "All Business features" },
-      { ar: "تكاملات مخصصة (مدد / ERP)", en: "Custom integrations (Mudad / ERP)" },
-      { ar: "مدير حساب مخصص + SLA", en: "Dedicated account manager + SLA" },
-      { ar: "وصول API + تقارير مخصصة", en: "API access + custom reporting" }
-    ]
-  }
-];
+type HomeFeatureGridSlot = keyof typeof homeFeatureGridAppearance;
 
-const trustItems = [
-  { icon: Zap, labelAr: "إعداد سريع خلال 24 ساعة", labelEn: "Setup in under 24 hours" },
-  { icon: Lock, labelAr: "بيانات محمية ومشفرة", labelEn: "Encrypted & secure data" },
-  { icon: Star, labelAr: "دعم فني على مدار الساعة", labelEn: "24/7 technical support" }
-];
+const features = getCommercialClaimsBySurface("home.feature-grid")
+  .map((claim) => {
+    const appearance = homeFeatureGridAppearance[claim.slot as HomeFeatureGridSlot];
 
-const personas = [
-  {
-    roleAr: "مدير الموارد البشرية",
-    roleEn: "HR Manager",
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      icon: appearance.icon,
+      color: appearance.color,
+      title: claim.title.ar,
+      titleEn: claim.title.en,
+      description: claim.description.ar,
+      descriptionEn: claim.description.en
+    };
+  })
+  .filter((feature): feature is NonNullable<typeof feature> => feature !== null);
+
+const homeTrustItemAppearance = {
+  "guided-activation": { icon: Zap },
+  "secure-workspaces": { icon: Lock },
+  "saudi-operations": { icon: Shield }
+} as const;
+
+type HomeTrustItemSlot = keyof typeof homeTrustItemAppearance;
+
+const trustItems = getCommercialClaimsBySurface("home.trust-items")
+  .map((claim) => {
+    const appearance = homeTrustItemAppearance[claim.slot as HomeTrustItemSlot];
+
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      icon: appearance.icon,
+      labelAr: claim.title.ar,
+      labelEn: claim.title.en
+    };
+  })
+  .filter((item): item is NonNullable<typeof item> => item !== null);
+
+const homeProofPillAppearance = {
+  "bilingual-operations": { dot: "bg-indigo-500" },
+  "unified-operations": { dot: "bg-blue-500" },
+  "web-mobile": { dot: "bg-emerald-500" }
+} as const;
+
+type HomeProofPillSlot = keyof typeof homeProofPillAppearance;
+
+const homeProofPills = getCommercialClaimsBySurface("home.proof-pills")
+  .map((claim) => {
+    const appearance = homeProofPillAppearance[claim.slot as HomeProofPillSlot];
+
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      dot: appearance.dot,
+      labelAr: claim.title.ar,
+      labelEn: claim.title.en
+    };
+  })
+  .filter((item): item is NonNullable<typeof item> => item !== null);
+
+const homeProofStripAppearance = {
+  "unified-operations": { icon: Layers },
+  "arabic-first": { icon: Globe },
+  "faster-adoption": { icon: Zap }
+} as const;
+
+type HomeProofStripSlot = keyof typeof homeProofStripAppearance;
+
+const homeProofStripItems = getCommercialClaimsBySurface("home.proof-strip")
+  .map((claim) => {
+    const appearance = homeProofStripAppearance[claim.slot as HomeProofStripSlot];
+
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      icon: appearance.icon,
+      titleAr: claim.title.ar,
+      titleEn: claim.title.en,
+      descAr: claim.description.ar,
+      descEn: claim.description.en
+    };
+  })
+  .filter((item): item is NonNullable<typeof item> => item !== null);
+
+const homePersonaAppearance = {
+  "hr-manager": {
     icon: Users,
     badge: "bg-indigo-600/90",
-    titleAr: "تحكم كامل في الهيكل التنظيمي والرواتب",
-    titleEn: "Full control of org structure & payroll",
-    descAr: "أدر ملفات الموظفين ومسير الرواتب والإجازات من لوحة تحكم واحدة متكاملة.",
-    descEn: "Manage employee files, payroll, and leaves from one integrated dashboard.",
     surface:
       "from-indigo-500/14 via-white to-sky-500/10 dark:from-indigo-500/18 dark:via-slate-900 dark:to-sky-500/10",
-    visualCaptionAr: "ملفات الموظفين والموافقات والرواتب في مشهد واحد واضح لفريق الموارد البشرية.",
-    visualCaptionEn:
-      "Employee records, approvals, and payroll sit together in one clear HR workspace.",
     visuals: {
       primary: {
         src: "/images/marketing/screenshot-employees.svg?v=2",
@@ -194,27 +203,13 @@ const personas = [
         labelAr: "تطبيق الموظف",
         labelEn: "Employee app"
       }
-    },
-    features: [
-      { ar: "مسير رواتب تلقائي متوافق مع GOSI", en: "Automated payroll with GOSI compliance" },
-      { ar: "موافقة فورية على الإجازات والطلبات", en: "Instant leave and request approvals" },
-      { ar: "تقارير HR قابلة للتصدير", en: "Exportable HR reports" }
-    ]
+    }
   },
-  {
-    roleAr: "المدير التنفيذي",
-    roleEn: "CEO / Finance",
+  executive: {
     icon: BarChart3,
     badge: "bg-blue-600/90",
-    titleAr: "رؤية تنفيذية شاملة لكل المؤشرات",
-    titleEn: "Complete executive visibility of all KPIs",
-    descAr: "تابع أداء الفريق ومؤشرات الامتثال والتكاليف من لوحة بيانات تنفيذية لحظية.",
-    descEn: "Monitor team performance, compliance and costs from a real-time executive dashboard.",
     surface:
       "from-blue-500/14 via-white to-indigo-500/10 dark:from-blue-500/18 dark:via-slate-900 dark:to-indigo-500/12",
-    visualCaptionAr: "لوحات تنفيذية وتقارير وتحليلات لحظية تساعد الإدارة على اتخاذ القرار بسرعة.",
-    visualCaptionEn:
-      "Executive dashboards, reports, and live analytics help leadership make faster decisions.",
     visuals: {
       primary: {
         src: "/images/marketing/screenshot-dashboard.svg?v=2",
@@ -231,27 +226,13 @@ const personas = [
         labelAr: "التقارير",
         labelEn: "Reports"
       }
-    },
-    features: [
-      { ar: "لوحات بيانات تنفيذية لحظية", en: "Real-time executive dashboards" },
-      { ar: "تقارير التكاليف والامتثال للوائح", en: "Cost & regulatory compliance reports" },
-      { ar: "تنبيهات ذكية للمواعيد والمستحقات", en: "Smart deadline & entitlement alerts" }
-    ]
+    }
   },
-  {
-    roleAr: "الموظف",
-    roleEn: "Employee",
+  employee: {
     icon: Clock,
     badge: "bg-emerald-600/90",
-    titleAr: "كل ما تحتاجه من جوالك مباشرةً",
-    titleEn: "Everything you need from your phone",
-    descAr: "سجّل حضورك واطلب إجازتك وراجع قسيمة راتبك — كل ذلك من تطبيق طاقم.",
-    descEn: "Clock in, request leave, and view your payslip — all from the Taqam mobile app.",
     surface:
       "from-emerald-500/14 via-white to-teal-500/12 dark:from-emerald-500/18 dark:via-slate-900 dark:to-teal-500/12",
-    visualCaptionAr: "مسار يومي واضح للموظف: حضور، طلبات، ورواتب من شاشة جوال واحدة.",
-    visualCaptionEn:
-      "A clear daily employee flow: attendance, requests, and payroll from one mobile screen.",
     visuals: {
       primary: {
         src: "/images/marketing/mobile-dashboard.svg?v=2",
@@ -268,14 +249,40 @@ const personas = [
         labelAr: "طلبات الموظف",
         labelEn: "Employee requests"
       }
-    },
-    features: [
-      { ar: "تسجيل الحضور والانصراف بسهولة", en: "Easy attendance check-in/out" },
-      { ar: "طلبات الإجازة ومتابعة الرصيد", en: "Leave requests with balance tracking" },
-      { ar: "قسيمة الراتب والمستحقات", en: "Payslip and entitlements view" }
-    ]
+    }
   }
-];
+} as const;
+
+type HomePersonaSlot = keyof typeof homePersonaAppearance;
+
+const personas = getMarketingPersonaShowcase()
+  .map((persona) => {
+    const appearance = homePersonaAppearance[persona.id as HomePersonaSlot];
+
+    if (!appearance) {
+      return null;
+    }
+
+    return {
+      roleAr: persona.role.ar,
+      roleEn: persona.role.en,
+      icon: appearance.icon,
+      badge: appearance.badge,
+      titleAr: persona.title.ar,
+      titleEn: persona.title.en,
+      descAr: persona.description.ar,
+      descEn: persona.description.en,
+      surface: appearance.surface,
+      visualCaptionAr: persona.visualCaption.ar,
+      visualCaptionEn: persona.visualCaption.en,
+      visuals: appearance.visuals,
+      features: persona.highlights.map((highlight) => ({
+        ar: highlight.ar,
+        en: highlight.en
+      }))
+    };
+  })
+  .filter((persona): persona is NonNullable<typeof persona> => persona !== null);
 
 type Persona = (typeof personas)[number];
 
@@ -341,98 +348,7 @@ function PersonaVisualPanel({ persona, isAr }: { persona: Persona; isAr: boolean
   );
 }
 
-const testimonials = [
-  {
-    quoteAr:
-      "طاقم غيّر طريقة إدارة رواتبنا تماماً. مسير الرواتب الذي كان يستغرق ٣ أيام بات يتم في أقل من ساعة.",
-    quoteEn:
-      "Taqam completely changed how we manage payroll. What used to take 3 days now takes less than an hour.",
-    nameAr: "سارة الشهراني",
-    nameEn: "Sarah Al-Shahrani",
-    roleAr: "مدير الموارد البشرية — شركة الباحة للمقاولات",
-    roleEn: "HR Manager — Al-Baha Contracting Co.",
-    avatar: "/images/marketing/testimonials/sarah.jpg"
-  },
-  {
-    quoteAr:
-      "التكامل مع GOSI ومدد وفّر علينا ساعات من العمل اليدوي شهرياً. الدعم الفني متاح دائماً وباحترافية عالية.",
-    quoteEn:
-      "Integration with GOSI and Mudad saved us hours of manual work monthly. Support is always professional.",
-    nameAr: "نورة الغامدي",
-    nameEn: "Noura Al-Ghamdi",
-    roleAr: "مديرة شؤون الموظفين — مجموعة سدير التجارية",
-    roleEn: "People Director — Sudair Trading Group",
-    avatar: "/images/marketing/testimonials/noura.jpg"
-  },
-  {
-    quoteAr:
-      "أقدر أتابع حضور وإجازات فريقي كامل من جوالي في أي وقت. طاقم جعل حياتي كمدير أسهل بكثير.",
-    quoteEn:
-      "I can track my whole team's attendance and leaves from my phone at any time. Taqam made my life much easier.",
-    nameAr: "خالد العتيبي",
-    nameEn: "Khalid Al-Otaibi",
-    roleAr: "المدير التنفيذي — مركز الخبر للتقنية",
-    roleEn: "CEO — Al-Khobar Tech Center",
-    avatar: "/images/marketing/testimonials/khalid.jpg"
-  }
-];
-
-const integrations = [
-  {
-    id: "gosi",
-    name: "GOSI",
-    descAr: "التأمينات الاجتماعية",
-    descEn: "Social Insurance",
-    src: "/images/marketing/integrations/gosi.png",
-    frameClassName: "bg-white p-4",
-    imageClassName: "object-contain"
-  },
-  {
-    id: "wps",
-    name: "WPS",
-    descAr: "نظام حماية الأجور",
-    descEn: "Wage Protection",
-    src: "/images/marketing/integrations/wps.jpg",
-    frameClassName: "bg-white p-2",
-    imageClassName: "object-contain"
-  },
-  {
-    id: "mudad",
-    name: "مدد",
-    descAr: "إدارة العمالة الوافدة",
-    descEn: "Expat Labour Mgmt",
-    src: "/images/marketing/integrations/mudad.png",
-    frameClassName: "bg-white p-3",
-    imageClassName: "object-contain"
-  },
-  {
-    id: "muqeem",
-    name: "مقيم",
-    descAr: "خدمات الإقامة",
-    descEn: "Residency Services",
-    src: "/images/marketing/integrations/muqeem.png",
-    frameClassName: "bg-white p-3",
-    imageClassName: "object-contain"
-  },
-  {
-    id: "mustafid",
-    name: "مستفيد",
-    descAr: "التوظيف والتدريب",
-    descEn: "Employment Portal",
-    src: "/images/marketing/integrations/mustafid.jpg",
-    frameClassName: "bg-white p-4",
-    imageClassName: "object-contain"
-  },
-  {
-    id: "sap",
-    name: "SAP",
-    descAr: "تكامل ERP",
-    descEn: "ERP Integration",
-    src: "/images/marketing/integrations/sap.png",
-    frameClassName: "bg-white p-4",
-    imageClassName: "object-contain"
-  }
-];
+const testimonials = getMarketingTestimonials();
 
 export default async function LandingPage({
   searchParams
@@ -442,10 +358,34 @@ export default async function LandingPage({
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const siteContent = await getPlatformSiteContent();
+  const { plans: pricingPlans } = await getPricingData();
   const p = locale === "en" ? "/en" : "";
   const homeCtaHref = siteContent.home.primaryCtaHref.startsWith("/")
     ? `${p}${siteContent.home.primaryCtaHref === "/" ? "" : siteContent.home.primaryCtaHref}`
     : siteContent.home.primaryCtaHref;
+  const marketingIntegrations = getMarketingIntegrationShowcase();
+  const liveMarketingIntegrations = marketingIntegrations.filter(
+    (item) => item.availability === "live"
+  );
+  const homepagePlans = pricingPlans.map((plan) => ({
+    slug: plan.slug,
+    name: plan.name,
+    nameAr: plan.nameAr,
+    priceText:
+      plan.priceMonthly != null
+        ? String(Number(plan.priceMonthly))
+        : isAr
+          ? "تواصل معنا"
+          : "Contact us",
+    priceEn: plan.priceMonthly == null ? "Contact us" : undefined,
+    sizeAr: plan.employeesLabel || "حسب نطاق الشركة",
+    sizeEn: plan.employeesLabelEn || "Based on company scope",
+    features: plan.featuresAr.map((feature, index) => ({
+      ar: feature,
+      en: plan.featuresEn[index] || feature
+    })),
+    popular: plan.isPopular
+  }));
 
   const sp = searchParams ? await searchParams : undefined;
   const tenantRequired = sp?.tenantRequired === "1";
@@ -520,23 +460,7 @@ export default async function LandingPage({
 
                 {/* Trust proof pills */}
                 <div className="mt-8 flex flex-wrap justify-center gap-2 border-t pt-6 lg:justify-start">
-                  {[
-                    {
-                      labelAr: "تشغيل عربي / إنجليزي كامل",
-                      labelEn: "Full Arabic / English operations",
-                      dot: "bg-indigo-500"
-                    },
-                    {
-                      labelAr: "الموظفون والحضور والرواتب في مكان واحد",
-                      labelEn: "Employees, attendance, and payroll in one place",
-                      dot: "bg-blue-500"
-                    },
-                    {
-                      labelAr: "ويب + جوال للإدارة والموظفين",
-                      labelEn: "Web + mobile for admins and employees",
-                      dot: "bg-emerald-500"
-                    }
-                  ].map((s) => (
+                  {homeProofPills.map((s) => (
                     <div
                       key={s.labelEn}
                       className="border-border/60 bg-muted/40 flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm">
@@ -581,19 +505,24 @@ export default async function LandingPage({
             </p>
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
               {[
-                { name: "GOSI", icon: Shield, color: "text-green-600" },
-                { name: "WPS", icon: CreditCard, color: "text-blue-600" },
-                { name: isAr ? "مدد" : "Mudad", icon: Users, color: "text-indigo-600" },
-                { name: isAr ? "مقيم" : "Muqeem", icon: Globe, color: "text-purple-600" },
-                { name: isAr ? "مستفيد" : "Mustafid", icon: Building2, color: "text-teal-600" }
-              ].map(({ name, icon: Icon, color }) => (
+                { id: "gosi", icon: Shield, color: "text-green-600" },
+                { id: "wps", icon: CreditCard, color: "text-blue-600" }
+              ].map(({ id, icon: Icon, color }) => {
+                const integration = liveMarketingIntegrations.find((item) => item.id === id);
+
+                if (!integration) {
+                  return null;
+                }
+
+                return (
                 <div
-                  key={name}
+                  key={integration.id}
                   className="text-foreground/70 hover:text-foreground flex items-center gap-1.5 text-sm font-medium transition-colors">
                   <Icon className={`h-3.5 w-3.5 ${color}`} />
-                  <span>{name}</span>
+                  <span>{isAr ? integration.name.ar : integration.name.en}</span>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -707,23 +636,23 @@ export default async function LandingPage({
               <path d="M10 6C5.6 6 2 9.6 2 14c0 4 2.7 7.4 6.5 8.3L6 26h4l3.5-6c.3-.6.5-1.3.5-2V6H10zm14 0c-4.4 0-8 3.6-8 8 0 4 2.7 7.4 6.5 8.3L20 26h4l3.5-6c.3-.6.5-1.3.5-2V6h-4z" />
             </svg>
             <blockquote className="text-xl leading-relaxed font-light text-white/90 italic sm:text-2xl">
-              {isAr ? testimonials[0].quoteAr : testimonials[0].quoteEn}
+              {isAr ? testimonials[0].quote.ar : testimonials[0].quote.en}
             </blockquote>
             <div className="mt-9 flex items-center justify-center gap-4">
               <Image
-                alt={isAr ? testimonials[0].nameAr : testimonials[0].nameEn}
+                alt={isAr ? testimonials[0].name.ar : testimonials[0].name.en}
                 className="rounded-full object-cover ring-2 ring-indigo-500/50"
                 height={52}
-                src={testimonials[0].avatar}
+                src={testimonials[0].avatarSrc}
                 unoptimized
                 width={52}
               />
               <div className="text-start">
                 <p className="font-semibold text-white">
-                  {isAr ? testimonials[0].nameAr : testimonials[0].nameEn}
+                  {isAr ? testimonials[0].name.ar : testimonials[0].name.en}
                 </p>
                 <p className="text-sm text-white/60">
-                  {isAr ? testimonials[0].roleAr : testimonials[0].roleEn}
+                  {isAr ? testimonials[0].role.ar : testimonials[0].role.en}
                 </p>
                 <div className="mt-1.5 flex gap-0.5">
                   {[1, 2, 3, 4, 5].map((s) => (
@@ -738,13 +667,13 @@ export default async function LandingPage({
           <div className="grid gap-5 border-t border-white/10 pt-12 sm:grid-cols-2">
             {testimonials.slice(1).map((t) => (
               <div
-                key={t.nameEn}
+                key={t.id}
                 className="group flex gap-5 rounded-[2.5rem] border border-white/5 bg-white/[0.02] p-8 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:border-white/15 hover:bg-white/[0.06] hover:shadow-[0_24px_40px_-15px_rgba(0,0,0,0.5)]">
                 <Image
-                  alt={isAr ? t.nameAr : t.nameEn}
+                  alt={isAr ? t.name.ar : t.name.en}
                   className="h-12 w-12 shrink-0 rounded-full object-cover ring-2 ring-white/15"
                   height={48}
-                  src={t.avatar}
+                  src={t.avatarSrc}
                   unoptimized
                   width={48}
                 />
@@ -757,12 +686,12 @@ export default async function LandingPage({
                     <path d="M10 6C5.6 6 2 9.6 2 14c0 4 2.7 7.4 6.5 8.3L6 26h4l3.5-6c.3-.6.5-1.3.5-2V6H10zm14 0c-4.4 0-8 3.6-8 8 0 4 2.7 7.4 6.5 8.3L20 26h4l3.5-6c.3-.6.5-1.3.5-2V6h-4z" />
                   </svg>
                   <p className="text-sm leading-relaxed text-white/80">
-                    {isAr ? t.quoteAr : t.quoteEn}
+                    {isAr ? t.quote.ar : t.quote.en}
                   </p>
                   <p className="mt-3 text-sm font-semibold text-white">
-                    {isAr ? t.nameAr : t.nameEn}
+                    {isAr ? t.name.ar : t.name.en}
                   </p>
-                  <p className="text-xs text-white/60">{isAr ? t.roleAr : t.roleEn}</p>
+                  <p className="text-xs text-white/60">{isAr ? t.role.ar : t.role.en}</p>
                 </div>
               </div>
             ))}
@@ -770,31 +699,7 @@ export default async function LandingPage({
 
           {/* Proof strip */}
           <div className="mt-16 grid gap-4 border-t border-white/10 pt-12 sm:grid-cols-3">
-            {[
-              {
-                icon: Layers,
-                titleAr: "تشغيل موحد",
-                titleEn: "Unified operations",
-                descAr: "الموظفون والحضور والرواتب في نفس المسار بدل التنقل بين أدوات منفصلة.",
-                descEn:
-                  "Employees, attendance, and payroll stay in one flow instead of separate tools."
-              },
-              {
-                icon: Globe,
-                titleAr: "واجهة عربية أصلية",
-                titleEn: "Arabic-first experience",
-                descAr: "تجربة RTL كاملة مع نسخة إنجليزية جاهزة للإدارة والموظفين.",
-                descEn: "Full RTL experience with an English-ready flow for admins and employees."
-              },
-              {
-                icon: Zap,
-                titleAr: "اعتماد أسرع داخل الفريق",
-                titleEn: "Faster team adoption",
-                descAr: "نفس المنصة تغطي الإدارة المكتبية والجوال اليومي بدون تعقيد بصري زائد.",
-                descEn:
-                  "The same product covers desktop admin work and daily mobile use without visual clutter."
-              }
-            ].map((item) => {
+            {homeProofStripItems.map((item) => {
               const ItemIcon = item.icon;
               return (
                 <div
@@ -833,9 +738,9 @@ export default async function LandingPage({
             </p>
           </div>
           <div className="relative grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {plans.map((plan) => (
+            {homepagePlans.map((plan) => (
               <div
-                key={plan.name}
+                key={plan.slug}
                 className={`group border-border/40 bg-card/60 hover:border-border/80 relative flex flex-col overflow-hidden rounded-[2.5rem] border shadow-[0_8px_30px_rgb(0,0,0,0.04)] backdrop-blur-md transition-all duration-500 hover:-translate-y-1 hover:shadow-xl ${
                   plan.popular ? "border-primary/40 ring-primary/20 shadow-lg ring-2" : ""
                 }`}>
@@ -848,19 +753,19 @@ export default async function LandingPage({
                   <div className="mb-5">
                     <h3 className="text-xl font-bold">{isAr ? plan.nameAr : plan.name}</h3>
                     <p className="text-muted-foreground mt-1 text-sm">
-                      {isAr ? plan.nameAr : plan.name}
+                      {isAr ? plan.name : plan.nameAr}
                     </p>
                     <div className="mt-4 flex items-end gap-1">
-                      {plan.price !== "تواصل معنا" ? (
+                      {plan.priceText !== (isAr ? "تواصل معنا" : "Contact us") ? (
                         <>
-                          <span className="text-4xl font-extrabold">{plan.price}</span>
+                          <span className="text-4xl font-extrabold">{plan.priceText}</span>
                           <span className="text-muted-foreground mb-1">
                             {isAr ? " ريال/شهر" : " SAR/mo"}
                           </span>
                         </>
                       ) : (
                         <span className="text-2xl font-bold">
-                          {isAr ? plan.price : plan.priceEn}
+                          {isAr ? plan.priceText : plan.priceEn}
                         </span>
                       )}
                     </div>
@@ -878,7 +783,7 @@ export default async function LandingPage({
                     ))}
                   </ul>
 
-                  <Link href={homeCtaHref}>
+                  <Link href={`${p}/request-demo?plan=${plan.slug}`}>
                     <Button
                       className="w-full"
                       variant={plan.popular ? "brand" : "brandOutline"}
@@ -907,36 +812,60 @@ export default async function LandingPage({
         <FadeIn direction="up" className="container mx-auto max-w-6xl px-4">
           <div className="mx-auto mb-8 max-w-2xl text-center">
             <h3 className="text-xl font-bold">
-              {isAr ? "يتكامل مع الأنظمة التي تعرفها" : "Integrates with the systems you know"}
+              {isAr
+                ? "تكاملات موثقة اليوم واتصالات مخصصة للمؤسسات"
+                : "Verified integrations today, custom enterprise connections on request"}
             </h3>
             <p className="text-muted-foreground mt-2 text-sm">
               {isAr
-                ? "طاقم يربط مباشرةً مع الجهات الحكومية السعودية وأنظمة المحاسبة"
-                : "Taqam connects directly with Saudi government entities and accounting systems"}
+                ? "نُظهر هنا ما هو جاهز فعلياً الآن، ونفصل بوضوح ما يحتاج تهيئة مخصصة ضمن مشاريع المؤسسات."
+                : "This section separates what is truly live today from integrations that are delivered as custom enterprise work."}
             </p>
           </div>
-          <div className="mx-auto grid max-w-5xl grid-cols-2 gap-3 sm:grid-cols-3 lg:gap-3.5 xl:grid-cols-6">
-            {integrations.map((item) => (
+          <div className="mx-auto grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-3.5 xl:grid-cols-3">
+            {marketingIntegrations.map((item) => (
               <div
                 key={item.id}
-                className="group border-border/45 bg-card/78 flex flex-col rounded-[1.85rem] border p-2 shadow-[0_10px_28px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:border-sky-200/80 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] sm:p-2.5">
+                className={`group border-border/45 bg-card/78 flex flex-col rounded-[1.85rem] border p-2 shadow-[0_10px_28px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(15,23,42,0.08)] sm:p-2.5 ${
+                  item.availability === "live"
+                    ? "hover:border-sky-200/80"
+                    : "border-amber-200/60 hover:border-amber-300/80"
+                }`}>
                 <div className="bg-background/85 mx-auto w-full rounded-[1.45rem] p-2">
                   <div
                     className={`relative aspect-[1.08/1] w-full overflow-hidden rounded-[1.15rem] border border-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${item.frameClassName}`}>
                     <Image
-                      src={item.src}
-                      alt={item.name}
+                      src={item.logoSrc}
+                      alt={isAr ? item.name.ar : item.name.en}
                       fill
-                      sizes="(max-width: 640px) 42vw, (max-width: 1280px) 26vw, 12vw"
+                      sizes="(max-width: 640px) 80vw, (max-width: 1280px) 40vw, 20vw"
                       unoptimized
                       className={`scale-[0.84] rounded-[0.95rem] transition-transform duration-300 group-hover:scale-[0.88] ${item.imageClassName}`}
                     />
                   </div>
                 </div>
                 <div className="mt-2 text-center">
-                  <p className="text-[13px] font-semibold tracking-tight sm:text-sm">{item.name}</p>
+                  <div className="flex items-center justify-center gap-2">
+                    <p className="text-[13px] font-semibold tracking-tight sm:text-sm">
+                      {isAr ? item.name.ar : item.name.en}
+                    </p>
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+                        item.availability === "live"
+                          ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                          : "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                      }`}>
+                      {item.availability === "live"
+                        ? isAr
+                          ? "Live"
+                          : "Live"
+                        : isAr
+                          ? "مخصص"
+                          : "Custom"}
+                    </span>
+                  </div>
                   <p className="text-muted-foreground mt-1 text-[10px] leading-4.5 sm:text-[11px]">
-                    {isAr ? item.descAr : item.descEn}
+                    {isAr ? item.description.ar : item.description.en}
                   </p>
                 </div>
               </div>

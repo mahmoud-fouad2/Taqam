@@ -279,18 +279,18 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>{isAr ? "حول بوابة الشركة" : "About the company portal"}</CardTitle>
+                <CardTitle>{isAr ? "عن الشركة والتقديم" : "About the company and application"}</CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-4 text-sm leading-7">
                 <p>
                   {isAr
-                    ? `يمكنك أيضًا تصفح كل الوظائف الأخرى الخاصة بـ ${companyName} من بوابتهم المخصصة.`
-                    : `You can also browse all other roles published by ${companyName} from their dedicated portal.`}
+                    ? `يمكنك أيضًا تصفح بقية الوظائف المفتوحة لدى ${companyName} من صفحة الوظائف الخاصة بهم.`
+                    : `You can also browse the rest of ${companyName}'s open roles from its jobs page.`}
                 </p>
                 <div className="flex flex-col gap-3">
                   <Button asChild variant="outline">
                     <Link href={buildTenantPath(job.tenantSlug, "/careers", locale)}>
-                      {isAr ? "وظائف هذه الشركة" : "This company's careers"}
+                      {isAr ? "كل وظائف هذه الشركة" : "More jobs at this company"}
                     </Link>
                   </Button>
                   <Button asChild variant="ghost">

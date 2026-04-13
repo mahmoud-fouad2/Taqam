@@ -131,4 +131,13 @@ describe("tenant public URL helpers", () => {
 
     expect(buildTenantUrl("demo", "/dashboard")).toBe("https://demo.taqam.net/dashboard");
   });
+
+  it("does not duplicate the tenant slug when the current host is already on the tenant subdomain", () => {
+    process.env.NEXT_PUBLIC_APP_URL = "https://taqam.net";
+    process.env.TAQAM_TENANT_URL_MODE = "subdomain";
+
+    expect(buildTenantUrl("demo", "/dashboard", "demo.taqam.net")).toBe(
+      "https://demo.taqam.net/dashboard"
+    );
+  });
 });

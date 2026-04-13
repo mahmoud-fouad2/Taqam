@@ -59,6 +59,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
       payslip.periodNameAr || payslip.periodName || payslip.periodStartDate || "فترة غير محددة";
     const html = buildPayslipHtmlDocument({
       title,
+      logoUrl: new URL("/logo-light.png", request.url).toString(),
       employeeName: payslip.employeeNameAr,
       employeeNumber: payslip.employeeNumber,
       department: payslip.departmentAr,

@@ -104,6 +104,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [readIds, setReadIds] = useState<Set<string>>(() => new Set());
+  const [sseUnreadCount, setSseUnreadCount] = useState<number | null>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -121,12 +122,36 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
 
     void load();
 
-    // Poll every 30 seconds for new notifications
+    // Poll every 30 seconds for full list refresh
     const interval = setInterval(() => void load(), 30_000);
+
+    // SSE stream for real-time unread count updates
+    let es: EventSource | null = null;
+    const connectSSE = () => {
+      if (!isMounted) return;
+      es = new EventSource("/api/notifications/stream");
+      es.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "unread_count" && isMounted) {
+            setSseUnreadCount(data.count);
+          }
+        } catch {
+          // ignore parse errors
+        }
+      };
+      es.onerror = () => {
+        es?.close();
+        // Reconnect after 10 s if still mounted
+        setTimeout(() => { if (isMounted) connectSSE(); }, 10_000);
+      };
+    };
+    connectSSE();
 
     return () => {
       isMounted = false;
       clearInterval(interval);
+      es?.close();
     };
   }, []);
 
@@ -152,12 +177,17 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
       isRead: n.isRead || readIds.has(n.id)
     }));
 
-    const unreadCount = withRead.filter((n: Notification) => !n.isRead).length;
+    // Prefer SSE real-time count when available, minus optimistic reads
+    const optimisticReads = withRead.filter((n) => readIds.has(n.id) && !n.isRead).length;
+    const unreadCount =
+      sseUnreadCount !== null
+        ? Math.max(0, sseUnreadCount - optimisticReads)
+        : withRead.filter((n: Notification) => !n.isRead).length;
     const latest = [...withRead]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5);
     return { unreadCount, latest };
-  }, [notifications, readIds]);
+  }, [notifications, readIds, sseUnreadCount]);
 
   const toggleLocale = () => {
     const next = locale === "ar" ? "en" : "ar";

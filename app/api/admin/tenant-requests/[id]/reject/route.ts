@@ -4,6 +4,13 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 
+function mapPlan(plan: string) {
+  if (plan === "ENTERPRISE") return "enterprise" as const;
+  if (plan === "PROFESSIONAL") return "business" as const;
+  if (plan === "BASIC") return "starter" as const;
+  return "trial" as const;
+}
+
 function mapRequest(r: any) {
   return {
     id: r.id,
@@ -13,8 +20,11 @@ function mapRequest(r: any) {
     contactEmail: r.contactEmail,
     contactPhone: r.contactPhone,
     employeesCount: r.employeeCount,
+    plan: mapPlan(r.plan),
     status: r.status === "PENDING" ? "pending" : r.status === "APPROVED" ? "approved" : "rejected",
     createdAt: r.createdAt,
+    reviewedAt: r.processedAt,
+    tenantId: r.tenantId,
     message: r.message
   };
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
+import { platformSiteContentSchema } from "@/lib/marketing/site-content-schema";
 import { getPlatformSiteContent, savePlatformSiteContent } from "@/lib/marketing/site-content";
 
 export async function GET() {
@@ -23,7 +24,19 @@ export async function PUT(request: NextRequest) {
   }
 
   const body = await request.json();
-  const data = await savePlatformSiteContent(body);
+  const parsed = platformSiteContentSchema.safeParse(body);
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      {
+        error: "Invalid site content payload",
+        issues: parsed.error.flatten()
+      },
+      { status: 400 }
+    );
+  }
+
+  const data = await savePlatformSiteContent(parsed.data);
 
   return NextResponse.json({ data });
 }

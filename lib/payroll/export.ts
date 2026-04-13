@@ -34,6 +34,7 @@ export function escapeHtml(value: string | number | null | undefined): string {
 
 export function buildPayslipHtmlDocument(input: {
   title: string;
+  logoUrl?: string;
   employeeName: string;
   employeeNumber: string;
   department: string;
@@ -46,8 +47,16 @@ export function buildPayslipHtmlDocument(input: {
   totalDeductions: string;
   netSalary: string;
 }) {
-  const { title, employeeName, employeeNumber, department, jobTitle, periodLabel, paymentDate } =
-    input;
+  const {
+    title,
+    logoUrl,
+    employeeName,
+    employeeNumber,
+    department,
+    jobTitle,
+    periodLabel,
+    paymentDate
+  } = input;
 
   return `<!DOCTYPE html>
 <html lang="ar" dir="rtl">
@@ -59,6 +68,9 @@ export function buildPayslipHtmlDocument(input: {
       body { font-family: "Segoe UI", Tahoma, sans-serif; background: #f5f5f5; color: #111827; margin: 0; padding: 24px; }
       .sheet { max-width: 860px; margin: 0 auto; background: #ffffff; border: 1px solid #e5e7eb; border-radius: 16px; padding: 32px; }
       .header { border-bottom: 2px solid #111827; padding-bottom: 20px; margin-bottom: 24px; }
+      .brand { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 16px; }
+      .brand-copy { color: #0f172a; font-size: 12px; font-weight: 700; letter-spacing: 0.16em; }
+      .brand-logo { height: 46px; width: auto; object-fit: contain; }
       .header h1 { margin: 0 0 8px; font-size: 28px; }
       .muted { color: #6b7280; }
       .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-bottom: 24px; }
@@ -80,6 +92,10 @@ export function buildPayslipHtmlDocument(input: {
   <body>
     <main class="sheet">
       <section class="header">
+        <div class="brand">
+          <div class="brand-copy">TAQAM</div>
+          ${logoUrl ? `<img class="brand-logo" src="${escapeHtml(logoUrl)}" alt="Taqam logo" />` : ""}
+        </div>
         <h1>${escapeHtml(title)}</h1>
         <div class="muted">${escapeHtml(periodLabel)}${paymentDate ? ` • تاريخ الصرف: ${escapeHtml(paymentDate)}` : ""}</div>
       </section>

@@ -14,6 +14,7 @@ const requestSchema = z.object({
   contactEmail: z.string().email(),
   contactPhone: z.string().optional().or(z.literal("")),
   employeesCount: z.string().min(1),
+  plan: z.enum(["trial", "starter", "business", "enterprise"]).optional(),
   message: z.string().max(2000).optional().or(z.literal("")),
   locale: z.enum(["ar", "en"]).optional()
 });
@@ -29,6 +30,13 @@ function getCaptchaErrorMessage(locale: "ar" | "en") {
     ar: "رمز التحقق غير صحيح أو انتهت صلاحيته. حدّثه وحاول مرة أخرى.",
     en: "The captcha is invalid or has expired. Refresh it and try again."
   }[locale];
+}
+
+function normalizeRequestedPlan(plan: "trial" | "starter" | "business" | "enterprise" | undefined) {
+  if (plan === "enterprise") return "ENTERPRISE" as const;
+  if (plan === "business") return "PROFESSIONAL" as const;
+  if (plan === "starter") return "BASIC" as const;
+  return "TRIAL" as const;
 }
 
 export async function POST(req: NextRequest) {
@@ -96,13 +104,14 @@ export async function POST(req: NextRequest) {
 
     await prisma.tenantRequest.create({
       data: {
-        companyName: input.companyName,
-        companyNameAr: input.companyNameAr || null,
+        companyName: input.companyName.trim(),
+        companyNameAr: input.companyNameAr?.trim() || null,
         employeeCount: input.employeesCount,
-        contactName: input.contactName,
-        contactEmail: input.contactEmail,
-        contactPhone: input.contactPhone || null,
-        message: input.message || null
+        contactName: input.contactName.trim(),
+        contactEmail: input.contactEmail.trim().toLowerCase(),
+        contactPhone: input.contactPhone?.trim() || null,
+        plan: normalizeRequestedPlan(input.plan),
+        message: input.message?.trim() || null
       }
     });
 

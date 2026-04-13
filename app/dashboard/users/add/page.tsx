@@ -128,7 +128,9 @@ export default function AddUserPage() {
             <div>
               <CardTitle>{isRtl ? t.common.details : "User Details"}</CardTitle>
               <CardDescription>
-                {isRtl ? "المعلومات الأساسية للمستخدم" : "Basic user information"}
+                {isRtl
+                  ? "المعلومات الأساسية للمستخدم. عند الحفظ سيُربط الحساب تلقائيًا بملف موظف موجود أو سيُنشأ له ملف موظف جديد داخل الشركة."
+                  : "Basic user information. Saving this form will automatically link the account to an existing employee or create a new employee record in the tenant workspace."}
               </CardDescription>
             </div>
           </div>

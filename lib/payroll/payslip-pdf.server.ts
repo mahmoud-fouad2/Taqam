@@ -23,19 +23,25 @@ const FONT_BOLD_PATH = path.join(
   "ibm-plex-sans-arabic",
   "ibm-plex-sans-arabic-arabic-600-normal.woff2"
 );
+const LOGO_PATH = path.join(process.cwd(), "public", "logo-light.png");
 const ARABIC_CHAR_REGEX = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
 
-let cachedFontBytesPromise: Promise<{ regular: Uint8Array; bold: Uint8Array }> | null = null;
+let cachedPdfAssetsPromise: Promise<{
+  regular: Uint8Array;
+  bold: Uint8Array;
+  logo: Uint8Array | null;
+}> | null = null;
 
-function loadPdfFontBytes() {
-  if (!cachedFontBytesPromise) {
-    cachedFontBytesPromise = Promise.all([
+function loadPdfAssets() {
+  if (!cachedPdfAssetsPromise) {
+    cachedPdfAssetsPromise = Promise.all([
       readFile(FONT_REGULAR_PATH),
-      readFile(FONT_BOLD_PATH)
-    ]).then(([regular, bold]) => ({ regular, bold }));
+      readFile(FONT_BOLD_PATH),
+      readFile(LOGO_PATH).catch(() => null)
+    ]).then(([regular, bold, logo]) => ({ regular, bold, logo }));
   }
 
-  return cachedFontBytesPromise;
+  return cachedPdfAssetsPromise;
 }
 
 function safeText(value: unknown): string {
@@ -79,13 +85,14 @@ export async function buildPayslipPdfBytes(input: { payslip: Payslip }): Promise
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
 
-  const fontBytes = await loadPdfFontBytes();
+  const pdfAssets = await loadPdfAssets();
 
   let page = pdfDoc.addPage(PageSizes.A4);
   let { width, height } = page.getSize();
 
-  const font = await pdfDoc.embedFont(fontBytes.regular);
-  const fontBold = await pdfDoc.embedFont(fontBytes.bold);
+  const font = await pdfDoc.embedFont(pdfAssets.regular);
+  const fontBold = await pdfDoc.embedFont(pdfAssets.bold);
+  const logoImage = pdfAssets.logo ? await pdfDoc.embedPng(pdfAssets.logo) : null;
 
   const marginX = 50;
   const marginY = 56;
@@ -210,6 +217,21 @@ export async function buildPayslipPdfBytes(input: { payslip: Payslip }): Promise
   };
 
   // Header
+  if (logoImage) {
+    const logoScale = Math.min(118 / logoImage.width, 42 / logoImage.height);
+    const logoWidth = logoImage.width * logoScale;
+    const logoHeight = logoImage.height * logoScale;
+
+    page.drawImage(logoImage, {
+      x: marginX,
+      y: y - logoHeight + 6,
+      width: logoWidth,
+      height: logoHeight
+    });
+
+    y -= logoHeight + 8;
+  }
+
   drawTextLine(formatPdfText("قسيمة راتب"), { align: "right", bold: true, size: 18 });
 
   const periodLabel =
