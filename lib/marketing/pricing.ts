@@ -1,5 +1,8 @@
 
 
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import path from "node:path";
+
 export interface MarketingPricingPlan {
   slug: string;
   name: string;
@@ -31,6 +34,8 @@ export interface LocalizedMarketingText {
 
 export interface PricingMarketingContent {
   pricingPage: {
+    heroPrimaryCtaLabel: LocalizedMarketingText;
+    heroSecondaryCtaLabel: LocalizedMarketingText;
     plansSectionTitle: LocalizedMarketingText;
     plansSectionDescription: LocalizedMarketingText;
     comparisonSectionTitle: LocalizedMarketingText;
@@ -40,6 +45,8 @@ export interface PricingMarketingContent {
     customCtaDescription: LocalizedMarketingText;
     customCtaPrimaryLabel: LocalizedMarketingText;
     customCtaSecondaryLabel: LocalizedMarketingText;
+    popularBadge: LocalizedMarketingText;
+    planCardPrimaryCtaLabel: LocalizedMarketingText;
   };
   plansPage: {
     heroBadge: LocalizedMarketingText;
@@ -55,9 +62,36 @@ export interface PricingMarketingContent {
     recommendationCtaDescription: LocalizedMarketingText;
     recommendationCtaPrimaryLabel: LocalizedMarketingText;
     recommendationCtaSecondaryLabel: LocalizedMarketingText;
+    popularBadge: LocalizedMarketingText;
+    planCardPrimaryCtaLabel: LocalizedMarketingText;
+    taglines: {
+      basic: LocalizedMarketingText;
+      professional: LocalizedMarketingText;
+      enterprise: LocalizedMarketingText;
+      popular: LocalizedMarketingText;
+    };
   };
   addons: LocalizedMarketingText[];
 }
+
+export type PricingMarketingContentAdminState = {
+  draft: PricingMarketingContent;
+  published: PricingMarketingContent;
+  hasUnpublishedChanges: boolean;
+  lastDraftSavedAt: string | null;
+  lastPublishedAt: string | null;
+};
+
+const publishedPricingMarketingContentFilePath = path.join(
+  process.cwd(),
+  "data",
+  "pricing-marketing-content.json"
+);
+const draftPricingMarketingContentFilePath = path.join(
+  process.cwd(),
+  "data",
+  "pricing-marketing-content.draft.json"
+);
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -73,6 +107,39 @@ function normalizePlanType(value: unknown): MarketingPricingPlan["planType"] {
   }
 
   return "BASIC";
+}
+
+function normalizeLocalizedMarketingText(
+  value: unknown,
+  fallback: LocalizedMarketingText
+): LocalizedMarketingText {
+  if (!value || typeof value !== "object") {
+    return fallback;
+  }
+
+  const source = value as Partial<LocalizedMarketingText>;
+
+  return {
+    ar: typeof source.ar === "string" && source.ar.trim() ? source.ar : fallback.ar,
+    en: typeof source.en === "string" && source.en.trim() ? source.en : fallback.en
+  };
+}
+
+function normalizeLocalizedMarketingList(
+  value: unknown,
+  fallback: LocalizedMarketingText[]
+): LocalizedMarketingText[] {
+  if (!Array.isArray(value)) {
+    return fallback;
+  }
+
+  const normalized = value
+    .map((entry, index) =>
+      normalizeLocalizedMarketingText(entry, fallback[index] ?? fallback[fallback.length - 1])
+    )
+    .filter((entry) => entry.ar.trim().length > 0 && entry.en.trim().length > 0);
+
+  return normalized.length > 0 ? normalized : fallback;
 }
 
 function normalizePricingPlan(plan: any): MarketingPricingPlan {
@@ -276,6 +343,14 @@ export const fallbackComparison: MarketingPricingComparisonRow[] = [
 
 export const pricingMarketingContent: PricingMarketingContent = {
   pricingPage: {
+    heroPrimaryCtaLabel: {
+      ar: "احجز عرضًا تجريبيًا",
+      en: "Book a demo"
+    },
+    heroSecondaryCtaLabel: {
+      ar: "تفاصيل الباقات",
+      en: "Plan details"
+    },
     plansSectionTitle: {
       ar: "الباقات المتاحة",
       en: "Available plans"
@@ -311,6 +386,14 @@ export const pricingMarketingContent: PricingMarketingContent = {
     customCtaSecondaryLabel: {
       ar: "راجع تفاصيل الباقات",
       en: "Review plan details"
+    },
+    popularBadge: {
+      ar: "الأكثر طلبًا",
+      en: "Most popular"
+    },
+    planCardPrimaryCtaLabel: {
+      ar: "طلب اشتراك",
+      en: "Request subscription"
     }
   },
   plansPage: {
@@ -365,6 +448,32 @@ export const pricingMarketingContent: PricingMarketingContent = {
     recommendationCtaSecondaryLabel: {
       ar: "استعرض المميزات",
       en: "Explore features"
+    },
+    popularBadge: {
+      ar: "الأكثر طلبًا",
+      en: "Most popular"
+    },
+    planCardPrimaryCtaLabel: {
+      ar: "ناقش هذه الباقة",
+      en: "Discuss this plan"
+    },
+    taglines: {
+      basic: {
+        ar: "للإطلاق السريع وتشغيل الموارد البشرية الأساسية",
+        en: "For fast launch and essential HR operations"
+      },
+      professional: {
+        ar: "للشركات التي تحتاج HR + Payroll بشكل منظم",
+        en: "For teams that need structured HR plus payroll"
+      },
+      enterprise: {
+        ar: "للتشغيل المتقدم والتكاملات الخاصة",
+        en: "For advanced operations and managed integrations"
+      },
+      popular: {
+        ar: "الأكثر طلباً للشركات النامية",
+        en: "Most popular for growing companies"
+      }
     }
   },
   addons: [
@@ -387,38 +496,249 @@ export const pricingMarketingContent: PricingMarketingContent = {
   ]
 };
 
-export function getPricingMarketingContent(): PricingMarketingContent {
-  return pricingMarketingContent;
+function normalizePricingMarketingContent(value: unknown): PricingMarketingContent {
+  if (!value || typeof value !== "object") {
+    return pricingMarketingContent;
+  }
+
+  const source = value as Partial<PricingMarketingContent>;
+  const pricingPageSource = source.pricingPage as Partial<PricingMarketingContent["pricingPage"]> | undefined;
+  const plansPageSource = source.plansPage as Partial<PricingMarketingContent["plansPage"]> | undefined;
+  const fallback = pricingMarketingContent;
+
+  return {
+    pricingPage: {
+      heroPrimaryCtaLabel: normalizeLocalizedMarketingText(
+        pricingPageSource?.heroPrimaryCtaLabel,
+        fallback.pricingPage.heroPrimaryCtaLabel
+      ),
+      heroSecondaryCtaLabel: normalizeLocalizedMarketingText(
+        pricingPageSource?.heroSecondaryCtaLabel,
+        fallback.pricingPage.heroSecondaryCtaLabel
+      ),
+      plansSectionTitle: normalizeLocalizedMarketingText(
+        pricingPageSource?.plansSectionTitle,
+        fallback.pricingPage.plansSectionTitle
+      ),
+      plansSectionDescription: normalizeLocalizedMarketingText(
+        pricingPageSource?.plansSectionDescription,
+        fallback.pricingPage.plansSectionDescription
+      ),
+      comparisonSectionTitle: normalizeLocalizedMarketingText(
+        pricingPageSource?.comparisonSectionTitle,
+        fallback.pricingPage.comparisonSectionTitle
+      ),
+      comparisonSectionDescription: normalizeLocalizedMarketingText(
+        pricingPageSource?.comparisonSectionDescription,
+        fallback.pricingPage.comparisonSectionDescription
+      ),
+      comparisonFootnote: normalizeLocalizedMarketingText(
+        pricingPageSource?.comparisonFootnote,
+        fallback.pricingPage.comparisonFootnote
+      ),
+      customCtaTitle: normalizeLocalizedMarketingText(
+        pricingPageSource?.customCtaTitle,
+        fallback.pricingPage.customCtaTitle
+      ),
+      customCtaDescription: normalizeLocalizedMarketingText(
+        pricingPageSource?.customCtaDescription,
+        fallback.pricingPage.customCtaDescription
+      ),
+      customCtaPrimaryLabel: normalizeLocalizedMarketingText(
+        pricingPageSource?.customCtaPrimaryLabel,
+        fallback.pricingPage.customCtaPrimaryLabel
+      ),
+      customCtaSecondaryLabel: normalizeLocalizedMarketingText(
+        pricingPageSource?.customCtaSecondaryLabel,
+        fallback.pricingPage.customCtaSecondaryLabel
+      ),
+      popularBadge: normalizeLocalizedMarketingText(
+        pricingPageSource?.popularBadge,
+        fallback.pricingPage.popularBadge
+      ),
+      planCardPrimaryCtaLabel: normalizeLocalizedMarketingText(
+        pricingPageSource?.planCardPrimaryCtaLabel,
+        fallback.pricingPage.planCardPrimaryCtaLabel
+      )
+    },
+    plansPage: {
+      heroBadge: normalizeLocalizedMarketingText(plansPageSource?.heroBadge, fallback.plansPage.heroBadge),
+      heroTitle: normalizeLocalizedMarketingText(plansPageSource?.heroTitle, fallback.plansPage.heroTitle),
+      heroDescription: normalizeLocalizedMarketingText(
+        plansPageSource?.heroDescription,
+        fallback.plansPage.heroDescription
+      ),
+      heroPrimaryCtaLabel: normalizeLocalizedMarketingText(
+        plansPageSource?.heroPrimaryCtaLabel,
+        fallback.plansPage.heroPrimaryCtaLabel
+      ),
+      heroSecondaryCtaLabel: normalizeLocalizedMarketingText(
+        plansPageSource?.heroSecondaryCtaLabel,
+        fallback.plansPage.heroSecondaryCtaLabel
+      ),
+      breakdownSectionTitle: normalizeLocalizedMarketingText(
+        plansPageSource?.breakdownSectionTitle,
+        fallback.plansPage.breakdownSectionTitle
+      ),
+      breakdownSectionDescription: normalizeLocalizedMarketingText(
+        plansPageSource?.breakdownSectionDescription,
+        fallback.plansPage.breakdownSectionDescription
+      ),
+      addonsSectionTitle: normalizeLocalizedMarketingText(
+        plansPageSource?.addonsSectionTitle,
+        fallback.plansPage.addonsSectionTitle
+      ),
+      addonsSectionDescription: normalizeLocalizedMarketingText(
+        plansPageSource?.addonsSectionDescription,
+        fallback.plansPage.addonsSectionDescription
+      ),
+      recommendationCtaTitle: normalizeLocalizedMarketingText(
+        plansPageSource?.recommendationCtaTitle,
+        fallback.plansPage.recommendationCtaTitle
+      ),
+      recommendationCtaDescription: normalizeLocalizedMarketingText(
+        plansPageSource?.recommendationCtaDescription,
+        fallback.plansPage.recommendationCtaDescription
+      ),
+      recommendationCtaPrimaryLabel: normalizeLocalizedMarketingText(
+        plansPageSource?.recommendationCtaPrimaryLabel,
+        fallback.plansPage.recommendationCtaPrimaryLabel
+      ),
+      recommendationCtaSecondaryLabel: normalizeLocalizedMarketingText(
+        plansPageSource?.recommendationCtaSecondaryLabel,
+        fallback.plansPage.recommendationCtaSecondaryLabel
+      ),
+      popularBadge: normalizeLocalizedMarketingText(
+        plansPageSource?.popularBadge,
+        fallback.plansPage.popularBadge
+      ),
+      planCardPrimaryCtaLabel: normalizeLocalizedMarketingText(
+        plansPageSource?.planCardPrimaryCtaLabel,
+        fallback.plansPage.planCardPrimaryCtaLabel
+      ),
+      taglines: {
+        basic: normalizeLocalizedMarketingText(
+          plansPageSource?.taglines?.basic,
+          fallback.plansPage.taglines.basic
+        ),
+        professional: normalizeLocalizedMarketingText(
+          plansPageSource?.taglines?.professional,
+          fallback.plansPage.taglines.professional
+        ),
+        enterprise: normalizeLocalizedMarketingText(
+          plansPageSource?.taglines?.enterprise,
+          fallback.plansPage.taglines.enterprise
+        ),
+        popular: normalizeLocalizedMarketingText(
+          plansPageSource?.taglines?.popular,
+          fallback.plansPage.taglines.popular
+        )
+      }
+    },
+    addons: normalizeLocalizedMarketingList(source.addons, fallback.addons)
+  };
+}
+
+async function readPricingMarketingContentFile(filePath: string): Promise<PricingMarketingContent | null> {
+  try {
+    const raw = await readFile(filePath, "utf8");
+    return normalizePricingMarketingContent(JSON.parse(raw));
+  } catch {
+    return null;
+  }
+}
+
+async function readPricingMarketingTimestamp(filePath: string): Promise<string | null> {
+  try {
+    const result = await stat(filePath);
+    return result.mtime.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+export async function getPricingMarketingContent(
+  version: "draft" | "published" = "published"
+): Promise<PricingMarketingContent> {
+  const published =
+    (await readPricingMarketingContentFile(publishedPricingMarketingContentFilePath)) ??
+    pricingMarketingContent;
+
+  if (version === "draft") {
+    return (await readPricingMarketingContentFile(draftPricingMarketingContentFilePath)) ?? published;
+  }
+
+  return published;
+}
+
+export async function getPricingMarketingContentAdminState(): Promise<PricingMarketingContentAdminState> {
+  const [draft, published, lastDraftSavedAt, lastPublishedAt] = await Promise.all([
+    getPricingMarketingContent("draft"),
+    getPricingMarketingContent("published"),
+    readPricingMarketingTimestamp(draftPricingMarketingContentFilePath),
+    readPricingMarketingTimestamp(publishedPricingMarketingContentFilePath)
+  ]);
+
+  return {
+    draft,
+    published,
+    hasUnpublishedChanges: JSON.stringify(draft) !== JSON.stringify(published),
+    lastDraftSavedAt,
+    lastPublishedAt
+  };
+}
+
+export async function savePricingMarketingContentDraft(
+  content: PricingMarketingContent
+): Promise<PricingMarketingContent> {
+  const normalized = normalizePricingMarketingContent(content);
+  await mkdir(path.dirname(draftPricingMarketingContentFilePath), { recursive: true });
+  await writeFile(
+    draftPricingMarketingContentFilePath,
+    `${JSON.stringify(normalized, null, 2)}\n`,
+    "utf8"
+  );
+
+  return normalized;
+}
+
+export async function publishPricingMarketingContent(): Promise<PricingMarketingContent> {
+  const draft = await getPricingMarketingContent("draft");
+  await mkdir(path.dirname(publishedPricingMarketingContentFilePath), { recursive: true });
+  await writeFile(
+    publishedPricingMarketingContentFilePath,
+    `${JSON.stringify(draft, null, 2)}\n`,
+    "utf8"
+  );
+
+  return draft;
+}
+
+export async function savePricingMarketingContent(
+  content: PricingMarketingContent
+): Promise<PricingMarketingContent> {
+  return savePricingMarketingContentDraft(content);
 }
 
 export function getPricingPlanTagline(
-  plan: Pick<MarketingPricingPlan, "isPopular" | "planType">
+  plan: Pick<MarketingPricingPlan, "isPopular" | "planType">,
+  content?: PricingMarketingContent
 ): LocalizedMarketingText {
+  const taglines = content?.plansPage.taglines ?? pricingMarketingContent.plansPage.taglines;
+
   if (plan.isPopular) {
-    return {
-      ar: "الأكثر طلباً للشركات النامية",
-      en: "Most popular for growing companies"
-    };
+    return taglines.popular;
   }
 
   if (plan.planType === "ENTERPRISE") {
-    return {
-      ar: "للتشغيل المتقدم والتكاملات الخاصة",
-      en: "For advanced operations and managed integrations"
-    };
+    return taglines.enterprise;
   }
 
   if (plan.planType === "PROFESSIONAL") {
-    return {
-      ar: "للشركات التي تحتاج HR + Payroll بشكل منظم",
-      en: "For teams that need structured HR plus payroll"
-    };
+    return taglines.professional;
   }
 
-  return {
-    ar: "للإطلاق السريع وتشغيل الموارد البشرية الأساسية",
-    en: "For fast launch and essential HR operations"
-  };
+  return taglines.basic;
 }
 
 export async function getPricingData() {

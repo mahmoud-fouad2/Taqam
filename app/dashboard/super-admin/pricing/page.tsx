@@ -8,14 +8,17 @@ import { redirect } from "next/navigation";
 
 import { authOptions } from "@/lib/auth";
 import { FeatureComparisonManager } from "./feature-comparison-manager";
+import { PricingMarketingManager } from "./pricing-marketing-manager";
 import { PricingPlansManager } from "./pricing-plans-manager";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
+import { getPricingMarketingContentAdminState } from "@/lib/marketing/pricing";
 
 export default async function PricingPlansPage() {
   const locale = await getAppLocale();
   const t = getText(locale);
   const session = await getServerSession(authOptions);
+  const pricingMarketingState = await getPricingMarketingContentAdminState();
 
   if (!session?.user || session.user.role !== "SUPER_ADMIN") {
     redirect("/dashboard");
@@ -35,6 +38,7 @@ export default async function PricingPlansPage() {
         </p>
       </section>
 
+      <PricingMarketingManager initialState={pricingMarketingState} locale={locale} />
       <PricingPlansManager />
       <FeatureComparisonManager />
     </div>

@@ -38,7 +38,7 @@ export default async function PricingPage() {
   const isAr = locale === "ar";
   const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
-  const pricingMarketing = getPricingMarketingContent();
+  const pricingMarketing = await getPricingMarketingContent();
 
   const { plans, comparison } = await getPricingData();
   const startingPrice = plans.reduce<number | null>((min, plan) => {
@@ -61,12 +61,16 @@ export default async function PricingPage() {
           actions={[
             {
               href: `${p}/plans`,
-              label: isAr ? "تفاصيل الباقات" : "Plan details",
+              label: isAr
+                ? pricingMarketing.pricingPage.heroSecondaryCtaLabel.ar
+                : pricingMarketing.pricingPage.heroSecondaryCtaLabel.en,
               variant: "outline"
             },
             {
               href: `${p}/request-demo`,
-              label: isAr ? "احجز عرضًا تجريبيًا" : "Book a demo",
+              label: isAr
+                ? pricingMarketing.pricingPage.heroPrimaryCtaLabel.ar
+                : pricingMarketing.pricingPage.heroPrimaryCtaLabel.en,
               variant: "brand"
             }
           ]}
@@ -120,7 +124,9 @@ export default async function PricingPage() {
                     }>
                     {plan.isPopular ? (
                       <div className="bg-primary text-primary-foreground absolute end-5 top-5 rounded-full px-3 py-1 text-xs font-semibold">
-                        {isAr ? "الأكثر طلبًا" : "Most popular"}
+                        {isAr
+                          ? pricingMarketing.pricingPage.popularBadge.ar
+                          : pricingMarketing.pricingPage.popularBadge.en}
                       </div>
                     ) : null}
                     <CardHeader className="pb-4">
@@ -160,7 +166,9 @@ export default async function PricingPage() {
                         <Button
                           className="w-full"
                           variant={plan.isPopular ? "brand" : "brandOutline"}>
-                          {isAr ? "طلب اشتراك" : "Request subscription"}
+                          {isAr
+                            ? pricingMarketing.pricingPage.planCardPrimaryCtaLabel.ar
+                            : pricingMarketing.pricingPage.planCardPrimaryCtaLabel.en}
                         </Button>
                       </Link>
                     </CardContent>

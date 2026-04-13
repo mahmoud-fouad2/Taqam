@@ -10,8 +10,8 @@ import {
   parsePagination,
   requireSession
 } from "@/lib/api/route-helper";
+import { triggerWorkflowEvent } from "@/lib/automation";
 import prisma from "@/lib/db";
-import { notifyLeaveRequestSubmitted } from "@/lib/notifications/send";
 import { z } from "zod";
 
 const createLeaveSchema = z.object({
@@ -263,17 +263,14 @@ export async function POST(request: NextRequest) {
       return created;
     });
 
-    if (leaveRequest.employee.manager?.userId) {
-      await notifyLeaveRequestSubmitted({
-        tenantId,
-        managerUserId: leaveRequest.employee.manager.userId,
-        employeeName: `${leaveRequest.employee.firstNameAr || leaveRequest.employee.firstName} ${leaveRequest.employee.lastNameAr || leaveRequest.employee.lastName}`,
-        leaveType: leaveRequest.leaveType.nameAr || leaveRequest.leaveType.name,
-        startDate: startDate.toISOString().split("T")[0] ?? "",
-        endDate: endDate.toISOString().split("T")[0] ?? "",
-        requestId: leaveRequest.id
-      });
-    }
+    await triggerWorkflowEvent(tenantId, "leave.requested", {
+      managerUserId: leaveRequest.employee.manager?.userId ?? null,
+      employeeName: `${leaveRequest.employee.firstNameAr || leaveRequest.employee.firstName} ${leaveRequest.employee.lastNameAr || leaveRequest.employee.lastName}`,
+      leaveType: leaveRequest.leaveType.nameAr || leaveRequest.leaveType.name,
+      startDate: startDate.toISOString().split("T")[0] ?? "",
+      endDate: endDate.toISOString().split("T")[0] ?? "",
+      requestId: leaveRequest.id
+    });
 
     return dataResponse(mapLeaveRequest(leaveRequest), 201);
   } catch (error) {

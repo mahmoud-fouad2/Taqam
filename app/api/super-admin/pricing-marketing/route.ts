@@ -3,21 +3,25 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { logCommercialAuditEntry } from "@/lib/marketing/commercial-audit";
-import { platformSiteContentSchema } from "@/lib/marketing/site-content-schema";
+import { pricingMarketingContentSchema } from "@/lib/marketing/pricing-marketing-schema";
 import {
-  getPlatformSiteContentAdminState,
-  getPlatformSiteContentVersion,
-  savePlatformSiteContentDraft
-} from "@/lib/marketing/site-content";
+  getPricingMarketingContent,
+  getPricingMarketingContentAdminState,
+  savePricingMarketingContentDraft
+} from "@/lib/marketing/pricing";
+
+function unauthorized() {
+  return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+}
 
 export async function GET() {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return unauthorized();
   }
 
-  const state = await getPlatformSiteContentAdminState();
+  const state = await getPricingMarketingContentAdminState();
   return NextResponse.json({
     data: state.draft,
     published: state.published,
@@ -31,31 +35,31 @@ export async function PUT(request: NextRequest) {
   const session = await getServerSession(authOptions);
 
   if (!session?.user || session.user.role !== "SUPER_ADMIN") {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return unauthorized();
   }
 
   const body = await request.json();
-  const parsed = platformSiteContentSchema.safeParse(body);
+  const parsed = pricingMarketingContentSchema.safeParse(body);
 
   if (!parsed.success) {
     return NextResponse.json(
       {
-        error: "Invalid site content payload",
+        error: "Invalid pricing marketing payload",
         issues: parsed.error.flatten()
       },
       { status: 400 }
     );
   }
 
-  const previousDraft = await getPlatformSiteContentVersion("draft");
-  const data = await savePlatformSiteContentDraft(parsed.data);
-  const state = await getPlatformSiteContentAdminState();
+  const previousDraft = await getPricingMarketingContent("draft");
+  const data = await savePricingMarketingContentDraft(parsed.data);
+  const state = await getPricingMarketingContentAdminState();
 
   await logCommercialAuditEntry({
     userId: session.user.id,
-    action: "COMMERCIAL_SITE_CONTENT_DRAFT_SAVED",
-    entity: "PlatformSiteContent",
-    entityId: "platform-site-content-draft",
+    action: "COMMERCIAL_PRICING_MARKETING_DRAFT_SAVED",
+    entity: "PricingMarketingContent",
+    entityId: "pricing-marketing-content-draft",
     oldData: previousDraft,
     newData: data
   });

@@ -33,15 +33,15 @@ export default async function PlansPage() {
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
   const { plans, comparison } = await getPricingData();
-  const pricingMarketing = getPricingMarketingContent();
+  const pricingMarketing = await getPricingMarketingContent();
   const planDetails = plans.map((plan) => ({
     slug: plan.slug,
     nameAr: plan.nameAr,
     nameEn: plan.name,
     sizeAr: plan.employeesLabel || "حسب نطاق الشركة",
     sizeEn: plan.employeesLabelEn || "Based on company scope",
-    tagAr: getPricingPlanTagline(plan).ar,
-    tagEn: getPricingPlanTagline(plan).en,
+    tagAr: getPricingPlanTagline(plan, pricingMarketing).ar,
+    tagEn: getPricingPlanTagline(plan, pricingMarketing).en,
     highlightsAr: plan.featuresAr || [],
     highlightsEn: plan.featuresEn || [],
     popular: plan.isPopular,
@@ -127,7 +127,9 @@ export default async function PlansPage() {
                     }>
                     {plan.popular ? (
                       <div className="bg-primary text-primary-foreground absolute end-5 top-5 rounded-full px-3 py-1 text-xs font-semibold">
-                        {isAr ? "الأكثر طلبًا" : "Most popular"}
+                        {isAr
+                          ? pricingMarketing.plansPage.popularBadge.ar
+                          : pricingMarketing.plansPage.popularBadge.en}
                       </div>
                     ) : null}
                     <CardHeader className="pb-4">
@@ -167,7 +169,9 @@ export default async function PlansPage() {
                           <Button
                             className="w-full"
                             variant={plan.popular ? "brand" : "brandOutline"}>
-                            {isAr ? "ناقش هذه الباقة" : "Discuss this plan"}
+                            {isAr
+                              ? pricingMarketing.plansPage.planCardPrimaryCtaLabel.ar
+                              : pricingMarketing.plansPage.planCardPrimaryCtaLabel.en}
                           </Button>
                         </Link>
                       </div>

@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { logCommercialAuditEntry } from "@/lib/marketing/commercial-audit";
 import { pricingPlanPayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 async function ensureDefaultPricingPlans() {
@@ -150,6 +151,24 @@ export async function POST(req: NextRequest) {
         isPopular: data.isPopular,
         isActive: data.isActive,
         sortOrder: data.sortOrder
+      }
+    });
+
+    await logCommercialAuditEntry({
+      userId: session.user.id,
+      action: "COMMERCIAL_PRICING_PLAN_CREATED",
+      entity: "PricingPlan",
+      entityId: plan.id,
+      newData: {
+        slug: plan.slug,
+        name: plan.name,
+        nameAr: plan.nameAr,
+        priceMonthly: plan.priceMonthly,
+        priceYearly: plan.priceYearly,
+        planType: plan.planType,
+        isPopular: plan.isPopular,
+        isActive: plan.isActive,
+        sortOrder: plan.sortOrder
       }
     });
 

@@ -53,6 +53,10 @@ export default async function SettingsLayout({ children }: { children: React.Rea
       href: `${p}/dashboard/settings/roles`
     },
     {
+      title: locale === "ar" ? "الأتمتة" : "Automation",
+      href: `${p}/dashboard/settings/automation`
+    },
+    {
       title: locale === "ar" ? "تسجيل الدخول الموحد (SSO)" : "Single Sign-On",
       href: `${p}/dashboard/settings/sso`
     },

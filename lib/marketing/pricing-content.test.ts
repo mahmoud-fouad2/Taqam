@@ -72,8 +72,8 @@ describe("marketing pricing content", () => {
     }
   });
 
-  it("provides non-empty marketing copy", () => {
-    const content = getPricingMarketingContent();
+  it("provides non-empty marketing copy", async () => {
+    const content = await getPricingMarketingContent();
     const strings: Array<{ path: string; value: string }> = [];
     deepCollectStrings(content, "", strings);
 

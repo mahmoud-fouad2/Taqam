@@ -69,6 +69,11 @@ function getNav(locale: "ar" | "en", role?: string): NavItem[] {
         icon: IconBriefcase
       },
       {
+        title: locale === "ar" ? "Feature Catalog" : "Feature catalog",
+        url: "/dashboard/super-admin/feature-catalog",
+        icon: IconListDetails
+      },
+      {
         title: locale === "ar" ? "المحتوى والسيو" : "Content and SEO",
         url: "/dashboard/super-admin/content",
         icon: IconFolder

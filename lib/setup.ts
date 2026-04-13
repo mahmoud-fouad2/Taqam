@@ -7,6 +7,7 @@
 
 import { z } from "zod";
 import prisma from "@/lib/db";
+import type { AttendanceStatus, JobPostingStatus } from "@prisma/client";
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
@@ -67,7 +68,8 @@ export const setupStep5Schema = z.object({
   leaveDaysPerYear: z.number().int().min(0).max(365).default(21),
   annualLeaveEnabled: z.boolean().default(true),
   sickLeaveEnabled: z.boolean().default(true),
-  payrollEnabled: z.boolean().default(false)
+  payrollEnabled: z.boolean().default(false),
+  seedSampleData: z.boolean().default(false)
 });
 
 // ── Stored data shape (persisted in Tenant.setupData JSON) ───────────────────
@@ -142,7 +144,7 @@ export async function saveSetupStep(
   });
 }
 
-export async function completeSetup(tenantId: string): Promise<void> {
+export async function completeSetup(tenantId: string, userId?: string): Promise<void> {
   await prisma.tenant.update({
     where: { id: tenantId },
     data: {
@@ -151,6 +153,9 @@ export async function completeSetup(tenantId: string): Promise<void> {
     }
   });
   await provisionSetupDefaults(tenantId);
+  if (userId) {
+    await seedSampleSetupData(tenantId, userId);
+  }
 }
 
 /**
@@ -210,6 +215,228 @@ export async function provisionSetupDefaults(tenantId: string): Promise<void> {
         }
       ],
       skipDuplicates: true
+    });
+  }
+}
+
+/**
+ * Optional sample data seeding for brand-new tenants.
+ * Safe to call multiple times: each domain only seeds when still empty.
+ */
+export async function seedSampleSetupData(tenantId: string, userId: string): Promise<void> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: {
+      name: true,
+      nameAr: true,
+      currency: true,
+      setupData: true
+    }
+  });
+
+  const setupData = (tenant?.setupData as SetupData | null) ?? {};
+  const step5 = setupData.step5;
+  if (!step5?.seedSampleData) return;
+
+  const [department, jobTitle] = await Promise.all([
+    prisma.department.findFirst({ where: { tenantId }, orderBy: { createdAt: "asc" } }),
+    prisma.jobTitle.findFirst({ where: { tenantId }, orderBy: { createdAt: "asc" } })
+  ]);
+
+  const existingEmployees = await prisma.employee.count({ where: { tenantId } });
+  let sampleEmployees = await prisma.employee.findMany({
+    where: { tenantId },
+    take: 3,
+    orderBy: { createdAt: "asc" },
+    select: { id: true, userId: true }
+  });
+
+  if (existingEmployees === 0) {
+    const created = await prisma.$transaction([
+      prisma.employee.create({
+        data: {
+          tenantId,
+          employeeNumber: "S-1001",
+          firstName: "Lina",
+          lastName: "Hassan",
+          firstNameAr: "لينا",
+          lastNameAr: "حسن",
+          email: `sample.manager+${tenantId}@taqam.local`,
+          hireDate: new Date(),
+          departmentId: department?.id,
+          jobTitleId: jobTitle?.id,
+          workLocation: "Riyadh HQ",
+          baseSalary: 18000,
+          currency: tenant?.currency ?? "SAR"
+        },
+        select: { id: true, userId: true }
+      }),
+      prisma.employee.create({
+        data: {
+          tenantId,
+          employeeNumber: "S-1002",
+          firstName: "Omar",
+          lastName: "Salem",
+          firstNameAr: "عمر",
+          lastNameAr: "سالم",
+          email: `sample.staff1+${tenantId}@taqam.local`,
+          hireDate: new Date(),
+          departmentId: department?.id,
+          jobTitleId: jobTitle?.id,
+          workLocation: "Riyadh HQ",
+          baseSalary: 11000,
+          currency: tenant?.currency ?? "SAR"
+        },
+        select: { id: true, userId: true }
+      }),
+      prisma.employee.create({
+        data: {
+          tenantId,
+          employeeNumber: "S-1003",
+          firstName: "Sara",
+          lastName: "Nasser",
+          firstNameAr: "سارة",
+          lastNameAr: "ناصر",
+          email: `sample.staff2+${tenantId}@taqam.local`,
+          hireDate: new Date(),
+          departmentId: department?.id,
+          jobTitleId: jobTitle?.id,
+          workLocation: "Jeddah Branch",
+          baseSalary: 12500,
+          currency: tenant?.currency ?? "SAR"
+        },
+        select: { id: true, userId: true }
+      })
+    ]);
+
+    await prisma.employee.updateMany({
+      where: { id: { in: [created[1].id, created[2].id] } },
+      data: { managerId: created[0].id }
+    });
+
+    sampleEmployees = created;
+  }
+
+  const attendanceCount = await prisma.attendanceRecord.count({ where: { tenantId } });
+  if (attendanceCount === 0 && sampleEmployees.length > 0) {
+    const today = new Date();
+    const records = sampleEmployees.flatMap((employee, employeeIndex) =>
+      Array.from({ length: 5 }, (_, dayOffset) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - dayOffset);
+        date.setHours(0, 0, 0, 0);
+
+        const checkIn = new Date(date);
+        checkIn.setHours(9, employeeIndex === 1 && dayOffset === 1 ? 18 : 2, 0, 0);
+        const checkOut = new Date(date);
+        checkOut.setHours(17, 5, 0, 0);
+
+        const status: AttendanceStatus =
+          employeeIndex === 1 && dayOffset === 1 ? "LATE" : "PRESENT";
+
+        return {
+          tenantId,
+          employeeId: employee.id,
+          date,
+          checkInTime: checkIn,
+          checkOutTime: checkOut,
+          status,
+          lateMinutes: employeeIndex === 1 && dayOffset === 1 ? 18 : 0,
+          totalWorkMinutes: 8 * 60
+        };
+      })
+    );
+
+    await prisma.attendanceRecord.createMany({
+      data: records,
+      skipDuplicates: true
+    });
+  }
+
+  const announcementCount = await prisma.announcement.count({ where: { tenantId } });
+  if (announcementCount === 0) {
+    await prisma.announcement.create({
+      data: {
+        tenantId,
+        authorId: userId,
+        title: "Welcome to Taqam",
+        titleAr: "مرحباً بكم في طاقم",
+        content: "Your workspace is ready. Review the dashboard and complete the remaining setup details.",
+        contentAr:
+          `تم تجهيز مساحة عمل ${tenant?.nameAr ?? tenant?.name ?? "الشركة"} بنجاح. راجع لوحة التحكم وابدأ بإضافة بياناتك الفعلية.`,
+        type: "INFO",
+        priority: "NORMAL",
+        targetAll: true,
+        isActive: true
+      }
+    });
+  }
+
+  const jobPostingCount = await prisma.jobPosting.count({ where: { tenantId } });
+  if (jobPostingCount === 0) {
+    const status: JobPostingStatus = "ACTIVE";
+
+    const posting = await prisma.jobPosting.create({
+      data: {
+        tenantId,
+        createdById: userId,
+        title: "HR Operations Specialist",
+        titleAr: "أخصائي عمليات موارد بشرية",
+        description: "Own day-to-day HR operations, employee records, and people reporting.",
+        requirements: "1-3 years in HR operations, HRIS familiarity, reporting skills.",
+        responsibilities: "Maintain employee data, coordinate leave processes, and support HR analytics.",
+        benefits: "Medical insurance, annual bonus, hybrid work policy.",
+        departmentId: department?.id,
+        jobTitleId: jobTitle?.id,
+        status,
+        positions: 1,
+        location: "Riyadh",
+        salaryMin: 9000,
+        salaryMax: 14000,
+        salaryCurrency: tenant?.currency ?? "SAR",
+        postedAt: new Date()
+      }
+    });
+
+    await prisma.applicant.createMany({
+      data: [
+        {
+          tenantId,
+          jobPostingId: posting.id,
+          firstName: "Noor",
+          lastName: "Ali",
+          email: `applicant.new+${tenantId}@taqam.local`,
+          phone: "+966500000001",
+          status: "NEW"
+        },
+        {
+          tenantId,
+          jobPostingId: posting.id,
+          firstName: "Maha",
+          lastName: "Khaled",
+          email: `applicant.screening+${tenantId}@taqam.local`,
+          phone: "+966500000002",
+          status: "SCREENING"
+        },
+        {
+          tenantId,
+          jobPostingId: posting.id,
+          firstName: "Yousef",
+          lastName: "Faris",
+          email: `applicant.interview+${tenantId}@taqam.local`,
+          phone: "+966500000003",
+          status: "INTERVIEW"
+        },
+        {
+          tenantId,
+          jobPostingId: posting.id,
+          firstName: "Rana",
+          lastName: "Majed",
+          email: `applicant.offer+${tenantId}@taqam.local`,
+          phone: "+966500000004",
+          status: "OFFER"
+        }
+      ]
     });
   }
 }

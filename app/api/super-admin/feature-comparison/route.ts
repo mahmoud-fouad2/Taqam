@@ -10,6 +10,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { logCommercialAuditEntry } from "@/lib/marketing/commercial-audit";
 import { comparisonFeaturePayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 async function ensureDefaultFeatureComparison() {
@@ -118,6 +119,22 @@ export async function POST(req: NextRequest) {
         inEnterprise: data.inEnterprise,
         sortOrder: data.sortOrder,
         isActive: data.isActive
+      }
+    });
+
+    await logCommercialAuditEntry({
+      userId: session.user.id,
+      action: "COMMERCIAL_COMPARISON_ROW_CREATED",
+      entity: "PlanFeatureComparison",
+      entityId: feature.id,
+      newData: {
+        featureAr: feature.featureAr,
+        featureEn: feature.featureEn,
+        inStarter: feature.inStarter,
+        inBusiness: feature.inBusiness,
+        inEnterprise: feature.inEnterprise,
+        isActive: feature.isActive,
+        sortOrder: feature.sortOrder
       }
     });
 

@@ -1,6 +1,6 @@
 # جدول تدقيق الميزات (Feature Inventory)
 
-> مولّد تلقائياً من lib/marketing/commercial-registry.ts — تاريخ التوليد: 2026-04-13
+> مولّد تلقائياً من الكاتالوج التجاري المُدار (مع fallback إلى lib/marketing/commercial-registry.ts) — تاريخ التوليد: 2026-04-13
 
 ## ملخص
 

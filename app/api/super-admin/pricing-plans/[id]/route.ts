@@ -11,6 +11,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { logCommercialAuditEntry } from "@/lib/marketing/commercial-audit";
 import { pricingPlanPayloadSchema } from "@/lib/marketing/commercial-schemas";
 
 // GET single plan
@@ -98,6 +99,35 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       }
     });
 
+    await logCommercialAuditEntry({
+      userId: session.user.id,
+      action: "COMMERCIAL_PRICING_PLAN_UPDATED",
+      entity: "PricingPlan",
+      entityId: plan.id,
+      oldData: {
+        slug: existing.slug,
+        name: existing.name,
+        nameAr: existing.nameAr,
+        priceMonthly: existing.priceMonthly,
+        priceYearly: existing.priceYearly,
+        planType: existing.planType,
+        isPopular: existing.isPopular,
+        isActive: existing.isActive,
+        sortOrder: existing.sortOrder
+      },
+      newData: {
+        slug: plan.slug,
+        name: plan.name,
+        nameAr: plan.nameAr,
+        priceMonthly: plan.priceMonthly,
+        priceYearly: plan.priceYearly,
+        planType: plan.planType,
+        isPopular: plan.isPopular,
+        isActive: plan.isActive,
+        sortOrder: plan.sortOrder
+      }
+    });
+
     return NextResponse.json({ data: plan });
   } catch (error) {
     logApiError("PUT pricing plan error", error);
@@ -115,8 +145,34 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     const { id } = await params;
 
+    const existing = await prisma.pricingPlan.findUnique({
+      where: { id }
+    });
+
+    if (!existing) {
+      return NextResponse.json({ error: "Plan not found" }, { status: 404 });
+    }
+
     await prisma.pricingPlan.delete({
       where: { id }
+    });
+
+    await logCommercialAuditEntry({
+      userId: session.user.id,
+      action: "COMMERCIAL_PRICING_PLAN_DELETED",
+      entity: "PricingPlan",
+      entityId: id,
+      oldData: {
+        slug: existing.slug,
+        name: existing.name,
+        nameAr: existing.nameAr,
+        priceMonthly: existing.priceMonthly,
+        priceYearly: existing.priceYearly,
+        planType: existing.planType,
+        isPopular: existing.isPopular,
+        isActive: existing.isActive,
+        sortOrder: existing.sortOrder
+      }
     });
 
     return NextResponse.json({ message: "Plan deleted successfully" });

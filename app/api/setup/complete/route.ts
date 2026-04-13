@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await completeSetup(auth.tenantId);
+    await completeSetup(auth.tenantId, auth.session.user.id);
 
     // Fire-and-forget audit log
     prisma.auditLog

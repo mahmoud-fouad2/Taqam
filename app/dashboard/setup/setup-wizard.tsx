@@ -129,7 +129,8 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
     leaveDaysPerYear: savedData.step5?.leaveDaysPerYear ?? 21,
     annualLeaveEnabled: savedData.step5?.annualLeaveEnabled ?? true,
     sickLeaveEnabled: savedData.step5?.sickLeaveEnabled ?? true,
-    payrollEnabled: savedData.step5?.payrollEnabled ?? false
+    payrollEnabled: savedData.step5?.payrollEnabled ?? false,
+    seedSampleData: savedData.step5?.seedSampleData ?? false
   });
 
   const completionPercent = Math.round((currentStep / totalSteps) * 100);
@@ -768,6 +769,7 @@ type Form5 = {
   annualLeaveEnabled: boolean;
   sickLeaveEnabled: boolean;
   payrollEnabled: boolean;
+  seedSampleData: boolean;
 };
 
 function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) => void }) {
@@ -826,6 +828,19 @@ function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) =>
         <Switch
           checked={form.payrollEnabled}
           onCheckedChange={(v) => onChange({ ...form, payrollEnabled: v })}
+        />
+      </div>
+
+      <div className="rounded-xl border p-4 flex items-center justify-between gap-4">
+        <div>
+          <p className="font-medium text-sm">إضافة بيانات تجريبية</p>
+          <p className="text-muted-foreground text-xs mt-0.5">
+            إنشاء موظفين وسجلات حضور ووظيفة ومتقدمين تجريبيين لتظهر لوحة التحكم بشكل عملي فوراً
+          </p>
+        </div>
+        <Switch
+          checked={form.seedSampleData}
+          onCheckedChange={(v) => onChange({ ...form, seedSampleData: v })}
         />
       </div>
     </div>

@@ -1,10 +1,11 @@
 import { Prisma } from "@prisma/client";
 
+import { triggerWorkflowEvent } from "@/lib/automation";
 import prisma from "@/lib/db";
 import { isEmailConfigured, sendEmail } from "@/lib/email";
 import { extractCurrentCompensation } from "@/lib/payroll/compensation";
 import { calculatePayrollDeductions } from "@/lib/gosi";
-import { sendBulkNotification, notifyPayslipReady } from "@/lib/notifications/send";
+import { sendBulkNotification } from "@/lib/notifications/send";
 import { sanitizeFilename } from "@/lib/payroll/export";
 import { buildPayslipPdfBytes } from "@/lib/payroll/payslip-pdf.server";
 import type { Payslip, PayslipDeduction, PayslipEarning, PayslipStatus } from "@/lib/types/payroll";
@@ -982,14 +983,11 @@ export async function sendSinglePayslip(tenantId: string, payslipId: string) {
     data: { status: "SENT", sentAt: new Date() }
   });
 
-  if (row.employee.userId) {
-    await notifyPayslipReady({
-      tenantId,
-      employeeUserId: row.employee.userId,
-      periodName,
-      payslipId: updated.id
-    });
-  }
+  await triggerWorkflowEvent(tenantId, "payslip.ready", {
+    employeeUserId: row.employee.userId ?? null,
+    periodName,
+    payslipId: updated.id
+  });
 
   return updated;
 }

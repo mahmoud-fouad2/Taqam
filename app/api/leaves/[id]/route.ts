@@ -10,8 +10,8 @@ import {
   notFoundResponse,
   requireSession
 } from "@/lib/api/route-helper";
+import { triggerWorkflowEvent } from "@/lib/automation";
 import prisma from "@/lib/db";
-import { notifyLeaveStatusChanged } from "@/lib/notifications/send";
 
 function isSuperAdmin(role: string | undefined) {
   return role === "SUPER_ADMIN";
@@ -215,16 +215,20 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         return updated;
       });
 
-      if (existing.employee.userId) {
-        await notifyLeaveStatusChanged({
-          tenantId: existing.tenantId,
-          employeeUserId: existing.employee.userId,
-          status: action === "approve" ? "approved" : "rejected",
+      await triggerWorkflowEvent(
+        existing.tenantId,
+        action === "approve" ? "leave.approved" : "leave.rejected",
+        {
+          employeeUserId: existing.employee.userId ?? null,
           leaveType: existing.leaveType.nameAr || existing.leaveType.name,
-          rejectionReason: action === "reject" ? body.rejectionReason : undefined,
+          rejectionReason: action === "reject" ? body.rejectionReason ?? "" : "",
+          rejectionSuffix:
+            action === "reject" && body.rejectionReason
+              ? `: ${body.rejectionReason}`
+              : "",
           requestId: leaveRequest.id
-        });
-      }
+        }
+      );
 
       return dataResponse(mapLeaveRequest(leaveRequest));
     }

@@ -84,6 +84,8 @@ model Tenant {
   integrationConnections IntegrationConnection[]
   webhooks              Webhook[]
   customRoles           CustomRole[]
+  workflowDefinitions   WorkflowDefinition[]
+  workflowRuns          WorkflowRun[]
 
   @@index([slug])
   @@index([status])
@@ -2135,8 +2137,40 @@ model PlatformSettings {
   maintenanceMode Boolean @default(false)
   maintenanceMsg  String?
 
+  commercialFeatureCatalog CommercialFeatureCatalogEntry[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model CommercialFeatureCatalogEntry {
+  id String @id @default(cuid())
+
+  platformSettingsId String
+  platformSettings   PlatformSettings @relation(fields: [platformSettingsId], references: [id], onDelete: Cascade)
+
+  featureId String @unique
+  family    String
+
+  nameAr    String
+  nameEn    String
+  summaryAr String
+  summaryEn String
+
+  status         String
+  commercialTier String
+  availability   String[] @default([])
+  evidencePaths  String[] @default([])
+  owner          String
+
+  sortOrder Int     @default(0)
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sortOrder])
+  @@index([isActive])
 }
 
 // =============================================
@@ -2351,4 +2385,83 @@ model CustomRole {
 
   @@unique([tenantId, name])
   @@index([tenantId])
+}
+
+// =============================================
+// AUTOMATION ENGINE MVP
+// =============================================
+
+/// Tenant-scoped workflow definitions with static trigger registry and JSON actions.
+model WorkflowDefinition {
+  id          String  @id @default(cuid())
+  tenantId    String
+  tenant      Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// Stable unique key per tenant, e.g. "builtin.leave-request-manager"
+  key         String
+  name        String
+  description String?
+
+  /// Examples: leave.requested, leave.approved, leave.rejected, payslip.ready
+  triggerType String
+  scope       String  @default("tenant")
+  version     Int     @default(1)
+  enabled     Boolean @default(true)
+  isBuiltin   Boolean @default(false)
+
+  /// Array of condition objects evaluated against the trigger payload.
+  conditions Json?
+  /// Array of action objects, currently notification actions.
+  actions    Json
+
+  runs      WorkflowRun[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, key])
+  @@index([tenantId, triggerType])
+  @@index([tenantId, enabled])
+}
+
+/// One run per workflow execution.
+model WorkflowRun {
+  id            String  @id @default(cuid())
+  tenantId      String
+  tenant        Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  workflowId    String
+  workflow      WorkflowDefinition @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  triggerType   String
+  status        String  @default("running") // running | success | failed | skipped
+  summary       String?
+  failureReason String?
+  retryCount    Int     @default(0)
+  triggerPayload Json?
+
+  logs       WorkflowActionLog[]
+
+  startedAt  DateTime @default(now())
+  finishedAt DateTime?
+
+  @@index([tenantId, startedAt])
+  @@index([workflowId, startedAt])
+  @@index([status])
+}
+
+/// One action log per step in a workflow run.
+model WorkflowActionLog {
+  id           String  @id @default(cuid())
+  runId        String
+  run          WorkflowRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  actionType   String
+  status       String  // success | failed | skipped
+  summary      String?
+  output       Json?
+  errorMessage String?
+
+  createdAt    DateTime @default(now())
+
+  @@index([runId, createdAt])
 }

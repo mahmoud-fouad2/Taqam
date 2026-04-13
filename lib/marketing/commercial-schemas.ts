@@ -10,6 +10,44 @@ const slugSchema = z
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, "Invalid slug format");
 const priceSchema = z.number().finite().nonnegative().max(999999).nullable().optional();
 const featureListSchema = z.array(z.string().trim().min(1).max(200)).max(30);
+const longCommercialText = z.string().trim().min(2).max(240);
+const pathListSchema = z.array(z.string().trim().min(1).max(200)).max(30);
+
+export const featureCatalogPayloadSchema = z.object({
+  featureId: z
+    .string()
+    .trim()
+    .min(3)
+    .max(120)
+    .regex(/^[a-z0-9]+(?:[.-][a-z0-9]+)*$/, "Invalid feature id format"),
+  family: z.enum([
+    "core-hr",
+    "attendance",
+    "payroll-compliance",
+    "mobile",
+    "recruitment",
+    "performance",
+    "learning",
+    "analytics",
+    "integrations",
+    "automation",
+    "platform"
+  ]),
+  nameAr: longCommercialText,
+  nameEn: longCommercialText,
+  summaryAr: longCommercialText.max(360),
+  summaryEn: longCommercialText.max(360),
+  status: z.enum(["live", "beta", "gated", "planned"]),
+  commercialTier: z.enum(["core", "advanced", "differentiator", "add-on"]),
+  availability: z
+    .array(z.enum(["starter", "business", "enterprise", "add-on"]))
+    .min(1)
+    .max(4),
+  evidencePaths: pathListSchema.default([]),
+  owner: z.string().trim().min(2).max(120),
+  sortOrder: z.number().int().min(0).max(9999).default(0),
+  isActive: z.boolean().default(true)
+});
 
 export const pricingPlanPayloadSchema = z
   .object({

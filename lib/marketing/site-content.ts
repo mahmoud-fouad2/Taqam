@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 export type LocalizedText = {
@@ -52,7 +52,16 @@ export type PlatformSiteContent = {
   requestDemo: RequestDemoContent;
 };
 
-const contentFilePath = path.join(process.cwd(), "data", "platform-site-content.json");
+export type PlatformSiteContentAdminState = {
+  draft: PlatformSiteContent;
+  published: PlatformSiteContent;
+  hasUnpublishedChanges: boolean;
+  lastDraftSavedAt: string | null;
+  lastPublishedAt: string | null;
+};
+
+const publishedContentFilePath = path.join(process.cwd(), "data", "platform-site-content.json");
+const draftContentFilePath = path.join(process.cwd(), "data", "platform-site-content.draft.json");
 
 const defaultContent: PlatformSiteContent = {
   siteNameAr: "طاقم",
@@ -326,17 +335,70 @@ function normalizeContent(value: unknown): PlatformSiteContent {
 }
 
 export async function getPlatformSiteContent(): Promise<PlatformSiteContent> {
+  return getPlatformSiteContentVersion("published");
+}
+
+async function readNormalizedContentFile(filePath: string): Promise<PlatformSiteContent | null> {
   try {
-    const raw = await readFile(contentFilePath, "utf8");
+    const raw = await readFile(filePath, "utf8");
     return normalizeContent(JSON.parse(raw));
   } catch {
-    return defaultContent;
+    return null;
   }
 }
 
-export async function savePlatformSiteContent(content: PlatformSiteContent): Promise<PlatformSiteContent> {
+async function readFileTimestamp(filePath: string): Promise<string | null> {
+  try {
+    const result = await stat(filePath);
+    return result.mtime.toISOString();
+  } catch {
+    return null;
+  }
+}
+
+export async function getPlatformSiteContentVersion(
+  version: "draft" | "published"
+): Promise<PlatformSiteContent> {
+  const published = (await readNormalizedContentFile(publishedContentFilePath)) ?? defaultContent;
+
+  if (version === "draft") {
+    return (await readNormalizedContentFile(draftContentFilePath)) ?? published;
+  }
+
+  return published;
+}
+
+export async function getPlatformSiteContentAdminState(): Promise<PlatformSiteContentAdminState> {
+  const [draft, published, lastDraftSavedAt, lastPublishedAt] = await Promise.all([
+    getPlatformSiteContentVersion("draft"),
+    getPlatformSiteContentVersion("published"),
+    readFileTimestamp(draftContentFilePath),
+    readFileTimestamp(publishedContentFilePath)
+  ]);
+
+  return {
+    draft,
+    published,
+    hasUnpublishedChanges: JSON.stringify(draft) !== JSON.stringify(published),
+    lastDraftSavedAt,
+    lastPublishedAt
+  };
+}
+
+export async function savePlatformSiteContentDraft(content: PlatformSiteContent): Promise<PlatformSiteContent> {
   const normalized = normalizeContent(content);
-  await mkdir(path.dirname(contentFilePath), { recursive: true });
-  await writeFile(contentFilePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
+  await mkdir(path.dirname(draftContentFilePath), { recursive: true });
+  await writeFile(draftContentFilePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
   return normalized;
+}
+
+export async function publishPlatformSiteContent(): Promise<PlatformSiteContent> {
+  const draft = await getPlatformSiteContentVersion("draft");
+  await mkdir(path.dirname(publishedContentFilePath), { recursive: true });
+  await writeFile(publishedContentFilePath, `${JSON.stringify(draft, null, 2)}\n`, "utf8");
+  return draft;
+}
+
+export async function savePlatformSiteContent(content: PlatformSiteContent): Promise<PlatformSiteContent> {
+  return savePlatformSiteContentDraft(content);
 }

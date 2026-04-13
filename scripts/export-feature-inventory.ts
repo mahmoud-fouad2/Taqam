@@ -21,8 +21,16 @@ function escapeTableCell(value: string) {
   return value.replaceAll("|", "\\|").replaceAll("\n", " ");
 }
 
-function buildInventoryRows(): InventoryRow[] {
-  const features = getCommercialFeatureCatalog();
+async function buildInventoryRows(): Promise<InventoryRow[]> {
+  let features = getCommercialFeatureCatalog();
+
+  try {
+    const store = await import("../lib/marketing/feature-catalog-store");
+    features = await store.getManagedCommercialFeatureCatalog();
+  } catch {
+    // Fall back to the static registry when DATABASE_URL is not available in the shell.
+  }
+
   const claims = getCommercialClaimsRegistry();
 
   const claimCountByFeature = new Map<string, number>();
@@ -62,7 +70,7 @@ function buildMarkdown(rows: InventoryRow[]) {
   lines.push("# جدول تدقيق الميزات (Feature Inventory)");
   lines.push("");
   lines.push(
-    `> مولّد تلقائياً من lib/marketing/commercial-registry.ts — تاريخ التوليد: ${isoDay}`
+    `> مولّد تلقائياً من الكاتالوج التجاري المُدار (مع fallback إلى lib/marketing/commercial-registry.ts) — تاريخ التوليد: ${isoDay}`
   );
   lines.push("");
   lines.push("## ملخص");
@@ -103,8 +111,8 @@ function buildMarkdown(rows: InventoryRow[]) {
   return lines.join("\n");
 }
 
-function main() {
-  const rows = buildInventoryRows();
+async function main() {
+  const rows = await buildInventoryRows();
   const outputPath = resolve(process.cwd(), "docs", "FEATURE_INVENTORY.md");
 
   const markdown = buildMarkdown(rows);
@@ -114,4 +122,4 @@ function main() {
   console.log(`[feature inventory] rows=${rows.length}`);
 }
 
-main();
+void main();

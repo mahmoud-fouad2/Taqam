@@ -507,7 +507,7 @@
 - [x] resume later — `getSetupStatus()` تقرأ الـ `setupStep` المحفوظة عند إعادة الفتح
 - [x] validation على مستوى الخطوة وعلى مستوى الرحلة كاملة — Zod schemas per step
 - [x] seeders للـ default policies — `provisionSetupDefaults()` في `lib/setup.ts` تُنشئ leave types افتراضية عند اكتمال الإعداد
-- [ ] sample data seeding منفصل وقابل للحذف لاحقاً
+- [x] sample data seeding منفصل وقابل للحذف لاحقاً
 - [ ] audit log لكل خطوة حرجة
 - [x] ربط activation flow بحالة الـ tenant lifecycle — `setupCompletedAt` تُكمل الدورة
 - [x] ربط activation flow بالسوبر أدمن للمراجعة أو المساعدة اليدوية — بطاقة "حالة التفعيل" في صفحة tenant detail مع setupStep وsetupCompletedAt ورابط wizard
@@ -577,8 +577,8 @@
 - [x] helper أو config موحد للصفحات العامة — `getText()` + `lib/marketing/pricing.ts` helpers
 - [x] Claims registry موحد وقابل للإدارة — `CommercialRegistry` في `commercial-registry.ts`
 - [x] ربط النصوص التجارية القابلة للتعديل بلوحة السوبر أدمن — pricing + feature-comparison + site-content managers
-- [ ] preview للنصوص قبل النشر من السوبر أدمن
-- [ ] draft/publish workflow للمحتوى التجاري المهم
+- [x] preview للنصوص قبل النشر من السوبر أدمن
+- [x] draft/publish workflow للمحتوى التجاري المهم
 
 ### البيانات المقترحة في Feature Catalog
 
@@ -839,40 +839,40 @@
 
 ### WorkflowDefinition
 
-- [ ] name
-- [ ] trigger type
-- [ ] enabled
-- [ ] version
-- [ ] scope
-- [ ] conditions JSON
-- [ ] actions JSON
+- [x] name
+- [x] trigger type
+- [x] enabled
+- [x] version
+- [x] scope
+- [x] conditions JSON
+- [x] actions JSON
 
 ### WorkflowRun
 
-- [ ] workflowId
-- [ ] trigger payload
-- [ ] status
-- [ ] startedAt
-- [ ] finishedAt
-- [ ] failure reason
-- [ ] retry count
+- [x] workflowId
+- [x] trigger payload
+- [x] status
+- [x] startedAt
+- [x] finishedAt
+- [x] failure reason
+- [x] retry count
 
 ### WorkflowActionLog
 
-- [ ] action type
-- [ ] result
-- [ ] output
-- [ ] error
+- [x] action type
+- [x] result
+- [x] output
+- [x] error
 
 ## 12.4 أول 8 workflows يجب تنفيذها قبل أي توسع
 
-- [ ] إذا طلب إجازة -> إشعار + approval chain
-- [ ] إذا تمت الموافقة/الرفض -> إشعار الموظف
+- [x] إذا طلب إجازة -> إشعار + approval chain
+- [x] إذا تمت الموافقة/الرفض -> إشعار الموظف
 - [ ] إذا موظف غاب -> إشعار المدير
 - [ ] إذا Document قرب الانتهاء -> تنبيه HR + الموظف
 - [ ] إذا نهاية probation اقتربت -> إشعار المدير وHR
 - [ ] إذا payroll period أغلقت -> إشعار الإدارة
-- [ ] إذا payslip أصبحت جاهزة -> إشعار الموظف
+- [x] إذا payslip أصبحت جاهزة -> إشعار الموظف
 - [ ] إذا onboarding task delayed -> escalation
 
 ## 12.5 ما لن نفعله الآن
@@ -909,7 +909,7 @@
 - [ ] فصل واضح بين marketing data وproduct capability data
 - [ ] adapter layer للتكاملات
 - [x] service layer للـ activation — `lib/setup.ts`
-- [ ] service layer للـ automation
+- [x] service layer للـ automation
 - [ ] منع تكرار business rules بين web/mobile/api
 - [ ] typed contracts بين backend والواجهات
 - [ ] فصل commercial control data عن static marketing code
@@ -930,7 +930,7 @@
 ## 13.3 الرصد والتشخيص
 
 - [ ] structured logs للتكاملات
-- [ ] workflow logs
+- [x] workflow logs
 - [ ] activation logs
 - [ ] mobile crash + error visibility
 - [ ] admin diagnostics for support
@@ -969,7 +969,7 @@
 - [x] statuses واضحة للـ tenant — `PENDING`, `ACTIVE`, `SUSPENDED`, `CANCELLED`
 - [x] wizard متعدد الخطوات — `app/dashboard/setup/` (5 خطوات: ملف الشركة، ضبط العمل، الهيكل، أول موظف، السياسات)
 - [x] default policies seeding — خطوة 5 تنشئ إجازة سنوية وإجازة مرضية تلقائياً
-- [ ] sample data option
+- [x] sample data option
 - [x] progress tracking — `setupStep`, `completionPercent`, progress bar في الـ wizard
 - [ ] lead / pending / approved lifecycle wiring
 - [x] step autosave + resume later — POST `/api/setup` يحفظ كل خطوة، initialStep يعيد من حيث توقف
@@ -1011,16 +1011,16 @@
 
 **التركيز:** Automation engine MVP
 
-- [ ] workflow schema
-- [ ] run engine
-- [ ] core triggers
-- [ ] logs + retry
-- [ ] admin control surface
-- [ ] condition evaluator MVP
-- [ ] action executor MVP
-- [ ] first leave workflow end-to-end
+- [x] workflow schema
+- [x] run engine
+- [x] core triggers
+- [x] logs + retry
+- [x] admin control surface
+- [x] condition evaluator MVP
+- [x] action executor MVP
+- [x] first leave workflow end-to-end
 - [ ] first absence alert workflow end-to-end
-- [ ] workflow diagnostics and run history review
+- [x] workflow diagnostics and run history review
 
 ## Phase F — أسبوع 15 إلى 16
 
@@ -1053,7 +1053,7 @@
 - [ ] tenant lifecycle model موجود
 - [x] activation wizard موجود
 - [x] autosave موجود
-- [ ] sample data اختياري
+- [x] sample data اختياري
 - [x] readiness checklist موجودة
 
 ## 15.3 Pricing & Packaging
@@ -1068,10 +1068,10 @@
 
 - [x] إدارة الباقات والأسعار من السوبر أدمن
 - [x] إدارة comparison rows من السوبر أدمن
-- [ ] إدارة feature catalog التجاري من السوبر أدمن
-- [ ] إدارة badges وlabels وCTA الأساسية من السوبر أدمن
-- [ ] draft / publish أو preview مع validation
-- [ ] audit log للتعديلات التجارية
+- [x] إدارة feature catalog التجاري من السوبر أدمن
+- [x] إدارة badges وlabels وCTA الأساسية من السوبر أدمن
+- [x] draft / publish أو preview مع validation
+- [x] audit log للتعديلات التجارية
 
 ## 15.5 Integrations
 
@@ -1097,10 +1097,10 @@
 
 ## 15.7 Automation
 
-- [ ] workflow definitions
-- [ ] workflow runs
-- [ ] action logs
-- [ ] retry policy
+- [x] workflow definitions
+- [x] workflow runs
+- [x] action logs
+- [x] retry policy
 - [ ] first 8 workflows live
 
 ## 15.8 Architecture & Quality

@@ -91,6 +91,10 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
   const [keywordsEn, setKeywordsEn] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [publishing, setPublishing] = useState(false);
+  const [hasUnpublishedChanges, setHasUnpublishedChanges] = useState(false);
+  const [lastDraftSavedAt, setLastDraftSavedAt] = useState<string | null>(null);
+  const [lastPublishedAt, setLastPublishedAt] = useState<string | null>(null);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -116,6 +120,9 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
         setForm(json.data);
         setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
         setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
+        setHasUnpublishedChanges(Boolean(json.hasUnpublishedChanges));
+        setLastDraftSavedAt(typeof json.lastDraftSavedAt === "string" ? json.lastDraftSavedAt : null);
+        setLastPublishedAt(typeof json.lastPublishedAt === "string" ? json.lastPublishedAt : null);
         setLoading(false);
       } catch {
         if (!active) {
@@ -232,11 +239,44 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
       setForm(json.data);
       setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
       setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
+      setHasUnpublishedChanges(Boolean(json.hasUnpublishedChanges));
+      setLastDraftSavedAt(typeof json.lastDraftSavedAt === "string" ? json.lastDraftSavedAt : null);
+      setLastPublishedAt(typeof json.lastPublishedAt === "string" ? json.lastPublishedAt : null);
       setSaving(false);
-      setMessage(isAr ? "تم حفظ التعديلات بنجاح." : "Changes saved successfully.");
+      setMessage(isAr ? "تم حفظ المسودة بنجاح." : "Draft saved successfully.");
     } catch {
       setSaving(false);
       setMessage(isAr ? "حدث خطأ أثناء حفظ التعديلات." : "An error occurred while saving changes.");
+    }
+  }
+
+  async function handlePublish() {
+    setPublishing(true);
+    setMessage("");
+
+    try {
+      const response = await fetch("/api/super-admin/site-content/publish", {
+        method: "POST"
+      });
+      const json = await response.json();
+
+      if (!response.ok || !json.data) {
+        setPublishing(false);
+        setMessage(json.error ?? (isAr ? "تعذر نشر التعديلات." : "Unable to publish changes."));
+        return;
+      }
+
+      setForm(json.data);
+      setKeywordsAr(toCsv(json.data.defaultKeywordsAr));
+      setKeywordsEn(toCsv(json.data.defaultKeywordsEn));
+      setHasUnpublishedChanges(Boolean(json.hasUnpublishedChanges));
+      setLastDraftSavedAt(typeof json.lastDraftSavedAt === "string" ? json.lastDraftSavedAt : null);
+      setLastPublishedAt(typeof json.lastPublishedAt === "string" ? json.lastPublishedAt : null);
+      setPublishing(false);
+      setMessage(isAr ? "تم نشر المحتوى العام بنجاح." : "Public content published successfully.");
+    } catch {
+      setPublishing(false);
+      setMessage(isAr ? "حدث خطأ أثناء نشر التعديلات." : "An error occurred while publishing changes.");
     }
   }
 
@@ -349,11 +389,24 @@ export function SiteContentManager({ locale }: { locale: "ar" | "en" }) {
             </TabsContent>
           </Tabs>
 
-          <div className="flex items-center justify-between gap-3">
-            <p className="text-sm text-muted-foreground">{message}</p>
-            <Button onClick={handleSave} disabled={saving}>
-              {saving ? (isAr ? "جاري الحفظ..." : "Saving...") : isAr ? "حفظ التعديلات" : "Save changes"}
-            </Button>
+          <div className="flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="space-y-1 text-sm">
+              <p className="font-medium">{message || (hasUnpublishedChanges ? (isAr ? "هناك مسودة غير منشورة." : "There are unpublished draft changes.") : (isAr ? "النسخة المنشورة متطابقة مع المسودة الحالية." : "The published version matches the current draft."))}</p>
+              <p className="text-muted-foreground">
+                {isAr ? "آخر حفظ للمسودة:" : "Last draft save:"} {lastDraftSavedAt ?? (isAr ? "غير متوفر" : "Not available")}
+              </p>
+              <p className="text-muted-foreground">
+                {isAr ? "آخر نشر:" : "Last published:"} {lastPublishedAt ?? (isAr ? "غير متوفر" : "Not available")}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <Button onClick={handleSave} disabled={saving || publishing} variant="outline">
+                {saving ? (isAr ? "جاري حفظ المسودة..." : "Saving draft...") : isAr ? "حفظ كمسودة" : "Save draft"}
+              </Button>
+              <Button onClick={handlePublish} disabled={saving || publishing || !hasUnpublishedChanges}>
+                {publishing ? (isAr ? "جارٍ النشر..." : "Publishing...") : isAr ? "نشر التعديلات" : "Publish changes"}
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
