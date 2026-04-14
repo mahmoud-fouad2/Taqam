@@ -37,7 +37,7 @@ const webMessages: Record<WebMessageKey, { ar: string; en: string }> = {
   "footer.stack.ar": { ar: "موارد بشرية • رواتب • حضور • امتثال سعودي", en: "" },
   "footer.stack.en": { ar: "", en: "HR • Payroll • Attendance • Saudi Compliance" },
 
-  "marketing.requestDemo": { ar: "طلب عرض تجريبي", en: "Request a demo" },
+  "marketing.requestDemo": { ar: "احجز جلسة تعريف", en: "Schedule a walkthrough" },
   "marketing.exploreFeatures": { ar: "استكشف المميزات", en: "Explore features" },
   "marketing.productTour": { ar: "استعراض النظام", en: "Product tour" },
   "marketing.viewPricing": { ar: "عرض الأسعار", en: "View pricing" },

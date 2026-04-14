@@ -298,8 +298,8 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
                       ? `نتائج البحث داخل ${companyName}: ${query}`
                       : `Search results inside ${companyName}: ${query}`
                     : isAr
-                      ? "يمكن مشاركة هذه الصفحة مباشرة مع المرشحين كصفحة الوظائف الرسمية الخاصة بالشركة."
-                      : "This page can be shared directly with candidates as the company's official jobs page."}
+                      ? "هذه صفحة وظائف الشركة. يمكنك مشاركتها مع المرشحين عبر نفس الرابط."
+                      : "This is the company's careers page. You can share it with candidates using this link."}
               </p>
               {hasFilters ? (
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -349,8 +349,8 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
                 </EmptyTitle>
                 <EmptyDescription>
                   {isAr
-                    ? "يمكن لهذه الصفحة أن تبقى كرابط التوظيف الرسمي للشركة، وستظهر الوظائف هنا تلقائيًا عند نشرها من لوحة التحكم."
-                    : "This page can remain the official careers link for the company, and roles will appear automatically once published from the dashboard."}
+                    ? "لا توجد وظائف منشورة حالياً. عند نشر وظائف جديدة ستظهر هنا تلقائياً."
+                    : "No roles are published right now. New postings will appear here automatically once published."}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>
@@ -369,12 +369,12 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               <CardContent className="space-y-3 p-6">
                 <Sparkles className="text-primary h-8 w-8" />
                 <h3 className="text-lg font-semibold">
-                  {isAr ? "مرتبطة مباشرة بقاعدة البيانات" : "Directly tied to the database"}
+                  {isAr ? "تقديم مباشر" : "Direct applications"}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-7">
                   {isAr
-                    ? "أي وظيفة منشورة من لوحة الشركة تظهر هنا تلقائيًا، وأي طلب تقديم يصل مباشرة إلى شاشة المتقدمين الخاصة بالشركة."
-                    : "Any role published from the tenant dashboard appears here automatically, and each application lands directly in the company's applicants screen."}
+                    ? "أي طلب تقديم يُسجل لدى الشركة صاحبة الإعلان ويمكن متابعته من لوحة التوظيف."
+                    : "Each application is recorded for the hiring company and can be followed up from the recruitment dashboard."}
                 </p>
               </CardContent>
             </Card>
@@ -382,12 +382,12 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               <CardContent className="space-y-3 p-6">
                 <Building2 className="text-primary h-8 w-8" />
                 <h3 className="text-lg font-semibold">
-                  {isAr ? "رابط رسمي قابل للمشاركة" : "An official shareable hiring link"}
+                  {isAr ? "رابط واحد للوظائف" : "One link for careers"}
                 </h3>
                 <p className="text-muted-foreground text-sm leading-7">
                   {isAr
-                    ? "يمكن استخدام هذا المسار كرابط التوظيف الرسمي في الموقع، لينكدإن، أو الحملات الإعلانية الخاصة بهذه الشركة."
-                    : "This route can be used as the official hiring link on the company website, LinkedIn, or paid campaigns for this tenant."}
+                    ? "يمكن مشاركة هذا الرابط ليطلع المرشحون على الوظائف الحالية لدى الشركة."
+                    : "Share this link so candidates can view the company's current openings."}
                 </p>
               </CardContent>
             </Card>

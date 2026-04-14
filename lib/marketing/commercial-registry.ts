@@ -730,10 +730,10 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     id: "features.hero.badge",
     surface: "features.hero",
     slot: "badge",
-    title: { ar: "منصة موارد بشرية متكاملة", en: "All-in-one HR platform" },
+    title: { ar: "وحدات الموارد البشرية الأساسية", en: "Core HR modules" },
     description: {
-      ar: "صياغة hero المختصرة لصفحة المميزات حول المنصة كطبقة تشغيل واحدة.",
-      en: "Short-form hero positioning for the features page around one operating platform."
+      ar: "شارة مختصرة لصفحة المميزات.",
+      en: "A short badge label for the features page."
     },
     linkedFeatureIds: [
       "core-hr.employee-management",
@@ -749,10 +749,10 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     id: "features.hero.primary",
     surface: "features.hero",
     slot: "primary",
-    title: { ar: "نظام تشغيل فعلي للموارد البشرية", en: "A real operating system for HR" },
+    title: { ar: "مميزات طاقم", en: "Taqam features" },
     description: {
-      ar: "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف.",
-      en: "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment."
+      ar: "هذه الصفحة تعرض وحدات طاقم الرئيسية: بيانات الموظفين، الحضور، الرواتب، التقارير، والتوظيف — بشكل منظّم وواضح.",
+      en: "This page lists Taqam's main modules: people data, attendance, payroll, reporting, and recruitment — organized and easy to scan."
     },
     linkedFeatureIds: [
       "core-hr.employee-management",
@@ -770,12 +770,12 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     surface: "features.platform-anatomy",
     slot: "primary",
     title: {
-      ar: "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها",
-      en: "One platform instead of six disconnected tools"
+      ar: "منصة واحدة لمسارات تشغيل أساسية",
+      en: "One platform for essential workflows"
     },
     description: {
-      ar: "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط.",
-      en: "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system."
+      ar: "نرتّب المميزات حسب مسارات العمل حتى تعرف بسرعة ماذا يغطي النظام وكيف تُقسم الوحدات.",
+      en: "Features are grouped by workflow so you can quickly see what's covered and how modules are organized."
     },
     linkedFeatureIds: [
       "core-hr.employee-management",
@@ -794,8 +794,8 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     slot: "faster-operations",
     title: { ar: "تشغيل يومي أسرع", en: "Faster daily operations" },
     description: {
-      ar: "بدل التنقل بين Sheets وأدوات متفرقة، كل مسار التشغيل في شاشة واحدة مترابطة.",
-      en: "Instead of jumping between sheets and scattered tools, every workflow lives in one connected place."
+      ar: "تجميع خطوات العمل الأساسية في مكان واحد يقلل التكرار ويُسهّل المتابعة.",
+      en: "Keeping core workflows in one place reduces duplication and makes follow-up easier."
     },
     linkedFeatureIds: [
       "core-hr.employee-management",
@@ -812,8 +812,8 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     slot: "clear-compliance",
     title: { ar: "امتثال سعودي أوضح", en: "Clear Saudi compliance" },
     description: {
-      ar: "الرواتب، WPS، والصلاحيات وسجلات التدقيق مصممة لتقليل الأخطاء التشغيلية.",
-      en: "Payroll, WPS, roles, and audit trails are designed to reduce operational mistakes."
+      ar: "تجميع الرواتب وWPS وسجلات التدقيق يساعد على متابعة الامتثال وتقليل الأخطاء.",
+      en: "Keeping payroll, WPS, and audit trails together helps track compliance and reduce mistakes."
     },
     linkedFeatureIds: ["payroll.saudi-payroll", "payroll.gosi-wps"],
     strength: "supporting",
@@ -871,10 +871,10 @@ export const defaultCommercialClaimsRegistry = commercialClaimSchema.array().par
     id: "careers.differentiator.portal",
     surface: "careers.differentiator",
     slot: "primary",
-    title: { ar: "بوابة وظائف مجمعة لكل الشركات على طاقم", en: "Unified careers portal across Taqam companies" },
+    title: { ar: "بوابة وظائف للمنصة", en: "Platform careers hub" },
     description: {
-      ar: "Differentiator تسويقي مباشر مرتبط بميزة careers portal الفعلية.",
-      en: "Direct marketing differentiator linked to the actual careers portal capability."
+      ar: "صفحة تجمع الوظائف المفتوحة وتسهّل الوصول لصفحة كل شركة أو وظيفة.",
+      en: "A page that aggregates open roles and links to each company or job page."
     },
     linkedFeatureIds: ["recruitment.company-careers-portal"],
     strength: "differentiator",
@@ -952,11 +952,50 @@ export const defaultMarketingIntegrationShowcase = marketingIntegrationShowcaseI
       id: "mudad-enterprise",
       name: { ar: "مدد", en: "Mudad" },
       description: {
-        ar: "تكامل مخصص لعملاء المؤسسات عند الطلب",
-        en: "Custom enterprise integration on request"
+        ar: "تكامل يُجهّز للمؤسسات عند الطلب",
+        en: "Enterprise integration on request"
       },
       logoSrc: "/images/marketing/integrations/mudad.png",
       frameClassName: "bg-white p-3",
+      imageClassName: "object-contain",
+      availability: "enterprise-custom",
+      linkedFeatureIds: []
+    },
+    {
+      id: "muqeem-enterprise",
+      name: { ar: "مقيم", en: "Muqeem" },
+      description: {
+        ar: "تكامل يُجهّز للمؤسسات عند الطلب",
+        en: "Enterprise integration on request"
+      },
+      logoSrc: "/images/marketing/integrations/muqeem.png",
+      frameClassName: "bg-white p-3",
+      imageClassName: "object-contain",
+      availability: "enterprise-custom",
+      linkedFeatureIds: []
+    },
+    {
+      id: "sap-enterprise",
+      name: { ar: "SAP", en: "SAP" },
+      description: {
+        ar: "تكامل يُجهّز للمؤسسات عند الطلب",
+        en: "Enterprise integration on request"
+      },
+      logoSrc: "/images/marketing/integrations/sap.png",
+      frameClassName: "bg-white p-3",
+      imageClassName: "object-contain",
+      availability: "enterprise-custom",
+      linkedFeatureIds: []
+    },
+    {
+      id: "mustafid-enterprise",
+      name: { ar: "مستفيد", en: "Mustafid" },
+      description: {
+        ar: "تكامل يُجهّز للمؤسسات عند الطلب",
+        en: "Enterprise integration on request"
+      },
+      logoSrc: "/images/marketing/integrations/mustafid.jpg",
+      frameClassName: "bg-white p-2",
       imageClassName: "object-contain",
       availability: "enterprise-custom",
       linkedFeatureIds: []

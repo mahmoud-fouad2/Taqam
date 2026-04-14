@@ -407,8 +407,8 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
                   </div>
                   <p>
                     {isAr
-                      ? "يصل الطلب مباشرة إلى قاعدة بيانات الشركة ولوحة المتقدمين الخاصة بها، ولا يطلع عليه سوى فريق التوظيف داخل الجهة المعنية."
-                      : "Your application goes directly into the company's database and applicants dashboard, visible only to the relevant recruitment team."}
+                      ? "يصل طلبك مباشرة إلى فريق التوظيف داخل الشركة المعنية، ولا يطلع عليه سوى الأشخاص المخوّلين بالتوظيف."
+                      : "Your application goes directly to the hiring team at the company and is only visible to authorized recruitment staff."}
                   </p>
                 </div>
               </CardContent>

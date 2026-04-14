@@ -230,9 +230,9 @@ export default async function FeaturesPage() {
   const pageTitle = isAr ? "مميزات طاقم" : "Taqam Features";
   const pageDescription = isAr
     ? (featuresHeroPrimaryClaim?.description.ar ??
-      "استكشف مميزات طاقم للموارد البشرية، الرواتب، الحضور، والتوظيف في تجربة واحدة مترابطة.")
+      "استكشف وحدات طاقم الأساسية للموارد البشرية والرواتب والحضور والتوظيف — بشكل منظّم وواضح.")
     : (featuresHeroPrimaryClaim?.description.en ??
-      "Explore Taqam capabilities for HR, payroll, attendance, and recruitment in one connected experience.");
+      "Explore Taqam's core modules for HR, payroll, attendance, and recruitment — organized and easy to scan.");
 
   const totalFeatures = featureSections.reduce((sum, section) => sum + section.items.length, 0);
 
@@ -265,8 +265,8 @@ export default async function FeaturesPage() {
           icon={Sparkles}
           badge={
             isAr
-              ? (featuresHeroBadgeClaim?.title.ar ?? "منصة موارد بشرية متكاملة")
-              : (featuresHeroBadgeClaim?.title.en ?? "All-in-one HR platform")
+              ? (featuresHeroBadgeClaim?.title.ar ?? "وحدات الموارد البشرية الأساسية")
+              : (featuresHeroBadgeClaim?.title.en ?? "Core HR modules")
           }
           title={
             isAr
@@ -276,14 +276,14 @@ export default async function FeaturesPage() {
           description={
             isAr
               ? (featuresHeroPrimaryClaim?.description.ar ??
-                "بدل صفحات متفرقة وكروت مكررة، طاقم ينظم التشغيل اليومي في مسارات واضحة: من الموظفين والحضور إلى الرواتب والتقارير والتوظيف.")
+                "نعرض هنا وحدات طاقم الأساسية وكيف تُقسم حسب مسارات العمل — من بيانات الموظفين والحضور إلى الرواتب والتقارير والتوظيف.")
               : (featuresHeroPrimaryClaim?.description.en ??
-                "Instead of scattered pages and repetitive cards, Taqam organizes daily operations into clear paths: from employees and attendance to payroll, reporting, and recruitment.")
+                "This page lists Taqam's main modules and groups them by workflow — from people data and attendance to payroll, reporting, and recruitment.")
           }
           actions={[
             {
               href: `${p}/request-demo`,
-              label: isAr ? "اطلب عرضًا عمليًا" : "Request a practical demo",
+              label: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
               variant: "brand"
             },
             {
@@ -319,16 +319,16 @@ export default async function FeaturesPage() {
                   <h2 className="mt-4 text-2xl font-black tracking-tight sm:text-3xl">
                     {isAr
                       ? (featuresPlatformAnatomyClaim?.title.ar ??
-                        "منصة واحدة بدل ست أدوات لا تتكلم مع بعضها")
+                        "منصة واحدة لمسارات تشغيل أساسية")
                       : (featuresPlatformAnatomyClaim?.title.en ??
-                        "One platform instead of six disconnected tools")}
+                        "One platform for essential workflows")}
                   </h2>
                   <p className="mt-4 max-w-xl leading-8 text-slate-600 dark:text-slate-400">
                     {isAr
                       ? (featuresPlatformAnatomyClaim?.description.ar ??
-                        "التصميم هنا ليس مجرد سرد للمميزات. الفكرة أن الزائر يفهم بسرعة كيف تتحول HR من ملفات وجداول وموافقات منفصلة إلى نظام تشغيل يومي مترابط.")
+                        "نرتّب المميزات حسب مسارات العمل حتى تعرف بسرعة ماذا يغطي النظام وكيف تُقسم الوحدات.")
                       : (featuresPlatformAnatomyClaim?.description.en ??
-                        "This page is not a random feature dump. It is structured so visitors quickly understand how HR moves from fragmented files and approvals to one operational system.")}
+                        "Features are grouped by workflow so you can quickly see what's covered and how modules are organized.")}
                   </p>
                   <div className="mt-8 grid gap-3 sm:grid-cols-2">
                     {platformHighlights.map((highlight) => (
@@ -526,12 +526,12 @@ export default async function FeaturesPage() {
           }
           description={
             isAr
-              ? "نرتب لك Demo يركز على المسارات التي تهمك فعلاً: HR الأساسية أو الرواتب أو الحضور أو التوظيف، بدل عرض عام سريع."
-              : "We can tailor a demo around the suites you actually need first—Core HR, payroll, attendance, or recruitment—instead of a generic walkthrough."
+              ? "نرتّب جلسة قصيرة تركز على المسارات التي تهمك فعلاً: الموارد البشرية أو الرواتب أو الحضور أو التوظيف."
+              : "We can run a short session focused on what you need first—Core HR, payroll, attendance, or recruitment."
           }
           primaryAction={{
             href: `${p}/request-demo`,
-            label: isAr ? "احجز عرضًا عمليًا" : "Book a practical demo"
+            label: isAr ? "احجز جلسة" : "Book a session"
           }}
           secondaryAction={{ href: `${p}/plans`, label: isAr ? "راجع الباقات" : "Review plans" }}
           tone="muted"

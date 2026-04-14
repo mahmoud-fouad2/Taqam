@@ -23,9 +23,9 @@ export const faqCategories = [
       {
         qAr: "كيف أبدأ؟ هل يوجد تجربة مجانية؟",
         qEn: "How do I get started? Is there a free trial?",
-        aAr: "اطلب عرضًا تجريبيًا وسنجهّز لك بيئة كاملة خلال يوم عمل واحد. التجربة تشمل جميع مميزات الباقة المناسبة لك بدون أي التزام مسبق.",
+        aAr: "احجز جلسة تعريف وسنجهّز لك بيئة كاملة خلال يوم عمل واحد. التجربة تشمل جميع مميزات الباقة المناسبة لك بدون أي التزام مسبق.",
         aEn:
-          "Request a demo and we'll set up a full environment for you within one business day — no commitment required."
+          "Schedule a walkthrough and we'll set up a full environment for you within one business day — no commitment required."
       },
       {
         qAr: "كيف أضيف موظفين جدد؟",

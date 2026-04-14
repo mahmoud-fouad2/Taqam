@@ -78,7 +78,7 @@ export default async function FaqPage() {
             },
             {
               href: `${p}/request-demo`,
-              label: isAr ? "اطلب عرضًا" : "Request a demo",
+              label: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
               variant: "outline"
             }
           ]}
@@ -138,8 +138,8 @@ export default async function FaqPage() {
           title={isAr ? "لم تجد إجابتك؟" : "Still have questions?"}
           description={
             isAr
-              ? "فريق الدعم جاهز يساعدك في الأسئلة التشغيلية أو طلبات التفعيل، ويمكننا أيضًا ترتيب عرض عملي إذا كنت تقيم المنصة."
-              : "The support team can help with operational questions or activation issues, and we can also arrange a practical demo if you're still evaluating the platform."
+              ? "فريق الدعم جاهز يساعدك في الأسئلة التشغيلية أو طلبات التفعيل، ويمكننا أيضًا ترتيب جلسة تعريف إذا كنت تقيم المنصة."
+              : "Support can help with operational questions or activation requests, and we can also schedule a walkthrough if you're still evaluating the platform."
           }
           primaryAction={{
             href: `${p}/support`,
@@ -147,7 +147,7 @@ export default async function FaqPage() {
           }}
           secondaryAction={{
             href: `${p}/request-demo`,
-            label: isAr ? "اطلب عرضًا" : "Request a demo"
+            label: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough"
           }}
         />
       </FadeIn>

@@ -422,8 +422,8 @@ export const pricingMarketingContent: PricingMarketingContent = {
       en: "Each plan is built around a real operating need: fast launch, clear features, and a natural upgrade path as you grow."
     },
     heroPrimaryCtaLabel: {
-      ar: "طلب عرض تجريبي",
-      en: "Request a demo"
+      ar: "احجز جلسة تعريف",
+      en: "Schedule a walkthrough"
     },
     heroSecondaryCtaLabel: {
       ar: "مقارنة الأسعار",

@@ -94,10 +94,10 @@ const marketingSeoRoutes: MarketingSeoRoute[] = [
     path: "/request-demo",
     changeFrequency: "monthly",
     priority: 0.7,
-    sectionAr: "طلب عرض تجريبي",
-    sectionEn: "Request Demo",
-    keywordsAr: ["طلب عرض تجريبي", "حجز ديمو", "تجربة نظام الموارد البشرية"],
-    keywordsEn: ["request demo", "book a demo", "HR demo"]
+    sectionAr: "حجز جلسة تعريف",
+    sectionEn: "Schedule a walkthrough",
+    keywordsAr: ["حجز جلسة تعريف", "جولة تعريف", "تجربة نظام الموارد البشرية"],
+    keywordsEn: ["schedule walkthrough", "book a walkthrough", "HR walkthrough"]
   },
   {
     path: "/privacy",

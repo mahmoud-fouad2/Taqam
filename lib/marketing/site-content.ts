@@ -107,8 +107,8 @@ const defaultContent: PlatformSiteContent = {
       en: "Taqam is a modern cloud platform to manage employees, attendance, and payroll with Saudi compliance and full Arabic/English experience."
     },
     primaryCtaLabel: {
-      ar: "طلب عرض تجريبي مجاني",
-      en: "Request a free demo"
+      ar: "احجز جلسة تعريف",
+      en: "Schedule a walkthrough"
     },
     primaryCtaHref: "/request-demo"
   },
@@ -142,16 +142,16 @@ const defaultContent: PlatformSiteContent = {
   },
   requestDemo: {
     badge: {
-      ar: "عرض سريع • تهيئة مخصصة • دعم مباشر",
-      en: "Fast demo • Tailored setup • Direct support"
+      ar: "جلسة تعريف • تهيئة مبدئية • متابعة",
+      en: "Walkthrough • Initial setup • Follow-up"
     },
     title: {
-      ar: "اطلب عرضًا يوضح كيف ستعمل طاقم داخل شركتك",
-      en: "Request a demo tailored to how Taqam fits your company"
+      ar: "احجز جلسة تعريف توضح كيف ستعمل طاقم داخل شركتك",
+      en: "Schedule a walkthrough tailored to how Taqam fits your company"
     },
     description: {
-      ar: "املأ النموذج وسيتواصل معك فريقنا خلال 24 ساعة مع عرض يناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال.",
-      en: "Fill in the form and our team will contact you within 24 hours with a demo tailored to your company size, payroll workflow, and compliance needs."
+      ar: "املأ النموذج وسيتواصل معك فريقنا لترتيب جلسة تعريف تناسب حجم الشركة، آلية الرواتب، ومتطلبات الحضور والامتثال.",
+      en: "Fill in the form and our team will reach out to schedule a walkthrough tailored to your company size, payroll workflow, and compliance needs."
     },
     formTitle: {
       ar: "بيانات الشركة",
@@ -162,8 +162,8 @@ const defaultContent: PlatformSiteContent = {
       en: "Required fields are marked with *"
     },
     sideTitle: {
-      ar: "Demo عملي يركز على ما يهم فريقك",
-      en: "A practical demo focused on what matters to your team"
+      ar: "جلسة تعريف عملية تركز على ما يهم فريقك",
+      en: "A practical walkthrough focused on what matters to your team"
     },
     sideDescription: {
       ar: "بدلاً من عرض عام، نجهز الجلسة على أساس عدد الموظفين، التعقيد التشغيلي، والخطوات التي تريد أتمتتها أولاً.",
@@ -174,8 +174,8 @@ const defaultContent: PlatformSiteContent = {
       en: "Prefer to review plans first?"
     },
     secondaryCtaDescription: {
-      ar: "اطلع على الباقات والأسعار الحالية، ثم عد لطلب العرض عندما تكون جاهزًا.",
-      en: "Review the current plans and pricing, then come back for a tailored demo when you're ready."
+      ar: "اطلع على الباقات والأسعار الحالية، ثم عد لحجز الجلسة عندما تكون جاهزًا.",
+      en: "Review the current plans and pricing, then come back for a tailored walkthrough when you're ready."
     },
     secondaryCtaLabel: {
       ar: "استعراض الباقات",
@@ -184,12 +184,12 @@ const defaultContent: PlatformSiteContent = {
     highlights: [
       {
         title: {
-          ar: "استجابة خلال 24 ساعة",
-          en: "Response within 24 hours"
+          ar: "متابعة سريعة",
+          en: "Fast follow-up"
         },
         description: {
-          ar: "فريقنا يراجع الطلب بسرعة ويقترح لك المسار المناسب مباشرة.",
-          en: "Our team reviews your request quickly and recommends the right rollout path."
+          ar: "نراجع طلبك ونقترح لك المسار المناسب حسب احتياجك.",
+          en: "We review your request and recommend the right rollout path for your needs."
         }
       },
       {

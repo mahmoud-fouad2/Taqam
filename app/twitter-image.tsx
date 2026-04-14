@@ -34,7 +34,7 @@ export default function TwitterImage() {
 
         <div tw="flex justify-between text-[16px] text-white/75">
           <div>taqam.net</div>
-          <div>Request a demo</div>
+          <div>Schedule a walkthrough</div>
         </div>
       </div>
     </div>,

@@ -37,7 +37,7 @@ export default async function HelpCenterPage() {
               {locale === "ar" ? "الأسعار والباقات" : "Pricing and plans"}
             </Link>
             <Link className="text-primary block hover:underline" href={`${p}/request-demo`}>
-              {locale === "ar" ? "طلب عرض تجريبي" : "Request a demo"}
+                {locale === "ar" ? "تواصل معنا" : "Talk to us"}
             </Link>
           </CardContent>
         </Card>

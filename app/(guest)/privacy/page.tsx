@@ -250,7 +250,7 @@ export default async function PrivacyPage() {
             },
             {
               href: `${p}/request-demo`,
-              label: isAr ? "اطلب عرضًا" : "Request a demo",
+              label: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
               variant: "brand"
             }
           ]}

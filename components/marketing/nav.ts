@@ -164,10 +164,10 @@ export const marketingNav: MarketingNavItem[] = [
           },
           {
             href: "/request-demo",
-            labelAr: "اطلب عرضًا تجريبيًا",
-            labelEn: "Request a Demo",
+            labelAr: "احجز جلسة تعريف",
+            labelEn: "Schedule a walkthrough",
             descAr: "رتّب جلسة مناسبة لطريقة عمل شركتك الحالية.",
-            descEn: "Book a demo tailored to how your company works today.",
+            descEn: "Book a walkthrough tailored to how your company works today.",
             icon: Rocket
           }
         ]
@@ -241,44 +241,6 @@ export const marketingNav: MarketingNavItem[] = [
             descAr: "إجابات مباشرة على أكثر الأسئلة تكرارًا قبل التواصل.",
             descEn: "Direct answers to the most common questions before contacting support.",
             icon: CircleHelp
-          },
-          {
-            href: "/support",
-            labelAr: "تواصل مع الدعم",
-            labelEn: "Contact Support",
-            descAr: "راسل فريقنا مباشرة لأي مشكلة أو استفسار تشغيلي.",
-            descEn: "Reach our team directly for any issue or operational question.",
-            icon: LifeBuoy
-          }
-        ]
-      },
-      {
-        titleAr: "قبل البدء",
-        titleEn: "Before You Start",
-        items: [
-          {
-            href: "/request-demo",
-            labelAr: "نسّق عرضًا سريعًا",
-            labelEn: "Book a Quick Demo",
-            descAr: "شاهد المنصة على حالتك الفعلية بدل القراءة فقط.",
-            descEn: "See the product on your real use case instead of just reading about it.",
-            icon: Rocket
-          },
-          {
-            href: "/terms",
-            labelAr: "الشروط والأحكام",
-            labelEn: "Terms",
-            descAr: "افهم نطاق الخدمة والالتزامات التشغيلية بوضوح.",
-            descEn: "Understand the service scope and operational terms clearly.",
-            icon: FileText
-          },
-          {
-            href: "/privacy",
-            labelAr: "سياسة الخصوصية",
-            labelEn: "Privacy",
-            descAr: "راجع كيف نحمي بيانات الحسابات والشركات ونديرها.",
-            descEn: "Review how we protect and manage account and company data.",
-            icon: ShieldCheck
           }
         ]
       }
@@ -288,13 +250,13 @@ export const marketingNav: MarketingNavItem[] = [
       badgeEn: "Start from clarity",
       titleAr: "موارد واضحة توصلك للمعلومة بسرعة",
       titleEn: "Short, clear resources instead of getting lost across many pages",
-      descAr: "جمعنا مركز المساعدة والأسئلة الشائعة والدعم والسياسات في مسار واضح، حتى تصل لما تحتاجه من أول مرة.",
-      descEn: "We grouped help, privacy, and contact paths so you can reach the right answer or channel faster.",
+      descAr: "جمعنا مركز المساعدة والأسئلة الشائعة في مسار واضح، حتى تصل لما تحتاجه من أول مرة.",
+      descEn: "We grouped help and FAQ paths so you can reach the right answer faster.",
       href: "/help-center",
       ctaAr: "افتح مركز المساعدة",
       ctaEn: "Open help center",
-      tagsAr: ["أدلة سريعة", "إجابات جاهزة", "دعم مباشر"],
-      tagsEn: ["Quick guides", "Ready answers", "Direct support"]
+      tagsAr: ["أدلة سريعة", "إجابات جاهزة", "FAQ"],
+      tagsEn: ["Quick guides", "Ready answers", "FAQ"]
     }
   },
   {
@@ -338,19 +300,11 @@ export const marketingNav: MarketingNavItem[] = [
           },
           {
             href: "/plans",
-            labelAr: "تفاصيل الباقات",
-            labelEn: "Plan Details",
-            descAr: "ما الذي يتغير حسب الخطة التجارية وحجم التفعيل.",
-            descEn: "What changes based on your commercial plan and activation level.",
+            labelAr: "الباقات",
+            labelEn: "Plans",
+            descAr: "مستويات الباقات ومتى تحتاج الترقية.",
+            descEn: "Plan tiers and when an upgrade makes sense.",
             icon: ReceiptText
-          },
-          {
-            href: "/request-demo",
-            labelAr: "ابدأ مع طاقم",
-            labelEn: "Start with Taqam",
-            descAr: "احجز جلسة مناسبة لفريقك قبل الإطلاق الفعلي.",
-            descEn: "Book the right kickoff session for your team before launch.",
-            icon: Rocket
           }
         ]
       }
@@ -369,6 +323,4 @@ export const marketingNav: MarketingNavItem[] = [
       tagsEn: ["Contact", "Support", "Policies"]
     }
   },
-  { href: "/pricing", labelAr: "الأسعار", labelEn: "Pricing" },
-  { href: "/careers", labelAr: "الوظائف", labelEn: "Careers" }
 ];

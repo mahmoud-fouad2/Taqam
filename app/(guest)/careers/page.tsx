@@ -68,9 +68,9 @@ const differentiatorCards: DifferentiatorCard[] = [
     titleAr: "تقديم مباشر ومتكامل",
     titleEn: "Direct integrated applications",
     descAr:
-      "أي طلب يصل مباشرة إلى قاعدة البيانات وإلى لوحة المتقدمين داخل الشركة المعنية مع إشعارات بريدية عند تفعيل SMTP.",
+      "أي طلب تقديم يصل مباشرة إلى فريق التوظيف داخل الشركة المعنية ويمكن متابعته من لوحة التوظيف.",
     descEn:
-      "Every application lands directly in the database and the tenant's applicants dashboard, with optional email alerts when SMTP is enabled."
+      "Each application reaches the hiring company directly and can be followed up from the recruitment dashboard."
   }
 ].map((card) => {
   const claim = careersDifferentiatorBySlot.get(card.slot);
@@ -258,10 +258,10 @@ export default async function CareersPage({
                     </div>
                     <div>
                       <p className="text-foreground text-sm font-bold">
-                        {isAr ? "فرص لا تنتهي" : "Endless opportunities"}
+                        {isAr ? "فرص جديدة" : "New opportunities"}
                       </p>
                       <p className="text-muted-foreground text-xs font-medium">
-                        {isAr ? "التحق بأفضل الشركات" : "Join the best companies"}
+                        {isAr ? "استعرض وظائف الشركات" : "Browse hiring companies"}
                       </p>
                     </div>
                   </div>
@@ -314,8 +314,8 @@ export default async function CareersPage({
                         ? `نتائج البحث عن: ${query}`
                         : `Search results for: ${query}`
                       : isAr
-                        ? "وظائف حقيقية مأخوذة مباشرة من لوحات الشركات داخل طاقم."
-                        : "Real roles pulled directly from company dashboards inside Taqam."}
+                        ? "وظائف منشورة من الشركات على طاقم."
+                        : "Roles published by companies using Taqam."}
                 </p>
                 {hasFilters ? (
                   <div className="mt-3 flex flex-wrap gap-2">

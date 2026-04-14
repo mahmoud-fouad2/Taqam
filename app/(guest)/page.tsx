@@ -573,8 +573,8 @@ export default async function LandingPage({
             </h2>
             <p className="text-muted-foreground/80 mx-auto mt-3 max-w-xl text-base sm:mt-4 sm:text-lg">
               {isAr
-                ? "وحدة واحدة متكاملة بدلاً من أدوات متعددة"
-                : "One integrated platform instead of multiple disconnected tools"}
+                ? "مسار واحد بدل أدوات متعددة"
+                : "One hub instead of multiple disconnected tools"}
             </p>
           </div>
 
@@ -778,7 +778,7 @@ export default async function LandingPage({
                 }`}>
                 {plan.popular && (
                   <div className="bg-primary text-primary-foreground px-4 py-1.5 text-center text-xs font-bold tracking-wide uppercase">
-                    ⭐ {isAr ? "الأكثر طلبًا" : "Most popular"}
+                    {isAr ? "الأكثر اختيارًا" : "Popular"}
                   </div>
                 )}
                 <div className="flex flex-1 flex-col p-6">
@@ -845,13 +845,13 @@ export default async function LandingPage({
           <div className="mx-auto mb-8 max-w-2xl text-center">
             <h3 className="text-xl font-bold">
               {isAr
-                ? "تكاملات موثقة اليوم واتصالات مخصصة للمؤسسات"
-                : "Verified integrations today, custom enterprise connections on request"}
+                ? "تكاملات متاحة الآن وتكاملات تُجهّز للمؤسسات"
+                : "Available integrations and enterprise connections"}
             </h3>
             <p className="text-muted-foreground mt-2 text-sm">
               {isAr
-                ? "نُظهر هنا ما هو جاهز فعلياً الآن، ونفصل بوضوح ما يحتاج تهيئة مخصصة ضمن مشاريع المؤسسات."
-                : "This section separates what is truly live today from integrations that are delivered as custom enterprise work."}
+                ? "نعرض التكاملات المتاحة حالياً. بعض التكاملات تتطلب تهيئة على مستوى المؤسسة حسب الاحتياج."
+                : "This list includes what's available today. Some integrations require enterprise-specific setup."}
             </p>
           </div>
           <div className="mx-auto grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-2 lg:gap-3.5 xl:grid-cols-3">
@@ -865,15 +865,18 @@ export default async function LandingPage({
                 }`}>
                 <div className="bg-background/85 mx-auto w-full rounded-[1.45rem] p-2">
                   <div
-                    className={`relative aspect-[1.08/1] w-full overflow-hidden rounded-[1.15rem] border border-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${item.frameClassName}`}>
-                    <Image
-                      src={item.logoSrc}
-                      alt={isAr ? item.name.ar : item.name.en}
-                      fill
-                      sizes="(max-width: 640px) 80vw, (max-width: 1280px) 40vw, 20vw"
-                      unoptimized
-                      className={`scale-[0.84] rounded-[0.95rem] transition-transform duration-300 group-hover:scale-[0.88] ${item.imageClassName}`}
-                    />
+                    className={`relative aspect-[16/10] w-full overflow-hidden rounded-[1.15rem] border border-black/5 shadow-[inset_0_1px_0_rgba(255,255,255,0.85)] ${item.frameClassName}`}>
+                    <div className="flex h-full w-full items-center justify-center p-5">
+                      <Image
+                        src={item.logoSrc}
+                        alt={isAr ? item.name.ar : item.name.en}
+                        width={480}
+                        height={300}
+                        sizes="(max-width: 640px) 80vw, (max-width: 1280px) 40vw, 20vw"
+                        unoptimized
+                        className={`h-full w-full rounded-[0.95rem] object-contain transition-transform duration-300 group-hover:scale-[1.02] ${item.imageClassName}`}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="mt-2 text-center">
@@ -916,12 +919,12 @@ export default async function LandingPage({
               {isAr ? "ابدأ اليوم" : "Get started today"}
             </p>
             <h2 className="text-3xl font-extrabold text-slate-950 sm:text-4xl dark:text-white">
-              {isAr ? "جاهز لتحويل إدارة فريقك؟" : "Ready to transform your HR?"}
+              {isAr ? "هل تريد تجربة المنصة؟" : "Want to try the platform?"}
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-base text-slate-600 dark:text-white/80">
               {isAr
-                ? "احصل على عرض تجريبي مجاني وشاهد كيف يمكن لطاقم توفير وقتك وتقليل الأخطاء وزيادة كفاءة فريق الموارد البشرية."
-                : "Get a free demo and see how Taqam saves time, reduces errors, and boosts your HR team's efficiency."}
+                ? "احجز جلسة تعريف قصيرة لنراجع معك كيف تعمل وحدات الموارد البشرية والحضور والرواتب ضمن سير عمل واحد."
+                : "Schedule a short walkthrough to see how HR, attendance, and payroll fit into one workflow."}
             </p>
             <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link href={`${p}/request-demo`}>
@@ -929,7 +932,7 @@ export default async function LandingPage({
                   size="lg"
                   variant="brand"
                   className="h-12 gap-2 px-8 text-base font-semibold shadow-lg">
-                  {isAr ? "طلب عرض تجريبي مجاني" : "Request a free demo"}
+                  {isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough"}
                   <ArrowLeft className="h-4 w-4 rtl:rotate-180" />
                 </Button>
               </Link>
@@ -944,8 +947,8 @@ export default async function LandingPage({
             </div>
             <p className="mt-5 text-xs text-slate-500 dark:text-white/60">
               {isAr
-                ? "لا حاجة لبطاقة ائتمانية • إعداد في 24 ساعة • دعم فني مجاني"
-                : "No credit card required • Setup in 24h • Free technical support"}
+                ? "لا حاجة لبطاقة ائتمانية • إعداد سريع • دعم فني متاح"
+                : "No credit card required • Fast setup • Support available"}
             </p>
           </div>
         </FadeIn>

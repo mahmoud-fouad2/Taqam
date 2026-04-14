@@ -1,6 +1,6 @@
 /**
  * Request Demo / Subscription Request Page
- * صفحة طلب اشتراك / عرض تجريبي
+ * صفحة طلب اشتراك / جلسة تعريف
  */
 
 import type { Metadata } from "next";
@@ -25,8 +25,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
   return marketingMetadata({
     path: "/request-demo",
-    titleAr: "طلب عرض تجريبي | طاقم",
-    titleEn: "Request a Demo | Taqam",
+    titleAr: "احجز جلسة تعريف | طاقم",
+    titleEn: "Schedule a walkthrough | Taqam",
     descriptionAr: siteContent.requestDemo.description.ar,
     descriptionEn: siteContent.requestDemo.description.en
   });
@@ -54,15 +54,15 @@ export default async function RequestDemoPage() {
           pageSchema({
             url: pageUrl,
             locale,
-            title: isAr ? "طلب عرض تجريبي" : "Request a Demo",
+            title: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
             description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
             type: "ContactPage",
-            about: isAr ? "طلب عرض تجريبي لمنصة طاقم" : "Request a Taqam product demo"
+            about: isAr ? "جلسة تعريف لمنصة طاقم" : "Schedule a Taqam walkthrough"
           }),
           itemListSchema({
             url: pageUrl,
             locale,
-            name: isAr ? "أسباب طلب العرض" : "Demo request highlights",
+            name: isAr ? "أهم ما سنغطيه" : "Walkthrough highlights",
             description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
             items: highlights.map((highlight) => ({
               name: highlight.title,

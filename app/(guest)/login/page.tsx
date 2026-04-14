@@ -78,13 +78,13 @@ export default async function LoginPageV1() {
                 <div className="mt-6 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-muted-foreground text-sm">
                     {locale === "ar"
-                      ? "تحتاج حسابًا جديدًا أو عرضًا سريعًا؟"
+                      ? "تحتاج حسابًا جديدًا أو جلسة تعريف قصيرة؟"
                       : "Need a new account or a quick walkthrough?"}
                   </p>
                   <div className="flex flex-col gap-2 sm:flex-row">
                     <Button asChild variant="brandOutline" className="h-10 rounded-xl">
                       <Link href={`${prefix}/request-demo`}>
-                        {locale === "ar" ? "طلب عرض تجريبي" : "Request a demo"}
+                        {locale === "ar" ? "احجز جلسة تعريف" : "Schedule a walkthrough"}
                       </Link>
                     </Button>
                     <Button asChild variant="ghost" className="h-10 rounded-xl">

@@ -248,7 +248,7 @@ export default async function TermsPage() {
             { href: `${p}/support`, label: isAr ? "تواصل معنا" : "Contact us", variant: "outline" },
             {
               href: `${p}/request-demo`,
-              label: isAr ? "اطلب عرضًا" : "Request a demo",
+              label: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
               variant: "brand"
             }
           ]}
