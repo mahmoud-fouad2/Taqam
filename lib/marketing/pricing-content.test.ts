@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   fallbackComparison,
   fallbackPlans,
+  getPlanCommercialDifferentiator,
   getPricingMarketingContent,
   getPricingPlanTagline
 } from "@/lib/marketing/pricing";
@@ -93,5 +94,23 @@ describe("marketing pricing content", () => {
       expect(tagline.ar.trim().length).toBeGreaterThan(0);
       expect(tagline.en.trim().length).toBeGreaterThan(0);
     }
+  });
+
+  it("surfaces the careers portal as a commercial differentiator in the right plans", () => {
+    const starter = fallbackPlans.find((plan) => plan.planType === "BASIC");
+    const business = fallbackPlans.find((plan) => plan.planType === "PROFESSIONAL");
+    const enterprise = fallbackPlans.find((plan) => plan.planType === "ENTERPRISE");
+
+    expect(starter).toBeDefined();
+    expect(business).toBeDefined();
+    expect(enterprise).toBeDefined();
+
+    expect(getPlanCommercialDifferentiator(starter!, fallbackComparison)).toBeNull();
+    expect(getPlanCommercialDifferentiator(business!, fallbackComparison)?.ar).toContain(
+      "بوابة التوظيف"
+    );
+    expect(getPlanCommercialDifferentiator(enterprise!, fallbackComparison)?.en).toContain(
+      "careers portal"
+    );
   });
 });

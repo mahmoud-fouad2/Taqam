@@ -1,7 +1,12 @@
 
 
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+import {
+  readCommercialContent,
+  readCommercialContentTimestamp,
+  writeCommercialContent
+} from "@/lib/marketing/commercial-content-storage";
 
 export interface MarketingPricingPlan {
   slug: string;
@@ -31,6 +36,9 @@ export interface LocalizedMarketingText {
   ar: string;
   en: string;
 }
+
+const RECRUITMENT_DIFFERENTIATOR_PATTERN =
+  /(بوابة التوظيف|التوظيف|المتقدمين|careers portal|applicant|recruitment)/i;
 
 export interface PricingMarketingContent {
   pricingPage: {
@@ -92,6 +100,10 @@ const draftPricingMarketingContentFilePath = path.join(
   "data",
   "pricing-marketing-content.draft.json"
 );
+const publishedPricingMarketingContentRemoteKey =
+  "commercial-content/pricing-marketing-content.published.json";
+const draftPricingMarketingContentRemoteKey =
+  "commercial-content/pricing-marketing-content.draft.json";
 
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
@@ -639,33 +651,25 @@ function normalizePricingMarketingContent(value: unknown): PricingMarketingConte
   };
 }
 
-async function readPricingMarketingContentFile(filePath: string): Promise<PricingMarketingContent | null> {
-  try {
-    const raw = await readFile(filePath, "utf8");
-    return normalizePricingMarketingContent(JSON.parse(raw));
-  } catch {
-    return null;
-  }
-}
-
-async function readPricingMarketingTimestamp(filePath: string): Promise<string | null> {
-  try {
-    const result = await stat(filePath);
-    return result.mtime.toISOString();
-  } catch {
-    return null;
-  }
-}
-
 export async function getPricingMarketingContent(
   version: "draft" | "published" = "published"
 ): Promise<PricingMarketingContent> {
   const published =
-    (await readPricingMarketingContentFile(publishedPricingMarketingContentFilePath)) ??
+    (await readCommercialContent({
+      filePath: publishedPricingMarketingContentFilePath,
+      remoteKey: publishedPricingMarketingContentRemoteKey,
+      normalize: normalizePricingMarketingContent
+    })) ??
     pricingMarketingContent;
 
   if (version === "draft") {
-    return (await readPricingMarketingContentFile(draftPricingMarketingContentFilePath)) ?? published;
+    return (
+      (await readCommercialContent({
+        filePath: draftPricingMarketingContentFilePath,
+        remoteKey: draftPricingMarketingContentRemoteKey,
+        normalize: normalizePricingMarketingContent
+      })) ?? published
+    );
   }
 
   return published;
@@ -675,8 +679,14 @@ export async function getPricingMarketingContentAdminState(): Promise<PricingMar
   const [draft, published, lastDraftSavedAt, lastPublishedAt] = await Promise.all([
     getPricingMarketingContent("draft"),
     getPricingMarketingContent("published"),
-    readPricingMarketingTimestamp(draftPricingMarketingContentFilePath),
-    readPricingMarketingTimestamp(publishedPricingMarketingContentFilePath)
+    readCommercialContentTimestamp({
+      filePath: draftPricingMarketingContentFilePath,
+      remoteKey: draftPricingMarketingContentRemoteKey
+    }),
+    readCommercialContentTimestamp({
+      filePath: publishedPricingMarketingContentFilePath,
+      remoteKey: publishedPricingMarketingContentRemoteKey
+    })
   ]);
 
   return {
@@ -692,24 +702,22 @@ export async function savePricingMarketingContentDraft(
   content: PricingMarketingContent
 ): Promise<PricingMarketingContent> {
   const normalized = normalizePricingMarketingContent(content);
-  await mkdir(path.dirname(draftPricingMarketingContentFilePath), { recursive: true });
-  await writeFile(
-    draftPricingMarketingContentFilePath,
-    `${JSON.stringify(normalized, null, 2)}\n`,
-    "utf8"
-  );
+  await writeCommercialContent({
+    filePath: draftPricingMarketingContentFilePath,
+    remoteKey: draftPricingMarketingContentRemoteKey,
+    value: normalized
+  });
 
   return normalized;
 }
 
 export async function publishPricingMarketingContent(): Promise<PricingMarketingContent> {
   const draft = await getPricingMarketingContent("draft");
-  await mkdir(path.dirname(publishedPricingMarketingContentFilePath), { recursive: true });
-  await writeFile(
-    publishedPricingMarketingContentFilePath,
-    `${JSON.stringify(draft, null, 2)}\n`,
-    "utf8"
-  );
+  await writeCommercialContent({
+    filePath: publishedPricingMarketingContentFilePath,
+    remoteKey: publishedPricingMarketingContentRemoteKey,
+    value: draft
+  });
 
   return draft;
 }
@@ -739,6 +747,46 @@ export function getPricingPlanTagline(
   }
 
   return taglines.basic;
+}
+
+function isComparisonCapabilityIncludedInPlan(
+  plan: Pick<MarketingPricingPlan, "planType">,
+  row: Pick<MarketingPricingComparisonRow, "inStarter" | "inBusiness" | "inEnterprise">
+) {
+  if (plan.planType === "ENTERPRISE") {
+    return row.inEnterprise;
+  }
+
+  if (plan.planType === "PROFESSIONAL") {
+    return row.inBusiness;
+  }
+
+  return row.inStarter;
+}
+
+export function getPlanCommercialDifferentiator(
+  plan: Pick<MarketingPricingPlan, "planType" | "featuresAr" | "featuresEn">,
+  comparison: MarketingPricingComparisonRow[]
+): LocalizedMarketingText | null {
+  const hasRecruitmentFeature = [...plan.featuresAr, ...plan.featuresEn].some((feature) =>
+    RECRUITMENT_DIFFERENTIATOR_PATTERN.test(feature)
+  );
+
+  const hasRecruitmentComparisonCapability = comparison.some(
+    (row) =>
+      isComparisonCapabilityIncludedInPlan(plan, row) &&
+      (RECRUITMENT_DIFFERENTIATOR_PATTERN.test(row.featureAr) ||
+        RECRUITMENT_DIFFERENTIATOR_PATTERN.test(row.featureEn))
+  );
+
+  if (!hasRecruitmentFeature && !hasRecruitmentComparisonCapability) {
+    return null;
+  }
+
+  return {
+    ar: "ميزة تفاضلية: بوابة التوظيف وبورتال الوظائف",
+    en: "Differentiator: careers portal and recruiting surface"
+  };
 }
 
 export async function getPricingData() {

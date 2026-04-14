@@ -10,7 +10,7 @@ import {
   AccordionTrigger
 } from "@/components/ui/accordion";
 import { JsonLd } from "@/components/marketing/json-ld";
-import { faqCategories } from "@/lib/marketing/faq";
+import { getFaqCategories } from "@/lib/marketing/faq";
 import { faqSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -32,8 +32,9 @@ export default async function FaqPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const categories = await getFaqCategories();
 
-  const allFaqs = faqCategories.flatMap((c) =>
+  const allFaqs = categories.flatMap((c) =>
     c.faqs.map((f) => ({ q: isAr ? f.qAr : f.qEn, a: isAr ? f.aAr : f.aEn }))
   );
 
@@ -64,7 +65,7 @@ export default async function FaqPage() {
             }
           ]}
           stats={[
-            { value: `${faqCategories.length}`, label: isAr ? "فئات" : "Categories" },
+            { value: `${categories.length}`, label: isAr ? "فئات" : "Categories" },
             { value: `${allFaqs.length}+`, label: isAr ? "إجابة" : "Answers" },
             { value: isAr ? "ثنائي اللغة" : "Bilingual", label: isAr ? "اللغة" : "Language" }
           ]}
@@ -74,7 +75,7 @@ export default async function FaqPage() {
       {/* ── FAQ CATEGORIES ── */}
       <section className="container mx-auto px-4 py-14">
         <StaggerContainer className="mx-auto max-w-3xl space-y-8">
-          {faqCategories.map((cat) => (
+          {categories.map((cat) => (
             <StaggerItem key={cat.titleEn}>
               <div className="bg-card overflow-hidden rounded-2xl border shadow-sm">
                 {/* Category header */}

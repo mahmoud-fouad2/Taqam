@@ -5,8 +5,9 @@ import prisma from "@/lib/db";
 import {
   getSetupStatus,
   saveSetupStep,
-  completeSetup,
+  logSetupStepAudit,
   getSetupCompletionPercent,
+  provisionSetupDefaults,
   SETUP_STEPS,
   SETUP_TOTAL_STEPS,
   setupStep1Schema,
@@ -25,6 +26,14 @@ const stepSchemas: Record<number, z.ZodTypeAny> = {
   4: setupStep4Schema,
   5: setupStep5Schema
 };
+
+function getRequestIpAddress(req: NextRequest) {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    null
+  );
+}
 
 // GET /api/setup — return current setup status
 export async function GET(req: NextRequest) {
@@ -85,21 +94,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await saveSetupStep(auth.tenantId, body.step, parsed.data as Record<string, unknown>);
+    const previousStatus = await getSetupStatus(auth.tenantId);
 
-    // Fire-and-forget audit log (non-blocking)
-    prisma.auditLog
-      .create({
-        data: {
-          tenantId: auth.tenantId,
-          userId: auth.session.user.id,
-          action: "SETUP_STEP_SAVED",
-          entity: "SetupWizard",
-          entityId: auth.tenantId,
-          newData: { step: body.step }
-        }
-      })
-      .catch(() => {});
+    await saveSetupStep(auth.tenantId, body.step, parsed.data as Record<string, unknown>);
 
     // Apply side-effects per step
     if (body.step === 1) {
@@ -172,42 +169,22 @@ export async function POST(req: NextRequest) {
     }
 
     if (body.step === 5) {
-      const d = parsed.data as {
-        leaveDaysPerYear: number;
-        annualLeaveEnabled: boolean;
-        sickLeaveEnabled: boolean;
-      };
-      // Create default leave types if not already present
-      const existing = await prisma.leaveType.count({ where: { tenantId: auth.tenantId } });
-      if (existing === 0) {
-        if (d.annualLeaveEnabled) {
-          await prisma.leaveType.create({
-            data: {
-              name: "Annual Leave",
-              nameAr: "إجازة سنوية",
-              code: "annual",
-              defaultDays: d.leaveDaysPerYear,
-              tenantId: auth.tenantId,
-              isActive: true
-            }
-          });
-        }
-        if (d.sickLeaveEnabled) {
-          await prisma.leaveType.create({
-            data: {
-              name: "Sick Leave",
-              nameAr: "إجازة مرضية",
-              code: "sick",
-              defaultDays: 30,
-              tenantId: auth.tenantId,
-              isActive: true
-            }
-          });
-        }
-      }
+      await provisionSetupDefaults(auth.tenantId);
     }
 
     const status = await getSetupStatus(auth.tenantId);
+
+    await logSetupStepAudit({
+      tenantId: auth.tenantId,
+      userId: auth.session.user.id,
+      step: body.step,
+      previousStep: previousStatus.currentStep,
+      currentStep: status.currentStep,
+      stepData: parsed.data as Record<string, unknown>,
+      ipAddress: getRequestIpAddress(req),
+      userAgent: req.headers.get("user-agent")
+    }).catch(() => {});
+
     const response = NextResponse.json({
       ok: true,
       currentStep: status.currentStep,

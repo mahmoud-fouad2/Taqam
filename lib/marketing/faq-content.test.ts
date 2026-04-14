@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { faqCategories } from "@/lib/marketing/faq";
+import {
+  applyPricingFaqAnswers,
+  faqCategories
+} from "@/lib/marketing/faq";
+import { fallbackPlans } from "@/lib/marketing/pricing";
 
 function assertUnique(values: string[], label: string) {
   const set = new Set(values);
@@ -38,5 +42,21 @@ describe("marketing FAQ content", () => {
 
     assertUnique(allQuestionsAr, "faq questions (ar)");
     assertUnique(allQuestionsEn, "faq questions (en)");
+  });
+
+  it("keeps the pricing FAQ answer aligned with the pricing source of truth", () => {
+    const categories = applyPricingFaqAnswers(faqCategories, fallbackPlans);
+    const pricingFaq = categories
+      .flatMap((category) => category.faqs)
+      .find((faq) => faq.qEn === "What's the difference between the three plans?");
+
+    expect(pricingFaq?.aAr).toContain("الأساسية");
+    expect(pricingFaq?.aAr).toContain("الأعمال");
+    expect(pricingFaq?.aAr).toContain("المؤسسات");
+    expect(pricingFaq?.aAr).toContain("بوابة التوظيف");
+    expect(pricingFaq?.aEn).toContain("Starter");
+    expect(pricingFaq?.aEn).toContain("Business");
+    expect(pricingFaq?.aEn).toContain("Enterprise");
+    expect(pricingFaq?.aEn).toContain("pricing page");
   });
 });

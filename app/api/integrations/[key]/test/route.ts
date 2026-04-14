@@ -11,7 +11,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { decryptCredentials } from "@/lib/integrations/credentials";
+import { buildIntegrationConnectionTestResponse } from "@/lib/integrations/contracts";
+import { resolveIntegrationTestRunResult } from "@/lib/integrations/run-policy";
+import { buildIntegrationTestRunLogs } from "@/lib/integrations/structured-logs";
 
 type Params = { params: Promise<{ key: string }> };
 
@@ -37,37 +39,22 @@ export async function POST(_req: NextRequest, { params }: Params) {
     }
 
     const startedAt = new Date();
-
-    // Resolve credentials (decrypt if present)
-    const credentials = decryptCredentials(connection.credentialsEncrypted);
-    const hasCredentials = !!credentials;
-
-    // ── Run the test ────────────────────────────────────────────────────────
-
-    let runStatus: "success" | "failed" = "success";
-    let summary: string;
-    let errorMessage: string | undefined;
-
-    if (connection.mode === "MANUAL_BRIDGE") {
-      // Manual bridge: no remote API call possible — mark as active if any
-      // configuration is present, regardless of credentials
-      summary = "الربط اليدوي لا يتطلب اختبار اتصال تلقائي — تم التفعيل";
-    } else if (!hasCredentials) {
-      runStatus = "failed";
-      summary = "لا توجد بيانات اعتماد محفوظة";
-      errorMessage = "يرجى حفظ بيانات الاعتماد أولاً";
-    } else {
-      // NATIVE_API / EMBEDDED / ENTERPRISE_CUSTOM
-      // TODO: route to real provider adapters once implemented
-      summary = "تم التحقق من بيانات الاعتماد بنجاح (اختبار أساسي)";
-    }
+    const { runStatus, summary, errorMessage } = resolveIntegrationTestRunResult({
+      mode: connection.mode,
+      credentialsEncrypted: connection.credentialsEncrypted
+    });
+    const logs = buildIntegrationTestRunLogs({
+      mode: connection.mode,
+      runStatus,
+      errorMessage
+    });
 
     const finishedAt = new Date();
     const durationMs = finishedAt.getTime() - startedAt.getTime();
 
     // ── Persist run record ──────────────────────────────────────────────────
 
-    await prisma.$transaction([
+    const [run] = await prisma.$transaction([
       prisma.integrationRun.create({
         data: {
           connectionId: connection.id,
@@ -75,6 +62,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
           status: runStatus,
           summary,
           ...(errorMessage ? { errorMessage } : {}),
+          logs,
           durationMs,
           startedAt,
           finishedAt
@@ -91,13 +79,17 @@ export async function POST(_req: NextRequest, { params }: Params) {
       })
     ]);
 
-    return NextResponse.json({
-      ok: runStatus === "success",
-      status: runStatus === "success" ? "CONNECTED" : "ERROR",
-      summary,
-      durationMs,
-      ...(errorMessage ? { error: errorMessage } : {})
-    });
+    return NextResponse.json(
+      buildIntegrationConnectionTestResponse({
+        ok: runStatus === "success",
+        runId: run.id,
+        status: runStatus === "success" ? "CONNECTED" : "ERROR",
+        summary,
+        durationMs,
+        logs,
+        ...(errorMessage ? { error: errorMessage } : {})
+      })
+    );
   } catch (error) {
     logApiError("POST integration test error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

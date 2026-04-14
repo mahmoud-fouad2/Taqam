@@ -5,6 +5,7 @@ import { IconKey } from "@tabler/icons-react";
 import { getText } from "@/lib/i18n/text";
 import { getAppLocale } from "@/lib/i18n/locale";
 import prisma from "@/lib/db";
+import { sanitizeTenantSsoSettingsForClient } from "@/lib/security/tenant-sso";
 
 export async function generateMetadata() {
   const locale = await getAppLocale();
@@ -31,7 +32,7 @@ export default async function SsoSettingsPage() {
   });
 
   const settings = (tenant?.settings as Record<string, unknown> | null) ?? {};
-  const initialConfig = (settings.sso as Record<string, unknown> | undefined) ?? {};
+  const initialConfig = sanitizeTenantSsoSettingsForClient(settings.sso);
 
   return (
     <div className="space-y-6">

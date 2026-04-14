@@ -9,7 +9,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
-import { decryptCredentials } from "@/lib/integrations/credentials";
+import { buildIntegrationRetryResponse } from "@/lib/integrations/contracts";
+import {
+  getIntegrationRetryValidationError,
+  resolveIntegrationTestRunResult
+} from "@/lib/integrations/run-policy";
+import { executeIntegrationSync } from "@/lib/integrations/sync-executor";
+import { buildIntegrationTestRunLogs } from "@/lib/integrations/structured-logs";
 
 type Params = { params: Promise<{ key: string; runId: string }> };
 
@@ -23,7 +29,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
     // Verify connection belongs to tenant
     const connection = await prisma.integrationConnection.findUnique({
       where: { tenantId_providerKey: { tenantId, providerKey: key } },
-      select: { id: true, mode: true, credentialsEncrypted: true }
+      select: { id: true, mode: true, status: true, credentialsEncrypted: true }
     });
 
     if (!connection) {
@@ -33,40 +39,91 @@ export async function POST(_req: NextRequest, { params }: Params) {
     // Verify run belongs to this connection
     const originalRun = await prisma.integrationRun.findUnique({
       where: { id: runId },
-      select: { id: true, connectionId: true, operation: true, retryCount: true }
+      select: {
+        id: true,
+        connectionId: true,
+        operation: true,
+        status: true,
+        retryCount: true
+      }
     });
 
     if (!originalRun || originalRun.connectionId !== connection.id) {
       return NextResponse.json({ error: "Run not found" }, { status: 404 });
     }
 
-    const startedAt = new Date();
-    let runStatus: "success" | "failed" = "success";
-    let summary: string;
-    let errorMessage: string | undefined;
+    const retryValidationError = getIntegrationRetryValidationError({
+      operation: originalRun.operation,
+      runRecordStatus: originalRun.status,
+      retryCount: originalRun.retryCount,
+      connectionStatus: connection.status
+    });
 
-    if (originalRun.operation === "test") {
-      const credentials = decryptCredentials(connection.credentialsEncrypted);
-      if (!credentials && connection.mode !== "MANUAL_BRIDGE") {
-        runStatus = "failed";
-        summary = "لا توجد بيانات اعتماد محفوظة";
-        errorMessage = "يرجى حفظ بيانات الاعتماد أولاً";
-      } else if (connection.mode === "MANUAL_BRIDGE") {
-        summary = "الربط اليدوي لا يتطلب اختبار اتصال تلقائي — تم التفعيل";
-      } else {
-        summary = "تم التحقق من بيانات الاعتماد بنجاح (إعادة محاولة)";
-      }
-    } else if (originalRun.operation === "sync") {
-      summary =
-        connection.mode === "MANUAL_BRIDGE"
-          ? "تم تسجيل إعادة المزامنة اليدوية بنجاح"
-          : "تمت إعادة المزامنة بنجاح (وضع محاكاة)";
-    } else {
+    if (retryValidationError) {
       return NextResponse.json(
-        { error: `إعادة المحاولة غير مدعومة لعملية: ${originalRun.operation}` },
-        { status: 422 }
+        { error: retryValidationError.error },
+        { status: retryValidationError.status }
       );
     }
+
+    if (originalRun.operation === "sync") {
+      const syncResult = await executeIntegrationSync({
+        tenantId,
+        providerKey: key,
+        trigger: "retry",
+        retryContext: {
+          originalRunId: originalRun.id,
+          previousRetryCount: originalRun.retryCount,
+          connectionStatus: connection.status
+        }
+      });
+
+      if (!syncResult.ok) {
+        return NextResponse.json(
+          buildIntegrationRetryResponse({
+            ok: false,
+            runId: syncResult.runId,
+            retryCount: originalRun.retryCount + 1,
+            error: syncResult.error,
+            durationMs: syncResult.durationMs,
+            logs: syncResult.logs,
+            runStatus: syncResult.runStatus
+          }),
+          { status: syncResult.status }
+        );
+      }
+
+      return NextResponse.json(
+        buildIntegrationRetryResponse({
+          ok: true,
+          runId: syncResult.runId,
+          retryCount: originalRun.retryCount + 1,
+          summary: syncResult.summary,
+          durationMs: syncResult.durationMs,
+          logs: syncResult.logs,
+          runStatus: syncResult.runStatus
+        })
+      );
+    }
+
+    const startedAt = new Date();
+    const executionResult = resolveIntegrationTestRunResult({
+      mode: connection.mode,
+      credentialsEncrypted: connection.credentialsEncrypted,
+      isRetry: true
+    });
+
+    const { runStatus, summary, errorMessage } = executionResult;
+    const logs = buildIntegrationTestRunLogs({
+      mode: connection.mode,
+      runStatus,
+      errorMessage,
+      retryContext: {
+        originalRunId: originalRun.id,
+        previousRetryCount: originalRun.retryCount,
+        connectionStatus: connection.status
+      }
+    });
 
     const finishedAt = new Date();
     const durationMs = finishedAt.getTime() - startedAt.getTime();
@@ -79,6 +136,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
           status: runStatus,
           summary,
           ...(errorMessage ? { errorMessage } : {}),
+          logs,
           durationMs,
           retryCount: originalRun.retryCount + 1,
           startedAt,
@@ -89,20 +147,25 @@ export async function POST(_req: NextRequest, { params }: Params) {
         where: { id: connection.id },
         data: {
           status: runStatus === "success" ? "CONNECTED" : "ERROR",
-          lastHealthCheckAt:
-            originalRun.operation === "test" ? finishedAt : undefined,
-          lastSyncAt: originalRun.operation === "sync" ? finishedAt : undefined,
+          lastConnectedAt: runStatus === "success" ? finishedAt : undefined,
+          lastHealthCheckAt: finishedAt,
           lastError: runStatus === "failed" ? (errorMessage ?? null) : null
         }
       })
     ]);
 
-    return NextResponse.json({
-      ok: runStatus === "success",
-      runId: newRun.id,
-      summary,
-      durationMs
-    });
+    return NextResponse.json(
+      buildIntegrationRetryResponse({
+        ok: runStatus === "success",
+        runId: newRun.id,
+        retryCount: newRun.retryCount,
+        summary,
+        durationMs,
+        logs,
+        runStatus,
+        ...(errorMessage ? { error: errorMessage } : {})
+      })
+    );
   } catch (error) {
     logApiError("POST integration run retry error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

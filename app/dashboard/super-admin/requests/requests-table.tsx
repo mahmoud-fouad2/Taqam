@@ -95,6 +95,46 @@ function getPlanLabel(plan: SubscriptionRequest["plan"], t: LocaleText) {
   return t.pricingPlans.trial;
 }
 
+function getActivationStageLabel(
+  stage: SubscriptionRequest["activationStage"],
+  locale: "ar" | "en"
+) {
+  if (!stage) return null;
+
+  const labels: Record<NonNullable<SubscriptionRequest["activationStage"]>, { ar: string; en: string }> = {
+    lead: {
+      ar: "Lead جديد بانتظار المعالجة",
+      en: "New lead awaiting review"
+    },
+    "pending-activation": {
+      ar: "تمت الموافقة وبانتظار تفعيل المدير",
+      en: "Approved and waiting for admin activation"
+    },
+    activating: {
+      ar: "الشركة مفعلة والإعداد جارٍ",
+      en: "Company active, setup in progress"
+    },
+    active: {
+      ar: "التفعيل مكتمل والشركة تعمل",
+      en: "Activation complete and live"
+    },
+    suspended: {
+      ar: "الشركة موقوفة حالياً",
+      en: "Tenant currently suspended"
+    },
+    archived: {
+      ar: "الدورة مغلقة أو مؤرشفة",
+      en: "Lifecycle closed or archived"
+    },
+    rejected: {
+      ar: "تم رفض الطلب",
+      en: "Request rejected"
+    }
+  };
+
+  return labels[stage][locale];
+}
+
 export function RequestsTable() {
   const locale = useClientLocale();
   const t = getText(locale);
@@ -239,7 +279,20 @@ export function RequestsTable() {
         return;
       }
       toast.success(t.requests.approvedSuccess);
-      setRequests((prev) => prev.map((r) => (r.id === id ? { ...r, status: "approved" } : r)));
+      setRequests((prev) =>
+        prev.map((request) =>
+          request.id === id
+            ? {
+                ...request,
+                status: "approved",
+                tenantId: res.data?.id,
+                tenantStatus: res.data?.status,
+                activationStage:
+                  res.data?.status === "pending" ? "pending-activation" : request.activationStage
+              }
+            : request
+        )
+      );
     } catch (e) {
       toast.error(e instanceof Error ? e.message : t.requests.acceptFailed);
     } finally {
@@ -412,15 +465,22 @@ export function RequestsTable() {
                   <Badge variant="outline">{request.employeesCount ?? t.common.unspecified}</Badge>
                 </TableCell>
                 <TableCell>
-                  {(() => {
-                    const meta = getStatusMeta((request as any)?.status, t);
-                    return (
-                      <Badge variant={meta.variant} className="gap-1">
-                        {meta.icon}
-                        {meta.label}
-                      </Badge>
-                    );
-                  })()}
+                  <div className="space-y-1">
+                    {(() => {
+                      const meta = getStatusMeta((request as any)?.status, t);
+                      return (
+                        <Badge variant={meta.variant} className="gap-1">
+                          {meta.icon}
+                          {meta.label}
+                        </Badge>
+                      );
+                    })()}
+                    {request.status === "approved" && request.activationStage ? (
+                      <div className="text-muted-foreground text-xs leading-5">
+                        {getActivationStageLabel(request.activationStage, locale)}
+                      </div>
+                    ) : null}
+                  </div>
                 </TableCell>
                 <TableCell>{new Date(request.createdAt).toLocaleDateString(dateLocale)}</TableCell>
                 <TableCell>

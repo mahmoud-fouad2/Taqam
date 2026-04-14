@@ -2295,6 +2295,7 @@ model IntegrationRun {
 
   summary      String?
   errorMessage String?
+  logs         Json?
   durationMs   Int?
   retryCount   Int     @default(0)
 

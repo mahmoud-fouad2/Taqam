@@ -31,6 +31,11 @@ function createPrismaClient() {
 
 type PrismaClientExtended = ReturnType<typeof createPrismaClient>;
 
+export type PrismaTransactionClient = Omit<
+  PrismaClientExtended,
+  "$connect" | "$disconnect" | "$extends" | "$on" | "$transaction" | "$use"
+>;
+
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClientExtended | undefined;
 };

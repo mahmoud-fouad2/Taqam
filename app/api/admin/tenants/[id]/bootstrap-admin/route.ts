@@ -4,6 +4,7 @@ import { hash } from "bcryptjs";
 
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/db";
+import { ensureTenantAdminWorkspaceProfile } from "@/lib/tenant-activation";
 
 /**
  * DEV-ONLY helper endpoint.
@@ -74,7 +75,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       });
     }
 
-    return existing
+    const createdOrUpdatedUser = existing
       ? await tx.user.update({
           where: { email },
           data: {
@@ -102,6 +103,13 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
           },
           select: { id: true, email: true, role: true, status: true, tenantId: true }
         });
+
+    await ensureTenantAdminWorkspaceProfile(tx, {
+      tenantId,
+      userId: createdOrUpdatedUser.id
+    });
+
+    return createdOrUpdatedUser;
   });
 
   await prisma.auditLog.create({

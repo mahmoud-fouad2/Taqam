@@ -64,7 +64,9 @@ export type AuditAction =
   | "DATA_IMPORT"
   | "BULK_UPDATE"
   | "BULK_DELETE"
-  | "SYSTEM_CONFIG_CHANGE";
+  | "SYSTEM_CONFIG_CHANGE"
+  | "MOBILE_APP_ERROR"
+  | "MOBILE_APP_CRASH";
 
 export interface AuditLogData {
   tenantId?: string | null;

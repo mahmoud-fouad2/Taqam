@@ -3,31 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-function mapPlan(plan: string) {
-  if (plan === "ENTERPRISE") return "enterprise" as const;
-  if (plan === "PROFESSIONAL") return "business" as const;
-  if (plan === "BASIC") return "starter" as const;
-  return "trial" as const;
-}
-
-function mapRequest(r: any) {
-  return {
-    id: r.id,
-    companyName: r.companyName,
-    companyNameAr: r.companyNameAr,
-    contactName: r.contactName,
-    contactEmail: r.contactEmail,
-    contactPhone: r.contactPhone,
-    employeesCount: r.employeeCount,
-    plan: mapPlan(r.plan),
-    status: r.status === "PENDING" ? "pending" : r.status === "APPROVED" ? "approved" : "rejected",
-    createdAt: r.createdAt,
-    reviewedAt: r.processedAt,
-    tenantId: r.tenantId,
-    message: r.message
-  };
-}
+import { mapTenantRequestFromDb } from "@/lib/tenant-request-mapping";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
@@ -62,5 +38,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     }
   });
 
-  return NextResponse.json({ data: mapRequest(updated) });
+  return NextResponse.json({
+    data: mapTenantRequestFromDb({
+      ...updated,
+      tenant: null
+    })
+  });
 }

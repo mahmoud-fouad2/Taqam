@@ -10,6 +10,7 @@ import bcrypt from "bcryptjs";
 import { authOptions } from "@/lib/auth";
 import { logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
+import { ensureTenantAdminWorkspaceProfile } from "@/lib/tenant-activation";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -161,6 +162,28 @@ export async function PUT(request: NextRequest, context: RouteContext) {
           where: { id: tenantId, status: "PENDING" },
           data: { status: "ACTIVE" }
         });
+
+        const adminWorkspaceProfile = await ensureTenantAdminWorkspaceProfile(tx, {
+          tenantId,
+          userId: admin.id
+        });
+
+        if (adminWorkspaceProfile && adminWorkspaceProfile.action !== "existing") {
+          await tx.auditLog.create({
+            data: {
+              tenantId,
+              userId: session.user.id ?? null,
+              action: "TENANT_ADMIN_EMPLOYEE_LINKED",
+              entity: "Employee",
+              entityId: adminWorkspaceProfile.employeeId,
+              newData: {
+                source: "super-admin-admin-password-update",
+                action: adminWorkspaceProfile.action,
+                adminUserId: adminWorkspaceProfile.adminUserId
+              }
+            }
+          });
+        }
       }
     });
 

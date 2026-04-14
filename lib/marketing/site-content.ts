@@ -1,5 +1,10 @@
-import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
+
+import {
+  readCommercialContent,
+  readCommercialContentTimestamp,
+  writeCommercialContent
+} from "@/lib/marketing/commercial-content-storage";
 
 export type LocalizedText = {
   ar: string;
@@ -62,6 +67,8 @@ export type PlatformSiteContentAdminState = {
 
 const publishedContentFilePath = path.join(process.cwd(), "data", "platform-site-content.json");
 const draftContentFilePath = path.join(process.cwd(), "data", "platform-site-content.draft.json");
+const publishedContentRemoteKey = "commercial-content/platform-site-content.published.json";
+const draftContentRemoteKey = "commercial-content/platform-site-content.draft.json";
 
 const defaultContent: PlatformSiteContent = {
   siteNameAr: "طاقم",
@@ -338,31 +345,24 @@ export async function getPlatformSiteContent(): Promise<PlatformSiteContent> {
   return getPlatformSiteContentVersion("published");
 }
 
-async function readNormalizedContentFile(filePath: string): Promise<PlatformSiteContent | null> {
-  try {
-    const raw = await readFile(filePath, "utf8");
-    return normalizeContent(JSON.parse(raw));
-  } catch {
-    return null;
-  }
-}
-
-async function readFileTimestamp(filePath: string): Promise<string | null> {
-  try {
-    const result = await stat(filePath);
-    return result.mtime.toISOString();
-  } catch {
-    return null;
-  }
-}
-
 export async function getPlatformSiteContentVersion(
   version: "draft" | "published"
 ): Promise<PlatformSiteContent> {
-  const published = (await readNormalizedContentFile(publishedContentFilePath)) ?? defaultContent;
+  const published =
+    (await readCommercialContent({
+      filePath: publishedContentFilePath,
+      remoteKey: publishedContentRemoteKey,
+      normalize: normalizeContent
+    })) ?? defaultContent;
 
   if (version === "draft") {
-    return (await readNormalizedContentFile(draftContentFilePath)) ?? published;
+    return (
+      (await readCommercialContent({
+        filePath: draftContentFilePath,
+        remoteKey: draftContentRemoteKey,
+        normalize: normalizeContent
+      })) ?? published
+    );
   }
 
   return published;
@@ -372,8 +372,14 @@ export async function getPlatformSiteContentAdminState(): Promise<PlatformSiteCo
   const [draft, published, lastDraftSavedAt, lastPublishedAt] = await Promise.all([
     getPlatformSiteContentVersion("draft"),
     getPlatformSiteContentVersion("published"),
-    readFileTimestamp(draftContentFilePath),
-    readFileTimestamp(publishedContentFilePath)
+    readCommercialContentTimestamp({
+      filePath: draftContentFilePath,
+      remoteKey: draftContentRemoteKey
+    }),
+    readCommercialContentTimestamp({
+      filePath: publishedContentFilePath,
+      remoteKey: publishedContentRemoteKey
+    })
   ]);
 
   return {
@@ -387,15 +393,21 @@ export async function getPlatformSiteContentAdminState(): Promise<PlatformSiteCo
 
 export async function savePlatformSiteContentDraft(content: PlatformSiteContent): Promise<PlatformSiteContent> {
   const normalized = normalizeContent(content);
-  await mkdir(path.dirname(draftContentFilePath), { recursive: true });
-  await writeFile(draftContentFilePath, `${JSON.stringify(normalized, null, 2)}\n`, "utf8");
+  await writeCommercialContent({
+    filePath: draftContentFilePath,
+    remoteKey: draftContentRemoteKey,
+    value: normalized
+  });
   return normalized;
 }
 
 export async function publishPlatformSiteContent(): Promise<PlatformSiteContent> {
   const draft = await getPlatformSiteContentVersion("draft");
-  await mkdir(path.dirname(publishedContentFilePath), { recursive: true });
-  await writeFile(publishedContentFilePath, `${JSON.stringify(draft, null, 2)}\n`, "utf8");
+  await writeCommercialContent({
+    filePath: publishedContentFilePath,
+    remoteKey: publishedContentRemoteKey,
+    value: draft
+  });
   return draft;
 }
 

@@ -11,6 +11,7 @@ import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import {
+  getPlanCommercialDifferentiator,
   getPricingData,
   getPricingMarketingContent,
   getPricingPlanTagline
@@ -116,6 +117,14 @@ export default async function PlansPage() {
                     ? Sparkles
                     : ShieldCheck;
               const price = plan.priceMonthly != null ? Number(plan.priceMonthly) : null;
+              const differentiator = getPlanCommercialDifferentiator(
+                {
+                  planType: plan.planType,
+                  featuresAr: plan.highlightsAr,
+                  featuresEn: plan.highlightsEn
+                },
+                comparison
+              );
 
               return (
                 <StaggerItem key={plan.nameEn}>
@@ -143,6 +152,11 @@ export default async function PlansPage() {
                       <p className="text-primary mt-1 text-sm font-medium">
                         {isAr ? plan.tagAr : plan.tagEn}
                       </p>
+                      {differentiator ? (
+                        <div className="bg-primary/10 text-primary mt-3 inline-flex w-fit rounded-full border border-primary/20 px-3 py-1 text-xs font-medium">
+                          {isAr ? differentiator.ar : differentiator.en}
+                        </div>
+                      ) : null}
                       <p className="text-muted-foreground mt-3 text-sm font-medium">
                         {price != null
                           ? isAr

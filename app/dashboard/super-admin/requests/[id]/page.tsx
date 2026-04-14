@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { RequestActions } from "./request-actions";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { getText } from "@/lib/i18n/text";
+import { deriveTenantRequestActivationStage } from "@/lib/tenant-request-mapping";
 
 type LocaleText = ReturnType<typeof getText>;
 
@@ -35,6 +36,29 @@ function mapRequestPlan(plan: string): "trial" | "starter" | "business" | "enter
   return "trial";
 }
 
+function getActivationStageLabel(
+  stage: ReturnType<typeof deriveTenantRequestActivationStage>,
+  locale: "ar" | "en"
+) {
+  const labels = {
+    lead: { ar: "Lead بانتظار المراجعة", en: "Lead awaiting review" },
+    "pending-activation": {
+      ar: "تم إنشاء الشركة وبانتظار تفعيل مديرها",
+      en: "Tenant created and waiting for admin activation"
+    },
+    activating: {
+      ar: "الحساب فعّال والإعداد ما زال جارياً",
+      en: "Workspace active, setup still in progress"
+    },
+    active: { ar: "التفعيل مكتمل والشركة جاهزة", en: "Activation complete and ready" },
+    suspended: { ar: "الشركة موقوفة حالياً", en: "Tenant currently suspended" },
+    archived: { ar: "الطلب مؤرشف أو مغلق", en: "Request archived or closed" },
+    rejected: { ar: "تم رفض الطلب", en: "Request rejected" }
+  } as const;
+
+  return labels[stage][locale];
+}
+
 export default async function SuperAdminRequestDetailsPage({
   params
 }: {
@@ -53,7 +77,19 @@ export default async function SuperAdminRequestDetailsPage({
   const item = await prisma.tenantRequest.findUnique({ where: { id } });
   if (!item) notFound();
 
+  const tenantSnapshot = item.tenantId
+    ? await prisma.tenant.findUnique({
+        where: { id: item.tenantId },
+        select: { status: true, setupCompletedAt: true }
+      })
+    : null;
+
   const status = mapStatus(item.status, t);
+  const activationStage = deriveTenantRequestActivationStage({
+    requestStatus: item.status,
+    tenantStatus: tenantSnapshot?.status,
+    setupCompletedAt: tenantSnapshot?.setupCompletedAt
+  });
 
   return (
     <div className="space-y-6">
@@ -109,6 +145,12 @@ export default async function SuperAdminRequestDetailsPage({
               <div className="text-sm font-medium">{t.common.updatedAt}</div>
               <div className="text-muted-foreground text-sm">
                 {item.processedAt ? item.processedAt.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US") : "—"}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm font-medium">{locale === "ar" ? "مرحلة التفعيل" : "Activation stage"}</div>
+              <div className="text-muted-foreground text-sm">
+                {getActivationStageLabel(activationStage, locale)}
               </div>
             </div>
           </div>

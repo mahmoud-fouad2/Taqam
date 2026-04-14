@@ -8,6 +8,9 @@
 import { z } from "zod";
 import prisma from "@/lib/db";
 import type { AttendanceStatus, JobPostingStatus } from "@prisma/client";
+import { getSetupAuditStepSnapshot } from "@/lib/setup-audit";
+import { buildSetupDefaultLeaveTypes } from "@/lib/setup-defaults";
+import { ensureEmployeeWorkspaceProfile } from "@/lib/employees/workspace-provisioning";
 
 // ── Step definitions ──────────────────────────────────────────────────────────
 
@@ -27,6 +30,97 @@ export const SETUP_STEPS: { key: SetupStepKey; titleAr: string; titleEn: string 
   { key: "first-employee", titleAr: "أول موظف", titleEn: "First employee" },
   { key: "policies", titleAr: "السياسات الأساسية", titleEn: "Basic policies" }
 ];
+
+function getSetupStepDefinition(step: number) {
+  return SETUP_STEPS[Math.max(0, Math.min(SETUP_STEPS.length - 1, step - 1))] ?? null;
+}
+
+export async function logSetupStepAudit({
+  tenantId,
+  userId,
+  step,
+  previousStep,
+  currentStep,
+  stepData,
+  ipAddress,
+  userAgent
+}: {
+  tenantId: string;
+  userId?: string | null;
+  step: number;
+  previousStep: number;
+  currentStep: number;
+  stepData: Record<string, unknown>;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  const definition = getSetupStepDefinition(step);
+
+  await prisma.auditLog.create({
+    data: {
+      tenantId,
+      userId: userId ?? null,
+      action: "SETUP_STEP_SAVED",
+      entity: "SetupWizard",
+      entityId: tenantId,
+      oldData: {
+        previousStep,
+        previousCompletionPercent: getSetupCompletionPercent(previousStep)
+      },
+      newData: {
+        step,
+        stepKey: definition?.key ?? null,
+        stepTitleAr: definition?.titleAr ?? null,
+        stepTitleEn: definition?.titleEn ?? null,
+        currentStep,
+        completionPercent: getSetupCompletionPercent(currentStep),
+        stepData: getSetupAuditStepSnapshot(step, stepData)
+      },
+      ipAddress: ipAddress ?? null,
+      userAgent: userAgent ?? null
+    }
+  });
+}
+
+export async function logSetupCompletionAudit({
+  tenantId,
+  userId,
+  previousStep,
+  completedAt,
+  setupData,
+  ipAddress,
+  userAgent
+}: {
+  tenantId: string;
+  userId?: string | null;
+  previousStep: number;
+  completedAt: Date;
+  setupData: SetupData;
+  ipAddress?: string | null;
+  userAgent?: string | null;
+}): Promise<void> {
+  await prisma.auditLog.create({
+    data: {
+      tenantId,
+      userId: userId ?? null,
+      action: "SETUP_COMPLETED",
+      entity: "SetupWizard",
+      entityId: tenantId,
+      oldData: {
+        previousStep,
+        previousCompletionPercent: getSetupCompletionPercent(previousStep)
+      },
+      newData: {
+        currentStep: SETUP_TOTAL_STEPS,
+        completionPercent: 100,
+        completedAt: completedAt.toISOString(),
+        completedSteps: Object.keys(setupData).sort()
+      },
+      ipAddress: ipAddress ?? null,
+      userAgent: userAgent ?? null
+    }
+  });
+}
 
 // ── Zod schemas for per-step payloads ─────────────────────────────────────────
 
@@ -144,7 +238,44 @@ export async function saveSetupStep(
   });
 }
 
+export async function ensureSetupFirstEmployeeRecord(tenantId: string): Promise<void> {
+  const tenant = await prisma.tenant.findUnique({
+    where: { id: tenantId },
+    select: { setupData: true }
+  });
+
+  if (!tenant) {
+    throw new Error("Tenant not found");
+  }
+
+  const setupData = (tenant.setupData as SetupData | null) ?? {};
+  const step4 = setupData.step4;
+
+  if (!step4 || step4.action !== "invite") {
+    return;
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await ensureEmployeeWorkspaceProfile(tx, {
+      tenantId,
+      email: step4.email,
+      firstName: step4.firstName,
+      lastName: step4.lastName
+    });
+  });
+}
+
+export async function ensureSetupCompletionArtifacts(tenantId: string, userId?: string): Promise<void> {
+  await ensureSetupFirstEmployeeRecord(tenantId);
+  await provisionSetupDefaults(tenantId);
+  if (userId) {
+    await seedSampleSetupData(tenantId, userId);
+  }
+}
+
 export async function completeSetup(tenantId: string, userId?: string): Promise<void> {
+  await ensureSetupCompletionArtifacts(tenantId, userId);
+
   await prisma.tenant.update({
     where: { id: tenantId },
     data: {
@@ -152,10 +283,6 @@ export async function completeSetup(tenantId: string, userId?: string): Promise<
       setupCompletedAt: new Date()
     }
   });
-  await provisionSetupDefaults(tenantId);
-  if (userId) {
-    await seedSampleSetupData(tenantId, userId);
-  }
 }
 
 /**
@@ -171,49 +298,25 @@ export async function provisionSetupDefaults(tenantId: string): Promise<void> {
   const setupData = (tenant?.setupData as SetupData | null) ?? {};
   const step5 = setupData.step5;
 
-  // ── Leave types ──────────────────────────────────────────────────────────
-  const leaveCount = await prisma.leaveType.count({ where: { tenantId } });
-  if (leaveCount === 0) {
-    const annualDays = step5?.leaveDaysPerYear ?? 21;
-    const annualEnabled = step5?.annualLeaveEnabled ?? true;
-    const sickEnabled = step5?.sickLeaveEnabled ?? true;
+  const existingLeaveTypeCodes = new Set(
+    (
+      await prisma.leaveType.findMany({
+        where: { tenantId },
+        select: { code: true }
+      })
+    ).map((leaveType) => leaveType.code)
+  );
 
+  const missingLeaveTypes = buildSetupDefaultLeaveTypes(step5)
+    .filter((leaveType) => !existingLeaveTypeCodes.has(leaveType.code))
+    .map((leaveType) => ({
+      ...leaveType,
+      tenantId
+    }));
+
+  if (missingLeaveTypes.length > 0) {
     await prisma.leaveType.createMany({
-      data: [
-        ...(annualEnabled
-          ? [
-              {
-                name: "Annual Leave",
-                nameAr: "إجازة سنوية",
-                code: "annual",
-                defaultDays: annualDays,
-                tenantId,
-                isActive: true
-              }
-            ]
-          : []),
-        ...(sickEnabled
-          ? [
-              {
-                name: "Sick Leave",
-                nameAr: "إجازة مرضية",
-                code: "sick",
-                defaultDays: 30,
-                tenantId,
-                isActive: true
-              }
-            ]
-          : []),
-        // Emergency leave is always provisioned as a baseline
-        {
-          name: "Emergency Leave",
-          nameAr: "إجازة طارئة",
-          code: "emergency",
-          defaultDays: 3,
-          tenantId,
-          isActive: true
-        }
-      ],
+      data: missingLeaveTypes,
       skipDuplicates: true
     });
   }

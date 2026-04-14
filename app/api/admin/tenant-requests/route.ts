@@ -3,13 +3,7 @@ import { getServerSession } from "next-auth";
 
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-
-function mapPlan(plan: string) {
-  if (plan === "ENTERPRISE") return "enterprise" as const;
-  if (plan === "PROFESSIONAL") return "business" as const;
-  if (plan === "BASIC") return "starter" as const;
-  return "trial" as const;
-}
+import { mapTenantRequestFromDb } from "@/lib/tenant-request-mapping";
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions);
@@ -30,22 +24,30 @@ export async function GET(req: Request) {
     take: 200
   });
 
-  // Shape the response to match the UI table expectation (SubscriptionRequest).
-  const data = items.map((r) => ({
-    id: r.id,
-    companyName: r.companyName,
-    companyNameAr: r.companyNameAr,
-    contactName: r.contactName,
-    contactEmail: r.contactEmail,
-    contactPhone: r.contactPhone,
-    employeesCount: r.employeeCount,
-    plan: mapPlan(r.plan),
-    status: r.status === "PENDING" ? "pending" : r.status === "APPROVED" ? "approved" : "rejected",
-    createdAt: r.createdAt,
-    reviewedAt: r.processedAt,
-    tenantId: r.tenantId,
-    message: r.message
-  }));
+  const tenantIds = items.flatMap((item) => (item.tenantId ? [item.tenantId] : []));
+  const tenantSnapshots =
+    tenantIds.length > 0
+      ? await prisma.tenant.findMany({
+          where: { id: { in: tenantIds } },
+          select: { id: true, status: true, setupCompletedAt: true }
+        })
+      : [];
+  const tenantSnapshotMap = new Map(
+    tenantSnapshots.map((tenant) => [
+      tenant.id,
+      {
+        status: tenant.status,
+        setupCompletedAt: tenant.setupCompletedAt
+      }
+    ])
+  );
+
+  const data = items.map((item) =>
+    mapTenantRequestFromDb({
+      ...item,
+      tenant: item.tenantId ? (tenantSnapshotMap.get(item.tenantId) ?? null) : null
+    })
+  );
 
   return NextResponse.json({ data });
 }

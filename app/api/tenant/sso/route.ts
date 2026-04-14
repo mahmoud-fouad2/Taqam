@@ -7,6 +7,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
+import {
+  getTenantSsoAuditShape,
+  mergeTenantSsoSettings,
+  sanitizeTenantSsoSettingsForClient
+} from "@/lib/security/tenant-sso";
 
 const ssoProviderConfigSchema = z.object({
   sso: z.object({
@@ -57,14 +62,31 @@ export async function PATCH(req: NextRequest) {
     });
 
     const existingSettings = (current?.settings as Record<string, unknown> | null) ?? {};
-    const updatedSettings = { ...existingSettings, sso };
+    const previousSso = existingSettings.sso;
+    const nextSso = mergeTenantSsoSettings(previousSso, sso);
+    const updatedSettings = { ...existingSettings, sso: nextSso };
 
     await prisma.tenant.update({
       where: { id: tenantId },
       data: { settings: updatedSettings },
     });
 
-    return NextResponse.json({ ok: true });
+    await prisma.auditLog.create({
+      data: {
+        tenantId,
+        userId: session.user.id,
+        action: "TENANT_SSO_SETTINGS_UPDATED",
+        entity: "Tenant",
+        entityId: tenantId,
+        oldData: getTenantSsoAuditShape(previousSso),
+        newData: getTenantSsoAuditShape(nextSso)
+      }
+    });
+
+    return NextResponse.json({
+      ok: true,
+      data: sanitizeTenantSsoSettingsForClient(nextSso)
+    });
   } catch (error) {
     logApiError("PATCH /api/tenant/sso error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

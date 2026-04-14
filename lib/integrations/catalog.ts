@@ -24,6 +24,30 @@ export type CredentialField = {
   hint?: string;
 };
 
+export type ManualBridgeWorkflowStep = {
+  id: string;
+  labelAr: string;
+  labelEn: string;
+};
+
+export type ManualBridgeWorkflowDef = {
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
+  confirmLabelAr: string;
+  confirmLabelEn: string;
+  referenceLabelAr: string;
+  referenceLabelEn: string;
+  referenceHintAr?: string;
+  referenceHintEn?: string;
+  noteLabelAr: string;
+  noteLabelEn: string;
+  notePlaceholderAr: string;
+  notePlaceholderEn: string;
+  steps: ManualBridgeWorkflowStep[];
+};
+
 export type IntegrationProviderDef = {
   key: string; // DB providerKey
   nameAr: string;
@@ -36,6 +60,7 @@ export type IntegrationProviderDef = {
   defaultMode: "NATIVE_API" | "EMBEDDED" | "MANUAL_BRIDGE" | "ENTERPRISE_CUSTOM";
   docsUrl?: string;
   credentialFields?: CredentialField[];
+  manualBridgeWorkflow?: ManualBridgeWorkflowDef;
 };
 
 export const INTEGRATION_PROVIDERS: IntegrationProviderDef[] = [
@@ -65,7 +90,42 @@ export const INTEGRATION_PROVIDERS: IntegrationProviderDef[] = [
         required: false,
         hint: "إن وُجد في بوابة GOSI"
       }
-    ]
+    ],
+    manualBridgeWorkflow: {
+      titleAr: "تأكيد مزامنة GOSI اليدوية",
+      titleEn: "Confirm manual GOSI sync",
+      descriptionAr:
+        "استخدم هذا المسار بعد تصدير البيانات من طاقم ورفعها يدويًا في بوابة GOSI حتى يبقى سجل المزامنة قابلاً للتدقيق.",
+      descriptionEn:
+        "Use this flow after exporting data from Taqam and submitting it manually in the GOSI portal so the sync trail remains auditable.",
+      confirmLabelAr: "أؤكد أنني نفذت الخطوات اليدوية في بوابة GOSI",
+      confirmLabelEn: "I confirm the manual GOSI steps were completed",
+      referenceLabelAr: "المرجع أو رقم العملية",
+      referenceLabelEn: "Reference or transaction number",
+      referenceHintAr: "مثل رقم العملية أو رقم الملف في بوابة GOSI",
+      referenceHintEn: "For example: transaction or file number from the GOSI portal",
+      noteLabelAr: "ملاحظات التنفيذ",
+      noteLabelEn: "Execution notes",
+      notePlaceholderAr: "اكتب أي ملاحظة مهمة مثل نوع الملف أو نطاق البيانات المرسلة",
+      notePlaceholderEn: "Add any useful notes such as file type or submitted data scope",
+      steps: [
+        {
+          id: "prepare-export",
+          labelAr: "جهزت ملف الاشتراكات أو تقرير التصدير من طاقم",
+          labelEn: "Prepared the contributions export from Taqam"
+        },
+        {
+          id: "submit-gosi-portal",
+          labelAr: "رفعت البيانات يدويًا في بوابة GOSI أو أكملت الإجراء المطلوب",
+          labelEn: "Submitted the data manually in the GOSI portal"
+        },
+        {
+          id: "verify-gosi-response",
+          labelAr: "راجعت نتيجة العملية أو الرسالة الراجعة من GOSI",
+          labelEn: "Verified the result or response returned by GOSI"
+        }
+      ]
+    }
   },
   {
     key: "wps",
@@ -92,7 +152,42 @@ export const INTEGRATION_PROVIDERS: IntegrationProviderDef[] = [
         required: false,
         hint: "حساب الرواتب الرئيسي"
       }
-    ]
+    ],
+    manualBridgeWorkflow: {
+      titleAr: "تأكيد مزامنة WPS اليدوية",
+      titleEn: "Confirm manual WPS sync",
+      descriptionAr:
+        "سجّل هنا أنك صدّرت ملف SIF وأرسلته للبنك أو الجهة المعتمدة حتى يظهر مرجع واضح للمراجعة لاحقًا.",
+      descriptionEn:
+        "Record here that the SIF file was exported and sent to the bank or authorized party so a clear audit reference is retained.",
+      confirmLabelAr: "أؤكد أن ملف WPS/SIF تم تجهيزه وإرساله يدويًا",
+      confirmLabelEn: "I confirm the WPS/SIF file was prepared and sent manually",
+      referenceLabelAr: "مرجع البنك أو اسم الملف",
+      referenceLabelEn: "Bank reference or file name",
+      referenceHintAr: "مثل رقم الدفعة أو اسم ملف SIF المرسل",
+      referenceHintEn: "For example: batch number or sent SIF file name",
+      noteLabelAr: "ملاحظات التنفيذ",
+      noteLabelEn: "Execution notes",
+      notePlaceholderAr: "أضف ملاحظات مثل تاريخ الإرسال أو البنك المستلم أو أي استثناءات",
+      notePlaceholderEn: "Add notes such as submission date, recipient bank, or exceptions",
+      steps: [
+        {
+          id: "generate-sif",
+          labelAr: "ولدت ملف SIF أو ملف WPS من طاقم",
+          labelEn: "Generated the SIF/WPS file from Taqam"
+        },
+        {
+          id: "submit-bank",
+          labelAr: "أرسلت الملف يدويًا إلى البنك أو الجهة المستلمة",
+          labelEn: "Sent the file manually to the bank or receiving party"
+        },
+        {
+          id: "confirm-acceptance",
+          labelAr: "أكدت قبول الملف أو راجعت ملاحظات الرفض إن وُجدت",
+          labelEn: "Confirmed the file was accepted or reviewed any rejection notes"
+        }
+      ]
+    }
   },
   {
     key: "mudad",

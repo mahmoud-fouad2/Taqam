@@ -212,8 +212,15 @@ pnpm validate:all
 pnpm db:generate
 pnpm db:push
 pnpm db:migrate
+pnpm db:migrate:prod
 pnpm db:seed
 ```
+
+## Render Deployment Reality
+
+- خدمة Render الأساسية تستخدم `preDeployCommand` لتشغيل `pnpm db:migrate:prod` قبل إطلاق النسخة الجديدة.
+- `scripts/render-start.mjs` يعيد تشغيل `prisma migrate deploy` كطبقة أمان إضافية وقت الإقلاع، لذلك لا يوجد اعتماد على shell يدوي لتنفيذ migrations في بيئة Render.
+- لا يُفترض تفعيل `SKIP_STARTUP_MIGRATIONS=true` إلا إذا كان هناك سبب تشغيلي واضح، لأن الوضع الافتراضي مصمم ليبقي ترحيل Prisma آليًا.
 
 ### Mobile
 

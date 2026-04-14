@@ -1,3 +1,5 @@
+import { getPricingData, type MarketingPricingPlan } from "@/lib/marketing/pricing";
+
 export type FaqItem = {
   qAr: string;
   qEn: string;
@@ -160,6 +162,75 @@ export const faqCategories = [
   }
 ] satisfies FaqCategory[];
 
-export function getFaqCategories(): FaqCategory[] {
-  return faqCategories;
+function getCorePricingFaqPlans(plans: MarketingPricingPlan[]) {
+  const preferredPlanOrder = ["BASIC", "PROFESSIONAL", "ENTERPRISE"] as const;
+
+  return preferredPlanOrder
+    .map((planType) => plans.find((plan) => plan.planType === planType))
+    .filter((plan): plan is MarketingPricingPlan => Boolean(plan));
+}
+
+const DIFFERENTIATOR_FEATURE_PATTERN =
+  /(بوابة التوظيف|التوظيف|المتقدمين|careers portal|applicant|recruitment)/i;
+
+function summarizePlanFeatures(features: string[]) {
+  const normalized = features
+    .map((feature) => feature.trim())
+    .filter(Boolean);
+
+  const selected = normalized.slice(0, 2);
+  const differentiator = normalized.find(
+    (feature) => DIFFERENTIATOR_FEATURE_PATTERN.test(feature) && !selected.includes(feature)
+  );
+
+  if (differentiator) {
+    selected.push(differentiator);
+  }
+
+  return selected.length > 0 ? selected.join("، ") : "حسب نطاق التشغيل";
+}
+
+export function buildPricingFaqPlanAnswer(plans: MarketingPricingPlan[]) {
+  const corePlans = getCorePricingFaqPlans(plans);
+
+  if (corePlans.length === 0) {
+    return {
+      ar: "تختلف الباقات حسب مستوى التشغيل المطلوب. راجع صفحة الأسعار للحصول على أحدث التفاصيل والميزات وحدود كل باقة.",
+      en: "Plans differ by the level of operations you need. Visit the pricing page for the latest details, features, and limits for each plan."
+    };
+  }
+
+  return {
+    ar: `${corePlans
+      .map((plan) => `${plan.nameAr}: ${summarizePlanFeatures(plan.featuresAr)}`)
+      .join(". ")}. التفاصيل والأسعار المحدثة تظهر دائمًا في صفحة الأسعار.`,
+    en: `${corePlans
+      .map((plan) => `${plan.name}: ${summarizePlanFeatures(plan.featuresEn)}`)
+      .join(". ")}. The latest pricing and plan details are always reflected on the pricing page.`
+  };
+}
+
+export function applyPricingFaqAnswers(
+  categories: FaqCategory[],
+  plans: MarketingPricingPlan[]
+): FaqCategory[] {
+  const pricingAnswer = buildPricingFaqPlanAnswer(plans);
+
+  return categories.map((category) => ({
+    ...category,
+    faqs: category.faqs.map((faq) =>
+      faq.qEn === "What's the difference between the three plans?"
+        ? {
+            ...faq,
+            aAr: pricingAnswer.ar,
+            aEn: pricingAnswer.en
+          }
+        : faq
+    )
+  }));
+}
+
+export async function getFaqCategories(): Promise<FaqCategory[]> {
+  const { plans } = await getPricingData();
+  return applyPricingFaqAnswers(faqCategories, plans);
 }

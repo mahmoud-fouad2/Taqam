@@ -42,6 +42,8 @@ export function mapTenantFromDb(t: any): Tenant {
     slug: t.slug,
     status: (t.status?.toLowerCase() ?? "pending") as TenantStatus,
     plan: mapPlanFromDb(t.plan),
+    commercialRegister: pickString(settings, ["commercialRegister"]),
+    taxNumber: pickString(settings, ["taxNumber"]),
     email: pickString(settings, ["contactEmail", "companyEmail"]) ?? "",
     phone: pickString(settings, ["contactPhone", "companyPhone"]),
     address: pickString(settings, ["address"]),
@@ -55,6 +57,12 @@ export function mapTenantFromDb(t: any): Tenant {
     createdAt: t.createdAt?.toISOString() ?? new Date().toISOString(),
     updatedAt: t.updatedAt?.toISOString() ?? new Date().toISOString(),
     createdBy: t.createdBy ?? "",
+    ...(pickString(settings, ["suspendedAt"])
+      ? { suspendedAt: pickString(settings, ["suspendedAt"]) }
+      : {}),
+    ...(pickString(settings, ["suspendReason"])
+      ? { suspendedReason: pickString(settings, ["suspendReason"]) }
+      : {}),
     ...(t.setupStep !== undefined && t.setupStep !== null ? { setupStep: t.setupStep as number } : {}),
     ...(t.setupCompletedAt ? { setupCompletedAt: (t.setupCompletedAt as Date).toISOString() } : {})
   };

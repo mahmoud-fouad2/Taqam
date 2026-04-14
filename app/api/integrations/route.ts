@@ -11,6 +11,13 @@ import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import prisma from "@/lib/db";
 import { INTEGRATION_PROVIDERS, getIntegrationProvider } from "@/lib/integrations/catalog";
 import { hasFeature, requiredPlanAr } from "@/lib/feature-gate";
+import {
+  supportsIntegrationProviderSyncAdapter
+} from "@/lib/integrations/provider-adapters";
+import {
+  type IntegrationConnectionConfig,
+  validateIntegrationConnectionConfig
+} from "@/lib/integrations/sync-schedule";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
@@ -27,6 +34,7 @@ export async function GET() {
         providerKey: true,
         mode: true,
         status: true,
+        config: true,
         lastConnectedAt: true,
         lastSyncAt: true,
         lastHealthCheckAt: true,
@@ -41,6 +49,7 @@ export async function GET() {
 
     const catalog = INTEGRATION_PROVIDERS.map((provider) => ({
       ...provider,
+      supportsScheduledSync: supportsIntegrationProviderSyncAdapter(provider.key),
       connection: connectionMap.get(provider.key) ?? null
     }));
 
@@ -104,6 +113,16 @@ export async function POST(req: NextRequest) {
     }
 
     const { providerKey, mode, config } = parsed.data;
+    let normalizedConfig: IntegrationConnectionConfig | undefined;
+
+    if (config !== undefined) {
+      const configValidation = validateIntegrationConnectionConfig(config);
+      if (!configValidation.ok) {
+        return NextResponse.json({ error: configValidation.error }, { status: 400 });
+      }
+
+      normalizedConfig = configValidation.data;
+    }
 
     const provider = getIntegrationProvider(providerKey);
     if (!provider) {
@@ -117,12 +136,12 @@ export async function POST(req: NextRequest) {
         providerKey,
         mode: mode ?? provider.defaultMode,
         status: "PENDING",
-        ...(config !== undefined ? { config } : {})
+        ...(normalizedConfig !== undefined ? { config: normalizedConfig } : {})
       },
       update: {
         mode: mode ?? provider.defaultMode,
         status: "PENDING",
-        ...(config !== undefined ? { config } : {}),
+        ...(normalizedConfig !== undefined ? { config: normalizedConfig } : {}),
         lastError: null
       },
       select: {

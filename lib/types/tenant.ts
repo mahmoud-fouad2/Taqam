@@ -6,6 +6,14 @@
 export type TenantStatus = "active" | "suspended" | "pending" | "cancelled" | "deleted";
 export type SubscriptionPlan = "starter" | "business" | "enterprise";
 export type RequestedSubscriptionPlan = "trial" | "starter" | "business" | "enterprise";
+export type TenantRequestActivationStage =
+  | "lead"
+  | "pending-activation"
+  | "activating"
+  | "active"
+  | "suspended"
+  | "archived"
+  | "rejected";
 
 export interface Tenant {
   id: string;
@@ -90,6 +98,9 @@ export interface SubscriptionRequest {
   reviewedBy?: string;
   notes?: string;
   tenantId?: string;
+  tenantStatus?: TenantStatus;
+  setupCompletedAt?: string;
+  activationStage?: TenantRequestActivationStage;
 }
 
 

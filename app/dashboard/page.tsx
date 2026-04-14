@@ -18,6 +18,16 @@ import { requireTenantAccess } from "@/lib/auth";
 import { getDashboardActivities, getDashboardCharts, getDashboardStats } from "@/lib/dashboard";
 import prisma from "@/lib/db";
 
+const GETTING_STARTED_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
+
+function wasSetupCompletedRecently(setupCompletedAt: Date | null | undefined) {
+  if (!setupCompletedAt) {
+    return false;
+  }
+
+  return Date.now() - setupCompletedAt.getTime() <= GETTING_STARTED_LOOKBACK_MS;
+}
+
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getAppLocale();
   const t = getText(locale);
@@ -64,11 +74,7 @@ export default async function Page() {
       where: { id: user.tenantId },
       select: { setupCompletedAt: true, name: true, nameAr: true }
     });
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-    if (
-      tenantMeta?.setupCompletedAt &&
-      tenantMeta.setupCompletedAt > thirtyDaysAgo
-    ) {
+    if (wasSetupCompletedRecently(tenantMeta?.setupCompletedAt)) {
       showGettingStarted = true;
       const [hasPayroll, hasAttendance] = await Promise.all([
         prisma.payrollPeriod.count({ where: { tenantId: user.tenantId } }).then((c: number) => c > 0),

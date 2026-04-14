@@ -10,7 +10,12 @@ import { z } from "zod";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
 import { getIntegrationProvider } from "@/lib/integrations/catalog";
-import { encryptCredentials, decryptCredentials } from "@/lib/integrations/credentials";
+import { buildIntegrationConnectionSnapshot } from "@/lib/integrations/contracts";
+import { encryptCredentials } from "@/lib/integrations/credentials";
+import {
+  mergeIntegrationConnectionConfigUpdate,
+  validateIntegrationConnectionConfig
+} from "@/lib/integrations/sync-schedule";
 
 type Params = { params: Promise<{ key: string }> };
 
@@ -34,6 +39,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
         lastSyncAt: true,
         lastHealthCheckAt: true,
         lastError: true,
+        config: true,
         createdAt: true,
         updatedAt: true,
         // Include presence flag for credentials without exposing the value
@@ -47,6 +53,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
             status: true,
             summary: true,
             errorMessage: true,
+            logs: true,
             durationMs: true,
             retryCount: true,
             startedAt: true,
@@ -66,9 +73,24 @@ export async function GET(_req: NextRequest, { params }: Params) {
     }
 
     // Strip raw credentials; expose only whether they exist
-    const { credentialsEncrypted, ...safeConnection } = connection;
+    const { credentialsEncrypted, runs, ...safeConnection } = connection;
+    const snapshot = buildIntegrationConnectionSnapshot({
+      providerKey: connection.providerKey,
+      mode: connection.mode.toString(),
+      status: connection.status.toString(),
+      config: connection.config,
+      lastConnectedAt: connection.lastConnectedAt,
+      lastSyncAt: connection.lastSyncAt,
+      lastError: connection.lastError,
+      hasCredentials: !!credentialsEncrypted,
+      runs
+    });
+
     return NextResponse.json({
-      data: { ...safeConnection, hasCredentials: !!credentialsEncrypted }
+      data: {
+        ...safeConnection,
+        ...snapshot
+      }
     });
   } catch (error) {
     logApiError("GET integration key error", error);
@@ -98,6 +120,15 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (!result.ok) return result.response;
     const { tenantId } = result;
 
+    const currentConnection = await prisma.integrationConnection.findUnique({
+      where: { tenantId_providerKey: { tenantId, providerKey: key } },
+      select: { id: true, config: true }
+    });
+
+    if (!currentConnection) {
+      return NextResponse.json({ error: "Integration not connected" }, { status: 404 });
+    }
+
     const body = await req.json();
     const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
@@ -105,6 +136,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         { error: "Invalid payload", details: parsed.error.flatten() },
         { status: 400 }
       );
+    }
+
+    const nextConfig =
+      parsed.data.config !== undefined
+        ? (() => {
+            const configValidation = validateIntegrationConnectionConfig(parsed.data.config);
+            if (!configValidation.ok) {
+              return configValidation;
+            }
+
+            return {
+              ok: true as const,
+              data: mergeIntegrationConnectionConfigUpdate({
+                currentConfig: currentConnection.config,
+                nextConfig: configValidation.data
+              })
+            };
+          })()
+        : null;
+
+    if (nextConfig && !nextConfig.ok) {
+      return NextResponse.json({ error: nextConfig.error }, { status: 400 });
     }
 
     // Encrypt credentials if provided — never store plaintext
@@ -115,10 +168,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     }
 
     const updated = await prisma.integrationConnection.update({
-      where: { tenantId_providerKey: { tenantId, providerKey: key } },
+      where: { id: currentConnection.id },
       data: {
         ...(parsed.data.mode ? { mode: parsed.data.mode } : {}),
-        ...(parsed.data.config !== undefined ? { config: parsed.data.config } : {}),
+        ...(nextConfig?.ok ? { config: nextConfig.data } : {}),
         ...(parsed.data.status ? { status: parsed.data.status } : {}),
         ...credentialsUpdate,
         // If credentials were provided, mark as PENDING for re-verification

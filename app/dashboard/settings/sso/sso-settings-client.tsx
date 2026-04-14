@@ -33,12 +33,14 @@ interface SsoConfig {
     tenantId?: string;
     clientId?: string;
     clientSecret?: string;
+    hasClientSecret?: boolean;
     enabled?: boolean;
   };
   google?: {
     clientId?: string;
     clientSecret?: string;
     hostedDomain?: string;
+    hasClientSecret?: boolean;
     enabled?: boolean;
   };
   saml?: {
@@ -85,9 +87,12 @@ export function SsoSettingsClient({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sso: config }),
       });
+      const j = await res.json().catch(() => ({}));
       if (!res.ok) {
-        const j = await res.json().catch(() => ({}));
         throw new Error(j.error ?? t.ssoSettings.saveFailed);
+      }
+      if (j.data) {
+        setConfig(j.data as SsoConfig);
       }
       setSaved(provider);
       setTimeout(() => setSaved(null), 3000);
@@ -101,8 +106,15 @@ export function SsoSettingsClient({
   const isConfigured = (provider: keyof SsoConfig) => {
     const c = config[provider];
     if (!c) return false;
-    if (provider === "entraId") return !!(c as SsoConfig["entraId"])?.tenantId && !!(c as SsoConfig["entraId"])?.clientId;
-    if (provider === "google") return !!(c as SsoConfig["google"])?.clientId;
+    if (provider === "entraId") {
+      return Boolean((c as SsoConfig["entraId"])?.tenantId) &&
+        Boolean((c as SsoConfig["entraId"])?.clientId) &&
+        Boolean((c as SsoConfig["entraId"])?.hasClientSecret || (c as SsoConfig["entraId"])?.clientSecret?.trim());
+    }
+    if (provider === "google") {
+      return Boolean((c as SsoConfig["google"])?.clientId) &&
+        Boolean((c as SsoConfig["google"])?.hasClientSecret || (c as SsoConfig["google"])?.clientSecret?.trim());
+    }
     if (provider === "saml") return !!(c as SsoConfig["saml"])?.metadataUrl;
     return false;
   };
@@ -182,6 +194,13 @@ export function SsoSettingsClient({
                     value={config.entraId?.clientSecret ?? ""}
                     onChange={(e) => update("entraId", "clientSecret", e.target.value)}
                   />
+                  {config.entraId?.hasClientSecret && !config.entraId?.clientSecret ? (
+                    <p className="text-xs text-muted-foreground">
+                      {locale === "ar"
+                        ? "يوجد Client Secret محفوظ بالفعل. اترك الحقل فارغاً للإبقاء عليه أو أدخل قيمة جديدة للاستبدال."
+                        : "A client secret is already stored. Leave this field empty to keep it or enter a new value to replace it."}
+                    </p>
+                  ) : null}
                 </div>
               </div>
               <CallbackUrlBox
@@ -267,6 +286,13 @@ export function SsoSettingsClient({
                     value={config.google?.clientSecret ?? ""}
                     onChange={(e) => update("google", "clientSecret", e.target.value)}
                   />
+                  {config.google?.hasClientSecret && !config.google?.clientSecret ? (
+                    <p className="text-xs text-muted-foreground">
+                      {locale === "ar"
+                        ? "يوجد Client Secret محفوظ بالفعل. اترك الحقل فارغاً للإبقاء عليه أو أدخل قيمة جديدة للاستبدال."
+                        : "A client secret is already stored. Leave this field empty to keep it or enter a new value to replace it."}
+                    </p>
+                  ) : null}
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t.ssoSettings.hostedDomain}</Label>

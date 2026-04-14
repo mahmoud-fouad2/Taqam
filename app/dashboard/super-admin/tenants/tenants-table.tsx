@@ -339,6 +339,14 @@ export function TenantsTable() {
     return planLabels[key]?.[locale] ?? (key || "—");
   };
 
+  const getActivateActionLabel = (status: TenantStatus) => {
+    if (status === "pending") {
+      return locale === "ar" ? "تفعيل أولي" : "Initial activation";
+    }
+
+    return t.tenant.activate;
+  };
+
   if (isLoading) {
     return <TableSkeleton rows={7} columns={8} />;
   }
@@ -565,7 +573,7 @@ export function TenantsTable() {
                             t.tenant.suspend
                           )}
                         </DropdownMenuItem>
-                      ) : tenant.status === "suspended" ? (
+                      ) : tenant.status === "suspended" || tenant.status === "pending" ? (
                         <DropdownMenuItem
                           className="text-green-600"
                           disabled={busy?.id === tenant.id}
@@ -580,7 +588,7 @@ export function TenantsTable() {
                               {t.tenants.activating}
                             </span>
                           ) : (
-                            t.tenant.activate
+                            getActivateActionLabel(tenant.status)
                           )}
                         </DropdownMenuItem>
                       ) : null}

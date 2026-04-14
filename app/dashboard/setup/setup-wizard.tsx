@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -84,6 +84,19 @@ async function apiComplete() {
   }
 }
 
+async function apiTrackSetupEvent(event: {
+  event: "setup_step_viewed" | "setup_checklist_viewed" | "setup_done_viewed";
+  phase: "wizard" | "checklist" | "done";
+  currentStep: number;
+  totalSteps: number;
+}) {
+  await fetch("/api/setup/events", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(event)
+  });
+}
+
 // ── Wizard component ──────────────────────────────────────────────────────────
 
 export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedData }: Props) {
@@ -92,6 +105,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
   const [saving, setSaving] = useState(false);
   // "checklist" = intermediate readiness review before final completion screen
   const [phase, setPhase] = useState<"wizard" | "checklist" | "done">("wizard");
+  const lastTrackedEventKeyRef = useRef<string | null>(null);
 
   // Per-step form state initialised from savedData
   const [form1, setForm1] = useState<Form1>({
@@ -134,6 +148,38 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
   });
 
   const completionPercent = Math.round((currentStep / totalSteps) * 100);
+
+  useEffect(() => {
+    const payload =
+      phase === "wizard"
+        ? {
+            event: "setup_step_viewed" as const,
+            phase,
+            currentStep,
+            totalSteps
+          }
+        : phase === "checklist"
+          ? {
+              event: "setup_checklist_viewed" as const,
+              phase,
+              currentStep,
+              totalSteps
+            }
+          : {
+              event: "setup_done_viewed" as const,
+              phase,
+              currentStep,
+              totalSteps
+            };
+
+    const eventKey = JSON.stringify(payload);
+    if (lastTrackedEventKeyRef.current === eventKey) {
+      return;
+    }
+
+    lastTrackedEventKeyRef.current = eventKey;
+    void apiTrackSetupEvent(payload).catch(() => {});
+  }, [currentStep, phase, totalSteps]);
 
   async function handleNext() {
     setSaving(true);

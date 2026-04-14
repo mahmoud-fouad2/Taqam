@@ -9,6 +9,7 @@ import {
   S3Client,
   PutObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   DeleteObjectCommand,
   ListObjectsV2Command
 } from "@aws-sdk/client-s3";
@@ -56,6 +57,29 @@ export interface FileMetadata {
   size: number;
   lastModified: Date;
   contentType?: string;
+}
+
+export async function putFile(
+  key: string,
+  file: Buffer | Uint8Array,
+  contentType: string,
+  metadata?: Record<string, string>
+): Promise<boolean> {
+  try {
+    const command = new PutObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key,
+      Body: file,
+      ContentType: contentType,
+      Metadata: metadata
+    });
+
+    await getR2Client().send(command);
+    return true;
+  } catch (error) {
+    console.error("R2 Put Error:", error);
+    return false;
+  }
 }
 
 /**
@@ -228,6 +252,27 @@ export async function getFile(key: string): Promise<Buffer | null> {
   }
 }
 
+export async function headFile(key: string): Promise<FileMetadata | null> {
+  try {
+    const command = new HeadObjectCommand({
+      Bucket: BUCKET_NAME,
+      Key: key
+    });
+
+    const response = await getR2Client().send(command);
+
+    return {
+      key,
+      size: Number(response.ContentLength ?? 0),
+      lastModified: response.LastModified ?? new Date(),
+      contentType: response.ContentType
+    };
+  } catch (error) {
+    console.error("R2 Head Error:", error);
+    return null;
+  }
+}
+
 /**
  * Get public URL for a file
  */
@@ -261,11 +306,13 @@ export function isAllowedFileSize(size: number, maxSizeMB: number = 10): boolean
 
 export const r2Storage = {
   uploadFile,
+  putFile,
   getSignedDownloadUrl,
   getSignedUploadUrl,
   deleteFile,
   listFiles,
   getFile,
+  headFile,
   getPublicUrl,
   isAllowedFileType,
   isAllowedFileSize,

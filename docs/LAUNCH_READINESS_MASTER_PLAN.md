@@ -17,6 +17,9 @@
 - [x] إضافة validation لواجهة `site-content` حتى تبقى تعديلات السوبر أدمن محكومة بـ schema واضحة بدلاً من الحفظ الخام.
 - [x] جعل كل مسارات إنشاء الشركة (`tenant request approval` و`super-admin create tenant` والمسار القديم `/api/tenants`) تنشئ الشركة بحالة `PENDING` بدلاً من `ACTIVE` حتى لا تفتح workspace production قبل اكتمال التفعيل.
 - [x] ربط اكتمال تفعيل مدير الشركة بتحويل الـ tenant من `PENDING` إلى `ACTIVE` تلقائياً، مع مواءمة التفعيل اليدوي من السوبر أدمن وواجهة إعدادات الشركة مع هذا السلوك.
+- [x] توحيد mapping لحالة طلبات الشركات في السوبر أدمن بحيث تظهر مرحلة التفعيل الفعلية (`lead` / `pending-activation` / `activating` / `active`) من snapshots الطلب والـ tenant بدلاً من الاكتفاء بحالة الطلب الخام.
+- [x] ضمان provisioning idempotent لأول `Employee` وربط `TENANT_ADMIN` بمساحة العمل في مسارات `reset-password` و`manual activation` و`bootstrap admin` و`user creation`.
+- [x] منع تكرار `TenantRequest` المفتوح لنفس بريد التواصل، مع الاحتفاظ ببيانات التواصل داخل `tenant.settings` عند الموافقة حتى لا تضيع لاحقاً في خرائط الإدارة.
 - [x] إصلاح redirect تسجيل الدخول بين `taqam.net` و`*.taqam.net` عبر مشاركة session cookies على مستوى الدومين الأساسي ومنع توليد روابط من نوع `demo.demo.taqam.net` عند إعادة التوجيه من subdomain موجود بالفعل.
 - [x] تنفيذ audit فعلي لسطح claims التجاري الحالي وتوثيق الشكل المقترح للـ `Feature Catalog` و`Claims Registry` في `docs/COMMERCIAL_CLAIMS_AUDIT_AND_CATALOG_SHAPE.md` تمهيداً للترحيل المنضبط.
 - [x] إضافة contract أولي داخل `lib/marketing/commercial-registry.ts` لتعريف shape الـ `Feature Catalog` والـ `Claims Registry` مع seed أولي للرسائل الأساسية المعتمدة.
@@ -508,11 +511,13 @@
 - [x] validation على مستوى الخطوة وعلى مستوى الرحلة كاملة — Zod schemas per step
 - [x] seeders للـ default policies — `provisionSetupDefaults()` في `lib/setup.ts` تُنشئ leave types افتراضية عند اكتمال الإعداد
 - [x] sample data seeding منفصل وقابل للحذف لاحقاً
-- [ ] audit log لكل خطوة حرجة
+- [x] audit log لكل خطوة حرجة
 - [x] ربط activation flow بحالة الـ tenant lifecycle — `setupCompletedAt` تُكمل الدورة
 - [x] ربط activation flow بالسوبر أدمن للمراجعة أو المساعدة اليدوية — بطاقة "حالة التفعيل" في صفحة tenant detail مع setupStep وsetupCompletedAt ورابط wizard
 - [x] تفعيل readiness score أو completion percent — `getSetupCompletionPercent()`
-- [ ] event tracking لكل خطوة رئيسية في رحلة التفعيل
+- [x] provisioning idempotent لأول employee/admin workspace profile عند اكتمال setup أو تفعيل مدير الشركة
+- [x] mapping مشتق لحالة activation داخل inbox/details الخاصة بطلبات الشركات بدل الاكتفاء بـ request status الخام
+- [x] event tracking لكل خطوة رئيسية في رحلة التفعيل
 
 ## 8.4 UX المطلوب
 
@@ -529,6 +534,7 @@
 - [x] شركة جديدة يمكن تفعيلها بدون تدخل هندسي مباشر — wizard 5 خطوات + API routes كاملة
 - [x] أول استخدام للوحة لا يكون فارغاً أو مربكاً — شاشة اكتمال + Getting Started widget في dashboard
 - [x] العميل يعرف ما الذي فعله وما الذي تبقى — completion screen يعرض ملخص + next steps
+- [x] أول مدير شركة لا يبقى user معزولاً عن HR workspace — الربط مع employee record يتم تلقائياً عند التفعيل أو الاستعادة
 
 ---
 
@@ -539,7 +545,7 @@
 ## 9.1 المناطق المطلوب مراجعتها
 
 - [x] الصفحة الرئيسية
-- [ ] صفحة المميزات (جزئي: تم نقل hero/anatomy/highlights؛ ما يزال suite catalog الكبير لاحقاً)
+- [x] صفحة المميزات (الـ hero/anatomy/highlights وfeature suites كلها أصبحت registry-backed عبر `getMarketingFeatureSuites()`)
 - [x] صفحة الأسعار
 - [x] صفحة الخطط
 - [x] FAQ
@@ -718,7 +724,7 @@
 - [x] masked credential display
 - [x] provider mode selector: native / embedded / manual / custom
 - [x] embedded launch URL or managed-setup hint
-- [ ] health summary widget داخل السوبر أدمن أو إعدادات الشركة
+- [x] health summary widget داخل السوبر أدمن أو إعدادات الشركة
 
 > **API:** `GET/POST /api/integrations` + `GET/PATCH/DELETE /api/integrations/[key]` ✓
 
@@ -731,7 +737,7 @@
 - [x] connection validation structure — schema + upsert API ✓
 - [x] "coming via managed setup" status — availability: "enterprise-custom" ✓
 - [x] embedded links أو hosted launch mode — EMBEDDED mode type ✓
-- [ ] manual CSV bridge where applicable
+- [x] manual CSV bridge where applicable
 
 ## 10.7 معايير الإنجاز
 
@@ -907,21 +913,24 @@
 ## 13.1 المطلوب معمارياً
 
 - [ ] فصل واضح بين marketing data وproduct capability data
-- [ ] adapter layer للتكاملات
+- [x] adapter layer للتكاملات
 - [x] service layer للـ activation — `lib/setup.ts`
 - [x] service layer للـ automation
 - [ ] منع تكرار business rules بين web/mobile/api
 - [ ] typed contracts بين backend والواجهات
-- [ ] فصل commercial control data عن static marketing code
+   - [x] shared contracts لتدفق integrations settings/test/sync/retry في `lib/integrations/contracts.ts`
+- [x] فصل commercial control data عن static marketing code
 - [ ] no-code admin contracts مع validation طبقية
 - [ ] publish pipeline واضحة للمحتوى التجاري القابل للتعديل
 
 ## 13.2 الجودة والاختبارات
 
 - [ ] unit tests للمنطق الحرج
+   - [x] integration contracts normalization/parsing tests — `lib/integrations/contracts.test.ts`
 - [ ] integration tests للمسارات الأساسية
+   - [x] integration connection route tests لـ `GET` / `PATCH` / `DELETE` / `test` / `sync` / `retry` — `app/api/integrations/connection-routes.test.ts`
 - [ ] smoke tests للصفحات العامة
-- [ ] pricing/claims snapshot tests أو content validation tests
+- [x] pricing/claims snapshot tests أو content validation tests
    - [x] pricing marketing content validation tests (Vitest)
    - [x] claims/content validation tests للصفحات العامة
 - [ ] end-to-end للـ activation flow
@@ -929,11 +938,11 @@
 
 ## 13.3 الرصد والتشخيص
 
-- [ ] structured logs للتكاملات
+- [x] structured logs للتكاملات
 - [x] workflow logs
-- [ ] activation logs
-- [ ] mobile crash + error visibility
-- [ ] admin diagnostics for support
+- [x] activation logs
+- [x] mobile crash + error visibility
+- [x] admin diagnostics for support
 
 ## 13.4 الضبط الأمني
 
@@ -971,9 +980,9 @@
 - [x] default policies seeding — خطوة 5 تنشئ إجازة سنوية وإجازة مرضية تلقائياً
 - [x] sample data option
 - [x] progress tracking — `setupStep`, `completionPercent`, progress bar في الـ wizard
-- [ ] lead / pending / approved lifecycle wiring
+- [x] lead / pending / approved lifecycle wiring
 - [x] step autosave + resume later — POST `/api/setup` يحفظ كل خطوة، initialStep يعيد من حيث توقف
-- [ ] first admin + first employee linking
+- [x] first admin + first employee linking
 - [x] readiness checklist داخل الflow
 - [x] team invite step — خطوة 4 تتيح دعوة أول موظف أو تخطي
 
@@ -984,13 +993,13 @@
 - [ ] schema + provider contract
 - [x] credentials store
 - [x] connection tests
-- [ ] health states
-- [ ] jobs + retry + logs
-- [ ] واجهة الإدارة
-- [ ] provider mode support (API / embedded / manual / custom)
-- [ ] integration run history
-- [ ] manual bridge workflows
-- [ ] connection health summary and retry UX
+- [x] health states
+- [x] jobs + retry + logs
+- [x] واجهة الإدارة
+- [x] provider mode support (API / embedded / manual / custom)
+- [x] integration run history
+- [x] manual bridge workflows
+- [x] connection health summary and retry UX
 
 ## Phase D — أسبوع 9 إلى 11
 
@@ -1050,7 +1059,7 @@
 
 ## 15.2 Activation
 
-- [ ] tenant lifecycle model موجود
+- [x] tenant lifecycle model موجود
 - [x] activation wizard موجود
 - [x] autosave موجود
 - [x] sample data اختياري
@@ -1060,9 +1069,9 @@
 
 - [x] source of truth واحد للباقات
 - [x] pricing page متسقة مع plans page
-- [ ] FAQ متسقة مع pricing
+- [x] FAQ متسقة مع pricing
 - [ ] feature gate مطبق على كل عنصر باقة
-- [ ] بوابة التوظيف وبورتال الوظائف موضحة كميزة تفاضلية في المكان الصحيح
+- [x] بوابة التوظيف وبورتال الوظائف موضحة كميزة تفاضلية في المكان الصحيح
 
 ## 15.4 Super Admin No-Code Control
 
@@ -1077,13 +1086,13 @@
 
 - [x] connection model موجود
 - [x] encrypted credentials
-- [ ] provider adapters
-- [ ] sync jobs
+- [x] provider adapters
+- [x] sync jobs
 - [x] connection tests
-- [ ] health state
-- [ ] retry
-- [ ] logs
-- [ ] admin UI
+- [x] health state
+- [x] retry
+- [x] logs
+- [x] admin UI
 
 ## 15.6 Mobile
 
@@ -1109,7 +1118,7 @@
 - [ ] tests للمسارات الحرجة
 - [ ] logs منظمة
 - [ ] rollback plan لأي migration كبيرة
-- [ ] support diagnostics جاهزة
+- [x] support diagnostics جاهزة
 
 ---
 

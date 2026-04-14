@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { logApiError, requireRole } from "@/lib/api/route-helper";
-import { buildCsv, sanitizeFilename } from "@/lib/payroll/export";
+import { buildGosiReportExport } from "@/lib/payroll/compliance-exports";
 import { listPayslipsForPeriod } from "@/lib/payroll/payslips";
 import { PAYROLL_ALLOWED_ROLES } from "@/lib/payroll/constants";
 
@@ -17,31 +17,15 @@ export async function GET(_request: NextRequest, { params }: { params: Promise<{
       return NextResponse.json({ error: "Payroll period not found" }, { status: 404 });
     }
 
-    const csv = buildCsv(
-      [
-        "employeeNumber",
-        "employeeName",
-        "department",
-        "basicSalary",
-        "gosiEmployee",
-        "gosiEmployer",
-        "totalGosi"
-      ],
-      result.payslips.map((payslip) => [
-        payslip.employeeNumber,
-        payslip.employeeName,
-        payslip.department,
-        payslip.basicSalary,
-        payslip.gosiEmployee,
-        payslip.gosiEmployer,
-        payslip.gosiEmployee + payslip.gosiEmployer
-      ])
-    );
+    const exported = buildGosiReportExport({
+      period: result.period,
+      payslips: result.payslips
+    });
 
-    return new NextResponse(`\ufeff${csv}`, {
+    return new NextResponse(`\ufeff${exported.csv}`, {
       headers: {
         "Content-Type": "text/csv; charset=utf-8",
-        "Content-Disposition": `attachment; filename="${sanitizeFilename(`gosi-report-${result.period.name || result.period.id}`)}.csv"`
+        "Content-Disposition": `attachment; filename="${exported.fileName}"`
       }
     });
   } catch (error) {

@@ -2,21 +2,26 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { ThemeProvider as NavThemeProvider, type Theme } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { Stack, usePathname } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useMemo } from 'react';
 import 'react-native-reanimated';
 
 import { AuthProvider } from '@/components/auth-provider';
 import { AppSettingsProvider } from '@/components/app-settings-provider';
+import {
+  installGlobalMobileErrorReporting,
+  MobileRouteErrorBoundary,
+  reportMobileError,
+  setCurrentMobileRoute,
+} from '@/lib/error-monitoring';
 import { usePushNotifications } from '@/hooks/use-push-notifications';
 import { OfflineBanner } from '@/components/offline-banner';
 import { ThemeProvider, useTheme } from '@/theme';
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from 'expo-router';
+export function ErrorBoundary(props: React.ComponentProps<typeof MobileRouteErrorBoundary>) {
+  return <MobileRouteErrorBoundary {...props} />;
+}
 
 export const unstable_settings = {
   initialRouteName: 'index',
@@ -33,7 +38,13 @@ export default function RootLayout() {
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
-    if (error) throw error;
+    if (error) {
+      void reportMobileError(error, {
+        source: 'startup',
+        severity: 'fatal',
+      });
+      throw error;
+    }
   }, [error]);
 
   useEffect(() => {
@@ -62,6 +73,15 @@ function RootLayoutNav() {
 /** Bridges our design tokens to react-navigation's theme format */
 function ThemedNavigator() {
   const { colors, isDark } = useTheme();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    installGlobalMobileErrorReporting();
+  }, []);
+
+  useEffect(() => {
+    setCurrentMobileRoute(pathname);
+  }, [pathname]);
 
   const navTheme = useMemo<Theme>(
     () => ({

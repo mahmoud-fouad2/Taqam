@@ -102,18 +102,37 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    await prisma.tenantRequest.create({
-      data: {
-        companyName: input.companyName.trim(),
-        companyNameAr: input.companyNameAr?.trim() || null,
-        employeeCount: input.employeesCount,
-        contactName: input.contactName.trim(),
-        contactEmail: input.contactEmail.trim().toLowerCase(),
-        contactPhone: input.contactPhone?.trim() || null,
-        plan: normalizeRequestedPlan(input.plan),
-        message: input.message?.trim() || null
-      }
+    const normalizedContactEmail = input.contactEmail.trim().toLowerCase();
+    const existingPendingRequest = await prisma.tenantRequest.findFirst({
+      where: {
+        contactEmail: normalizedContactEmail,
+        status: "PENDING"
+      },
+      orderBy: { createdAt: "desc" },
+      select: { id: true }
     });
+
+    const payload = {
+      companyName: input.companyName.trim(),
+      companyNameAr: input.companyNameAr?.trim() || null,
+      employeeCount: input.employeesCount,
+      contactName: input.contactName.trim(),
+      contactEmail: normalizedContactEmail,
+      contactPhone: input.contactPhone?.trim() || null,
+      plan: normalizeRequestedPlan(input.plan),
+      message: input.message?.trim() || null
+    };
+
+    if (existingPendingRequest) {
+      await prisma.tenantRequest.update({
+        where: { id: existingPendingRequest.id },
+        data: payload
+      });
+    } else {
+      await prisma.tenantRequest.create({
+        data: payload
+      });
+    }
 
     return withRateLimitHeaders(NextResponse.json({ ok: true }), {
       limit,

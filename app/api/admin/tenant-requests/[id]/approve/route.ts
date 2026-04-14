@@ -218,7 +218,10 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         maxEmployees,
         settings: {
           defaultLocale: body.defaultLocale ?? "ar",
-          defaultTheme: body.defaultTheme ?? "shadcn"
+          defaultTheme: body.defaultTheme ?? "shadcn",
+          contactEmail: adminEmail,
+          contactPhone: item.contactPhone ?? null,
+          requestId: item.id
         },
         planExpiresAt
       }

@@ -1,5 +1,12 @@
 import prisma from "@/lib/db";
 
+type JobTitleCatalogClient = {
+  jobTitle: {
+    findMany(args: unknown): Promise<Array<{ code: string }>>;
+    createMany(args: unknown): Promise<unknown>;
+  };
+};
+
 export type CuratedJobTitleDefinition = {
   code: string;
   name: string;
@@ -125,11 +132,14 @@ export function getDefaultJobTitleCodeForUserRole(role?: string | null) {
   }
 }
 
-export async function ensureTenantJobTitleCatalog(tenantId: string) {
+export async function ensureTenantJobTitleCatalog(
+  tenantId: string,
+  client: JobTitleCatalogClient = prisma
+) {
   const catalog = getCuratedJobTitleCatalog();
   const codes = catalog.map((item) => item.code);
 
-  const existing = await prisma.jobTitle.findMany({
+  const existing = await client.jobTitle.findMany({
     where: {
       tenantId,
       code: { in: codes }
@@ -143,7 +153,7 @@ export async function ensureTenantJobTitleCatalog(tenantId: string) {
   const missing = catalog.filter((item) => !existingCodes.has(item.code));
 
   if (missing.length > 0) {
-    await prisma.jobTitle.createMany({
+    await client.jobTitle.createMany({
       data: missing.map((item) => ({
         tenantId,
         code: item.code,

@@ -1,7 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   AlertCircle,
@@ -24,8 +25,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Dialog,
   DialogContent,
@@ -34,34 +44,36 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { MAX_INTEGRATION_RUN_RETRIES } from "@/lib/integrations/constants";
+import {
+  getIntegrationApiErrorMessage,
+  parseIntegrationConnectionTestResponse,
+  parseIntegrationRetryResponse,
+  parseIntegrationSyncResponse,
+  type IntegrationConnectionSnapshot,
+  type IntegrationConnectionTestResponse,
+  type IntegrationRunRecord as RunRecord
+} from "@/lib/integrations/contracts";
+import type { IntegrationRunLogEntry } from "@/lib/integrations/structured-logs";
+import {
+  buildIntegrationConnectionConfigWithSchedule,
+  getIntegrationSyncSchedule,
+  getIntegrationSyncScheduleLabelAr,
+  getNextIntegrationSyncDueAt,
+  type IntegrationConnectionConfig,
+  type IntegrationSyncScheduleFrequency
+} from "@/lib/integrations/sync-schedule";
 import { cn } from "@/lib/utils";
-import type { IntegrationProviderDef, CredentialField } from "@/lib/integrations/catalog";
+import type {
+  IntegrationProviderDef,
+  CredentialField,
+  ManualBridgeWorkflowDef
+} from "@/lib/integrations/catalog";
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type RunRecord = {
-  id: string;
-  operation: string;
-  status: string;
-  summary: string | null;
-  errorMessage: string | null;
-  durationMs: number | null;
-  startedAt: string;
-  finishedAt: string | null;
+type CatalogEntry = IntegrationProviderDef & {
+  connection: IntegrationConnectionSnapshot | null;
+  supportsScheduledSync: boolean;
 };
-
-type ConnectionSnapshot = {
-  providerKey: string;
-  mode: string;
-  status: string;
-  lastConnectedAt: string | null;
-  lastSyncAt: string | null;
-  lastError: string | null;
-  hasCredentials: boolean;
-  runs: RunRecord[];
-} | null;
-
-type CatalogEntry = IntegrationProviderDef & { connection: ConnectionSnapshot };
 
 type Props = {
   catalog: CatalogEntry[];
@@ -232,6 +244,30 @@ const RUN_STATUS_LABELS: Record<string, { label: string; className: string }> = 
   partial: { label: "جزئي", className: "text-amber-600 dark:text-amber-400" }
 };
 
+const SCHEDULE_OUTCOME_LABELS: Record<string, string> = {
+  success: "ناجح",
+  partial: "جزئي",
+  failed: "فشل"
+};
+
+const LOG_LEVEL_LABELS: Record<IntegrationRunLogEntry["level"], string> = {
+  info: "معلومة",
+  warn: "تنبيه",
+  error: "خطأ"
+};
+
+function logLevelClassName(level: IntegrationRunLogEntry["level"]) {
+  if (level === "info") {
+    return "rounded-full border border-sky-500/30 bg-sky-500/10 px-2 py-0.5 text-[11px] font-medium text-sky-700 dark:text-sky-400";
+  }
+
+  if (level === "warn") {
+    return "rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:text-amber-400";
+  }
+
+  return "rounded-full border border-red-500/30 bg-red-500/10 px-2 py-0.5 text-[11px] font-medium text-red-700 dark:text-red-400";
+}
+
 function MaskedField({ value }: { value: string }) {
   const [visible, setVisible] = useState(false);
   return (
@@ -257,6 +293,11 @@ type ConfigDialogProps = {
   onOpenChange: (open: boolean) => void;
   providerKey: string;
   nameAr: string;
+  mode: string;
+  config: IntegrationConnectionConfig | null;
+  supportsScheduledSync: boolean;
+  lastConnectedAt: string | null;
+  lastSyncAt: string | null;
   credentialFields?: CredentialField[];
   hasCredentials: boolean;
   runs: RunRecord[];
@@ -268,6 +309,11 @@ function IntegrationConfigDialog({
   onOpenChange,
   providerKey,
   nameAr,
+  mode,
+  config,
+  supportsScheduledSync,
+  lastConnectedAt,
+  lastSyncAt,
   credentialFields,
   hasCredentials,
   runs,
@@ -277,8 +323,24 @@ function IntegrationConfigDialog({
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedOk, setSavedOk] = useState(false);
   const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [scheduleSaving, setScheduleSaving] = useState(false);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [scheduleSavedOk, setScheduleSavedOk] = useState(false);
+  const [scheduleEnabled, setScheduleEnabled] = useState(false);
+  const [scheduleFrequency, setScheduleFrequency] =
+    useState<IntegrationSyncScheduleFrequency>("weekly");
   const [retryingRunId, setRetryingRunId] = useState<string | null>(null);
   const [localRuns, setLocalRuns] = useState<RunRecord[]>(runs);
+
+  useEffect(() => {
+    setLocalRuns(runs);
+
+    const currentSchedule = getIntegrationSyncSchedule(config);
+    setScheduleEnabled(Boolean(currentSchedule?.enabled));
+    setScheduleFrequency(currentSchedule?.frequency ?? "weekly");
+    setScheduleError(null);
+    setScheduleSavedOk(false);
+  }, [config, runs]);
 
   async function handleSaveCredentials(e: React.FormEvent) {
     e.preventDefault();
@@ -321,29 +383,96 @@ function IntegrationConfigDialog({
         `/api/integrations/${providerKey}/runs/${runId}/retry`,
         { method: "POST" }
       );
-      if (res.ok) {
-        const json = await res.json() as { runId: string; ok: boolean; summary: string; durationMs: number };
-        // Prepend new run to local list
-        const newRun: RunRecord = {
-          id: json.runId,
-          operation: localRuns.find((r) => r.id === runId)?.operation ?? "test",
-          status: json.ok ? "success" : "failed",
-          summary: json.summary,
-          errorMessage: null,
-          durationMs: json.durationMs,
-          startedAt: new Date().toISOString(),
-          finishedAt: new Date().toISOString()
-        };
-        setLocalRuns((prev) => [newRun, ...prev].slice(0, 10));
+      const json = await res.json().catch(() => null);
+      const parsed = parseIntegrationRetryResponse(json);
+
+      if (!parsed.success || !parsed.data.runId) {
+        toast.error(getIntegrationApiErrorMessage(json, "تعذر تنفيذ إعادة المحاولة"));
+        return;
       }
+
+      const retryResponse = parsed.data;
+      const retryRunId = retryResponse.runId;
+
+      if (!retryRunId) {
+        toast.error("تعذر تنفيذ إعادة المحاولة");
+        return;
+      }
+
+      const previousRun = localRuns.find((run) => run.id === runId);
+      const nowIso = new Date().toISOString();
+      const newRun: RunRecord = {
+        id: retryRunId,
+        operation: previousRun?.operation ?? "test",
+        status: retryResponse.runStatus ?? (retryResponse.ok ? "success" : "failed"),
+        summary: retryResponse.summary ?? null,
+        errorMessage:
+          retryResponse.ok
+            ? null
+            : retryResponse.error ?? retryResponse.summary ?? null,
+        logs: retryResponse.logs ?? [],
+        durationMs:
+          typeof retryResponse.durationMs === "number" ? retryResponse.durationMs : null,
+        retryCount:
+          typeof retryResponse.retryCount === "number"
+            ? retryResponse.retryCount
+            : (previousRun?.retryCount ?? 0) + 1,
+        startedAt: nowIso,
+        finishedAt: nowIso
+      };
+
+      setLocalRuns((prev) => [newRun, ...prev].slice(0, 10));
+      toast[retryResponse.ok ? "success" : "error"](
+        retryResponse.summary ??
+          (retryResponse.ok ? "تمت إعادة المحاولة بنجاح" : "فشلت إعادة المحاولة")
+      );
     } catch {
-      // silently ignore
+      toast.error("تعذّر الوصول للخادم أثناء إعادة المحاولة");
     } finally {
       setRetryingRunId(null);
     }
   }
 
+  async function handleSaveSchedule(event: React.FormEvent) {
+    event.preventDefault();
+    setScheduleError(null);
+    setScheduleSavedOk(false);
+    setScheduleSaving(true);
+
+    try {
+      const nextConfig = buildIntegrationConnectionConfigWithSchedule(config, {
+        enabled: scheduleEnabled,
+        frequency: scheduleFrequency
+      });
+      const res = await fetch(`/api/integrations/${providerKey}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ config: nextConfig })
+      });
+      const json = (await res.json().catch(() => null)) as { error?: string } | null;
+
+      if (!res.ok) {
+        setScheduleError(json?.error ?? "تعذر حفظ إعدادات الجدولة");
+        return;
+      }
+
+      setScheduleSavedOk(true);
+      onSaved();
+    } catch {
+      setScheduleError("تعذّر الوصول للخادم أثناء حفظ الجدولة");
+    } finally {
+      setScheduleSaving(false);
+    }
+  }
+
   const hasFields = (credentialFields?.length ?? 0) > 0;
+  const currentSchedule = getIntegrationSyncSchedule(config);
+  const nextDueAt = getNextIntegrationSyncDueAt({
+    config,
+    createdAt: currentSchedule?.enabledAt ?? new Date().toISOString(),
+    lastConnectedAt,
+    lastSyncAt
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -364,6 +493,12 @@ function IntegrationConfigDialog({
               <History className="h-3.5 w-3.5" />
               سجل الأنشطة
             </TabsTrigger>
+            {supportsScheduledSync && (
+              <TabsTrigger value="schedule" className="flex-1 gap-1.5 text-xs">
+                <Clock className="h-3.5 w-3.5" />
+                الجدولة
+              </TabsTrigger>
+            )}
           </TabsList>
 
           {/* ── Credentials tab ── */}
@@ -437,7 +572,8 @@ function IntegrationConfigDialog({
                     className: "text-muted-foreground"
                   };
                   const canRetry = run.status === "failed" &&
-                    (run.operation === "test" || run.operation === "sync");
+                    (run.operation === "test" || run.operation === "sync") &&
+                    run.retryCount < MAX_INTEGRATION_RUN_RETRIES;
                   return (
                     <div key={run.id} className="px-4 py-3 flex items-start gap-3">
                       <div className="flex-1 min-w-0 space-y-0.5">
@@ -476,6 +612,47 @@ function IntegrationConfigDialog({
                         {run.errorMessage && (
                           <p className="text-red-600 dark:text-red-400">{run.errorMessage}</p>
                         )}
+                        {run.logs.length > 0 && (
+                          <details className="mt-2 rounded-lg border bg-muted/20 px-3 py-2">
+                            <summary className="cursor-pointer list-none font-medium text-muted-foreground">
+                              تفاصيل السجل
+                            </summary>
+                            <div className="mt-2 space-y-2">
+                              {run.logs.map((log, index) => (
+                                <div key={`${run.id}-${index}`} className="rounded-md bg-background px-3 py-2">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className={logLevelClassName(log.level)}>
+                                      {LOG_LEVEL_LABELS[log.level]}
+                                    </span>
+                                    <span className="text-muted-foreground">{log.message}</span>
+                                  </div>
+                                  {log.context && Object.keys(log.context).length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                      {Object.entries(log.context).map(([key, value]) => (
+                                        key === "downloadPath" && value.startsWith("/") ? (
+                                          <a
+                                            key={`${run.id}-${index}-${key}`}
+                                            href={value}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-primary underline-offset-4 hover:underline">
+                                            تنزيل الملف
+                                          </a>
+                                        ) : (
+                                          <span
+                                            key={`${run.id}-${index}-${key}`}
+                                            className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                                            {key}: {value}
+                                          </span>
+                                        )
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          </details>
+                        )}
                       </div>
                       <div className="shrink-0 text-muted-foreground whitespace-nowrap" dir="ltr">
                         {new Date(run.startedAt).toLocaleDateString("ar-SA", {
@@ -491,7 +668,267 @@ function IntegrationConfigDialog({
               </div>
             )}
           </TabsContent>
+
+          {supportsScheduledSync && (
+            <TabsContent value="schedule" className="mt-4 space-y-4">
+              <div className="rounded-xl border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
+                <p className="font-medium text-foreground">تشغيل مزامنة مجدولة</p>
+                <p>
+                  {mode === "MANUAL_BRIDGE"
+                    ? "الجدولة هنا تجهز ملف التكامل تلقائياً وتترك العملية بوضع جزئي حتى يتم الإرسال اليدوي وتوثيقه."
+                    : "سيتم تشغيل المزامنة تلقائياً وفق التكرار المحدد عندما يكون التكامل في حالة متصل."}
+                </p>
+              </div>
+
+              <form onSubmit={handleSaveSchedule} className="space-y-4">
+                <label className="flex cursor-pointer items-start gap-2 rounded-xl border px-4 py-3">
+                  <Checkbox
+                    checked={scheduleEnabled}
+                    onCheckedChange={(checked) => setScheduleEnabled(checked === true)}
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm leading-6">
+                    تفعيل مزامنة مجدولة لهذا التكامل
+                  </span>
+                </label>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium">التكرار</Label>
+                  <Select
+                    value={scheduleFrequency}
+                    onValueChange={(value) =>
+                      setScheduleFrequency(value as IntegrationSyncScheduleFrequency)
+                    }>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="اختر التكرار" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="daily">يومي</SelectItem>
+                      <SelectItem value="weekly">أسبوعي</SelectItem>
+                      <SelectItem value="monthly">شهري</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {currentSchedule && (
+                  <div className="rounded-xl border bg-background px-4 py-3 text-xs text-muted-foreground space-y-1.5">
+                    <p>
+                      الحالة الحالية: {currentSchedule.enabled ? "مفعلة" : "متوقفة"}
+                      {" "}({getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)})
+                    </p>
+                    {currentSchedule.lastOutcome && (
+                      <p>
+                        آخر نتيجة مجدولة: {SCHEDULE_OUTCOME_LABELS[currentSchedule.lastOutcome] ?? currentSchedule.lastOutcome}
+                      </p>
+                    )}
+                    {currentSchedule.lastTriggeredAt && (
+                      <p>
+                        آخر تشغيل مجدول: {new Date(currentSchedule.lastTriggeredAt).toLocaleString("ar-SA")}
+                      </p>
+                    )}
+                    {currentSchedule.lastSummary && <p>{currentSchedule.lastSummary}</p>}
+                    {nextDueAt && scheduleEnabled && (
+                      <p>الاستحقاق التالي تقريباً: {nextDueAt.toLocaleString("ar-SA")}</p>
+                    )}
+                  </div>
+                )}
+
+                {scheduleError && (
+                  <p className="text-xs text-red-600 dark:text-red-400 rounded-lg bg-red-50 dark:bg-red-950/30 px-3 py-2">
+                    {scheduleError}
+                  </p>
+                )}
+                {scheduleSavedOk && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
+                    تم حفظ إعدادات الجدولة ✓
+                  </p>
+                )}
+
+                <DialogFooter>
+                  <Button type="submit" size="sm" disabled={scheduleSaving} className="gap-1.5">
+                    {scheduleSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    حفظ الجدولة
+                  </Button>
+                </DialogFooter>
+              </form>
+            </TabsContent>
+          )}
         </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+type ManualBridgeSyncDialogProps = {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  providerKey: string;
+  nameAr: string;
+  workflow: ManualBridgeWorkflowDef;
+  onSynced: () => void;
+};
+
+function ManualBridgeSyncDialog({
+  open,
+  onOpenChange,
+  providerKey,
+  nameAr,
+  workflow,
+  onSynced
+}: ManualBridgeSyncDialogProps) {
+  const [syncing, setSyncing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [confirmed, setConfirmed] = useState(false);
+  const [referenceId, setReferenceId] = useState("");
+  const [note, setNote] = useState("");
+  const [completedSteps, setCompletedSteps] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    setSyncing(false);
+    setError(null);
+    setConfirmed(false);
+    setReferenceId("");
+    setNote("");
+    setCompletedSteps(Object.fromEntries(workflow.steps.map((step) => [step.id, false])));
+  }, [open, workflow.steps]);
+
+  const allStepsCompleted = workflow.steps.every((step) => completedSteps[step.id]);
+  const hasAuditContext = Boolean(referenceId.trim() || note.trim());
+
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    setError(null);
+
+    if (!confirmed) {
+      setError("يجب تأكيد تنفيذ الخطوات اليدوية قبل المتابعة");
+      return;
+    }
+
+    if (!allStepsCompleted) {
+      setError("أكمل جميع خطوات الربط اليدوي أولًا");
+      return;
+    }
+
+    if (!hasAuditContext) {
+      setError("أدخل مرجعًا أو ملاحظة واحدة على الأقل لتوثيق العملية");
+      return;
+    }
+
+    setSyncing(true);
+    try {
+      const res = await fetch(`/api/integrations/${providerKey}/sync`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          confirmed: true,
+          completedSteps: workflow.steps
+            .filter((step) => completedSteps[step.id])
+            .map((step) => step.id),
+          referenceId,
+          note
+        })
+      });
+      const json = await res.json().catch(() => null);
+      const parsed = parseIntegrationSyncResponse(json);
+
+      if (!res.ok || !parsed.success) {
+        setError(getIntegrationApiErrorMessage(json, "تعذر تسجيل المزامنة اليدوية"));
+        return;
+      }
+
+      toast.success(parsed.data.summary ?? `تم تسجيل مزامنة ${nameAr} اليدوية بنجاح`);
+      onOpenChange(false);
+      onSynced();
+    } catch {
+      setError("تعذّر الوصول للخادم أثناء تسجيل المزامنة اليدوية");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-xl" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="text-base font-bold">{workflow.titleAr || nameAr}</DialogTitle>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="rounded-xl border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
+            <p className="font-medium text-foreground">{workflow.descriptionAr}</p>
+          </div>
+
+          <div className="space-y-3 rounded-xl border p-4">
+            <p className="text-sm font-medium">الخطوات المطلوبة</p>
+            <div className="space-y-2">
+              {workflow.steps.map((step) => (
+                <label key={step.id} className="flex cursor-pointer items-start gap-2 rounded-lg px-1 py-1">
+                  <Checkbox
+                    checked={completedSteps[step.id] ?? false}
+                    onCheckedChange={(checked) =>
+                      setCompletedSteps((prev) => ({
+                        ...prev,
+                        [step.id]: checked === true
+                      }))
+                    }
+                    className="mt-0.5"
+                  />
+                  <span className="text-sm leading-6">{step.labelAr}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">{workflow.referenceLabelAr}</Label>
+              <Input
+                value={referenceId}
+                onChange={(event) => setReferenceId(event.target.value)}
+                placeholder={workflow.referenceHintAr}
+                className="text-sm"
+                dir="ltr"
+              />
+              {workflow.referenceHintAr && (
+                <p className="text-xs text-muted-foreground">{workflow.referenceHintAr}</p>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-medium">{workflow.noteLabelAr}</Label>
+              <Textarea
+                value={note}
+                onChange={(event) => setNote(event.target.value)}
+                placeholder={workflow.notePlaceholderAr}
+                className="min-h-24 resize-none text-sm"
+              />
+            </div>
+          </div>
+
+          <label className="flex cursor-pointer items-start gap-2 rounded-xl border bg-muted/20 px-4 py-3">
+            <Checkbox checked={confirmed} onCheckedChange={(checked) => setConfirmed(checked === true)} className="mt-0.5" />
+            <span className="text-sm leading-6">{workflow.confirmLabelAr}</span>
+          </label>
+
+          {error && (
+            <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-400">
+              {error}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={syncing}>
+              إلغاء
+            </Button>
+            <Button type="submit" disabled={syncing} className="gap-1.5">
+              {syncing && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              تسجيل المزامنة
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );
@@ -502,8 +939,12 @@ function IntegrationConfigDialog({
 function IntegrationCard({ entry }: { entry: CatalogEntry }) {
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<{ ok: boolean; summary: string } | null>(null);
+  const [testResult, setTestResult] = useState<
+    Pick<IntegrationConnectionTestResponse, "ok" | "summary"> | null
+  >(null);
   const [configOpen, setConfigOpen] = useState(false);
+  const [manualSyncOpen, setManualSyncOpen] = useState(false);
+  const currentSchedule = getIntegrationSyncSchedule(entry.connection?.config);
 
   async function handleConnect() {
     setConnecting(true);
@@ -535,8 +976,18 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
     setTestResult(null);
     try {
       const res = await fetch(`/api/integrations/${entry.key}/test`, { method: "POST" });
-      const json = await res.json() as { ok: boolean; summary: string };
-      setTestResult({ ok: json.ok, summary: json.summary });
+      const json = await res.json().catch(() => null);
+      const parsed = parseIntegrationConnectionTestResponse(json);
+
+      if (!res.ok || !parsed.success) {
+        setTestResult({
+          ok: false,
+          summary: getIntegrationApiErrorMessage(json, "خطأ في الاتصال بالخادم")
+        });
+        return;
+      }
+
+      setTestResult({ ok: parsed.data.ok, summary: parsed.data.summary });
       // Reload after a short delay to refresh status badge
       setTimeout(() => window.location.reload(), 1500);
     } catch {
@@ -547,11 +998,27 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
   }
 
   async function handleSync() {
+    if (isManualBridge) {
+      setManualSyncOpen(true);
+      return;
+    }
+
     setConnecting(true);
     try {
-      await fetch(`/api/integrations/${entry.key}/sync`, { method: "POST" });
+      const res = await fetch(`/api/integrations/${entry.key}/sync`, { method: "POST" });
+      const json = await res.json().catch(() => null);
+      const parsed = parseIntegrationSyncResponse(json);
+
+      if (!res.ok || !parsed.success) {
+        toast.error(getIntegrationApiErrorMessage(json, "تعذر تنفيذ المزامنة"));
+        return;
+      }
+
+      toast.success(parsed.data.summary ?? "تمت المزامنة بنجاح");
       window.location.reload();
     } catch {
+      toast.error("تعذّر الوصول للخادم أثناء المزامنة");
+    } finally {
       setConnecting(false);
     }
   }
@@ -561,6 +1028,7 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
   const isLive = entry.availability === "live";
   const isComingSoon = entry.availability === "coming-soon";
   const canTest = isLive && (isConnected || isPending);
+  const isManualBridge = entry.connection?.mode === "MANUAL_BRIDGE" && !!entry.manualBridgeWorkflow;
 
   return (
     <div
@@ -596,6 +1064,18 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
 
       {/* Description */}
       <p className="text-muted-foreground text-xs leading-6 flex-1">{entry.descriptionAr}</p>
+
+      {isManualBridge && (
+        <div className="rounded-lg border bg-muted/20 px-3 py-2 text-xs leading-6 text-muted-foreground">
+          هذا التكامل يعمل عبر ربط يدوي موثق. عند كل مزامنة ستسجل الخطوات المنفذة والمرجع والملاحظات داخل السجل.
+        </div>
+      )}
+
+      {entry.supportsScheduledSync && currentSchedule?.enabled && (
+        <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-300">
+          مزامنة مجدولة {getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)} مفعلة لهذا التكامل.
+        </div>
+      )}
 
       {/* Test result feedback */}
       {testResult && (
@@ -651,7 +1131,7 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
               disabled={connecting || testing}
               className="text-xs h-8 gap-1.5 text-muted-foreground hover:text-foreground">
               <RefreshCw className="h-3 w-3" />
-              مزامنة
+              {isManualBridge ? "تسجيل يدوي" : "مزامنة"}
             </Button>
           )}
 
@@ -695,11 +1175,30 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
           onOpenChange={setConfigOpen}
           providerKey={entry.key}
           nameAr={entry.nameAr}
+          mode={entry.connection.mode}
+          config={entry.connection.config}
+          supportsScheduledSync={entry.supportsScheduledSync}
+          lastConnectedAt={entry.connection.lastConnectedAt}
+          lastSyncAt={entry.connection.lastSyncAt}
           credentialFields={entry.credentialFields}
           hasCredentials={entry.connection.hasCredentials}
           runs={entry.connection.runs}
           onSaved={() => {
             setConfigOpen(false);
+            window.location.reload();
+          }}
+        />
+      )}
+
+      {entry.connection && entry.manualBridgeWorkflow && (
+        <ManualBridgeSyncDialog
+          open={manualSyncOpen}
+          onOpenChange={setManualSyncOpen}
+          providerKey={entry.key}
+          nameAr={entry.nameAr}
+          workflow={entry.manualBridgeWorkflow}
+          onSynced={() => {
+            setManualSyncOpen(false);
             window.location.reload();
           }}
         />

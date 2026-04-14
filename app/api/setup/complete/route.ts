@@ -1,8 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
-import { getSetupStatus, completeSetup, SETUP_TOTAL_STEPS } from "@/lib/setup";
-import prisma from "@/lib/db";
+import {
+  getSetupStatus,
+  completeSetup,
+  ensureSetupCompletionArtifacts,
+  logSetupCompletionAudit,
+  SETUP_TOTAL_STEPS
+} from "@/lib/setup";
+
+function getRequestIpAddress(req: NextRequest) {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    null
+  );
+}
 
 // POST /api/setup/complete — mark setup as done
 export async function POST(req: NextRequest) {
@@ -25,7 +38,11 @@ export async function POST(req: NextRequest) {
     const status = await getSetupStatus(auth.tenantId);
 
     if (status.isComplete) {
-      return NextResponse.json({ ok: true, alreadyComplete: true });
+      await ensureSetupCompletionArtifacts(auth.tenantId, auth.session.user.id);
+      return withRateLimitHeaders(
+        NextResponse.json({ ok: true, alreadyComplete: true }),
+        rateLimit
+      );
     }
 
     if (status.currentStep < SETUP_TOTAL_STEPS) {
@@ -41,23 +58,21 @@ export async function POST(req: NextRequest) {
 
     await completeSetup(auth.tenantId, auth.session.user.id);
 
-    // Fire-and-forget audit log
-    prisma.auditLog
-      .create({
-        data: {
-          tenantId: auth.tenantId,
-          userId: auth.session.user.id,
-          action: "SETUP_COMPLETED",
-          entity: "SetupWizard",
-          entityId: auth.tenantId,
-          newData: { completedAt: new Date().toISOString() }
-        }
-      })
-      .catch(() => {});
+    const completedStatus = await getSetupStatus(auth.tenantId);
+    const completedAt = completedStatus.completedAt ?? new Date();
 
-    const completedAt = new Date().toISOString();
+    await logSetupCompletionAudit({
+      tenantId: auth.tenantId,
+      userId: auth.session.user.id,
+      previousStep: status.currentStep,
+      completedAt,
+      setupData: completedStatus.data,
+      ipAddress: getRequestIpAddress(req),
+      userAgent: req.headers.get("user-agent")
+    }).catch(() => {});
+
     return withRateLimitHeaders(
-      NextResponse.json({ ok: true, completedAt }),
+      NextResponse.json({ ok: true, completedAt: completedAt.toISOString() }),
       rateLimit
     );
   } catch (err) {

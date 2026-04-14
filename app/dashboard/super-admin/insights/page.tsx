@@ -1,10 +1,13 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { Building2, CircleAlert, CircleCheckBig, CreditCard, ShieldCheck, Users } from "lucide-react";
+import { Building2, CircleAlert, CircleCheckBig, CreditCard, ShieldCheck, Smartphone, Users } from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
+import { deriveSystemHealthSnapshot } from "@/lib/health";
 import { prisma } from "@/lib/db";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { buildMobileDiagnosticsSummary } from "@/lib/mobile-diagnostics";
+import { getRuntimeIntegrationReport } from "@/lib/runtime-integrations";
 
 export default async function SuperAdminInsightsPage() {
   const locale = await getAppLocale();
@@ -15,7 +18,17 @@ export default async function SuperAdminInsightsPage() {
     redirect("/dashboard");
   }
 
-  const [tenants, users, openTickets, activeTenants, enterpriseTenants] = await Promise.all([
+  const [
+    tenants,
+    users,
+    openTickets,
+    activeTenants,
+    enterpriseTenants,
+    recentMobileDiagnosticsLogs,
+    mobileEventsLast7Days,
+    mobileFatalEventsLast7Days,
+    mobileAffectedTenants
+  ] = await Promise.all([
     prisma.tenant.findMany({
       select: {
         id: true,
@@ -52,6 +65,53 @@ export default async function SuperAdminInsightsPage() {
       where: {
         plan: "ENTERPRISE"
       }
+    }),
+    prisma.auditLog.findMany({
+      where: {
+        action: {
+          in: ["MOBILE_APP_ERROR", "MOBILE_APP_CRASH"]
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true
+          }
+        }
+      },
+      orderBy: {
+        createdAt: "desc"
+      },
+      take: 6
+    }),
+    prisma.auditLog.count({
+      where: {
+        action: {
+          in: ["MOBILE_APP_ERROR", "MOBILE_APP_CRASH"]
+        }
+      }
+    }),
+    prisma.auditLog.count({
+      where: {
+        action: "MOBILE_APP_CRASH"
+      }
+    }),
+    prisma.auditLog.findMany({
+      where: {
+        action: {
+          in: ["MOBILE_APP_ERROR", "MOBILE_APP_CRASH"]
+        },
+        tenantId: {
+          not: null
+        }
+      },
+      select: {
+        tenantId: true
+      },
+      distinct: ["tenantId"]
     })
   ]);
 
@@ -60,6 +120,32 @@ export default async function SuperAdminInsightsPage() {
   const basicTenants = tenants.filter((tenant) => tenant.plan === "BASIC").length;
   const professionalTenants = tenants.filter((tenant) => tenant.plan === "PROFESSIONAL").length;
   const totalEmployees = tenants.reduce((sum, tenant) => sum + tenant._count.employees, 0);
+  const runtimeReport = getRuntimeIntegrationReport();
+  const healthSnapshot = deriveSystemHealthSnapshot({
+    databaseStatus: "connected",
+    runtimeReport
+  });
+  const mobileDiagnostics = buildMobileDiagnosticsSummary({
+    logs: recentMobileDiagnosticsLogs.map((log) => ({
+      id: log.id,
+      action: log.action,
+      tenantId: log.tenantId,
+      createdAt: log.createdAt,
+      newData: log.newData as Record<string, unknown> | null,
+      user: log.user
+        ? {
+            id: log.user.id,
+            name: `${log.user.firstName ?? ""} ${log.user.lastName ?? ""}`.trim() || null,
+            email: log.user.email
+          }
+        : null
+    })),
+    locale,
+    totalEventsLast7Days: mobileEventsLast7Days,
+    fatalEventsLast7Days: mobileFatalEventsLast7Days,
+    affectedTenantsCount: mobileAffectedTenants.length,
+    tenantNameById: Object.fromEntries(tenants.map((tenant) => [tenant.id, tenant.name]))
+  });
   const formatter = new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-US", {
     dateStyle: "medium"
   });
@@ -167,6 +253,157 @@ export default async function SuperAdminInsightsPage() {
       </section>
 
       <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="text-primary size-5" />
+            <h2 className="font-semibold">{isAr ? "صحة التشغيل الحالية" : "Current system health"}</h2>
+          </div>
+          <span className={healthBadgeClassName(healthSnapshot.status)}>
+            {formatHealthStatus(healthSnapshot.status, isAr)}
+          </span>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[0.8fr_1.2fr]">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InsightStat
+              label={isAr ? "قاعدة البيانات" : "Database"}
+              valueLabel={isAr ? "متصلة" : "Connected"}
+            />
+            <InsightStat
+              label={isAr ? "الخدمات المهيأة" : "Configured services"}
+              value={runtimeReport.summary.configured}
+            />
+            <InsightStat
+              label={isAr ? "خدمات تحتاج استكمال" : "Partial services"}
+              value={runtimeReport.summary.partial}
+            />
+            <InsightStat
+              label={isAr ? "خدمات غير مهيأة" : "Missing services"}
+              value={runtimeReport.summary.missing}
+            />
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {runtimeReport.items.map((item) => (
+              <div key={item.id} className="rounded-2xl border bg-muted/20 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-medium">{item.name}</p>
+                    <p className="text-muted-foreground mt-1 text-xs leading-5">
+                      {item.features.join(isAr ? "، " : ", ")}
+                    </p>
+                  </div>
+                  <span className={runtimeModeBadgeClassName(item.mode)}>
+                    {formatRuntimeMode(item.mode, isAr)}
+                  </span>
+                </div>
+
+                {item.missing.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {item.missing.map((entry) => (
+                      <span
+                        key={entry}
+                        className="rounded-md bg-background px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                        {entry}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="mb-4 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <Smartphone className="text-primary size-5" />
+            <h2 className="font-semibold">
+              {isAr ? "رؤية أخطاء الموبايل" : "Mobile crash and error visibility"}
+            </h2>
+          </div>
+          <span
+            className={
+              mobileDiagnostics.fatalEventsLast7Days > 0
+                ? healthBadgeClassName("error")
+                : healthBadgeClassName("ok")
+            }>
+            {isAr
+              ? `${mobileDiagnostics.fatalEventsLast7Days} حرجة مسجلة`
+              : `${mobileDiagnostics.fatalEventsLast7Days} fatal reported`}
+          </span>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-[0.7fr_1.3fr]">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <InsightStat
+              label={isAr ? "كل الأحداث المسجلة" : "All reported events"}
+              value={mobileDiagnostics.totalEventsLast7Days}
+            />
+            <InsightStat
+              label={isAr ? "الأخطاء الحرجة" : "Fatal crashes"}
+              value={mobileDiagnostics.fatalEventsLast7Days}
+            />
+            <InsightStat
+              label={isAr ? "شركات متأثرة" : "Affected tenants"}
+              value={mobileDiagnostics.affectedTenantsCount}
+            />
+            <InsightStat
+              label={isAr ? "أحدث إصدار ظاهر" : "Latest reported version"}
+              valueLabel={mobileDiagnostics.latestAppVersion ?? (isAr ? "غير متاح" : "Unavailable")}
+            />
+          </div>
+
+          <div className="space-y-3">
+            {mobileDiagnostics.recentEvents.length === 0 ? (
+              <div className="rounded-2xl border border-dashed p-6 text-sm text-muted-foreground">
+                {isAr
+                  ? "لا توجد تقارير أخطاء موبايل مسجلة بعد."
+                  : "No mobile crash reports have been recorded yet."}
+              </div>
+            ) : (
+              mobileDiagnostics.recentEvents.map((entry) => (
+                <div key={entry.id} className="rounded-2xl border bg-muted/20 p-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span
+                          className={
+                            entry.severityLabel === (isAr ? "انهيار" : "Crash")
+                              ? runtimeModeBadgeClassName("missing")
+                              : runtimeModeBadgeClassName("partial")
+                          }>
+                          {entry.severityLabel}
+                        </span>
+                        <span className="text-sm font-medium">{entry.message}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {entry.sourceLabel}
+                        {entry.route ? ` • ${entry.route}` : ""}
+                        {entry.appVersion ? ` • v${entry.appVersion}` : ""}
+                        {entry.deviceLabel ? ` • ${entry.deviceLabel}` : ""}
+                      </p>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-US", {
+                        dateStyle: "medium",
+                        timeStyle: "short"
+                      }).format(new Date(entry.createdAt))}
+                    </span>
+                  </div>
+                  <p className="mt-3 text-xs text-muted-foreground">
+                    {isAr ? `الشركة: ${entry.tenantLabel}` : `Tenant: ${entry.tenantLabel}`}
+                    {isAr ? ` • المستخدم: ${entry.actorLabel}` : ` • User: ${entry.actorLabel}`}
+                  </p>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border bg-card p-5 shadow-sm">
         <h2 className="font-semibold">{isAr ? "أحدث الشركات المنضمة" : "Newest tenant accounts"}</h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
@@ -202,11 +439,67 @@ export default async function SuperAdminInsightsPage() {
   );
 }
 
-function InsightStat({ label, value }: { label: string; value: number }) {
+function formatHealthStatus(status: "ok" | "degraded" | "error", isAr: boolean) {
+  if (status === "ok") {
+    return isAr ? "سليم" : "Healthy";
+  }
+
+  if (status === "degraded") {
+    return isAr ? "متدهور" : "Degraded";
+  }
+
+  return isAr ? "خطأ" : "Error";
+}
+
+function formatRuntimeMode(mode: "configured" | "partial" | "missing", isAr: boolean) {
+  if (mode === "configured") {
+    return isAr ? "مهيأ" : "Configured";
+  }
+
+  if (mode === "partial") {
+    return isAr ? "جزئي" : "Partial";
+  }
+
+  return isAr ? "غير مهيأ" : "Missing";
+}
+
+function healthBadgeClassName(status: "ok" | "degraded" | "error") {
+  if (status === "ok") {
+    return "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400";
+  }
+
+  if (status === "degraded") {
+    return "rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400";
+  }
+
+  return "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400";
+}
+
+function runtimeModeBadgeClassName(mode: "configured" | "partial" | "missing") {
+  if (mode === "configured") {
+    return "rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-400";
+  }
+
+  if (mode === "partial") {
+    return "rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-xs font-medium text-amber-700 dark:text-amber-400";
+  }
+
+  return "rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-700 dark:text-red-400";
+}
+
+function InsightStat({
+  label,
+  value,
+  valueLabel
+}: {
+  label: string;
+  value?: number;
+  valueLabel?: string;
+}) {
   return (
     <div className="rounded-2xl border bg-muted/20 p-4">
       <p className="text-sm text-muted-foreground">{label}</p>
-      <p className="mt-2 text-2xl font-semibold">{value.toLocaleString()}</p>
+      <p className="mt-2 text-2xl font-semibold">{valueLabel ?? value?.toLocaleString() ?? "0"}</p>
     </div>
   );
 }

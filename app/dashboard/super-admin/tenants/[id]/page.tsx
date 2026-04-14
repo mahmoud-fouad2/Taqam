@@ -26,6 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { Tenant, TenantStatus } from "@/lib/types/tenant";
+import {
+  buildTenantActivationDiagnostics,
+  type TenantActivationAuditLog
+} from "@/lib/tenant-activation-diagnostics";
 import { buildTenantUrl } from "@/lib/tenant";
 import { tenantsService } from "@/lib/api";
 import { getText } from "@/lib/i18n/text";
@@ -70,18 +74,7 @@ type TenantUser = {
   } | null;
 };
 
-type TenantAuditLog = {
-  id: string;
-  action: string;
-  entity: string;
-  entityId: string | null;
-  createdAt: string;
-  user: {
-    id: string;
-    name: string | null;
-    email: string | null;
-  } | null;
-};
+type TenantAuditLog = TenantActivationAuditLog;
 
 const rolePriority: Record<string, number> = {
   TENANT_ADMIN: 0,
@@ -119,7 +112,7 @@ function getRoleLabel(role: string, t: LocaleText) {
   return roleLabels[role] ?? role;
 }
 
-function formatAuditAction(action: string, t: LocaleText) {
+function formatAuditAction(action: string, t: LocaleText, locale: "ar" | "en") {
   const auditActionLabels: Record<string, string> = {
     LOGIN: t.audit.login,
     LOGOUT: t.audit.logout,
@@ -137,24 +130,35 @@ function formatAuditAction(action: string, t: LocaleText) {
     EMPLOYEE_DELETE: t.audit.employeeDelete,
     EMPLOYEE_BULK_IMPORT: t.audit.employeeBulkImport,
     EMPLOYEE_STATUS_CHANGE: t.audit.employeeStatusChange,
+    TENANT_ACTIVATED: t.tenant.activate,
+    TENANT_ADMIN_EMPLOYEE_LINKED: locale === "ar" ? "ربط مدير الشركة بملف موظف" : "Link admin to employee",
     DATA_IMPORT: t.audit.dataImport,
     DATA_EXPORT: t.common.exportData,
     SETTINGS_UPDATE: t.audit.settingsUpdate,
-    PAYROLL_PROCESS: t.audit.payrollProcess
+    PAYROLL_PROCESS: t.audit.payrollProcess,
+    SETUP_STEP_SAVED: locale === "ar" ? "حفظ خطوة الإعداد" : "Saved setup step",
+    SETUP_STEP_VIEWED: locale === "ar" ? "عرض خطوة الإعداد" : "Viewed setup step",
+    SETUP_CHECKLIST_VIEWED: locale === "ar" ? "عرض قائمة الجاهزية" : "Viewed readiness checklist",
+    SETUP_DONE_VIEWED: locale === "ar" ? "عرض شاشة الانطلاق" : "Viewed launch screen",
+    SETUP_COMPLETED: locale === "ar" ? "اكتمال الإعداد" : "Setup completed",
+    MOBILE_APP_ERROR: locale === "ar" ? "خطأ تطبيق الجوال" : "Mobile app error",
+    MOBILE_APP_CRASH: locale === "ar" ? "انهيار تطبيق الجوال" : "Mobile app crash"
   };
 
   return auditActionLabels[action] ?? action.replaceAll("_", " ");
 }
 
-function formatAuditEntity(entity: string, t: LocaleText) {
+function formatAuditEntity(entity: string, t: LocaleText, locale: "ar" | "en") {
   const auditEntityLabels: Record<string, string> = {
     User: t.audit.entityUser,
     Employee: t.common.employee,
-    Tenant: t.common.company,
+    Tenant: t.audit.entityTenant,
+    SetupWizard: locale === "ar" ? "رحلة التفعيل" : "Activation flow",
     DevelopmentPlan: t.audit.entityDevPlan,
     PayrollPeriod: t.audit.entityPayrollPeriod,
     MobileSession: t.audit.entityMobileSession,
     MobileRefreshToken: t.audit.entityMobileSession,
+    MobileApp: locale === "ar" ? "تطبيق الجوال" : "Mobile app",
     Settings: t.common.options
   };
 
@@ -171,6 +175,7 @@ function formatCompactId(value: string | null | undefined) {
   if (value.length <= 12) return value;
   return `${value.slice(0, 8)}...`;
 }
+
 
 export default function TenantDetailsPage() {
   const locale = useClientLocale();
@@ -198,7 +203,7 @@ export default function TenantDetailsPage() {
           tenantsService.getById(id),
           apiClient.get<TenantUser[]>(`/admin/tenants/${id}/users`),
           apiClient.get<TenantAuditLog[]>("/audit-logs", {
-            params: { tenantId: id, pageSize: 20 }
+            params: { tenantId: id, pageSize: 50 }
           })
         ]);
 
@@ -288,6 +293,12 @@ export default function TenantDetailsPage() {
 
   const activeUsersCount = tenantUsers.filter((user) => user.status === "ACTIVE").length;
   const adminUsersCount = tenantUsers.filter((user) => user.role === "TENANT_ADMIN").length;
+  const activationDiagnostics = buildTenantActivationDiagnostics({
+    auditLogs,
+    locale,
+    setupStep: tenant.setupStep ?? 0,
+    setupCompletedAt: tenant.setupCompletedAt
+  });
 
   return (
     <div className="space-y-6">
@@ -536,6 +547,101 @@ export default function TenantDetailsPage() {
             </CardContent>
           </Card>
 
+          <Card className="border-border/60 bg-card/85 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base">
+                <History className="h-4 w-4" />
+                {locale === "ar" ? "تشخيص رحلة التفعيل" : "Activation diagnostics"}
+              </CardTitle>
+              <CardDescription>
+                {locale === "ar"
+                  ? "ملخص زمني لأهم أحداث التفعيل والإعداد لمساعدة الدعم والمراجعة التشغيلية."
+                  : "A timeline of the key activation and setup events for support and operations review."}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="rounded-lg border p-4">
+                  <p className="text-muted-foreground text-sm">
+                    {locale === "ar" ? "آخر حدث" : "Latest event"}
+                  </p>
+                  <p className="mt-2 text-sm font-semibold">
+                    {activationDiagnostics.latestActivationEvent
+                      ? formatDateTime(activationDiagnostics.latestActivationEvent.createdAt, locale)
+                      : "—"}
+                  </p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-muted-foreground text-sm">
+                    {locale === "ar" ? "أحداث التفعيل" : "Activation events"}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold">{activationDiagnostics.activationEventCount}</p>
+                </div>
+                <div className="rounded-lg border p-4">
+                  <p className="text-muted-foreground text-sm">
+                    {locale === "ar" ? "آخر تقدم مسجل" : "Latest recorded progress"}
+                  </p>
+                  <p className="mt-2 text-2xl font-bold">{activationDiagnostics.latestActivationProgress}%</p>
+                </div>
+              </div>
+
+              {activationDiagnostics.activationEventCount === 0 ? (
+                <div className="text-muted-foreground rounded-lg border border-dashed p-6 text-center text-sm">
+                  {locale === "ar"
+                    ? "لا توجد أحداث تفعيل مسجلة بعد لهذه الشركة."
+                    : "No activation events have been recorded for this tenant yet."}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="text-muted-foreground flex items-center justify-between text-xs">
+                    <span>
+                      {locale === "ar"
+                        ? `خطوات محفوظة: ${activationDiagnostics.savedSetupStepCount}`
+                        : `Saved steps: ${activationDiagnostics.savedSetupStepCount}`}
+                    </span>
+                    <span>
+                      {locale === "ar"
+                        ? `المعروض: ${activationDiagnostics.timeline.length} من ${activationDiagnostics.activationEventCount}`
+                        : `Showing ${activationDiagnostics.timeline.length} of ${activationDiagnostics.activationEventCount}`}
+                    </span>
+                  </div>
+
+                  {activationDiagnostics.timeline.map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex flex-col gap-3 rounded-lg border p-4 md:flex-row md:items-start md:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="bg-primary/10 mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full">
+                          <History className="text-primary h-4 w-4" />
+                        </div>
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <p className="font-medium">{entry.title}</p>
+                            <Badge variant="outline">
+                              {formatAuditEntity(entry.entity, t, locale)}
+                            </Badge>
+                          </div>
+                          {entry.summary ? (
+                            <p className="text-muted-foreground text-sm">{entry.summary}</p>
+                          ) : null}
+                          <p className="text-muted-foreground text-xs">
+                            {locale === "ar"
+                              ? `بواسطة ${entry.actorLabel}`
+                              : `By ${entry.actorLabel}`}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="text-muted-foreground text-sm md:text-end">
+                        {formatDateTime(entry.createdAt, locale)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Suspended Warning */}
           {tenant.status === "suspended" && tenant.suspendedReason && (
             <Card className="border-destructive">
@@ -668,8 +774,8 @@ export default function TenantDetailsPage() {
                         </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium">{formatAuditAction(entry.action, t)}</p>
-                            <Badge variant="outline">{formatAuditEntity(entry.entity, t)}</Badge>
+                            <p className="font-medium">{formatAuditAction(entry.action, t, locale)}</p>
+                            <Badge variant="outline">{formatAuditEntity(entry.entity, t, locale)}</Badge>
                           </div>
                           <p className="text-muted-foreground text-sm">
                             {entry.user?.name || entry.user?.email

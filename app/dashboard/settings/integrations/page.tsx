@@ -2,6 +2,8 @@ import { Metadata } from "next";
 import { requireTenantAccess } from "@/lib/auth";
 import prisma from "@/lib/db";
 import { INTEGRATION_PROVIDERS } from "@/lib/integrations/catalog";
+import { buildIntegrationConnectionSnapshot } from "@/lib/integrations/contracts";
+import { supportsIntegrationProviderSyncAdapter } from "@/lib/integrations/provider-adapters";
 import { IntegrationsShowcase } from "./integrations-showcase";
 import { generateMeta } from "@/lib/utils";
 
@@ -21,6 +23,7 @@ export default async function IntegrationsPage() {
       providerKey: true,
       mode: true,
       status: true,
+      config: true,
       lastConnectedAt: true,
       lastSyncAt: true,
       lastError: true,
@@ -34,7 +37,9 @@ export default async function IntegrationsPage() {
           status: true,
           summary: true,
           errorMessage: true,
+          logs: true,
           durationMs: true,
+          retryCount: true,
           startedAt: true,
           finishedAt: true
         }
@@ -48,26 +53,19 @@ export default async function IntegrationsPage() {
     const conn = connectionMap.get(provider.key);
     return {
       ...provider,
+      supportsScheduledSync: supportsIntegrationProviderSyncAdapter(provider.key),
       connection: conn
-        ? {
+        ? buildIntegrationConnectionSnapshot({
             providerKey: conn.providerKey,
             mode: conn.mode.toString(),
             status: conn.status.toString(),
-            lastConnectedAt: conn.lastConnectedAt?.toISOString() ?? null,
-            lastSyncAt: conn.lastSyncAt?.toISOString() ?? null,
-            lastError: conn.lastError ?? null,
+            config: conn.config,
+            lastConnectedAt: conn.lastConnectedAt,
+            lastSyncAt: conn.lastSyncAt,
+            lastError: conn.lastError,
             hasCredentials: !!conn.credentialsEncrypted,
-            runs: conn.runs.map((r) => ({
-              id: r.id,
-              operation: r.operation,
-              status: r.status,
-              summary: r.summary ?? null,
-              errorMessage: r.errorMessage ?? null,
-              durationMs: r.durationMs ?? null,
-              startedAt: r.startedAt.toISOString(),
-              finishedAt: r.finishedAt?.toISOString() ?? null
-            }))
-          }
+            runs: conn.runs
+          })
         : null
     };
   });

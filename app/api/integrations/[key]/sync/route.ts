@@ -10,15 +10,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import prisma from "@/lib/db";
+import { buildIntegrationSyncResponse } from "@/lib/integrations/contracts";
+import {
+  type ManualBridgeSyncSubmission,
+  validateManualBridgeSyncSubmission
+} from "@/lib/integrations/manual-bridge";
+import { executeIntegrationSync } from "@/lib/integrations/sync-executor";
 
 type Params = { params: Promise<{ key: string }> };
 
-export async function POST(_req: NextRequest, { params }: Params) {
+export async function POST(req: NextRequest, { params }: Params) {
   try {
     const { key } = await params;
     const result = await requireTenantSession();
     if (!result.ok) return result.response;
     const { tenantId } = result;
+    const body = await req.json().catch(() => ({}));
 
     const connection = await prisma.integrationConnection.findUnique({
       where: { tenantId_providerKey: { tenantId, providerKey: key } },
@@ -36,46 +43,41 @@ export async function POST(_req: NextRequest, { params }: Params) {
       );
     }
 
-    const startedAt = new Date();
-    let summary: string;
-
+    let manualBridgeSubmission: ManualBridgeSyncSubmission | undefined;
     if (connection.mode === "MANUAL_BRIDGE") {
-      summary = "تم تسجيل المزامنة اليدوية بنجاح";
-    } else {
-      // NATIVE_API / EMBEDDED — placeholder until real adapters are wired
-      summary = "تمت المزامنة (وضع محاكاة — سيتحول لمزامنة حقيقية عند تفعيل الـ adapter)";
+      const validation = validateManualBridgeSyncSubmission({
+        providerKey: key,
+        input: body
+      });
+
+      if (!validation.ok) {
+        return NextResponse.json({ error: validation.error }, { status: validation.status });
+      }
+
+      manualBridgeSubmission = validation.data;
     }
 
-    const finishedAt = new Date();
-    const durationMs = finishedAt.getTime() - startedAt.getTime();
-
-    await prisma.$transaction([
-      prisma.integrationRun.create({
-        data: {
-          connectionId: connection.id,
-          operation: "sync",
-          status: "success",
-          summary,
-          durationMs,
-          startedAt,
-          finishedAt
-        }
-      }),
-      prisma.integrationConnection.update({
-        where: { id: connection.id },
-        data: {
-          lastSyncAt: finishedAt,
-          lastError: null
-        }
-      })
-    ]);
-
-    return NextResponse.json({
-      ok: true,
-      summary,
-      durationMs,
-      lastSyncAt: finishedAt.toISOString()
+    const syncResult = await executeIntegrationSync({
+      tenantId,
+      providerKey: key,
+      trigger: "manual",
+      manualBridgeSubmission
     });
+
+    if (!syncResult.ok) {
+      return NextResponse.json({ error: syncResult.error }, { status: syncResult.status });
+    }
+
+    return NextResponse.json(
+      buildIntegrationSyncResponse({
+        runId: syncResult.runId,
+        runStatus: syncResult.runStatus,
+        summary: syncResult.summary,
+        durationMs: syncResult.durationMs,
+        logs: syncResult.logs,
+        lastSyncAt: syncResult.lastSyncAt
+      })
+    );
   } catch (error) {
     logApiError("POST integration sync error", error);
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });

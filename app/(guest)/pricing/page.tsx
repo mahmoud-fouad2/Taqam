@@ -18,7 +18,11 @@ import {
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
-import { getPricingData, getPricingMarketingContent } from "@/lib/marketing/pricing";
+import {
+  getPlanCommercialDifferentiator,
+  getPricingData,
+  getPricingMarketingContent
+} from "@/lib/marketing/pricing";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -108,6 +112,7 @@ export default async function PricingPage() {
               const priceText = price != null ? String(price) : isAr ? "تواصل معنا" : "Contact us";
               const employeesText = isAr ? plan.employeesLabel : plan.employeesLabelEn;
               const features = (isAr ? plan.featuresAr : plan.featuresEn) as string[];
+              const differentiator = getPlanCommercialDifferentiator(plan, comparison);
               const PlanIcon = plan.isPopular
                 ? Sparkles
                 : price == null
@@ -135,6 +140,11 @@ export default async function PricingPage() {
                       </div>
                       <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.name}</CardTitle>
                       <CardDescription>{isAr ? plan.name : plan.nameAr}</CardDescription>
+                      {differentiator ? (
+                        <div className="bg-primary/10 text-primary mt-3 inline-flex w-fit rounded-full border border-primary/20 px-3 py-1 text-xs font-medium">
+                          {isAr ? differentiator.ar : differentiator.en}
+                        </div>
+                      ) : null}
                       <div className="mt-4 flex items-end justify-between gap-3">
                         <div>
                           <div className="text-4xl font-bold tracking-tight">{priceText}</div>

@@ -5,16 +5,8 @@ import { hasRole } from "@/lib/access-control";
 import prisma from "@/lib/db";
 import { logger } from "@/lib/logger";
 import bcrypt from "bcryptjs";
-import { EmploymentType } from "@prisma/client";
 
-import {
-  allocateNextEmployeeNumber,
-  findOrCreateDefaultDepartmentId
-} from "@/lib/employees/provisioning";
-import {
-  ensureTenantJobTitleCatalog,
-  getDefaultJobTitleCodeForUserRole
-} from "@/lib/hr/job-title-catalog";
+import { ensureEmployeeWorkspaceProfile } from "@/lib/employees/workspace-provisioning";
 
 const ALLOWED_ROLES = ["TENANT_ADMIN", "HR_MANAGER"] as const;
 const MANAGEABLE_ROLES = new Set(["EMPLOYEE", "HR_MANAGER", "MANAGER", "TENANT_ADMIN"]);
@@ -205,8 +197,6 @@ export async function POST(request: NextRequest) {
           );
         }
       }
-
-      await ensureTenantJobTitleCatalog(tenantId);
     }
 
     // Hash password
@@ -255,55 +245,14 @@ export async function POST(request: NextRequest) {
           throw new Error("الموظف المحدد مرتبط بالفعل بحساب آخر");
         }
       } else if (shouldCreateEmployee) {
-        const departmentId = await findOrCreateDefaultDepartmentId(tx, tenantId);
-        const preferredJobTitleCode = getDefaultJobTitleCodeForUserRole(role);
-        const defaultJobTitle =
-          (await tx.jobTitle.findFirst({
-            where: {
-              tenantId,
-              code: preferredJobTitleCode,
-              isActive: true
-            },
-            select: { id: true }
-          })) ||
-          (await tx.jobTitle.findFirst({
-            where: {
-              tenantId,
-              code: "EMPLOYEE",
-              isActive: true
-            },
-            select: { id: true }
-          })) ||
-          (await tx.jobTitle.findFirst({
-            where: {
-              tenantId,
-              isActive: true
-            },
-            orderBy: [{ level: "asc" }, { name: "asc" }],
-            select: { id: true }
-          }));
-
-        if (!defaultJobTitle) {
-          throw new Error("لا توجد مسميات وظيفية جاهزة لربط المستخدم بملف موظف");
-        }
-
-        const employeeNumber = await allocateNextEmployeeNumber(tx, tenantId);
-
-        await tx.employee.create({
-          data: {
-            tenantId,
-            userId: createdUser.id,
-            employeeNumber,
-            firstName,
-            lastName,
-            email: normalizedEmail,
-            phone: phone || null,
-            departmentId,
-            jobTitleId: defaultJobTitle.id,
-            hireDate: new Date(),
-            employmentType: EmploymentType.FULL_TIME,
-            status: "ACTIVE"
-          }
+        await ensureEmployeeWorkspaceProfile(tx, {
+          tenantId,
+          userId: createdUser.id,
+          email: normalizedEmail,
+          firstName,
+          lastName,
+          phone: phone || null,
+          role
         });
       }
 

@@ -8,6 +8,7 @@ import { logger } from "@/lib/logger";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import { verifyActionToken } from "@/lib/security/action-tokens";
 import { revokeAllRefreshTokensForUser } from "@/lib/mobile/refresh-tokens";
+import { ensureTenantAdminWorkspaceProfile } from "@/lib/tenant-activation";
 
 const RESET_PASSWORD_RATE_LIMIT = {
   limit: 10,
@@ -144,10 +145,31 @@ export async function POST(request: NextRequest) {
       });
 
       if (payload.type === "tenant-admin-activation" && user.tenantId) {
+        const adminWorkspaceProfile = await ensureTenantAdminWorkspaceProfile(tx, {
+          tenantId: user.tenantId,
+          userId: user.id
+        });
+
         const activatedTenant = await tx.tenant.updateMany({
           where: { id: user.tenantId, status: "PENDING" },
           data: { status: "ACTIVE" }
         });
+
+        if (adminWorkspaceProfile && adminWorkspaceProfile.action !== "existing") {
+          await tx.auditLog.create({
+            data: {
+              tenantId: user.tenantId,
+              userId: user.id,
+              action: "TENANT_ADMIN_EMPLOYEE_LINKED",
+              entity: "Employee",
+              entityId: adminWorkspaceProfile.employeeId,
+              newData: {
+                source: "tenant-admin-activation",
+                action: adminWorkspaceProfile.action
+              }
+            }
+          });
+        }
 
         if (activatedTenant.count > 0) {
           await tx.auditLog.create({

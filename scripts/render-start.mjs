@@ -9,8 +9,20 @@ function bin(name) {
 
 function run(cmd, args, { label, env } = {}) {
   return new Promise((resolve) => {
+    let settled = false;
+    const finish = (code) => {
+      if (!settled) {
+        settled = true;
+        resolve({ code, label });
+      }
+    };
+
     const child = spawn(cmd, args, { stdio: "inherit", env: env ?? process.env });
-    child.on("close", (code) => resolve({ code: code ?? 1, label }));
+    child.on("error", (error) => {
+      console.error(`[render-start] Failed to start ${label ?? cmd}.`, error);
+      finish(1);
+    });
+    child.on("close", (code) => finish(code ?? 1));
   });
 }
 
@@ -19,7 +31,7 @@ async function main() {
   const skipStartupMigrations = process.env.SKIP_STARTUP_MIGRATIONS === "true";
 
   if (skipStartupMigrations) {
-    console.log("[render-start] startup migrations disabled; relying on preDeployCommand.");
+    console.log("[render-start] startup migrations disabled; relying on Render preDeployCommand.");
   } else {
     console.log("[render-start] Running prisma migrate deploy as a startup safety net...");
     const migrate = await run(bin("prisma"), ["migrate", "deploy"], {
