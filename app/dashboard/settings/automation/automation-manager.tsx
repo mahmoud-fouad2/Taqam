@@ -23,8 +23,8 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table";
-import type { AutomationDashboardData } from "@/lib/automation";
-import { AUTOMATION_TRIGGER_LABELS } from "@/lib/automation";
+import type { AutomationDashboardData } from "@/lib/automation-contracts";
+import { AUTOMATION_TRIGGER_LABELS } from "@/lib/automation-contracts";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 
 type Props = {

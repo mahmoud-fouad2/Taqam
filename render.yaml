@@ -8,7 +8,7 @@ services:
     runtime: node
     region: frankfurt # Closest to Middle East
     plan: starter
-    buildCommand: corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm install --frozen-lockfile && rm -rf .next && SKIP_BUILD_VALIDATION=true NEXT_DISABLE_STANDALONE_OUTPUT=true NODE_OPTIONS=--max-old-space-size=448 pnpm build:webpack && rm -rf .next/standalone
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm install --frozen-lockfile && rm -rf .next && SKIP_BUILD_VALIDATION=true NEXT_DISABLE_STANDALONE_OUTPUT=true NODE_OPTIONS=--max-old-space-size=3072 pnpm build:webpack && rm -rf .next/standalone
     preDeployCommand: corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm db:migrate:prod
     startCommand: corepack pnpm start:render
     healthCheckPath: /api/health

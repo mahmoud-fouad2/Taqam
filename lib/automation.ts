@@ -1,25 +1,25 @@
+import "server-only";
+
 import prisma from "@/lib/db";
 import { sendBulkNotification, type NotificationType } from "@/lib/notifications/send";
 import type { Prisma, WorkflowDefinition, WorkflowRun } from "@prisma/client";
+import {
+  type AutomationDashboardData,
+  type AutomationTriggerType,
+  AUTOMATION_TRIGGER_LABELS,
+  AUTOMATION_TRIGGER_TYPES
+} from "@/lib/automation-contracts";
 
-export const AUTOMATION_TRIGGER_TYPES = [
-  "leave.requested",
-  "leave.approved",
-  "leave.rejected",
-  "payslip.ready"
-] as const;
-
-export type AutomationTriggerType = (typeof AUTOMATION_TRIGGER_TYPES)[number];
-
-export const AUTOMATION_TRIGGER_LABELS: Record<
+export {
+  AUTOMATION_TRIGGER_LABELS,
+  AUTOMATION_TRIGGER_TYPES
+} from "@/lib/automation-contracts";
+export type {
+  AutomationDashboardData,
+  AutomationRunSummary,
   AutomationTriggerType,
-  { ar: string; en: string }
-> = {
-  "leave.requested": { ar: "عند تقديم طلب إجازة", en: "When a leave request is submitted" },
-  "leave.approved": { ar: "عند الموافقة على الإجازة", en: "When a leave request is approved" },
-  "leave.rejected": { ar: "عند رفض الإجازة", en: "When a leave request is rejected" },
-  "payslip.ready": { ar: "عند جاهزية قسيمة الراتب", en: "When a payslip becomes ready" }
-};
+  AutomationWorkflowSummary
+} from "@/lib/automation-contracts";
 
 type WorkflowConditionOperator = "exists" | "equals" | "notEquals" | "in";
 
@@ -39,48 +39,6 @@ export type NotificationWorkflowAction = {
 };
 
 export type WorkflowActionDefinition = NotificationWorkflowAction;
-
-export type AutomationWorkflowSummary = {
-  id: string;
-  key: string;
-  name: string;
-  description: string | null;
-  triggerType: string;
-  enabled: boolean;
-  isBuiltin: boolean;
-  version: number;
-  conditionsCount: number;
-  actionsCount: number;
-  updatedAt: string;
-  latestRun:
-    | {
-        id: string;
-        status: string;
-        summary: string | null;
-        retryCount: number;
-        startedAt: string;
-        finishedAt: string | null;
-      }
-    | null;
-};
-
-export type AutomationRunSummary = {
-  id: string;
-  workflowId: string;
-  workflowName: string;
-  triggerType: string;
-  status: string;
-  summary: string | null;
-  failureReason: string | null;
-  retryCount: number;
-  startedAt: string;
-  finishedAt: string | null;
-};
-
-export type AutomationDashboardData = {
-  workflows: AutomationWorkflowSummary[];
-  runs: AutomationRunSummary[];
-};
 
 type AutomationPayload = Record<string, unknown>;
 

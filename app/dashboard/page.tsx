@@ -74,14 +74,18 @@ export default async function Page() {
       where: { id: user.tenantId },
       select: { setupCompletedAt: true, name: true, nameAr: true }
     });
-    if (wasSetupCompletedRecently(tenantMeta?.setupCompletedAt)) {
+    const recentTenant = tenantMeta && wasSetupCompletedRecently(tenantMeta.setupCompletedAt)
+      ? tenantMeta
+      : null;
+
+    if (recentTenant) {
       showGettingStarted = true;
       const [hasPayroll, hasAttendance] = await Promise.all([
         prisma.payrollPeriod.count({ where: { tenantId: user.tenantId } }).then((c: number) => c > 0),
         prisma.attendanceRecord.count({ where: { tenantId: user.tenantId } }).then((c: number) => c > 0)
       ]);
       gettingStartedSteps = buildGettingStartedSteps({
-        tenantName: tenantMeta.nameAr ?? tenantMeta.name,
+        tenantName: recentTenant.nameAr ?? recentTenant.name,
         hasEmployees: stats.totalEmployees > 0,
         hasPayroll,
         hasAttendance,
