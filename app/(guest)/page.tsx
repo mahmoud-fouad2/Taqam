@@ -24,6 +24,7 @@ import {
   ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/marketing/json-ld";
 import {
   getCommercialClaimsBySurface,
   getMarketingTestimonials,
@@ -31,6 +32,8 @@ import {
   getMarketingIntegrationShowcase
 } from "@/lib/marketing/commercial-registry";
 import { getPricingData } from "@/lib/marketing/pricing";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -367,6 +370,14 @@ export default async function LandingPage({
   const liveMarketingIntegrations = marketingIntegrations.filter(
     (item) => item.availability === "live"
   );
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}` || base;
+  const pageTitle = isAr
+    ? `${siteContent.siteNameAr} | منصة الموارد البشرية والرواتب والحضور`
+    : `${siteContent.siteNameEn} | HR, Payroll & Attendance Platform`;
+  const pageDescription = isAr
+    ? siteContent.defaultDescriptionAr
+    : siteContent.defaultDescriptionEn;
   const homepagePlans = pricingPlans.map((plan) => ({
     slug: plan.slug,
     name: plan.name,
@@ -400,6 +411,27 @@ export default async function LandingPage({
 
   return (
     <main className="bg-background min-h-[calc(100vh-8rem)]">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl || base,
+            locale,
+            title: pageTitle,
+            description: pageDescription,
+            about: isAr ? "إدارة الموارد البشرية والرواتب والحضور" : "HR, payroll and attendance"
+          }),
+          itemListSchema({
+            url: pageUrl || base,
+            locale,
+            name: isAr ? "أبرز مميزات طاقم" : "Taqam feature highlights",
+            description: pageDescription,
+            items: features.map((feature) => ({
+              name: isAr ? feature.title : feature.titleEn,
+              description: isAr ? feature.description : feature.descriptionEn
+            }))
+          })
+        ]}
+      />
       <StaggerContainer>
         {/* ── HERO ─────────────────────────────────────────────── */}
         <section className="relative overflow-hidden pt-20 pb-12 sm:pt-28">

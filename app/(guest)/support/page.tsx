@@ -15,7 +15,10 @@ import {
 
 import { FadeIn } from "@/components/ui/fade-in";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { ContactForm } from "../help-center/contact-form";
 
@@ -90,10 +93,25 @@ export default async function SupportPage({
   const issue = typeof sp?.issue === "string" ? sp.issue : null;
   const highlightedIssue =
     issue && issue in issueCopy ? issueCopy[issue as keyof typeof issueCopy] : null;
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/support`;
+  const pageDescription = isAr
+    ? "راسل فريق دعم طاقم مباشرة وتابع مشكلتك أو استفسارك من صفحة مستقلة وواضحة."
+    : "Reach Taqam support directly from a dedicated page for technical issues and inquiries.";
 
   return (
     <FadeIn direction="up">
       <main className="bg-background">
+        <JsonLd
+          data={pageSchema({
+            url: pageUrl,
+            locale,
+            title: isAr ? "الدعم الفني" : "Support",
+            description: pageDescription,
+            type: "ContactPage",
+            about: supportEmail
+          })}
+        />
         {/* ── HERO ── */}
         <section className="relative overflow-hidden border-b pt-20 pb-20 sm:pt-28">
           <div className="pointer-events-none absolute inset-0 -z-10">

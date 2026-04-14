@@ -1,6 +1,6 @@
 # Final Development Guide
 
-Last updated: 2026-04-07
+Last updated: 2026-04-14
 
 ## Purpose
 
@@ -9,13 +9,14 @@ Last updated: 2026-04-07
 
 ## Verified Current State
 
-- الويب يبني بنجاح عبر `pnpm build`.
+- الويب يبني بنجاح عبر `pnpm build:webpack` (على Windows يتم تعطيل standalone output تلقائيًا لتفادي مشاكل EBUSY).
 - فحص الأنواع ناجح عبر `pnpm typecheck`.
 - الفحص الصارم لـ ESLint ناجح عبر `pnpm lint:strict`.
 - اختبارات Vitest الحالية ناجحة عبر `pnpm test`.
 - تطبيق الهاتف الرسمي في `apps/mobile` ينجح في `pnpm --dir apps/mobile typecheck`.
 - `https://taqam.net/api/health` يستجيب بشكل صحيح في الإنتاج.
 - صفحات `privacy` و `terms` وواجهات اللودينج والأخطاء و404 والوضع الداكن في الأسطح العامة تم تحديثها إلى الوضع الحالي.
+- metadata و sitemap و robots و structured data للأسطح العامة أصبحت محدثة للعربي والإنجليزي على الوضع الحالي.
 
 ## Active Workspaces
 
@@ -180,6 +181,13 @@ Last updated: 2026-04-07
 - `SUPER_ADMIN_BOOTSTRAP_TOKEN`
 - `SUPER_ADMIN_EMAIL`
 - `SUPER_ADMIN_PASSWORD`
+- `NEXT_PUBLIC_SENTRY_DSN`
+- `SENTRY_DSN`
+- `SENTRY_ENVIRONMENT`
+- `SENTRY_AUTH_TOKEN`
+- `SENTRY_ORG`
+- `SENTRY_PROJECT`
+- `SENTRY_TEST_SECRET`
 
 ## Commands That Matter
 
@@ -197,6 +205,12 @@ pnpm typecheck
 pnpm lint:strict
 pnpm test
 pnpm build
+
+# Smoke (Windows PowerShell)
+$env:SMOKE_BASE_URL="https://taqam.net"; pnpm smoke
+
+# Smoke (macOS/Linux)
+SMOKE_BASE_URL=https://taqam.net pnpm smoke
 pnpm --dir apps/mobile typecheck
 ```
 
@@ -240,6 +254,8 @@ pnpm --dir apps/mobile android:aab:release
   - `SETUP_GUIDE.md`
   - `COMPLETE_GUIDE.md`
   - `ANDROID_APK.md`
+   - `docs/SUPPORT_PLAYBOOK.md`
+   - `docs/GO_LIVE_CHECKLIST.md`
   - هذا الملف: `docs/FINAL_DEVELOPMENT_GUIDE.md`
 - التقارير التاريخية ونتائج التنفيذ القديمة: `docs/reports/`
 - الخطط القديمة المؤرشفة: `docs/archive/plans/`
@@ -265,6 +281,8 @@ pnpm --dir apps/mobile android:aab:release
 - اختبار الجهاز الحقيقي بعد التوقيع النهائي
 - تنظيف إضافي للتقارير التاريخية غير المستخدمة إذا تقرر تقليل الأرشيف لاحقًا
 - حسم `sslmode` في قيم البيئة الإنتاجية بشكل صريح وفق مزود قاعدة البيانات
+- تنفيذ controlled test error واحد في Sentry بعد ضبط envs على Render
+- (اختياري لكن مُوصى به) ضبط `SENTRY_TEST_SECRET` ثم استدعاء `POST /api/ops/sentry-test` للتحقق end-to-end
 
 ## Recommended Starting Point For Future Work
 

@@ -4,6 +4,7 @@ import { MarketingHeader } from "@/components/marketing/marketing-header";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { getSiteUrl } from "@/lib/marketing/site";
 import { organizationSchema, softwareAppSchema, websiteSchema } from "@/lib/marketing/schema";
+import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
 
 export default async function GuestLayout({
@@ -13,20 +14,44 @@ export default async function GuestLayout({
 }>) {
   const locale = await getAppLocale();
   const base = getSiteUrl();
+  const siteContent = await getPlatformSiteContent();
 
   const ratingValue = Number(process.env.NEXT_PUBLIC_RATING_VALUE);
   const ratingCount = Number(process.env.NEXT_PUBLIC_RATING_COUNT);
   const hasRating = Number.isFinite(ratingValue) && Number.isFinite(ratingCount) && ratingCount > 0;
   const softwareAppJsonLd = softwareAppSchema({
     url: base,
+    locale,
+    siteNameAr: siteContent.siteNameAr,
+    siteNameEn: siteContent.siteNameEn,
+    descriptionAr: siteContent.defaultDescriptionAr,
+    descriptionEn: siteContent.defaultDescriptionEn,
     pricingUrl: `${base}/pricing`,
     ...(hasRating ? { ratingValue, ratingCount } : {})
   });
 
   return (
     <div className="relative min-h-screen">
-      <JsonLd data={organizationSchema({ url: base })} />
-      <JsonLd data={websiteSchema({ url: base, locale })} />
+      <JsonLd
+        data={organizationSchema({
+          url: base,
+          locale,
+          siteNameAr: siteContent.siteNameAr,
+          siteNameEn: siteContent.siteNameEn,
+          descriptionAr: siteContent.defaultDescriptionAr,
+          descriptionEn: siteContent.defaultDescriptionEn
+        })}
+      />
+      <JsonLd
+        data={websiteSchema({
+          url: base,
+          locale,
+          siteNameAr: siteContent.siteNameAr,
+          siteNameEn: siteContent.siteNameEn,
+          descriptionAr: siteContent.defaultDescriptionAr,
+          descriptionEn: siteContent.defaultDescriptionEn
+        })}
+      />
       <JsonLd data={softwareAppJsonLd} />
       <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
         <div className="bg-primary/10 premium-float absolute start-1/2 -top-24 h-[520px] w-[520px] -translate-x-1/2 rounded-full blur-3xl" />

@@ -5,9 +5,12 @@ import { CheckCircle2, Layers3, Rocket, ShieldCheck, Sparkles } from "lucide-rea
 
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import {
@@ -33,8 +36,16 @@ export default async function PlansPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const prefix = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${prefix}/plans`;
   const { plans, comparison } = await getPricingData();
   const pricingMarketing = await getPricingMarketingContent();
+  const pageTitle = isAr
+    ? pricingMarketing.plansPage.heroTitle.ar
+    : pricingMarketing.plansPage.heroTitle.en;
+  const pageDescription = isAr
+    ? pricingMarketing.plansPage.heroDescription.ar
+    : pricingMarketing.plansPage.heroDescription.en;
   const planDetails = plans.map((plan) => ({
     slug: plan.slug,
     nameAr: plan.nameAr,
@@ -54,6 +65,29 @@ export default async function PlansPage() {
 
   return (
     <main className="bg-background">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: pageTitle,
+            description: pageDescription,
+            type: "CollectionPage",
+            about: isAr ? "تفاصيل باقات طاقم" : "Taqam plan details"
+          }),
+          itemListSchema({
+            url: pageUrl,
+            locale,
+            name: isAr ? "تفاصيل الباقات" : "Plan breakdown",
+            description: pageDescription,
+            items: planDetails.map((plan) => ({
+              name: isAr ? plan.nameAr : plan.nameEn,
+              url: `${base}${prefix}/request-demo?plan=${plan.slug}`,
+              description: isAr ? plan.tagAr : plan.tagEn
+            }))
+          })
+        ]}
+      />
       <FadeIn>
         <MarketingPageHero
           icon={Layers3}

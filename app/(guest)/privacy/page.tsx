@@ -11,10 +11,13 @@ import {
   UserCheck
 } from "lucide-react";
 
+import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 
 type PrivacySection = {
@@ -212,9 +215,23 @@ export default async function PrivacyPage() {
   const p = locale === "en" ? "/en" : "";
   const dir = isAr ? "rtl" : "ltr";
   const lastUpdated = isAr ? "7 أبريل 2026" : "April 7, 2026";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/privacy`;
+  const pageDescription = isAr
+    ? "كيف تجمع طاقم بيانات الحسابات والشركات، وكيف تستخدمها وتحميها وتتعامل مع طلبات الخصوصية."
+    : "How Taqam collects account and company data, how it uses and protects it, and how privacy requests are handled.";
 
   return (
     <main className="bg-background" dir={dir}>
+      <JsonLd
+        data={pageSchema({
+          url: pageUrl,
+          locale,
+          title: isAr ? "سياسة الخصوصية" : "Privacy Policy",
+          description: pageDescription,
+          about: isAr ? "سياسة الخصوصية" : "Privacy policy"
+        })}
+      />
       <FadeIn>
         <MarketingPageHero
           icon={ShieldCheck}

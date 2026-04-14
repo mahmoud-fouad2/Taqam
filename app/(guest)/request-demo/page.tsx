@@ -7,12 +7,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2, Clock3, ShieldCheck } from "lucide-react";
 
+import { JsonLd } from "@/components/marketing/json-ld";
 import { LogoMark } from "@/components/logo-mark";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { SubscriptionRequestForm } from "./subscription-request-form";
 import { RecaptchaProvider } from "@/components/recaptcha-provider";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getAppLocale } from "@/lib/i18n/locale";
@@ -34,6 +37,8 @@ export default async function RequestDemoPage() {
   const siteContent = await getPlatformSiteContent();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/request-demo`;
   const requestDemoContent = siteContent.requestDemo;
   const highlightIcons = [Clock3, ShieldCheck, CheckCircle2];
   const highlights = requestDemoContent.highlights.map((highlight, index) => ({
@@ -44,6 +49,28 @@ export default async function RequestDemoPage() {
 
   return (
     <main className="bg-background min-h-[calc(100vh-8rem)]">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: isAr ? "طلب عرض تجريبي" : "Request a Demo",
+            description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
+            type: "ContactPage",
+            about: isAr ? "طلب عرض تجريبي لمنصة طاقم" : "Request a Taqam product demo"
+          }),
+          itemListSchema({
+            url: pageUrl,
+            locale,
+            name: isAr ? "أسباب طلب العرض" : "Demo request highlights",
+            description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
+            items: highlights.map((highlight) => ({
+              name: highlight.title,
+              description: highlight.description
+            }))
+          })
+        ]}
+      />
       <section className="container mx-auto px-4 py-14 lg:py-20">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.05fr)_minmax(320px,.95fr)]">
           <div className="mx-auto w-full max-w-2xl lg:mx-0">

@@ -4,7 +4,7 @@
 
 **نظام موارد بشرية متكامل مصمم للشركات التي تريد أن تُركّز على نموّها لا على إدارة أوراقها.**
 
-[🌐 taqam.net](https://taqam.net) &nbsp;|&nbsp; [📧 تواصل معنا](https://taqam.net/contact)
+[🌐 taqam.net](https://taqam.net) &nbsp;|&nbsp; [📧 تواصل معنا](https://taqam.net/support)
 
 ---
 
@@ -41,6 +41,13 @@ pnpm format:all
 pnpm format:check:all
 pnpm lint:strict
 pnpm typecheck
+pnpm test
+
+# Smoke (Windows PowerShell)
+$env:SMOKE_BASE_URL="https://taqam.net"; pnpm smoke
+
+# Smoke (macOS/Linux)
+SMOKE_BASE_URL=https://taqam.net pnpm smoke
 ```
 
 الخطة التشغيلية التفصيلية لترقية المشروع إلى Node 24 موجودة في `NODE_24_UPGRADE_PLAN.md`.

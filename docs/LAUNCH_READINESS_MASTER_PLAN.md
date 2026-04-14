@@ -929,7 +929,7 @@
    - [x] integration contracts normalization/parsing tests — `lib/integrations/contracts.test.ts`
 - [ ] integration tests للمسارات الأساسية
    - [x] integration connection route tests لـ `GET` / `PATCH` / `DELETE` / `test` / `sync` / `retry` — `app/api/integrations/connection-routes.test.ts`
-- [ ] smoke tests للصفحات العامة
+- [x] smoke tests للصفحات العامة
 - [x] pricing/claims snapshot tests أو content validation tests
    - [x] pricing marketing content validation tests (Vitest)
    - [x] claims/content validation tests للصفحات العامة
@@ -1037,10 +1037,10 @@
 
 - [ ] QA كامل
 - [ ] content freeze
-- [ ] support playbook
-- [ ] go-live checklist
-- [ ] pricing truth validation
-- [ ] claims validation pass
+- [x] support playbook
+- [x] go-live checklist
+- [x] pricing truth validation
+- [x] claims validation pass
 - [ ] activation flow end-to-end validation
 - [ ] mobile core journeys validation
 - [ ] rollback / incident response rehearsal

@@ -20,7 +20,8 @@ export async function generateMetadata(): Promise<Metadata> {
     titleAr: "اختيار الشركة | طاقم",
     titleEn: "Select Tenant | Taqam",
     descriptionAr: "اختر شركتك (Tenant) للدخول إلى لوحة التحكم.",
-    descriptionEn: "Select your tenant to continue to the dashboard."
+    descriptionEn: "Select your tenant to continue to the dashboard.",
+    noIndex: true
   });
 }
 

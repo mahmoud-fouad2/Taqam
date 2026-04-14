@@ -20,7 +20,10 @@ import {
 
 import { FadeIn } from "@/components/ui/fade-in";
 import { Button } from "@/components/ui/button";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -142,10 +145,37 @@ export default async function PublicHelpCenterPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/help-center`;
+  const pageDescription = isAr
+    ? "بوابة مساعدة مرتبة: أدلة الاستخدام، الأسئلة الشائعة، وصفحة دعم مستقلة للتواصل المباشر."
+    : "An organized help portal with usage guides, a dedicated FAQ page, and a separate support page.";
 
   return (
     <FadeIn direction="up">
       <main className="bg-background">
+        <JsonLd
+          data={[
+            pageSchema({
+              url: pageUrl,
+              locale,
+              title: isAr ? "مركز المساعدة" : "Help Center",
+              description: pageDescription,
+              type: "CollectionPage",
+              about: isAr ? "مساعدة طاقم" : "Taqam help center"
+            }),
+            itemListSchema({
+              url: pageUrl,
+              locale,
+              name: isAr ? "موضوعات مركز المساعدة" : "Help center topics",
+              description: pageDescription,
+              items: helpTopics.map((topic) => ({
+                name: isAr ? topic.titleAr : topic.titleEn,
+                description: isAr ? topic.descAr : topic.descEn
+              }))
+            })
+          ]}
+        />
         {/* ── HERO ── */}
         <section className="relative overflow-hidden border-b pt-20 pb-20 sm:pt-28">
           <div className="pointer-events-none absolute inset-0 -z-10">

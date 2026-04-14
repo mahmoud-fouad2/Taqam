@@ -7,6 +7,7 @@ import { BriefcaseBusiness, Building2, Sparkles } from "lucide-react";
 
 import { PublicJobFilters } from "@/components/recruitment/public-job-filters";
 import { PublicJobCard } from "@/components/recruitment/public-job-card";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,6 +22,8 @@ import {
 import { getAppLocale } from "@/lib/i18n/locale";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getCommercialClaimsBySurface } from "@/lib/marketing/commercial-registry";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import { getPublicJobTypeLabel, normalizePublicJobType } from "@/lib/recruitment/public-meta";
 import { listPublicJobFilters, listPublicJobPostings } from "@/lib/recruitment/public";
@@ -131,14 +134,42 @@ export default async function CareersPage({
     listPublicJobFilters()
   ]);
   const tenantCount = new Set(jobs.map((job) => job.tenantSlug)).size;
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/careers`;
   const nf = new Intl.NumberFormat(isAr ? "ar-SA" : "en-US");
   const selectedDepartment = filters.departments.find(
     (department) => department.id === departmentId
   );
   const hasFilters = Boolean(query || location || departmentId || jobType);
+  const pageDescription = isAr
+    ? siteContent.careers.description.ar
+    : siteContent.careers.description.en;
 
   return (
     <main className="bg-background pb-20">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: isAr ? siteContent.careers.title.ar : siteContent.careers.title.en,
+            description: pageDescription,
+            type: "CollectionPage",
+            about: isAr ? "وظائف الشركات على طاقم" : "Jobs across companies on Taqam"
+          }),
+          itemListSchema({
+            url: pageUrl,
+            locale,
+            name: isAr ? "الوظائف المفتوحة" : "Open roles",
+            description: pageDescription,
+            items: jobs.slice(0, 10).map((job) => ({
+              name: isAr ? (job.titleAr || job.title) : job.title,
+              url: `${base}${p}/careers/${job.id}`,
+              description: isAr ? (job.tenantNameAr || job.tenantName) : job.tenantName
+            }))
+          })
+        ]}
+      />
       <StaggerContainer>
         <section className="relative overflow-hidden border-b pt-20 pb-20 sm:pt-28">
           <div className="pointer-events-none absolute inset-0 -z-10">

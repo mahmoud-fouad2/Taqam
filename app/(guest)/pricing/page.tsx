@@ -5,6 +5,7 @@ import { CheckCircle2, CircleDollarSign, Minus, ShieldCheck, Sparkles } from "lu
 
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -16,6 +17,8 @@ import {
   TableRow
 } from "@/components/ui/table";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getPlatformSiteContent } from "@/lib/marketing/site-content";
 import {
@@ -42,6 +45,12 @@ export default async function PricingPage() {
   const isAr = locale === "ar";
   const siteContent = await getPlatformSiteContent();
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/pricing`;
+  const pageTitle = isAr ? siteContent.pricing.title.ar : siteContent.pricing.title.en;
+  const pageDescription = isAr
+    ? siteContent.pricing.description.ar
+    : siteContent.pricing.description.en;
   const pricingMarketing = await getPricingMarketingContent();
 
   const { plans, comparison } = await getPricingData();
@@ -56,6 +65,29 @@ export default async function PricingPage() {
 
   return (
     <main className="bg-background">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: pageTitle,
+            description: pageDescription,
+            type: "CollectionPage",
+            about: isAr ? "أسعار طاقم وباقات الموارد البشرية" : "Taqam pricing and HR plans"
+          }),
+          itemListSchema({
+            url: pageUrl,
+            locale,
+            name: isAr ? "باقات الأسعار" : "Pricing plans",
+            description: pageDescription,
+            items: plans.map((plan) => ({
+              name: isAr ? plan.nameAr : plan.name,
+              url: `${base}${p}/request-demo?plan=${plan.slug}`,
+              description: (isAr ? plan.featuresAr : plan.featuresEn).slice(0, 2).join("، ")
+            }))
+          })
+        ]}
+      />
       <FadeIn>
         <MarketingPageHero
           icon={CircleDollarSign}

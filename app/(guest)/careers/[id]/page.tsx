@@ -10,13 +10,16 @@ import {
   Users2
 } from "lucide-react";
 
+import { JsonLd } from "@/components/marketing/json-ld";
 import { PublicApplicationForm } from "@/components/recruitment/public-application-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { jobPostingSchema, pageSchema } from "@/lib/marketing/schema";
+import { buildMarketingLanguageAlternates } from "@/lib/marketing/seo";
 import { getSiteUrl } from "@/lib/marketing/site";
-import { buildTenantPath } from "@/lib/tenant";
+import { buildTenantCanonicalUrl, buildTenantPath } from "@/lib/tenant";
 import {
   getPublicExperienceLevelLabel,
   getPublicJobTypeLabel
@@ -61,39 +64,93 @@ function formatDate(locale: "ar" | "en", iso: string | null) {
   }).format(new Date(iso));
 }
 
+function toSchemaEmploymentType(value: string): string | undefined {
+  switch (value) {
+    case "full-time":
+      return "FULL_TIME";
+    case "part-time":
+      return "PART_TIME";
+    case "contract":
+      return "CONTRACTOR";
+    case "internship":
+      return "INTERN";
+    case "temporary":
+      return "TEMPORARY";
+    default:
+      return undefined;
+  }
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { id } = await params;
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
   const job = await getPublicJobPostingById(id);
   const base = getSiteUrl();
 
   if (!job) {
     return {
-      title: "Career Opportunity | Taqam",
-      description: "Public job opportunity on Taqam."
+      title: isAr ? "فرصة وظيفية | طاقم" : "Career Opportunity | Taqam",
+      description: isAr ? "فرصة وظيفية عامة على طاقم." : "Public job opportunity on Taqam.",
+      robots: {
+        index: false,
+        follow: false
+      }
     };
   }
 
-  const title = `${job.titleAr || job.title} | ${job.tenantNameAr || job.tenantName} | Taqam`;
-  const description = job.description.slice(0, 160);
-  const url = `${base}/careers/${job.id}`;
+  const jobTitle = isAr ? (job.titleAr || job.title) : job.title;
+  const companyName = isAr ? (job.tenantNameAr || job.tenantName) : job.tenantName;
+  const jobTypeLabel = getPublicJobTypeLabel(locale, job.jobType);
+  const locationLabel = job.location || (isAr ? "السعودية" : "Saudi Arabia");
+  const { arUrl, enUrl, languages } = buildMarketingLanguageAlternates(`/careers/${job.id}`, base);
+  const url = isAr ? arUrl : enUrl;
+  const title = isAr
+    ? `${jobTitle} | وظائف ${companyName} | طاقم`
+    : `${jobTitle} | ${companyName} Careers | Taqam`;
+  const description = isAr
+    ? `تقدم على وظيفة ${jobTitle} في ${companyName} عبر بوابة طاقم للتوظيف. نوع الوظيفة: ${jobTypeLabel}. الموقع: ${locationLabel}.`
+    : `Apply for ${jobTitle} at ${companyName} through Taqam's careers portal. Role type: ${jobTypeLabel}. Location: ${locationLabel}.`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: url
+      canonical: url,
+      languages
     },
+    keywords: Array.from(
+      new Set([
+        jobTitle,
+        companyName,
+        jobTypeLabel,
+        isAr ? "وظائف" : "jobs",
+        isAr ? "بوابة التوظيف" : "careers portal",
+        "Taqam"
+      ])
+    ),
     openGraph: {
       title,
       description,
       url,
       siteName: "Taqam",
-      type: "article"
+      type: "article",
+      locale: isAr ? "ar_SA" : "en_US",
+      alternateLocale: isAr ? ["en_US"] : ["ar_SA"],
+      images: [
+        {
+          url: `${base}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: title
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description
+      description,
+      images: [`${base}/twitter-image`]
     }
   };
 }
@@ -103,6 +160,7 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
 
   const job = await getPublicJobPostingById(id);
   if (!job) {
@@ -110,10 +168,51 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
   }
 
   const companyName = job.tenantNameAr || job.tenantName;
+  const { arUrl, enUrl } = buildMarketingLanguageAlternates(`/careers/${job.id}`, base);
+  const pageUrl = locale === "ar" ? arUrl : enUrl;
+  const pageTitle = isAr ? (job.titleAr || job.title) : job.title;
+  const pageDescription = isAr
+    ? `تقدم على وظيفة ${pageTitle} في ${companyName} عبر طاقم. نوع الوظيفة ${getPublicJobTypeLabel(locale, job.jobType)}.`
+    : `Apply for ${pageTitle} at ${companyName} through Taqam. Role type: ${getPublicJobTypeLabel(locale, job.jobType)}.`;
+  const tenantCareersUrl = buildTenantCanonicalUrl(
+    { slug: job.tenantSlug, domain: job.tenantDomain },
+    "/careers",
+    {
+      locale,
+      baseDomain: base.replace(/^https?:\/\//, "")
+    }
+  );
 
   return (
     <FadeIn direction="up">
       <main className="bg-background pb-20">
+        <JsonLd
+          data={[
+            pageSchema({
+              url: pageUrl,
+              locale,
+              title: pageTitle,
+              description: pageDescription,
+              about: companyName
+            }),
+            jobPostingSchema({
+              url: pageUrl,
+              locale,
+              title: pageTitle,
+              description: job.description,
+              employmentType: toSchemaEmploymentType(job.jobType),
+              datePosted: job.postedAt,
+              validThrough: job.expiresAt,
+              hiringOrganizationName: companyName,
+              hiringOrganizationUrl: tenantCareersUrl,
+              hiringOrganizationLogo: job.tenantLogo,
+              jobLocation: job.location,
+              salaryMin: job.salaryMin,
+              salaryMax: job.salaryMax,
+              salaryCurrency: job.salaryCurrency
+            })
+          ]}
+        />
         <section className="from-primary/10 via-background to-background relative overflow-hidden border-b bg-gradient-to-b py-16">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="bg-primary/10 absolute top-0 left-1/4 h-72 w-72 rounded-full blur-3xl" />

@@ -12,13 +12,22 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/api/",
+          "/dashboard",
           "/dashboard/",
+          "/en/dashboard",
+          "/en/dashboard/",
           "/login",
+          "/en/login",
           "/register",
+          "/en/register",
           "/select-tenant",
+          "/en/select-tenant",
           "/m/",
+          "/en/m/",
           "/404-page",
+          "/en/404-page",
           "/500-page",
+          "/en/500-page",
           "/_next/"
         ]
       }

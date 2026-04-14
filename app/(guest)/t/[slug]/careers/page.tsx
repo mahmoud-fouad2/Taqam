@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { BriefcaseBusiness, Building2, Sparkles } from "lucide-react";
 
+import { JsonLd } from "@/components/marketing/json-ld";
 import { PublicJobFilters } from "@/components/recruitment/public-job-filters";
 import { PublicJobCard } from "@/components/recruitment/public-job-card";
 import { Badge } from "@/components/ui/badge";
@@ -24,6 +25,7 @@ import {
   listPublicJobFilters,
   listPublicJobPostings
 } from "@/lib/recruitment/public";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { buildTenantCanonicalUrl, buildTenantPath } from "@/lib/tenant";
 
 import { FadeIn } from "@/components/ui/fade-in";
@@ -35,39 +37,81 @@ type PageProps = {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
   const tenant = await getPublicCareersTenantBySlug(slug);
   const base = getSiteUrl();
 
   if (!tenant) {
     return {
-      title: "Company Careers | Taqam",
-      description: "Company-specific careers portal on Taqam."
+      title: isAr ? "وظائف الشركة | طاقم" : "Company Careers | Taqam",
+      description: isAr
+        ? "بوابة وظائف خاصة بالشركة على طاقم."
+        : "Company-specific careers portal on Taqam.",
+      robots: {
+        index: false,
+        follow: false
+      }
     };
   }
 
-  const companyName = tenant.nameAr || tenant.name;
-  const url = buildTenantCanonicalUrl(tenant, "/careers", {
+  const companyName = isAr ? (tenant.nameAr || tenant.name) : tenant.name;
+  const arUrl = buildTenantCanonicalUrl(tenant, "/careers", {
+    locale: "ar",
     baseDomain: base.replace(/^https?:\/\//, "")
   });
-  const title = `${companyName} | Careers | Taqam`;
-  const description = `Open roles and direct applications for ${companyName} on Taqam.`;
+  const enUrl = buildTenantCanonicalUrl(tenant, "/careers", {
+    locale: "en",
+    baseDomain: base.replace(/^https?:\/\//, "")
+  });
+  const url = isAr ? arUrl : enUrl;
+  const title = isAr
+    ? `${companyName} | وظائف الشركة | طاقم`
+    : `${companyName} | Company Careers | Taqam`;
+  const description = isAr
+    ? `استعرض الوظائف المفتوحة لدى ${companyName} وقدّم مباشرة عبر بوابة التوظيف الخاصة بهم على طاقم.`
+    : `Browse open roles at ${companyName} and apply directly through their dedicated Taqam careers portal.`;
 
   return {
     title,
     description,
     alternates: {
-      canonical: url
+      canonical: url,
+      languages: {
+        "ar-SA": arUrl,
+        "en-US": enUrl,
+        "x-default": arUrl
+      }
     },
+    keywords: Array.from(
+      new Set([
+        companyName,
+        isAr ? "وظائف الشركة" : "company careers",
+        isAr ? "التوظيف" : "recruitment",
+        "Taqam"
+      ])
+    ),
     openGraph: {
       title,
       description,
       url,
-      siteName: "Taqam"
+      siteName: "Taqam",
+      locale: isAr ? "ar_SA" : "en_US",
+      alternateLocale: isAr ? ["en_US"] : ["ar_SA"],
+      images: [
+        {
+          url: `${base}/opengraph-image`,
+          width: 1200,
+          height: 630,
+          alt: title
+        }
+      ]
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description
+      description,
+      images: [`${base}/twitter-image`]
     }
   };
 }
@@ -106,10 +150,40 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
     (department) => department.id === departmentId
   );
   const hasFilters = Boolean(query || location || departmentId || jobType);
+  const pageUrl = buildTenantCanonicalUrl(tenant, "/careers", {
+    locale,
+    baseDomain: getSiteUrl().replace(/^https?:\/\//, "")
+  });
+  const pageDescription = isAr
+    ? `استعرض الوظائف المفتوحة لدى ${companyName} وقدّم مباشرة عبر بوابة التوظيف الخاصة بهم على طاقم.`
+    : `Browse open roles at ${companyName} and apply directly through their dedicated Taqam careers portal.`;
 
   return (
     <FadeIn direction="up">
       <main className="bg-background pb-20">
+        <JsonLd
+          data={[
+            pageSchema({
+              url: pageUrl,
+              locale,
+              title: isAr ? `${companyName} | وظائف الشركة` : `${companyName} | Company Careers`,
+              description: pageDescription,
+              type: "CollectionPage",
+              about: companyName
+            }),
+            itemListSchema({
+              url: pageUrl,
+              locale,
+              name: isAr ? `وظائف ${companyName}` : `${companyName} open roles`,
+              description: pageDescription,
+              items: jobs.slice(0, 10).map((job) => ({
+                name: isAr ? (job.titleAr || job.title) : job.title,
+                url: `${getSiteUrl()}${buildTenantPath(slug, `/careers/${job.id}`, locale)}`,
+                description: job.location || (isAr ? "السعودية" : "Saudi Arabia")
+              }))
+            })
+          ]}
+        />
         <section className="from-primary/10 via-background to-background relative overflow-hidden border-b bg-gradient-to-b py-16 sm:py-20">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="bg-primary/10 absolute top-0 left-1/2 h-72 w-72 -translate-x-1/2 rounded-full blur-3xl" />

@@ -1,21 +1,30 @@
 import * as Sentry from "@sentry/nextjs";
 
-const dsn = process.env.NEXT_PUBLIC_SENTRY_DSN;
+import {
+  getSentryDsn,
+  getSentryEnvironment,
+  getSentryReplayOnErrorSampleRate,
+  getSentryReplaySessionSampleRate,
+  getSentryTracesSampleRate,
+  isSentryEnabled
+} from "@/lib/sentry";
+
+const dsn = getSentryDsn("client");
 
 Sentry.init({
   dsn,
-  enabled: Boolean(dsn),
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  enabled: isSentryEnabled("client"),
+  tracesSampleRate: getSentryTracesSampleRate(),
   debug: false,
-  replaysOnErrorSampleRate: 1.0,
-  replaysSessionSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  replaysOnErrorSampleRate: getSentryReplayOnErrorSampleRate(),
+  replaysSessionSampleRate: getSentryReplaySessionSampleRate(),
   integrations: [
     Sentry.replayIntegration({
       maskAllText: true,
       blockAllMedia: true
     })
   ],
-  environment: process.env.NODE_ENV || "development",
+  environment: getSentryEnvironment(),
   ignoreErrors: [
     "Non-Error promise rejection captured",
     "ResizeObserver loop limit exceeded",

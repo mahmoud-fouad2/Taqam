@@ -37,6 +37,8 @@ pnpm dev
 ```bash
 # Sentry Configuration
 NEXT_PUBLIC_SENTRY_DSN=https://your-dsn@sentry.io/project-id
+SENTRY_DSN=https://your-dsn@sentry.io/project-id
+SENTRY_ENVIRONMENT=production
 SENTRY_ORG=your-organization
 SENTRY_PROJECT=your-project
 SENTRY_AUTH_TOKEN=your-auth-token  # Optional for source maps
@@ -45,7 +47,7 @@ SENTRY_AUTH_TOKEN=your-auth-token  # Optional for source maps
 #### ج) التحقق من التكامل
 
 ```bash
-# سيبدأ Sentry بالعمل تلقائياً
+# سيبدأ Sentry بالعمل تلقائياً بعد ضبط DSN للعميل والسيرفر
 pnpm dev
 
 # للتأكد من التكامل، ارمِ خطأ تجريبي:
@@ -314,7 +316,7 @@ pnpm add -D pino-pretty
 
 قبل Deploy إلى Production:
 
-- [ ] أضف `NEXT_PUBLIC_SENTRY_DSN` إلى Render/Vercel
+- [ ] أضف `NEXT_PUBLIC_SENTRY_DSN` و `SENTRY_DSN` إلى Render/Vercel
 - [ ] اضبط `LOG_LEVEL=info` (لا تستخدم debug)
 - [ ] فعّل Sentry Alerts للأخطاء الحرجة
 - [ ] راجع Audit Logs بانتظام (مرة يومياً)

@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import type { LucideIcon } from "lucide-react";
 import { Ban, CheckCircle2, Clock3, FileText, Mail, Scale, Shield, Users } from "lucide-react";
 
+import { JsonLd } from "@/components/marketing/json-ld";
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import { getAppLocale } from "@/lib/i18n/locale";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 
 type TermsSection = {
@@ -213,9 +216,23 @@ export default async function TermsPage() {
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
   const dir = isAr ? "rtl" : "ltr";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/terms`;
+  const pageDescription = isAr
+    ? "الشروط المنظمة لاستخدام منصة طاقم، بما يشمل نطاق الخدمة، مسؤوليات العميل، والاشتراكات والالتزامات التشغيلية."
+    : "The terms governing use of Taqam, including service scope, customer responsibilities, subscriptions, and operational commitments.";
 
   return (
     <main className="bg-background" dir={dir}>
+      <JsonLd
+        data={pageSchema({
+          url: pageUrl,
+          locale,
+          title: isAr ? "الشروط والأحكام" : "Terms & Conditions",
+          description: pageDescription,
+          about: isAr ? "الشروط والأحكام" : "Terms and conditions"
+        })}
+      />
       <FadeIn>
         <MarketingPageHero
           icon={FileText}

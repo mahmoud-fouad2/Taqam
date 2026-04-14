@@ -28,10 +28,13 @@ import {
 
 import { MarketingPageCta } from "@/components/marketing/page-cta";
 import { MarketingPageHero } from "@/components/marketing/page-hero";
+import { JsonLd } from "@/components/marketing/json-ld";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import type { MarketingFeatureSuiteIconKey } from "@/lib/marketing/commercial-registry";
 import { getCommercialClaimsBySurface, getMarketingFeatureSuites } from "@/lib/marketing/commercial-registry";
 import { cn } from "@/lib/utils";
+import { getSiteUrl } from "@/lib/marketing/site";
+import { itemListSchema, pageSchema } from "@/lib/marketing/schema";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 
@@ -222,11 +225,41 @@ export default async function FeaturesPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/features`;
+  const pageTitle = isAr ? "مميزات طاقم" : "Taqam Features";
+  const pageDescription = isAr
+    ? (featuresHeroPrimaryClaim?.description.ar ??
+      "استكشف مميزات طاقم للموارد البشرية، الرواتب، الحضور، والتوظيف في تجربة واحدة مترابطة.")
+    : (featuresHeroPrimaryClaim?.description.en ??
+      "Explore Taqam capabilities for HR, payroll, attendance, and recruitment in one connected experience.");
 
   const totalFeatures = featureSections.reduce((sum, section) => sum + section.items.length, 0);
 
   return (
     <main className="bg-background">
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: pageTitle,
+            description: pageDescription,
+            type: "CollectionPage",
+            about: isAr ? "مميزات إدارة الموارد البشرية" : "HR software features"
+          }),
+          itemListSchema({
+            url: pageUrl,
+            locale,
+            name: isAr ? "مسارات المميزات" : "Feature suites",
+            description: pageDescription,
+            items: featureSections.map((section) => ({
+              name: isAr ? section.titleAr : section.titleEn,
+              description: isAr ? section.summaryAr : section.summaryEn
+            }))
+          })
+        ]}
+      />
       <StaggerContainer>
         <MarketingPageHero
           icon={Sparkles}

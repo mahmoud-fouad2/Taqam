@@ -13,8 +13,31 @@ const baseUrl = (process.env.SMOKE_BASE_URL || "http://localhost:3000").replace(
 
 const checks = [
   { name: "Home", path: "/" },
+  { name: "Home EN", path: "/en" },
+  { name: "Features", path: "/features" },
+  { name: "Features EN", path: "/en/features" },
+  { name: "Pricing", path: "/pricing" },
+  { name: "Pricing EN", path: "/en/pricing" },
+  { name: "Plans", path: "/plans" },
+  { name: "Plans EN", path: "/en/plans" },
+  { name: "Careers", path: "/careers" },
+  { name: "Careers EN", path: "/en/careers" },
+  { name: "Request Demo", path: "/request-demo" },
+  { name: "Request Demo EN", path: "/en/request-demo" },
+  { name: "Help Center", path: "/help-center" },
+  { name: "Help Center EN", path: "/en/help-center" },
+  { name: "Support", path: "/support" },
+  { name: "Support EN", path: "/en/support" },
+  { name: "FAQ", path: "/faq" },
+  { name: "FAQ EN", path: "/en/faq" },
+  { name: "Privacy", path: "/privacy" },
+  { name: "Privacy EN", path: "/en/privacy" },
+  { name: "Terms", path: "/terms" },
+  { name: "Terms EN", path: "/en/terms" },
   { name: "Login", path: "/login" },
   { name: "Dashboard", path: "/dashboard" },
+  { name: "Robots", path: "/robots.txt", expectTextIncludes: "Sitemap:" },
+  { name: "Sitemap", path: "/sitemap.xml", expectTextIncludes: "<urlset" },
 
   // Health + auth surface
   { name: "Health API", path: "/api/health", expectJson: true },
@@ -76,6 +99,18 @@ for (const c of checks) {
         extra = " (expected JSON)";
         failed++;
         console.log(`[FAIL] ${c.name}: ${c.path} -> ${formatStatus(res)}${extra}`);
+        continue;
+      }
+    }
+
+    if (c.expectTextIncludes) {
+      const text = await res.text();
+
+      if (!text.includes(c.expectTextIncludes)) {
+        failed++;
+        console.log(
+          `[FAIL] ${c.name}: ${c.path} -> ${formatStatus(res)} (expected text containing: ${c.expectTextIncludes})`
+        );
         continue;
       }
     }

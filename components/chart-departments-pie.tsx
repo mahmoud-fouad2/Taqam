@@ -22,6 +22,39 @@ const CHART_COLORS = [
   "hsl(var(--primary))"
 ];
 
+const CHART_COLOR_CLASSES = [
+  "bg-[hsl(var(--chart-1))]",
+  "bg-[hsl(var(--chart-2))]",
+  "bg-[hsl(var(--chart-3))]",
+  "bg-[hsl(var(--chart-4))]",
+  "bg-[hsl(var(--chart-5))]",
+  "bg-[hsl(var(--primary))]"
+];
+
+type TooltipPayloadItem = {
+  name?: string;
+  value?: number;
+};
+
+function DepartmentsTooltip({ active, payload }: { active?: boolean; payload?: TooltipPayloadItem[] }) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+
+  const item = payload[0];
+  const name = typeof item?.name === "string" ? item.name : "";
+  const value = typeof item?.value === "number" ? item.value : undefined;
+
+  return (
+    <div className="rounded-md border bg-background px-2 py-1 text-sm text-foreground shadow-sm">
+      <div className="font-medium">{name}</div>
+      {typeof value === "number" ? (
+        <div className="text-muted-foreground tabular-nums">{value}</div>
+      ) : null}
+    </div>
+  );
+}
+
 interface Props {
   locale: AppLocale;
   data: DashboardPiePoint[];
@@ -59,8 +92,7 @@ export function ChartDepartmentsPie({ locale, data }: Props) {
                   ))}
                 </Pie>
                 <Tooltip
-                  formatter={(value: number, name: string) => [value, name]}
-                  contentStyle={{ borderRadius: 8, border: "1px solid hsl(var(--border))" }}
+                  content={<DepartmentsTooltip />}
                 />
               </PieChart>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
@@ -72,8 +104,9 @@ export function ChartDepartmentsPie({ locale, data }: Props) {
               {data.map((dept, i) => (
                 <li key={dept.name} className="flex items-center gap-2 text-sm min-w-0">
                   <span
-                    className="h-3 w-3 rounded-sm shrink-0"
-                    style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
+                    className={`h-3 w-3 rounded-sm shrink-0 ${
+                      CHART_COLOR_CLASSES[i % CHART_COLOR_CLASSES.length]
+                    }`}
                   />
                   <span className="truncate flex-1">
                     {locale === "ar" && dept.nameAr ? dept.nameAr : dept.name}

@@ -8,6 +8,7 @@
 - `LAUNCH_READINESS_MASTER_PLAN.md`: الخطة التنفيذية الرئيسية للانطلاق التجاري والتقني، وتشمل activation، الباقات، التكاملات، الموبايل، والأتمتة.
 - `COMMERCIAL_CLAIMS_AUDIT_AND_CATALOG_SHAPE.md`: حصر surfaces الوعود التجارية الحالية وتعريف الشكل المقترح للـ Feature Catalog والـ Claims Registry.
 - `FINAL_DEVELOPMENT_GUIDE.md`: المرجع النهائي المحدث للحالة الحالية وخطوط التطوير اللاحقة.
+- `STATUS_2026-04-14.md`: صورة حالة (snapshot) بتاريخ اليوم: ما تم التحقق منه وما الذي تغيّر وما المتبقي.
 - `reports/`: تقارير تاريخية، نتائج اختبارات، وملخصات تنفيذ سابقة.
 - `archive/plans/`: خطط قديمة محفوظة للرجوع إليها فقط.
 

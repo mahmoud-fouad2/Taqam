@@ -1,14 +1,22 @@
 import * as Sentry from "@sentry/nextjs";
 
+import {
+  getSentryDsn,
+  getSentryEnvironment,
+  getSentryTracesSampleRate,
+  isSentryEnabled
+} from "@/lib/sentry";
+
 Sentry.init({
-  dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
+  dsn: getSentryDsn("server"),
+  enabled: isSentryEnabled("server"),
 
   // Adjust this value in production, or use tracesSampler for greater control
-  tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1.0,
+  tracesSampleRate: getSentryTracesSampleRate(),
 
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
 
   // Environment
-  environment: process.env.NODE_ENV || "development"
+  environment: getSentryEnvironment()
 });

@@ -11,7 +11,8 @@ import {
 } from "@/components/ui/accordion";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { getFaqCategories } from "@/lib/marketing/faq";
-import { faqSchema } from "@/lib/marketing/schema";
+import { faqSchema, pageSchema } from "@/lib/marketing/schema";
+import { getSiteUrl } from "@/lib/marketing/site";
 import { marketingMetadata } from "@/lib/marketing/seo";
 import { getAppLocale } from "@/lib/i18n/locale";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
@@ -32,15 +33,32 @@ export default async function FaqPage() {
   const locale = await getAppLocale();
   const isAr = locale === "ar";
   const p = locale === "en" ? "/en" : "";
+  const base = getSiteUrl();
+  const pageUrl = `${base}${p}/faq`;
   const categories = await getFaqCategories();
 
   const allFaqs = categories.flatMap((c) =>
     c.faqs.map((f) => ({ q: isAr ? f.qAr : f.qEn, a: isAr ? f.aAr : f.aEn }))
   );
+  const pageDescription = isAr
+    ? "إجابات على الأسئلة الشائعة حول طاقم: البدء، الرواتب، الحضور، الإجازات، والأمان."
+    : "Frequently asked questions about Taqam: onboarding, payroll, attendance, leave, and security.";
 
   return (
     <main className="bg-background">
-      <JsonLd data={faqSchema(allFaqs)} />
+      <JsonLd
+        data={[
+          pageSchema({
+            url: pageUrl,
+            locale,
+            title: isAr ? "الأسئلة الشائعة" : "Frequently Asked Questions",
+            description: pageDescription,
+            type: "CollectionPage",
+            about: isAr ? "الأسئلة الشائعة عن طاقم" : "Taqam frequently asked questions"
+          }),
+          faqSchema(allFaqs)
+        ]}
+      />
 
       <FadeIn>
         <MarketingPageHero

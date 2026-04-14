@@ -2,9 +2,18 @@ import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 
 const isWindows = process.platform === "win32";
+const argv = process.argv.slice(2);
+const cliForceWebpack = argv.includes("--webpack");
+const cliForceTurbopack = argv.includes("--turbopack");
+
+if (cliForceWebpack && cliForceTurbopack) {
+  console.error("[build] Invalid flags: cannot pass both --webpack and --turbopack.");
+  process.exit(1);
+}
+
 const forceWebpack = process.env.NEXT_FORCE_WEBPACK_BUILD === "true";
 const forceTurbopack = process.env.NEXT_FORCE_TURBOPACK_BUILD === "true";
-const useWebpack = forceWebpack || (isWindows && !forceTurbopack);
+const useWebpack = cliForceWebpack || (!cliForceTurbopack && (forceWebpack || (isWindows && !forceTurbopack)));
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve("next/dist/bin/next");
 

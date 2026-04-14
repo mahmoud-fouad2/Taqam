@@ -9,17 +9,32 @@ import { getSiteUrl } from "@/lib/marketing/site";
 import "./globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getAppLocale();
+  const isAr = locale === "ar";
   const siteContent = await getPlatformSiteContent();
-  const title = `${siteContent.siteNameEn} | ${siteContent.siteNameAr}`;
+  const primarySiteName = isAr ? siteContent.siteNameAr : siteContent.siteNameEn;
+  const secondarySiteName = isAr ? siteContent.siteNameEn : siteContent.siteNameAr;
+  const title = `${primarySiteName} | ${secondarySiteName}`;
+  const description = isAr
+    ? siteContent.defaultDescriptionAr
+    : siteContent.defaultDescriptionEn;
+  const keywords = Array.from(
+    new Set(
+      isAr
+        ? [...siteContent.defaultKeywordsAr, siteContent.siteNameAr, "الموارد البشرية", "الرواتب"]
+        : [...siteContent.defaultKeywordsEn, siteContent.siteNameEn, "HR", "Payroll"]
+    )
+  );
 
   return {
     metadataBase: new URL(getSiteUrl()),
-    applicationName: siteContent.siteNameEn,
+    applicationName: primarySiteName,
     title: {
       default: title,
-      template: `%s | ${siteContent.siteNameEn}`
+      template: `%s | ${primarySiteName}`
     },
-    description: siteContent.defaultDescriptionEn,
+    description,
+    keywords,
     manifest: "/manifest.webmanifest",
     verification: {
       google: "googlec1df282af5d25af4"
@@ -36,27 +51,29 @@ export async function generateMetadata(): Promise<Metadata> {
     },
     openGraph: {
       type: "website",
-      siteName: siteContent.siteNameEn,
+      siteName: primarySiteName,
       title,
-      description: siteContent.defaultDescriptionEn,
+      description,
+      locale: isAr ? "ar_SA" : "en_US",
+      alternateLocale: isAr ? ["en_US"] : ["ar_SA"],
       images: [
         {
           url: "/opengraph-image",
-          alt: siteContent.siteNameEn
+          alt: primarySiteName
         }
       ]
     },
     twitter: {
       card: "summary_large_image",
       title,
-      description: siteContent.defaultDescriptionEn,
+      description,
       images: ["/twitter-image"]
     },
     other: {
       "mobile-web-app-capable": "yes"
     },
-    authors: [{ name: siteContent.siteNameEn }],
-    creator: siteContent.siteNameEn
+    authors: [{ name: primarySiteName }],
+    creator: primarySiteName
   };
 }
 
