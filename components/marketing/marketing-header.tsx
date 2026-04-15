@@ -154,6 +154,8 @@ export function MarketingHeader({ initialLocale = "ar" }: { initialLocale?: "ar"
               frameClassName="rounded-[1rem] p-0 dark:ring-white/10"
               imageClassName="h-9"
               darkImageClassName="h-[2.65rem]"
+              priority
+              loading="eager"
             />
           </Link>
 

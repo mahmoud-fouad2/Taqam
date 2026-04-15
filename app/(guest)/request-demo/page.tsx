@@ -160,7 +160,13 @@ export default async function RequestDemoPage() {
 
             <div className="relative">
               <FadeIn>
-                <LogoMark className="mb-6" frameClassName="rounded-xl p-0" imageClassName="h-10" />
+                <LogoMark
+                  className="mb-6"
+                  frameClassName="rounded-xl p-0"
+                  imageClassName="h-10"
+                  priority
+                  loading="eager"
+                />
                 <h2 className="text-3xl leading-tight font-bold">
                   {isAr ? requestDemoContent.sideTitle.ar : requestDemoContent.sideTitle.en}
                 </h2>
