@@ -17,12 +17,33 @@ export type SmartAlert = {
   type: "document_expiry" | "contract_end" | "probation_end" | "work_anniversary" | "birthday";
   severity: AlertSeverity;
   titleAr: string;
+  titleEn: string;
   descriptionAr: string;
+  descriptionEn: string;
   employeeId: string;
   employeeName: string;
   daysUntil: number | null; // null for anniversary/birthday (already today)
   referenceDate: Date;
 };
+
+function getEmployeeNames(employee: {
+  firstName: string;
+  lastName: string;
+  firstNameAr: string | null;
+  lastNameAr: string | null;
+}) {
+  return {
+    ar:
+      employee.firstNameAr && employee.lastNameAr
+        ? `${employee.firstNameAr} ${employee.lastNameAr}`
+        : `${employee.firstName} ${employee.lastName}`,
+    en: `${employee.firstName} ${employee.lastName}`.trim()
+  };
+}
+
+function formatYearsWorkedEn(yearsWorked: number) {
+  return yearsWorked === 1 ? "1 year" : `${yearsWorked} years`;
+}
 
 /** Get smart alerts for a tenant within the next `horizonDays` days */
 export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promise<SmartAlert[]> {
@@ -61,21 +82,24 @@ export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promis
     const daysUntil = Math.ceil(
       (doc.expiryDate!.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24)
     );
-    const empName =
-      doc.employee.firstNameAr && doc.employee.lastNameAr
-        ? `${doc.employee.firstNameAr} ${doc.employee.lastNameAr}`
-        : `${doc.employee.firstName} ${doc.employee.lastName}`;
-    const docName = doc.titleAr ?? doc.title ?? doc.category;
+    const employeeNames = getEmployeeNames(doc.employee);
+    const docNameAr = doc.titleAr ?? doc.title ?? doc.category;
+    const docNameEn = doc.title ?? doc.titleAr ?? doc.category;
 
     alerts.push({
       id: `doc-${doc.id}`,
       type: "document_expiry",
       severity: daysUntil <= 7 ? "urgent" : daysUntil <= 14 ? "warning" : "info",
       titleAr:
-        daysUntil === 0 ? `وثيقة تنتهي اليوم: ${docName}` : `وثيقة تنتهي خلال ${daysUntil} يوم`,
-      descriptionAr: `${empName} — ${docName}`,
+        daysUntil === 0 ? `وثيقة تنتهي اليوم: ${docNameAr}` : `وثيقة تنتهي خلال ${daysUntil} يوم`,
+      titleEn:
+        daysUntil === 0
+          ? `Document expires today: ${docNameEn}`
+          : `Document expires in ${daysUntil} day${daysUntil === 1 ? "" : "s"}`,
+      descriptionAr: `${employeeNames.ar} — ${docNameAr}`,
+      descriptionEn: `${employeeNames.en} — ${docNameEn}`,
       employeeId: doc.employee.id,
-      employeeName: empName,
+      employeeName: employeeNames.en || employeeNames.ar,
       daysUntil,
       referenceDate: doc.expiryDate!
     });
@@ -102,19 +126,18 @@ export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promis
     const daysUntil = Math.ceil(
       (emp.contractEndDate!.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24)
     );
-    const empName =
-      emp.firstNameAr && emp.lastNameAr
-        ? `${emp.firstNameAr} ${emp.lastNameAr}`
-        : `${emp.firstName} ${emp.lastName}`;
+    const employeeNames = getEmployeeNames(emp);
 
     alerts.push({
       id: `contract-${emp.id}`,
       type: "contract_end",
       severity: daysUntil <= 7 ? "urgent" : "warning",
       titleAr: `عقد ينتهي خلال ${daysUntil} يوم`,
-      descriptionAr: `${empName} — ينتهي في ${emp.contractEndDate!.toLocaleDateString("ar-SA")}`,
+      titleEn: `Contract ends in ${daysUntil} day${daysUntil === 1 ? "" : "s"}`,
+      descriptionAr: `${employeeNames.ar} — ينتهي في ${emp.contractEndDate!.toLocaleDateString("ar-SA")}`,
+      descriptionEn: `${employeeNames.en} — ends on ${emp.contractEndDate!.toLocaleDateString("en-US")}`,
       employeeId: emp.id,
-      employeeName: empName,
+      employeeName: employeeNames.en || employeeNames.ar,
       daysUntil,
       referenceDate: emp.contractEndDate!
     });
@@ -145,19 +168,18 @@ export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promis
     const daysUntil = Math.ceil(
       (emp.probationEndDate!.getTime() - todayUTC.getTime()) / (1000 * 60 * 60 * 24)
     );
-    const empName =
-      emp.firstNameAr && emp.lastNameAr
-        ? `${emp.firstNameAr} ${emp.lastNameAr}`
-        : `${emp.firstName} ${emp.lastName}`;
+    const employeeNames = getEmployeeNames(emp);
 
     alerts.push({
       id: `probation-${emp.id}`,
       type: "probation_end",
       severity: daysUntil <= 3 ? "urgent" : "warning",
       titleAr: `نهاية فترة التجربة خلال ${daysUntil} يوم`,
-      descriptionAr: `${empName} — تنتهي في ${emp.probationEndDate!.toLocaleDateString("ar-SA")}`,
+      titleEn: `Probation ends in ${daysUntil} day${daysUntil === 1 ? "" : "s"}`,
+      descriptionAr: `${employeeNames.ar} — تنتهي في ${emp.probationEndDate!.toLocaleDateString("ar-SA")}`,
+      descriptionEn: `${employeeNames.en} — ends on ${emp.probationEndDate!.toLocaleDateString("en-US")}`,
       employeeId: emp.id,
-      employeeName: empName,
+      employeeName: employeeNames.en || employeeNames.ar,
       daysUntil,
       referenceDate: emp.probationEndDate!
     });
@@ -185,18 +207,17 @@ export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promis
         dob.getUTCMonth() === todayUTC.getUTCMonth() &&
         dob.getUTCDate() === todayUTC.getUTCDate()
       ) {
-        const empName =
-          emp.firstNameAr && emp.lastNameAr
-            ? `${emp.firstNameAr} ${emp.lastNameAr}`
-            : `${emp.firstName} ${emp.lastName}`;
+        const employeeNames = getEmployeeNames(emp);
         alerts.push({
           id: `birthday-${emp.id}`,
           type: "birthday",
           severity: "info",
           titleAr: `🎂 عيد ميلاد اليوم`,
-          descriptionAr: `${empName}`,
+          titleEn: "Birthday today",
+          descriptionAr: `${employeeNames.ar}`,
+          descriptionEn: `${employeeNames.en}`,
           employeeId: emp.id,
-          employeeName: empName,
+          employeeName: employeeNames.en || employeeNames.ar,
           daysUntil: 0,
           referenceDate: todayUTC
         });
@@ -211,18 +232,17 @@ export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promis
       hireDate.getUTCMonth() === todayUTC.getUTCMonth() &&
       hireDate.getUTCDate() === todayUTC.getUTCDate()
     ) {
-      const empName =
-        emp.firstNameAr && emp.lastNameAr
-          ? `${emp.firstNameAr} ${emp.lastNameAr}`
-          : `${emp.firstName} ${emp.lastName}`;
+      const employeeNames = getEmployeeNames(emp);
       alerts.push({
         id: `anniversary-${emp.id}`,
         type: "work_anniversary",
         severity: "info",
         titleAr: `🏅 ذكرى التوظيف`,
-        descriptionAr: `${empName} — ${yearsWorked} ${yearsWorked === 1 ? "سنة" : "سنوات"} في الشركة`,
+        titleEn: "Work anniversary",
+        descriptionAr: `${employeeNames.ar} — ${yearsWorked} ${yearsWorked === 1 ? "سنة" : "سنوات"} في الشركة`,
+        descriptionEn: `${employeeNames.en} — ${formatYearsWorkedEn(yearsWorked)} with the company`,
         employeeId: emp.id,
-        employeeName: empName,
+        employeeName: employeeNames.en || employeeNames.ar,
         daysUntil: 0,
         referenceDate: todayUTC
       });

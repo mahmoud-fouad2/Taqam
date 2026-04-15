@@ -12,7 +12,7 @@ const createApplicationSchema = z.object({
   lastName: z.string().min(2).max(80),
   email: z.string().email(),
   phone: z.string().min(7).max(30).optional(),
-  resumeUrl: z.string().url().max(2000),
+  resumeUrl: z.string().min(1).max(3000),
   coverLetter: z.string().min(20).max(5000).optional()
 });
 
@@ -65,7 +65,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const result = await createPublicJobApplication(parsed.data);
+    const origin = new URL(request.url).origin;
+    const result = await createPublicJobApplication(parsed.data, { origin });
 
     if (!result.ok) {
       return withRateLimitHeaders(

@@ -4,8 +4,11 @@ import { useEffect, useState } from "react";
 import { AlertCircle, AlertTriangle, Info, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SmartAlert } from "@/lib/smart-alerts";
+import type { AppLocale } from "@/lib/i18n/types";
 
 type AlertsResponse = { data: SmartAlert[]; count: number };
+
+const DISMISS_KEY_PREFIX = "taqam:dashboard:smart-alerts";
 
 const SEVERITY_STYLES = {
   urgent: {
@@ -25,22 +28,76 @@ const SEVERITY_STYLES = {
   }
 } as const;
 
-export function SmartAlertsWidget() {
-  const [alerts, setAlerts] = useState<SmartAlert[]>([]);
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
+function getDismissStorageKey() {
+  const dateKey = new Date().toISOString().slice(0, 10);
+  return `${DISMISS_KEY_PREFIX}:${dateKey}`;
+}
+
+function readDismissedIds(storageKey: string) {
+  if (typeof window === "undefined") {
+    return [] as string[];
+  }
+
+  try {
+    const stored = window.sessionStorage.getItem(storageKey);
+    return stored ? ((JSON.parse(stored) as string[]) ?? []) : [];
+  } catch {
+    return [] as string[];
+  }
+}
+
+export function SmartAlertsWidget({
+  locale,
+  initialAlerts
+}: {
+  locale: AppLocale;
+  initialAlerts: SmartAlert[];
+}) {
+  const [alerts, setAlerts] = useState<SmartAlert[]>(initialAlerts);
+  const [dismissedRuntime, setDismissedRuntime] = useState<Record<string, string[]>>({});
+  const storageKey = getDismissStorageKey();
+  const dismissedIds = new Set([
+    ...readDismissedIds(storageKey),
+    ...(dismissedRuntime[storageKey] ?? [])
+  ]);
 
   useEffect(() => {
+    let active = true;
+
     fetch("/api/smart-alerts")
       .then((r) => (r.ok ? (r.json() as Promise<AlertsResponse>) : Promise.reject()))
-      .then((res) => setAlerts(res.data ?? []))
-      .catch(() => setAlerts([]))
-      .finally(() => setLoading(false));
+      .then((res) => {
+        if (active) {
+          setAlerts(res.data ?? []);
+        }
+      })
+      .catch(() => undefined);
+
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const visible = alerts.filter((a) => !dismissed.has(a.id));
+  const dismissAlert = (id: string) => {
+    setDismissedRuntime((prev) => {
+      const nextIds = Array.from(new Set([...(prev[storageKey] ?? []), id]));
 
-  if (loading || visible.length === 0) return null;
+      try {
+        window.sessionStorage.setItem(storageKey, JSON.stringify(nextIds));
+      } catch {
+        // Ignore storage issues and keep runtime dismiss state only.
+      }
+
+      return {
+        ...prev,
+        [storageKey]: nextIds
+      };
+    });
+  };
+
+  const visible = alerts.filter((a) => !dismissedIds.has(a.id));
+
+  if (visible.length === 0) return null;
 
   // Show max 5 alerts, prioritised by severity
   const shown = visible.slice(0, 5);
@@ -59,22 +116,28 @@ export function SmartAlertsWidget() {
             )}>
             <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", style.icon)} />
             <div className="min-w-0 flex-1">
-              <p className="text-foreground leading-snug font-medium">{alert.titleAr}</p>
-              <p className="text-muted-foreground mt-0.5 text-xs">{alert.descriptionAr}</p>
+              <p className="text-foreground leading-snug font-medium">
+                {locale === "ar" ? alert.titleAr : alert.titleEn}
+              </p>
+              <p className="text-muted-foreground mt-0.5 text-xs">
+                {locale === "ar" ? alert.descriptionAr : alert.descriptionEn}
+              </p>
             </div>
             <button
               type="button"
-              onClick={() => setDismissed((prev) => new Set([...prev, alert.id]))}
+              onClick={() => dismissAlert(alert.id)}
               className="text-muted-foreground hover:text-foreground mt-0.5 shrink-0 transition-colors">
               <X className="h-3.5 w-3.5" />
-              <span className="sr-only">إخفاء</span>
+              <span className="sr-only">{locale === "ar" ? "إخفاء" : "Dismiss"}</span>
             </button>
           </div>
         );
       })}
       {visible.length > 5 && (
         <p className="text-muted-foreground text-center text-xs">
-          و {visible.length - 5} تنبيه آخر
+          {locale === "ar"
+            ? `و ${visible.length - 5} تنبيه آخر`
+            : `${visible.length - 5} more alert${visible.length - 5 === 1 ? "" : "s"}`}
         </p>
       )}
     </div>

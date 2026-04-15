@@ -17,6 +17,7 @@ import { getText } from "@/lib/i18n/text";
 import { requireTenantAccess } from "@/lib/auth";
 import { getDashboardActivities, getDashboardCharts, getDashboardStats } from "@/lib/dashboard";
 import prisma from "@/lib/db";
+import { getSmartAlerts } from "@/lib/smart-alerts";
 
 const GETTING_STARTED_LOOKBACK_MS = 30 * 24 * 60 * 60 * 1000;
 
@@ -42,7 +43,7 @@ export default async function Page() {
   const t = getText(locale);
   const user = await requireTenantAccess();
 
-  const [stats, charts, activities] = await Promise.all([
+  const [stats, charts, activities, smartAlerts] = await Promise.all([
     getDashboardStats(user.tenantId).catch(() => ({
       totalEmployees: 0,
       activeEmployees: 0,
@@ -60,11 +61,15 @@ export default async function Page() {
       departments: [],
       leaves: []
     })),
-    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }).catch(() => [])
+    getDashboardActivities({ tenantId: user.tenantId, limit: 10 }).catch(() => []),
+    getSmartAlerts(user.tenantId).catch(() => [])
   ]);
 
   const userName = `${user.firstName ?? ""} ${user.lastName ?? ""}`.trim() || "User";
-  const workspaceLabel = user.tenant?.nameAr || user.tenant?.name || null;
+  const workspaceLabel =
+    locale === "ar"
+      ? user.tenant?.nameAr || user.tenant?.name || null
+      : user.tenant?.name || user.tenant?.nameAr || null;
 
   // Show getting-started only for tenant admins with recently completed setup
   let showGettingStarted = false;
@@ -88,7 +93,10 @@ export default async function Page() {
           .then((c: number) => c > 0)
       ]);
       gettingStartedSteps = buildGettingStartedSteps({
-        tenantName: recentTenant.nameAr ?? recentTenant.name,
+        tenantName:
+          locale === "ar"
+            ? recentTenant.nameAr ?? recentTenant.name
+            : recentTenant.name ?? recentTenant.nameAr,
         hasEmployees: stats.totalEmployees > 0,
         hasPayroll,
         hasAttendance,
@@ -109,12 +117,13 @@ export default async function Page() {
       </div>
       {showGettingStarted && gettingStartedSteps.length > 0 && (
         <DashboardGettingStarted
-          tenantName={workspaceLabel ?? "شركتك"}
+          tenantName={workspaceLabel ?? (locale === "ar" ? "شركتك" : "Your workspace")}
           steps={gettingStartedSteps}
+          locale={locale}
         />
       )}
       <DashboardQuickActions locale={locale} pendingLeaves={stats.pendingLeaves} role={user.role} />
-      <SmartAlertsWidget />
+      <SmartAlertsWidget locale={locale} initialAlerts={smartAlerts} />
       <SectionCards locale={locale} stats={stats} />
       <div className="grid grid-cols-1 gap-4 @5xl/main:grid-cols-2">
         <ChartAreaInteractiveClient locale={locale} initialAttendance={charts.attendance} />

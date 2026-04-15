@@ -89,19 +89,24 @@ export async function POST(request: NextRequest) {
       "career-resumes"
     );
 
-    if (!upload.success || !upload.url) {
+    if (!upload.success || !upload.key) {
       return withRateLimitHeaders(
         NextResponse.json({ error: upload.error || "Resume upload failed" }, { status: 500 }),
         { remaining: rate.remaining, resetAt: rate.resetAt, limit: RATE_LIMIT.limit }
       );
     }
 
+    const origin = new URL(request.url).origin;
+    const resumeRefUrl = `${origin}/api/public/job-applications/resume?key=${encodeURIComponent(
+      upload.key
+    )}`;
+
     return withRateLimitHeaders(
       NextResponse.json(
         {
           data: {
             key: upload.key,
-            url: upload.url,
+            url: resumeRefUrl,
             fileName: file.name,
             contentType: file.type,
             size: file.size

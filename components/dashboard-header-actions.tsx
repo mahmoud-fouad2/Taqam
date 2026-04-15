@@ -19,6 +19,7 @@ import {
 import { getSession, signOut } from "next-auth/react";
 import { useTheme } from "next-themes";
 import { startLocaleTransition } from "@/components/locale-transition";
+import { DashboardCommandPalette } from "@/components/dashboard-command-palette";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -235,6 +236,8 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
 
   return (
     <div className="flex items-center gap-2">
+      <DashboardCommandPalette locale={locale} />
+
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button

@@ -2,15 +2,18 @@
 
 import Link from "next/link";
 import { Users, Wallet, CalendarCheck2, Building2, X, Rocket } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
+import type { AppLocale } from "@/lib/i18n/types";
 
 type GettingStartedStep = {
   id: string;
   titleAr: string;
+  titleEn: string;
   descriptionAr: string;
+  descriptionEn: string;
   href: string;
   icon: React.ElementType;
   done: boolean;
@@ -19,24 +22,61 @@ type GettingStartedStep = {
 type Props = {
   tenantName: string;
   steps: GettingStartedStep[];
+  locale: AppLocale;
 };
 
-export function DashboardGettingStarted({ tenantName, steps }: Props) {
-  const [dismissed, setDismissed] = useState(false);
+function readDismissedFlag(storageKey: string) {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    return window.localStorage.getItem(storageKey) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function DashboardGettingStarted({ tenantName, steps, locale }: Props) {
+  const [dismissedRuntime, setDismissedRuntime] = useState<Record<string, boolean>>({});
+  const progressSignature = useMemo(
+    () => steps.map((step) => `${step.id}:${step.done ? 1 : 0}`).join("|"),
+    [steps]
+  );
+  const storageKey = useMemo(
+    () => `taqam:dashboard:getting-started:${tenantName}:${progressSignature}`,
+    [progressSignature, tenantName]
+  );
+  const dismissed = Boolean(dismissedRuntime[storageKey]) || readDismissedFlag(storageKey);
+
+  const dismissCard = () => {
+    setDismissedRuntime((prev) => ({
+      ...prev,
+      [storageKey]: true
+    }));
+
+    try {
+      window.localStorage.setItem(storageKey, "1");
+    } catch {
+      // Ignore storage issues and keep in-memory dismiss state only.
+    }
+  };
+
   if (dismissed) return null;
 
   const doneCount = steps.filter((s) => s.done).length;
   const percent = Math.round((doneCount / steps.length) * 100);
   const allDone = doneCount === steps.length;
+  const isArabic = locale === "ar";
 
   return (
     <div className="bg-card border-border/60 relative overflow-hidden rounded-2xl border p-5 shadow-sm">
       {/* dismiss */}
       <button
-        onClick={() => setDismissed(true)}
+        onClick={dismissCard}
         className="text-muted-foreground hover:text-foreground absolute top-4 left-4 rounded-lg p-1 transition-colors">
         <X className="h-4 w-4" />
-        <span className="sr-only">إغلاق</span>
+        <span className="sr-only">{isArabic ? "إغلاق" : "Dismiss"}</span>
       </button>
 
       {/* Header */}
@@ -46,12 +86,22 @@ export function DashboardGettingStarted({ tenantName, steps }: Props) {
         </div>
         <div>
           <h2 className="text-base font-bold">
-            {allDone ? `أحسنت! مساحة العمل مكتملة ✓` : "خطوات البدء السريع"}
+            {allDone
+              ? isArabic
+                ? "أحسنت! مساحة العمل مكتملة ✓"
+                : "Nice work! Your workspace is ready ✓"
+              : isArabic
+                ? "خطوات البدء السريع"
+                : "Getting started checklist"}
           </h2>
           <p className="text-muted-foreground mt-0.5 text-xs">
             {allDone
-              ? `${tenantName} جاهزة بالكامل لاستخدام طاقم`
-              : `${doneCount} من ${steps.length} خطوات مكتملة`}
+              ? isArabic
+                ? `${tenantName} جاهزة بالكامل لاستخدام طاقم`
+                : `${tenantName} is fully ready to use Taqam`
+              : isArabic
+                ? `${doneCount} من ${steps.length} خطوات مكتملة`
+                : `${doneCount} of ${steps.length} steps completed`}
           </p>
         </div>
       </div>
@@ -85,11 +135,11 @@ export function DashboardGettingStarted({ tenantName, steps }: Props) {
               />
               <div className="min-w-0 flex-1">
                 <p className={cn("font-medium", step.done && "line-through opacity-60")}>
-                  {step.titleAr}
+                  {isArabic ? step.titleAr : step.titleEn}
                 </p>
                 {!step.done && (
                   <p className="text-muted-foreground mt-0.5 truncate text-xs">
-                    {step.descriptionAr}
+                    {isArabic ? step.descriptionAr : step.descriptionEn}
                   </p>
                 )}
               </div>
@@ -105,8 +155,8 @@ export function DashboardGettingStarted({ tenantName, steps }: Props) {
 
       {allDone && (
         <div className="mt-4 text-center">
-          <Button variant="outline" size="sm" onClick={() => setDismissed(true)}>
-            إخفاء هذه البطاقة
+          <Button variant="outline" size="sm" onClick={dismissCard}>
+            {isArabic ? "إخفاء هذه البطاقة" : "Hide this card"}
           </Button>
         </div>
       )}
@@ -129,7 +179,9 @@ export function buildGettingStartedSteps(data: GettingStartedData): GettingStart
     {
       id: "company-setup",
       titleAr: "إعداد الشركة",
+      titleEn: "Company setup",
       descriptionAr: "أكمل بيانات ملف الشركة الأساسية",
+      descriptionEn: "Complete your core company profile",
       href: "/dashboard/setup",
       icon: Building2,
       done: true // always true here since we only show this after setup complete
@@ -137,7 +189,9 @@ export function buildGettingStartedSteps(data: GettingStartedData): GettingStart
     {
       id: "add-employees",
       titleAr: "إضافة الموظفين",
+      titleEn: "Add employees",
       descriptionAr: "أضف أعضاء فريقك إلى النظام",
+      descriptionEn: "Add your team members to the system",
       href: "/dashboard/employees",
       icon: Users,
       done: data.hasEmployees
@@ -145,7 +199,9 @@ export function buildGettingStartedSteps(data: GettingStartedData): GettingStart
     {
       id: "departments",
       titleAr: "الأقسام والهياكل",
+      titleEn: "Departments and structure",
       descriptionAr: "تنظيم هيكل الشركة والأقسام",
+      descriptionEn: "Organize teams, departments, and structure",
       href: "/dashboard/settings",
       icon: Building2,
       done: data.hasDepartments
@@ -153,7 +209,9 @@ export function buildGettingStartedSteps(data: GettingStartedData): GettingStart
     {
       id: "attendance",
       titleAr: "تسجيل الحضور",
+      titleEn: "Start attendance tracking",
       descriptionAr: "ابدأ متابعة حضور وانصراف الفريق",
+      descriptionEn: "Start tracking attendance and time",
       href: "/dashboard/attendance",
       icon: CalendarCheck2,
       done: data.hasAttendance
@@ -161,7 +219,9 @@ export function buildGettingStartedSteps(data: GettingStartedData): GettingStart
     {
       id: "payroll",
       titleAr: "إعداد الرواتب",
+      titleEn: "Set up payroll",
       descriptionAr: "ضبط إعدادات الرواتب والـ WPS",
+      descriptionEn: "Configure payroll and WPS settings",
       href: "/dashboard/settings",
       icon: Wallet,
       done: data.hasPayroll

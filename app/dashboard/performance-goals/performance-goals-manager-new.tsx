@@ -214,7 +214,14 @@ export function PerformanceGoalsManagerNew() {
       const res = await fetch("/api/employees?status=ACTIVE&limit=100");
       if (!res.ok) throw new Error("Failed to fetch employees");
       const data = await res.json();
-      setEmployees(data.employees || []);
+
+      const employeesPayload =
+        (Array.isArray(data?.data) && data.data) ||
+        (Array.isArray(data?.employees) && data.employees) ||
+        (Array.isArray(data?.data?.employees) && data.data.employees) ||
+        [];
+
+      setEmployees(employeesPayload);
     } catch (error) {
       console.error("Error fetching employees:", error);
     }

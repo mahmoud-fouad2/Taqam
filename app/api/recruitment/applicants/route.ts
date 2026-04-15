@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
       lastName: a.lastName,
       email: a.email,
       phone: a.phone,
-      resumeUrl: a.resumeUrl,
+      resumeUrl: a.resumeUrl ? `/api/recruitment/applicants/${a.id}/resume` : null,
       coverLetter: a.coverLetter,
       status: mapStatus(a.status),
       source: a.source,

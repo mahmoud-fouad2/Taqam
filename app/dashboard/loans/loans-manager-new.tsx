@@ -178,22 +178,27 @@ export function LoansManager() {
   // Fetch employees
   const fetchEmployees = React.useCallback(async () => {
     try {
-      const res = await fetch("/api/employees?pageSize=100");
+      const res = await fetch("/api/employees?limit=100");
       const json = await res.json();
-      if (json.success) {
-        setEmployees(
-          json.data.employees.map((e: any) => ({
-            id: e.id,
-            employeeNumber: e.employeeNumber,
-            user: {
-              firstName: e.user?.firstName || e.firstName || "",
-              lastName: e.user?.lastName || e.lastName || "",
-              email: e.user?.email || e.email || "",
-              avatar: e.user?.avatar || e.avatar || null
-            }
-          }))
-        );
-      }
+
+      const employeesPayload =
+        (Array.isArray(json?.data) && json.data) ||
+        (Array.isArray(json?.employees) && json.employees) ||
+        (Array.isArray(json?.data?.employees) && json.data.employees) ||
+        [];
+
+      setEmployees(
+        employeesPayload.map((e: any) => ({
+          id: e.id,
+          employeeNumber: e.employeeNumber,
+          user: {
+            firstName: e.user?.firstName || e.firstName || "",
+            lastName: e.user?.lastName || e.lastName || "",
+            email: e.user?.email || e.email || "",
+            avatar: e.user?.avatar || e.avatar || null
+          }
+        }))
+      );
     } catch (error) {
       console.error("Failed to fetch employees", error);
     }

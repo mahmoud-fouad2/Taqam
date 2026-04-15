@@ -2,9 +2,39 @@ import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
 
 const isWindows = process.platform === "win32";
+const MIN_BUILD_HEAP_MB = 3072;
 const argv = process.argv.slice(2);
 const cliForceWebpack = argv.includes("--webpack");
 const cliForceTurbopack = argv.includes("--turbopack");
+
+function ensureMinHeap(nodeOptions, minimumMb) {
+  const optionPattern = /--max[-_]old[-_]space[-_]size(?:=|\s+)(\d+)/i;
+  const trimmed = nodeOptions?.trim() ?? "";
+  const match = trimmed.match(optionPattern);
+
+  if (!match) {
+    return {
+      nodeOptions: trimmed ? `${trimmed} --max-old-space-size=${minimumMb}` : `--max-old-space-size=${minimumMb}`,
+      adjusted: true,
+      previous: null
+    };
+  }
+
+  const previous = Number(match[1]);
+  if (Number.isFinite(previous) && previous >= minimumMb) {
+    return {
+      nodeOptions: trimmed,
+      adjusted: false,
+      previous
+    };
+  }
+
+  return {
+    nodeOptions: trimmed.replace(optionPattern, `--max-old-space-size=${minimumMb}`),
+    adjusted: true,
+    previous: Number.isFinite(previous) ? previous : null
+  };
+}
 
 if (cliForceWebpack && cliForceTurbopack) {
   console.error("[build] Invalid flags: cannot pass both --webpack and --turbopack.");
@@ -28,6 +58,15 @@ const env = {
     ? { NEXT_DISABLE_STANDALONE_OUTPUT: "true" }
     : {})
 };
+
+const heap = ensureMinHeap(env.NODE_OPTIONS, MIN_BUILD_HEAP_MB);
+env.NODE_OPTIONS = heap.nodeOptions;
+
+if (heap.adjusted) {
+  console.log(
+    `[build] Raised Node heap for build to ${MIN_BUILD_HEAP_MB}MB${heap.previous ? ` (was ${heap.previous}MB)` : ""}.`
+  );
+}
 
 const child = spawn(process.execPath, args, {
   stdio: "inherit",

@@ -54,6 +54,7 @@ export async function GET(_request: NextRequest, context: RouteContext) {
     // Map status to kebab-case
     const mappedApplicant = {
       ...applicant,
+      resumeUrl: applicant.resumeUrl ? `/api/recruitment/applicants/${id}/resume` : null,
       status: applicant.status.toLowerCase().replace(/_/g, "-"),
       jobPosting: {
         ...applicant.jobPosting,

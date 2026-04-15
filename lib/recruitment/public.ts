@@ -2,6 +2,7 @@ import { JobPostingStatus, Prisma, UserRole, UserStatus } from "@prisma/client";
 
 import prisma from "@/lib/db";
 import { getAppBaseUrl, sendEmail } from "@/lib/email";
+import { headFile, isAllowedFileType, isR2Configured } from "@/lib/r2-storage";
 import { buildTenantCanonicalUrl } from "@/lib/tenant";
 import { findActiveTenantBySlug } from "@/lib/tenant-directory";
 import {
@@ -129,6 +130,61 @@ export type PublicJobApplicationInput = {
   resumeUrl: string;
   coverLetter?: string;
 };
+
+type PublicJobApplicationContext = {
+  origin?: string;
+};
+
+const ALLOWED_RESUME_TYPES = [
+  "application/pdf",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+];
+
+function trimTrailingSlashes(value: string) {
+  return value.replace(/\/+$/g, "");
+}
+
+function tryExtractResumeKeyFromRef(resumeRef: string, origin?: string): string | null {
+  const value = resumeRef.trim();
+  if (!value) return null;
+
+  // Reject non-http(s) schemes early.
+  if (value.includes("://") && !value.startsWith("http://") && !value.startsWith("https://")) {
+    return null;
+  }
+
+  // New flow: resumeRef is a platform-owned URL containing `?key=`.
+  if (value.startsWith("http://") || value.startsWith("https://")) {
+    try {
+      const url = new URL(value);
+
+      if (origin && url.origin === origin && url.pathname === "/api/public/job-applications/resume") {
+        const key = url.searchParams.get("key")?.trim();
+        return key ? key : null;
+      }
+
+      // Legacy fallback: raw public R2 URL.
+      const publicBase = process.env.R2_PUBLIC_URL ? trimTrailingSlashes(process.env.R2_PUBLIC_URL) : "";
+      if (publicBase && value.startsWith(`${publicBase}/`)) {
+        const key = value.slice(publicBase.length + 1);
+        return key ? key : null;
+      }
+    } catch {
+      return null;
+    }
+
+    return null;
+  }
+
+  // Legacy fallback: the API might return the raw key (no scheme).
+  // Keep it strict-ish: keys are path-like and must not be absolute paths.
+  if (value.startsWith("/") || value.startsWith("\\")) {
+    return null;
+  }
+
+  return value;
+}
 
 function splitMultiline(value: string | null | undefined) {
   if (!value) {
@@ -448,7 +504,10 @@ async function getTenantRecruitmentRecipients(tenantId: string, fallbackEmail: s
   return Array.from(recipients);
 }
 
-export async function createPublicJobApplication(input: PublicJobApplicationInput) {
+export async function createPublicJobApplication(
+  input: PublicJobApplicationInput,
+  context: PublicJobApplicationContext = {}
+) {
   const normalizedEmail = input.email.trim().toLowerCase();
   const job = await prisma.jobPosting.findFirst({
     where: {
@@ -478,6 +537,15 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
     return { ok: false as const, code: 404, error: "الوظيفة غير متاحة حاليًا" };
   }
 
+  const resumeKey = tryExtractResumeKeyFromRef(input.resumeUrl, context.origin);
+  if (!resumeKey) {
+    return { ok: false as const, code: 400, error: "رابط السيرة الذاتية غير صالح" };
+  }
+
+  if (!resumeKey.startsWith(`${job.tenantId}/career-resumes/`)) {
+    return { ok: false as const, code: 400, error: "السيرة الذاتية غير مرتبطة بهذه الشركة" };
+  }
+
   const existing = await prisma.applicant.findFirst({
     where: {
       jobPostingId: job.id,
@@ -499,6 +567,23 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
     };
   }
 
+  if (!isR2Configured()) {
+    return { ok: false as const, code: 503, error: "خدمة رفع السيرة الذاتية غير متاحة حاليًا" };
+  }
+
+  const resumeMeta = await headFile(resumeKey);
+  if (!resumeMeta) {
+    return { ok: false as const, code: 400, error: "تعذر العثور على ملف السيرة الذاتية" };
+  }
+
+  if (resumeMeta.size > 5 * 1024 * 1024) {
+    return { ok: false as const, code: 400, error: "حجم السيرة الذاتية أكبر من المسموح" };
+  }
+
+  if (resumeMeta.contentType && !isAllowedFileType(resumeMeta.contentType, ALLOWED_RESUME_TYPES)) {
+    return { ok: false as const, code: 400, error: "صيغة السيرة الذاتية غير مدعومة" };
+  }
+
   const applicant = await prisma.applicant.create({
     data: {
       tenantId: job.tenantId,
@@ -507,13 +592,14 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       lastName: input.lastName.trim(),
       email: normalizedEmail,
       phone: input.phone?.trim() || null,
-      resumeUrl: input.resumeUrl.trim(),
+      resumeUrl: resumeKey,
       coverLetter: input.coverLetter?.trim() || null,
       source: "career-portal"
     }
   });
 
   const portalBase = getAppBaseUrl();
+  const resumeDownloadUrl = `${portalBase}/api/recruitment/applicants/${applicant.id}/resume`;
   const publicJobUrl = `${portalBase}/careers/${job.id}`;
   const tenantPortalUrl = buildTenantCanonicalUrl(job.tenant, "/careers", {
     baseDomain: portalBase.replace(/^https?:\/\//, "")
@@ -539,8 +625,8 @@ export async function createPublicJobApplication(input: PublicJobApplicationInpu
       ? sendEmail({
           to: recipientEmails,
           subject: `متقدم جديد على ${jobTitle}`,
-          text: `وصل متقدم جديد على وظيفة ${jobTitle}.\nالاسم: ${applicantName}\nالبريد: ${normalizedEmail}\nالهاتف: ${input.phone?.trim() || "غير متوفر"}\nالسيرة الذاتية: ${input.resumeUrl.trim()}\nإعلان الوظيفة: ${publicJobUrl}`,
-          html: `<div dir="rtl" style="font-family:Segoe UI,Tahoma,sans-serif;line-height:1.8;color:#0f172a"><h2 style="margin:0 0 12px">متقدم جديد</h2><p>وصل متقدم جديد على وظيفة <strong>${jobTitle}</strong>.</p><ul><li>الاسم: ${applicantName}</li><li>البريد: ${normalizedEmail}</li><li>الهاتف: ${input.phone?.trim() || "غير متوفر"}</li><li><a href="${input.resumeUrl.trim()}">رابط السيرة الذاتية</a></li></ul><p><a href="${publicJobUrl}">عرض الوظيفة العامة</a></p></div>`
+          text: `وصل متقدم جديد على وظيفة ${jobTitle}.\nالاسم: ${applicantName}\nالبريد: ${normalizedEmail}\nالهاتف: ${input.phone?.trim() || "غير متوفر"}\nالسيرة الذاتية: ${resumeDownloadUrl}\nإعلان الوظيفة: ${publicJobUrl}`,
+          html: `<div dir="rtl" style="font-family:Segoe UI,Tahoma,sans-serif;line-height:1.8;color:#0f172a"><h2 style="margin:0 0 12px">متقدم جديد</h2><p>وصل متقدم جديد على وظيفة <strong>${jobTitle}</strong>.</p><ul><li>الاسم: ${applicantName}</li><li>البريد: ${normalizedEmail}</li><li>الهاتف: ${input.phone?.trim() || "غير متوفر"}</li><li><a href="${resumeDownloadUrl}">فتح السيرة الذاتية (يتطلب تسجيل الدخول)</a></li></ul><p><a href="${publicJobUrl}">عرض الوظيفة العامة</a></p></div>`
         })
       : Promise.resolve({ sent: false as const, skipped: true as const })
   ]);

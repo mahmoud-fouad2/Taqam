@@ -160,9 +160,10 @@ export async function requireRole(
  */
 export function parsePagination(searchParams: URLSearchParams, maxLimit = 100) {
   const page = Math.max(1, parseInt(searchParams.get("page") ?? "1", 10) || 1);
+  const limitParam = searchParams.get("limit") ?? searchParams.get("pageSize");
   const limit = Math.min(
     maxLimit,
-    Math.max(1, parseInt(searchParams.get("limit") ?? "20", 10) || 20)
+    Math.max(1, parseInt(limitParam ?? "20", 10) || 20)
   );
   return { page, limit, skip: (page - 1) * limit };
 }
