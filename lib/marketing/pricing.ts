@@ -88,6 +88,14 @@ export type PricingMarketingContentAdminState = {
   lastPublishedAt: string | null;
 };
 
+const PRICING_SCHEMA_CHECK_TTL_MS = 5 * 60 * 1000;
+let pricingSchemaSupportCache:
+  | {
+      checkedAt: number;
+      available: boolean;
+    }
+  | undefined;
+
 const publishedPricingMarketingContentFilePath = path.join(
   process.cwd(),
   "data",
@@ -801,9 +809,56 @@ export function getPlanCommercialDifferentiator(
   };
 }
 
+async function hasPricingSchemaSupport(prismaClient: {
+  $queryRaw<T = unknown>(query: TemplateStringsArray, ...values: unknown[]): Promise<T>;
+}) {
+  if (
+    pricingSchemaSupportCache &&
+    Date.now() - pricingSchemaSupportCache.checkedAt < PRICING_SCHEMA_CHECK_TTL_MS
+  ) {
+    return pricingSchemaSupportCache.available;
+  }
+
+  try {
+    const rows = await prismaClient.$queryRaw<
+      Array<{
+        pricingPlanTable: string | null;
+        planFeatureComparisonTable: string | null;
+      }>
+    >`
+      SELECT
+        to_regclass('public."PricingPlan"')::text AS "pricingPlanTable",
+        to_regclass('public."PlanFeatureComparison"')::text AS "planFeatureComparisonTable"
+    `;
+
+    const available = Boolean(rows[0]?.pricingPlanTable) && Boolean(rows[0]?.planFeatureComparisonTable);
+    pricingSchemaSupportCache = {
+      checkedAt: Date.now(),
+      available
+    };
+
+    return available;
+  } catch {
+    pricingSchemaSupportCache = {
+      checkedAt: Date.now(),
+      available: false
+    };
+
+    return false;
+  }
+}
+
 export async function getPricingData() {
   try {
     const { prisma } = await import("@/lib/db");
+
+    if (!(await hasPricingSchemaSupport(prisma))) {
+      return {
+        plans: fallbackPlans,
+        comparison: fallbackComparison
+      };
+    }
+
     const [dbPlans, dbComparison] = await Promise.all([
       prisma.pricingPlan.findMany({
         where: { isActive: true },

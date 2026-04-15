@@ -7,6 +7,32 @@ type ReadCommercialContentOptions<T> = {
   normalize: (value: unknown) => T;
 };
 
+const REMOTE_CONTENT_READ_TIMEOUT_MS = 1500;
+const REMOTE_CONTENT_BACKOFF_MS = 5 * 60 * 1000;
+const remoteKeyBackoffUntil = new Map<string, number>();
+
+function isRemoteReadBackedOff(remoteKey: string) {
+  const until = remoteKeyBackoffUntil.get(remoteKey);
+  if (!until) {
+    return false;
+  }
+
+  if (until <= Date.now()) {
+    remoteKeyBackoffUntil.delete(remoteKey);
+    return false;
+  }
+
+  return true;
+}
+
+function markRemoteReadBackoff(remoteKey: string) {
+  remoteKeyBackoffUntil.set(remoteKey, Date.now() + REMOTE_CONTENT_BACKOFF_MS);
+}
+
+function clearRemoteReadBackoff(remoteKey: string) {
+  remoteKeyBackoffUntil.delete(remoteKey);
+}
+
 function hasCommercialR2Config() {
   return Boolean(
     (process.env.R2_ENDPOINT || process.env.R2_ACCOUNT_ID) &&
@@ -64,14 +90,22 @@ export async function readCommercialContent<T>(
 ): Promise<T | null> {
   const remoteStorage = await getCommercialRemoteStorage();
 
-  if (remoteStorage) {
-    const remoteBuffer = await remoteStorage.getFile(options.remoteKey);
+  if (remoteStorage && !isRemoteReadBackedOff(options.remoteKey)) {
+    const remoteBuffer = await remoteStorage.getFile(options.remoteKey, {
+      suppressErrorLog: true,
+      timeoutMs: REMOTE_CONTENT_READ_TIMEOUT_MS
+    });
+
     if (remoteBuffer) {
+      clearRemoteReadBackoff(options.remoteKey);
+
       try {
         return options.normalize(safeParseJson(remoteBuffer.toString("utf8")));
       } catch {
         // Fall through to the local fallback for recovery from malformed remote content.
       }
+    } else {
+      markRemoteReadBackoff(options.remoteKey);
     }
   }
 
@@ -84,11 +118,18 @@ export async function readCommercialContentTimestamp(options: {
 }): Promise<string | null> {
   const remoteStorage = await getCommercialRemoteStorage();
 
-  if (remoteStorage) {
-    const remoteMetadata = await remoteStorage.headFile(options.remoteKey);
+  if (remoteStorage && !isRemoteReadBackedOff(options.remoteKey)) {
+    const remoteMetadata = await remoteStorage.headFile(options.remoteKey, {
+      suppressErrorLog: true,
+      timeoutMs: REMOTE_CONTENT_READ_TIMEOUT_MS
+    });
+
     if (remoteMetadata?.lastModified) {
+      clearRemoteReadBackoff(options.remoteKey);
       return remoteMetadata.lastModified.toISOString();
     }
+
+    markRemoteReadBackoff(options.remoteKey);
   }
 
   try {

@@ -77,6 +77,11 @@ export interface FileMetadata {
   contentType?: string;
 }
 
+type R2ReadOptions = {
+  suppressErrorLog?: boolean;
+  timeoutMs?: number;
+};
+
 export async function putFile(
   key: string,
   file: Buffer | Uint8Array,
@@ -246,14 +251,16 @@ export async function listFiles(prefix: string, maxKeys: number = 100): Promise<
 /**
  * Get file as buffer (for server-side processing)
  */
-export async function getFile(key: string): Promise<Buffer | null> {
+export async function getFile(key: string, options: R2ReadOptions = {}): Promise<Buffer | null> {
   try {
     const command = new GetObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key
     });
 
-    const response = await getR2Client().send(command);
+    const response = await getR2Client().send(command, {
+      ...(options.timeoutMs ? { abortSignal: AbortSignal.timeout(options.timeoutMs) } : {})
+    });
 
     if (!response.Body) return null;
 
@@ -269,19 +276,27 @@ export async function getFile(key: string): Promise<Buffer | null> {
       return null;
     }
 
-    console.error("R2 Get Error:", error);
+    if (!options.suppressErrorLog) {
+      console.error("R2 Get Error:", error);
+    }
+
     return null;
   }
 }
 
-export async function headFile(key: string): Promise<FileMetadata | null> {
+export async function headFile(
+  key: string,
+  options: R2ReadOptions = {}
+): Promise<FileMetadata | null> {
   try {
     const command = new HeadObjectCommand({
       Bucket: BUCKET_NAME,
       Key: key
     });
 
-    const response = await getR2Client().send(command);
+    const response = await getR2Client().send(command, {
+      ...(options.timeoutMs ? { abortSignal: AbortSignal.timeout(options.timeoutMs) } : {})
+    });
 
     return {
       key,
@@ -294,7 +309,10 @@ export async function headFile(key: string): Promise<FileMetadata | null> {
       return null;
     }
 
-    console.error("R2 Head Error:", error);
+    if (!options.suppressErrorLog) {
+      console.error("R2 Head Error:", error);
+    }
+
     return null;
   }
 }
