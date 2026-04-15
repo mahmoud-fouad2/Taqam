@@ -13,7 +13,11 @@ function assertUnique(values: string[], label: string) {
   expect(set.size, `${label} should be unique`).toBe(values.length);
 }
 
-function deepCollectStrings(value: unknown, path: string, out: Array<{ path: string; value: string }>) {
+function deepCollectStrings(
+  value: unknown,
+  path: string,
+  out: Array<{ path: string; value: string }>
+) {
   if (typeof value === "string") {
     out.push({ path, value });
     return;
@@ -65,7 +69,9 @@ describe("marketing pricing content", () => {
     );
 
     const sorted = [...fallbackComparison].sort((a, b) => a.sortOrder - b.sortOrder);
-    expect(fallbackComparison.map((row) => row.featureEn)).toEqual(sorted.map((row) => row.featureEn));
+    expect(fallbackComparison.map((row) => row.featureEn)).toEqual(
+      sorted.map((row) => row.featureEn)
+    );
 
     for (const row of fallbackComparison) {
       expect(row.featureAr.trim().length).toBeGreaterThan(0);

@@ -99,8 +99,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const jobTitle = isAr ? (job.titleAr || job.title) : job.title;
-  const companyName = isAr ? (job.tenantNameAr || job.tenantName) : job.tenantName;
+  const jobTitle = isAr ? job.titleAr || job.title : job.title;
+  const companyName = isAr ? job.tenantNameAr || job.tenantName : job.tenantName;
   const jobTypeLabel = getPublicJobTypeLabel(locale, job.jobType);
   const locationLabel = job.location || (isAr ? "السعودية" : "Saudi Arabia");
   const { arUrl, enUrl, languages } = buildMarketingLanguageAlternates(`/careers/${job.id}`, base);
@@ -170,7 +170,7 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
   const companyName = job.tenantNameAr || job.tenantName;
   const { arUrl, enUrl } = buildMarketingLanguageAlternates(`/careers/${job.id}`, base);
   const pageUrl = locale === "ar" ? arUrl : enUrl;
-  const pageTitle = isAr ? (job.titleAr || job.title) : job.title;
+  const pageTitle = isAr ? job.titleAr || job.title : job.title;
   const pageDescription = isAr
     ? `تقدم على وظيفة ${pageTitle} في ${companyName} عبر طاقم. نوع الوظيفة ${getPublicJobTypeLabel(locale, job.jobType)}.`
     : `Apply for ${pageTitle} at ${companyName} through Taqam. Role type: ${getPublicJobTypeLabel(locale, job.jobType)}.`;
@@ -378,7 +378,9 @@ export default async function CareerJobDetailsPage({ params }: PageProps) {
 
             <Card>
               <CardHeader>
-                <CardTitle>{isAr ? "عن الشركة والتقديم" : "About the company and application"}</CardTitle>
+                <CardTitle>
+                  {isAr ? "عن الشركة والتقديم" : "About the company and application"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="text-muted-foreground space-y-4 text-sm leading-7">
                 <p>

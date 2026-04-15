@@ -1,8 +1,4 @@
-export const INTEGRATION_SYNC_SCHEDULE_FREQUENCIES = [
-  "daily",
-  "weekly",
-  "monthly"
-] as const;
+export const INTEGRATION_SYNC_SCHEDULE_FREQUENCIES = ["daily", "weekly", "monthly"] as const;
 
 export type IntegrationSyncScheduleFrequency =
   (typeof INTEGRATION_SYNC_SCHEDULE_FREQUENCIES)[number];
@@ -37,9 +33,7 @@ function isIntegrationSyncScheduleFrequency(
 ): value is IntegrationSyncScheduleFrequency {
   return (
     typeof value === "string" &&
-    INTEGRATION_SYNC_SCHEDULE_FREQUENCIES.includes(
-      value as IntegrationSyncScheduleFrequency
-    )
+    INTEGRATION_SYNC_SCHEDULE_FREQUENCIES.includes(value as IntegrationSyncScheduleFrequency)
   );
 }
 
@@ -83,10 +77,7 @@ function toDate(value: Date | string | null | undefined) {
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
-function addIntegrationSyncInterval(
-  anchor: Date,
-  frequency: IntegrationSyncScheduleFrequency
-) {
+function addIntegrationSyncInterval(anchor: Date, frequency: IntegrationSyncScheduleFrequency) {
   const next = new Date(anchor);
 
   if (frequency === "daily") {
@@ -103,23 +94,16 @@ function addIntegrationSyncInterval(
   return next;
 }
 
-export function getIntegrationSyncScheduleLabelAr(
-  frequency: IntegrationSyncScheduleFrequency
-) {
+export function getIntegrationSyncScheduleLabelAr(frequency: IntegrationSyncScheduleFrequency) {
   return SYNC_SCHEDULE_FREQUENCY_LABELS_AR[frequency];
 }
 
-export function normalizeIntegrationSyncSchedule(
-  input: unknown
-): IntegrationSyncSchedule | null {
+export function normalizeIntegrationSyncSchedule(input: unknown): IntegrationSyncSchedule | null {
   if (!isRecord(input)) {
     return null;
   }
 
-  if (
-    typeof input.enabled !== "boolean" ||
-    !isIntegrationSyncScheduleFrequency(input.frequency)
-  ) {
+  if (typeof input.enabled !== "boolean" || !isIntegrationSyncScheduleFrequency(input.frequency)) {
     return null;
   }
 
@@ -140,9 +124,7 @@ export function normalizeIntegrationSyncSchedule(
   };
 }
 
-export function normalizeIntegrationConnectionConfig(
-  input: unknown
-): IntegrationConnectionConfig {
+export function normalizeIntegrationConnectionConfig(input: unknown): IntegrationConnectionConfig {
   if (!isRecord(input)) {
     return {};
   }
@@ -161,9 +143,7 @@ export function normalizeIntegrationConnectionConfig(
 
 export function validateIntegrationConnectionConfig(
   input: unknown
-):
-  | { ok: true; data: IntegrationConnectionConfig }
-  | { ok: false; error: string } {
+): { ok: true; data: IntegrationConnectionConfig } | { ok: false; error: string } {
   if (!isRecord(input)) {
     return {
       ok: false,
@@ -243,10 +223,9 @@ export function mergeIntegrationConnectionConfigUpdate({
     syncSchedule: {
       enabled: nextSchedule.enabled,
       frequency: nextSchedule.frequency,
-      ...((currentSchedule?.enabledAt || nextSchedule.enabled)
+      ...(currentSchedule?.enabledAt || nextSchedule.enabled
         ? {
-            enabledAt:
-              currentSchedule?.enabledAt ?? nextSchedule.enabledAt ?? now.toISOString()
+            enabledAt: currentSchedule?.enabledAt ?? nextSchedule.enabledAt ?? now.toISOString()
           }
         : {}),
       ...(currentSchedule?.lastTriggeredAt

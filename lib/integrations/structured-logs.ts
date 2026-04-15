@@ -207,8 +207,7 @@ export function buildIntegrationTestRunLogs({
     createIntegrationRunLogEntry({
       level: runStatus === "success" ? "info" : "error",
       category: "connection",
-      message:
-        runStatus === "success" ? "تم اعتماد الاتصال كمتصل" : "تم وسم الاتصال بحالة خطأ",
+      message: runStatus === "success" ? "تم اعتماد الاتصال كمتصل" : "تم وسم الاتصال بحالة خطأ",
       context: {
         nextStatus: runStatus === "success" ? "CONNECTED" : "ERROR"
       }
@@ -350,7 +349,7 @@ export function buildIntegrationSyncRunLogs({
       category: "connection",
       message:
         runStatus === "failed"
-          ? errorMessage ?? "انتهت المزامنة بفشل"
+          ? (errorMessage ?? "انتهت المزامنة بفشل")
           : runStatus === "partial"
             ? awaitingManualAction
               ? "اكتملت المهمة جزئياً وتنتظر إتمام الربط اليدوي"

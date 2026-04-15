@@ -33,11 +33,7 @@ export const commercialClaimVisibilitySchema = z.enum([
   "sales-assisted",
   "enterprise-only"
 ]);
-export const commercialClaimStatusGateSchema = z.enum([
-  "live-only",
-  "allow-beta",
-  "internal-only"
-]);
+export const commercialClaimStatusGateSchema = z.enum(["live-only", "allow-beta", "internal-only"]);
 export const marketingIntegrationAvailabilitySchema = z.enum(["live", "enterprise-custom"]);
 export const commercialClaimSurfaceSchema = z.enum([
   "home.hero",

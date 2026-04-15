@@ -1,9 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  applyPricingFaqAnswers,
-  faqCategories
-} from "@/lib/marketing/faq";
+import { applyPricingFaqAnswers, faqCategories } from "@/lib/marketing/faq";
 import { fallbackPlans } from "@/lib/marketing/pricing";
 
 function assertUnique(values: string[], label: string) {

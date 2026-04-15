@@ -98,7 +98,7 @@ export function EmployeesList({
                       <div className="min-w-0">
                         <Link
                           href={`/dashboard/employees/${emp.id}`}
-                          className="truncate font-medium transition-colors hover:text-primary hover:underline">
+                          className="hover:text-primary truncate font-medium transition-colors hover:underline">
                           {getEmployeeFullName(emp, locale)}
                         </Link>
                         <div className="text-muted-foreground truncate text-sm">{emp.email}</div>
@@ -221,7 +221,7 @@ export function EmployeesList({
                           <div className="min-w-0">
                             <Link
                               href={`/dashboard/employees/${emp.id}`}
-                              className="truncate font-medium transition-colors hover:text-primary hover:underline">
+                              className="hover:text-primary truncate font-medium transition-colors hover:underline">
                               {getEmployeeFullName(emp, locale)}
                             </Link>
                             <div className="text-muted-foreground truncate text-xs">
@@ -241,8 +241,14 @@ export function EmployeesList({
                       <div className="truncate">{emp.hireDate}</div>
                       <div>
                         <div className="flex items-center justify-start gap-1">
-                          <Button variant="ghost" size="icon" aria-label={t.common.viewProfile} asChild>
-                            <Link href={`/dashboard/employees/${emp.id}`} title={t.common.viewProfile}>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={t.common.viewProfile}
+                            asChild>
+                            <Link
+                              href={`/dashboard/employees/${emp.id}`}
+                              title={t.common.viewProfile}>
                               <IconEye className="h-4 w-4" />
                             </Link>
                           </Button>

@@ -92,7 +92,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   for (const job of publicJobs) {
-    const { arUrl, enUrl, languages } = buildMarketingLanguageAlternates(`/careers/${job.id}`, base);
+    const { arUrl, enUrl, languages } = buildMarketingLanguageAlternates(
+      `/careers/${job.id}`,
+      base
+    );
 
     for (const url of [arUrl, enUrl]) {
       entries.push({

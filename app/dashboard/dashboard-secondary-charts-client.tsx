@@ -11,8 +11,8 @@ const ChartDepartmentsPie = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-card rounded-xl border p-4">
-        <Skeleton className="h-5 w-40 mb-2" />
-        <Skeleton className="h-4 w-56 mb-4" />
+        <Skeleton className="mb-2 h-5 w-40" />
+        <Skeleton className="mb-4 h-4 w-56" />
         <Skeleton className="h-[180px] w-full" />
       </div>
     )
@@ -25,8 +25,8 @@ const ChartLeavesBar = dynamic(
     ssr: false,
     loading: () => (
       <div className="bg-card rounded-xl border p-4">
-        <Skeleton className="h-5 w-40 mb-2" />
-        <Skeleton className="h-4 w-56 mb-4" />
+        <Skeleton className="mb-2 h-5 w-40" />
+        <Skeleton className="mb-4 h-4 w-56" />
         <Skeleton className="h-[180px] w-full" />
       </div>
     )

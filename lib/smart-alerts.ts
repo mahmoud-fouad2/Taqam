@@ -14,12 +14,7 @@ export type AlertSeverity = "info" | "warning" | "urgent";
 
 export type SmartAlert = {
   id: string;
-  type:
-    | "document_expiry"
-    | "contract_end"
-    | "probation_end"
-    | "work_anniversary"
-    | "birthday";
+  type: "document_expiry" | "contract_end" | "probation_end" | "work_anniversary" | "birthday";
   severity: AlertSeverity;
   titleAr: string;
   descriptionAr: string;
@@ -30,10 +25,7 @@ export type SmartAlert = {
 };
 
 /** Get smart alerts for a tenant within the next `horizonDays` days */
-export async function getSmartAlerts(
-  tenantId: string,
-  horizonDays = 30
-): Promise<SmartAlert[]> {
+export async function getSmartAlerts(tenantId: string, horizonDays = 30): Promise<SmartAlert[]> {
   const now = new Date();
   const todayUTC = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
   const horizonDate = new Date(todayUTC.getTime() + horizonDays * 24 * 60 * 60 * 1000);
@@ -80,9 +72,7 @@ export async function getSmartAlerts(
       type: "document_expiry",
       severity: daysUntil <= 7 ? "urgent" : daysUntil <= 14 ? "warning" : "info",
       titleAr:
-        daysUntil === 0
-          ? `وثيقة تنتهي اليوم: ${docName}`
-          : `وثيقة تنتهي خلال ${daysUntil} يوم`,
+        daysUntil === 0 ? `وثيقة تنتهي اليوم: ${docName}` : `وثيقة تنتهي خلال ${daysUntil} يوم`,
       descriptionAr: `${empName} — ${docName}`,
       employeeId: doc.employee.id,
       employeeName: empName,

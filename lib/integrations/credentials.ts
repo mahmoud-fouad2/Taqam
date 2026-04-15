@@ -45,9 +45,7 @@ function getEncryptionKey(): Buffer {
  * Encrypt a credentials object. Returns base64-encoded blob: iv | authTag | ciphertext.
  * Returns null if the credentials object is empty (no keys).
  */
-export function encryptCredentials(
-  credentials: Record<string, string>
-): string | null {
+export function encryptCredentials(credentials: Record<string, string>): string | null {
   if (Object.keys(credentials).length === 0) return null;
 
   const key = getEncryptionKey();
@@ -67,9 +65,7 @@ export function encryptCredentials(
  * Decrypt a credentials blob previously returned by encryptCredentials.
  * Returns null if the input is null/undefined/empty or decryption fails.
  */
-export function decryptCredentials(
-  blob: string | null | undefined
-): Record<string, string> | null {
+export function decryptCredentials(blob: string | null | undefined): Record<string, string> | null {
   if (!blob) return null;
 
   try {

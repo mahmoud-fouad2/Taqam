@@ -35,10 +35,7 @@ export async function findActiveTenantByHost(host: string | null | undefined) {
   }
 
   const slugFromHost = extractTenantSlugFromHost(normalizedHost);
-  const orWhere = [
-    ...(slugFromHost ? [{ slug: slugFromHost }] : []),
-    { domain: normalizedHost }
-  ];
+  const orWhere = [...(slugFromHost ? [{ slug: slugFromHost }] : []), { domain: normalizedHost }];
 
   return prisma.tenant.findFirst({
     where: {

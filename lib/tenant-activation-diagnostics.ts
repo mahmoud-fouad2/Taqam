@@ -44,7 +44,8 @@ export function formatTenantActivationAuditTitle(
   locale: ActivationDiagnosticsLocale
 ) {
   if (entry.action === "SETUP_STEP_VIEWED") {
-    const step = getAuditNumber(entry.newData, "currentStep") ?? getAuditNumber(entry.newData, "step");
+    const step =
+      getAuditNumber(entry.newData, "currentStep") ?? getAuditNumber(entry.newData, "step");
     return locale === "ar"
       ? `عرض خطوة الإعداد${step ? ` ${step}` : ""}`
       : `Viewed setup step${step ? ` ${step}` : ""}`;
@@ -150,7 +151,9 @@ export function buildTenantActivationDiagnostics({
   setupStep: number;
   setupCompletedAt?: string | null;
 }) {
-  const activationAuditLogs = auditLogs.filter((entry) => isTenantActivationAuditAction(entry.action));
+  const activationAuditLogs = auditLogs.filter((entry) =>
+    isTenantActivationAuditAction(entry.action)
+  );
   const latestActivationProgressEntry = activationAuditLogs.find(
     (entry) => getAuditNumber(entry.newData, "completionPercent") !== null
   );
@@ -158,17 +161,21 @@ export function buildTenantActivationDiagnostics({
   return {
     activationAuditLogs,
     activationEventCount: activationAuditLogs.length,
-    savedSetupStepCount: activationAuditLogs.filter((entry) => entry.action === "SETUP_STEP_SAVED").length,
+    savedSetupStepCount: activationAuditLogs.filter((entry) => entry.action === "SETUP_STEP_SAVED")
+      .length,
     latestActivationEvent: activationAuditLogs[0] ?? null,
     latestActivationProgress: setupCompletedAt
       ? 100
-      : getAuditNumber(latestActivationProgressEntry?.newData ?? null, "completionPercent") ??
-        Math.round((setupStep / 5) * 100),
+      : (getAuditNumber(latestActivationProgressEntry?.newData ?? null, "completionPercent") ??
+        Math.round((setupStep / 5) * 100)),
     timeline: activationAuditLogs.slice(0, 8).map((entry) => ({
       ...entry,
       title: formatTenantActivationAuditTitle(entry, locale),
       summary: formatTenantActivationAuditSummary(entry, locale),
-      actorLabel: entry.user?.name || entry.user?.email || (locale === "ar" ? "بدون مستخدم مرتبط" : "No linked user")
+      actorLabel:
+        entry.user?.name ||
+        entry.user?.email ||
+        (locale === "ar" ? "بدون مستخدم مرتبط" : "No linked user")
     }))
   };
 }

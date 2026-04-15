@@ -58,14 +58,14 @@ export function SmartAlertsWidget() {
               style.container
             )}>
             <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", style.icon)} />
-            <div className="flex-1 min-w-0">
-              <p className="font-medium text-foreground leading-snug">{alert.titleAr}</p>
-              <p className="text-muted-foreground text-xs mt-0.5">{alert.descriptionAr}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-foreground leading-snug font-medium">{alert.titleAr}</p>
+              <p className="text-muted-foreground mt-0.5 text-xs">{alert.descriptionAr}</p>
             </div>
             <button
               type="button"
               onClick={() => setDismissed((prev) => new Set([...prev, alert.id]))}
-              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors mt-0.5">
+              className="text-muted-foreground hover:text-foreground mt-0.5 shrink-0 transition-colors">
               <X className="h-3.5 w-3.5" />
               <span className="sr-only">إخفاء</span>
             </button>
@@ -73,7 +73,7 @@ export function SmartAlertsWidget() {
         );
       })}
       {visible.length > 5 && (
-        <p className="text-xs text-muted-foreground text-center">
+        <p className="text-muted-foreground text-center text-xs">
           و {visible.length - 5} تنبيه آخر
         </p>
       )}

@@ -143,7 +143,9 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
       es.onerror = () => {
         es?.close();
         // Reconnect after 10 s if still mounted
-        setTimeout(() => { if (isMounted) connectSSE(); }, 10_000);
+        setTimeout(() => {
+          if (isMounted) connectSSE();
+        }, 10_000);
       };
     };
     connectSSE();
@@ -238,9 +240,8 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
           <Button
             type="button"
             variant="ghost"
-            className="h-9 rounded-lg border border-border/70 bg-background/75 px-3 shadow-sm hover:bg-accent/80"
-            aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"}
-          >
+            className="border-border/70 bg-background/75 hover:bg-accent/80 h-9 rounded-lg border px-3 shadow-sm"
+            aria-label={locale === "ar" ? "اختيار اللغة" : "Choose language"}>
             <Languages className="h-4 w-4" />
             <span className="text-sm font-medium">{locale === "ar" ? "العربية" : "English"}</span>
           </Button>
@@ -248,19 +249,29 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
         <DropdownMenuContent align="end" className={`w-48 ${dropdownSurfaceClass}`}>
           <DropdownMenuLabel>{locale === "ar" ? "اللغة" : "Language"}</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onSelect={locale === "ar" ? undefined : (e: Event) => {
-            e.preventDefault();
-            toggleLocale();
-          }}>
+          <DropdownMenuItem
+            onSelect={
+              locale === "ar"
+                ? undefined
+                : (e: Event) => {
+                    e.preventDefault();
+                    toggleLocale();
+                  }
+            }>
             <span className="flex flex-1 items-center justify-between">
               <span>العربية</span>
               {locale === "ar" ? <Check className="h-4 w-4" /> : null}
             </span>
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={locale === "en" ? undefined : (e: Event) => {
-            e.preventDefault();
-            toggleLocale();
-          }}>
+          <DropdownMenuItem
+            onSelect={
+              locale === "en"
+                ? undefined
+                : (e: Event) => {
+                    e.preventDefault();
+                    toggleLocale();
+                  }
+            }>
             <span className="flex flex-1 items-center justify-between">
               <span>English</span>
               {locale === "en" ? <Check className="h-4 w-4" /> : null}
@@ -293,9 +304,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
             {isPlatformAdmin ? (
               <>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/super-admin"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/super-admin" className="flex items-center justify-between">
                     <span>{locale === "ar" ? "لوحة المنصة" : "Platform dashboard"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -353,9 +362,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/support"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/support" className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الدعم الفني" : "Support desk"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -365,9 +372,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/help-center"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/help-center" className="flex items-center justify-between">
                     <span>{locale === "ar" ? "مركز المساعدة" : "Help center"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -414,9 +419,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
             ) : (
               <>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/help-center"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/help-center" className="flex items-center justify-between">
                     <span>{t.common.helpCenter}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -426,9 +429,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/academy"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/academy" className="flex items-center justify-between">
                     <span>{t.common.academy}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -438,9 +439,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/support"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/support" className="flex items-center justify-between">
                     <span>{locale === "ar" ? "الدعم الفني" : "Support"}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />
@@ -460,9 +459,7 @@ export function DashboardHeaderActions({ locale }: { locale: "ar" | "en" }) {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link
-                    href="/dashboard/whats-new"
-                    className="flex items-center justify-between">
+                  <Link href="/dashboard/whats-new" className="flex items-center justify-between">
                     <span>{t.common.whatsNew}</span>
                     {locale === "ar" ? (
                       <ChevronLeft className="h-4 w-4 opacity-60" />

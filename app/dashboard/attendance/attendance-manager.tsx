@@ -203,7 +203,8 @@ export function AttendanceManager() {
 
   const StatusBadge = ({ status }: { status: AttendanceStatus }) => {
     const colorClass = getStatusColor(status).replace("bg-", "");
-    const label = locale === "ar" ? attendanceStatusLabels[status].ar : attendanceStatusLabels[status].en;
+    const label =
+      locale === "ar" ? attendanceStatusLabels[status].ar : attendanceStatusLabels[status].en;
     return (
       <Badge
         variant="outline"
@@ -277,17 +278,17 @@ export function AttendanceManager() {
   return (
     <div className="space-y-6">
       {error && (
-        <div className="text-destructive rounded-2xl border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm">
+        <div className="text-destructive border-destructive/30 bg-destructive/5 rounded-2xl border px-4 py-3 text-sm">
           {error}
         </div>
       )}
 
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(320px,0.8fr)]">
-        <Card className="rounded-3xl border-primary/20 bg-primary/5 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-primary/20 bg-primary/5 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardContent className="pt-6">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-start gap-4">
-                <div className="rounded-2xl bg-primary/10 p-3">
+                <div className="bg-primary/10 rounded-2xl p-3">
                   <IconClock className="text-primary h-8 w-8" />
                 </div>
                 <div className="space-y-2">
@@ -349,7 +350,7 @@ export function AttendanceManager() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="pb-3">
             <CardTitle>{locale === "ar" ? "ملخص التشغيل" : "Operations summary"}</CardTitle>
             <CardDescription>
@@ -359,19 +360,19 @@ export function AttendanceManager() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-3 sm:grid-cols-3 xl:grid-cols-1">
-            <div className="rounded-2xl border border-border/50 bg-muted/30 px-4 py-3">
+            <div className="border-border/50 bg-muted/30 rounded-2xl border px-4 py-3">
               <p className="text-muted-foreground text-xs font-medium">
                 {locale === "ar" ? "الشهر الحالي" : "Current month"}
               </p>
               <p className="mt-1 font-semibold">{currentMonth}</p>
             </div>
-            <div className="rounded-2xl border border-border/50 bg-muted/30 px-4 py-3">
+            <div className="border-border/50 bg-muted/30 rounded-2xl border px-4 py-3">
               <p className="text-muted-foreground text-xs font-medium">
                 {locale === "ar" ? "السجلات المعروضة" : "Visible records"}
               </p>
               <p className="mt-1 text-2xl font-semibold">{filteredRecords.length}</p>
             </div>
-            <div className="rounded-2xl border border-border/50 bg-muted/30 px-4 py-3">
+            <div className="border-border/50 bg-muted/30 rounded-2xl border px-4 py-3">
               <p className="text-muted-foreground text-xs font-medium">
                 {locale === "ar" ? "إجمالي التأخير" : "Total delay"}
               </p>
@@ -382,7 +383,7 @@ export function AttendanceManager() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.shifts.workingDays}</CardTitle>
             <IconCalendar className="text-muted-foreground h-4 w-4" />
@@ -398,7 +399,9 @@ export function AttendanceManager() {
             <IconCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{stats.present}</div>
+            <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">
+              {stats.present}
+            </div>
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
@@ -408,7 +411,9 @@ export function AttendanceManager() {
             <IconAlertCircle className="h-4 w-4 text-amber-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{stats.late}</div>
+            <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+              {stats.late}
+            </div>
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
@@ -418,7 +423,9 @@ export function AttendanceManager() {
             <IconX className="h-4 w-4 text-rose-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">{stats.absent}</div>
+            <div className="text-2xl font-bold text-rose-600 dark:text-rose-400">
+              {stats.absent}
+            </div>
             <p className="text-muted-foreground text-xs">{t.attendance.day}</p>
           </CardContent>
         </Card>
@@ -428,13 +435,15 @@ export function AttendanceManager() {
             <IconClock className="h-4 w-4 text-sky-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">{stats.avgWorkHours}</div>
+            <div className="text-2xl font-bold text-sky-600 dark:text-sky-400">
+              {stats.avgWorkHours}
+            </div>
             <p className="text-muted-foreground text-xs">{t.attendance.hourPerDay}</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+      <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardContent className="pt-6">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center gap-2">
@@ -495,7 +504,7 @@ export function AttendanceManager() {
         </CardContent>
       </Card>
 
-      <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+      <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <CardTitle>{t.attendance.title}</CardTitle>
@@ -563,7 +572,9 @@ export function AttendanceManager() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <IconLogin className="h-4 w-4 text-green-500" />
-                        <span className="font-mono text-sm">{formatDateTime(record.checkInTime)}</span>
+                        <span className="font-mono text-sm">
+                          {formatDateTime(record.checkInTime)}
+                        </span>
                       </div>
                       <p className="text-muted-foreground text-xs">
                         {t.attendance.pExpected} {formatTime(record.expectedCheckIn)}
@@ -572,7 +583,9 @@ export function AttendanceManager() {
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <IconLogout className="h-4 w-4 text-red-500" />
-                        <span className="font-mono text-sm">{formatDateTime(record.checkOutTime)}</span>
+                        <span className="font-mono text-sm">
+                          {formatDateTime(record.checkOutTime)}
+                        </span>
                       </div>
                       <p className="text-muted-foreground text-xs">
                         {t.attendance.pExpected} {formatTime(record.expectedCheckOut)}

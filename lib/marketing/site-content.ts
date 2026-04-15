@@ -323,13 +323,22 @@ function normalizeContent(value: unknown): PlatformSiteContent {
       typeof source.defaultDescriptionEn === "string" && source.defaultDescriptionEn.trim()
         ? source.defaultDescriptionEn
         : defaultContent.defaultDescriptionEn,
-    defaultKeywordsAr: normalizeStringArray(source.defaultKeywordsAr, defaultContent.defaultKeywordsAr),
-    defaultKeywordsEn: normalizeStringArray(source.defaultKeywordsEn, defaultContent.defaultKeywordsEn),
+    defaultKeywordsAr: normalizeStringArray(
+      source.defaultKeywordsAr,
+      defaultContent.defaultKeywordsAr
+    ),
+    defaultKeywordsEn: normalizeStringArray(
+      source.defaultKeywordsEn,
+      defaultContent.defaultKeywordsEn
+    ),
     home: {
       badge: normalizeLocalizedText(homeSource?.badge, defaultContent.home.badge),
       title: normalizeLocalizedText(homeSource?.title, defaultContent.home.title),
       description: normalizeLocalizedText(homeSource?.description, defaultContent.home.description),
-      primaryCtaLabel: normalizeLocalizedText(homeSource?.primaryCtaLabel, defaultContent.home.primaryCtaLabel),
+      primaryCtaLabel: normalizeLocalizedText(
+        homeSource?.primaryCtaLabel,
+        defaultContent.home.primaryCtaLabel
+      ),
       primaryCtaHref:
         typeof homeSource?.primaryCtaHref === "string" && homeSource.primaryCtaHref.trim()
           ? homeSource.primaryCtaHref
@@ -391,7 +400,9 @@ export async function getPlatformSiteContentAdminState(): Promise<PlatformSiteCo
   };
 }
 
-export async function savePlatformSiteContentDraft(content: PlatformSiteContent): Promise<PlatformSiteContent> {
+export async function savePlatformSiteContentDraft(
+  content: PlatformSiteContent
+): Promise<PlatformSiteContent> {
   const normalized = normalizeContent(content);
   await writeCommercialContent({
     filePath: draftContentFilePath,
@@ -411,6 +422,8 @@ export async function publishPlatformSiteContent(): Promise<PlatformSiteContent>
   return draft;
 }
 
-export async function savePlatformSiteContent(content: PlatformSiteContent): Promise<PlatformSiteContent> {
+export async function savePlatformSiteContent(
+  content: PlatformSiteContent
+): Promise<PlatformSiteContent> {
   return savePlatformSiteContentDraft(content);
 }

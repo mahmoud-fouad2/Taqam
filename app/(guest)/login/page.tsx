@@ -58,24 +58,22 @@ export default async function LoginPageV1() {
                   </div>
                   <h1 className="text-3xl font-semibold tracking-tight">{t.login.title}</h1>
                   <p className="text-muted-foreground mt-2 text-sm">{t.login.subtitle}</p>
-
-
                 </div>
 
                 <RecaptchaProvider>
-                <LoginForm
-                  locale={locale}
-                  labels={{
-                    email: t.login.email,
-                    emailPlaceholder: t.login.emailPlaceholder,
-                    password: t.login.password,
-                    passwordPlaceholder: t.login.passwordPlaceholder,
-                    submit: t.login.submit
-                  }}
-                />
+                  <LoginForm
+                    locale={locale}
+                    labels={{
+                      email: t.login.email,
+                      emailPlaceholder: t.login.emailPlaceholder,
+                      password: t.login.password,
+                      passwordPlaceholder: t.login.passwordPlaceholder,
+                      submit: t.login.submit
+                    }}
+                  />
                 </RecaptchaProvider>
 
-                <div className="mt-6 flex flex-col gap-3 border-t border-border/60 pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="border-border/60 mt-6 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <p className="text-muted-foreground text-sm">
                     {locale === "ar"
                       ? "تحتاج حسابًا جديدًا أو جلسة تعريف قصيرة؟"

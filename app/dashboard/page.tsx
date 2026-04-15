@@ -74,15 +74,18 @@ export default async function Page() {
       where: { id: user.tenantId },
       select: { setupCompletedAt: true, name: true, nameAr: true }
     });
-    const recentTenant = tenantMeta && wasSetupCompletedRecently(tenantMeta.setupCompletedAt)
-      ? tenantMeta
-      : null;
+    const recentTenant =
+      tenantMeta && wasSetupCompletedRecently(tenantMeta.setupCompletedAt) ? tenantMeta : null;
 
     if (recentTenant) {
       showGettingStarted = true;
       const [hasPayroll, hasAttendance] = await Promise.all([
-        prisma.payrollPeriod.count({ where: { tenantId: user.tenantId } }).then((c: number) => c > 0),
-        prisma.attendanceRecord.count({ where: { tenantId: user.tenantId } }).then((c: number) => c > 0)
+        prisma.payrollPeriod
+          .count({ where: { tenantId: user.tenantId } })
+          .then((c: number) => c > 0),
+        prisma.attendanceRecord
+          .count({ where: { tenantId: user.tenantId } })
+          .then((c: number) => c > 0)
       ]);
       gettingStartedSteps = buildGettingStartedSteps({
         tenantName: recentTenant.nameAr ?? recentTenant.name,
@@ -110,11 +113,7 @@ export default async function Page() {
           steps={gettingStartedSteps}
         />
       )}
-      <DashboardQuickActions
-        locale={locale}
-        pendingLeaves={stats.pendingLeaves}
-        role={user.role}
-      />
+      <DashboardQuickActions locale={locale} pendingLeaves={stats.pendingLeaves} role={user.role} />
       <SmartAlertsWidget />
       <SectionCards locale={locale} stats={stats} />
       <div className="grid grid-cols-1 gap-4 @5xl/main:grid-cols-2">

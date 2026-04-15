@@ -2,12 +2,8 @@ import { hasFeature } from "@/lib/feature-gate";
 import { logger } from "@/lib/logger";
 import prisma from "@/lib/db";
 import { getTenantAccessIssue } from "@/lib/tenant-access";
-import {
-  executeIntegrationSync
-} from "@/lib/integrations/sync-executor";
-import {
-  SUPPORTED_INTEGRATION_PROVIDER_SYNC_ADAPTERS
-} from "@/lib/integrations/provider-adapters";
+import { executeIntegrationSync } from "@/lib/integrations/sync-executor";
+import { SUPPORTED_INTEGRATION_PROVIDER_SYNC_ADAPTERS } from "@/lib/integrations/provider-adapters";
 import { isIntegrationSyncDue } from "@/lib/integrations/sync-schedule";
 
 export async function runScheduledIntegrationSyncJobs({ now = new Date() } = {}) {

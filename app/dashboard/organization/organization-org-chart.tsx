@@ -227,10 +227,11 @@ export function OrganizationOrgChart() {
             <Card key={card.title} className="border-border/70 shadow-sm">
               <CardHeader className="space-y-3 pb-4">
                 <div className="flex items-center justify-between gap-3">
-                  <CardDescription className="text-xs font-semibold uppercase tracking-[0.08em]">
+                  <CardDescription className="text-xs font-semibold tracking-[0.08em] uppercase">
                     {card.title}
                   </CardDescription>
-                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${card.tone}`}>
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${card.tone}`}>
                     <Icon className="h-4 w-4" />
                   </div>
                 </div>
@@ -296,13 +297,21 @@ export function OrganizationOrgChart() {
   );
 }
 
-function EmployeeTreeCard({ node, locale, depth = 0 }: { node: EmployeeTreeNode; locale: "ar" | "en"; depth?: number }) {
+function EmployeeTreeCard({
+  node,
+  locale,
+  depth = 0
+}: {
+  node: EmployeeTreeNode;
+  locale: "ar" | "en";
+  depth?: number;
+}) {
   const isRtl = locale === "ar";
   const name = getEmployeeFullName(node, locale);
 
   return (
-    <div className={depth > 0 ? "ms-5 border-s border-dashed border-border/70 ps-4" : ""}>
-      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm">
+    <div className={depth > 0 ? "border-border/70 ms-5 border-s border-dashed ps-4" : ""}>
+      <div className="border-border/70 bg-card/80 rounded-2xl border p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex min-w-0 items-center gap-3">
             <Avatar className="h-12 w-12">
@@ -312,14 +321,16 @@ function EmployeeTreeCard({ node, locale, depth = 0 }: { node: EmployeeTreeNode;
             <div className="min-w-0">
               <Link
                 href={`/dashboard/employees/${node.id}`}
-                className="block truncate font-medium transition-colors hover:text-primary hover:underline">
+                className="hover:text-primary block truncate font-medium transition-colors hover:underline">
                 {name}
               </Link>
               <p className="text-muted-foreground truncate text-sm">
                 {node.jobTitle?.nameAr || node.jobTitle?.name || (isRtl ? "بدون مسمى" : "No title")}
               </p>
               <p className="text-muted-foreground truncate text-xs">
-                {node.department?.nameAr || node.department?.name || (isRtl ? "بدون قسم" : "No department")}
+                {node.department?.nameAr ||
+                  node.department?.name ||
+                  (isRtl ? "بدون قسم" : "No department")}
               </p>
             </div>
           </div>
@@ -337,11 +348,11 @@ function EmployeeTreeCard({ node, locale, depth = 0 }: { node: EmployeeTreeNode;
           </div>
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-          <span>{isRtl ? "التابعون المباشرون:" : "Direct reports:"} {node.directReportsCount}</span>
-          {node.branch ? (
-            <span>• {node.branch.nameAr || node.branch.name}</span>
-          ) : null}
+        <div className="text-muted-foreground mt-3 flex flex-wrap items-center gap-2 text-xs">
+          <span>
+            {isRtl ? "التابعون المباشرون:" : "Direct reports:"} {node.directReportsCount}
+          </span>
+          {node.branch ? <span>• {node.branch.nameAr || node.branch.name}</span> : null}
         </div>
       </div>
 
@@ -356,13 +367,21 @@ function EmployeeTreeCard({ node, locale, depth = 0 }: { node: EmployeeTreeNode;
   );
 }
 
-function DepartmentTreeCard({ node, locale, depth = 0 }: { node: DepartmentTreeNode; locale: "ar" | "en"; depth?: number }) {
+function DepartmentTreeCard({
+  node,
+  locale,
+  depth = 0
+}: {
+  node: DepartmentTreeNode;
+  locale: "ar" | "en";
+  depth?: number;
+}) {
   const isRtl = locale === "ar";
   const managerName = node.manager ? getEmployeeFullName(node.manager, locale) : null;
 
   return (
-    <div className={depth > 0 ? "ms-5 border-s border-dashed border-border/70 ps-4" : ""}>
-      <div className="rounded-2xl border border-border/70 bg-card/80 p-4 shadow-sm">
+    <div className={depth > 0 ? "border-border/70 ms-5 border-s border-dashed ps-4" : ""}>
+      <div className="border-border/70 bg-card/80 rounded-2xl border p-4 shadow-sm">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-2">
@@ -387,12 +406,14 @@ function DepartmentTreeCard({ node, locale, depth = 0 }: { node: DepartmentTreeN
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground flex shrink-0 items-center gap-2 text-xs">
             <Badge variant="secondary" className="rounded-full px-3 py-1">
               {isRtl ? `مباشر ${node.employeesCount}` : `${node.employeesCount} direct`}
             </Badge>
             <Badge variant="outline" className="rounded-full px-3 py-1">
-              {isRtl ? `إجمالي ${node.descendantEmployeeCount}` : `${node.descendantEmployeeCount} total`}
+              {isRtl
+                ? `إجمالي ${node.descendantEmployeeCount}`
+                : `${node.descendantEmployeeCount} total`}
             </Badge>
           </div>
         </div>

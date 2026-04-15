@@ -18,7 +18,7 @@ export default async function SuperAdminFeatureCatalogPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border bg-card/80 p-5 shadow-sm">
+      <section className="bg-card/80 rounded-2xl border p-5 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight">
           {isAr ? "Feature Catalog التجاري" : "Commercial feature catalog"}
         </h1>

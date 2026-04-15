@@ -27,12 +27,14 @@ export default async function SuperAdminPage() {
   if (!session?.user || session.user.role !== "SUPER_ADMIN") {
     return (
       <div className="space-y-4">
-        <div className="rounded-2xl border bg-card/80 p-5 shadow-sm">
+        <div className="bg-card/80 rounded-2xl border p-5 shadow-sm">
           <h1 className="text-2xl font-semibold tracking-tight">
             {isAr ? "غير مصرح" : "Unauthorized"}
           </h1>
           <p className="text-muted-foreground mt-1">
-            {isAr ? "هذه الصفحة مخصصة لإدارة المنصة فقط." : "This page is for platform administration only."}
+            {isAr
+              ? "هذه الصفحة مخصصة لإدارة المنصة فقط."
+              : "This page is for platform administration only."}
           </p>
         </div>
       </div>
@@ -143,7 +145,7 @@ export default async function SuperAdminPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border bg-card/85 p-6 shadow-sm">
+      <section className="bg-card/85 rounded-3xl border p-6 shadow-sm">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div className="space-y-2">
             <Badge variant="secondary" className="rounded-full px-3 py-1">
@@ -183,12 +185,15 @@ export default async function SuperAdminPage() {
             <Card key={card.title} className="border-border/60 bg-card/85 shadow-sm">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
-                <span className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${card.accent}`}>
+                <span
+                  className={`inline-flex h-9 w-9 items-center justify-center rounded-xl ${card.accent}`}>
                   <Icon className="size-4" />
                 </span>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-semibold tracking-tight">{card.value.toLocaleString()}</div>
+                <div className="text-3xl font-semibold tracking-tight">
+                  {card.value.toLocaleString()}
+                </div>
                 <p className="text-muted-foreground mt-2 text-sm">{card.description}</p>
               </CardContent>
             </Card>
@@ -213,15 +218,16 @@ export default async function SuperAdminPage() {
                 <Link
                   key={module.href}
                   href={module.href}
-                  className="group rounded-2xl border bg-background/70 p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary/35 hover:bg-primary/[0.04]"
-                >
+                  className="group bg-background/70 hover:border-primary/35 hover:bg-primary/[0.04] rounded-2xl border p-4 shadow-sm transition hover:-translate-y-0.5">
                   <div className="flex items-start gap-3">
                     <span className="bg-primary/10 text-primary inline-flex h-10 w-10 items-center justify-center rounded-xl">
                       <Icon className="size-5" />
                     </span>
                     <div>
                       <p className="font-medium">{module.title}</p>
-                      <p className="text-muted-foreground mt-1 text-sm leading-6">{module.description}</p>
+                      <p className="text-muted-foreground mt-1 text-sm leading-6">
+                        {module.description}
+                      </p>
                     </div>
                   </div>
                 </Link>
@@ -240,10 +246,26 @@ export default async function SuperAdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <MetricRow label={isAr ? "شركات نشطة" : "Active tenants"} value={activeTenants} total={totalTenants} />
-            <MetricRow label={isAr ? "باقات احترافية" : "Professional plans"} value={professionalTenants} total={totalTenants} />
-            <MetricRow label={isAr ? "باقات Enterprise" : "Enterprise plans"} value={enterpriseTenants} total={totalTenants} />
-            <MetricRow label={isAr ? "طلبات جديدة" : "Pending requests"} value={pendingRequests} total={[totalTenants, pendingRequests].reduce((sum, item) => sum + item, 0)} />
+            <MetricRow
+              label={isAr ? "شركات نشطة" : "Active tenants"}
+              value={activeTenants}
+              total={totalTenants}
+            />
+            <MetricRow
+              label={isAr ? "باقات احترافية" : "Professional plans"}
+              value={professionalTenants}
+              total={totalTenants}
+            />
+            <MetricRow
+              label={isAr ? "باقات Enterprise" : "Enterprise plans"}
+              value={enterpriseTenants}
+              total={totalTenants}
+            />
+            <MetricRow
+              label={isAr ? "طلبات جديدة" : "Pending requests"}
+              value={pendingRequests}
+              total={[totalTenants, pendingRequests].reduce((sum, item) => sum + item, 0)}
+            />
           </CardContent>
         </Card>
       </section>
@@ -253,19 +275,26 @@ export default async function SuperAdminPage() {
           <CardHeader>
             <CardTitle>{isAr ? "أحدث الشركات" : "Newest tenants"}</CardTitle>
             <CardDescription>
-              {isAr ? "متابعة سريعة لآخر الحسابات التي تم إنشاؤها." : "Quick follow-up for the most recently created accounts."}
+              {isAr
+                ? "متابعة سريعة لآخر الحسابات التي تم إنشاؤها."
+                : "Quick follow-up for the most recently created accounts."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {recentTenants.map((tenant) => (
-              <div key={tenant.id} className="flex items-center justify-between rounded-2xl border bg-background/70 p-4">
+              <div
+                key={tenant.id}
+                className="bg-background/70 flex items-center justify-between rounded-2xl border p-4">
                 <div>
                   <p className="font-medium">{tenant.nameAr ?? tenant.name}</p>
                   <p className="text-muted-foreground mt-1 text-sm">
-                    {tenant.plan} • {tenant._count.users} {isAr ? "مستخدم" : "users"} • {tenant._count.employees} {isAr ? "موظف" : "employees"}
+                    {tenant.plan} • {tenant._count.users} {isAr ? "مستخدم" : "users"} •{" "}
+                    {tenant._count.employees} {isAr ? "موظف" : "employees"}
                   </p>
                 </div>
-                <Badge variant={tenant.status === "ACTIVE" ? "default" : "secondary"}>{tenant.status}</Badge>
+                <Badge variant={tenant.status === "ACTIVE" ? "default" : "secondary"}>
+                  {tenant.status}
+                </Badge>
               </div>
             ))}
           </CardContent>
@@ -275,13 +304,17 @@ export default async function SuperAdminPage() {
           <CardHeader>
             <CardTitle>{isAr ? "طلبات تحتاج قرارًا" : "Requests needing a decision"}</CardTitle>
             <CardDescription>
-              {isAr ? "أولوية اليوم لتسريع التحويل والتفعيل." : "Today’s priority queue for faster conversion and activation."}
+              {isAr
+                ? "أولوية اليوم لتسريع التحويل والتفعيل."
+                : "Today’s priority queue for faster conversion and activation."}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {pendingSubscriptions.length > 0 ? (
               pendingSubscriptions.map((request) => (
-                <div key={request.id} className="flex items-center justify-between rounded-2xl border bg-background/70 p-4">
+                <div
+                  key={request.id}
+                  className="bg-background/70 flex items-center justify-between rounded-2xl border p-4">
                   <div>
                     <p className="font-medium">{request.companyNameAr ?? request.companyName}</p>
                     <p className="text-muted-foreground mt-1 text-sm">{request.contactEmail}</p>

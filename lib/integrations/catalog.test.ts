@@ -17,9 +17,10 @@ describe("INTEGRATION_PROVIDERS catalog", () => {
       expect(p.key, `provider key missing`).toBeTruthy();
       expect(p.nameAr, `${p.key}: nameAr missing`).toBeTruthy();
       expect(p.nameEn, `${p.key}: nameEn missing`).toBeTruthy();
-      expect(["live", "coming-soon", "enterprise-custom"], `${p.key}: invalid availability`).toContain(
-        p.availability
-      );
+      expect(
+        ["live", "coming-soon", "enterprise-custom"],
+        `${p.key}: invalid availability`
+      ).toContain(p.availability);
       expect(
         ["NATIVE_API", "EMBEDDED", "MANUAL_BRIDGE", "ENTERPRISE_CUSTOM"],
         `${p.key}: invalid defaultMode`
@@ -65,12 +66,14 @@ describe("getLiveIntegrations", () => {
 
   it("all live integrations have credentialFields defined", () => {
     for (const p of getLiveIntegrations()) {
-      expect(Array.isArray(p.credentialFields), `${p.key}: credentialFields should be an array`).toBe(
-        true
-      );
-      expect(p.credentialFields!.length, `${p.key}: credentialFields should not be empty`).toBeGreaterThan(
-        0
-      );
+      expect(
+        Array.isArray(p.credentialFields),
+        `${p.key}: credentialFields should be an array`
+      ).toBe(true);
+      expect(
+        p.credentialFields!.length,
+        `${p.key}: credentialFields should not be empty`
+      ).toBeGreaterThan(0);
     }
   });
 });

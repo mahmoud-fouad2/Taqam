@@ -547,12 +547,12 @@ export default async function LandingPage({
                 }
 
                 return (
-                <div
-                  key={integration.id}
-                  className="text-foreground/70 hover:text-foreground flex items-center gap-1.5 text-sm font-medium transition-colors">
-                  <Icon className={`h-3.5 w-3.5 ${color}`} />
-                  <span>{isAr ? integration.name.ar : integration.name.en}</span>
-                </div>
+                  <div
+                    key={integration.id}
+                    className="text-foreground/70 hover:text-foreground flex items-center gap-1.5 text-sm font-medium transition-colors">
+                    <Icon className={`h-3.5 w-3.5 ${color}`} />
+                    <span>{isAr ? integration.name.ar : integration.name.en}</span>
+                  </div>
                 );
               })}
             </div>

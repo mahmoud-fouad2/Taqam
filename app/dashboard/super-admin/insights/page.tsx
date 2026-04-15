@@ -1,6 +1,14 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
-import { Building2, CircleAlert, CircleCheckBig, CreditCard, ShieldCheck, Smartphone, Users } from "lucide-react";
+import {
+  Building2,
+  CircleAlert,
+  CircleCheckBig,
+  CreditCard,
+  ShieldCheck,
+  Smartphone,
+  Users
+} from "lucide-react";
 
 import { authOptions } from "@/lib/auth";
 import { deriveSystemHealthSnapshot } from "@/lib/health";
@@ -160,7 +168,9 @@ export default async function SuperAdminInsightsPage() {
     {
       title: isAr ? "الشركات النشطة" : "Active tenants",
       value: activeTenants,
-      description: isAr ? "القواعد العاملة حاليًا على المنصة" : "Accounts currently operating on the platform",
+      description: isAr
+        ? "القواعد العاملة حاليًا على المنصة"
+        : "Accounts currently operating on the platform",
       icon: CircleCheckBig
     },
     {
@@ -186,7 +196,7 @@ export default async function SuperAdminInsightsPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border bg-card p-6 shadow-sm">
+      <section className="bg-card rounded-3xl border p-6 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight">
           {isAr ? "رؤية تشغيلية على مستوى المنصة" : "Platform-wide operational insight"}
         </h1>
@@ -201,12 +211,14 @@ export default async function SuperAdminInsightsPage() {
         {metrics.map((metric) => {
           const Icon = metric.icon;
           return (
-            <div key={metric.title} className="rounded-2xl border bg-card p-5 shadow-sm">
+            <div key={metric.title} className="bg-card rounded-2xl border p-5 shadow-sm">
               <div className="flex items-center justify-between">
                 <p className="text-muted-foreground text-sm">{metric.title}</p>
                 <Icon className="text-primary size-5" />
               </div>
-              <p className="mt-4 text-3xl font-semibold tracking-tight">{metric.value.toLocaleString()}</p>
+              <p className="mt-4 text-3xl font-semibold tracking-tight">
+                {metric.value.toLocaleString()}
+              </p>
               <p className="text-muted-foreground mt-2 text-sm leading-6">{metric.description}</p>
             </div>
           );
@@ -214,10 +226,12 @@ export default async function SuperAdminInsightsPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
-        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="bg-card rounded-2xl border p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <CreditCard className="text-primary size-5" />
-            <h2 className="font-semibold">{isAr ? "توزيع الباقات والحالات" : "Plan and status distribution"}</h2>
+            <h2 className="font-semibold">
+              {isAr ? "توزيع الباقات والحالات" : "Plan and status distribution"}
+            </h2>
           </div>
           <div className="space-y-4">
             {distribution.map((item) => (
@@ -238,25 +252,41 @@ export default async function SuperAdminInsightsPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border bg-card p-5 shadow-sm">
+        <div className="bg-card rounded-2xl border p-5 shadow-sm">
           <div className="mb-4 flex items-center gap-2">
             <ShieldCheck className="text-primary size-5" />
-            <h2 className="font-semibold">{isAr ? "ملخص الجاهزية التشغيلية" : "Operational readiness summary"}</h2>
+            <h2 className="font-semibold">
+              {isAr ? "ملخص الجاهزية التشغيلية" : "Operational readiness summary"}
+            </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            <InsightStat label={isAr ? "شركات بانتظار التفعيل" : "Pending activation"} value={pendingTenants} />
-            <InsightStat label={isAr ? "إجمالي الموظفين المسجلين" : "Tracked employees"} value={totalEmployees} />
-            <InsightStat label={isAr ? "عملاء Enterprise" : "Enterprise customers"} value={enterpriseTenants} />
-            <InsightStat label={isAr ? "ضغط الدعم الحالي" : "Current support load"} value={openTickets} />
+            <InsightStat
+              label={isAr ? "شركات بانتظار التفعيل" : "Pending activation"}
+              value={pendingTenants}
+            />
+            <InsightStat
+              label={isAr ? "إجمالي الموظفين المسجلين" : "Tracked employees"}
+              value={totalEmployees}
+            />
+            <InsightStat
+              label={isAr ? "عملاء Enterprise" : "Enterprise customers"}
+              value={enterpriseTenants}
+            />
+            <InsightStat
+              label={isAr ? "ضغط الدعم الحالي" : "Current support load"}
+              value={openTickets}
+            />
           </div>
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <section className="bg-card rounded-2xl border p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <ShieldCheck className="text-primary size-5" />
-            <h2 className="font-semibold">{isAr ? "صحة التشغيل الحالية" : "Current system health"}</h2>
+            <h2 className="font-semibold">
+              {isAr ? "صحة التشغيل الحالية" : "Current system health"}
+            </h2>
           </div>
           <span className={healthBadgeClassName(healthSnapshot.status)}>
             {formatHealthStatus(healthSnapshot.status, isAr)}
@@ -285,7 +315,7 @@ export default async function SuperAdminInsightsPage() {
 
           <div className="grid gap-3 md:grid-cols-2">
             {runtimeReport.items.map((item) => (
-              <div key={item.id} className="rounded-2xl border bg-muted/20 p-4">
+              <div key={item.id} className="bg-muted/20 rounded-2xl border p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-medium">{item.name}</p>
@@ -303,7 +333,7 @@ export default async function SuperAdminInsightsPage() {
                     {item.missing.map((entry) => (
                       <span
                         key={entry}
-                        className="rounded-md bg-background px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                        className="bg-background text-muted-foreground rounded-md px-2 py-1 font-mono text-[11px]">
                         {entry}
                       </span>
                     ))}
@@ -315,7 +345,7 @@ export default async function SuperAdminInsightsPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
+      <section className="bg-card rounded-2xl border p-5 shadow-sm">
         <div className="mb-4 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <Smartphone className="text-primary size-5" />
@@ -357,14 +387,14 @@ export default async function SuperAdminInsightsPage() {
 
           <div className="space-y-3">
             {mobileDiagnostics.recentEvents.length === 0 ? (
-              <div className="rounded-2xl border border-dashed p-6 text-sm text-muted-foreground">
+              <div className="text-muted-foreground rounded-2xl border border-dashed p-6 text-sm">
                 {isAr
                   ? "لا توجد تقارير أخطاء موبايل مسجلة بعد."
                   : "No mobile crash reports have been recorded yet."}
               </div>
             ) : (
               mobileDiagnostics.recentEvents.map((entry) => (
-                <div key={entry.id} className="rounded-2xl border bg-muted/20 p-4">
+                <div key={entry.id} className="bg-muted/20 rounded-2xl border p-4">
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
@@ -378,21 +408,21 @@ export default async function SuperAdminInsightsPage() {
                         </span>
                         <span className="text-sm font-medium">{entry.message}</span>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {entry.sourceLabel}
                         {entry.route ? ` • ${entry.route}` : ""}
                         {entry.appVersion ? ` • v${entry.appVersion}` : ""}
                         {entry.deviceLabel ? ` • ${entry.deviceLabel}` : ""}
                       </p>
                     </div>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="text-muted-foreground text-xs">
                       {new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-US", {
                         dateStyle: "medium",
                         timeStyle: "short"
                       }).format(new Date(entry.createdAt))}
                     </span>
                   </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
+                  <p className="text-muted-foreground mt-3 text-xs">
                     {isAr ? `الشركة: ${entry.tenantLabel}` : `Tenant: ${entry.tenantLabel}`}
                     {isAr ? ` • المستخدم: ${entry.actorLabel}` : ` • User: ${entry.actorLabel}`}
                   </p>
@@ -403,12 +433,14 @@ export default async function SuperAdminInsightsPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border bg-card p-5 shadow-sm">
-        <h2 className="font-semibold">{isAr ? "أحدث الشركات المنضمة" : "Newest tenant accounts"}</h2>
+      <section className="bg-card rounded-2xl border p-5 shadow-sm">
+        <h2 className="font-semibold">
+          {isAr ? "أحدث الشركات المنضمة" : "Newest tenant accounts"}
+        </h2>
         <div className="mt-4 overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
             <thead>
-              <tr className="border-b text-left text-muted-foreground">
+              <tr className="text-muted-foreground border-b text-left">
                 <th className="px-3 py-3 font-medium">{isAr ? "الشركة" : "Tenant"}</th>
                 <th className="px-3 py-3 font-medium">{isAr ? "الحالة" : "Status"}</th>
                 <th className="px-3 py-3 font-medium">{isAr ? "الباقة" : "Plan"}</th>
@@ -422,13 +454,15 @@ export default async function SuperAdminInsightsPage() {
                 <tr key={tenant.id} className="border-b last:border-b-0">
                   <td className="px-3 py-3">
                     <div className="font-medium">{tenant.name}</div>
-                    <div className="text-xs text-muted-foreground">/{tenant.slug}</div>
+                    <div className="text-muted-foreground text-xs">/{tenant.slug}</div>
                   </td>
                   <td className="px-3 py-3">{tenant.status}</td>
                   <td className="px-3 py-3">{tenant.plan}</td>
                   <td className="px-3 py-3">{tenant._count.users}</td>
                   <td className="px-3 py-3">{tenant._count.employees}</td>
-                  <td className="px-3 py-3 text-muted-foreground">{formatter.format(tenant.createdAt)}</td>
+                  <td className="text-muted-foreground px-3 py-3">
+                    {formatter.format(tenant.createdAt)}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -497,8 +531,8 @@ function InsightStat({
   valueLabel?: string;
 }) {
   return (
-    <div className="rounded-2xl border bg-muted/20 p-4">
-      <p className="text-sm text-muted-foreground">{label}</p>
+    <div className="bg-muted/20 rounded-2xl border p-4">
+      <p className="text-muted-foreground text-sm">{label}</p>
       <p className="mt-2 text-2xl font-semibold">{valueLabel ?? value?.toLocaleString() ?? "0"}</p>
     </div>
   );

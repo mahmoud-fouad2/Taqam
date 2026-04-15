@@ -8,6 +8,8 @@ type LogoMarkProps = {
   imageClassName?: string;
   darkImageClassName?: string;
   alt?: string;
+  priority?: boolean;
+  loading?: "eager" | "lazy";
 };
 
 export function LogoMark({
@@ -15,7 +17,9 @@ export function LogoMark({
   frameClassName,
   imageClassName,
   darkImageClassName,
-  alt = "Taqam"
+  alt = "Taqam",
+  priority = false,
+  loading
 }: LogoMarkProps) {
   return (
     <span className={cn("inline-flex shrink-0", className)}>
@@ -29,6 +33,8 @@ export function LogoMark({
           alt={alt}
           width={877}
           height={496}
+          priority={priority}
+          loading={loading}
           className={cn("block h-10 w-auto max-w-none dark:hidden", imageClassName)}
         />
         <Image
@@ -36,6 +42,8 @@ export function LogoMark({
           alt={alt}
           width={1536}
           height={1024}
+          priority={priority}
+          loading={loading}
           className={cn(
             "hidden h-10 w-auto max-w-none dark:block",
             imageClassName,

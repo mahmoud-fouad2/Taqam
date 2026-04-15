@@ -126,9 +126,7 @@ export function FeatureComparisonManager() {
         return;
       }
 
-      toast.success(
-        isUpdate ? t.pricingPlans.comparisonUpdated : t.pricingPlans.comparisonCreated
-      );
+      toast.success(isUpdate ? t.pricingPlans.comparisonUpdated : t.pricingPlans.comparisonCreated);
       setDialogOpen(false);
       setEditingFeature(null);
       await fetchRows();

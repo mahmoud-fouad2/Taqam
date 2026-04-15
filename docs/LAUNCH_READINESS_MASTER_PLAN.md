@@ -390,12 +390,12 @@
 ### المهام
 
 - [x] مراجعة كل نقاط الدخول العامة: home, pricing, plans, faq, request-demo, features
-   - [x] home
-   - [x] pricing
-   - [x] plans
-   - [x] request-demo
-   - [x] faq
-   - [x] features
+  - [x] home
+  - [x] pricing
+  - [x] plans
+  - [x] request-demo
+  - [x] faq
+  - [x] features
 - [x] بناء جدول تدقيق feature inventory (`docs/FEATURE_INVENTORY.md`)
 - [x] تصنيف كل ميزة إلى:
   - [x] Live (14 ميزة)
@@ -918,7 +918,7 @@
 - [x] service layer للـ automation
 - [ ] منع تكرار business rules بين web/mobile/api
 - [ ] typed contracts بين backend والواجهات
-   - [x] shared contracts لتدفق integrations settings/test/sync/retry في `lib/integrations/contracts.ts`
+  - [x] shared contracts لتدفق integrations settings/test/sync/retry في `lib/integrations/contracts.ts`
 - [x] فصل commercial control data عن static marketing code
 - [ ] no-code admin contracts مع validation طبقية
 - [ ] publish pipeline واضحة للمحتوى التجاري القابل للتعديل
@@ -926,13 +926,13 @@
 ## 13.2 الجودة والاختبارات
 
 - [ ] unit tests للمنطق الحرج
-   - [x] integration contracts normalization/parsing tests — `lib/integrations/contracts.test.ts`
+  - [x] integration contracts normalization/parsing tests — `lib/integrations/contracts.test.ts`
 - [ ] integration tests للمسارات الأساسية
-   - [x] integration connection route tests لـ `GET` / `PATCH` / `DELETE` / `test` / `sync` / `retry` — `app/api/integrations/connection-routes.test.ts`
+  - [x] integration connection route tests لـ `GET` / `PATCH` / `DELETE` / `test` / `sync` / `retry` — `app/api/integrations/connection-routes.test.ts`
 - [x] smoke tests للصفحات العامة
 - [x] pricing/claims snapshot tests أو content validation tests
-   - [x] pricing marketing content validation tests (Vitest)
-   - [x] claims/content validation tests للصفحات العامة
+  - [x] pricing marketing content validation tests (Vitest)
+  - [x] claims/content validation tests للصفحات العامة
 - [ ] end-to-end للـ activation flow
 - [ ] end-to-end للموبايل في أهم 5 مسارات
 

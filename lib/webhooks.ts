@@ -59,9 +59,7 @@ export async function deliverWebhookEvent(
     select: { id: true, url: true, secretHash: true, events: true }
   });
 
-  const subscribed = webhooks.filter(
-    (w) => w.events.length === 0 || w.events.includes(event)
-  );
+  const subscribed = webhooks.filter((w) => w.events.length === 0 || w.events.includes(event));
 
   if (subscribed.length === 0) return;
 

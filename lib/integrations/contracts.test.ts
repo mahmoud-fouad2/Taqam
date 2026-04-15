@@ -121,9 +121,9 @@ describe("integration contracts", () => {
     expect(parseIntegrationConnectionTestResponse(testResponse).success).toBe(true);
     expect(parseIntegrationSyncResponse(syncResponse).success).toBe(true);
     expect(parseIntegrationRetryResponse(retryResponse).success).toBe(true);
-    expect(
-      getIntegrationApiErrorMessage({ error: "server failed" }, "fallback message")
-    ).toBe("server failed");
+    expect(getIntegrationApiErrorMessage({ error: "server failed" }, "fallback message")).toBe(
+      "server failed"
+    );
     expect(getIntegrationApiErrorMessage(null, "fallback message")).toBe("fallback message");
   });
 });

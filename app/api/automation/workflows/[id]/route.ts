@@ -27,7 +27,10 @@ export async function PATCH(req: NextRequest, { params }: RouteParams) {
     const body = await req.json();
     const parsed = updateWorkflowSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" },
+        { status: 400 }
+      );
     }
 
     const existing = await prisma.workflowDefinition.findFirst({

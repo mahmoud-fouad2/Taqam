@@ -74,7 +74,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
           status: runStatus === "success" ? "CONNECTED" : "ERROR",
           lastHealthCheckAt: finishedAt,
           lastConnectedAt: runStatus === "success" ? finishedAt : undefined,
-          lastError: runStatus === "failed" ? errorMessage ?? null : null
+          lastError: runStatus === "failed" ? (errorMessage ?? null) : null
         }
       })
     ]);

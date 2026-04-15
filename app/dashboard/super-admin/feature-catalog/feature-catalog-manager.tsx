@@ -147,7 +147,9 @@ export function FeatureCatalogManager({
       total: isAr ? "إجمالي العناصر" : "Total items",
       newFeature: isAr ? "ميزة جديدة" : "New feature",
       noRows: isAr ? "لا توجد ميزات بعد" : "No features yet",
-      createFirst: isAr ? "أضف أول feature لتبدأ إدارة الكاتالوج." : "Add your first feature to start managing the catalog.",
+      createFirst: isAr
+        ? "أضف أول feature لتبدأ إدارة الكاتالوج."
+        : "Add your first feature to start managing the catalog.",
       save: isAr ? "حفظ" : "Save",
       cancel: isAr ? "إلغاء" : "Cancel",
       create: isAr ? "إنشاء" : "Create",
@@ -179,9 +181,15 @@ export function FeatureCatalogManager({
       actions: isAr ? "الإجراءات" : "Actions",
       updatedAt: isAr ? "آخر تحديث" : "Updated",
       deleteTitle: isAr ? "حذف الميزة" : "Delete feature",
-      deleteDesc: isAr ? "سيتم حذف الميزة نهائياً إذا لم تكن مربوطة بأي surfaces تجارية." : "The feature will be deleted permanently if it is not linked to any commercial surfaces.",
-      defaultDeleteHint: isAr ? "الميزات الافتراضية لا تُحذف. عطّلها بدلاً من ذلك." : "Default features cannot be deleted. Disable them instead.",
-      manageHint: isAr ? "يمكنك تعديل الحالة أو التعطيل، لكن الـ default feature IDs لا تتغير ولا تُحذف." : "You can edit status or disable entries, but default feature IDs cannot be changed or deleted."
+      deleteDesc: isAr
+        ? "سيتم حذف الميزة نهائياً إذا لم تكن مربوطة بأي surfaces تجارية."
+        : "The feature will be deleted permanently if it is not linked to any commercial surfaces.",
+      defaultDeleteHint: isAr
+        ? "الميزات الافتراضية لا تُحذف. عطّلها بدلاً من ذلك."
+        : "Default features cannot be deleted. Disable them instead.",
+      manageHint: isAr
+        ? "يمكنك تعديل الحالة أو التعطيل، لكن الـ default feature IDs لا تتغير ولا تُحذف."
+        : "You can edit status or disable entries, but default feature IDs cannot be changed or deleted."
     }),
     [isAr]
   );
@@ -310,7 +318,7 @@ export function FeatureCatalogManager({
         const errorMessage =
           json?.references?.length > 0
             ? `${json.error}: ${json.references.join(", ")}`
-            : json?.error ?? text.deleteFailed;
+            : (json?.error ?? text.deleteFailed);
         setDeleteError(errorMessage);
         return;
       }
@@ -375,7 +383,9 @@ export function FeatureCatalogManager({
                         <div className="flex flex-col gap-1">
                           <span className="font-mono text-xs">{row.featureId}</span>
                           <div className="flex gap-1">
-                            {row.isDefault ? <Badge variant="outline">{text.defaultFeature}</Badge> : null}
+                            {row.isDefault ? (
+                              <Badge variant="outline">{text.defaultFeature}</Badge>
+                            ) : null}
                             <Badge variant={row.isActive ? "default" : "secondary"}>
                               {row.isActive ? text.active : text.disabled}
                             </Badge>
@@ -390,7 +400,14 @@ export function FeatureCatalogManager({
                       </TableCell>
                       <TableCell>{row.family}</TableCell>
                       <TableCell>
-                        <Badge variant={row.status === "live" ? "default" : row.status === "beta" ? "secondary" : "outline"}>
+                        <Badge
+                          variant={
+                            row.status === "live"
+                              ? "default"
+                              : row.status === "beta"
+                                ? "secondary"
+                                : "outline"
+                          }>
                           {row.status}
                         </Badge>
                       </TableCell>
@@ -461,7 +478,9 @@ export function FeatureCatalogManager({
                 <Label>{text.family}</Label>
                 <Select
                   value={editingFeature.family}
-                  onValueChange={(value) => setEditingFeature({ ...editingFeature, family: value })}>
+                  onValueChange={(value) =>
+                    setEditingFeature({ ...editingFeature, family: value })
+                  }>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -479,7 +498,9 @@ export function FeatureCatalogManager({
                 <Label>{text.status}</Label>
                 <Select
                   value={editingFeature.status}
-                  onValueChange={(value) => setEditingFeature({ ...editingFeature, status: value })}>
+                  onValueChange={(value) =>
+                    setEditingFeature({ ...editingFeature, status: value })
+                  }>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -514,7 +535,9 @@ export function FeatureCatalogManager({
                 <Label>{text.summaryAr}</Label>
                 <Textarea
                   value={editingFeature.summaryAr}
-                  onChange={(e) => setEditingFeature({ ...editingFeature, summaryAr: e.target.value })}
+                  onChange={(e) =>
+                    setEditingFeature({ ...editingFeature, summaryAr: e.target.value })
+                  }
                   rows={4}
                 />
               </div>
@@ -523,7 +546,9 @@ export function FeatureCatalogManager({
                 <Label>{text.summaryEn}</Label>
                 <Textarea
                   value={editingFeature.summaryEn}
-                  onChange={(e) => setEditingFeature({ ...editingFeature, summaryEn: e.target.value })}
+                  onChange={(e) =>
+                    setEditingFeature({ ...editingFeature, summaryEn: e.target.value })
+                  }
                   rows={4}
                   dir="ltr"
                 />
@@ -644,7 +669,7 @@ export function FeatureCatalogManager({
             </div>
           ) : null}
           {deleteError ? (
-            <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border p-3 text-sm">
               {deleteError}
             </div>
           ) : null}

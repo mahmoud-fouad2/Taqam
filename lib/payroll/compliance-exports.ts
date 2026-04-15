@@ -52,7 +52,10 @@ export function resolveBankFileFormat(value: string | null | undefined): BankFil
 
 export function getBankFileMissingAccountNumbers(payslips: Payslip[]) {
   return payslips
-    .filter((payslip) => payslip.paymentMethod === "bank_transfer" && !(payslip.accountNumber || "").trim())
+    .filter(
+      (payslip) =>
+        payslip.paymentMethod === "bank_transfer" && !(payslip.accountNumber || "").trim()
+    )
     .map((payslip) => payslip.employeeNumber);
 }
 

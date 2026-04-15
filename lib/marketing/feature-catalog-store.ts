@@ -128,9 +128,7 @@ export function getFeatureCatalogReferences(featureId: string) {
   return references;
 }
 
-export async function listManagedCommercialFeatureCatalog(options?: {
-  includeInactive?: boolean;
-}) {
+export async function listManagedCommercialFeatureCatalog(options?: { includeInactive?: boolean }) {
   await seedDefaultCommercialFeatureCatalog();
 
   const rows = await prisma.commercialFeatureCatalogEntry.findMany({
@@ -159,7 +157,9 @@ export async function getManagedCommercialFeatureCatalog(): Promise<CommercialFe
   );
 }
 
-export async function getManagedCommercialFeatureCatalogRows(): Promise<ManagedCommercialFeatureRow[]> {
+export async function getManagedCommercialFeatureCatalogRows(): Promise<
+  ManagedCommercialFeatureRow[]
+> {
   const rows = await listManagedCommercialFeatureCatalog({ includeInactive: true });
 
   return rows.map((row) => ({

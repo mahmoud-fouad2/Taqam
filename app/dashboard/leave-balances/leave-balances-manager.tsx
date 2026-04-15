@@ -310,9 +310,7 @@ export function LeaveBalancesManager() {
             variant="outline"
             onClick={async () => {
               try {
-                const res = await fetch(
-                  `/api/export?type=leaves&format=csv&year=${selectedYear}`
-                );
+                const res = await fetch(`/api/export?type=leaves&format=csv&year=${selectedYear}`);
                 if (!res.ok) throw new Error();
                 const blob = await res.blob();
                 const url = URL.createObjectURL(blob);

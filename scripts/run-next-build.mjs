@@ -13,7 +13,8 @@ if (cliForceWebpack && cliForceTurbopack) {
 
 const forceWebpack = process.env.NEXT_FORCE_WEBPACK_BUILD === "true";
 const forceTurbopack = process.env.NEXT_FORCE_TURBOPACK_BUILD === "true";
-const useWebpack = cliForceWebpack || (!cliForceTurbopack && (forceWebpack || (isWindows && !forceTurbopack)));
+const useWebpack =
+  cliForceWebpack || (!cliForceTurbopack && (forceWebpack || (isWindows && !forceTurbopack)));
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve("next/dist/bin/next");
 

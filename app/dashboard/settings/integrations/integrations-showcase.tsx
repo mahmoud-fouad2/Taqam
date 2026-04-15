@@ -84,27 +84,33 @@ type Props = {
 function StatusBadge({ status }: { status: string }) {
   if (status === "CONNECTED")
     return (
-      <Badge variant="outline" className="border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400 gap-1">
+      <Badge
+        variant="outline"
+        className="gap-1 border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-400">
         <CheckCircle2 className="h-3 w-3" />
         متصل
       </Badge>
     );
   if (status === "PENDING")
     return (
-      <Badge variant="outline" className="border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400 gap-1">
+      <Badge
+        variant="outline"
+        className="gap-1 border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-400">
         <Clock className="h-3 w-3" />
         في المعالجة
       </Badge>
     );
   if (status === "ERROR" || status === "DEGRADED")
     return (
-      <Badge variant="outline" className="border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400 gap-1">
+      <Badge
+        variant="outline"
+        className="gap-1 border-red-300 bg-red-50 text-red-700 dark:border-red-800 dark:bg-red-950/40 dark:text-red-400">
         <AlertCircle className="h-3 w-3" />
         خطأ
       </Badge>
     );
   return (
-    <Badge variant="outline" className="gap-1 text-muted-foreground">
+    <Badge variant="outline" className="text-muted-foreground gap-1">
       <WifiOff className="h-3 w-3" />
       غير متصل
     </Badge>
@@ -121,13 +127,13 @@ function AvailabilityBadge({ availability }: { availability: string }) {
     );
   if (availability === "enterprise-custom")
     return (
-      <Badge variant="outline" className="gap-1 text-[10px] text-muted-foreground">
+      <Badge variant="outline" className="text-muted-foreground gap-1 text-[10px]">
         <Building2 className="h-2.5 w-2.5" />
         Enterprise
       </Badge>
     );
   return (
-    <Badge variant="outline" className="gap-1 text-[10px] text-muted-foreground">
+    <Badge variant="outline" className="text-muted-foreground gap-1 text-[10px]">
       <Sparkles className="h-2.5 w-2.5" />
       قريباً
     </Badge>
@@ -147,15 +153,10 @@ const CATEGORY_LABELS: Record<string, string> = {
 export function IntegrationsShowcase({ catalog }: Props) {
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  const categories = [
-    "all",
-    ...Array.from(new Set(catalog.map((e) => e.category)))
-  ];
+  const categories = ["all", ...Array.from(new Set(catalog.map((e) => e.category)))];
 
   const filtered =
-    activeCategory === "all"
-      ? catalog
-      : catalog.filter((e) => e.category === activeCategory);
+    activeCategory === "all" ? catalog : catalog.filter((e) => e.category === activeCategory);
 
   // Health summary counts
   const connected = catalog.filter((e) => e.connection?.status === "CONNECTED").length;
@@ -177,8 +178,8 @@ export function IntegrationsShowcase({ catalog }: Props) {
 
       {/* Health summary — only shown when at least one connection exists */}
       {anyConnected && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border bg-card px-4 py-3 text-sm shadow-sm">
-          <Activity className="h-4 w-4 text-muted-foreground shrink-0" />
+        <div className="bg-card flex flex-wrap items-center gap-3 rounded-xl border px-4 py-3 text-sm shadow-sm">
+          <Activity className="text-muted-foreground h-4 w-4 shrink-0" />
           <span className="text-muted-foreground text-xs font-medium">حالة التكاملات:</span>
           {connected > 0 && (
             <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
@@ -213,7 +214,7 @@ export function IntegrationsShowcase({ catalog }: Props) {
                 ? "border-primary bg-primary text-primary-foreground"
                 : "border-border text-muted-foreground hover:border-primary/40 hover:text-foreground"
             )}>
-            {cat === "all" ? "الكل" : CATEGORY_LABELS[cat] ?? cat}
+            {cat === "all" ? "الكل" : (CATEGORY_LABELS[cat] ?? cat)}
           </button>
         ))}
       </div>
@@ -275,13 +276,13 @@ function MaskedField({ value }: { value: string }) {
       <Input
         readOnly
         value={visible ? value : "•".repeat(Math.min(value.length, 20))}
-        className="font-mono text-sm bg-muted/50 pr-9"
+        className="bg-muted/50 pr-9 font-mono text-sm"
         dir="ltr"
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        className="absolute left-2 text-muted-foreground hover:text-foreground transition-colors">
+        className="text-muted-foreground hover:text-foreground absolute left-2 transition-colors">
         {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
       </button>
     </div>
@@ -362,7 +363,7 @@ function IntegrationConfigDialog({
         body: JSON.stringify({ credentials: fieldValues })
       });
       if (!res.ok) {
-        const json = await res.json() as { error?: string };
+        const json = (await res.json()) as { error?: string };
         setSaveError(json.error ?? "حدث خطأ أثناء الحفظ");
         return;
       }
@@ -379,10 +380,9 @@ function IntegrationConfigDialog({
   async function handleRetry(runId: string) {
     setRetryingRunId(runId);
     try {
-      const res = await fetch(
-        `/api/integrations/${providerKey}/runs/${runId}/retry`,
-        { method: "POST" }
-      );
+      const res = await fetch(`/api/integrations/${providerKey}/runs/${runId}/retry`, {
+        method: "POST"
+      });
       const json = await res.json().catch(() => null);
       const parsed = parseIntegrationRetryResponse(json);
 
@@ -406,13 +406,11 @@ function IntegrationConfigDialog({
         operation: previousRun?.operation ?? "test",
         status: retryResponse.runStatus ?? (retryResponse.ok ? "success" : "failed"),
         summary: retryResponse.summary ?? null,
-        errorMessage:
-          retryResponse.ok
-            ? null
-            : retryResponse.error ?? retryResponse.summary ?? null,
+        errorMessage: retryResponse.ok
+          ? null
+          : (retryResponse.error ?? retryResponse.summary ?? null),
         logs: retryResponse.logs ?? [],
-        durationMs:
-          typeof retryResponse.durationMs === "number" ? retryResponse.durationMs : null,
+        durationMs: typeof retryResponse.durationMs === "number" ? retryResponse.durationMs : null,
         retryCount:
           typeof retryResponse.retryCount === "number"
             ? retryResponse.retryCount
@@ -505,7 +503,7 @@ function IntegrationConfigDialog({
           {hasFields && (
             <TabsContent value="credentials" className="mt-4 space-y-4">
               {hasCredentials && (
-                <div className="rounded-lg border border-emerald-200 bg-emerald-50 dark:border-emerald-800 dark:bg-emerald-950/30 px-4 py-3 text-xs text-emerald-700 dark:text-emerald-400 flex items-center gap-2">
+                <div className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-700 dark:border-emerald-800 dark:bg-emerald-950/30 dark:text-emerald-400">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                   بيانات الاعتماد محفوظة ومشفّرة. أدخل قيماً جديدة أدناه للاستبدال.
                 </div>
@@ -515,7 +513,7 @@ function IntegrationConfigDialog({
                   <div key={field.key} className="space-y-1.5">
                     <Label className="text-xs font-medium">
                       {field.labelAr}
-                      {field.required && <span className="text-red-500 mr-1">*</span>}
+                      {field.required && <span className="mr-1 text-red-500">*</span>}
                     </Label>
                     {field.type === "password" ? (
                       <MaskedField value={fieldValues[field.key] ?? ""} />
@@ -532,18 +530,18 @@ function IntegrationConfigDialog({
                       />
                     )}
                     {field.hint && field.type !== "password" && (
-                      <p className="text-xs text-muted-foreground">{field.hint}</p>
+                      <p className="text-muted-foreground text-xs">{field.hint}</p>
                     )}
                   </div>
                 ))}
 
                 {saveError && (
-                  <p className="text-xs text-red-600 dark:text-red-400 rounded-lg bg-red-50 dark:bg-red-950/30 px-3 py-2">
+                  <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-400">
                     {saveError}
                   </p>
                 )}
                 {savedOk && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
+                  <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
                     تم الحفظ بنجاح ✓
                   </p>
                 )}
@@ -561,23 +559,24 @@ function IntegrationConfigDialog({
           {/* ── Run history tab ── */}
           <TabsContent value="history" className="mt-4">
             {localRuns.length === 0 ? (
-              <div className="py-10 text-center text-sm text-muted-foreground">
+              <div className="text-muted-foreground py-10 text-center text-sm">
                 لا توجد أنشطة مسجّلة بعد
               </div>
             ) : (
-              <div className="divide-y divide-border rounded-lg border text-xs">
+              <div className="divide-border divide-y rounded-lg border text-xs">
                 {localRuns.map((run) => {
                   const runStatus = RUN_STATUS_LABELS[run.status] ?? {
                     label: run.status,
                     className: "text-muted-foreground"
                   };
-                  const canRetry = run.status === "failed" &&
+                  const canRetry =
+                    run.status === "failed" &&
                     (run.operation === "test" || run.operation === "sync") &&
                     run.retryCount < MAX_INTEGRATION_RUN_RETRIES;
                   return (
-                    <div key={run.id} className="px-4 py-3 flex items-start gap-3">
-                      <div className="flex-1 min-w-0 space-y-0.5">
-                        <div className="flex items-center gap-2 flex-wrap">
+                    <div key={run.id} className="flex items-start gap-3 px-4 py-3">
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <div className="flex flex-wrap items-center gap-2">
                           <span className="font-medium">
                             {OPERATION_LABELS[run.operation] ?? run.operation}
                           </span>
@@ -585,16 +584,14 @@ function IntegrationConfigDialog({
                             {runStatus.label}
                           </span>
                           {run.durationMs !== null && (
-                            <span className="text-muted-foreground">
-                              {run.durationMs}ms
-                            </span>
+                            <span className="text-muted-foreground">{run.durationMs}ms</span>
                           )}
                           {canRetry && (
                             <button
                               type="button"
                               onClick={() => handleRetry(run.id)}
                               disabled={retryingRunId === run.id}
-                              className="flex items-center gap-1 text-primary hover:underline disabled:opacity-60">
+                              className="text-primary flex items-center gap-1 hover:underline disabled:opacity-60">
                               {retryingRunId === run.id ? (
                                 <Loader2 className="h-3 w-3 animate-spin" />
                               ) : (
@@ -605,22 +602,22 @@ function IntegrationConfigDialog({
                           )}
                         </div>
                         {run.summary && (
-                          <p className="text-muted-foreground leading-relaxed">
-                            {run.summary}
-                          </p>
+                          <p className="text-muted-foreground leading-relaxed">{run.summary}</p>
                         )}
                         {run.errorMessage && (
                           <p className="text-red-600 dark:text-red-400">{run.errorMessage}</p>
                         )}
                         {run.logs.length > 0 && (
-                          <details className="mt-2 rounded-lg border bg-muted/20 px-3 py-2">
-                            <summary className="cursor-pointer list-none font-medium text-muted-foreground">
+                          <details className="bg-muted/20 mt-2 rounded-lg border px-3 py-2">
+                            <summary className="text-muted-foreground cursor-pointer list-none font-medium">
                               تفاصيل السجل
                             </summary>
                             <div className="mt-2 space-y-2">
                               {run.logs.map((log, index) => (
-                                <div key={`${run.id}-${index}`} className="rounded-md bg-background px-3 py-2">
-                                  <div className="flex items-center gap-2 flex-wrap">
+                                <div
+                                  key={`${run.id}-${index}`}
+                                  className="bg-background rounded-md px-3 py-2">
+                                  <div className="flex flex-wrap items-center gap-2">
                                     <span className={logLevelClassName(log.level)}>
                                       {LOG_LEVEL_LABELS[log.level]}
                                     </span>
@@ -628,24 +625,24 @@ function IntegrationConfigDialog({
                                   </div>
                                   {log.context && Object.keys(log.context).length > 0 && (
                                     <div className="mt-2 flex flex-wrap gap-1.5">
-                                      {Object.entries(log.context).map(([key, value]) => (
+                                      {Object.entries(log.context).map(([key, value]) =>
                                         key === "downloadPath" && value.startsWith("/") ? (
                                           <a
                                             key={`${run.id}-${index}-${key}`}
                                             href={value}
                                             target="_blank"
                                             rel="noopener noreferrer"
-                                            className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-primary underline-offset-4 hover:underline">
+                                            className="bg-muted text-primary rounded-md px-2 py-1 font-mono text-[11px] underline-offset-4 hover:underline">
                                             تنزيل الملف
                                           </a>
                                         ) : (
                                           <span
                                             key={`${run.id}-${index}-${key}`}
-                                            className="rounded-md bg-muted px-2 py-1 font-mono text-[11px] text-muted-foreground">
+                                            className="bg-muted text-muted-foreground rounded-md px-2 py-1 font-mono text-[11px]">
                                             {key}: {value}
                                           </span>
                                         )
-                                      ))}
+                                      )}
                                     </div>
                                   )}
                                 </div>
@@ -654,7 +651,7 @@ function IntegrationConfigDialog({
                           </details>
                         )}
                       </div>
-                      <div className="shrink-0 text-muted-foreground whitespace-nowrap" dir="ltr">
+                      <div className="text-muted-foreground shrink-0 whitespace-nowrap" dir="ltr">
                         {new Date(run.startedAt).toLocaleDateString("ar-SA", {
                           month: "short",
                           day: "numeric",
@@ -671,8 +668,8 @@ function IntegrationConfigDialog({
 
           {supportsScheduledSync && (
             <TabsContent value="schedule" className="mt-4 space-y-4">
-              <div className="rounded-xl border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
-                <p className="font-medium text-foreground">تشغيل مزامنة مجدولة</p>
+              <div className="bg-muted/20 text-muted-foreground rounded-xl border p-4 text-sm leading-6">
+                <p className="text-foreground font-medium">تشغيل مزامنة مجدولة</p>
                 <p>
                   {mode === "MANUAL_BRIDGE"
                     ? "الجدولة هنا تجهز ملف التكامل تلقائياً وتترك العملية بوضع جزئي حتى يتم الإرسال اليدوي وتوثيقه."
@@ -687,9 +684,7 @@ function IntegrationConfigDialog({
                     onCheckedChange={(checked) => setScheduleEnabled(checked === true)}
                     className="mt-0.5"
                   />
-                  <span className="text-sm leading-6">
-                    تفعيل مزامنة مجدولة لهذا التكامل
-                  </span>
+                  <span className="text-sm leading-6">تفعيل مزامنة مجدولة لهذا التكامل</span>
                 </label>
 
                 <div className="space-y-1.5">
@@ -711,19 +706,22 @@ function IntegrationConfigDialog({
                 </div>
 
                 {currentSchedule && (
-                  <div className="rounded-xl border bg-background px-4 py-3 text-xs text-muted-foreground space-y-1.5">
+                  <div className="bg-background text-muted-foreground space-y-1.5 rounded-xl border px-4 py-3 text-xs">
                     <p>
-                      الحالة الحالية: {currentSchedule.enabled ? "مفعلة" : "متوقفة"}
-                      {" "}({getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)})
+                      الحالة الحالية: {currentSchedule.enabled ? "مفعلة" : "متوقفة"} (
+                      {getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)})
                     </p>
                     {currentSchedule.lastOutcome && (
                       <p>
-                        آخر نتيجة مجدولة: {SCHEDULE_OUTCOME_LABELS[currentSchedule.lastOutcome] ?? currentSchedule.lastOutcome}
+                        آخر نتيجة مجدولة:{" "}
+                        {SCHEDULE_OUTCOME_LABELS[currentSchedule.lastOutcome] ??
+                          currentSchedule.lastOutcome}
                       </p>
                     )}
                     {currentSchedule.lastTriggeredAt && (
                       <p>
-                        آخر تشغيل مجدول: {new Date(currentSchedule.lastTriggeredAt).toLocaleString("ar-SA")}
+                        آخر تشغيل مجدول:{" "}
+                        {new Date(currentSchedule.lastTriggeredAt).toLocaleString("ar-SA")}
                       </p>
                     )}
                     {currentSchedule.lastSummary && <p>{currentSchedule.lastSummary}</p>}
@@ -734,12 +732,12 @@ function IntegrationConfigDialog({
                 )}
 
                 {scheduleError && (
-                  <p className="text-xs text-red-600 dark:text-red-400 rounded-lg bg-red-50 dark:bg-red-950/30 px-3 py-2">
+                  <p className="rounded-lg bg-red-50 px-3 py-2 text-xs text-red-600 dark:bg-red-950/30 dark:text-red-400">
                     {scheduleError}
                   </p>
                 )}
                 {scheduleSavedOk && (
-                  <p className="text-xs text-emerald-600 dark:text-emerald-400 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 px-3 py-2">
+                  <p className="rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400">
                     تم حفظ إعدادات الجدولة ✓
                   </p>
                 )}
@@ -858,15 +856,17 @@ function ManualBridgeSyncDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="rounded-xl border bg-muted/20 p-4 text-sm leading-6 text-muted-foreground">
-            <p className="font-medium text-foreground">{workflow.descriptionAr}</p>
+          <div className="bg-muted/20 text-muted-foreground rounded-xl border p-4 text-sm leading-6">
+            <p className="text-foreground font-medium">{workflow.descriptionAr}</p>
           </div>
 
           <div className="space-y-3 rounded-xl border p-4">
             <p className="text-sm font-medium">الخطوات المطلوبة</p>
             <div className="space-y-2">
               {workflow.steps.map((step) => (
-                <label key={step.id} className="flex cursor-pointer items-start gap-2 rounded-lg px-1 py-1">
+                <label
+                  key={step.id}
+                  className="flex cursor-pointer items-start gap-2 rounded-lg px-1 py-1">
                   <Checkbox
                     checked={completedSteps[step.id] ?? false}
                     onCheckedChange={(checked) =>
@@ -894,7 +894,7 @@ function ManualBridgeSyncDialog({
                 dir="ltr"
               />
               {workflow.referenceHintAr && (
-                <p className="text-xs text-muted-foreground">{workflow.referenceHintAr}</p>
+                <p className="text-muted-foreground text-xs">{workflow.referenceHintAr}</p>
               )}
             </div>
             <div className="space-y-1.5">
@@ -908,8 +908,12 @@ function ManualBridgeSyncDialog({
             </div>
           </div>
 
-          <label className="flex cursor-pointer items-start gap-2 rounded-xl border bg-muted/20 px-4 py-3">
-            <Checkbox checked={confirmed} onCheckedChange={(checked) => setConfirmed(checked === true)} className="mt-0.5" />
+          <label className="bg-muted/20 flex cursor-pointer items-start gap-2 rounded-xl border px-4 py-3">
+            <Checkbox
+              checked={confirmed}
+              onCheckedChange={(checked) => setConfirmed(checked === true)}
+              className="mt-0.5"
+            />
             <span className="text-sm leading-6">{workflow.confirmLabelAr}</span>
           </label>
 
@@ -920,7 +924,11 @@ function ManualBridgeSyncDialog({
           )}
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={syncing}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={syncing}>
               إلغاء
             </Button>
             <Button type="submit" disabled={syncing} className="gap-1.5">
@@ -939,9 +947,10 @@ function ManualBridgeSyncDialog({
 function IntegrationCard({ entry }: { entry: CatalogEntry }) {
   const [connecting, setConnecting] = useState(false);
   const [testing, setTesting] = useState(false);
-  const [testResult, setTestResult] = useState<
-    Pick<IntegrationConnectionTestResponse, "ok" | "summary"> | null
-  >(null);
+  const [testResult, setTestResult] = useState<Pick<
+    IntegrationConnectionTestResponse,
+    "ok" | "summary"
+  > | null>(null);
   const [configOpen, setConfigOpen] = useState(false);
   const [manualSyncOpen, setManualSyncOpen] = useState(false);
   const currentSchedule = getIntegrationSyncSchedule(entry.connection?.config);
@@ -1055,7 +1064,7 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
             )}
           </div>
           <div>
-            <p className="font-semibold text-sm">{entry.nameAr}</p>
+            <p className="text-sm font-semibold">{entry.nameAr}</p>
             <p className="text-muted-foreground text-xs">{entry.nameEn}</p>
           </div>
         </div>
@@ -1063,28 +1072,31 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
       </div>
 
       {/* Description */}
-      <p className="text-muted-foreground text-xs leading-6 flex-1">{entry.descriptionAr}</p>
+      <p className="text-muted-foreground flex-1 text-xs leading-6">{entry.descriptionAr}</p>
 
       {isManualBridge && (
-        <div className="rounded-lg border bg-muted/20 px-3 py-2 text-xs leading-6 text-muted-foreground">
-          هذا التكامل يعمل عبر ربط يدوي موثق. عند كل مزامنة ستسجل الخطوات المنفذة والمرجع والملاحظات داخل السجل.
+        <div className="bg-muted/20 text-muted-foreground rounded-lg border px-3 py-2 text-xs leading-6">
+          هذا التكامل يعمل عبر ربط يدوي موثق. عند كل مزامنة ستسجل الخطوات المنفذة والمرجع والملاحظات
+          داخل السجل.
         </div>
       )}
 
       {entry.supportsScheduledSync && currentSchedule?.enabled && (
         <div className="rounded-lg border border-sky-200 bg-sky-50 px-3 py-2 text-xs leading-6 text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-300">
-          مزامنة مجدولة {getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)} مفعلة لهذا التكامل.
+          مزامنة مجدولة {getIntegrationSyncScheduleLabelAr(currentSchedule.frequency)} مفعلة لهذا
+          التكامل.
         </div>
       )}
 
       {/* Test result feedback */}
       {testResult && (
-        <p className={cn(
-          "text-xs rounded-lg px-3 py-2",
-          testResult.ok
-            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
-            : "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
-        )}>
+        <p
+          className={cn(
+            "rounded-lg px-3 py-2 text-xs",
+            testResult.ok
+              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400"
+              : "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-400"
+          )}>
           {testResult.summary}
         </p>
       )}
@@ -1106,7 +1118,7 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
               size="sm"
               variant="ghost"
               onClick={() => setConfigOpen(true)}
-              className="text-xs h-8 gap-1.5 text-muted-foreground hover:text-foreground px-2">
+              className="text-muted-foreground hover:text-foreground h-8 gap-1.5 px-2 text-xs">
               <Settings2 className="h-3.5 w-3.5" />
             </Button>
           )}
@@ -1117,7 +1129,7 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
               variant="ghost"
               onClick={handleTestConnection}
               disabled={testing || connecting}
-              className="text-xs h-8 gap-1.5 text-muted-foreground hover:text-foreground">
+              className="text-muted-foreground hover:text-foreground h-8 gap-1.5 text-xs">
               <FlaskConical className="h-3 w-3" />
               {testing ? "جارٍ الاختبار…" : "اختبر"}
             </Button>
@@ -1129,36 +1141,36 @@ function IntegrationCard({ entry }: { entry: CatalogEntry }) {
               variant="ghost"
               onClick={handleSync}
               disabled={connecting || testing}
-              className="text-xs h-8 gap-1.5 text-muted-foreground hover:text-foreground">
+              className="text-muted-foreground hover:text-foreground h-8 gap-1.5 text-xs">
               <RefreshCw className="h-3 w-3" />
               {isManualBridge ? "تسجيل يدوي" : "مزامنة"}
             </Button>
           )}
 
-          {isLive && !isComingSoon && (
-            isConnected || isPending ? (
+          {isLive &&
+            !isComingSoon &&
+            (isConnected || isPending ? (
               <Button
                 size="sm"
                 variant="outline"
                 onClick={handleDisconnect}
                 disabled={connecting || testing}
-                className="text-xs h-8">
+                className="h-8 text-xs">
                 قطع الاتصال
               </Button>
             ) : (
-              <Button size="sm" onClick={handleConnect} disabled={connecting} className="text-xs h-8 gap-1.5">
+              <Button
+                size="sm"
+                onClick={handleConnect}
+                disabled={connecting}
+                className="h-8 gap-1.5 text-xs">
                 <Wifi className="h-3 w-3" />
                 ربط
               </Button>
-            )
-          )}
+            ))}
 
           {entry.availability === "enterprise-custom" && (
-            <Button
-              size="sm"
-              variant="outline"
-              asChild
-              className="text-xs h-8 gap-1.5">
+            <Button size="sm" variant="outline" asChild className="h-8 gap-1.5 text-xs">
               <a href="/request-demo" target="_blank" rel="noopener noreferrer">
                 <ExternalLink className="h-3 w-3" />
                 تواصل معنا

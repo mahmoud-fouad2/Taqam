@@ -11,9 +11,7 @@ import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import prisma from "@/lib/db";
 import { INTEGRATION_PROVIDERS, getIntegrationProvider } from "@/lib/integrations/catalog";
 import { hasFeature, requiredPlanAr } from "@/lib/feature-gate";
-import {
-  supportsIntegrationProviderSyncAdapter
-} from "@/lib/integrations/provider-adapters";
+import { supportsIntegrationProviderSyncAdapter } from "@/lib/integrations/provider-adapters";
 import {
   type IntegrationConnectionConfig,
   validateIntegrationConnectionConfig
@@ -64,9 +62,7 @@ export async function GET() {
 
 const connectSchema = z.object({
   providerKey: z.string().min(1).max(80),
-  mode: z
-    .enum(["NATIVE_API", "EMBEDDED", "MANUAL_BRIDGE", "ENTERPRISE_CUSTOM"])
-    .optional(),
+  mode: z.enum(["NATIVE_API", "EMBEDDED", "MANUAL_BRIDGE", "ENTERPRISE_CUSTOM"]).optional(),
   config: z.record(z.unknown()).optional()
 });
 

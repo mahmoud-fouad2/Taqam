@@ -10,7 +10,7 @@ on:
 jobs:
   validate:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     env:
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/taqam
       NEXTAUTH_SECRET: ci-local-secret
@@ -39,6 +39,9 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
 
       - name: Validate workspace
         run: pnpm validate:ci

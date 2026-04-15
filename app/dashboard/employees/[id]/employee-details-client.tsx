@@ -366,7 +366,7 @@ export default function EmployeeDetailsClient({ employee, initialLocale, canMana
                     type="button"
                     size="icon"
                     variant="secondary"
-                    className="absolute -bottom-2 -end-2 h-8 w-8 rounded-full"
+                    className="absolute -end-2 -bottom-2 h-8 w-8 rounded-full"
                     onClick={() => avatarInputRef.current?.click()}
                     disabled={isUploadingAvatar}
                     aria-label={locale === "ar" ? "رفع صورة الموظف" : "Upload employee photo"}>

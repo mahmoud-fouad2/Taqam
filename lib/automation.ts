@@ -10,10 +10,7 @@ import {
   AUTOMATION_TRIGGER_TYPES
 } from "@/lib/automation-contracts";
 
-export {
-  AUTOMATION_TRIGGER_LABELS,
-  AUTOMATION_TRIGGER_TYPES
-} from "@/lib/automation-contracts";
+export { AUTOMATION_TRIGGER_LABELS, AUTOMATION_TRIGGER_TYPES } from "@/lib/automation-contracts";
 export type {
   AutomationDashboardData,
   AutomationRunSummary,
@@ -98,8 +95,7 @@ const DEFAULT_WORKFLOWS: DefaultWorkflowSeed[] = [
         notificationType: "leave-rejected",
         recipientField: "employeeUserId",
         title: "تم رفض طلب الإجازة",
-        message:
-          "تم رفض طلب إجازة {{leaveType}} الخاص بك{{rejectionSuffix}}",
+        message: "تم رفض طلب إجازة {{leaveType}} الخاص بك{{rejectionSuffix}}",
         link: "/dashboard/my-requests?id={{requestId}}"
       }
     ]
@@ -138,7 +134,10 @@ function getByPath(payload: AutomationPayload, path: string): unknown {
   }, payload);
 }
 
-function interpolateTemplate(template: string | undefined, payload: AutomationPayload): string | undefined {
+function interpolateTemplate(
+  template: string | undefined,
+  payload: AutomationPayload
+): string | undefined {
   if (!template) return template;
   return template.replace(/{{\s*([^}]+)\s*}}/g, (_match, rawKey: string) => {
     const value = getByPath(payload, rawKey.trim());
@@ -174,27 +173,25 @@ function parseConditions(raw: unknown): WorkflowCondition[] {
 function parseActions(raw: unknown): WorkflowActionDefinition[] {
   if (!Array.isArray(raw)) return [];
 
-  return raw
-    .filter(isRecord)
-    .flatMap((entry) => {
-      if (entry.type !== "notification") return [];
-      if (typeof entry.recipientField !== "string") return [];
-      if (typeof entry.title !== "string" || typeof entry.message !== "string") return [];
+  return raw.filter(isRecord).flatMap((entry) => {
+    if (entry.type !== "notification") return [];
+    if (typeof entry.recipientField !== "string") return [];
+    if (typeof entry.title !== "string" || typeof entry.message !== "string") return [];
 
-      return [
-        {
-          type: "notification" as const,
-          notificationType:
-            typeof entry.notificationType === "string"
-              ? (entry.notificationType as NotificationType)
-              : "general",
-          recipientField: entry.recipientField,
-          title: entry.title,
-          message: entry.message,
-          link: typeof entry.link === "string" ? entry.link : undefined
-        }
-      ];
-    });
+    return [
+      {
+        type: "notification" as const,
+        notificationType:
+          typeof entry.notificationType === "string"
+            ? (entry.notificationType as NotificationType)
+            : "general",
+        recipientField: entry.recipientField,
+        title: entry.title,
+        message: entry.message,
+        link: typeof entry.link === "string" ? entry.link : undefined
+      }
+    ];
+  });
 }
 
 function evaluateCondition(payload: AutomationPayload, condition: WorkflowCondition): boolean {
@@ -226,7 +223,9 @@ function resolveRecipientIds(payload: AutomationPayload, recipientField: string)
   }
 
   if (Array.isArray(value)) {
-    return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+    return value.filter(
+      (item): item is string => typeof item === "string" && item.trim().length > 0
+    );
   }
 
   if (isRecord(value) && typeof value.userId === "string" && value.userId.trim()) {
@@ -236,11 +235,14 @@ function resolveRecipientIds(payload: AutomationPayload, recipientField: string)
   return [];
 }
 
-async function finalizeRun(runId: string, data: {
-  status: string;
-  summary?: string;
-  failureReason?: string | null;
-}) {
+async function finalizeRun(
+  runId: string,
+  data: {
+    status: string;
+    summary?: string;
+    failureReason?: string | null;
+  }
+) {
   return prisma.workflowRun.update({
     where: { id: runId },
     data: {
@@ -485,9 +487,7 @@ export async function retryWorkflowRun(tenantId: string, workflowId: string, run
     throw new Error("Workflow is disabled");
   }
 
-  const payload = isRecord(originalRun.triggerPayload)
-    ? originalRun.triggerPayload
-    : {};
+  const payload = isRecord(originalRun.triggerPayload) ? originalRun.triggerPayload : {};
 
   return executeWorkflowDefinition(originalRun.workflow, payload, originalRun.retryCount + 1);
 }

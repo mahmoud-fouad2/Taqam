@@ -93,16 +93,18 @@ export function pickFallbackApprover(
     return null;
   }
 
-  return [...filteredApprovers].sort((left, right) => {
-    const leftPriority = approverRolePriority[left.role ?? ""] ?? Number.MAX_SAFE_INTEGER;
-    const rightPriority = approverRolePriority[right.role ?? ""] ?? Number.MAX_SAFE_INTEGER;
+  return (
+    [...filteredApprovers].sort((left, right) => {
+      const leftPriority = approverRolePriority[left.role ?? ""] ?? Number.MAX_SAFE_INTEGER;
+      const rightPriority = approverRolePriority[right.role ?? ""] ?? Number.MAX_SAFE_INTEGER;
 
-    if (leftPriority !== rightPriority) {
-      return leftPriority - rightPriority;
-    }
+      if (leftPriority !== rightPriority) {
+        return leftPriority - rightPriority;
+      }
 
-    return userDisplayName(left).localeCompare(userDisplayName(right), "ar");
-  })[0] ?? null;
+      return userDisplayName(left).localeCompare(userDisplayName(right), "ar");
+    })[0] ?? null
+  );
 }
 
 export function buildManagedRequestApprovers(args: {
@@ -115,7 +117,7 @@ export function buildManagedRequestApprovers(args: {
 }): RequestApprover[] {
   const status = approverStatusFromRequestStatus(args.requestStatus);
   const actionAt = toIso(args.actionAt);
-  const comments = status === "rejected" ? args.rejectionReason ?? undefined : undefined;
+  const comments = status === "rejected" ? (args.rejectionReason ?? undefined) : undefined;
 
   if (args.resolvedBy) {
     return [

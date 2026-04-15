@@ -57,19 +57,25 @@ export default async function SuperAdminJobTitlesPage() {
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "إجمالي المسميات القياسية" : "Curated titles"}</CardDescription>
+            <CardDescription>
+              {locale === "ar" ? "إجمالي المسميات القياسية" : "Curated titles"}
+            </CardDescription>
             <CardTitle className="text-3xl">{catalog.length}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "المسميات الإدارية" : "Management titles"}</CardDescription>
+            <CardDescription>
+              {locale === "ar" ? "المسميات الإدارية" : "Management titles"}
+            </CardDescription>
             <CardTitle className="text-3xl">{managementTitles}</CardTitle>
           </CardHeader>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardDescription>{locale === "ar" ? "آلية التوزيع" : "Provisioning mode"}</CardDescription>
+            <CardDescription>
+              {locale === "ar" ? "آلية التوزيع" : "Provisioning mode"}
+            </CardDescription>
             <CardTitle className="text-lg">
               {locale === "ar" ? "تزامن تلقائي للشركات" : "Automatic tenant sync"}
             </CardTitle>
@@ -91,23 +97,25 @@ export default async function SuperAdminJobTitlesPage() {
             {catalog.map((item) => (
               <div
                 key={item.code}
-                className="rounded-2xl border border-border/70 bg-card/60 p-4 shadow-sm">
+                className="border-border/70 bg-card/60 rounded-2xl border p-4 shadow-sm">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{item.code}</Badge>
-                  <Badge variant="outline">
-                    {getLocalizedLevelLabel(item.level, locale)}
-                  </Badge>
+                  <Badge variant="outline">{getLocalizedLevelLabel(item.level, locale)}</Badge>
                 </div>
                 <div className="mt-4 space-y-1">
                   <p className="font-semibold">{getLocalizedTitle(item, locale)}</p>
-                  <p className="text-muted-foreground text-sm">{getLocalizedSubtitle(item, locale)}</p>
+                  <p className="text-muted-foreground text-sm">
+                    {getLocalizedSubtitle(item, locale)}
+                  </p>
                 </div>
                 <div className="text-muted-foreground mt-4 flex flex-wrap gap-4 text-xs">
                   <span>
-                    {locale === "ar" ? "حد أدنى" : "Min"}: {item.minSalary?.toLocaleString(locale === "ar" ? "ar-SA" : "en-US") ?? "-"}
+                    {locale === "ar" ? "حد أدنى" : "Min"}:{" "}
+                    {item.minSalary?.toLocaleString(locale === "ar" ? "ar-SA" : "en-US") ?? "-"}
                   </span>
                   <span>
-                    {locale === "ar" ? "حد أقصى" : "Max"}: {item.maxSalary?.toLocaleString(locale === "ar" ? "ar-SA" : "en-US") ?? "-"}
+                    {locale === "ar" ? "حد أقصى" : "Max"}:{" "}
+                    {item.maxSalary?.toLocaleString(locale === "ar" ? "ar-SA" : "en-US") ?? "-"}
                   </span>
                 </div>
               </div>

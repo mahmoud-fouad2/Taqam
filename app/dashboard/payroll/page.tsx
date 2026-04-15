@@ -12,7 +12,7 @@ export default async function PayrollPage() {
     <div className="mx-auto max-w-7xl space-y-6 sm:space-y-8">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-12 w-12 shrink-0 transition-transform duration-300 group-hover:scale-105 items-center justify-center rounded-2xl bg-purple-500/10">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-purple-500/10 transition-transform duration-300 group-hover:scale-105">
             <DollarSign className="h-6 w-6 text-purple-600 dark:text-purple-400" />
           </div>
           <div>
@@ -25,5 +25,3 @@ export default async function PayrollPage() {
     </div>
   );
 }
-
-

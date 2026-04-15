@@ -11,14 +11,14 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
+  SelectValue
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useEmployees } from "@/hooks/use-employees";
@@ -47,7 +47,7 @@ export function LetterGenerator() {
       const res = await fetch("/api/letters", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ employeeId, type: letterType }),
+        body: JSON.stringify({ employeeId, type: letterType })
       });
 
       if (!res.ok) {
@@ -80,8 +80,8 @@ export function LetterGenerator() {
 
   const letterTypes: { value: LetterType; label: string; desc: string }[] = [
     { value: "introductory", label: t.letters.introductory, desc: t.letters.introductoryDesc },
-    { value: "salary",       label: t.letters.salary,       desc: t.letters.salaryDesc       },
-    { value: "experience",   label: t.letters.experience,   desc: t.letters.experienceDesc   },
+    { value: "salary", label: t.letters.salary, desc: t.letters.salaryDesc },
+    { value: "experience", label: t.letters.experience, desc: t.letters.experienceDesc }
   ];
 
   return (
@@ -110,15 +110,13 @@ export function LetterGenerator() {
                   setEmployeeId("");
                   setError(null);
                 }
-              }}
-            >
+              }}>
               <DialogTrigger asChild>
                 <button
                   type="button"
-                  className="group flex flex-col items-start gap-1.5 rounded-xl border bg-muted/40 p-4 text-start transition-colors hover:bg-muted/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                >
+                  className="group bg-muted/40 hover:bg-muted/70 focus-visible:ring-ring flex flex-col items-start gap-1.5 rounded-xl border p-4 text-start transition-colors focus-visible:ring-2 focus-visible:outline-none">
                   <span className="font-medium">{lt.label}</span>
-                  <span className="text-xs text-muted-foreground">{lt.desc}</span>
+                  <span className="text-muted-foreground text-xs">{lt.desc}</span>
                 </button>
               </DialogTrigger>
 
@@ -152,17 +150,14 @@ export function LetterGenerator() {
                     </Select>
                   </div>
 
-                  {error && (
-                    <p className="text-sm text-destructive">{error}</p>
-                  )}
+                  {error && <p className="text-destructive text-sm">{error}</p>}
                 </div>
 
                 <DialogFooter>
                   <Button
                     onClick={handleGenerate}
                     disabled={!employeeId || isGenerating}
-                    className="gap-2"
-                  >
+                    className="gap-2">
                     {isGenerating ? (
                       <IconLoader2 className="h-4 w-4 animate-spin" />
                     ) : (

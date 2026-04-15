@@ -67,33 +67,30 @@ export default async function AttendancePage() {
         <div className="flex flex-wrap gap-3">
           <Link
             href={`${prefix}/dashboard/shifts`}
-            className="inline-flex h-12 items-center gap-2 rounded-xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted/50"
-          >
+            className="border-border/60 bg-card text-foreground hover:bg-muted/50 inline-flex h-12 items-center gap-2 rounded-xl border px-4 text-sm font-medium shadow-sm transition-colors">
             <CalendarClock className="h-4 w-4" />
             {locale === "ar" ? "الورديات" : "Shifts"}
           </Link>
           <Link
             href={`${prefix}/dashboard/settings/attendance`}
-            className="inline-flex h-12 items-center gap-2 rounded-xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted/50"
-          >
+            className="border-border/60 bg-card text-foreground hover:bg-muted/50 inline-flex h-12 items-center gap-2 rounded-xl border px-4 text-sm font-medium shadow-sm transition-colors">
             <Settings2 className="h-4 w-4" />
             {locale === "ar" ? "إعدادات الحضور" : "Attendance settings"}
           </Link>
           <Link
             href={`${prefix}/dashboard/calendar`}
-            className="inline-flex h-12 items-center gap-2 rounded-xl border border-border/60 bg-card px-4 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted/50"
-          >
+            className="border-border/60 bg-card text-foreground hover:bg-muted/50 inline-flex h-12 items-center gap-2 rounded-xl border px-4 text-sm font-medium shadow-sm transition-colors">
             <CalendarDays className="h-4 w-4" />
             {locale === "ar" ? "عرض التقويم" : "Calendar view"}
           </Link>
         </div>
       </div>
 
-      <Card className="rounded-3xl border-border/60 bg-card/80 shadow-sm">
+      <Card className="border-border/60 bg-card/80 rounded-3xl shadow-sm">
         <CardContent className="grid gap-4 p-5 lg:grid-cols-[minmax(0,1.2fr)_repeat(3,minmax(0,1fr))]">
-          <div className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+          <div className="border-primary/20 bg-primary/5 rounded-2xl border p-4">
             <div className="flex items-start gap-3">
-              <div className="rounded-2xl bg-primary/10 p-3">
+              <div className="bg-primary/10 rounded-2xl p-3">
                 <Clock className="text-primary h-5 w-5" />
               </div>
               <div>
@@ -119,12 +116,11 @@ export default async function AttendancePage() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="group rounded-2xl border border-border/60 bg-muted/20 p-4 transition-colors hover:border-primary/30 hover:bg-primary/5"
-              >
+                className="group border-border/60 bg-muted/20 hover:border-primary/30 hover:bg-primary/5 rounded-2xl border p-4 transition-colors">
                 <div className="bg-background mb-3 inline-flex rounded-2xl p-3 shadow-sm">
                   <Icon className="text-primary h-5 w-5" />
                 </div>
-                <h3 className="text-sm font-semibold group-hover:text-primary">{item.title}</h3>
+                <h3 className="group-hover:text-primary text-sm font-semibold">{item.title}</h3>
                 <p className="text-muted-foreground mt-2 text-sm leading-6">{item.description}</p>
               </Link>
             );

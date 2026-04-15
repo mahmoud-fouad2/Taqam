@@ -106,13 +106,17 @@ export function CreateTenantForm() {
     }
 
     if (!file.type.startsWith("image/")) {
-      toast.error(locale === "ar" ? "يجب اختيار ملف صورة صالح" : "Please choose a valid image file");
+      toast.error(
+        locale === "ar" ? "يجب اختيار ملف صورة صالح" : "Please choose a valid image file"
+      );
       e.target.value = "";
       return;
     }
 
     if (file.size > 3 * 1024 * 1024) {
-      toast.error(locale === "ar" ? "حجم الشعار يجب ألا يتجاوز 3MB" : "Logo size must be 3MB or less");
+      toast.error(
+        locale === "ar" ? "حجم الشعار يجب ألا يتجاوز 3MB" : "Logo size must be 3MB or less"
+      );
       e.target.value = "";
       return;
     }
@@ -137,8 +141,7 @@ export function CreateTenantForm() {
         setLogoPreview("");
         setLogoUrl("");
         toast.error(
-          json?.error ||
-            (locale === "ar" ? "فشل رفع شعار الشركة" : "Failed to upload company logo")
+          json?.error || (locale === "ar" ? "فشل رفع شعار الشركة" : "Failed to upload company logo")
         );
         return;
       }
@@ -321,9 +324,7 @@ export function CreateTenantForm() {
                       : "Upload a compact logo for public portals"}
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  {locale === "ar"
-                    ? "PNG أو JPG أو WebP حتى 3MB"
-                    : "PNG, JPG, or WebP up to 3MB"}
+                  {locale === "ar" ? "PNG أو JPG أو WebP حتى 3MB" : "PNG, JPG, or WebP up to 3MB"}
                 </p>
               </div>
             </div>
@@ -347,7 +348,11 @@ export function CreateTenantForm() {
               </Button>
 
               {logoPreview ? (
-                <Button type="button" variant="ghost" onClick={clearLogo} disabled={isUploadingLogo}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={clearLogo}
+                  disabled={isUploadingLogo}>
                   <X className="me-2 h-4 w-4" />
                   {locale === "ar" ? "إزالة" : "Remove"}
                 </Button>

@@ -11,10 +11,7 @@ import { WEBHOOK_EVENTS } from "@/lib/webhooks";
 
 // ── GET ───────────────────────────────────────────────────────────────────────
 
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireTenantSession(req);
   if (!auth.ok) return auth.response;
 
@@ -67,10 +64,7 @@ const patchSchema = z.object({
   isActive: z.boolean().optional()
 });
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireTenantSession(req);
   if (!auth.ok) return auth.response;
 
@@ -121,10 +115,7 @@ export async function PATCH(
 
 // ── DELETE ────────────────────────────────────────────────────────────────────
 
-export async function DELETE(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const auth = await requireTenantSession(req);
   if (!auth.ok) return auth.response;
 

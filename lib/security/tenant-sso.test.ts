@@ -19,13 +19,16 @@ describe("tenant SSO settings security helpers", () => {
   });
 
   it("encrypts new client secrets and keeps them off the client payload", () => {
-    const stored = mergeTenantSsoSettings({}, {
-      entraId: {
-        tenantId: "tenant-123",
-        clientId: "client-123",
-        clientSecret: "super-secret"
+    const stored = mergeTenantSsoSettings(
+      {},
+      {
+        entraId: {
+          tenantId: "tenant-123",
+          clientId: "client-123",
+          clientSecret: "super-secret"
+        }
       }
-    });
+    );
 
     expect(stored.entraId?.clientSecret).toBeDefined();
     expect(stored.entraId?.clientSecret).not.toBe("super-secret");
@@ -44,13 +47,16 @@ describe("tenant SSO settings security helpers", () => {
   });
 
   it("preserves an existing stored secret when a blank replacement is submitted", () => {
-    const current = mergeTenantSsoSettings({}, {
-      google: {
-        clientId: "google-client",
-        clientSecret: "existing-secret",
-        hostedDomain: "company.com"
+    const current = mergeTenantSsoSettings(
+      {},
+      {
+        google: {
+          clientId: "google-client",
+          clientSecret: "existing-secret",
+          hostedDomain: "company.com"
+        }
       }
-    });
+    );
 
     const merged = mergeTenantSsoSettings(current, {
       google: {

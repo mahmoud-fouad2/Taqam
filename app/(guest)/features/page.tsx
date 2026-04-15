@@ -31,7 +31,10 @@ import { MarketingPageHero } from "@/components/marketing/page-hero";
 import { JsonLd } from "@/components/marketing/json-ld";
 import { FadeIn, StaggerContainer, StaggerItem } from "@/components/ui/fade-in";
 import type { MarketingFeatureSuiteIconKey } from "@/lib/marketing/commercial-registry";
-import { getCommercialClaimsBySurface, getMarketingFeatureSuites } from "@/lib/marketing/commercial-registry";
+import {
+  getCommercialClaimsBySurface,
+  getMarketingFeatureSuites
+} from "@/lib/marketing/commercial-registry";
 import { cn } from "@/lib/utils";
 import { getSiteUrl } from "@/lib/marketing/site";
 import { itemListSchema, pageSchema } from "@/lib/marketing/schema";

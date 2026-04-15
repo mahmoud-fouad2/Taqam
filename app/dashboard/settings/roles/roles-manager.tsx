@@ -1,16 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import {
-  Plus,
-  Trash2,
-  Shield,
-  ShieldCheck,
-  Users,
-  Pencil,
-  Loader2,
-  RefreshCw
-} from "lucide-react";
+import { Plus, Trash2, Shield, ShieldCheck, Users, Pencil, Loader2, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -63,7 +54,12 @@ async function saveRole(id: string, permissions: string[]) {
   return json.data;
 }
 
-async function createRole(data: { name: string; nameAr?: string; description?: string; permissions: string[] }) {
+async function createRole(data: {
+  name: string;
+  nameAr?: string;
+  description?: string;
+  permissions: string[];
+}) {
   const res = await fetch("/api/roles", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -108,7 +104,9 @@ export function RolesManager() {
     }
   }, []);
 
-  useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    void load();
+  }, [load]);
 
   const selectRole = (role: CustomRole) => {
     setSelectedRole(role);
@@ -196,9 +194,7 @@ export function RolesManager() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">إدارة الأدوار والصلاحيات</h2>
-          <p className="text-muted-foreground text-sm">
-            أنشئ أدواراً مخصصة وحدد صلاحياتها بدقة
-          </p>
+          <p className="text-muted-foreground text-sm">أنشئ أدواراً مخصصة وحدد صلاحياتها بدقة</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load} disabled={isLoading}>
@@ -228,19 +224,17 @@ export function RolesManager() {
                   <li
                     key={role.id}
                     onClick={() => selectRole(role)}
-                    className={`flex cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-muted/50 ${
+                    className={`hover:bg-muted/50 flex cursor-pointer items-center justify-between px-4 py-3 transition-colors ${
                       selectedRole?.id === role.id ? "bg-muted" : ""
                     }`}>
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex min-w-0 items-center gap-2">
                       {role.isBuiltin ? (
                         <ShieldCheck className="text-primary h-4 w-4 shrink-0" />
                       ) : (
                         <Shield className="text-muted-foreground h-4 w-4 shrink-0" />
                       )}
                       <div className="min-w-0">
-                        <p className="truncate font-medium text-sm">
-                          {role.nameAr || role.name}
-                        </p>
+                        <p className="truncate text-sm font-medium">{role.nameAr || role.name}</p>
                         <p className="text-muted-foreground flex items-center gap-1 text-xs">
                           <Users className="h-3 w-3" />
                           {role._count.users}
@@ -248,7 +242,7 @@ export function RolesManager() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex shrink-0 gap-1">
                       {role.isBuiltin && (
                         <Badge variant="secondary" className="text-xs">
                           افتراضي
@@ -280,7 +274,7 @@ export function RolesManager() {
             <div className="flex items-center justify-between">
               <div>
                 <CardTitle className="text-base">
-                  {selectedRole ? (selectedRole.nameAr || selectedRole.name) : "اختر دوراً"}
+                  {selectedRole ? selectedRole.nameAr || selectedRole.name : "اختر دوراً"}
                 </CardTitle>
                 {selectedRole && (
                   <CardDescription>
@@ -322,7 +316,7 @@ export function RolesManager() {
                             data-state={someOn ? "indeterminate" : allOn ? "checked" : "unchecked"}
                             onCheckedChange={() => toggleGroup(group.permissions)}
                           />
-                          <span className="font-semibold text-sm">{group.groupAr}</span>
+                          <span className="text-sm font-semibold">{group.groupAr}</span>
                           <span className="text-muted-foreground text-xs">
                             ({group.permissions.filter((p) => editedPermissions.has(p)).length}/
                             {group.permissions.length})
@@ -330,9 +324,7 @@ export function RolesManager() {
                         </div>
                         <div className="ms-6 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                           {group.permissions.map((perm) => (
-                            <label
-                              key={perm}
-                              className="flex cursor-pointer items-center gap-1.5">
+                            <label key={perm} className="flex cursor-pointer items-center gap-1.5">
                               <Checkbox
                                 checked={editedPermissions.has(perm)}
                                 onCheckedChange={() => togglePermission(perm as Permission)}

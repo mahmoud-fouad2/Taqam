@@ -219,7 +219,10 @@ export async function POST(request: NextRequest) {
         where: { id: body.departmentId, tenantId }
       });
       if (!department) {
-        return NextResponse.json({ success: false, error: "Department not found" }, { status: 400 });
+        return NextResponse.json(
+          { success: false, error: "Department not found" },
+          { status: 400 }
+        );
       }
     }
 

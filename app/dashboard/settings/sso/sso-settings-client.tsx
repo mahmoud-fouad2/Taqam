@@ -8,7 +8,7 @@ import {
   IconCheck,
   IconLoader2,
   IconExternalLink,
-  IconInfoCircle,
+  IconInfoCircle
 } from "@tabler/icons-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger,
+  AccordionTrigger
 } from "@/components/ui/accordion";
 import { useClientLocale } from "@/lib/i18n/use-client-locale";
 import { getText } from "@/lib/i18n/text";
@@ -54,11 +54,7 @@ interface SsoConfig {
 /* ─────────────────────────────────────────────────────────────
    Component
 ───────────────────────────────────────────────────────────── */
-export function SsoSettingsClient({
-  initialConfig,
-}: {
-  initialConfig: SsoConfig;
-}) {
+export function SsoSettingsClient({ initialConfig }: { initialConfig: SsoConfig }) {
   const locale = useClientLocale();
   const t = getText(locale);
 
@@ -67,14 +63,10 @@ export function SsoSettingsClient({
   const [saved, setSaved] = React.useState<string | null>(null);
   const [error, setError] = React.useState<string | null>(null);
 
-  const update = <K extends keyof SsoConfig>(
-    key: K,
-    field: string,
-    value: string | boolean
-  ) => {
+  const update = <K extends keyof SsoConfig>(key: K, field: string, value: string | boolean) => {
     setConfig((prev) => ({
       ...prev,
-      [key]: { ...(prev[key] as object), [field]: value },
+      [key]: { ...(prev[key] as object), [field]: value }
     }));
   };
 
@@ -85,7 +77,7 @@ export function SsoSettingsClient({
       const res = await fetch("/api/tenant/sso", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sso: config }),
+        body: JSON.stringify({ sso: config })
       });
       const j = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -107,13 +99,23 @@ export function SsoSettingsClient({
     const c = config[provider];
     if (!c) return false;
     if (provider === "entraId") {
-      return Boolean((c as SsoConfig["entraId"])?.tenantId) &&
+      return (
+        Boolean((c as SsoConfig["entraId"])?.tenantId) &&
         Boolean((c as SsoConfig["entraId"])?.clientId) &&
-        Boolean((c as SsoConfig["entraId"])?.hasClientSecret || (c as SsoConfig["entraId"])?.clientSecret?.trim());
+        Boolean(
+          (c as SsoConfig["entraId"])?.hasClientSecret ||
+          (c as SsoConfig["entraId"])?.clientSecret?.trim()
+        )
+      );
     }
     if (provider === "google") {
-      return Boolean((c as SsoConfig["google"])?.clientId) &&
-        Boolean((c as SsoConfig["google"])?.hasClientSecret || (c as SsoConfig["google"])?.clientSecret?.trim());
+      return (
+        Boolean((c as SsoConfig["google"])?.clientId) &&
+        Boolean(
+          (c as SsoConfig["google"])?.hasClientSecret ||
+          (c as SsoConfig["google"])?.clientSecret?.trim()
+        )
+      );
     }
     if (provider === "saml") return !!(c as SsoConfig["saml"])?.metadataUrl;
     return false;
@@ -127,7 +129,7 @@ export function SsoSettingsClient({
         <p className="text-sm text-blue-800 dark:text-blue-300">{t.ssoSettings.infoBanner}</p>
       </div>
 
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-destructive text-sm">{error}</p>}
 
       <Tabs defaultValue="entra">
         <TabsList className="mb-4 w-full">
@@ -160,7 +162,9 @@ export function SsoSettingsClient({
                   </div>
                 </div>
                 {isConfigured("entraId") && (
-                  <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400">
+                  <Badge
+                    variant="outline"
+                    className="border-green-500/50 text-green-600 dark:text-green-400">
                     <IconCheck className="mr-1 h-3 w-3" />
                     {t.ssoSettings.configured}
                   </Badge>
@@ -176,7 +180,7 @@ export function SsoSettingsClient({
                     value={config.entraId?.tenantId ?? ""}
                     onChange={(e) => update("entraId", "tenantId", e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">{t.ssoSettings.tenantIdDesc}</p>
+                  <p className="text-muted-foreground text-xs">{t.ssoSettings.tenantIdDesc}</p>
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t.ssoSettings.clientId}</Label>
@@ -195,7 +199,7 @@ export function SsoSettingsClient({
                     onChange={(e) => update("entraId", "clientSecret", e.target.value)}
                   />
                   {config.entraId?.hasClientSecret && !config.entraId?.clientSecret ? (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {locale === "ar"
                         ? "يوجد Client Secret محفوظ بالفعل. اترك الحقل فارغاً للإبقاء عليه أو أدخل قيمة جديدة للاستبدال."
                         : "A client secret is already stored. Leave this field empty to keep it or enter a new value to replace it."}
@@ -209,8 +213,10 @@ export function SsoSettingsClient({
               />
               <Accordion type="single" collapsible>
                 <AccordionItem value="setup">
-                  <AccordionTrigger className="text-sm">{t.ssoSettings.setupGuide}</AccordionTrigger>
-                  <AccordionContent className="space-y-2 text-sm text-muted-foreground">
+                  <AccordionTrigger className="text-sm">
+                    {t.ssoSettings.setupGuide}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground space-y-2 text-sm">
                     <ol className="list-inside list-decimal space-y-1">
                       <li>{t.ssoSettings.entraStep1}</li>
                       <li>{t.ssoSettings.entraStep2}</li>
@@ -221,8 +227,7 @@ export function SsoSettingsClient({
                       href="https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                    >
+                      className="text-primary inline-flex items-center gap-1 text-xs hover:underline">
                       {t.ssoSettings.entraDocsLink}
                       <IconExternalLink className="h-3 w-3" />
                     </a>
@@ -230,7 +235,10 @@ export function SsoSettingsClient({
                 </AccordionItem>
               </Accordion>
               <div className="flex justify-end">
-                <Button onClick={() => save("entra")} disabled={saving === "entra"} className="gap-2">
+                <Button
+                  onClick={() => save("entra")}
+                  disabled={saving === "entra"}
+                  className="gap-2">
                   {saving === "entra" ? <IconLoader2 className="h-4 w-4 animate-spin" /> : null}
                   {saved === "entra" ? (
                     <>
@@ -257,11 +265,15 @@ export function SsoSettingsClient({
                   </div>
                   <div>
                     <CardTitle className="text-base">Google Workspace</CardTitle>
-                    <CardDescription className="text-xs">{t.ssoSettings.googleDesc}</CardDescription>
+                    <CardDescription className="text-xs">
+                      {t.ssoSettings.googleDesc}
+                    </CardDescription>
                   </div>
                 </div>
                 {isConfigured("google") && (
-                  <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400">
+                  <Badge
+                    variant="outline"
+                    className="border-green-500/50 text-green-600 dark:text-green-400">
                     <IconCheck className="mr-1 h-3 w-3" />
                     {t.ssoSettings.configured}
                   </Badge>
@@ -287,7 +299,7 @@ export function SsoSettingsClient({
                     onChange={(e) => update("google", "clientSecret", e.target.value)}
                   />
                   {config.google?.hasClientSecret && !config.google?.clientSecret ? (
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-muted-foreground text-xs">
                       {locale === "ar"
                         ? "يوجد Client Secret محفوظ بالفعل. اترك الحقل فارغاً للإبقاء عليه أو أدخل قيمة جديدة للاستبدال."
                         : "A client secret is already stored. Leave this field empty to keep it or enter a new value to replace it."}
@@ -301,7 +313,7 @@ export function SsoSettingsClient({
                     value={config.google?.hostedDomain ?? ""}
                     onChange={(e) => update("google", "hostedDomain", e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">{t.ssoSettings.hostedDomainDesc}</p>
+                  <p className="text-muted-foreground text-xs">{t.ssoSettings.hostedDomainDesc}</p>
                 </div>
               </div>
               <CallbackUrlBox
@@ -309,7 +321,10 @@ export function SsoSettingsClient({
                 value={`${typeof window !== "undefined" ? window.location.origin : ""}/api/auth/callback/google`}
               />
               <div className="flex justify-end">
-                <Button onClick={() => save("google")} disabled={saving === "google"} className="gap-2">
+                <Button
+                  onClick={() => save("google")}
+                  disabled={saving === "google"}
+                  className="gap-2">
                   {saving === "google" ? <IconLoader2 className="h-4 w-4 animate-spin" /> : null}
                   {saved === "google" ? (
                     <>
@@ -340,7 +355,9 @@ export function SsoSettingsClient({
                   </div>
                 </div>
                 {isConfigured("saml") && (
-                  <Badge variant="outline" className="border-green-500/50 text-green-600 dark:text-green-400">
+                  <Badge
+                    variant="outline"
+                    className="border-green-500/50 text-green-600 dark:text-green-400">
                     <IconCheck className="mr-1 h-3 w-3" />
                     {t.ssoSettings.configured}
                   </Badge>
@@ -356,7 +373,9 @@ export function SsoSettingsClient({
                     value={config.saml?.metadataUrl ?? ""}
                     onChange={(e) => update("saml", "metadataUrl", e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">{t.ssoSettings.samlMetadataUrlDesc}</p>
+                  <p className="text-muted-foreground text-xs">
+                    {t.ssoSettings.samlMetadataUrlDesc}
+                  </p>
                 </div>
                 <div className="space-y-1.5">
                   <Label>{t.ssoSettings.samlEntityId}</Label>
@@ -409,11 +428,7 @@ function CallbackUrlBox({ label, value }: { label: string; value: string }) {
     <div className="space-y-1.5">
       <Label>{label}</Label>
       <div className="flex items-center gap-2">
-        <Input
-          value={value}
-          readOnly
-          className="font-mono text-xs text-muted-foreground"
-        />
+        <Input value={value} readOnly className="text-muted-foreground font-mono text-xs" />
         <Button variant="outline" size="sm" onClick={copy} className="shrink-0">
           {copied ? <IconCheck className="h-4 w-4 text-green-500" /> : "نسخ"}
         </Button>

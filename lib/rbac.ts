@@ -155,13 +155,7 @@ export const BUILTIN_ROLE_PERMISSIONS: Record<string, Permission[]> = {
     "documents.view",
     "recruitment.view"
   ],
-  EMPLOYEE: [
-    "employees.view",
-    "leaves.view",
-    "attendance.view",
-    "documents.view",
-    "reports.view"
-  ]
+  EMPLOYEE: ["employees.view", "leaves.view", "attendance.view", "documents.view", "reports.view"]
 };
 
 /**
@@ -210,7 +204,6 @@ export function sanitizeCustomRolePermissions(permissions: string[]): Permission
   // unless the caller is TENANT_ADMIN (enforced at API level).
   const escalationGates: Permission[] = ["settings.manage", "roles.manage", "users.manage"];
   return permissions.filter(
-    (p) =>
-      ALL_PERMISSIONS.includes(p as Permission) && !escalationGates.includes(p as Permission)
+    (p) => ALL_PERMISSIONS.includes(p as Permission) && !escalationGates.includes(p as Permission)
   ) as Permission[];
 }

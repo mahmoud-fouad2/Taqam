@@ -55,7 +55,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  const companyName = isAr ? (tenant.nameAr || tenant.name) : tenant.name;
+  const companyName = isAr ? tenant.nameAr || tenant.name : tenant.name;
   const arUrl = buildTenantCanonicalUrl(tenant, "/careers", {
     locale: "ar",
     baseDomain: base.replace(/^https?:\/\//, "")
@@ -177,7 +177,7 @@ export default async function TenantCareersPage({ params, searchParams }: PagePr
               name: isAr ? `وظائف ${companyName}` : `${companyName} open roles`,
               description: pageDescription,
               items: jobs.slice(0, 10).map((job) => ({
-                name: isAr ? (job.titleAr || job.title) : job.title,
+                name: isAr ? job.titleAr || job.title : job.title,
                 url: `${getSiteUrl()}${buildTenantPath(slug, `/careers/${job.id}`, locale)}`,
                 description: job.location || (isAr ? "السعودية" : "Saudi Arabia")
               }))

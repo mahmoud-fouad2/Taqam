@@ -42,7 +42,12 @@ const marketingSeoRoutes: MarketingSeoRoute[] = [
     priority: 0.8,
     sectionAr: "الأسعار",
     sectionEn: "Pricing",
-    keywordsAr: ["أسعار طاقم", "باقات الموارد البشرية", "باقات الرواتب", "تكلفة نظام الموارد البشرية"],
+    keywordsAr: [
+      "أسعار طاقم",
+      "باقات الموارد البشرية",
+      "باقات الرواتب",
+      "تكلفة نظام الموارد البشرية"
+    ],
     keywordsEn: ["Taqam pricing", "HR pricing", "payroll plans", "HR software cost"]
   },
   {
@@ -219,7 +224,8 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
   const seoDefaults = getMarketingSeoDefaults(copy.path);
   const title = locale === "ar" ? copy.titleAr : copy.titleEn;
   const description = locale === "ar" ? copy.descriptionAr : copy.descriptionEn;
-  const routeKeywords = locale === "ar" ? (seoDefaults?.keywordsAr ?? []) : (seoDefaults?.keywordsEn ?? []);
+  const routeKeywords =
+    locale === "ar" ? (seoDefaults?.keywordsAr ?? []) : (seoDefaults?.keywordsEn ?? []);
   const explicitKeywords = locale === "ar" ? (copy.keywordsAr ?? []) : (copy.keywordsEn ?? []);
   const pageKeywords = [...routeKeywords, ...explicitKeywords];
   const section =
@@ -228,7 +234,8 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       : (copy.sectionEn ?? seoDefaults?.sectionEn);
   const noIndex = copy.noIndex === true;
   const siteName = locale === "ar" ? siteContent.siteNameAr : siteContent.siteNameEn;
-  const defaultKeywords = locale === "ar" ? siteContent.defaultKeywordsAr : siteContent.defaultKeywordsEn;
+  const defaultKeywords =
+    locale === "ar" ? siteContent.defaultKeywordsAr : siteContent.defaultKeywordsEn;
 
   const base = getSiteUrl();
   const path = copy.path.startsWith("/") ? copy.path : `/${copy.path}`;
@@ -243,7 +250,9 @@ export async function marketingMetadata(copy: SeoCopy): Promise<Metadata> {
       canonical: url,
       languages
     },
-    keywords: Array.from(new Set([...defaultKeywords, ...pageKeywords, ...marketingCoreKeywords[locale]])),
+    keywords: Array.from(
+      new Set([...defaultKeywords, ...pageKeywords, ...marketingCoreKeywords[locale]])
+    ),
     category: section ?? (locale === "ar" ? "منصة موارد بشرية سعودية" : "Saudi HR platform"),
     classification:
       locale === "ar"

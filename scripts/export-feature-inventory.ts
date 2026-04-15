@@ -79,12 +79,8 @@ function buildMarkdown(rows: InventoryRow[]) {
   lines.push("");
   lines.push("## Features");
   lines.push("");
-  lines.push(
-    "| ID | Family | Status | Tier | Availability | Claims | Owner | Evidence paths |"
-  );
-  lines.push(
-    "| --- | --- | --- | --- | --- | --- | --- | --- |"
-  );
+  lines.push("| ID | Family | Status | Tier | Availability | Claims | Owner | Evidence paths |");
+  lines.push("| --- | --- | --- | --- | --- | --- | --- | --- |");
 
   for (const row of rows) {
     lines.push(
@@ -104,9 +100,7 @@ function buildMarkdown(rows: InventoryRow[]) {
   lines.push(
     "- هذا الملف يُستخدم كـ master sheet مرجعي لمواءمة (المنتج ↔ التسويق) ويُفضّل إعادة توليده بعد أي تعديل على الكاتالوج."
   );
-  lines.push(
-    "- للتوليد: pnpm exec tsx scripts/export-feature-inventory.ts"
-  );
+  lines.push("- للتوليد: pnpm exec tsx scripts/export-feature-inventory.ts");
 
   return lines.join("\n");
 }

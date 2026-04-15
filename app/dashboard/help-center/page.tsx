@@ -37,7 +37,7 @@ export default async function HelpCenterPage() {
               {locale === "ar" ? "الأسعار والباقات" : "Pricing and plans"}
             </Link>
             <Link className="text-primary block hover:underline" href={`${p}/request-demo`}>
-                {locale === "ar" ? "تواصل معنا" : "Talk to us"}
+              {locale === "ar" ? "تواصل معنا" : "Talk to us"}
             </Link>
           </CardContent>
         </Card>
@@ -78,7 +78,9 @@ export default async function HelpCenterPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>{locale === "ar" ? "ابدأ من المسار المناسب" : "Start from the right route"}</CardTitle>
+          <CardTitle>
+            {locale === "ar" ? "ابدأ من المسار المناسب" : "Start from the right route"}
+          </CardTitle>
         </CardHeader>
         <CardContent className="text-sm">
           <div className="grid gap-2 md:grid-cols-2">

@@ -105,14 +105,18 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
             employeeUserId,
             courseTitle,
             enrollmentId: id
-          }).catch((error) => logApiError("Failed to send training enrollment approval notification", error)),
+          }).catch((error) =>
+            logApiError("Failed to send training enrollment approval notification", error)
+          ),
         rejected: () =>
           notifyTrainingEnrollmentRejected({
             tenantId,
             employeeUserId,
             courseTitle,
             enrollmentId: id
-          }).catch((error) => logApiError("Failed to send training enrollment rejection notification", error)),
+          }).catch((error) =>
+            logApiError("Failed to send training enrollment rejection notification", error)
+          ),
         completed: () =>
           notifyTrainingCompleted({
             tenantId,

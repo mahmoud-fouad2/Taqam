@@ -2,13 +2,7 @@
 
 import * as React from "react";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -48,7 +42,7 @@ export function ChartLeavesBar({ locale, data }: Props) {
       </CardHeader>
       <CardContent className="px-2 pt-2 sm:px-6">
         {data.length === 0 ? (
-          <p className="text-muted-foreground text-sm py-8 w-full text-center">{c.noData}</p>
+          <p className="text-muted-foreground w-full py-8 text-center text-sm">{c.noData}</p>
         ) : (
           <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full">
             <BarChart

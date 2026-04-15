@@ -1,6 +1,9 @@
 import { EmploymentType, type Prisma } from "@prisma/client";
 
-import { allocateNextEmployeeNumber, findOrCreateDefaultDepartmentId } from "@/lib/employees/provisioning";
+import {
+  allocateNextEmployeeNumber,
+  findOrCreateDefaultDepartmentId
+} from "@/lib/employees/provisioning";
 import {
   ensureTenantJobTitleCatalog,
   getDefaultJobTitleCodeForUserRole

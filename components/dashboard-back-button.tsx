@@ -29,7 +29,7 @@ export function DashboardBackButton({ locale }: { locale: "ar" | "en" }) {
     <Button
       type="button"
       variant="ghost"
-      className="h-9 rounded-lg border border-border/70 bg-background/75 px-3 shadow-sm hover:bg-accent/80"
+      className="border-border/70 bg-background/75 hover:bg-accent/80 h-9 rounded-lg border px-3 shadow-sm"
       onClick={() => {
         if (window.history.length > 1) {
           router.back();

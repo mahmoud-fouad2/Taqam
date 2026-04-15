@@ -66,7 +66,7 @@ function loadAssets() {
     cachedAssetsPromise = Promise.all([
       readFile(FONT_REGULAR_PATH),
       readFile(FONT_BOLD_PATH),
-      readFile(LOGO_PATH).catch(() => null),
+      readFile(LOGO_PATH).catch(() => null)
     ]).then(([regular, bold, logo]) => ({ regular, bold, logo }));
   }
   return cachedAssetsPromise;
@@ -89,7 +89,7 @@ function formatDate(iso: string): string {
     return new Date(iso).toLocaleDateString("ar-SA", {
       year: "numeric",
       month: "long",
-      day: "numeric",
+      day: "numeric"
     });
   } catch {
     return iso;
@@ -99,7 +99,7 @@ function formatDate(iso: string): string {
 function formatMoney(amount: number, currency = "SAR"): string {
   const n = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
+    maximumFractionDigits: 2
   }).format(Number.isFinite(amount) ? amount : 0);
   return `${currency} ${n}`;
 }
@@ -145,9 +145,12 @@ function buildExperienceBody(input: LetterInput): string[] {
 
 function getLetterTitle(type: LetterType): string {
   switch (type) {
-    case "introductory": return "خطاب تعريف";
-    case "salary":       return "خطاب راتب";
-    case "experience":   return "شهادة خبرة";
+    case "introductory":
+      return "خطاب تعريف";
+    case "salary":
+      return "خطاب راتب";
+    case "experience":
+      return "شهادة خبرة";
   }
 }
 
@@ -164,9 +167,9 @@ export async function buildLetterPdfBytes(input: LetterInput): Promise<Uint8Arra
   const page = pdfDoc.addPage(PageSizes.A4);
   const { width, height } = page.getSize();
 
-  const font     = await pdfDoc.embedFont(assets.regular);
+  const font = await pdfDoc.embedFont(assets.regular);
   const fontBold = await pdfDoc.embedFont(assets.bold);
-  const logoImg  = assets.logo ? await pdfDoc.embedPng(assets.logo) : null;
+  const logoImg = assets.logo ? await pdfDoc.embedPng(assets.logo) : null;
 
   const marginX = 60;
   const marginY = 56;
@@ -208,12 +211,14 @@ export async function buildLetterPdfBytes(input: LetterInput): Promise<Uint8Arra
       end: { x: width - marginX, y },
       thickness: 0.75,
       color: rgb(0, 0, 0),
-      opacity,
+      opacity
     });
     y -= 12;
   };
 
-  const skipLine = (n = 1) => { y -= 14 * n; };
+  const skipLine = (n = 1) => {
+    y -= 14 * n;
+  };
 
   // ── Logo + Company header ─────────────────────
   if (logoImg) {
@@ -223,14 +228,18 @@ export async function buildLetterPdfBytes(input: LetterInput): Promise<Uint8Arra
       x: marginX + contentW - logoDims.width,
       y: y - logoDims.height + 6,
       width: logoDims.width,
-      height: logoDims.height,
+      height: logoDims.height
     });
     y -= logoDims.height + 8;
   }
 
   drawLine(shapeAr(input.companyName), { bold: true, size: 14, align: "right" });
   if (input.companyAddress) {
-    drawLine(shapeAr(input.companyAddress), { size: 10, align: "right", color: { r: 0.4, g: 0.4, b: 0.4 } });
+    drawLine(shapeAr(input.companyAddress), {
+      size: 10,
+      align: "right",
+      color: { r: 0.4, g: 0.4, b: 0.4 }
+    });
   }
   skipLine();
   drawHRule(0.2);
@@ -247,7 +256,11 @@ export async function buildLetterPdfBytes(input: LetterInput): Promise<Uint8Arra
   skipLine(0.5);
 
   // ── Date + reference ─────────────────────────
-  const today = new Date().toLocaleDateString("ar-SA", { year: "numeric", month: "long", day: "numeric" });
+  const today = new Date().toLocaleDateString("ar-SA", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
   drawLine(`التاريخ: ${today}`, { size: 10, align: "right", color: { r: 0.4, g: 0.4, b: 0.4 } });
   skipLine();
 
@@ -285,7 +298,7 @@ export async function buildLetterPdfBytes(input: LetterInput): Promise<Uint8Arra
     end: { x: marginX + contentW, y },
     thickness: 0.75,
     color: rgb(0.2, 0.2, 0.2),
-    opacity: 0.5,
+    opacity: 0.5
   });
   y -= 14;
   drawLine("التوقيع والختم", { size: 9, align: "right", color: { r: 0.5, g: 0.5, b: 0.5 } });

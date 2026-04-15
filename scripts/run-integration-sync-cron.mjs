@@ -1,5 +1,4 @@
-const baseUrl =
-  process.env.INTEGRATION_SYNC_CRON_TARGET_URL || process.env.NEXT_PUBLIC_APP_URL;
+const baseUrl = process.env.INTEGRATION_SYNC_CRON_TARGET_URL || process.env.NEXT_PUBLIC_APP_URL;
 const secret = process.env.INTEGRATION_SYNC_CRON_SECRET;
 
 if (!baseUrl) {

@@ -35,84 +35,90 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const navigateTo = useCallback((target: string) => {
-    const targetUrl = new URL(target, window.location.origin);
+  const navigateTo = useCallback(
+    (target: string) => {
+      const targetUrl = new URL(target, window.location.origin);
 
-    if (targetUrl.origin === window.location.origin) {
-      router.replace(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`);
-      return;
-    }
-
-    window.location.assign(targetUrl.toString());
-  }, [router]);
-
-  const onSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail || !password) {
-      setError(
-        locale === "ar" ? "يرجى إدخال البريد وكلمة المرور" : "Please enter email and password"
-      );
-      return;
-    }
-
-    if (!siteKey || !executeRecaptcha) {
-      setError(t(locale, "captcha.missingConfig"));
-      return;
-    }
-
-    setIsLoading(true);
-    let captchaToken: string;
-    try {
-      captchaToken = await executeRecaptcha("login");
-    } catch {
-      setError(t(locale, "captcha.invalid"));
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const res = await signIn("credentials", {
-        email: trimmedEmail,
-        password,
-        locale,
-        captchaToken,
-        redirect: false
-      });
-
-      if (!res || res.error) {
-        const raw = res?.error;
-        if (raw === "CredentialsSignin") {
-          setError(
-            locale === "ar"
-              ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
-              : "Invalid email or password"
-          );
-        } else {
-          setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
-        }
+      if (targetUrl.origin === window.location.origin) {
+        router.replace(`${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`);
         return;
       }
 
-      const session = await getSession();
-      const role = (session?.user as any)?.role as string | undefined;
-      const tenantSlug = (session?.user as any)?.tenant?.slug as string | undefined;
+      window.location.assign(targetUrl.toString());
+    },
+    [router]
+  );
 
-      if (role === "SUPER_ADMIN") {
-        router.replace("/dashboard/super-admin");
-      } else if (tenantSlug) {
-        navigateTo(buildTenantUrl(tenantSlug, "/dashboard"));
-      } else {
-        router.replace("/dashboard");
+  const onSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError(null);
+
+      const trimmedEmail = email.trim();
+      if (!trimmedEmail || !password) {
+        setError(
+          locale === "ar" ? "يرجى إدخال البريد وكلمة المرور" : "Please enter email and password"
+        );
+        return;
       }
-    } catch {
-      setError(locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [email, password, locale, siteKey, executeRecaptcha, router, navigateTo]);
+
+      if (!siteKey || !executeRecaptcha) {
+        setError(t(locale, "captcha.missingConfig"));
+        return;
+      }
+
+      setIsLoading(true);
+      let captchaToken: string;
+      try {
+        captchaToken = await executeRecaptcha("login");
+      } catch {
+        setError(t(locale, "captcha.invalid"));
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await signIn("credentials", {
+          email: trimmedEmail,
+          password,
+          locale,
+          captchaToken,
+          redirect: false
+        });
+
+        if (!res || res.error) {
+          const raw = res?.error;
+          if (raw === "CredentialsSignin") {
+            setError(
+              locale === "ar"
+                ? "البريد الإلكتروني أو كلمة المرور غير صحيحة"
+                : "Invalid email or password"
+            );
+          } else {
+            setError(raw || (locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in"));
+          }
+          return;
+        }
+
+        const session = await getSession();
+        const role = (session?.user as any)?.role as string | undefined;
+        const tenantSlug = (session?.user as any)?.tenant?.slug as string | undefined;
+
+        if (role === "SUPER_ADMIN") {
+          router.replace("/dashboard/super-admin");
+        } else if (tenantSlug) {
+          navigateTo(buildTenantUrl(tenantSlug, "/dashboard"));
+        } else {
+          router.replace("/dashboard");
+        }
+      } catch {
+        setError(locale === "ar" ? "تعذر تسجيل الدخول" : "Unable to sign in");
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [email, password, locale, siteKey, executeRecaptcha, router, navigateTo]
+  );
 
   return (
     <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -181,9 +187,7 @@ export function LoginForm({ locale, labels }: LoginFormProps) {
         </div>
       ) : null}
 
-      {!siteKey && (
-        <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
-      )}
+      {!siteKey && <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>}
 
       <Button
         type="submit"

@@ -91,8 +91,12 @@ export default async function PlansPage() {
       <FadeIn>
         <MarketingPageHero
           icon={Layers3}
-          badge={isAr ? pricingMarketing.plansPage.heroBadge.ar : pricingMarketing.plansPage.heroBadge.en}
-          title={isAr ? pricingMarketing.plansPage.heroTitle.ar : pricingMarketing.plansPage.heroTitle.en}
+          badge={
+            isAr ? pricingMarketing.plansPage.heroBadge.ar : pricingMarketing.plansPage.heroBadge.en
+          }
+          title={
+            isAr ? pricingMarketing.plansPage.heroTitle.ar : pricingMarketing.plansPage.heroTitle.en
+          }
           description={
             isAr
               ? pricingMarketing.plansPage.heroDescription.ar
@@ -187,7 +191,7 @@ export default async function PlansPage() {
                         {isAr ? plan.tagAr : plan.tagEn}
                       </p>
                       {differentiator ? (
-                        <div className="bg-primary/10 text-primary mt-3 inline-flex w-fit rounded-full border border-primary/20 px-3 py-1 text-xs font-medium">
+                        <div className="bg-primary/10 text-primary border-primary/20 mt-3 inline-flex w-fit rounded-full border px-3 py-1 text-xs font-medium">
                           {isAr ? differentiator.ar : differentiator.en}
                         </div>
                       ) : null}

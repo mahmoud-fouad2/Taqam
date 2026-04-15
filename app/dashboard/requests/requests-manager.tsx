@@ -144,7 +144,7 @@ function RequestsTable({
   onReject
 }: RequestsTableProps) {
   return (
-    <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+    <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
       <CardHeader>
         <CardTitle>
           {isApprovalMode ? t.requests.needsApproval : t.requests.myRequestsLabel}
@@ -548,7 +548,7 @@ export function RequestsManager() {
       )}
 
       <div className="grid gap-4 md:grid-cols-5">
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.requests.totalMyRequests}</CardTitle>
             <IconFileDescription className="text-muted-foreground h-4 w-4" />
@@ -557,7 +557,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold">{stats.total}</div>
           </CardContent>
         </Card>
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.documents.pendingApproval}</CardTitle>
             <IconClock className="h-4 w-4 text-yellow-500" />
@@ -566,7 +566,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
           </CardContent>
         </Card>
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.documents.approved}</CardTitle>
             <IconCheck className="h-4 w-4 text-green-500" />
@@ -575,7 +575,7 @@ export function RequestsManager() {
             <div className="text-2xl font-bold text-green-600">{stats.approved}</div>
           </CardContent>
         </Card>
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t.common.rejected}</CardTitle>
             <IconX className="h-4 w-4 text-red-500" />
@@ -585,7 +585,7 @@ export function RequestsManager() {
           </CardContent>
         </Card>
         {canApprove && (
-          <Card className="rounded-3xl border-primary/30 bg-primary/5 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+          <Card className="border-primary/30 bg-primary/5 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.requests.needsYourApproval}</CardTitle>
               <IconClock className="text-primary h-4 w-4" />

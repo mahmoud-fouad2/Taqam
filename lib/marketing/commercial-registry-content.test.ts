@@ -13,14 +13,7 @@ import {
   getMarketingTestimonials
 } from "@/lib/marketing/commercial-registry";
 
-const ROUTE_FILES = new Set([
-  "page.tsx",
-  "page.ts",
-  "page.jsx",
-  "page.js",
-  "route.ts",
-  "route.js"
-]);
+const ROUTE_FILES = new Set(["page.tsx", "page.ts", "page.jsx", "page.js", "route.ts", "route.js"]);
 
 let cachedAppRoutes: Set<string> | null = null;
 
@@ -175,7 +168,9 @@ describe("commercial registry content", () => {
   it("ships a valid claims registry with live-only gating", () => {
     const features = getCommercialFeatureCatalog();
     const featureIds = new Set(features.map((feature) => feature.id));
-    const featureStatusById = new Map(features.map((feature) => [feature.id, feature.status] as const));
+    const featureStatusById = new Map(
+      features.map((feature) => [feature.id, feature.status] as const)
+    );
 
     const claims = getCommercialClaimsRegistry();
     expect(claims.length).toBeGreaterThan(0);
@@ -235,7 +230,10 @@ describe("commercial registry content", () => {
 
       expect(claim.visibility, `careers.differentiator.${slot}.visibility`).toBe("public");
       expect(claim.statusGate, `careers.differentiator.${slot}.statusGate`).toBe("live-only");
-      expect(claim.linkedFeatureIds.length, `careers.differentiator.${slot}.linkedFeatureIds`).toBeGreaterThan(0);
+      expect(
+        claim.linkedFeatureIds.length,
+        `careers.differentiator.${slot}.linkedFeatureIds`
+      ).toBeGreaterThan(0);
 
       for (const locale of ["ar", "en"] as const) {
         expect(
@@ -300,7 +298,9 @@ describe("commercial registry content", () => {
 
     for (const persona of personas) {
       for (const locale of ["ar", "en"] as const) {
-        expect(persona.role[locale].trim().length, `${persona.id}.role.${locale}`).toBeGreaterThan(0);
+        expect(persona.role[locale].trim().length, `${persona.id}.role.${locale}`).toBeGreaterThan(
+          0
+        );
         expect(
           persona.title[locale].trim().length,
           `${persona.id}.title.${locale}`
@@ -338,16 +338,30 @@ describe("commercial registry content", () => {
 
     const features = getCommercialFeatureCatalog();
     const featureIds = new Set(features.map((feature) => feature.id));
-    const featureStatusById = new Map(features.map((feature) => [feature.id, feature.status] as const));
+    const featureStatusById = new Map(
+      features.map((feature) => [feature.id, feature.status] as const)
+    );
 
     for (const testimonial of testimonials) {
       expect(testimonial.avatarSrc.trim().length, `${testimonial.id}.avatarSrc`).toBeGreaterThan(0);
-      expect(testimonial.linkedFeatureIds.length, `${testimonial.id}.linkedFeatureIds`).toBeGreaterThan(0);
+      expect(
+        testimonial.linkedFeatureIds.length,
+        `${testimonial.id}.linkedFeatureIds`
+      ).toBeGreaterThan(0);
 
       for (const locale of ["ar", "en"] as const) {
-        expect(testimonial.quote[locale].trim().length, `${testimonial.id}.quote.${locale}`).toBeGreaterThan(0);
-        expect(testimonial.name[locale].trim().length, `${testimonial.id}.name.${locale}`).toBeGreaterThan(0);
-        expect(testimonial.role[locale].trim().length, `${testimonial.id}.role.${locale}`).toBeGreaterThan(0);
+        expect(
+          testimonial.quote[locale].trim().length,
+          `${testimonial.id}.quote.${locale}`
+        ).toBeGreaterThan(0);
+        expect(
+          testimonial.name[locale].trim().length,
+          `${testimonial.id}.name.${locale}`
+        ).toBeGreaterThan(0);
+        expect(
+          testimonial.role[locale].trim().length,
+          `${testimonial.id}.role.${locale}`
+        ).toBeGreaterThan(0);
       }
 
       for (const linkedFeatureId of testimonial.linkedFeatureIds) {
@@ -371,7 +385,9 @@ describe("commercial registry content", () => {
   it("ships valid marketing feature suites", () => {
     const features = getCommercialFeatureCatalog();
     const featureIds = new Set(features.map((feature) => feature.id));
-    const featureStatusById = new Map(features.map((feature) => [feature.id, feature.status] as const));
+    const featureStatusById = new Map(
+      features.map((feature) => [feature.id, feature.status] as const)
+    );
 
     const suites = getMarketingFeatureSuites();
     expect(suites.length).toBeGreaterThan(0);
@@ -404,15 +420,23 @@ describe("commercial registry content", () => {
 
       for (const outcome of suite.outcomes) {
         for (const locale of ["ar", "en"] as const) {
-          expect(outcome[locale].trim().length, `${suite.id}.outcomes.${locale}`).toBeGreaterThan(0);
+          expect(outcome[locale].trim().length, `${suite.id}.outcomes.${locale}`).toBeGreaterThan(
+            0
+          );
         }
       }
 
       for (const item of suite.items) {
-        expect(item.linkedFeatureIds.length, `${suite.id}.${item.id}.linkedFeatureIds`).toBeGreaterThan(0);
+        expect(
+          item.linkedFeatureIds.length,
+          `${suite.id}.${item.id}.linkedFeatureIds`
+        ).toBeGreaterThan(0);
 
         for (const locale of ["ar", "en"] as const) {
-          expect(item.title[locale].trim().length, `${suite.id}.${item.id}.title.${locale}`).toBeGreaterThan(0);
+          expect(
+            item.title[locale].trim().length,
+            `${suite.id}.${item.id}.title.${locale}`
+          ).toBeGreaterThan(0);
           expect(
             item.description[locale].trim().length,
             `${suite.id}.${item.id}.description.${locale}`

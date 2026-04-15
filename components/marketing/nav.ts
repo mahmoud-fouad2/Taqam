@@ -87,7 +87,8 @@ export const marketingNav: MarketingNavItem[] = [
             labelAr: "التكاملات",
             labelEn: "Integrations",
             descAr: "ربط مباشر مع GOSI وWPS، مع تكاملات مخصصة للمؤسسات عند الطلب.",
-            descEn: "Direct GOSI and WPS connections, with custom enterprise integrations on request.",
+            descEn:
+              "Direct GOSI and WPS connections, with custom enterprise integrations on request.",
             icon: ShieldCheck
           }
         ]
@@ -128,8 +129,10 @@ export const marketingNav: MarketingNavItem[] = [
       badgeEn: "One operating layer",
       titleAr: "كل شؤون الفريق في تجربة واحدة واضحة",
       titleEn: "Run your whole team from one clear experience",
-      descAr: "بدل التنقل بين أدوات منفصلة، طاقم يجمع ملفات الموظفين والحضور والرواتب والتكاملات في مساحة واحدة مفهومة.",
-      descEn: "Instead of switching between separate tools, Taqam brings people data, attendance, payroll, and integrations into one clear workspace.",
+      descAr:
+        "بدل التنقل بين أدوات منفصلة، طاقم يجمع ملفات الموظفين والحضور والرواتب والتكاملات في مساحة واحدة مفهومة.",
+      descEn:
+        "Instead of switching between separate tools, Taqam brings people data, attendance, payroll, and integrations into one clear workspace.",
       href: "/request-demo",
       ctaAr: "شاهد طاقم عمليًا",
       ctaEn: "See Taqam in action",
@@ -208,8 +211,10 @@ export const marketingNav: MarketingNavItem[] = [
       badgeEn: "Clearer fit",
       titleAr: "ابدأ بالخطة المناسبة اليوم ووسّعها مع نمو فريقك",
       titleEn: "Choose the right plan now and scale it as your team grows",
-      descAr: "باقات طاقم مرتبة بوضوح لتناسب الشركات الصغيرة والفرق المتنامية والمؤسسات، مع انتقال سهل كلما كبر فريقك.",
-      descEn: "Taqam plans are clear for small businesses, growing teams, and enterprises, with a straightforward upgrade path.",
+      descAr:
+        "باقات طاقم مرتبة بوضوح لتناسب الشركات الصغيرة والفرق المتنامية والمؤسسات، مع انتقال سهل كلما كبر فريقك.",
+      descEn:
+        "Taqam plans are clear for small businesses, growing teams, and enterprises, with a straightforward upgrade path.",
       href: "/pricing",
       ctaAr: "اعرض الباقات والأسعار",
       ctaEn: "View plans and pricing",
@@ -314,13 +319,15 @@ export const marketingNav: MarketingNavItem[] = [
       badgeEn: "Direct access",
       titleAr: "التواصل والسياسات الأساسية في مكان واحد واضح",
       titleEn: "Everything you need from Taqam in one clear place",
-      descAr: "كل ما يخص التواصل مع طاقم والسياسات المرجعية أصبح مرتبًا في مسار واحد أوضح وأسهل وصولًا.",
-      descEn: "From contact and support to policies and essential references, you can reach the right destination quickly without scattered links.",
+      descAr:
+        "كل ما يخص التواصل مع طاقم والسياسات المرجعية أصبح مرتبًا في مسار واحد أوضح وأسهل وصولًا.",
+      descEn:
+        "From contact and support to policies and essential references, you can reach the right destination quickly without scattered links.",
       href: "/support",
       ctaAr: "افتح قنوات التواصل",
       ctaEn: "Open contact options",
       tagsAr: ["تواصل", "دعم", "سياسات"],
       tagsEn: ["Contact", "Support", "Policies"]
     }
-  },
+  }
 ];

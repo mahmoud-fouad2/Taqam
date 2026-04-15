@@ -32,7 +32,10 @@ export async function proxy(request: NextRequest) {
   const dashboardRewrite = resolveTenantDashboardRewrite(localizedPathname);
   const effectivePathname = dashboardRewrite?.pathname ?? localizedPathname;
 
-  if (hasEnPrefix && (localizedPathname === "/dashboard" || localizedPathname.startsWith("/dashboard/"))) {
+  if (
+    hasEnPrefix &&
+    (localizedPathname === "/dashboard" || localizedPathname.startsWith("/dashboard/"))
+  ) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = localizedPathname;
 
@@ -50,7 +53,11 @@ export async function proxy(request: NextRequest) {
 
     if (publicCareersMatch) {
       const rewriteUrl = request.nextUrl.clone();
-      rewriteUrl.pathname = buildTenantPath(resolvedTenant.slug, "/careers", hasEnPrefix ? "en" : "ar");
+      rewriteUrl.pathname = buildTenantPath(
+        resolvedTenant.slug,
+        "/careers",
+        hasEnPrefix ? "en" : "ar"
+      );
 
       const rewriteResponse = NextResponse.rewrite(rewriteUrl, {
         request: {

@@ -223,7 +223,8 @@ export async function GET(_request: NextRequest) {
       approverUsersById.set(approver.id, approver);
     }
 
-    const directManager = employee?.manager && employee.manager.id !== employee.id ? employee.manager : null;
+    const directManager =
+      employee?.manager && employee.manager.id !== employee.id ? employee.manager : null;
     const fallbackApprover = pickFallbackApprover(fallbackApproverUsers, userId);
 
     const items: SelfServiceRequest[] = [];
@@ -345,8 +346,7 @@ export async function GET(_request: NextRequest) {
         approvers: buildAssignedRequestApprovers({
           requestStatus: status,
           assignee: t.assignedTo,
-          actionAt:
-            status === "approved" ? t.updatedAt : undefined
+          actionAt: status === "approved" ? t.updatedAt : undefined
         }),
         createdAt: t.createdAt.toISOString(),
         updatedAt: t.updatedAt.toISOString(),

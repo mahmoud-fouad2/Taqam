@@ -92,11 +92,12 @@ export async function GET(req: NextRequest) {
       labelAr: STAGE_LABELS[stage]?.ar ?? stage,
       labelEn: STAGE_LABELS[stage]?.en ?? stage,
       count: stageCounts[stage] ?? 0
-    })).filter((f) => f.count > 0 || ["NEW", "SCREENING", "INTERVIEW", "ACCEPTED"].includes(f.stage));
+    })).filter(
+      (f) => f.count > 0 || ["NEW", "SCREENING", "INTERVIEW", "ACCEPTED"].includes(f.stage)
+    );
 
     const total = Object.values(stageCounts).reduce((s, n) => s + n, 0);
-    const offerAcceptanceRate =
-      offers > 0 ? Math.round((acceptedOffers / offers) * 100) : null;
+    const offerAcceptanceRate = offers > 0 ? Math.round((acceptedOffers / offers) * 100) : null;
 
     return NextResponse.json({
       data: {

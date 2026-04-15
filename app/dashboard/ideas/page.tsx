@@ -27,7 +27,7 @@ export default async function IdeasPage() {
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border/50 bg-card/70 px-4 py-3 text-sm text-muted-foreground shadow-sm lg:max-w-sm">
+        <div className="border-border/50 bg-card/70 text-muted-foreground rounded-2xl border px-4 py-3 text-sm shadow-sm lg:max-w-sm">
           {locale === "ar"
             ? "أي إدخال من هذه الصفحة يتحول مباشرة إلى تذكرة قابلة للمراجعة والرد والمتابعة من نفس المسار."
             : "Every submission from this page becomes a tracked ticket that can be reviewed and answered from the same flow."}

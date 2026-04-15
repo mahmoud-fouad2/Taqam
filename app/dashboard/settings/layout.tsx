@@ -86,7 +86,8 @@ export default async function SettingsLayout({ children }: { children: React.Rea
             : "Manage your account settings and email preferences."}
         </p>
       </div>
-      <div className={`flex flex-col gap-6 lg:items-start ${isRtl ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
+      <div
+        className={`flex flex-col gap-6 lg:items-start ${isRtl ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
         <aside className="lg:sticky lg:top-20 lg:w-64 lg:shrink-0">
           <div className="bg-card rounded-lg border p-2 shadow-sm">
             <SidebarNav items={sidebarNavItems} />

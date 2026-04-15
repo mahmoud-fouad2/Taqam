@@ -389,7 +389,8 @@ const text = {
     ssoSettings: {
       pageTitle: "تسجيل الدخول الموحد (SSO)",
       pageDesc: "ربط الشركة بمزودي الهوية الخارجيين للدخول الموحد",
-      infoBanner: "يتيح تسجيل الدخول الموحد (SSO) للموظفين الدخول باستخدام حسابات شركتهم (Microsoft أو Google). احرص على حفظ الإعدادات بعد إدخالها ثم تفعيلها.",
+      infoBanner:
+        "يتيح تسجيل الدخول الموحد (SSO) للموظفين الدخول باستخدام حسابات شركتهم (Microsoft أو Google). احرص على حفظ الإعدادات بعد إدخالها ثم تفعيلها.",
       save: "حفظ الإعدادات",
       saved: "تم الحفظ",
       saveFailed: "فشل حفظ الإعدادات",
@@ -2682,7 +2683,8 @@ const text = {
       inStarter: "يظهر في Starter",
       inBusiness: "يظهر في Business",
       inEnterprise: "يظهر في Enterprise",
-      comparisonManagementHint: "من نفس الشاشة يمكنك الآن ضبط بطاقات الباقات وصفوف المقارنة التي تظهر في pricing وplans.",
+      comparisonManagementHint:
+        "من نفس الشاشة يمكنك الآن ضبط بطاقات الباقات وصفوف المقارنة التي تظهر في pricing وplans.",
 
       pManagePricingAndPlans: "إدارة الأسعار والباقات",
 
@@ -3729,13 +3731,15 @@ const text = {
     ssoSettings: {
       pageTitle: "Single Sign-On (SSO)",
       pageDesc: "Connect your organization to external identity providers for single sign-on",
-      infoBanner: "SSO allows employees to sign in using their company accounts (Microsoft or Google). Save settings after entering them, then enable the provider.",
+      infoBanner:
+        "SSO allows employees to sign in using their company accounts (Microsoft or Google). Save settings after entering them, then enable the provider.",
       save: "Save Settings",
       saved: "Saved",
       saveFailed: "Failed to save settings",
       configured: "Configured",
       tenantId: "Tenant ID (Directory ID)",
-      tenantIdDesc: "Your Azure tenant identifier — found in the Azure portal under Azure Active Directory",
+      tenantIdDesc:
+        "Your Azure tenant identifier — found in the Azure portal under Azure Active Directory",
       clientId: "Client ID (Application ID)",
       clientSecret: "Client Secret",
       redirectUri: "Redirect URI (add this in your app settings)",
@@ -4415,8 +4419,10 @@ const text = {
       submitDialogDesc: "Choose request type and enter details",
       requestDetails: "Request details",
       approvalPath: "Approval path",
-      approvalPathPendingAssignment: "The approver will appear here once the request is assigned or reviewed.",
-      approvalPathUnavailable: "A detailed approval path is not available for this request type yet.",
+      approvalPathPendingAssignment:
+        "The approver will appear here once the request is assigned or reviewed.",
+      approvalPathUnavailable:
+        "A detailed approval path is not available for this request type yet.",
       cancelRequest: "Cancel request",
       submitFailed: "Failed to submit request",
       cannotCancel: "Cannot cancel this request",
@@ -6012,7 +6018,8 @@ const text = {
         "Taqam uses a sales-assisted activation flow to align plan selection, setup, and launch from day one.",
       summary:
         "Instead of creating a fully active company instantly, we review your scope first and prepare the right activation path before launch.",
-      stepOne: "We review your company size, target package, and launch priorities before activation.",
+      stepOne:
+        "We review your company size, target package, and launch priorities before activation.",
       stepTwo:
         "We prepare the initial setup and identify the data, permissions, or integrations needed for launch.",
       stepThree:

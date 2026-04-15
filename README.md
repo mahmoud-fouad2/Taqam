@@ -30,6 +30,7 @@
 corepack enable
 corepack prepare pnpm@9.15.9 --activate
 pnpm install --frozen-lockfile
+pnpm test:e2e:install
 pnpm validate:ci
 pnpm dev
 ```
@@ -42,6 +43,8 @@ pnpm format:check:all
 pnpm lint:strict
 pnpm typecheck
 pnpm test
+pnpm test:e2e
+pnpm audit:deps
 
 # Smoke (Windows PowerShell)
 $env:SMOKE_BASE_URL="https://taqam.net"; pnpm smoke
@@ -51,6 +54,8 @@ SMOKE_BASE_URL=https://taqam.net pnpm smoke
 ```
 
 الخطة التشغيلية التفصيلية لترقية المشروع إلى Node 24 موجودة في `NODE_24_UPGRADE_PLAN.md`.
+
+ملاحظة الجودة: المشروع الآن يتضمن E2E baseline عبر Playwright وتدقيق dependencies عبر `audit:deps` باستخدام npm audit داخل بيئة مؤقتة حتى لا نعتمد على `pnpm audit` المكسور حاليًا بسبب endpoint متقاعد من npm.
 
 ---
 

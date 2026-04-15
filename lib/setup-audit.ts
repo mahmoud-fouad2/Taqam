@@ -17,8 +17,7 @@ export function getSetupAuditStepSnapshot(
     return {
       timezone: typeof stepData.timezone === "string" ? stepData.timezone : undefined,
       currency: typeof stepData.currency === "string" ? stepData.currency : undefined,
-      weekStartDay:
-        typeof stepData.weekStartDay === "number" ? stepData.weekStartDay : undefined
+      weekStartDay: typeof stepData.weekStartDay === "number" ? stepData.weekStartDay : undefined
     };
   }
 
@@ -48,9 +47,7 @@ export function getSetupAuditStepSnapshot(
       leaveDaysPerYear:
         typeof stepData.leaveDaysPerYear === "number" ? stepData.leaveDaysPerYear : undefined,
       annualLeaveEnabled:
-        typeof stepData.annualLeaveEnabled === "boolean"
-          ? stepData.annualLeaveEnabled
-          : undefined,
+        typeof stepData.annualLeaveEnabled === "boolean" ? stepData.annualLeaveEnabled : undefined,
       sickLeaveEnabled:
         typeof stepData.sickLeaveEnabled === "boolean" ? stepData.sickLeaveEnabled : undefined,
       payrollEnabled:

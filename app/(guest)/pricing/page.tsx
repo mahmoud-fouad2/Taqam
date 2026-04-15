@@ -93,7 +93,9 @@ export default async function PricingPage() {
           icon={CircleDollarSign}
           badge={isAr ? siteContent.pricing.badge.ar : siteContent.pricing.badge.en}
           title={isAr ? siteContent.pricing.title.ar : siteContent.pricing.title.en}
-          description={isAr ? siteContent.pricing.description.ar : siteContent.pricing.description.en}
+          description={
+            isAr ? siteContent.pricing.description.ar : siteContent.pricing.description.en
+          }
           actions={[
             {
               href: `${p}/plans`,
@@ -173,7 +175,7 @@ export default async function PricingPage() {
                       <CardTitle className="text-2xl">{isAr ? plan.nameAr : plan.name}</CardTitle>
                       <CardDescription>{isAr ? plan.name : plan.nameAr}</CardDescription>
                       {differentiator ? (
-                        <div className="bg-primary/10 text-primary mt-3 inline-flex w-fit rounded-full border border-primary/20 px-3 py-1 text-xs font-medium">
+                        <div className="bg-primary/10 text-primary border-primary/20 mt-3 inline-flex w-fit rounded-full border px-3 py-1 text-xs font-medium">
                           {isAr ? differentiator.ar : differentiator.en}
                         </div>
                       ) : null}

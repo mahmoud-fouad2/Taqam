@@ -36,9 +36,7 @@ describe("tenant activation diagnostics", () => {
 
   it("formats localized titles and summaries for setup events", () => {
     expect(formatTenantActivationAuditTitle(baseLog, "ar")).toBe("حفظ خطوة الإعداد 3");
-    expect(formatTenantActivationAuditSummary(baseLog, "en")).toBe(
-      "Org structure • 60% progress"
-    );
+    expect(formatTenantActivationAuditSummary(baseLog, "en")).toBe("Org structure • 60% progress");
   });
 
   it("builds activation diagnostics stats and timeline", () => {

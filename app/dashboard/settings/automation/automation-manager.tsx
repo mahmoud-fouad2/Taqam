@@ -3,14 +3,7 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  Bot,
-  Loader2,
-  RefreshCcw,
-  RotateCcw,
-  Sparkles,
-  Workflow
-} from "lucide-react";
+import { Bot, Loader2, RefreshCcw, RotateCcw, Sparkles, Workflow } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,7 +24,9 @@ type Props = {
   initialData: AutomationDashboardData;
 };
 
-function getStatusBadgeVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+function getStatusBadgeVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "success":
       return "default";
@@ -96,7 +91,9 @@ export function AutomationManager({ initialData }: Props) {
       noRuns: isArabic ? "لا توجد تشغيلات حتى الآن" : "No runs yet",
       toggleSuccess: isArabic ? "تم تحديث الـ workflow بنجاح" : "Workflow updated successfully",
       retrySuccess: isArabic ? "تمت إعادة المحاولة بنجاح" : "Workflow retried successfully",
-      syncSuccess: isArabic ? "تمت مزامنة الـ workflows الافتراضية" : "Default workflows synced successfully",
+      syncSuccess: isArabic
+        ? "تمت مزامنة الـ workflows الافتراضية"
+        : "Default workflows synced successfully",
       actionFailed: isArabic ? "تعذر تنفيذ العملية" : "Action failed"
     }),
     [isArabic]
@@ -178,8 +175,16 @@ export function AutomationManager({ initialData }: Props) {
             </CardTitle>
             <CardDescription>{text.workflowDesc}</CardDescription>
           </div>
-          <Button onClick={handleSyncDefaults} variant="outline" className="gap-2" disabled={syncingDefaults}>
-            {syncingDefaults ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCcw className="h-4 w-4" />}
+          <Button
+            onClick={handleSyncDefaults}
+            variant="outline"
+            className="gap-2"
+            disabled={syncingDefaults}>
+            {syncingDefaults ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCcw className="h-4 w-4" />
+            )}
             {text.syncDefaults}
           </Button>
         </CardHeader>
@@ -187,9 +192,9 @@ export function AutomationManager({ initialData }: Props) {
           {initialData.workflows.map((workflow) => {
             const triggerLabel =
               workflow.triggerType in AUTOMATION_TRIGGER_LABELS
-                ? AUTOMATION_TRIGGER_LABELS[workflow.triggerType as keyof typeof AUTOMATION_TRIGGER_LABELS][
-                    isArabic ? "ar" : "en"
-                  ]
+                ? AUTOMATION_TRIGGER_LABELS[
+                    workflow.triggerType as keyof typeof AUTOMATION_TRIGGER_LABELS
+                  ][isArabic ? "ar" : "en"]
                 : workflow.triggerType;
 
             return (
@@ -197,12 +202,12 @@ export function AutomationManager({ initialData }: Props) {
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="font-semibold leading-none">{workflow.name}</h3>
+                      <h3 className="leading-none font-semibold">{workflow.name}</h3>
                       {workflow.isBuiltin ? <Badge variant="outline">{text.builtin}</Badge> : null}
                       <Badge variant="secondary">{triggerLabel}</Badge>
                     </div>
                     {workflow.description ? (
-                      <p className="text-sm text-muted-foreground">{workflow.description}</p>
+                      <p className="text-muted-foreground text-sm">{workflow.description}</p>
                     ) : null}
                   </div>
 
@@ -216,34 +221,44 @@ export function AutomationManager({ initialData }: Props) {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap gap-2 text-xs text-muted-foreground">
-                  <Badge variant="outline">{text.version}: v{workflow.version}</Badge>
-                  <Badge variant="outline">{text.conditions}: {workflow.conditionsCount}</Badge>
-                  <Badge variant="outline">{text.actions}: {workflow.actionsCount}</Badge>
+                <div className="text-muted-foreground mt-4 flex flex-wrap gap-2 text-xs">
+                  <Badge variant="outline">
+                    {text.version}: v{workflow.version}
+                  </Badge>
+                  <Badge variant="outline">
+                    {text.conditions}: {workflow.conditionsCount}
+                  </Badge>
+                  <Badge variant="outline">
+                    {text.actions}: {workflow.actionsCount}
+                  </Badge>
                 </div>
 
-                <div className="mt-4 rounded-xl bg-muted/40 p-3 text-sm">
+                <div className="bg-muted/40 mt-4 rounded-xl p-3 text-sm">
                   <div className="flex items-center gap-2 font-medium">
                     <Sparkles className="h-4 w-4 text-cyan-600 dark:text-cyan-400" />
                     {text.latestRun}
                   </div>
                   {workflow.latestRun ? (
-                    <div className="mt-2 space-y-1 text-muted-foreground">
+                    <div className="text-muted-foreground mt-2 space-y-1">
                       <div className="flex items-center gap-2">
                         <Badge variant={getStatusBadgeVariant(workflow.latestRun.status)}>
                           {workflow.latestRun.status}
                         </Badge>
                         <span>{workflow.latestRun.summary ?? text.noSummary}</span>
                       </div>
-                      <div>{text.retryCount}: {workflow.latestRun.retryCount}</div>
-                      <div>{text.startedAt}: {formatDate(workflow.latestRun.startedAt, locale)}</div>
+                      <div>
+                        {text.retryCount}: {workflow.latestRun.retryCount}
+                      </div>
+                      <div>
+                        {text.startedAt}: {formatDate(workflow.latestRun.startedAt, locale)}
+                      </div>
                     </div>
                   ) : (
-                    <p className="mt-2 text-muted-foreground">{text.noRuns}</p>
+                    <p className="text-muted-foreground mt-2">{text.noRuns}</p>
                   )}
                 </div>
 
-                <div className="mt-3 text-xs text-muted-foreground">
+                <div className="text-muted-foreground mt-3 text-xs">
                   {text.updatedAt}: {formatDate(workflow.updatedAt, locale)}
                 </div>
               </div>
@@ -262,7 +277,7 @@ export function AutomationManager({ initialData }: Props) {
         </CardHeader>
         <CardContent>
           {initialData.runs.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{text.noRuns}</p>
+            <p className="text-muted-foreground text-sm">{text.noRuns}</p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -281,9 +296,9 @@ export function AutomationManager({ initialData }: Props) {
                   {initialData.runs.map((run) => {
                     const triggerLabel =
                       run.triggerType in AUTOMATION_TRIGGER_LABELS
-                        ? AUTOMATION_TRIGGER_LABELS[run.triggerType as keyof typeof AUTOMATION_TRIGGER_LABELS][
-                            isArabic ? "ar" : "en"
-                          ]
+                        ? AUTOMATION_TRIGGER_LABELS[
+                            run.triggerType as keyof typeof AUTOMATION_TRIGGER_LABELS
+                          ][isArabic ? "ar" : "en"]
                         : run.triggerType;
 
                     return (

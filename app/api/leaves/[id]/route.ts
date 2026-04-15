@@ -221,11 +221,9 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         {
           employeeUserId: existing.employee.userId ?? null,
           leaveType: existing.leaveType.nameAr || existing.leaveType.name,
-          rejectionReason: action === "reject" ? body.rejectionReason ?? "" : "",
+          rejectionReason: action === "reject" ? (body.rejectionReason ?? "") : "",
           rejectionSuffix:
-            action === "reject" && body.rejectionReason
-              ? `: ${body.rejectionReason}`
-              : "",
+            action === "reject" && body.rejectionReason ? `: ${body.rejectionReason}` : "",
           requestId: leaveRequest.id
         }
       );

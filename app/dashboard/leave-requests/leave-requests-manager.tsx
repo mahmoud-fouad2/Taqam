@@ -359,7 +359,7 @@ export function LeaveRequestsManager() {
       <LeaveRequestsStats stats={stats} />
 
       {/* Filters and Table */}
-      <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+      <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
         <CardHeader>
           <LeaveRequestsFilters
             activeTab={activeTab}

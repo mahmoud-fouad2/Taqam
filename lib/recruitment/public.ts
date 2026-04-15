@@ -367,8 +367,9 @@ export async function listPublicJobFilters(
     ).map((option) => option.value);
     const departments = departmentRows
       .map((row) => row.department)
-      .filter((department): department is NonNullable<typeof departmentRows[number]["department"]> =>
-        Boolean(department)
+      .filter(
+        (department): department is NonNullable<(typeof departmentRows)[number]["department"]> =>
+          Boolean(department)
       )
       .sort((left, right) => left.name.localeCompare(right.name, "ar"));
 

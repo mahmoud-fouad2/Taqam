@@ -225,7 +225,10 @@ function normalizeStoredTenantSsoConfig(value: unknown): TenantSsoStoredConfig {
   };
 }
 
-function mergeOAuthProvider<TStored extends OAuthProviderStored & Record<string, unknown>, TInput extends OAuthProviderInput & Record<string, unknown>>({
+function mergeOAuthProvider<
+  TStored extends OAuthProviderStored & Record<string, unknown>,
+  TInput extends OAuthProviderInput & Record<string, unknown>
+>({
   current,
   incoming,
   extraFields

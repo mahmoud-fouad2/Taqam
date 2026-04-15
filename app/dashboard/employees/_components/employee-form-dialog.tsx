@@ -100,13 +100,13 @@ export function EmployeeFormDialog({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <Tabs defaultValue="personal" className="w-full">
               <TabsList className="flex h-auto w-full flex-wrap justify-start">
-                <TabsTrigger value="personal" className="flex-1 min-w-[140px]">
+                <TabsTrigger value="personal" className="min-w-[140px] flex-1">
                   {t.employees.personalInfo}
                 </TabsTrigger>
-                <TabsTrigger value="employment" className="flex-1 min-w-[140px]">
+                <TabsTrigger value="employment" className="min-w-[140px] flex-1">
                   {t.employees.employmentInfo}
                 </TabsTrigger>
-                <TabsTrigger value="salary" className="flex-1 min-w-[140px]">
+                <TabsTrigger value="salary" className="min-w-[140px] flex-1">
                   {t.leaveTypes.salary}
                 </TabsTrigger>
               </TabsList>
@@ -306,15 +306,19 @@ export function EmployeeFormDialog({
                                 )}>
                                 <span className="truncate">
                                   {jobTitles.find((jobTitle) => jobTitle.id === field.value)
-                                    ? jobTitles.find((jobTitle) => jobTitle.id === field.value)?.nameAr ||
-                                      jobTitles.find((jobTitle) => jobTitle.id === field.value)?.name
+                                    ? jobTitles.find((jobTitle) => jobTitle.id === field.value)
+                                        ?.nameAr ||
+                                      jobTitles.find((jobTitle) => jobTitle.id === field.value)
+                                        ?.name
                                     : t.employeeForm.selectJobTitle}
                                 </span>
                                 <ChevronsUpDown className="ms-2 h-4 w-4 shrink-0 opacity-50" />
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
+                          <PopoverContent
+                            className="w-[var(--radix-popover-trigger-width)] p-0"
+                            align="start">
                             <Command>
                               <CommandInput
                                 placeholder={
@@ -345,7 +349,9 @@ export function EmployeeFormDialog({
                                         )}
                                       />
                                       <div className="flex min-w-0 flex-col">
-                                        <span className="truncate">{jobTitle.nameAr || jobTitle.name}</span>
+                                        <span className="truncate">
+                                          {jobTitle.nameAr || jobTitle.name}
+                                        </span>
                                         {jobTitle.nameAr && jobTitle.nameAr !== jobTitle.name ? (
                                           <span className="text-muted-foreground truncate text-xs">
                                             {jobTitle.name}

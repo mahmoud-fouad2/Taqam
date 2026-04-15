@@ -139,9 +139,12 @@ describe("integration connection routes", () => {
   it("returns provider metadata when no tenant connection exists yet", async () => {
     dbMocks.integrationConnectionFindUnique.mockResolvedValueOnce(null);
 
-    const response = await getIntegrationConnection(createRequest("http://localhost/api/integrations/gosi", undefined, "GET"), {
-      params: Promise.resolve({ key: "gosi" })
-    });
+    const response = await getIntegrationConnection(
+      createRequest("http://localhost/api/integrations/gosi", undefined, "GET"),
+      {
+        params: Promise.resolve({ key: "gosi" })
+      }
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -203,9 +206,12 @@ describe("integration connection routes", () => {
       ]
     });
 
-    const response = await getIntegrationConnection(createRequest("http://localhost/api/integrations/gosi", undefined, "GET"), {
-      params: Promise.resolve({ key: "gosi" })
-    });
+    const response = await getIntegrationConnection(
+      createRequest("http://localhost/api/integrations/gosi", undefined, "GET"),
+      {
+        params: Promise.resolve({ key: "gosi" })
+      }
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -362,9 +368,12 @@ describe("integration connection routes", () => {
   });
 
   it("records a successful manual-bridge connection test", async () => {
-    const response = await testIntegrationConnectionPost(createRequest("http://localhost/api/integrations/wps/test"), {
-      params: Promise.resolve({ key: "wps" })
-    });
+    const response = await testIntegrationConnectionPost(
+      createRequest("http://localhost/api/integrations/wps/test"),
+      {
+        params: Promise.resolve({ key: "wps" })
+      }
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -403,9 +412,12 @@ describe("integration connection routes", () => {
       credentialsEncrypted: null
     });
 
-    const response = await testIntegrationConnectionPost(createRequest("http://localhost/api/integrations/gosi/test"), {
-      params: Promise.resolve({ key: "gosi" })
-    });
+    const response = await testIntegrationConnectionPost(
+      createRequest("http://localhost/api/integrations/gosi/test"),
+      {
+        params: Promise.resolve({ key: "gosi" })
+      }
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -453,9 +465,12 @@ describe("integration connection routes", () => {
       status: "DISCONNECTED"
     });
 
-    const response = await syncIntegrationPost(createRequest("http://localhost/api/integrations/wps/sync"), {
-      params: Promise.resolve({ key: "wps" })
-    });
+    const response = await syncIntegrationPost(
+      createRequest("http://localhost/api/integrations/wps/sync"),
+      {
+        params: Promise.resolve({ key: "wps" })
+      }
+    );
     const body = await response.json();
 
     expect(response.status).toBe(409);

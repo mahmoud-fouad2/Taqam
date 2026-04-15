@@ -17,7 +17,7 @@ export default async function SuperAdminContentPage() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border bg-card/80 p-5 shadow-sm">
+      <section className="bg-card/80 rounded-2xl border p-5 shadow-sm">
         <h1 className="text-2xl font-semibold tracking-tight">
           {isAr ? "استوديو المحتوى والسيو" : "Content and SEO studio"}
         </h1>

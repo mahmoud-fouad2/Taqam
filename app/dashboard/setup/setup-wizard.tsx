@@ -221,7 +221,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
       {
         id: "company",
         label: "بيانات الشركة مكتملة",
-        done: !!(form1.nameAr),
+        done: !!form1.nameAr,
         hint: form1.nameAr || "—"
       },
       {
@@ -248,12 +248,10 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
         id: "leaves",
         label: "أنواع الإجازات الأساسية مفعّلة",
         done: form5.annualLeaveEnabled || form5.sickLeaveEnabled,
-        hint: [
-          form5.annualLeaveEnabled && "سنوية",
-          form5.sickLeaveEnabled && "مرضية"
-        ]
-          .filter(Boolean)
-          .join(" · ") || "لا إجازات مفعّلة"
+        hint:
+          [form5.annualLeaveEnabled && "سنوية", form5.sickLeaveEnabled && "مرضية"]
+            .filter(Boolean)
+            .join(" · ") || "لا إجازات مفعّلة"
       }
     ];
 
@@ -266,9 +264,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
             <CheckCircle2 className="h-7 w-7" />
           </div>
           <h1 className="text-2xl font-black tracking-tight">مراجعة الجاهزية</h1>
-          <p className="text-muted-foreground mt-2 text-sm">
-            تحقق من تفاصيل الإعداد قبل الانطلاق
-          </p>
+          <p className="text-muted-foreground mt-2 text-sm">تحقق من تفاصيل الإعداد قبل الانطلاق</p>
         </div>
 
         <div className="space-y-3">
@@ -280,8 +276,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
                 item.done
                   ? "border-emerald-200 bg-emerald-50/60 dark:border-emerald-900 dark:bg-emerald-950/30"
                   : "border-amber-200 bg-amber-50/60 dark:border-amber-900 dark:bg-amber-950/30"
-              )}
-            >
+              )}>
               <div className="mt-0.5 shrink-0">
                 {item.done ? (
                   <CheckCircle2 className="h-4 w-4 text-emerald-500" />
@@ -310,15 +305,11 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
             onClick={() => {
               setPhase("wizard");
               setCurrentStep(totalSteps);
-            }}
-          >
+            }}>
             <ChevronRight className="me-1.5 h-4 w-4" />
             تعديل
           </Button>
-          <Button
-            className="flex-1 gap-2"
-            onClick={() => setPhase("done")}
-          >
+          <Button className="flex-1 gap-2" onClick={() => setPhase("done")}>
             انطلق الآن
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -336,11 +327,8 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
         </div>
         <h1 className="text-3xl font-black tracking-tight">مساحة العمل جاهزة!</h1>
         <p className="text-muted-foreground mx-auto mt-3 max-w-md text-sm leading-7">
-          تم إعداد{" "}
-          <span className="text-foreground font-semibold">
-            {tenantName}
-          </span>{" "}
-          بنجاح. الخطوات التالية ستساعدك على البدء الفوري.
+          تم إعداد <span className="text-foreground font-semibold">{tenantName}</span> بنجاح.
+          الخطوات التالية ستساعدك على البدء الفوري.
         </p>
 
         {/* Next steps cards */}
@@ -348,7 +336,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
           <Link
             href="/dashboard/employees"
             className="bg-card border-border/60 hover:border-primary/40 group flex flex-col items-center gap-3 rounded-2xl border p-5 text-center transition-all hover:shadow-sm">
-            <div className="bg-blue-50 text-blue-600 dark:bg-blue-950/60 flex h-10 w-10 items-center justify-center rounded-xl group-hover:scale-110 transition-transform">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition-transform group-hover:scale-110 dark:bg-blue-950/60">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -362,7 +350,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
           <Link
             href="/dashboard/settings"
             className="bg-card border-border/60 hover:border-primary/40 group flex flex-col items-center gap-3 rounded-2xl border p-5 text-center transition-all hover:shadow-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 group-hover:scale-110 transition-transform">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 transition-transform group-hover:scale-110 dark:bg-emerald-950/60">
               <Wallet className="h-5 w-5" />
             </div>
             <div>
@@ -376,7 +364,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
           <Link
             href="/dashboard"
             className="bg-card border-border/60 hover:border-primary/40 group flex flex-col items-center gap-3 rounded-2xl border p-5 text-center transition-all hover:shadow-sm">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-950/60 group-hover:scale-110 transition-transform">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600 transition-transform group-hover:scale-110 dark:bg-purple-950/60">
               <BarChart3 className="h-5 w-5" />
             </div>
             <div>
@@ -390,7 +378,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
 
         {/* Completed steps summary */}
         <div className="bg-muted/30 mt-8 rounded-2xl p-4 text-right">
-          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 text-center">
+          <p className="text-muted-foreground mb-3 text-center text-xs font-semibold tracking-wider uppercase">
             ما تم إعداده
           </p>
           <div className="grid gap-2 sm:grid-cols-2">
@@ -438,9 +426,8 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
       <div className="mb-8">
         <div className="mb-2 flex items-center justify-between text-xs">
           <span className="text-muted-foreground">التقدم</span>
-          <span className="font-semibold text-muted-foreground">
-            {completionPercent}%
-            {" · "}
+          <span className="text-muted-foreground font-semibold">
+            {completionPercent}%{" · "}
             متبقي حوالي {STEP_MINUTES.slice(currentStep - 1).reduce((a, b) => a + b, 0)} دقيقة
           </span>
         </div>
@@ -476,15 +463,11 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
 
       {/* Step content */}
       <div className="bg-card border-border/60 rounded-2xl border p-6 shadow-sm">
-        {currentStep === 1 && (
-          <StepCompanyProfile form={form1} onChange={setForm1} />
-        )}
+        {currentStep === 1 && <StepCompanyProfile form={form1} onChange={setForm1} />}
         {currentStep === 2 && (
           <StepWorkSettings form={form2} onChange={setForm2} timezones={TIMEZONES} />
         )}
-        {currentStep === 3 && (
-          <StepStructure form={form3} onChange={setForm3} />
-        )}
+        {currentStep === 3 && <StepStructure form={form3} onChange={setForm3} />}
         {currentStep === 4 && (
           <StepFirstEmployee
             action={form4Action}
@@ -493,9 +476,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
             onInviteChange={setForm4Invite}
           />
         )}
-        {currentStep === 5 && (
-          <StepPolicies form={form5} onChange={setForm5} />
-        )}
+        {currentStep === 5 && <StepPolicies form={form5} onChange={setForm5} />}
       </div>
 
       {/* Navigation */}
@@ -508,7 +489,7 @@ export function SetupWizard({ tenantName, initialStep, totalSteps, steps, savedD
           <ChevronRight className="h-4 w-4" />
           السابق
         </Button>
-        <Button onClick={handleNext} disabled={saving} className="gap-2 min-w-[140px]">
+        <Button onClick={handleNext} disabled={saving} className="min-w-[140px] gap-2">
           {saving && <Loader2 className="h-4 w-4 animate-spin" />}
           {currentStep === totalSteps ? "إتمام الإعداد" : "التالي"}
           {!saving && currentStep < totalSteps && <ChevronLeft className="h-4 w-4" />}
@@ -529,13 +510,7 @@ type Form1 = {
   taxNumber: string;
 };
 
-function StepCompanyProfile({
-  form,
-  onChange
-}: {
-  form: Form1;
-  onChange: (v: Form1) => void;
-}) {
+function StepCompanyProfile({ form, onChange }: { form: Form1; onChange: (v: Form1) => void }) {
   return (
     <div className="space-y-4">
       <p className="text-muted-foreground text-sm">أدخل بيانات شركتك الأساسية للبدء.</p>
@@ -613,9 +588,7 @@ function StepWorkSettings({
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
           <Label>المنطقة الزمنية</Label>
-          <Select
-            value={form.timezone}
-            onValueChange={(v) => onChange({ ...form, timezone: v })}>
+          <Select value={form.timezone} onValueChange={(v) => onChange({ ...form, timezone: v })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -630,9 +603,7 @@ function StepWorkSettings({
         </div>
         <div className="space-y-2">
           <Label>العملة</Label>
-          <Select
-            value={form.currency}
-            onValueChange={(v) => onChange({ ...form, currency: v })}>
+          <Select value={form.currency} onValueChange={(v) => onChange({ ...form, currency: v })}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -680,8 +651,10 @@ function StepStructure({ form, onChange }: { form: Form3; onChange: (v: Form3) =
       <p className="text-muted-foreground text-sm">
         أنشئ أول قسم ومسمى وظيفي. يمكنك إضافة المزيد لاحقاً.
       </p>
-      <div className="rounded-xl border p-4 space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">أول قسم</p>
+      <div className="space-y-3 rounded-xl border p-4">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          أول قسم
+        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>اسم القسم بالعربي *</Label>
@@ -702,8 +675,10 @@ function StepStructure({ form, onChange }: { form: Form3; onChange: (v: Form3) =
           </div>
         </div>
       </div>
-      <div className="rounded-xl border p-4 space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">أول مسمى وظيفي</p>
+      <div className="space-y-3 rounded-xl border p-4">
+        <p className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
+          أول مسمى وظيفي
+        </p>
         <div className="grid gap-3 sm:grid-cols-2">
           <div className="space-y-2">
             <Label>المسمى بالعربي *</Label>
@@ -825,11 +800,11 @@ function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) =>
         اضبط السياسات الأساسية لبدء التشغيل. كلها قابلة للتعديل لاحقاً.
       </p>
 
-      <div className="rounded-xl border p-4 space-y-3">
+      <div className="space-y-3 rounded-xl border p-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-medium text-sm">تفعيل الإجازة السنوية</p>
-            <p className="text-muted-foreground text-xs mt-0.5">
+            <p className="text-sm font-medium">تفعيل الإجازة السنوية</p>
+            <p className="text-muted-foreground mt-0.5 text-xs">
               إنشاء نوع إجازة سنوية تلقائياً عند الإعداد
             </p>
           </div>
@@ -853,10 +828,10 @@ function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) =>
         )}
       </div>
 
-      <div className="rounded-xl border p-4 flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl border p-4">
         <div>
-          <p className="font-medium text-sm">تفعيل الإجازة المرضية</p>
-          <p className="text-muted-foreground text-xs mt-0.5">30 يوم سنوياً بشكل افتراضي</p>
+          <p className="text-sm font-medium">تفعيل الإجازة المرضية</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">30 يوم سنوياً بشكل افتراضي</p>
         </div>
         <Switch
           checked={form.sickLeaveEnabled}
@@ -864,10 +839,10 @@ function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) =>
         />
       </div>
 
-      <div className="rounded-xl border p-4 flex items-center justify-between">
+      <div className="flex items-center justify-between rounded-xl border p-4">
         <div>
-          <p className="font-medium text-sm">تفعيل الرواتب</p>
-          <p className="text-muted-foreground text-xs mt-0.5">
+          <p className="text-sm font-medium">تفعيل الرواتب</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
             تفعيل وحدة الرواتب لتشغيل مسير الرواتب الشهري
           </p>
         </div>
@@ -877,10 +852,10 @@ function StepPolicies({ form, onChange }: { form: Form5; onChange: (v: Form5) =>
         />
       </div>
 
-      <div className="rounded-xl border p-4 flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4 rounded-xl border p-4">
         <div>
-          <p className="font-medium text-sm">إضافة بيانات تجريبية</p>
-          <p className="text-muted-foreground text-xs mt-0.5">
+          <p className="text-sm font-medium">إضافة بيانات تجريبية</p>
+          <p className="text-muted-foreground mt-0.5 text-xs">
             إنشاء موظفين وسجلات حضور ووظيفة ومتقدمين تجريبيين لتظهر لوحة التحكم بشكل عملي فوراً
           </p>
         </div>

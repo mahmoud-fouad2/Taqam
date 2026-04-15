@@ -90,7 +90,7 @@ export function GeneralSettingsSection({
         <CardDescription>{t.generalSettings.subtitle}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+        <div className="border-border/60 bg-muted/20 rounded-2xl border p-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-background flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border shadow-sm">

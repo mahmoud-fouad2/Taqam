@@ -9,8 +9,7 @@ const REGISTER_RATE_LIMIT = {
 
 const REGISTER_DISABLED_RESPONSE = {
   code: "ASSISTED_ACTIVATION_REQUIRED",
-  error:
-    "Self-service registration is disabled. Please contact us to activate your workspace.",
+  error: "Self-service registration is disabled. Please contact us to activate your workspace.",
   nextStep: "/request-demo"
 } as const;
 

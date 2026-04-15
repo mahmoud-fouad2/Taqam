@@ -5,6 +5,8 @@
 - **Node.js:** 24 LTS
 - **pnpm:** 9.15.9
 - **التحقق الكامل:** `pnpm validate:ci`
+- **تثبيت متطلبات E2E:** `pnpm test:e2e:install`
+- **تدقيق dependencies:** `pnpm audit:deps`
 - **تنسيق الويب + الموبايل:** `pnpm format:all`
 
 ### أوامر البداية المقترحة
@@ -13,6 +15,7 @@
 corepack enable
 corepack prepare pnpm@9.15.9 --activate
 pnpm install --frozen-lockfile
+pnpm test:e2e:install
 pnpm validate:ci
 pnpm dev
 ```

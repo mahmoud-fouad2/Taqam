@@ -63,7 +63,9 @@ export function mapTenantFromDb(t: any): Tenant {
     ...(pickString(settings, ["suspendReason"])
       ? { suspendedReason: pickString(settings, ["suspendReason"]) }
       : {}),
-    ...(t.setupStep !== undefined && t.setupStep !== null ? { setupStep: t.setupStep as number } : {}),
+    ...(t.setupStep !== undefined && t.setupStep !== null
+      ? { setupStep: t.setupStep as number }
+      : {}),
     ...(t.setupCompletedAt ? { setupCompletedAt: (t.setupCompletedAt as Date).toISOString() } : {})
   };
 }

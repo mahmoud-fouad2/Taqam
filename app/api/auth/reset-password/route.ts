@@ -188,7 +188,8 @@ export async function POST(request: NextRequest) {
         data: {
           tenantId: user.tenantId,
           userId: user.id,
-          action: payload.type === "tenant-admin-activation" ? "ACCOUNT_ACTIVATED" : "PASSWORD_RESET",
+          action:
+            payload.type === "tenant-admin-activation" ? "ACCOUNT_ACTIVATED" : "PASSWORD_RESET",
           entity: "User",
           entityId: user.id
         }

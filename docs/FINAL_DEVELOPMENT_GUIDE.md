@@ -254,8 +254,8 @@ pnpm --dir apps/mobile android:aab:release
   - `SETUP_GUIDE.md`
   - `COMPLETE_GUIDE.md`
   - `ANDROID_APK.md`
-   - `docs/SUPPORT_PLAYBOOK.md`
-   - `docs/GO_LIVE_CHECKLIST.md`
+  - `docs/SUPPORT_PLAYBOOK.md`
+  - `docs/GO_LIVE_CHECKLIST.md`
   - هذا الملف: `docs/FINAL_DEVELOPMENT_GUIDE.md`
 - التقارير التاريخية ونتائج التنفيذ القديمة: `docs/reports/`
 - الخطط القديمة المؤرشفة: `docs/archive/plans/`

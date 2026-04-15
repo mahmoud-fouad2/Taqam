@@ -153,7 +153,7 @@ export async function executeIntegrationSync({
           config: connection.config,
           executedAt: finishedAt,
           outcome: runStatus,
-          summary: runStatus === "failed" ? errorMessage ?? summary : summary
+          summary: runStatus === "failed" ? (errorMessage ?? summary) : summary
         })
       : undefined;
 

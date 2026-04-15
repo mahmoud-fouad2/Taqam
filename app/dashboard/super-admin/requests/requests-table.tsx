@@ -101,7 +101,10 @@ function getActivationStageLabel(
 ) {
   if (!stage) return null;
 
-  const labels: Record<NonNullable<SubscriptionRequest["activationStage"]>, { ar: string; en: string }> = {
+  const labels: Record<
+    NonNullable<SubscriptionRequest["activationStage"]>,
+    { ar: string; en: string }
+  > = {
     lead: {
       ar: "Lead جديد بانتظار المعالجة",
       en: "New lead awaiting review"
@@ -523,8 +526,8 @@ export function RequestsTable() {
                         {request.status === "approved" && request.tenantId && (
                           <DropdownMenuItem asChild>
                             <Link href={`/dashboard/super-admin/tenants/${request.tenantId}`}>
-                            <Building2 className="me-2 h-4 w-4" />
-                            {t.superAdmin.pViewCompany}
+                              <Building2 className="me-2 h-4 w-4" />
+                              {t.superAdmin.pViewCompany}
                             </Link>
                           </DropdownMenuItem>
                         )}

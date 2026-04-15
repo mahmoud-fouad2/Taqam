@@ -269,7 +269,7 @@ export function IdeasWorkspace({
           </CardHeader>
           <CardContent className="space-y-4">
             {canSubmit ? null : (
-              <Alert className="rounded-2xl border-border/60 bg-muted/40">
+              <Alert className="border-border/60 bg-muted/40 rounded-2xl">
                 <AlertTitle>{locale === "ar" ? "وضع العرض فقط" : "View only"}</AlertTitle>
                 <AlertDescription>
                   {locale === "ar"
@@ -296,7 +296,7 @@ export function IdeasWorkspace({
                     onClick={() => setCategory(key)}
                     disabled={!canSubmit}>
                     <div className="flex items-start gap-3">
-                      <div className="rounded-xl bg-muted p-2.5">
+                      <div className="bg-muted rounded-xl p-2.5">
                         <Icon className="h-4 w-4" />
                       </div>
                       <div>
@@ -366,7 +366,10 @@ export function IdeasWorkspace({
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Button onClick={() => void handleSubmit()} disabled={!canSubmit || submitting} className="h-12 rounded-xl px-5">
+              <Button
+                onClick={() => void handleSubmit()}
+                disabled={!canSubmit || submitting}
+                className="h-12 rounded-xl px-5">
                 <Send className="me-2 h-4 w-4" />
                 {submitting
                   ? locale === "ar"
@@ -398,7 +401,11 @@ export function IdeasWorkspace({
                   : "Entries here are tied to the same ticketing workflow, so status and replies stay in one place."}
               </CardDescription>
             </div>
-            <Button variant="outline" onClick={() => void load()} disabled={loading} className="h-12 rounded-xl px-5">
+            <Button
+              variant="outline"
+              onClick={() => void load()}
+              disabled={loading}
+              className="h-12 rounded-xl px-5">
               <RefreshCw className="me-2 h-4 w-4" />
               {locale === "ar" ? t.common.update : "Refresh"}
             </Button>
@@ -414,11 +421,11 @@ export function IdeasWorkspace({
             ) : null}
 
             {loading ? (
-              <div className="text-muted-foreground rounded-2xl border border-dashed border-border/60 bg-muted/20 py-10 text-center text-sm">
+              <div className="text-muted-foreground border-border/60 bg-muted/20 rounded-2xl border border-dashed py-10 text-center text-sm">
                 {locale === "ar" ? "جاري تحميل المقترحات..." : "Loading ideas..."}
               </div>
             ) : relevantItems.length === 0 ? (
-              <div className="text-muted-foreground rounded-2xl border border-dashed border-border/60 bg-muted/20 p-8 text-center text-sm leading-7">
+              <div className="text-muted-foreground border-border/60 bg-muted/20 rounded-2xl border border-dashed p-8 text-center text-sm leading-7">
                 {locale === "ar"
                   ? "لا توجد عناصر مصنفة بعد. أول مقترح أو بلاغ يتم إرساله من هذه الصفحة سيظهر هنا فورًا مع حالته الحالية."
                   : "There are no categorized ideas or bug reports yet. The first submission from this page will appear here immediately."}
@@ -432,7 +439,7 @@ export function IdeasWorkspace({
                     <Link
                       key={item.id}
                       href={`${prefix}/dashboard/support/${item.id}`}
-                      className="rounded-2xl border border-border/60 bg-background p-4 transition hover:-translate-y-0.5 hover:border-primary/20 hover:bg-muted/20 hover:shadow-sm">
+                      className="border-border/60 bg-background hover:border-primary/20 hover:bg-muted/20 rounded-2xl border p-4 transition hover:-translate-y-0.5 hover:shadow-sm">
                       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                         <div className="space-y-2">
                           <div className="flex flex-wrap items-center gap-2">

@@ -13,7 +13,7 @@ export const runtime = "nodejs";
 
 const generateLetterSchema = z.object({
   employeeId: z.string().min(1),
-  type: z.enum(["introductory", "salary", "experience"]),
+  type: z.enum(["introductory", "salary", "experience"])
 });
 
 export async function POST(req: NextRequest) {
@@ -31,7 +31,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = generateLetterSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" },
+        { status: 400 }
+      );
     }
 
     const { employeeId, type } = parsed.data;
@@ -51,8 +54,8 @@ export async function POST(req: NextRequest) {
         status: true,
         jobTitle: { select: { name: true, nameAr: true } },
         department: { select: { name: true, nameAr: true } },
-        tenant: { select: { name: true, nameAr: true } },
-      },
+        tenant: { select: { name: true, nameAr: true } }
+      }
     });
 
     if (!employee) {
@@ -60,7 +63,7 @@ export async function POST(req: NextRequest) {
     }
 
     const employeeName =
-      (employee.firstNameAr && employee.lastNameAr)
+      employee.firstNameAr && employee.lastNameAr
         ? `${employee.firstNameAr} ${employee.lastNameAr}`
         : `${employee.firstName} ${employee.lastName}`;
 
@@ -71,9 +74,7 @@ export async function POST(req: NextRequest) {
     // For experience letters, terminated employees may have an end date inferred
     // from the most recent expected end (prisma doesn't have termination date field by default; use null)
     const endDate: string | null =
-      type === "experience" && employee.status !== "ACTIVE"
-        ? new Date().toISOString()
-        : null;
+      type === "experience" && employee.status !== "ACTIVE" ? new Date().toISOString() : null;
 
     const pdfBytes = await buildLetterPdfBytes({
       type: type as LetterType,
@@ -85,13 +86,13 @@ export async function POST(req: NextRequest) {
       nationalId: employee.nationalId ?? undefined,
       salary: employee.baseSalary ? Number(employee.baseSalary) : undefined,
       currency: employee.currency,
-      companyName,
+      companyName
     });
 
     const letterTitles: Record<LetterType, string> = {
       introductory: "خطاب-تعريف",
       salary: "خطاب-راتب",
-      experience: "شهادة-خبرة",
+      experience: "شهادة-خبرة"
     };
     const filename = `${letterTitles[type as LetterType]}_${employeeName.replace(/\s+/g, "_")}.pdf`;
 
@@ -101,8 +102,8 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename*=UTF-8''${encodeURIComponent(filename)}`,
         "Content-Length": String(pdfBytes.byteLength),
-        "Cache-Control": "no-store",
-      },
+        "Cache-Control": "no-store"
+      }
     });
   } catch (error) {
     logApiError("POST /api/letters error", error);

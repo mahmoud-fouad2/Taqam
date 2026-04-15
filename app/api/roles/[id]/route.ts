@@ -62,7 +62,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const body = await req.json();
     const parsed = patchSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "بيانات غير صحيحة", details: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "بيانات غير صحيحة", details: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     const updateData: Record<string, unknown> = {};

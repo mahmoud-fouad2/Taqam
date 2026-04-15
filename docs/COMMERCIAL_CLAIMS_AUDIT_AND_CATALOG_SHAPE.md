@@ -12,11 +12,11 @@
 
 ### 1.2 أماكن claims ما زالت hardcoded أو موزعة
 
-- [app/(guest)/page.tsx](../app/(guest)/page.tsx): السطح الرئيسي أصبح مرتبطاً بدرجة جيدة بمصادر موحدة، لكن ما يزال presentation layer نفسه page-local كما هو متوقع.
-- [app/(guest)/features/page.tsx](../app/(guest)/features/page.tsx): تم ترحيل `suite catalog` إلى source موحد داخل `commercial-registry` (Feature Suites registry)، والصفحة أصبحت registry-backed على مستوى copy/claims مع بقاء presentation layer محلياً.
-- [app/(guest)/pricing/page.tsx](../app/(guest)/pricing/page.tsx): الباقات والمقارنة وframing الأساسي أصبحت في source مشترك، لكن لم تُربط بعد بالكامل بـ Feature Catalog / Claims Registry.
-- [app/(guest)/plans/page.tsx](../app/(guest)/plans/page.tsx): صارت تعتمد على source pricing المشترك في الباقات والـ framing الأساسي، لكن لم تُربط بعد بالكامل بـ claims registry نفسها.
-- [app/(guest)/careers/page.tsx](../app/(guest)/careers/page.tsx): hero مركزي، لكن differentiator framing والإحصاءات والعناصر المساندة ما زالت محلية.
+- [app/(guest)/page.tsx](<../app/(guest)/page.tsx>): السطح الرئيسي أصبح مرتبطاً بدرجة جيدة بمصادر موحدة، لكن ما يزال presentation layer نفسه page-local كما هو متوقع.
+- [app/(guest)/features/page.tsx](<../app/(guest)/features/page.tsx>): تم ترحيل `suite catalog` إلى source موحد داخل `commercial-registry` (Feature Suites registry)، والصفحة أصبحت registry-backed على مستوى copy/claims مع بقاء presentation layer محلياً.
+- [app/(guest)/pricing/page.tsx](<../app/(guest)/pricing/page.tsx>): الباقات والمقارنة وframing الأساسي أصبحت في source مشترك، لكن لم تُربط بعد بالكامل بـ Feature Catalog / Claims Registry.
+- [app/(guest)/plans/page.tsx](<../app/(guest)/plans/page.tsx>): صارت تعتمد على source pricing المشترك في الباقات والـ framing الأساسي، لكن لم تُربط بعد بالكامل بـ claims registry نفسها.
+- [app/(guest)/careers/page.tsx](<../app/(guest)/careers/page.tsx>): hero مركزي، لكن differentiator framing والإحصاءات والعناصر المساندة ما زالت محلية.
 
 ## 2. المشاكل الحالية
 
@@ -96,14 +96,14 @@
 ## 9. التقدم المنفذ بعد الـ audit
 
 - تم إنشاء contract أولي في [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts).
-- تم ترحيل `home feature grid` في [app/(guest)/page.tsx](../app/(guest)/page.tsx) ليقرأ من `Claims Registry` بدل النصوص الحرة.
-- تم توحيد بطاقات الباقات في [app/(guest)/page.tsx](../app/(guest)/page.tsx) مع [lib/marketing/pricing.ts](../lib/marketing/pricing.ts).
+- تم ترحيل `home feature grid` في [app/(guest)/page.tsx](<../app/(guest)/page.tsx>) ليقرأ من `Claims Registry` بدل النصوص الحرة.
+- تم توحيد بطاقات الباقات في [app/(guest)/page.tsx](<../app/(guest)/page.tsx>) مع [lib/marketing/pricing.ts](../lib/marketing/pricing.ts).
 - تم نقل `homepage integrations showcase` إلى مصدر مركزي داخل [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts) مع readiness صريحة تميّز بين `live` و`enterprise custom`.
-- تم نقل `homepage trust/proof surfaces` في [app/(guest)/page.tsx](../app/(guest)/page.tsx) إلى `Claims Registry` بدل arrays page-local.
-- تم توحيد `homepage personas` داخل [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts) عبر model منفصل للـ persona showcase، مع إبقاء الصور والتراكيب البصرية في [app/(guest)/page.tsx](../app/(guest)/page.tsx).
+- تم نقل `homepage trust/proof surfaces` في [app/(guest)/page.tsx](<../app/(guest)/page.tsx>) إلى `Claims Registry` بدل arrays page-local.
+- تم توحيد `homepage personas` داخل [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts) عبر model منفصل للـ persona showcase، مع إبقاء الصور والتراكيب البصرية في [app/(guest)/page.tsx](<../app/(guest)/page.tsx>).
 - تم نقل `homepage testimonials` إلى مصدر مركزي داخل [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts) مع `linkedFeatureIds` وguardrail test يمنع ظهور social proof غير مربوط بقدرات live.
-- تم سحب framing المحلي المتبقي في [app/(guest)/pricing/page.tsx](../app/(guest)/pricing/page.tsx) و[app/(guest)/plans/page.tsx](../app/(guest)/plans/page.tsx) إلى مصدر مشترك داخل [lib/marketing/pricing.ts](../lib/marketing/pricing.ts).
-- تم نقل أول slice من [app/(guest)/features/page.tsx](../app/(guest)/features/page.tsx) إلى `Claims Registry` وتشمل: `features hero` و`platform anatomy` و`platform highlights`.
+- تم سحب framing المحلي المتبقي في [app/(guest)/pricing/page.tsx](<../app/(guest)/pricing/page.tsx>) و[app/(guest)/plans/page.tsx](<../app/(guest)/plans/page.tsx>) إلى مصدر مشترك داخل [lib/marketing/pricing.ts](../lib/marketing/pricing.ts).
+- تم نقل أول slice من [app/(guest)/features/page.tsx](<../app/(guest)/features/page.tsx>) إلى `Claims Registry` وتشمل: `features hero` و`platform anatomy` و`platform highlights`.
 - تم ترحيل `features suite catalog` بالكامل إلى `Feature Suites registry` داخل [lib/marketing/commercial-registry.ts](../lib/marketing/commercial-registry.ts) مع guardrail tests لمنع drift.
 - بقيت surfaces التالية خارج المصدر الموحد حتى الآن:
   - أجزاء ثانوية من `plans page` إذا قررنا ربطها لاحقًا بالـ claims registry بدل source pricing المشترك فقط

@@ -131,7 +131,8 @@ function formatAuditAction(action: string, t: LocaleText, locale: "ar" | "en") {
     EMPLOYEE_BULK_IMPORT: t.audit.employeeBulkImport,
     EMPLOYEE_STATUS_CHANGE: t.audit.employeeStatusChange,
     TENANT_ACTIVATED: t.tenant.activate,
-    TENANT_ADMIN_EMPLOYEE_LINKED: locale === "ar" ? "ربط مدير الشركة بملف موظف" : "Link admin to employee",
+    TENANT_ADMIN_EMPLOYEE_LINKED:
+      locale === "ar" ? "ربط مدير الشركة بملف موظف" : "Link admin to employee",
     DATA_IMPORT: t.audit.dataImport,
     DATA_EXPORT: t.common.exportData,
     SETTINGS_UPDATE: t.audit.settingsUpdate,
@@ -175,7 +176,6 @@ function formatCompactId(value: string | null | undefined) {
   if (value.length <= 12) return value;
   return `${value.slice(0, 8)}...`;
 }
-
 
 export default function TenantDetailsPage() {
   const locale = useClientLocale();
@@ -501,11 +501,17 @@ export default function TenantDetailsPage() {
               <CardTitle className="flex items-center gap-2 text-base">
                 حالة التفعيل
                 {tenant.setupCompletedAt ? (
-                  <Badge variant="default" className="text-xs">مكتمل</Badge>
+                  <Badge variant="default" className="text-xs">
+                    مكتمل
+                  </Badge>
                 ) : (tenant.setupStep ?? 0) > 0 ? (
-                  <Badge variant="secondary" className="text-xs">جارٍ الإعداد</Badge>
+                  <Badge variant="secondary" className="text-xs">
+                    جارٍ الإعداد
+                  </Badge>
                 ) : (
-                  <Badge variant="outline" className="text-xs">لم يبدأ</Badge>
+                  <Badge variant="outline" className="text-xs">
+                    لم يبدأ
+                  </Badge>
                 )}
               </CardTitle>
             </CardHeader>
@@ -513,14 +519,12 @@ export default function TenantDetailsPage() {
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-sm">خطوة الإعداد</span>
                 <span className="font-semibold">
-                  {tenant.setupCompletedAt
-                    ? "✓ مكتمل"
-                    : `${tenant.setupStep ?? 0} / 5`}
+                  {tenant.setupCompletedAt ? "✓ مكتمل" : `${tenant.setupStep ?? 0} / 5`}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground text-sm">تاريخ الاكتمال</span>
-                <span className="font-semibold text-sm">
+                <span className="text-sm font-semibold">
                   {tenant.setupCompletedAt
                     ? new Date(tenant.setupCompletedAt).toLocaleDateString(
                         locale === "ar" ? "ar-SA" : "en-US"
@@ -535,8 +539,7 @@ export default function TenantDetailsPage() {
                     href={buildTenantUrl(tenant.slug, "/dashboard/setup")}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-primary hover:underline text-sm font-medium flex items-center gap-1"
-                  >
+                    className="text-primary flex items-center gap-1 text-sm font-medium hover:underline">
                     <ExternalLink className="h-3 w-3" />
                     فتح wizard
                   </a>
@@ -567,7 +570,10 @@ export default function TenantDetailsPage() {
                   </p>
                   <p className="mt-2 text-sm font-semibold">
                     {activationDiagnostics.latestActivationEvent
-                      ? formatDateTime(activationDiagnostics.latestActivationEvent.createdAt, locale)
+                      ? formatDateTime(
+                          activationDiagnostics.latestActivationEvent.createdAt,
+                          locale
+                        )
                       : "—"}
                   </p>
                 </div>
@@ -575,13 +581,17 @@ export default function TenantDetailsPage() {
                   <p className="text-muted-foreground text-sm">
                     {locale === "ar" ? "أحداث التفعيل" : "Activation events"}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{activationDiagnostics.activationEventCount}</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {activationDiagnostics.activationEventCount}
+                  </p>
                 </div>
                 <div className="rounded-lg border p-4">
                   <p className="text-muted-foreground text-sm">
                     {locale === "ar" ? "آخر تقدم مسجل" : "Latest recorded progress"}
                   </p>
-                  <p className="mt-2 text-2xl font-bold">{activationDiagnostics.latestActivationProgress}%</p>
+                  <p className="mt-2 text-2xl font-bold">
+                    {activationDiagnostics.latestActivationProgress}%
+                  </p>
                 </div>
               </div>
 
@@ -774,8 +784,12 @@ export default function TenantDetailsPage() {
                         </div>
                         <div className="space-y-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-medium">{formatAuditAction(entry.action, t, locale)}</p>
-                            <Badge variant="outline">{formatAuditEntity(entry.entity, t, locale)}</Badge>
+                            <p className="font-medium">
+                              {formatAuditAction(entry.action, t, locale)}
+                            </p>
+                            <Badge variant="outline">
+                              {formatAuditEntity(entry.entity, t, locale)}
+                            </Badge>
                           </div>
                           <p className="text-muted-foreground text-sm">
                             {entry.user?.name || entry.user?.email

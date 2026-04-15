@@ -144,11 +144,15 @@ export default async function SuperAdminRequestDetailsPage({
             <div>
               <div className="text-sm font-medium">{t.common.updatedAt}</div>
               <div className="text-muted-foreground text-sm">
-                {item.processedAt ? item.processedAt.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US") : "—"}
+                {item.processedAt
+                  ? item.processedAt.toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US")
+                  : "—"}
               </div>
             </div>
             <div>
-              <div className="text-sm font-medium">{locale === "ar" ? "مرحلة التفعيل" : "Activation stage"}</div>
+              <div className="text-sm font-medium">
+                {locale === "ar" ? "مرحلة التفعيل" : "Activation stage"}
+              </div>
               <div className="text-muted-foreground text-sm">
                 {getActivationStageLabel(activationStage, locale)}
               </div>
@@ -163,7 +167,11 @@ export default async function SuperAdminRequestDetailsPage({
           </div>
 
           <div className="pt-2">
-            <RequestActions requestId={item.id} status={item.status} initialPlan={mapRequestPlan(item.plan)} />
+            <RequestActions
+              requestId={item.id}
+              status={item.status}
+              initialPlan={mapRequestPlan(item.plan)}
+            />
           </div>
 
           {item.tenantId ? (

@@ -41,7 +41,7 @@ export function SidebarNav({ className, items, ...props }: SidebarNavProps) {
             currentPath === item.href || pathname === item.href
               ? "bg-muted hover:bg-muted"
               : "hover:bg-muted",
-            "w-max shrink-0 justify-start whitespace-nowrap text-start rtl:justify-end rtl:text-right lg:w-full"
+            "w-max shrink-0 justify-start text-start whitespace-nowrap lg:w-full rtl:justify-end rtl:text-right"
           )}>
           {item.title}
         </Link>

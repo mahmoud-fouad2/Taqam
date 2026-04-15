@@ -15,25 +15,31 @@ import {
 
 const ssoProviderConfigSchema = z.object({
   sso: z.object({
-    entraId: z.object({
-      tenantId: z.string().max(200).optional(),
-      clientId: z.string().max(200).optional(),
-      clientSecret: z.string().max(500).optional(),
-      enabled: z.boolean().optional(),
-    }).optional(),
-    google: z.object({
-      clientId: z.string().max(500).optional(),
-      clientSecret: z.string().max(500).optional(),
-      hostedDomain: z.string().max(100).optional(),
-      enabled: z.boolean().optional(),
-    }).optional(),
-    saml: z.object({
-      metadataUrl: z.string().url().max(1000).optional().or(z.literal("")),
-      entityId: z.string().max(1000).optional(),
-      acsUrl: z.string().max(1000).optional(),
-      enabled: z.boolean().optional(),
-    }).optional(),
-  }),
+    entraId: z
+      .object({
+        tenantId: z.string().max(200).optional(),
+        clientId: z.string().max(200).optional(),
+        clientSecret: z.string().max(500).optional(),
+        enabled: z.boolean().optional()
+      })
+      .optional(),
+    google: z
+      .object({
+        clientId: z.string().max(500).optional(),
+        clientSecret: z.string().max(500).optional(),
+        hostedDomain: z.string().max(100).optional(),
+        enabled: z.boolean().optional()
+      })
+      .optional(),
+    saml: z
+      .object({
+        metadataUrl: z.string().url().max(1000).optional().or(z.literal("")),
+        entityId: z.string().max(1000).optional(),
+        acsUrl: z.string().max(1000).optional(),
+        enabled: z.boolean().optional()
+      })
+      .optional()
+  })
 });
 
 export async function PATCH(req: NextRequest) {
@@ -50,7 +56,10 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json();
     const parsed = ssoProviderConfigSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "بيانات غير صالحة" },
+        { status: 400 }
+      );
     }
 
     const { sso } = parsed.data;
@@ -58,7 +67,7 @@ export async function PATCH(req: NextRequest) {
     // Merge into existing settings (preserve other settings keys)
     const current = await prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { settings: true },
+      select: { settings: true }
     });
 
     const existingSettings = (current?.settings as Record<string, unknown> | null) ?? {};
@@ -68,7 +77,7 @@ export async function PATCH(req: NextRequest) {
 
     await prisma.tenant.update({
       where: { id: tenantId },
-      data: { settings: updatedSettings },
+      data: { settings: updatedSettings }
     });
 
     await prisma.auditLog.create({

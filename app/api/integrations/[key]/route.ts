@@ -101,13 +101,9 @@ export async function GET(_req: NextRequest, { params }: Params) {
 // ── PATCH ─────────────────────────────────────────────────────────────────────
 
 const patchSchema = z.object({
-  mode: z
-    .enum(["NATIVE_API", "EMBEDDED", "MANUAL_BRIDGE", "ENTERPRISE_CUSTOM"])
-    .optional(),
+  mode: z.enum(["NATIVE_API", "EMBEDDED", "MANUAL_BRIDGE", "ENTERPRISE_CUSTOM"]).optional(),
   config: z.record(z.unknown()).optional(),
-  status: z
-    .enum(["DISCONNECTED", "PENDING", "CONNECTED", "DEGRADED", "ERROR"])
-    .optional(),
+  status: z.enum(["DISCONNECTED", "PENDING", "CONNECTED", "DEGRADED", "ERROR"]).optional(),
   // Raw credentials are accepted here and immediately encrypted before storage.
   // Never returned to the client — only stored as credentialsEncrypted.
   credentials: z.record(z.string()).optional()
@@ -219,4 +215,3 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
-

@@ -422,7 +422,7 @@ export function ShiftsManager() {
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+          <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.total}</CardTitle>
               <IconClock className="text-muted-foreground h-4 w-4" />
@@ -431,7 +431,7 @@ export function ShiftsManager() {
               <div className="text-2xl font-bold">{shifts.length}</div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+          <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.active}</CardTitle>
               <IconCalendar className="h-4 w-4 text-green-500" />
@@ -442,7 +442,7 @@ export function ShiftsManager() {
               </div>
             </CardContent>
           </Card>
-          <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+          <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{t.shifts.default}</CardTitle>
               <IconSun className="h-4 w-4 text-yellow-500" />
@@ -481,10 +481,16 @@ export function ShiftsManager() {
               </DialogHeader>
               <ShiftForm />
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddOpen(false)} className="h-12 rounded-xl px-5">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsAddOpen(false)}
+                  className="h-12 rounded-xl px-5">
                   {t.common.cancel}
                 </Button>
-                <Button onClick={handleSave} disabled={!formData.nameAr || !formData.code} className="h-12 rounded-xl px-5">
+                <Button
+                  onClick={handleSave}
+                  disabled={!formData.nameAr || !formData.code}
+                  className="h-12 rounded-xl px-5">
                   {t.common.add}
                 </Button>
               </DialogFooter>
@@ -493,7 +499,7 @@ export function ShiftsManager() {
         </div>
 
         {/* Shifts Table */}
-        <Card className="rounded-3xl border-border/40 bg-card/90 shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
+        <Card className="border-border/40 bg-card/90 rounded-3xl shadow-[0_2px_10px_0_rgba(0,0,0,0.02)]">
           <CardHeader>
             <CardTitle>{t.shifts.title}</CardTitle>
             <CardDescription>

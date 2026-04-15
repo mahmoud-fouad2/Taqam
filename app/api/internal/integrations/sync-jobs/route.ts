@@ -20,10 +20,7 @@ function hasValidCronSecret(req: NextRequest) {
     return { ok: false as const, status: 401, error: "Unauthorized" };
   }
 
-  const matches = timingSafeEqual(
-    Buffer.from(providedSecret),
-    Buffer.from(configuredSecret)
-  );
+  const matches = timingSafeEqual(Buffer.from(providedSecret), Buffer.from(configuredSecret));
 
   return matches
     ? { ok: true as const }

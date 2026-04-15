@@ -8,13 +8,17 @@ import { buildDepartmentTree, buildEmployeeOrgForest } from "@/lib/organization/
 
 const ALLOWED_ROLES = new Set(["SUPER_ADMIN", "TENANT_ADMIN", "HR_MANAGER", "MANAGER"]);
 
-function countEmployeeIssues(nodes: Array<{ hasHierarchyIssue?: boolean; directReports: any[] }>): number {
+function countEmployeeIssues(
+  nodes: Array<{ hasHierarchyIssue?: boolean; directReports: any[] }>
+): number {
   return nodes.reduce((sum, node) => {
     return sum + (node.hasHierarchyIssue ? 1 : 0) + countEmployeeIssues(node.directReports);
   }, 0);
 }
 
-function countDepartmentIssues(nodes: Array<{ hasHierarchyIssue?: boolean; children: any[] }>): number {
+function countDepartmentIssues(
+  nodes: Array<{ hasHierarchyIssue?: boolean; children: any[] }>
+): number {
   return nodes.reduce((sum, node) => {
     return sum + (node.hasHierarchyIssue ? 1 : 0) + countDepartmentIssues(node.children);
   }, 0);
@@ -34,9 +38,10 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url);
     const requestedTenantId = searchParams.get("tenantId")?.trim() || undefined;
-    const tenantId = session.user.role === "SUPER_ADMIN"
-      ? (requestedTenantId ?? session.user.tenantId ?? undefined)
-      : (session.user.tenantId ?? undefined);
+    const tenantId =
+      session.user.role === "SUPER_ADMIN"
+        ? (requestedTenantId ?? session.user.tenantId ?? undefined)
+        : (session.user.tenantId ?? undefined);
 
     if (!tenantId) {
       return NextResponse.json({ error: "Tenant context required" }, { status: 400 });

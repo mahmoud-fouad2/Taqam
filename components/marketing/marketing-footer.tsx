@@ -123,7 +123,8 @@ export async function MarketingFooter() {
                   <div
                     className="group border-border/60 bg-background/88 hover:border-border/90 flex h-9 w-[3.6rem] items-center justify-center overflow-hidden rounded-[0.9rem] border shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md sm:h-10 sm:w-[4rem]"
                     title={item.title}>
-                    <div className={`relative h-full w-full overflow-hidden ${item.frameClassName}`}>
+                    <div
+                      className={`relative h-full w-full overflow-hidden ${item.frameClassName}`}>
                       <Image
                         src={item.src}
                         alt={item.title}
@@ -199,8 +200,7 @@ export async function MarketingFooter() {
                 alt="Ma-Fo"
                 width={22}
                 height={22}
-                style={{ width: "auto", height: "22px" }}
-                className="object-contain"
+                className="h-[22px] w-[22px] object-contain"
               />
               <span>Development By Ma-Fo</span>
             </Link>

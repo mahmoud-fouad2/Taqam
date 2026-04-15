@@ -12,7 +12,7 @@ export async function generateMetadata() {
   const t = getText(locale);
   return {
     title: t.ssoSettings.pageTitle,
-    description: t.ssoSettings.pageDesc,
+    description: t.ssoSettings.pageDesc
   };
 }
 
@@ -28,7 +28,7 @@ export default async function SsoSettingsPage() {
 
   const tenant = await prisma.tenant.findUnique({
     where: { id: user.tenantId! },
-    select: { settings: true },
+    select: { settings: true }
   });
 
   const settings = (tenant?.settings as Record<string, unknown> | null) ?? {};
@@ -42,7 +42,7 @@ export default async function SsoSettingsPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">{t.ssoSettings.pageTitle}</h1>
-          <p className="text-sm text-muted-foreground">{t.ssoSettings.pageDesc}</p>
+          <p className="text-muted-foreground text-sm">{t.ssoSettings.pageDesc}</p>
         </div>
       </div>
 

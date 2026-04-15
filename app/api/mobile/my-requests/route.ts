@@ -218,7 +218,8 @@ export async function GET(request: NextRequest) {
       approverUsersById.set(approver.id, approver);
     }
 
-    const directManager = employee.manager && employee.manager.id !== employee.id ? employee.manager : null;
+    const directManager =
+      employee.manager && employee.manager.id !== employee.id ? employee.manager : null;
     const fallbackApprover = pickFallbackApprover(fallbackApproverUsers, userId);
 
     const items: SelfServiceRequest[] = [];

@@ -7,19 +7,13 @@ import { z } from "zod";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import prisma from "@/lib/db";
-import {
-  WEBHOOK_EVENTS,
-  generateWebhookSecret,
-  hashSecret
-} from "@/lib/webhooks";
+import { WEBHOOK_EVENTS, generateWebhookSecret, hashSecret } from "@/lib/webhooks";
 
 const createWebhookSchema = z.object({
   url: z.string().url().startsWith("https://", { message: "يجب أن يكون URL بروتوكول HTTPS" }),
   description: z.string().max(200).optional(),
-  events: z
-    .array(z.enum(WEBHOOK_EVENTS))
-    .default([])
-    // empty array = subscribe to ALL events
+  events: z.array(z.enum(WEBHOOK_EVENTS)).default([])
+  // empty array = subscribe to ALL events
 });
 
 // ── GET ───────────────────────────────────────────────────────────────────────
@@ -109,10 +103,7 @@ export async function POST(req: NextRequest) {
 
     // Return the raw secret exactly once — it cannot be retrieved again
     return withRateLimitHeaders(
-      NextResponse.json(
-        { data: webhook, secret: rawSecret },
-        { status: 201 }
-      ),
+      NextResponse.json({ data: webhook, secret: rawSecret }, { status: 201 }),
       rateLimit
     );
   } catch (err) {

@@ -37,10 +37,7 @@ export async function POST(req: NextRequest, { params }: Params) {
     }
 
     if (connection.status === "DISCONNECTED") {
-      return NextResponse.json(
-        { error: "لا يمكن المزامنة — التكامل غير مربوط" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "لا يمكن المزامنة — التكامل غير مربوط" }, { status: 409 });
     }
 
     let manualBridgeSubmission: ManualBridgeSyncSubmission | undefined;

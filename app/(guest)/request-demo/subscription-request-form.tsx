@@ -102,49 +102,52 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
     }
   }, [requestedPlan, setValue]);
 
-  const onSubmit = useCallback(async (data: RequestInput) => {
-    setSubmitError(null);
+  const onSubmit = useCallback(
+    async (data: RequestInput) => {
+      setSubmitError(null);
 
-    if (!siteKey || !executeRecaptcha) {
-      setSubmitError(t(locale, "captcha.missingConfig"));
-      return;
-    }
-
-    setIsLoading(true);
-    let captchaToken: string;
-    try {
-      captchaToken = await executeRecaptcha("request_demo");
-    } catch {
-      setSubmitError(t(locale, "captcha.invalid"));
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const res = await fetch("/api/public/tenant-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...data,
-          locale,
-          captchaToken
-        })
-      });
-
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        throw new Error(json?.error || (isAr ? "تعذر إرسال الطلب" : "Failed to submit request"));
+      if (!siteKey || !executeRecaptcha) {
+        setSubmitError(t(locale, "captcha.missingConfig"));
+        return;
       }
 
-      setIsSuccess(true);
-    } catch (e) {
-      setSubmitError(
-        e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request"
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  }, [locale, siteKey, executeRecaptcha, isAr]);
+      setIsLoading(true);
+      let captchaToken: string;
+      try {
+        captchaToken = await executeRecaptcha("request_demo");
+      } catch {
+        setSubmitError(t(locale, "captcha.invalid"));
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const res = await fetch("/api/public/tenant-requests", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...data,
+            locale,
+            captchaToken
+          })
+        });
+
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(json?.error || (isAr ? "تعذر إرسال الطلب" : "Failed to submit request"));
+        }
+
+        setIsSuccess(true);
+      } catch (e) {
+        setSubmitError(
+          e instanceof Error ? e.message : isAr ? "تعذر إرسال الطلب" : "Failed to submit request"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [locale, siteKey, executeRecaptcha, isAr]
+  );
 
   if (isSuccess) {
     return (
@@ -273,16 +276,23 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         <Select
           value={watch("plan")}
           onValueChange={(value) =>
-            setValue("plan", normalizeRequestedPlan(value), { shouldDirty: true, shouldValidate: true })
+            setValue("plan", normalizeRequestedPlan(value), {
+              shouldDirty: true,
+              shouldValidate: true
+            })
           }>
           <SelectTrigger className="bg-muted/50 focus:bg-background h-11 rounded-xl">
-            <SelectValue placeholder={isAr ? "اختر الباقة المناسبة مبدئياً" : "Select the closest plan"} />
+            <SelectValue
+              placeholder={isAr ? "اختر الباقة المناسبة مبدئياً" : "Select the closest plan"}
+            />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="trial">{isAr ? "تجريبي / مبدئي" : "Trial / initial"}</SelectItem>
             <SelectItem value="starter">{isAr ? "Starter / الأساسية" : "Starter"}</SelectItem>
             <SelectItem value="business">{isAr ? "Business / الأعمال" : "Business"}</SelectItem>
-            <SelectItem value="enterprise">{isAr ? "Enterprise / المؤسسات" : "Enterprise"}</SelectItem>
+            <SelectItem value="enterprise">
+              {isAr ? "Enterprise / المؤسسات" : "Enterprise"}
+            </SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -299,9 +309,7 @@ export function SubscriptionRequestForm({ locale }: SubscriptionRequestFormProps
         />
       </div>
 
-      {!siteKey && (
-        <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>
-      )}
+      {!siteKey && <p className="text-destructive text-sm">{t(locale, "captcha.missingConfig")}</p>}
 
       {submitError ? (
         <div className="border-destructive/30 bg-destructive/5 text-destructive rounded-xl border px-4 py-3 text-sm">

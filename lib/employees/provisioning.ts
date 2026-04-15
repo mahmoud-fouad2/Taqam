@@ -1,7 +1,10 @@
 import type { Prisma } from "@prisma/client";
 
 type EmployeeProvisioningClient = {
-  $queryRaw<T = unknown>(query: TemplateStringsArray | Prisma.Sql, ...values: unknown[]): Promise<T>;
+  $queryRaw<T = unknown>(
+    query: TemplateStringsArray | Prisma.Sql,
+    ...values: unknown[]
+  ): Promise<T>;
   employee: {
     findMany(args: unknown): Promise<Array<{ employeeNumber: string }>>;
   };

@@ -24,7 +24,9 @@ export async function GET(req: NextRequest) {
   const tenantId = session.user.tenantId ?? null;
 
   let closed = false;
-  req.signal.addEventListener("abort", () => { closed = true; });
+  req.signal.addEventListener("abort", () => {
+    closed = true;
+  });
 
   const encoder = new TextEncoder();
 
@@ -53,7 +55,11 @@ export async function GET(req: NextRequest) {
       const interval = setInterval(async () => {
         if (closed) {
           clearInterval(interval);
-          try { controller.close(); } catch { /* already closed */ }
+          try {
+            controller.close();
+          } catch {
+            /* already closed */
+          }
           return;
         }
         try {
@@ -68,7 +74,10 @@ export async function GET(req: NextRequest) {
 
       // Heartbeat every 25 s to keep connection alive through proxies
       const heartbeat = setInterval(() => {
-        if (closed) { clearInterval(heartbeat); return; }
+        if (closed) {
+          clearInterval(heartbeat);
+          return;
+        }
         try {
           controller.enqueue(encoder.encode(": heartbeat\n\n"));
         } catch {

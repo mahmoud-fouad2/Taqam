@@ -69,9 +69,7 @@ function sanitizeMobileDiagnosticsTags(
     MOBILE_DIAGNOSTICS_SENSITIVE_TAG_PATTERN.test(key) ? "[redacted]" : value
   ]);
 
-  return sanitizedEntries.length > 0
-    ? Object.fromEntries(sanitizedEntries)
-    : undefined;
+  return sanitizedEntries.length > 0 ? Object.fromEntries(sanitizedEntries) : undefined;
 }
 
 function getAuditString(data: Record<string, unknown> | null, key: string) {
@@ -103,9 +101,9 @@ function getSourceLabel(source: string | null, locale: MobileDiagnosticsLocale) 
   return locale === "ar" ? "معالج عام" : "Global handler";
 }
 
-export function parseMobileDiagnosticsReport(input: unknown):
-  | { ok: true; data: ParsedMobileDiagnosticsReport }
-  | { ok: false; error: string } {
+export function parseMobileDiagnosticsReport(
+  input: unknown
+): { ok: true; data: ParsedMobileDiagnosticsReport } | { ok: false; error: string } {
   const parsed = mobileDiagnosticsReportSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -195,7 +193,7 @@ export function buildMobileDiagnosticsSummary({
       appVersion,
       deviceLabel: deviceName ?? platform,
       tenantLabel: entry.tenantId
-        ? tenantNameById[entry.tenantId] ?? entry.tenantId
+        ? (tenantNameById[entry.tenantId] ?? entry.tenantId)
         : locale === "ar"
           ? "بدون شركة مرتبطة"
           : "No tenant linked",
@@ -203,7 +201,8 @@ export function buildMobileDiagnosticsSummary({
         entry.user?.name ||
         entry.user?.email ||
         (locale === "ar" ? "بدون مستخدم مرتبط" : "No linked user"),
-      createdAt: typeof entry.createdAt === "string" ? entry.createdAt : entry.createdAt.toISOString()
+      createdAt:
+        typeof entry.createdAt === "string" ? entry.createdAt : entry.createdAt.toISOString()
     };
   });
 

@@ -70,11 +70,7 @@ describe("manual bridge workflow validation", () => {
       ok: true,
       data: {
         confirmed: true,
-        completedSteps: [
-          "prepare-export",
-          "submit-gosi-portal",
-          "verify-gosi-response"
-        ],
+        completedSteps: ["prepare-export", "submit-gosi-portal", "verify-gosi-response"],
         referenceId: "GOSI-2026-04",
         note: "تم رفع الملف"
       }

@@ -2,13 +2,7 @@
 
 import * as React from "react";
 import { Cell, Pie, PieChart, Tooltip } from "recharts";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import type { AppLocale } from "@/lib/i18n/types";
 import { getText } from "@/lib/i18n/text";
 import type { DashboardPiePoint } from "@/lib/dashboard";
@@ -36,7 +30,13 @@ type TooltipPayloadItem = {
   value?: number;
 };
 
-function DepartmentsTooltip({ active, payload }: { active?: boolean; payload?: TooltipPayloadItem[] }) {
+function DepartmentsTooltip({
+  active,
+  payload
+}: {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+}) {
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -46,7 +46,7 @@ function DepartmentsTooltip({ active, payload }: { active?: boolean; payload?: T
   const value = typeof item?.value === "number" ? item.value : undefined;
 
   return (
-    <div className="rounded-md border bg-background px-2 py-1 text-sm text-foreground shadow-sm">
+    <div className="bg-background text-foreground rounded-md border px-2 py-1 text-sm shadow-sm">
       <div className="font-medium">{name}</div>
       {typeof value === "number" ? (
         <div className="text-muted-foreground tabular-nums">{value}</div>
@@ -74,7 +74,7 @@ export function ChartDepartmentsPie({ locale, data }: Props) {
       </CardHeader>
       <CardContent className="flex flex-col items-center gap-4 sm:flex-row">
         {data.length === 0 ? (
-          <p className="text-muted-foreground text-sm py-8 w-full text-center">{c.noData}</p>
+          <p className="text-muted-foreground w-full py-8 text-center text-sm">{c.noData}</p>
         ) : (
           <>
             <div className="relative shrink-0">
@@ -91,27 +91,25 @@ export function ChartDepartmentsPie({ locale, data }: Props) {
                     <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
                   ))}
                 </Pie>
-                <Tooltip
-                  content={<DepartmentsTooltip />}
-                />
+                <Tooltip content={<DepartmentsTooltip />} />
               </PieChart>
               <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                 <span className="text-2xl font-bold">{total}</span>
                 <span className="text-muted-foreground text-xs">{c.employees}</span>
               </div>
             </div>
-            <ul className="flex-1 space-y-2 min-w-0">
+            <ul className="min-w-0 flex-1 space-y-2">
               {data.map((dept, i) => (
-                <li key={dept.name} className="flex items-center gap-2 text-sm min-w-0">
+                <li key={dept.name} className="flex min-w-0 items-center gap-2 text-sm">
                   <span
-                    className={`h-3 w-3 rounded-sm shrink-0 ${
+                    className={`h-3 w-3 shrink-0 rounded-sm ${
                       CHART_COLOR_CLASSES[i % CHART_COLOR_CLASSES.length]
                     }`}
                   />
-                  <span className="truncate flex-1">
+                  <span className="flex-1 truncate">
                     {locale === "ar" && dept.nameAr ? dept.nameAr : dept.name}
                   </span>
-                  <span className="font-medium tabular-nums shrink-0">{dept.value}</span>
+                  <span className="shrink-0 font-medium tabular-nums">{dept.value}</span>
                 </li>
               ))}
             </ul>

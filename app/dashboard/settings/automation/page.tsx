@@ -30,7 +30,7 @@ export default async function AutomationSettingsPage() {
         </div>
         <div>
           <h1 className="text-2xl font-bold tracking-tight">الأتمتة</h1>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             إدارة الـ workflows المبنية على الأحداث مع سجل التشغيل وإعادة المحاولة.
           </p>
         </div>

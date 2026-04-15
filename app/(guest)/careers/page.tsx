@@ -51,14 +51,16 @@ const differentiatorCards: DifferentiatorCard[] = [
     titleAr: "بوابة خاصة بكل شركة",
     titleEn: "Dedicated portal per company",
     descAr: "لكل شركة صفحة توظيف مستقلة يمكن مشاركتها مباشرة مع المرشحين على رابط خاص بها.",
-    descEn: "Each company gets a dedicated careers portal that can be shared directly with candidates."
+    descEn:
+      "Each company gets a dedicated careers portal that can be shared directly with candidates."
   },
   {
     slot: "jobs-hub",
     icon: BriefcaseBusiness,
     titleAr: "مجمّع وظائف المنصة",
     titleEn: "Platform-wide jobs hub",
-    descAr: "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة.",
+    descAr:
+      "المرشح يرى كل الوظائف المفتوحة على مستوى المنصة ويصل منها مباشرة إلى صفحة كل وظيفة أو كل شركة.",
     descEn:
       "Candidates can browse all active openings across the platform and jump into either a job page or a company portal."
   },
@@ -163,9 +165,9 @@ export default async function CareersPage({
             name: isAr ? "الوظائف المفتوحة" : "Open roles",
             description: pageDescription,
             items: jobs.slice(0, 10).map((job) => ({
-              name: isAr ? (job.titleAr || job.title) : job.title,
+              name: isAr ? job.titleAr || job.title : job.title,
               url: `${base}${p}/careers/${job.id}`,
-              description: isAr ? (job.tenantNameAr || job.tenantName) : job.tenantName
+              description: isAr ? job.tenantNameAr || job.tenantName : job.tenantName
             }))
           })
         ]}

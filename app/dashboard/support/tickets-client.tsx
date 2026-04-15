@@ -243,7 +243,9 @@ export function SupportTicketsClient({
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="subject">{locale === "ar" ? t.common.subject : "Subject"}</Label>
+                    <Label htmlFor="subject">
+                      {locale === "ar" ? t.common.subject : "Subject"}
+                    </Label>
                     <Input
                       id="subject"
                       value={subject}
@@ -257,11 +259,15 @@ export function SupportTicketsClient({
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="category">{locale === "ar" ? t.common.category : "Category"}</Label>
+                    <Label htmlFor="category">
+                      {locale === "ar" ? t.common.category : "Category"}
+                    </Label>
                     <Select value={category || undefined} onValueChange={setCategory}>
                       <SelectTrigger id="category">
                         <SelectValue
-                          placeholder={locale === "ar" ? "اختر التصنيف الأقرب" : "Choose a category"}
+                          placeholder={
+                            locale === "ar" ? "اختر التصنيف الأقرب" : "Choose a category"
+                          }
                         />
                       </SelectTrigger>
                       <SelectContent>
@@ -277,7 +283,9 @@ export function SupportTicketsClient({
 
                 <div className="grid gap-4 sm:grid-cols-[minmax(0,1fr)_220px]">
                   <div className="space-y-2">
-                    <Label htmlFor="message">{locale === "ar" ? "تفاصيل الحالة" : "Case details"}</Label>
+                    <Label htmlFor="message">
+                      {locale === "ar" ? "تفاصيل الحالة" : "Case details"}
+                    </Label>
                     <Textarea
                       id="message"
                       rows={7}
@@ -292,22 +300,30 @@ export function SupportTicketsClient({
                   </div>
 
                   <div className="space-y-4">
-                    <div className="space-y-2 rounded-2xl border bg-muted/30 p-4">
-                      <Label htmlFor="priority">{locale === "ar" ? t.common.priority : "Priority"}</Label>
-                      <Select value={priority} onValueChange={(value) => setPriority(value as Ticket["priority"])}>
+                    <div className="bg-muted/30 space-y-2 rounded-2xl border p-4">
+                      <Label htmlFor="priority">
+                        {locale === "ar" ? t.common.priority : "Priority"}
+                      </Label>
+                      <Select
+                        value={priority}
+                        onValueChange={(value) => setPriority(value as Ticket["priority"])}>
                         <SelectTrigger id="priority">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="LOW">{priorityLabel(locale, "LOW", t)}</SelectItem>
-                          <SelectItem value="NORMAL">{priorityLabel(locale, "NORMAL", t)}</SelectItem>
+                          <SelectItem value="NORMAL">
+                            {priorityLabel(locale, "NORMAL", t)}
+                          </SelectItem>
                           <SelectItem value="HIGH">{priorityLabel(locale, "HIGH", t)}</SelectItem>
-                          <SelectItem value="URGENT">{priorityLabel(locale, "URGENT", t)}</SelectItem>
+                          <SelectItem value="URGENT">
+                            {priorityLabel(locale, "URGENT", t)}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="rounded-2xl border border-dashed bg-background p-4 text-sm leading-6">
+                    <div className="bg-background rounded-2xl border border-dashed p-4 text-sm leading-6">
                       <p className="font-medium">
                         {locale === "ar" ? "بعد الإرسال" : "After submission"}
                       </p>

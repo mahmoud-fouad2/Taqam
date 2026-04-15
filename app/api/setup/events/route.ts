@@ -36,10 +36,7 @@ export async function POST(req: NextRequest) {
   try {
     const parsed = parseSetupTrackedEventInput(await req.json().catch(() => ({})));
     if (!parsed.ok) {
-      return NextResponse.json(
-        { error: parsed.error, issues: parsed.issues },
-        { status: 422 }
-      );
+      return NextResponse.json({ error: parsed.error, issues: parsed.issues }, { status: 422 });
     }
 
     const action = getSetupTrackedEventAuditAction(parsed.data.event);

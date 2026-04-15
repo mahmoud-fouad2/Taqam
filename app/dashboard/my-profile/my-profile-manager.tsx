@@ -568,16 +568,16 @@ export default function MyProfileManager() {
       {/* Tabs */}
       <Tabs defaultValue="personal" className="w-full">
         <TabsList className="flex h-auto w-full flex-wrap justify-start">
-          <TabsTrigger value="personal" className="flex-1 min-w-[140px]">
+          <TabsTrigger value="personal" className="min-w-[140px] flex-1">
             {t.employees.personalInfo}
           </TabsTrigger>
-          <TabsTrigger value="contact" className="flex-1 min-w-[140px]">
+          <TabsTrigger value="contact" className="min-w-[140px] flex-1">
             {t.organization.contactInfo}
           </TabsTrigger>
-          <TabsTrigger value="bank" className="flex-1 min-w-[140px]">
+          <TabsTrigger value="bank" className="min-w-[140px] flex-1">
             {t.common.bankData}
           </TabsTrigger>
-          <TabsTrigger value="documents" className="flex-1 min-w-[140px]">
+          <TabsTrigger value="documents" className="min-w-[140px] flex-1">
             {t.onboarding.documents}
           </TabsTrigger>
         </TabsList>

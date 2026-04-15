@@ -55,7 +55,9 @@ export default async function RequestDemoPage() {
             url: pageUrl,
             locale,
             title: isAr ? "احجز جلسة تعريف" : "Schedule a walkthrough",
-            description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
+            description: isAr
+              ? requestDemoContent.description.ar
+              : requestDemoContent.description.en,
             type: "ContactPage",
             about: isAr ? "جلسة تعريف لمنصة طاقم" : "Schedule a Taqam walkthrough"
           }),
@@ -63,7 +65,9 @@ export default async function RequestDemoPage() {
             url: pageUrl,
             locale,
             name: isAr ? "أهم ما سنغطيه" : "Walkthrough highlights",
-            description: isAr ? requestDemoContent.description.ar : requestDemoContent.description.en,
+            description: isAr
+              ? requestDemoContent.description.ar
+              : requestDemoContent.description.en,
             items: highlights.map((highlight) => ({
               name: highlight.title,
               description: highlight.description
@@ -80,6 +84,8 @@ export default async function RequestDemoPage() {
                   className="mb-5"
                   frameClassName="rounded-2xl p-0 shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-white dark:ring-white/20"
                   imageClassName="h-16"
+                  priority
+                  loading="eager"
                 />
                 <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-200">
                   {isAr ? requestDemoContent.badge.ar : requestDemoContent.badge.en}
@@ -159,7 +165,9 @@ export default async function RequestDemoPage() {
                   {isAr ? requestDemoContent.sideTitle.ar : requestDemoContent.sideTitle.en}
                 </h2>
                 <p className="mt-4 max-w-md text-sm leading-7 text-slate-600 dark:text-white/70">
-                  {isAr ? requestDemoContent.sideDescription.ar : requestDemoContent.sideDescription.en}
+                  {isAr
+                    ? requestDemoContent.sideDescription.ar
+                    : requestDemoContent.sideDescription.en}
                 </p>
               </FadeIn>
 

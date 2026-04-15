@@ -57,10 +57,7 @@ export async function PUT(req: NextRequest, { params }: RouteParams) {
       isDefaultCommercialFeatureId(existing.featureId) &&
       parsed.data.featureId !== existing.featureId
     ) {
-      return NextResponse.json(
-        { error: "Default feature IDs cannot be changed" },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: "Default feature IDs cannot be changed" }, { status: 409 });
     }
 
     const updated = await prisma.commercialFeatureCatalogEntry.update({

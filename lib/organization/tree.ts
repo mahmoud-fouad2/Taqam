@@ -255,6 +255,8 @@ export function buildDepartmentTree(departments: OrgDepartmentRecord[]): OrgDepa
     if (node) tree.push({ ...node, hasHierarchyIssue: true });
   }
 
-  tree.sort((left, right) => (left.nameAr || left.name).localeCompare(right.nameAr || right.name, "ar"));
+  tree.sort((left, right) =>
+    (left.nameAr || left.name).localeCompare(right.nameAr || right.name, "ar")
+  );
   return tree;
 }

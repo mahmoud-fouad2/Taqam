@@ -9,7 +9,11 @@ import { z } from "zod";
 import { requireTenantSession, logApiError } from "@/lib/api/route-helper";
 import { checkRateLimit, withRateLimitHeaders } from "@/lib/rate-limit";
 import prisma from "@/lib/db";
-import { ALL_PERMISSIONS, sanitizeCustomRolePermissions, BUILTIN_ROLE_PERMISSIONS } from "@/lib/rbac";
+import {
+  ALL_PERMISSIONS,
+  sanitizeCustomRolePermissions,
+  BUILTIN_ROLE_PERMISSIONS
+} from "@/lib/rbac";
 
 const createRoleSchema = z.object({
   name: z.string().min(2).max(60),
@@ -77,7 +81,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const parsed = createRoleSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: "بيانات غير صحيحة", details: parsed.error.issues }, { status: 400 });
+      return NextResponse.json(
+        { error: "بيانات غير صحيحة", details: parsed.error.issues },
+        { status: 400 }
+      );
     }
 
     // Enforce max 50 custom roles per tenant

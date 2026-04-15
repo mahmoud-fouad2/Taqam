@@ -15,9 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const primarySiteName = isAr ? siteContent.siteNameAr : siteContent.siteNameEn;
   const secondarySiteName = isAr ? siteContent.siteNameEn : siteContent.siteNameAr;
   const title = `${primarySiteName} | ${secondarySiteName}`;
-  const description = isAr
-    ? siteContent.defaultDescriptionAr
-    : siteContent.defaultDescriptionEn;
+  const description = isAr ? siteContent.defaultDescriptionAr : siteContent.defaultDescriptionEn;
   const keywords = Array.from(
     new Set(
       isAr

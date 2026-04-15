@@ -619,7 +619,7 @@ export function JobOffersManager() {
             ) : null}
 
             {isManualCandidate ? (
-              <div className="grid gap-4 rounded-2xl border bg-muted/20 p-4">
+              <div className="bg-muted/20 grid gap-4 rounded-2xl border p-4">
                 <div>
                   <p className="font-medium">
                     {locale === "ar" ? "بيانات الشخص" : "Person details"}
@@ -808,7 +808,11 @@ export function JobOffersManager() {
               {t.common.cancel}
             </Button>
             <Button onClick={() => void handleSave()} disabled={isSaving}>
-              {editingOffer ? t.common.saveChanges : locale === "ar" ? "حفظ العرض / العقد" : "Save offer / contract"}
+              {editingOffer
+                ? t.common.saveChanges
+                : locale === "ar"
+                  ? "حفظ العرض / العقد"
+                  : "Save offer / contract"}
             </Button>
           </DialogFooter>
         </DialogContent>

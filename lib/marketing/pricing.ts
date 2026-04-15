@@ -1,5 +1,3 @@
-
-
 import path from "node:path";
 
 import {
@@ -114,7 +112,12 @@ function asStringArray(value: unknown): string[] {
 }
 
 function normalizePlanType(value: unknown): MarketingPricingPlan["planType"] {
-  if (value === "TRIAL" || value === "BASIC" || value === "PROFESSIONAL" || value === "ENTERPRISE") {
+  if (
+    value === "TRIAL" ||
+    value === "BASIC" ||
+    value === "PROFESSIONAL" ||
+    value === "ENTERPRISE"
+  ) {
     return value;
   }
 
@@ -514,8 +517,12 @@ function normalizePricingMarketingContent(value: unknown): PricingMarketingConte
   }
 
   const source = value as Partial<PricingMarketingContent>;
-  const pricingPageSource = source.pricingPage as Partial<PricingMarketingContent["pricingPage"]> | undefined;
-  const plansPageSource = source.plansPage as Partial<PricingMarketingContent["plansPage"]> | undefined;
+  const pricingPageSource = source.pricingPage as
+    | Partial<PricingMarketingContent["pricingPage"]>
+    | undefined;
+  const plansPageSource = source.plansPage as
+    | Partial<PricingMarketingContent["plansPage"]>
+    | undefined;
   const fallback = pricingMarketingContent;
 
   return {
@@ -574,8 +581,14 @@ function normalizePricingMarketingContent(value: unknown): PricingMarketingConte
       )
     },
     plansPage: {
-      heroBadge: normalizeLocalizedMarketingText(plansPageSource?.heroBadge, fallback.plansPage.heroBadge),
-      heroTitle: normalizeLocalizedMarketingText(plansPageSource?.heroTitle, fallback.plansPage.heroTitle),
+      heroBadge: normalizeLocalizedMarketingText(
+        plansPageSource?.heroBadge,
+        fallback.plansPage.heroBadge
+      ),
+      heroTitle: normalizeLocalizedMarketingText(
+        plansPageSource?.heroTitle,
+        fallback.plansPage.heroTitle
+      ),
       heroDescription: normalizeLocalizedMarketingText(
         plansPageSource?.heroDescription,
         fallback.plansPage.heroDescription
@@ -659,8 +672,7 @@ export async function getPricingMarketingContent(
       filePath: publishedPricingMarketingContentFilePath,
       remoteKey: publishedPricingMarketingContentRemoteKey,
       normalize: normalizePricingMarketingContent
-    })) ??
-    pricingMarketingContent;
+    })) ?? pricingMarketingContent;
 
   if (version === "draft") {
     return (

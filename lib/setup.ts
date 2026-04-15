@@ -265,7 +265,10 @@ export async function ensureSetupFirstEmployeeRecord(tenantId: string): Promise<
   });
 }
 
-export async function ensureSetupCompletionArtifacts(tenantId: string, userId?: string): Promise<void> {
+export async function ensureSetupCompletionArtifacts(
+  tenantId: string,
+  userId?: string
+): Promise<void> {
   await ensureSetupFirstEmployeeRecord(tenantId);
   await provisionSetupDefaults(tenantId);
   if (userId) {
@@ -464,9 +467,9 @@ export async function seedSampleSetupData(tenantId: string, userId: string): Pro
         authorId: userId,
         title: "Welcome to Taqam",
         titleAr: "مرحباً بكم في طاقم",
-        content: "Your workspace is ready. Review the dashboard and complete the remaining setup details.",
-        contentAr:
-          `تم تجهيز مساحة عمل ${tenant?.nameAr ?? tenant?.name ?? "الشركة"} بنجاح. راجع لوحة التحكم وابدأ بإضافة بياناتك الفعلية.`,
+        content:
+          "Your workspace is ready. Review the dashboard and complete the remaining setup details.",
+        contentAr: `تم تجهيز مساحة عمل ${tenant?.nameAr ?? tenant?.name ?? "الشركة"} بنجاح. راجع لوحة التحكم وابدأ بإضافة بياناتك الفعلية.`,
         type: "INFO",
         priority: "NORMAL",
         targetAll: true,
@@ -487,7 +490,8 @@ export async function seedSampleSetupData(tenantId: string, userId: string): Pro
         titleAr: "أخصائي عمليات موارد بشرية",
         description: "Own day-to-day HR operations, employee records, and people reporting.",
         requirements: "1-3 years in HR operations, HRIS familiarity, reporting skills.",
-        responsibilities: "Maintain employee data, coordinate leave processes, and support HR analytics.",
+        responsibilities:
+          "Maintain employee data, coordinate leave processes, and support HR analytics.",
         benefits: "Medical insurance, annual bonus, hybrid work policy.",
         departmentId: department?.id,
         jobTitleId: jobTitle?.id,
