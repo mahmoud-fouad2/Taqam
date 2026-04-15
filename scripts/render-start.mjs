@@ -61,11 +61,9 @@ async function main() {
   }
 
   // 3) Start Next.
-  // Always use `next start` — never standalone server.js. Standalone mode on
-  // Render requires manually copying .next/static, public, and native binaries
-  // into .next/standalone, which is fragile and has caused persistent 404s.
-  // `next start` serves everything correctly from the .next directory directly.
-  console.log("[render-start] Starting Next.js via next start...");
+  // Delegate to the shared production start wrapper so Render works whether the
+  // build produced `.next/standalone/server.js` or a regular `.next` output.
+  console.log("[render-start] Starting Next.js via production start wrapper...");
 
   // Force HOSTNAME=0.0.0.0 so Next binds on all interfaces.
   // Render sets HOSTNAME to the pod's internal hostname; inheriting it makes
@@ -79,8 +77,8 @@ async function main() {
       : {})
   };
 
-  const next = await run(bin("next"), ["start", "--hostname", "0.0.0.0"], {
-    label: "next-start",
+  const next = await run("node", ["scripts/start-production.mjs", "--hostname", "0.0.0.0"], {
+    label: "start-production",
     env: nextEnv
   });
   process.exit(next.code);
