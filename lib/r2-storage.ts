@@ -41,6 +41,24 @@ function getR2Client() {
 const BUCKET_NAME = process.env.R2_BUCKET_NAME || "";
 const PUBLIC_URL = process.env.R2_PUBLIC_URL || "";
 
+function isR2ObjectMissing(error: unknown) {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  const maybeError = error as {
+    Code?: string;
+    name?: string;
+    $metadata?: { httpStatusCode?: number };
+  };
+
+  return (
+    maybeError.Code === "NoSuchKey" ||
+    maybeError.name === "NoSuchKey" ||
+    maybeError.$metadata?.httpStatusCode === 404
+  );
+}
+
 export function isR2Configured() {
   return getStorageRuntimeStatus().configured;
 }
@@ -247,6 +265,10 @@ export async function getFile(key: string): Promise<Buffer | null> {
 
     return Buffer.concat(chunks);
   } catch (error) {
+    if (isR2ObjectMissing(error)) {
+      return null;
+    }
+
     console.error("R2 Get Error:", error);
     return null;
   }
@@ -268,6 +290,10 @@ export async function headFile(key: string): Promise<FileMetadata | null> {
       contentType: response.ContentType
     };
   } catch (error) {
+    if (isR2ObjectMissing(error)) {
+      return null;
+    }
+
     console.error("R2 Head Error:", error);
     return null;
   }
