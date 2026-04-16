@@ -1,5 +1,8 @@
+import { cp, rm } from "node:fs/promises";
+import { existsSync } from "node:fs";
 import { spawn } from "node:child_process";
 import { createRequire } from "node:module";
+import path from "node:path";
 
 const isWindows = process.platform === "win32";
 const MIN_BUILD_HEAP_MB = 3072;
@@ -47,6 +50,7 @@ const useWebpack =
   cliForceWebpack || (!cliForceTurbopack && (forceWebpack || (isWindows && !forceTurbopack)));
 const require = createRequire(import.meta.url);
 const nextBin = require.resolve("next/dist/bin/next");
+const projectRoot = path.resolve(import.meta.dirname, "..");
 
 const args = [nextBin, "build", ...(useWebpack ? ["--webpack"] : [])];
 
@@ -73,15 +77,49 @@ const child = spawn(process.execPath, args, {
   env
 });
 
+async function copyDirectoryIntoStandalone(sourceRelativePath, destinationRelativePath) {
+  const sourcePath = path.join(projectRoot, sourceRelativePath);
+  const destinationPath = path.join(projectRoot, ".next", "standalone", destinationRelativePath);
+
+  if (!existsSync(sourcePath)) {
+    return;
+  }
+
+  await rm(destinationPath, { recursive: true, force: true });
+  await cp(sourcePath, destinationPath, { recursive: true, force: true });
+}
+
+async function finalizeStandaloneAssets() {
+  const standalonePath = path.join(projectRoot, ".next", "standalone");
+
+  if (!existsSync(standalonePath)) {
+    console.log("[build] Standalone output not detected; skipping static asset copy.");
+    return;
+  }
+
+  await copyDirectoryIntoStandalone("public", "public");
+  await copyDirectoryIntoStandalone(path.join(".next", "static"), path.join(".next", "static"));
+  console.log("[build] Copied public and .next/static into standalone output.");
+}
+
 child.on("error", (error) => {
   console.error("[build] Failed to start Next.js build.", error);
   process.exit(1);
 });
 
-child.on("exit", (code, signal) => {
+child.on("exit", async (code, signal) => {
   if (signal) {
     console.error(`[build] Next.js build terminated by signal ${signal}.`);
     process.exit(1);
+  }
+
+  if (code === 0) {
+    try {
+      await finalizeStandaloneAssets();
+    } catch (error) {
+      console.error("[build] Failed to prepare standalone assets.", error);
+      process.exit(1);
+    }
   }
 
   process.exit(code ?? 1);
